@@ -129,14 +129,9 @@ class QuranImagePrewarmService implements QuranImagePrewarmer {
 
     unawaited(ensurePageReady(pageNumber: pageNumber, cacheWidth: cacheWidth));
 
-    // Also enqueue via the normal drain path as a safety net (e.g. if the
-    // LRU cache evicts an entry between resolve and paint on a low-memory device).
-    _prewarmAround(
-      pageNumber,
-      cacheWidth: cacheWidth,
-      radius: 0,
-      reason: 'jump-target',
-    );
+    // Jump navigation awaits ensurePageReady before commit. A parallel drain
+    // batch re-resolves the same 15 lines ~32 ms later and can land decode
+    // callbacks on the jump commit frame — skip the duplicate enqueue here.
   }
 
   @override

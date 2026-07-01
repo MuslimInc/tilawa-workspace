@@ -1,13 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:quran_image/core/di/dependency_injection.dart';
 import 'package:quran_image/core/perf_logger.dart';
-import 'package:quran_image/core/utils/quran_image_utils.dart';
 import 'package:quran_image/domain/domain.dart';
 import 'package:quran_image/l10n/quran_image_localizations.dart';
 import 'package:quran_image/page_mapping.dart';
 import 'package:quran_image/presentation/widgets/widgets.dart';
-import 'package:quran_qcf/quran_qcf.dart'
-    hide CalibratedSurahHeaderBannerLayoutPolicy, SurahHeaderBannerLayoutPolicy;
 import 'package:tilawa_ui_kit/tilawa_ui_kit.dart';
 
 import 'core/constants/surah_header_constants.dart';
@@ -45,11 +42,16 @@ class _QuranImagePageState extends State<QuranImagePage> {
   late final VerseMarkerRepository _markerRepository;
   late final SurahHeaderRepository _headerRepository;
   late final QuranImageCacheRepository _imageCacheRepository;
+  late final DecodedQuranImageCache _decodedImageCache;
 
   int _cacheWidth = 0;
   double _devicePixelRatio = 1.0;
   double _pageWidth = 0;
   double _pageHeight = 0;
+
+  (int cacheWidth, int layoutWidth, int layoutHeight, bool isLandscape)?
+  _layoutMetricsKey;
+  QuranPageLayoutMetrics? _cachedLayoutMetrics;
 
   List<VerseMarkerData> _markers = const <VerseMarkerData>[];
   List<SurahHeaderData> _headers = const <SurahHeaderData>[];
@@ -62,6 +64,7 @@ class _QuranImagePageState extends State<QuranImagePage> {
     _markerRepository = sl<VerseMarkerRepository>();
     _headerRepository = sl<SurahHeaderRepository>();
     _imageCacheRepository = sl<QuranImageCacheRepository>();
+    _decodedImageCache = sl<DecodedQuranImageCache>();
     _refreshPageData();
   }
 
@@ -79,6 +82,11 @@ class _QuranImagePageState extends State<QuranImagePage> {
     if (pageChanged) {
       _refreshPageData();
       _rebuildLineProviders();
+    }
+
+    if (layoutPolicyChanged) {
+      _layoutMetricsKey = null;
+      _cachedLayoutMetrics = null;
     }
 
     PerfLogger.log(
@@ -123,6 +131,8 @@ class _QuranImagePageState extends State<QuranImagePage> {
     _devicePixelRatio = dpr;
     _pageWidth = availableWidth;
     _pageHeight = availableHeight;
+    _layoutMetricsKey = null;
+    _cachedLayoutMetrics = null;
 
     if (cacheWidthChanged) {
       _rebuildLineProviders();
@@ -144,22 +154,34 @@ class _QuranImagePageState extends State<QuranImagePage> {
     _headers = _headerRepository.getHeadersForPage(widget.pageNumber);
   }
 
-  ({double layoutHeight, List<double> yOffsets}) _calculateLayoutMetrics({
-    required double availableHeight,
-    required double lineHeight,
+  QuranPageLayoutMetrics _layoutMetricsFor({
+    required double layoutWidth,
+    required double layoutHeight,
     required bool isLandscape,
   }) {
-    final layoutHeight = isLandscape
-        ? lineHeight * SurahHeaderConstants.lineCount
-        : availableHeight;
-
-    final lastLineIndex = SurahHeaderConstants.lastLineIndex.toDouble();
-    final yOffsets = List<double>.generate(
-      SurahHeaderConstants.lineCount,
-      (index) => (layoutHeight - lineHeight) / lastLineIndex * index,
-      growable: false,
+    final key = (
+      _cacheWidth,
+      layoutWidth.round(),
+      layoutHeight.round(),
+      isLandscape,
     );
-    return (layoutHeight: layoutHeight, yOffsets: yOffsets);
+    if (_layoutMetricsKey == key && _cachedLayoutMetrics != null) {
+      return _cachedLayoutMetrics!;
+    }
+
+    final lineHeight = widget.surahHeaderLayoutPolicy.lineHeightForPageWidth(
+      layoutWidth,
+    );
+    final metrics = QuranPageLayoutMetrics.compute(
+      layoutWidth: layoutWidth,
+      layoutHeight: layoutHeight,
+      viewportHeight: _pageHeight > 0 ? _pageHeight : layoutHeight,
+      lineHeight: lineHeight,
+      isLandscape: isLandscape,
+    );
+    _layoutMetricsKey = key;
+    _cachedLayoutMetrics = metrics;
+    return metrics;
   }
 
   void _rebuildLineProviders() {
@@ -173,7 +195,7 @@ class _QuranImagePageState extends State<QuranImagePage> {
         if (path == null) {
           return null;
         }
-        return buildQuranLineImageProvider(
+        return _decodedImageCache.lineImageProvider(
           imagePath: path,
           cacheWidth: _cacheWidth,
         );
@@ -202,11 +224,9 @@ class _QuranImagePageState extends State<QuranImagePage> {
               final layoutPageWidth = constraints.maxWidth;
               final layoutPageHeight = constraints.maxHeight;
               final layoutIsLandscape = layoutPageWidth > layoutPageHeight;
-              final layoutLineHeight = widget.surahHeaderLayoutPolicy
-                  .lineHeightForPageWidth(layoutPageWidth);
-              final (:layoutHeight, :yOffsets) = _calculateLayoutMetrics(
-                availableHeight: constraints.maxHeight,
-                lineHeight: layoutLineHeight,
+              final layoutMetrics = _layoutMetricsFor(
+                layoutWidth: layoutPageWidth,
+                layoutHeight: layoutPageHeight,
                 isLandscape: layoutIsLandscape,
               );
 
@@ -215,19 +235,13 @@ class _QuranImagePageState extends State<QuranImagePage> {
               return RepaintBoundary(
                 child: QuranImageContent(
                   pageNumber: widget.pageNumber,
-                  pageWidth: layoutPageWidth,
-                  // Header layout policy was tuned with full-viewport height; the
-                  // line stack width/height still come from this frame's layout.
-                  pageHeight: _pageHeight > 0 ? _pageHeight : layoutPageHeight,
-                  lineHeight: layoutLineHeight,
-                  yOffsets: yOffsets,
+                  layoutMetrics: layoutMetrics,
                   headers: _headers,
                   markers: _markers,
                   lineProviders: _lineProviders,
                   surahHeaderLayoutPolicy: widget.surahHeaderLayoutPolicy,
                   imageCacheRepository: _imageCacheRepository,
                   devicePixelRatio: _devicePixelRatio,
-                  isLandscape: layoutIsLandscape,
                   headerImageFilter: widget.headerImageFilter,
                 ),
               );
@@ -248,10 +262,8 @@ class QuranAppBar extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final pageInfo = QuranPageMapping.getPageInfo(pageNumber);
-    final pageData = getPageData(pageNumber);
-    final surahNumbers = pageData.map((e) => e.surah).toSet().toList();
-    final surahNames = surahNumbers
-        .map((s) => SurahNames.getSurahName(s, 'ar'))
+    final surahNames = QuranPageMapping.getSurahNumbers(pageNumber)
+        .map((surahNumber) => SurahNames.getSurahName(surahNumber, 'ar'))
         .join('  ');
     final theme = Theme.of(context);
     final tokens = theme.tokens;

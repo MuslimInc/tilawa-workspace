@@ -1,5 +1,6 @@
 import 'dart:convert';
 import 'dart:io';
+import 'dart:typed_data';
 
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
@@ -212,6 +213,19 @@ class _FakeDecodedQuranImageCache implements DecodedQuranImageCache {
 
   @override
   void handleMemoryPressure() {}
+
+  @override
+  ImageProvider<Object> fileImageProvider({required String imagePath}) {
+    return MemoryImage(Uint8List(0));
+  }
+
+  @override
+  ImageProvider<Object> lineImageProvider({
+    required String imagePath,
+    required int cacheWidth,
+  }) {
+    return MemoryImage(Uint8List(0));
+  }
 
   @override
   Future<void> prewarmFileImage(String imagePath) async {

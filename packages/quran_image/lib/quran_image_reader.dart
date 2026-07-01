@@ -803,6 +803,29 @@ class _QuranImageReaderState extends State<QuranImageReader>
 
   String _pageWarmKey(int pageNumber) => '$_warmViewportKey:$pageNumber';
 
+  double _markerWidthForCurrentView() {
+    if (!mounted) return 0;
+    final view = View.of(context);
+    return (view.physicalSize.width / view.devicePixelRatio) * 0.05138889;
+  }
+
+  Future<void> _warmVerseMarkersForPage(int pageNumber) async {
+    final markerWidth = _markerWidthForCurrentView();
+    if (markerWidth <= 0) return;
+
+    final ayahNumbers = sl<VerseMarkerRepository>()
+        .getMarkersForPage(pageNumber)
+        .map((marker) => marker.ayah)
+        .toSet();
+    if (ayahNumbers.isEmpty) return;
+
+    await VerseMarker.warmUpNumbers(
+      markerWidth: markerWidth,
+      verseNumbers: ayahNumbers,
+      batchSize: 50,
+    );
+  }
+
   Future<void> _preparePageForNavigation(int pageNumber) async {
     if (!mounted ||
         pageNumber < 1 ||
@@ -812,10 +835,16 @@ class _QuranImageReaderState extends State<QuranImageReader>
     }
 
     try {
-      await _imagePrewarmer.ensurePageReady(
-        pageNumber: pageNumber,
-        cacheWidth: _cacheWidth,
-      );
+      // Mirror PreloadingScreen: decode images and warm target-page marker
+      // glyphs in parallel so the jump commit frame does not pay cold
+      // TextPainter.layout() in _VerseMarkersPainter on first paint.
+      await Future.wait<Object?>([
+        _imagePrewarmer.ensurePageReady(
+          pageNumber: pageNumber,
+          cacheWidth: _cacheWidth,
+        ),
+        _warmVerseMarkersForPage(pageNumber),
+      ]);
     } catch (error) {
       PerfLogger.log(
         widgetName: 'QuranImageReader',
@@ -837,6 +866,8 @@ class _QuranImageReaderState extends State<QuranImageReader>
     await _preparePageForNavigation(pageNumber);
     if (!mounted) return null;
 
+    // Decode + marker warm finish above; toImage() below is a separate
+    // frame-bound raster cost on the long-jump snapshot path.
     final snapshot = await _ensurePageSnapshotReady(pageNumber);
     if (snapshot == null) {
       return null;

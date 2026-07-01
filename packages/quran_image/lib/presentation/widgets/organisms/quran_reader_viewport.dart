@@ -1,3 +1,4 @@
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:quran_image/core/perf_logger.dart';
 import 'package:quran_image/domain/domain.dart';
@@ -24,13 +25,15 @@ class QuranReaderViewport extends StatelessWidget {
     PerfLogger.markBuild('QuranReaderViewport');
     return LayoutBuilder(
       builder: (context, constraints) {
-        PerfLogger.log(
-          widgetName: 'QuranImageReader Layout Builder',
-          message:
-              'LayoutBuilder constraints=$constraints '
-              'maxWidth=${constraints.maxWidth} '
-              'maxHeight=${constraints.maxHeight}',
-        );
+        if (kDebugMode) {
+          PerfLogger.log(
+            widgetName: 'QuranImageReader Layout Builder',
+            message:
+                'LayoutBuilder constraints=$constraints '
+                'maxWidth=${constraints.maxWidth} '
+                'maxHeight=${constraints.maxHeight}',
+          );
+        }
         final isLandscape = constraints.maxWidth > constraints.maxHeight;
         return GestureDetector(
           onTap: onToggleNavigation,

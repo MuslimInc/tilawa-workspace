@@ -39,5 +39,16 @@ void main() {
       () => QuranPageMapping.getPageInfo(PageState.quranPageCount + 1),
       throwsArgumentError,
     );
+    expect(() => QuranPageMapping.getSurahNumbers(0), throwsArgumentError);
+    expect(
+      () => QuranPageMapping.getSurahNumbers(PageState.quranPageCount + 1),
+      throwsArgumentError,
+    );
+  });
+
+  test('getSurahNumbers returns O(1) single- and multi-surah pages', () {
+    expect(QuranPageMapping.getSurahNumbers(1), [1]);
+    expect(QuranPageMapping.getSurahNumbers(106), [4, 5]);
+    expect(QuranPageMapping.getSurahNumbers(604), [112, 113, 114]);
   });
 }

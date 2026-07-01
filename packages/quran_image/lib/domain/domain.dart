@@ -3,6 +3,7 @@ export 'entities/app_message.dart';
 export 'entities/navigation_visibility.dart';
 export 'entities/page_state.dart';
 export 'entities/quran_image_cache_status.dart';
+export 'entities/quran_page_layout_metrics.dart';
 export 'entities/surah_header_data.dart';
 export 'entities/verse_marker_data.dart';
 export 'repositories/last_visited_page_repository.dart';

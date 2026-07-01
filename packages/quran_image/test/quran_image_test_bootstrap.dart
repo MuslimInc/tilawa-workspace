@@ -178,6 +178,19 @@ class _FakeDecodedQuranImageCache implements DecodedQuranImageCache {
   void handleMemoryPressure() {}
 
   @override
+  ImageProvider<Object> fileImageProvider({required String imagePath}) {
+    return MemoryImage(Uint8List(0));
+  }
+
+  @override
+  ImageProvider<Object> lineImageProvider({
+    required String imagePath,
+    required int cacheWidth,
+  }) {
+    return MemoryImage(Uint8List(0));
+  }
+
+  @override
   Future<void> prewarmFileImage(String imagePath) async {}
 
   @override

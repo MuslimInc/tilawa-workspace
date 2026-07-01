@@ -29,18 +29,28 @@ class FlutterDecodedQuranImageCache implements DecodedQuranImageCache {
   Timer? _trimPaceTimer;
 
   @override
+  ImageProvider<Object> lineImageProvider({
+    required String imagePath,
+    required int cacheWidth,
+  }) => _lineProvider(imagePath, cacheWidth);
+
+  @override
+  ImageProvider<Object> fileImageProvider({required String imagePath}) =>
+      _fileProvider(imagePath);
+
+  @override
   Future<void> prewarmLineImage({
     required String imagePath,
     required int cacheWidth,
   }) => _ensureWarm(
     cacheKey: _lineKey(imagePath, cacheWidth),
-    provider: _lineProvider(imagePath, cacheWidth),
+    provider: lineImageProvider(imagePath: imagePath, cacheWidth: cacheWidth),
   );
 
   @override
   Future<void> prewarmFileImage(String imagePath) => _ensureWarm(
     cacheKey: 'file:$imagePath',
-    provider: _fileProvider(imagePath),
+    provider: fileImageProvider(imagePath: imagePath),
   );
 
   @override

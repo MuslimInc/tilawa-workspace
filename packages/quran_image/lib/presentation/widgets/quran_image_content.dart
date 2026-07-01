@@ -9,10 +9,7 @@ class QuranImageContent extends StatelessWidget {
   const QuranImageContent({
     super.key,
     required this.pageNumber,
-    required this.pageWidth,
-    required this.pageHeight,
-    required this.lineHeight,
-    required this.yOffsets,
+    required this.layoutMetrics,
     required this.headers,
     required this.markers,
     required this.lineProviders,
@@ -20,15 +17,11 @@ class QuranImageContent extends StatelessWidget {
     required this.imageCacheRepository,
     required this.devicePixelRatio,
     this.backgroundColor,
-    this.isLandscape = false,
     this.headerImageFilter,
   });
 
   final int pageNumber;
-  final double pageWidth;
-  final double pageHeight;
-  final double lineHeight;
-  final List<double> yOffsets;
+  final QuranPageLayoutMetrics layoutMetrics;
   final List<SurahHeaderData> headers;
   final List<VerseMarkerData> markers;
   final List<ImageProvider<Object>?> lineProviders;
@@ -36,7 +29,6 @@ class QuranImageContent extends StatelessWidget {
   final QuranImageCacheRepository imageCacheRepository;
   final double devicePixelRatio;
   final Color? backgroundColor;
-  final bool isLandscape;
   final ColorFilter? headerImageFilter;
 
   @override
@@ -52,14 +44,14 @@ class QuranImageContent extends StatelessWidget {
               key: ValueKey<String>('header:${header.lineIndex}'),
               left: 0,
               right: 0,
-              top: yOffsets[header.lineIndex],
-              height: lineHeight,
+              top: layoutMetrics.yOffsets[header.lineIndex],
+              height: layoutMetrics.lineHeight,
               child: SurahHeaderBanner(
                 header: header,
                 layoutPolicy: surahHeaderLayoutPolicy,
-                pageWidth: pageWidth,
-                pageHeight: pageHeight,
-                lineHeight: lineHeight,
+                pageWidth: layoutMetrics.pageWidth,
+                pageHeight: layoutMetrics.pageHeight,
+                lineHeight: layoutMetrics.lineHeight,
                 bannerLocalPath: imageCacheRepository
                     .surahHeaderBannerFilePath(),
                 devicePixelRatio: devicePixelRatio,
@@ -71,8 +63,8 @@ class QuranImageContent extends StatelessWidget {
               key: ValueKey<int>(index),
               left: 0,
               right: 0,
-              top: yOffsets[index],
-              height: lineHeight,
+              top: layoutMetrics.yOffsets[index],
+              height: layoutMetrics.lineHeight,
               child: QuranLineImage(
                 provider: lineProviders[index],
                 colorFilter: headerImageFilter,
@@ -87,16 +79,16 @@ class QuranImageContent extends StatelessWidget {
                         colorFilter: headerImageFilter!,
                         child: VerseMarkersOverlay(
                           markers: markers,
-                          pageWidth: pageWidth,
-                          lineHeight: lineHeight,
-                          yOffsets: yOffsets,
+                          pageWidth: layoutMetrics.pageWidth,
+                          lineHeight: layoutMetrics.lineHeight,
+                          yOffsets: layoutMetrics.yOffsets,
                         ),
                       )
                     : VerseMarkersOverlay(
                         markers: markers,
-                        pageWidth: pageWidth,
-                        lineHeight: lineHeight,
-                        yOffsets: yOffsets,
+                        pageWidth: layoutMetrics.pageWidth,
+                        lineHeight: layoutMetrics.lineHeight,
+                        yOffsets: layoutMetrics.yOffsets,
                       ),
               ),
             ),
@@ -104,10 +96,10 @@ class QuranImageContent extends StatelessWidget {
       ),
     );
 
-    if (isLandscape) {
+    if (layoutMetrics.isLandscape) {
       return SingleChildScrollView(
         child: SizedBox(
-          height: lineHeight * SurahHeaderConstants.lineCount,
+          height: layoutMetrics.lineHeight * SurahHeaderConstants.lineCount,
           child: contentStack,
         ),
       );

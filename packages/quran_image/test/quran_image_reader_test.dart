@@ -1,5 +1,7 @@
+import 'dart:async';
 import 'dart:convert';
 import 'dart:io';
+import 'dart:typed_data';
 
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
@@ -107,6 +109,9 @@ void main() {
     );
     sl.registerLazySingleton<SurahHeaderRepository>(
       () => _EmptySurahHeaderRepository(),
+    );
+    sl.registerLazySingleton<DecodedQuranImageCache>(
+      _ReaderTestDecodedQuranImageCache.new,
     );
   });
 
@@ -228,14 +233,68 @@ void main() {
       await gesture.up();
       await _pumpUntilNavigationSettles(tester);
     });
+
+    testWidgets(
+      'long jump queries verse markers while page decode is in flight',
+      (tester) async {
+        final markerRepository = _TrackingVerseMarkerRepository(
+          markersByPage: {
+            20: const [
+              VerseMarkerData(sura: 1, ayah: 1, line: 0, centerX: 0.5),
+              VerseMarkerData(sura: 1, ayah: 2, line: 1, centerX: 0.6),
+            ],
+          },
+        );
+        final ensurePageReadyGate = Completer<void>();
+        final blockingPrewarmer = _BlockingTestQuranImagePrewarmer(
+          ensurePageReadyGate,
+        );
+
+        await sl.reset();
+        sl.registerLazySingleton<QuranImagePrewarmer>(() => blockingPrewarmer);
+        sl.registerLazySingleton<QuranImageCacheRepository>(
+          () => imageRepository,
+        );
+        sl.registerLazySingleton<VerseMarkerRepository>(
+          () => markerRepository,
+        );
+        sl.registerLazySingleton<SurahHeaderRepository>(
+          () => _EmptySurahHeaderRepository(),
+        );
+        sl.registerLazySingleton<DecodedQuranImageCache>(
+          _ReaderTestDecodedQuranImageCache.new,
+        );
+
+        await _pumpReaderHarness(tester, navigationBloc);
+        await _showNavigationSlider(tester, navigationBloc);
+
+        final slider = find.byType(Slider);
+        final rect = tester.getRect(slider);
+        final gesture = await tester.startGesture(
+          Offset(rect.center.dx, rect.center.dy),
+        );
+        await gesture.moveBy(const Offset(-180, 0));
+        await tester.pump();
+        await gesture.up();
+        await tester.pump();
+
+        await tester.pump(const Duration(milliseconds: 50));
+        expect(blockingPrewarmer.jumpTargetRequests, isNotEmpty);
+        expect(
+          blockingPrewarmer.jumpTargetRequests.last.pageNumber,
+          greaterThan(3),
+        );
+        expect(blockingPrewarmer.ensurePageReadyRequests, isNotEmpty);
+        expect(
+          markerRepository.queriedPages,
+          contains(blockingPrewarmer.ensurePageReadyRequests.last.pageNumber),
+        );
+
+        ensurePageReadyGate.complete();
+        await _pumpUntilNavigationSettles(tester);
+      },
+    );
   });
-}
-
-class _WarmRequest {
-  const _WarmRequest({required this.pageNumber, required this.cacheWidth});
-
-  final int pageNumber;
-  final int cacheWidth;
 }
 
 class _TestQuranImagePrewarmer implements QuranImagePrewarmer {
@@ -323,6 +382,62 @@ class _TestQuranImagePrewarmer implements QuranImagePrewarmer {
   }
 }
 
+class _BlockingTestQuranImagePrewarmer extends _TestQuranImagePrewarmer {
+  _BlockingTestQuranImagePrewarmer(this._ensurePageReadyGate);
+
+  final Completer<void> _ensurePageReadyGate;
+
+  @override
+  Future<void> ensurePageReady({
+    required int pageNumber,
+    required int cacheWidth,
+  }) async {
+    ensurePageReadyRequests.add(
+      _WarmRequest(pageNumber: pageNumber, cacheWidth: cacheWidth),
+    );
+    await _ensurePageReadyGate.future;
+  }
+}
+
+class _WarmRequest {
+  const _WarmRequest({required this.pageNumber, required this.cacheWidth});
+
+  final int pageNumber;
+  final int cacheWidth;
+}
+
+class _TrackingVerseMarkerRepository implements VerseMarkerRepository {
+  _TrackingVerseMarkerRepository({required this.markersByPage});
+
+  final Map<int, List<VerseMarkerData>> markersByPage;
+  final List<int> queriedPages = <int>[];
+
+  @override
+  bool get isDebugMode => false;
+
+  @override
+  bool get isPreloaded => true;
+
+  @override
+  bool get isPreloading => false;
+
+  @override
+  double get preloadProgress => 1;
+
+  @override
+  void dispose() {}
+
+  @override
+  List<VerseMarkerData> getMarkersForPage(int pageNumber) {
+    queriedPages.add(pageNumber);
+    return markersByPage[pageNumber] ?? const <VerseMarkerData>[];
+  }
+
+  @override
+  Future<List<VerseMarkerData>> getMarkersForPageAsync(int pageNumber) async =>
+      getMarkersForPage(pageNumber);
+}
+
 class _TestQuranImageCacheRepository implements QuranImageCacheRepository {
   _TestQuranImageCacheRepository(this.linePaths);
 
@@ -401,4 +516,31 @@ class _InMemoryLastVisitedPageRepository implements LastVisitedPageRepository {
   Future<void> saveLastVisitedPage(int pageNumber) async {
     _page = pageNumber;
   }
+}
+
+class _ReaderTestDecodedQuranImageCache implements DecodedQuranImageCache {
+  @override
+  void handleMemoryPressure() {}
+
+  @override
+  ImageProvider<Object> fileImageProvider({required String imagePath}) {
+    return MemoryImage(Uint8List(0));
+  }
+
+  @override
+  ImageProvider<Object> lineImageProvider({
+    required String imagePath,
+    required int cacheWidth,
+  }) {
+    return MemoryImage(Uint8List(0));
+  }
+
+  @override
+  Future<void> prewarmFileImage(String imagePath) async {}
+
+  @override
+  Future<void> prewarmLineImage({
+    required String imagePath,
+    required int cacheWidth,
+  }) async {}
 }
