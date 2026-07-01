@@ -76,7 +76,7 @@ class _HomeScreenState extends State<HomeScreen> {
           children: [
             const Positioned.fill(child: HomeScreenBackground()),
             RefreshIndicator(
-              edgeOffset: topInset + kToolbarHeight,
+              edgeOffset: topInset,
               onRefresh: _refreshHome,
               child: NotificationListener<ScrollNotification>(
                 onNotification: (notification) =>
