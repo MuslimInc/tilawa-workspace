@@ -2896,5 +2896,78 @@ void main() {
         });
       },
     );
+
+    test(
+      'sync active downloads tolerates active set mutation during watchdog',
+      () {
+        fakeAsync((async) {
+          GetIt.instance.unregister<DownloadQueueManager>();
+          final mockService = MockDownloadServiceInterface();
+          final StreamController<DownloadProgress> progressController =
+              StreamController<DownloadProgress>.broadcast();
+
+          when(
+            mockService.globalProgressStream,
+          ).thenAnswer((_) => progressController.stream);
+          when(mockService.getActiveDownloadIds()).thenAnswer((_) async {
+            progressController.add(
+              const DownloadProgress(
+                id: 'id_a',
+                status: DownloadStatus.completed,
+                progress: 1,
+                downloadedSize: 100,
+                fileSize: 100,
+              ),
+            );
+            async.flushMicrotasks();
+            return <String>['id_a', 'id_b'];
+          });
+          when(mockService.getDownloadProgress(any)).thenAnswer(
+            (_) async => const DownloadProgress(
+              id: 'id_b',
+              status: DownloadStatus.downloading,
+              progress: 0,
+              downloadedSize: 0,
+              fileSize: 100,
+            ),
+          );
+          when(
+            mockService.getStatus(any),
+          ).thenAnswer((_) async => DownloadStatus.downloading);
+
+          final DownloadQueueManager dqm = DownloadQueueManager(
+            mockService,
+            GetIt.instance<DownloadNotificationService>(),
+          );
+          GetIt.instance.registerSingleton<DownloadQueueManager>(dqm);
+
+          dqm.initialize();
+          unawaited(
+            dqm.trackInFlightDownload(
+              id: 'id_a',
+              url: 'url_a',
+              title: 'Title A',
+              reciterName: 'Reciter',
+            ),
+          );
+          unawaited(
+            dqm.trackInFlightDownload(
+              id: 'id_b',
+              url: 'url_b',
+              title: 'Title B',
+              reciterName: 'Reciter',
+            ),
+          );
+          async.flushMicrotasks();
+
+          expect(dqm.activeDownloadsCount, 2);
+
+          async.elapse(const Duration(seconds: 31));
+          async.flushMicrotasks();
+
+          expect(dqm.activeDownloadsCount, lessThanOrEqualTo(2));
+        });
+      },
+    );
   });
 }

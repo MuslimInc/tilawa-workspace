@@ -859,7 +859,7 @@ class DownloadQueueManager implements IDownloadQueueService {
       final DateTime now = clock.now();
       final List<String> stuckIds = [];
 
-      for (final String id in _activeDownloads) {
+      for (final String id in Set<String>.from(_activeDownloads)) {
         final String lookupId = _activeDownloadUrls[id] ?? id;
         final bool shouldCancel = await _shouldCancelStuckDownload(
           trackingId: id,

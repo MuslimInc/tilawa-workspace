@@ -64,6 +64,8 @@ class DownloadStatusSynchronizer {
     }
 
     final updatedDownloads = <DownloadItem>[];
+    var orphanedPendingCount = 0;
+    String? orphanedPendingSampleId;
 
     for (final download in downloads) {
       final bool isActive = activeDownloadIds.contains(download.url);
@@ -81,6 +83,9 @@ class DownloadStatusSynchronizer {
 
       // Check for orphaned pending downloads (Pending in DB, but not in queue and not active)
       if (download.status == DownloadStatus.pending && !isQueued && !isActive) {
+        orphanedPendingCount++;
+        orphanedPendingSampleId ??= download.id;
+
         final DownloadItem recovered = await _recoveryService
             .handleOrphanedDownload(
               download,
@@ -114,6 +119,14 @@ class DownloadStatusSynchronizer {
 
         updatedDownloads.add(recovered);
       }
+    }
+
+    if (orphanedPendingCount > 0) {
+      logger.w(
+        '[DownloadStatusSynchronizer] Recovered $orphanedPendingCount orphaned '
+        'pending download(s) during sync'
+        '${orphanedPendingSampleId != null ? ' (e.g. id=$orphanedPendingSampleId)' : ''}',
+      );
     }
 
     return updatedDownloads;

@@ -657,29 +657,23 @@ class _TeacherDashboardScreenState extends State<TeacherDashboardScreen> {
 
   Future<void> _reload() async {
     final bloc = context.read<TeacherDashboardBloc>();
-    final softRefresh = bloc.state is TeacherDashboardSuccess;
+    final wasSuccess = bloc.state is TeacherDashboardSuccess;
 
-    // Subscribe before dispatch so we never complete on the pre-reload state
-    // (Empty / Success with isRefreshing false).
-    final Future<void> reloadDone = softRefresh
-        ? bloc.stream
-              .firstWhere(
-                (s) => s is TeacherDashboardSuccess && s.isRefreshing,
-              )
-              .then(
-                (_) => bloc.stream.firstWhere(
-                  (s) => s is TeacherDashboardSuccess && !s.isRefreshing,
-                ),
-              )
-              .then((_) {})
-        : bloc.stream
-              .firstWhere(
-                (s) =>
-                    s is TeacherDashboardSuccess ||
-                    s is TeacherDashboardEmpty ||
-                    s is TeacherDashboardFailure,
-              )
-              .then((_) {});
+    // Subscribe before dispatch so we never complete on the pre-reload state.
+    final Future<void> reloadDone = bloc.stream
+        .firstWhere(
+          (s) {
+            if (wasSuccess) {
+              return (s is TeacherDashboardSuccess && !s.isRefreshing) ||
+                  s is TeacherDashboardEmpty ||
+                  s is TeacherDashboardFailure;
+            }
+            return s is TeacherDashboardSuccess ||
+                s is TeacherDashboardEmpty ||
+                s is TeacherDashboardFailure;
+          },
+        )
+        .then((_) {});
 
     bloc.add(TeacherDashboardLoadRequested(teacherId: widget.teacherId));
     await reloadDone;

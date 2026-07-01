@@ -37,8 +37,8 @@ class DownloadRecoveryService {
     try {
       actualStatus = await _downloadService.getStatus(download.url);
     } catch (e) {
-      logger.w(
-        '[DownloadRecoveryService] Error checking status for orphaned download: $e',
+      logger.d(
+        '[DownloadRecoveryService] Error checking status for orphaned download id=${download.id}: $e',
       );
     }
 
@@ -76,7 +76,7 @@ class DownloadRecoveryService {
       return download;
     }
 
-    logger.w(
+    logger.d(
       '[DownloadRecoveryService] Found orphaned pending download: id=${download.id} isQueued=$isQueued isActive=$isActive actualStatus=$actualStatus - Re-enqueueing',
     );
 

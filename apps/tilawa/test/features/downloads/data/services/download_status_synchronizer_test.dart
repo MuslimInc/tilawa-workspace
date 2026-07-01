@@ -267,6 +267,42 @@ void main() {
     },
   );
 
+  test('recovers multiple orphaned pending downloads in one sync', () async {
+    when(
+      () => mockDownloadService.getActiveDownloadIds(),
+    ).thenAnswer((_) async => []);
+
+    final List<DownloadItem> downloads = <DownloadItem>[
+      createTestDownload(id: '1', url: 'url1'),
+      createTestDownload(id: '2', url: 'url2'),
+      createTestDownload(id: '3', url: 'url3'),
+    ];
+
+    when(() => mockDownloadQueueManager.isQueued(any())).thenReturn(false);
+    when(
+      () => mockDownloadRecoveryService.handleOrphanedDownload(
+        any(),
+        isQueued: any(named: 'isQueued'),
+        isActive: any(named: 'isActive'),
+      ),
+    ).thenAnswer(
+      (Invocation i) async => i.positionalArguments[0] as DownloadItem,
+    );
+
+    final List<DownloadItem> result = await synchronizer.syncDownloadStatuses(
+      downloads,
+    );
+
+    expect(result.length, 3);
+    verify(
+      () => mockDownloadRecoveryService.handleOrphanedDownload(
+        any(),
+        isQueued: false,
+        isActive: false,
+      ),
+    ).called(3);
+  });
+
   test('processes multiple downloads with different states', () async {
     when(
       () => mockDownloadService.getActiveDownloadIds(),

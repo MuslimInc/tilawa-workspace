@@ -14,6 +14,7 @@ import '../../helpers/availability_test_helpers.dart';
 import '../../helpers/fakes/fake_booked_slot_lock_repository.dart';
 import '../../helpers/fakes/fake_availability_provider.dart';
 import '../../helpers/fakes/fake_session_repository.dart';
+import '../../helpers/fixtures.dart';
 import '../../helpers/lifecycle_test_helpers.dart';
 
 Future<void> _pumpDashboard(
@@ -109,6 +110,41 @@ void main() {
         final state = bloc.state as TeacherDashboardSuccess;
         check(state.availability).isNotEmpty();
       },
+    );
+
+    blocTest<TeacherDashboardBloc, TeacherDashboardState>(
+      'reload from success emits empty when dashboard has no content',
+      build: () {
+        sessionRepo.sessions = [
+          makeSession(
+            lifecycleStatus: SessionLifecycleStatus.scheduled,
+            startsAt: DateTime.utc(2026, 7, 1, 9),
+            endsAt: DateTime.utc(2026, 7, 1, 9, 30),
+          ),
+        ];
+        return buildBloc();
+      },
+      seed: () => seedTeacherDashboardSuccess(
+        upcomingSessions: sessionRepo.sessions,
+      ),
+      act: (bloc) async {
+        sessionRepo.sessions = [];
+        scheduleRepo.schedule = null;
+        bloc.add(const TeacherDashboardLoadRequested(teacherId: 'teacher_1'));
+        await bloc.stream.firstWhere(
+          (s) =>
+              s is TeacherDashboardEmpty ||
+              (s is TeacherDashboardSuccess && !s.isRefreshing),
+        );
+      },
+      expect: () => [
+        isA<TeacherDashboardSuccess>().having(
+          (s) => s.isRefreshing,
+          'isRefreshing',
+          true,
+        ),
+        isA<TeacherDashboardEmpty>(),
+      ],
     );
 
     blocTest<TeacherDashboardBloc, TeacherDashboardState>(
