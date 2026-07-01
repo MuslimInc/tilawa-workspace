@@ -12,8 +12,8 @@ the changelog for full engineering detail.
 
 | Field | Value |
 |-------|--------|
-| Version | **2.0.17** (build **68**) |
-| Git tag | `v2.0.17+68` (pending) |
+| Version | **2.0.17** (build **69**) |
+| Git tag | `v2.0.17+69` (pending) |
 | Date | 2026-07-01 |
 | Track | Production |
 
@@ -23,7 +23,8 @@ the changelog for full engineering detail.
 • Smoother Quran reader scrolling and page jumps
 • More reliable sign-in and session handling after device changes
 • Fewer crashes when returning to the app on Android
-• Tasbeeh and Settings polish; stability improvements
+• More reliable downloads and ayah audio; teacher dashboard stability
+• Tasbeeh and Settings polish; in-app update check improvements
 ```
 
 ### ما الجديد (ar) — نص متجر Play
@@ -32,8 +33,20 @@ the changelog for full engineering detail.
 • تمرير أنعم في مصحف القرآن وقفزات أوضح بين الصفحات
 • تسجيل دخول وجلسات أكثر موثوقية عند تغيير الجهاز
 • تعطّل أقل عند العودة للتطبيق على أندرويد
-• تحسينات التسبيح والإعدادات واستقرار عام
+• تنزيلات وصوت آيات أكثر موثوقية؛ استقرار لوحة المعلّم
+• تحسينات التسبيح والإعدادات وفحص التحديث داخل التطبيق
 ```
+
+---
+
+## Previous current release (2.0.17+68 — not published)
+
+| Field | Value |
+|-------|--------|
+| Version | **2.0.17** (build **68**) |
+| Git tag | `v2.0.17+68` |
+| Date | 2026-07-01 |
+| Track | Production (release cancelled; shipped as build 69) |
 
 ---
 

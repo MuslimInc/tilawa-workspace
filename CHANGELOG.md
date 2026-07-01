@@ -7,7 +7,47 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
-## [2.0.17+68] - 2026-07-01 [Google Play Production]
+## [2.0.17+69] - 2026-07-01 [Google Play Production]
+
+Ships **2.0.17+68** changes that did not reach Play (build 68 cancelled), plus
+post-68 fixes.
+
+### Added
+
+- **Telemetry**: Sentry Session Replay (error replays always; sampled sessions in
+  release).
+- **Quran Sessions**: Teacher apply-only rollout — student Learn Quran surfaces
+  off by default; optional Settings/Home entry to external Google Form when flags
+  are enabled.
+
+### Fixed
+
+- **Router**: Avoid `StateError` on Android resume when GoRouter matches are not
+  yet resolved (`ShellRouteLocation` defensive read).
+- **Auth**: Keep `AuthBloc` in sync after remote session revocation (FCM / resume
+  checks); faster redirect after Google sign-in.
+- **Settings**: Hide duplicate teacher-apply tile when Google Form entry section is
+  shown.
+- **Quran**: Restore 15-line grid alignment on mushaf pages 1–2.
+- **In-app updates**: Treat benign Play `TASK_FAILURE` on update check (no user-facing
+  error).
+- **Audio**: Harden ayah playback reciter id parsing (`PlayAyahAudioUseCase`).
+- **Downloads**: Snapshot active tasks during status sync; quieter orphaned-download
+  recovery logs (`DownloadQueueManager`, `DownloadStatusSynchronizer`,
+  `DownloadRecoveryService`).
+- **Quran Sessions**: Teacher dashboard reload handles terminal availability sync
+  states without stuck UI.
+
+### Changed
+
+- **Performance (Quran reader)**: P0 fixes for layout freeze, unified providers,
+  and page-jump jank (`quran_image`).
+- **Home**: Cleaner quick-tools layout and Quran Sessions visibility gating.
+- **Tasbeeh**: History list uses `TilawaCard` for consistent tap feedback.
+
+## [2.0.17+68] - 2026-07-01 [Google Play Production — not published]
+
+Superseded by **2.0.17+69** (build 68 release workflow cancelled).
 
 ### Added
 
