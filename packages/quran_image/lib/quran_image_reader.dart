@@ -866,6 +866,8 @@ class _QuranImageReaderState extends State<QuranImageReader>
     await _preparePageForNavigation(pageNumber);
     if (!mounted) return null;
 
+    // Decode + marker warm finish above; toImage() below is a separate
+    // frame-bound raster cost on the long-jump snapshot path.
     final snapshot = await _ensurePageSnapshotReady(pageNumber);
     if (snapshot == null) {
       return null;

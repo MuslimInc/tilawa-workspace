@@ -64,6 +64,33 @@ void main() {
   );
 
   test(
+    'jump target warms target page once without duplicate drain enqueue',
+    () {
+      fakeAsync((async) {
+        final decodedCache = _FakeDecodedQuranImageCache();
+        final service = QuranImagePrewarmService(
+          imageCacheRepository: const _ReadyQuranImageCacheRepository(),
+          decodedImageCache: decodedCache,
+        );
+
+        service.prewarmJumpTarget(pageNumber: 77, cacheWidth: 1080);
+
+        async.flushMicrotasks();
+        async.elapse(const Duration(seconds: 1));
+        async.flushMicrotasks();
+
+        expect(decodedCache.prewarmedLinePaths, hasLength(15));
+        expect(
+          decodedCache.prewarmedLinePaths.every(
+            (path) => path.startsWith('1080:page_77_line_'),
+          ),
+          isTrue,
+        );
+      });
+    },
+  );
+
+  test(
     'cancel ignores stale in-flight page readiness and forces a fresh warm',
     () async {
       final decodedCache = _ControllableDecodedQuranImageCache();
