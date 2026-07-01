@@ -21,3 +21,23 @@ Deploy from repo root: `firebase deploy --only firestore:rules`
 
 Use Firebase Admin SDK or Console custom claims tool for operator UIDs.
 Document operator roster outside the repo.
+
+Script (single Auth record per email):
+
+```sh
+cd functions
+ADMIN_EMAIL=operator@example.com ADMIN_PASSWORD='…' npm run admin:create-user
+```
+
+**Duplicate Auth accounts:** `getUserByEmail` returns one UID. If the same email
+has multiple Auth UIDs (see **Quran Sessions → Duplicate accounts** in
+tilawa-admin), set `{ admin: true }` on the UID you sign in with — or on every
+UID that should show the admin badge in the users list. Example (Admin SDK):
+
+```ts
+await getAuth().setCustomUserClaims("<uid>", { admin: true });
+```
+
+After changing claims, the user must sign out and sign in again (or refresh the
+ID token) for badges and callables to see the update.
+

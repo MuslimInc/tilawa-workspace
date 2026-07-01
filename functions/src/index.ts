@@ -34,6 +34,17 @@ export { issueDebugLiveKitToken } from "./quranSessions/issueDebugLiveKitToken";
 export { recordCallTelemetryEvent } from "./quranSessions/recordCallTelemetryEvent";
 export { sessionReminders } from "./quranSessions/sessionReminders";
 export { approveChildGuardianBooking } from "./quranSessions/approveChildGuardianBooking";
+export { requestUserDeletion } from "./userDeletion/requestUserDeletion";
+export { requestSelfAccountDeletion } from "./userDeletion/requestSelfAccountDeletion";
+export { cancelUserDeletion } from "./userDeletion/cancelUserDeletion";
+export {
+  purgeDeletedUsers,
+  forcePurgeUser,
+} from "./userDeletion/purgeDeletedUsers";
+export { lookupDuplicateAccountsByEmail } from "./userDeletion/lookupDuplicateAccountsByEmail";
+export { lookupUserAdminClaims } from "./userDeletion/lookupUserAdminClaims";
+export { requestDuplicateAccountsDeletion } from "./userDeletion/requestDuplicateAccountsDeletion";
+export { purgeFirestoreOrphanUser } from "./userDeletion/purgeFirestoreOrphanUser";
 
 import { onDocumentCreated } from "firebase-functions/v2/firestore";
 import { initializeApp } from "firebase-admin/app";
@@ -44,6 +55,7 @@ import {
   clearInvalidActiveFcmTokens,
   collectActiveFcmTokens,
 } from "./quranSessions/fcmTokenService";
+import { resolveUserIds } from "./notifications/resolveUserIds";
 
 initializeApp();
 
@@ -142,16 +154,3 @@ export const sendNotification = onDocumentCreated(
   }
 );
 
-/**
- * Resolve target user IDs based on targetType.
- */
-async function resolveUserIds(
-  db: FirebaseFirestore.Firestore,
-  notification: NotificationDoc
-): Promise<string[]> {
-  if (notification.targetType === "all") {
-    const usersSnapshot = await db.collection("users").get();
-    return usersSnapshot.docs.map((doc) => doc.id);
-  }
-  return notification.targetUserIds;
-}

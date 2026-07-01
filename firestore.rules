@@ -110,23 +110,6 @@ service cloud.firestore {
       allow write: if false;
     }
 
-    // Client startup telemetry (see docs/observability/startup_health_logs.md).
-    match /app_startup_logs/{logId} {
-      allow create: if request.resource.data.keys().hasAll([
-          'level',
-          'event',
-          'session_id',
-          'client_timestamp_ms',
-        ])
-        && request.resource.data.level in ['info', 'error']
-        && request.resource.data.event in [
-          'startup_phase',
-          'startup_failed',
-          'startup_completed',
-        ];
-      allow read, update, delete: if false;
-    }
-
     // Subscription catalog — read-only for clients; seed via admin tools.
     match /subscription_plans/{planId} {
       allow read: if true;
@@ -412,16 +395,33 @@ service cloud.firestore {
           && after.get('notifications', {}) == before.get('notifications', {});
     }
 
+    // Deletion envelope (requestUserDeletion CF) is CF-only: no client —
+    // including admin clients — may add, change, or remove it. get(...,null)
+    // equality blocks removal too, unlike incomingUnchanged.
+    function deletionEnvelopeUntouched() {
+      return request.resource.data.get('accountStatus', null)
+          == resource.data.get('accountStatus', null)
+        && request.resource.data.get('deletion', null)
+          == resource.data.get('deletion', null);
+    }
+
+    function deletionEnvelopeAbsentOnCreate() {
+      return !('deletion' in request.resource.data)
+        && !('accountStatus' in request.resource.data);
+    }
+
     match /users/{userId} {
       allow get: if isAdmin() || isOwner(userId);
       allow list: if isAdmin();
       allow create: if isOwner(userId)
-        && quranSessionsProfileModerationSafeOnCreate();
-      allow update: if isAdmin()
-        || (isOwner(userId)
-            && quranSessionsProfileModerationUnchanged()
-            && quranSessionsProfileEligibilityUnchanged()
-            && sessionFieldsUnchanged());
+        && quranSessionsProfileModerationSafeOnCreate()
+        && deletionEnvelopeAbsentOnCreate();
+      allow update: if (isAdmin()
+          || (isOwner(userId)
+              && quranSessionsProfileModerationUnchanged()
+              && quranSessionsProfileEligibilityUnchanged()
+              && sessionFieldsUnchanged()))
+        && deletionEnvelopeUntouched();
       allow delete: if false;
 
       match /fcm_tokens/{tokenId} {
@@ -473,5 +473,19 @@ service cloud.firestore {
       allow read: if isAdmin();
       allow write: if false;
     }
+
+    // Admin-initiated user deletion (docs/plans/admin_user_deletion_plan.md).
+    // Purge state machine keyed by target uid — admin read; CF writes only.
+    match /user_deletion_state/{userId} {
+      allow read: if isAdmin();
+      allow write: if false;
+    }
+
+    // Append-only deletion audit log — admin read; CF writes only.
+    match /user_deletion_audit/{auditId} {
+      allow read: if isAdmin();
+      allow write: if false;
+    }
   }
 }
+
