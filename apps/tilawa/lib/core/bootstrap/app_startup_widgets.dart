@@ -10,9 +10,11 @@ extension AppStartupWidgets on AppStartupTasks {
   /// begins. This trades ~16ms of "splash appears later" for eliminating the
   /// ~700ms vsync wait we'd otherwise see on frame #1.
   Widget buildBootGate(Future<void> Function() startCriticalInit) {
-    return _BootGate(
-      startCriticalInit: startCriticalInit,
-      child: buildRootApp(),
+    return SentryConfig.wrapRootWidget(
+      _BootGate(
+        startCriticalInit: startCriticalInit,
+        child: buildRootApp(),
+      ),
     );
   }
 
@@ -28,9 +30,11 @@ extension AppStartupWidgets on AppStartupTasks {
   /// languages. Retry re-runs the full bootstrap pipeline ([bootstrap] and
   /// [configureDependencies] are both safe to re-enter).
   Widget buildFatalErrorApp({Future<void> Function()? onRetry}) {
-    return MaterialApp(
-      debugShowCheckedModeBanner: false,
-      home: _StartupFatalErrorScreen(onRetry: onRetry ?? () => bootstrap()),
+    return SentryConfig.wrapRootWidget(
+      MaterialApp(
+        debugShowCheckedModeBanner: false,
+        home: _StartupFatalErrorScreen(onRetry: onRetry ?? () => bootstrap()),
+      ),
     );
   }
 }

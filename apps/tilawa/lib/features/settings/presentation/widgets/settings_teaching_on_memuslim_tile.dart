@@ -2,11 +2,28 @@ import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:quran_sessions/quran_sessions.dart';
 import 'package:tilawa/features/quran_sessions/presentation/quran_sessions_analytics.dart';
+import 'package:tilawa/features/quran_sessions/presentation/teacher_application_entry.dart';
 import 'package:tilawa/features/quran_sessions/quran_sessions_feature_flags.dart';
 import 'package:tilawa_ui_kit/tilawa_ui_kit.dart';
 
 import 'settings_teacher_capability_scope.dart';
 import 'settings_widgets.dart';
+
+bool _suppressTeachingSectionForGoogleFormApply({
+  required QuranSessionsFeatureConfig config,
+  required TeacherCapability? capability,
+  required bool isLoading,
+}) {
+  if (!config.showTeacherApplicationEntry ||
+      config.showInAppTeacherApplicationEntry) {
+    return false;
+  }
+  if (isLoading) {
+    return true;
+  }
+  return capability?.navigationTarget ==
+      TeacherCapabilityNavigationTarget.apply;
+}
 
 /// Self-contained Settings block for teacher capability — no section header.
 ///
@@ -18,7 +35,7 @@ class SettingsTeachingOnMemuslimSection extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final config = quranSessionsFeatureConfig();
-    if (!config.showProfileTeacherEntry) {
+    if (!config.quranSessionsEnabled) {
       return const SizedBox.shrink();
     }
 
@@ -29,7 +46,17 @@ class SettingsTeachingOnMemuslimSection extends StatelessWidget {
       return const SizedBox.shrink();
     }
 
-    if (SettingsTeacherCapabilityScope.isTeachingSectionLoadingOf(context)) {
+    final isLoading = SettingsTeacherCapabilityScope.isTeachingSectionLoadingOf(
+      context,
+    );
+    if (isLoading) {
+      if (_suppressTeachingSectionForGoogleFormApply(
+        config: config,
+        capability: null,
+        isLoading: true,
+      )) {
+        return const SizedBox.shrink();
+      }
       final tokens = Theme.of(context).tokens;
       return Padding(
         padding: EdgeInsetsDirectional.only(
@@ -46,6 +73,14 @@ class SettingsTeachingOnMemuslimSection extends StatelessWidget {
       context,
     );
     if (capability == null) {
+      return const SizedBox.shrink();
+    }
+
+    if (_suppressTeachingSectionForGoogleFormApply(
+      config: config,
+      capability: capability,
+      isLoading: false,
+    )) {
       return const SizedBox.shrink();
     }
 
@@ -86,7 +121,7 @@ class SettingsTeachingOnMemuslimTile extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final config = quranSessionsFeatureConfig();
-    if (!config.showProfileTeacherEntry) {
+    if (!config.quranSessionsEnabled) {
       return const SizedBox.shrink();
     }
 
@@ -94,7 +129,17 @@ class SettingsTeachingOnMemuslimTile extends StatelessWidget {
       return const SizedBox.shrink();
     }
 
-    if (SettingsTeacherCapabilityScope.isTeachingSectionLoadingOf(context)) {
+    final isLoading = SettingsTeacherCapabilityScope.isTeachingSectionLoadingOf(
+      context,
+    );
+    if (isLoading) {
+      if (_suppressTeachingSectionForGoogleFormApply(
+        config: config,
+        capability: null,
+        isLoading: true,
+      )) {
+        return const SizedBox.shrink();
+      }
       return TilawaCapabilityActionCardSkeleton(
         margin: standaloneLayout ? EdgeInsets.zero : null,
       );
@@ -104,6 +149,14 @@ class SettingsTeachingOnMemuslimTile extends StatelessWidget {
       context,
     );
     if (capability == null) {
+      return const SizedBox.shrink();
+    }
+
+    if (_suppressTeachingSectionForGoogleFormApply(
+      config: config,
+      capability: capability,
+      isLoading: false,
+    )) {
       return const SizedBox.shrink();
     }
 
@@ -143,6 +196,15 @@ class SettingsTeachingOnMemuslimTile extends StatelessWidget {
     QuranSessionsAnalyticsCallbacks analytics,
   ) {
     analytics.onTeacherApplyEntrySeen?.call();
+
+    final config = quranSessionsFeatureConfig();
+    if (capability.navigationTarget ==
+            TeacherCapabilityNavigationTarget.apply &&
+        !config.showInAppTeacherApplicationEntry &&
+        config.showTeacherApplicationEntry) {
+      showTeacherApplicationEntrySheet(context);
+      return;
+    }
 
     switch (capability.navigationTarget) {
       case TeacherCapabilityNavigationTarget.apply:

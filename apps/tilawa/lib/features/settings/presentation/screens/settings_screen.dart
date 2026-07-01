@@ -33,6 +33,7 @@ import '../cubit/settings_cubit.dart';
 import '../formatters/settings_share_text_formatter.dart';
 import '../../../quran_sessions/quran_sessions_feature_flags.dart';
 import '../widgets/settings_teacher_capability_scope.dart';
+import '../widgets/settings_teacher_application_entry_tile.dart';
 import '../widgets/settings_teaching_on_memuslim_tile.dart';
 import '../widgets/settings_picker_sheets.dart';
 import '../widgets/settings_widgets.dart';
@@ -128,7 +129,10 @@ class _SettingsScreenState extends State<SettingsScreen> {
                   const SettingsProfileHeader(),
                   const SettingsGuestAccountGroup(),
                   if (!isGuest &&
-                      quranSessionsFeatureConfig().showProfileTeacherEntry)
+                      quranSessionsFeatureConfig().showTeacherApplicationEntry)
+                    const SettingsTeacherApplicationEntrySection(),
+                  if (!isGuest &&
+                      quranSessionsFeatureConfig().quranSessionsEnabled)
                     const SettingsTeachingOnMemuslimSection(),
                   TilawaSettingsGroup(
                     title: l10n.settingsAppearance,

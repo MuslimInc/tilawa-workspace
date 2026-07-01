@@ -91,6 +91,16 @@ class AnalyticsEvents {
   static const String sessionJoined = 'session_joined';
   static const String reviewSubmitted = 'review_submitted';
 
+  // Teacher application (Google Form entry)
+  static const String teacherApplicationEntrySeen =
+      'teacher_application_entry_seen';
+  static const String teacherApplicationEntryTapped =
+      'teacher_application_entry_tapped';
+  static const String teacherApplicationFormOpened =
+      'teacher_application_form_opened';
+  static const String teacherApplicationFormFailed =
+      'teacher_application_form_failed';
+
   // Quran Sessions
   static const String teacherApplyEntrySeen = 'teacher_apply_entry_seen';
   static const String teacherApplyStarted = 'teacher_apply_started';

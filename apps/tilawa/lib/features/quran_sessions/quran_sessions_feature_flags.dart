@@ -6,6 +6,9 @@ import 'package:tilawa/core/di/injection.dart';
 ///
 /// Defaults (production const / `play_production` distribution):
 /// - [quranSessionsEnabled]: true
+/// - [learnQuranStudentFeatureEnabled]: **false** — student hub hidden in prod
+/// - [teacherApplicationEntryEnabled]: **false** — Google Form entry opt-in
+/// - [homeTeacherApplicationCardEnabled]: **false**
 /// - [teacherApplicationEnabled]: false until MVO ops ready
 /// - [teacherApplicationDiscoverability]: profileAndEmptyState when apply enabled
 /// - [quranSessionsBookingEnabled]: **false** — production kill switch; do not
@@ -20,6 +23,10 @@ QuranSessionsFeatureConfig quranSessionsFeatureConfig() {
       : AppLaunchConfig.fromEnvironment();
   return QuranSessionsFeatureConfig(
     quranSessionsEnabled: config.quranSessionsEnabled,
+    learnQuranStudentFeatureEnabled: config.learnQuranStudentFeatureEnabled,
+    teacherApplicationEntryEnabled: config.teacherApplicationEntryEnabled,
+    homeTeacherApplicationCardEnabled: config.homeTeacherApplicationCardEnabled,
+    teacherApplicationFormUrl: config.teacherApplicationFormUrl,
     teacherApplicationEnabled: config.teacherApplicationEnabled,
     teacherApplicationDiscoverability: _discoverabilityFromString(
       config.teacherApplicationDiscoverability,

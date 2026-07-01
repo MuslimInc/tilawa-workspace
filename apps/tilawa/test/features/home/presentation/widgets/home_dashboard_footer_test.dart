@@ -149,7 +149,10 @@ void main() {
   ) async {
     await resetScopeGetIt();
     getIt.registerSingleton<AppLaunchConfig>(
-      const AppLaunchConfig(quranSessionsEnabled: true),
+      const AppLaunchConfig(
+        quranSessionsEnabled: true,
+        learnQuranStudentFeatureEnabled: true,
+      ),
     );
 
     await _pumpFooter(tester);
@@ -167,7 +170,10 @@ void main() {
   ) async {
     await resetScopeGetIt();
     getIt.registerSingleton<AppLaunchConfig>(
-      const AppLaunchConfig(quranSessionsEnabled: false),
+      const AppLaunchConfig(
+        quranSessionsEnabled: true,
+        learnQuranStudentFeatureEnabled: false,
+      ),
     );
 
     await _pumpFooter(tester);
@@ -185,7 +191,10 @@ void main() {
   ) async {
     await resetScopeGetIt();
     getIt.registerSingleton<AppLaunchConfig>(
-      const AppLaunchConfig(quranSessionsEnabled: true),
+      const AppLaunchConfig(
+        quranSessionsEnabled: true,
+        learnQuranStudentFeatureEnabled: true,
+      ),
     );
     await _registerSessionsDependencies(
       authSession: const FakeAuthSessionProvider(userId: 'user_1'),
@@ -217,7 +226,10 @@ void main() {
     testWidgets('does not push routes when feature disabled', (tester) async {
       await resetScopeGetIt();
       getIt.registerSingleton<AppLaunchConfig>(
-        const AppLaunchConfig(quranSessionsEnabled: false),
+        const AppLaunchConfig(
+          quranSessionsEnabled: true,
+          learnQuranStudentFeatureEnabled: false,
+        ),
       );
 
       final router = _sessionsNavRouter(
@@ -244,7 +256,10 @@ void main() {
     testWidgets('routes logged-out users to login', (tester) async {
       await resetScopeGetIt();
       getIt.registerSingleton<AppLaunchConfig>(
-        const AppLaunchConfig(quranSessionsEnabled: true),
+        const AppLaunchConfig(
+          quranSessionsEnabled: true,
+          learnQuranStudentFeatureEnabled: true,
+        ),
       );
       getIt.registerSingleton<AuthSessionProvider>(_LoggedOutAuthSession());
 
@@ -272,7 +287,10 @@ void main() {
     ) async {
       await resetScopeGetIt();
       getIt.registerSingleton<AppLaunchConfig>(
-        const AppLaunchConfig(quranSessionsEnabled: true),
+        const AppLaunchConfig(
+          quranSessionsEnabled: true,
+          learnQuranStudentFeatureEnabled: true,
+        ),
       );
       await _registerSessionsDependencies(
         authSession: const FakeAuthSessionProvider(userId: 'user_1'),
@@ -303,7 +321,10 @@ void main() {
     ) async {
       await resetScopeGetIt();
       getIt.registerSingleton<AppLaunchConfig>(
-        const AppLaunchConfig(quranSessionsEnabled: true),
+        const AppLaunchConfig(
+          quranSessionsEnabled: true,
+          learnQuranStudentFeatureEnabled: true,
+        ),
       );
       await _registerSessionsDependencies(
         authSession: const FakeAuthSessionProvider(userId: 'user_1'),
@@ -335,7 +356,10 @@ void main() {
     ) async {
       await resetScopeGetIt();
       getIt.registerSingleton<AppLaunchConfig>(
-        const AppLaunchConfig(quranSessionsEnabled: true),
+        const AppLaunchConfig(
+          quranSessionsEnabled: true,
+          learnQuranStudentFeatureEnabled: true,
+        ),
       );
       await _registerSessionsDependencies(
         authSession: const FakeAuthSessionProvider(userId: 'user_1'),
@@ -372,7 +396,10 @@ void main() {
     ) async {
       await resetScopeGetIt();
       getIt.registerSingleton<AppLaunchConfig>(
-        const AppLaunchConfig(quranSessionsEnabled: true),
+        const AppLaunchConfig(
+          quranSessionsEnabled: true,
+          learnQuranStudentFeatureEnabled: true,
+        ),
       );
       await _registerSessionsDependencies(
         authSession: const FakeAuthSessionProvider(userId: 'user_1'),

@@ -8,7 +8,7 @@ import '../../../quran_sessions/quran_sessions_feature_flags.dart';
 
 /// Opens Quran Sessions when the profile is complete, otherwise gates first.
 Future<void> openHomeQuranSessions(BuildContext context) async {
-  if (!quranSessionsFeatureConfig().quranSessionsEnabled) {
+  if (!quranSessionsFeatureConfig().showLearnQuranStudentExperience) {
     return;
   }
 

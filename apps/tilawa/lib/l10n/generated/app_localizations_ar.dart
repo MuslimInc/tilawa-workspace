@@ -275,6 +275,30 @@ class AppLocalizationsAr extends AppLocalizations {
   String get homeFeaturedTutorMySessions => 'جلساتي';
 
   @override
+  String get settingsTeacherApplicationEntryTitle => 'التقديم كمعلّم قرآن';
+
+  @override
+  String get settingsTeacherApplicationEntrySubtitle =>
+      'إذا كنت محفّظًا أو لديك خبرة في تعليم القرآن، يمكنك إرسال طلبك للمراجعة.';
+
+  @override
+  String get teacherApplicationOpenFormCta => 'فتح نموذج التقديم';
+
+  @override
+  String get teacherApplicationSheetTitle => 'هل أنت محفّظ أو معلّم قرآن؟';
+
+  @override
+  String get teacherApplicationSheetBody =>
+      'نستقبل الآن طلبات المحفّظين والمعلّمين ذوي الخبرة للمشاركة في ميزة تعلّم القرآن داخل التطبيق. يمكنك تعبئة نموذج التقديم، وسيقوم فريقنا بمراجعته قبل تفعيل أي صلاحيات.';
+
+  @override
+  String get teacherApplicationLaterCta => 'لاحقاً';
+
+  @override
+  String get teacherApplicationFormOpenFailed =>
+      'تعذّر فتح نموذج التقديم. حاول مرة أخرى.';
+
+  @override
   String get homeQuickQuranReader => 'المصحف';
 
   @override

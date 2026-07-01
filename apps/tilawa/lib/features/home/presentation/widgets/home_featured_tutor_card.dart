@@ -9,9 +9,20 @@ import 'package:visibility_detector/visibility_detector.dart';
 
 import 'home_learn_quran_analytics.dart';
 import 'open_home_quran_sessions.dart';
+import '../../../quran_sessions/presentation/teacher_application_entry.dart';
 
 /// Minimum visible fraction that counts as an impression.
 const double _kImpressionVisibleFraction = 0.5;
+
+bool _isHomeTeacherApplicationCardVisible() =>
+    quranSessionsFeatureConfig().showHomeTeacherApplicationCard;
+
+bool _isHomeLearnQuranStudentCardVisible() =>
+    quranSessionsFeatureConfig().showLearnQuranStudentExperience;
+
+bool _isHomeFeaturedCardVisible() =>
+    _isHomeTeacherApplicationCardVisible() ||
+    _isHomeLearnQuranStudentCardVisible();
 
 /// Layout metrics for the home featured tutor sliver.
 abstract final class HomeFeaturedTutorCardLayout {
@@ -105,9 +116,9 @@ abstract final class HomeFeaturedTutorCardLayout {
   }
 }
 
-/// Builds the featured tutor sliver when the feature flag is enabled.
+/// Builds the featured tutor sliver when a home card flag is enabled.
 Widget? homeFeaturedTutorCardSliver(BuildContext context) {
-  if (!quranSessionsFeatureConfig().quranSessionsEnabled) {
+  if (!_isHomeFeaturedCardVisible()) {
     return null;
   }
 
@@ -140,7 +151,7 @@ class HomeFeaturedTutorCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    if (!quranSessionsFeatureConfig().quranSessionsEnabled) {
+    if (!_isHomeFeaturedCardVisible()) {
       return const SizedBox.shrink();
     }
 
@@ -171,11 +182,13 @@ class _HomeFeaturedTutorCardImpressionScopeState
     if (info.visibleFraction < _kImpressionVisibleFraction) {
       return;
     }
-    if (!quranSessionsFeatureConfig().quranSessionsEnabled) {
+    if (!_isHomeFeaturedCardVisible()) {
       return;
     }
     _loggedImpression = true;
-    logHomeLearnQuranCardViewed();
+    if (_isHomeLearnQuranStudentCardVisible()) {
+      logHomeLearnQuranCardViewed();
+    }
   }
 
   @override
@@ -190,6 +203,111 @@ class _HomeFeaturedTutorCardImpressionScopeState
 
 class _HomeFeaturedTutorCardContent extends StatelessWidget {
   const _HomeFeaturedTutorCardContent();
+
+  @override
+  Widget build(BuildContext context) {
+    if (_isHomeTeacherApplicationCardVisible()) {
+      return _HomeTeacherApplicationCardContent(
+        showExperimentalBadge: !_isHomeLearnQuranStudentCardVisible(),
+      );
+    }
+
+    return const _HomeLearnQuranStudentCardContent();
+  }
+}
+
+class _HomeTeacherApplicationCardContent extends StatelessWidget {
+  const _HomeTeacherApplicationCardContent({
+    required this.showExperimentalBadge,
+  });
+
+  final bool showExperimentalBadge;
+
+  @override
+  Widget build(BuildContext context) {
+    final MeMuslimDesignTokens tokens = context.tokens;
+    final ThemeData theme = Theme.of(context);
+    final TilawaHomeScreenTokens screenTokens =
+        theme.componentTokens.homeScreen;
+    final Color accent = screenTokens.homeFeaturedTutorAccent;
+    final Color cardBorder = Color.alphaBlend(
+      screenTokens.homePrayerHeroBorder.withValues(alpha: 0.72),
+      theme.colorScheme.outlineVariant.withValues(alpha: 0.28),
+    );
+    final double radius = tokens.resolveRadius(
+      family: TilawaRadiusFamily.decorative,
+    );
+    final BorderRadius borderRadius = BorderRadius.circular(radius);
+    final l10n = context.l10n;
+
+    return TilawaInteractiveSurface(
+      onTap: () => showTeacherApplicationEntrySheet(context),
+      borderRadius: borderRadius,
+      stateLayerColor: accent,
+      semanticLabel: l10n.settingsTeacherApplicationEntryTitle,
+      semanticHint: l10n.teacherApplicationOpenFormCta,
+      child: DecoratedBox(
+        decoration: BoxDecoration(
+          borderRadius: borderRadius,
+          color: screenTokens.homeContentSheetSurface,
+          border: Border.all(
+            color: cardBorder,
+            width: tokens.borderWidthThin,
+          ),
+        ),
+        child: Padding(
+          padding: EdgeInsetsDirectional.all(tokens.spaceMedium),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Row(
+                spacing: tokens.spaceSmall,
+                children: [
+                  _FeaturedTutorIconWell(accent: accent),
+                  Expanded(
+                    child: Text(
+                      l10n.settingsTeacherApplicationEntryTitle,
+                      maxLines: 2,
+                      overflow: TextOverflow.ellipsis,
+                      style: theme.textTheme.titleMedium?.copyWith(
+                        color: theme.colorScheme.onSurface,
+                        fontWeight: FontWeight.w700,
+                        height: 1.15,
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+              SizedBox(height: tokens.spaceExtraSmall),
+              Text(
+                l10n.settingsTeacherApplicationEntrySubtitle,
+                maxLines: 3,
+                overflow: TextOverflow.ellipsis,
+                style: theme.textTheme.bodySmall?.copyWith(
+                  color: theme.colorScheme.onSurfaceVariant,
+                  height: 1.3,
+                ),
+              ),
+              SizedBox(height: tokens.spaceMedium),
+              _FeaturedTutorFooter(
+                ctaLabel: l10n.teacherApplicationOpenFormCta,
+                badgeLabel: showExperimentalBadge
+                    ? l10n.experimentalBadgeLabel
+                    : null,
+                accent: accent,
+                ctaForeground: screenTokens.homeFeaturedTutorCtaForeground,
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+class _HomeLearnQuranStudentCardContent extends StatelessWidget {
+  const _HomeLearnQuranStudentCardContent();
 
   @override
   Widget build(BuildContext context) {
@@ -285,7 +403,7 @@ abstract final class _FeaturedTutorFooterMetrics {
     required BuildContext context,
     required double maxWidth,
     required String ctaLabel,
-    required String badgeLabel,
+    String? badgeLabel,
   }) {
     final MeMuslimDesignTokens tokens = context.tokens;
     final TextDirection textDirection = Directionality.of(context);
@@ -295,6 +413,10 @@ abstract final class _FeaturedTutorFooterMetrics {
       label: ctaLabel,
       textDirection: textDirection,
     );
+    if (badgeLabel == null) {
+      return ctaHeight;
+    }
+
     final double badgeHeight = _badgeHeight(
       context: context,
       label: badgeLabel,
@@ -367,12 +489,11 @@ abstract final class _FeaturedTutorFooterMetrics {
   static double _minFooterRowWidth({
     required BuildContext context,
     required String ctaLabel,
-    required String badgeLabel,
+    String? badgeLabel,
     required TextDirection textDirection,
   }) {
     final MeMuslimDesignTokens tokens = context.tokens;
     final ThemeData theme = Theme.of(context);
-    final badgeTokens = theme.componentTokens.experimentalBadge;
 
     final TextStyle ctaStyle =
         theme.textTheme.labelMedium?.copyWith(
@@ -392,6 +513,11 @@ abstract final class _FeaturedTutorFooterMetrics {
         tokens.spaceExtraSmall +
         tokens.iconSizeSmall;
 
+    if (badgeLabel == null) {
+      return ctaWidth;
+    }
+
+    final badgeTokens = theme.componentTokens.experimentalBadge;
     final TextStyle badgeStyle =
         theme.textTheme.labelSmall?.copyWith(
           fontWeight: badgeTokens.fontWeight,
@@ -416,13 +542,13 @@ abstract final class _FeaturedTutorFooterMetrics {
 class _FeaturedTutorFooter extends StatelessWidget {
   const _FeaturedTutorFooter({
     required this.ctaLabel,
-    required this.badgeLabel,
     required this.accent,
     required this.ctaForeground,
+    this.badgeLabel,
   });
 
   final String ctaLabel;
-  final String badgeLabel;
+  final String? badgeLabel;
   final Color accent;
   final Color ctaForeground;
 
@@ -444,10 +570,15 @@ class _FeaturedTutorFooter extends StatelessWidget {
       accent: accent,
       foreground: ctaForeground,
     );
+
+    if (badgeLabel == null) {
+      return cta;
+    }
+
     final theme = Theme.of(context);
     final badge = ExcludeSemantics(
       child: TilawaExperimentalBadge(
-        label: badgeLabel,
+        label: badgeLabel!,
         foregroundColor: theme.colorScheme.onSurface,
       ),
     );

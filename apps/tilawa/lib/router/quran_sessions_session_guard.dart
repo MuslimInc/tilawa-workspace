@@ -21,13 +21,57 @@ bool isProtectedQuranSessionsPath(String path) {
       normalized.startsWith('${QuranSessionsRoutes.home}/');
 }
 
-/// Redirects when Quran Sessions feature flag is off.
+/// Whether [path] is a student-facing Quran Sessions route (hub, booking, …).
+@visibleForTesting
+bool isStudentFacingQuranSessionsPath(String path) {
+  final normalized = path.endsWith('/') && path.length > 1
+      ? path.substring(0, path.length - 1)
+      : path;
+
+  const exactStudentPaths = <String>{
+    QuranSessionsRoutes.home,
+    QuranSessionsRoutes.teacherList,
+    QuranSessionsRoutes.mySessions,
+    QuranSessionsRoutes.wallet,
+    QuranSessionsRoutes.profileCompletion,
+    QuranSessionsRoutes.guardianDashboard,
+    QuranSessionsRoutes.guardianApproval,
+  };
+  if (exactStudentPaths.contains(normalized)) {
+    return true;
+  }
+
+  if (normalized.startsWith('${QuranSessionsRoutes.home}/teachers/')) {
+    return true;
+  }
+
+  const detailPrefix = '${QuranSessionsRoutes.home}/detail/';
+  if (normalized.startsWith(detailPrefix) &&
+      normalized.length > detailPrefix.length) {
+    return true;
+  }
+
+  const reschedulePrefix = '${QuranSessionsRoutes.home}/reschedule/';
+  if (normalized.startsWith(reschedulePrefix) &&
+      normalized.length > reschedulePrefix.length) {
+    return true;
+  }
+
+  return false;
+}
+
+/// Redirects when Quran Sessions feature flag is off or student experience hidden.
 String? quranSessionsFeatureRedirect(GoRouterState state) {
   final path = state.uri.path;
   if (!isProtectedQuranSessionsPath(path)) {
     return null;
   }
-  if (!quranSessionsFeatureConfig().quranSessionsEnabled) {
+  final config = quranSessionsFeatureConfig();
+  if (!config.quranSessionsEnabled) {
+    return const HomeRoute().location;
+  }
+  if (!config.showLearnQuranStudentExperience &&
+      isStudentFacingQuranSessionsPath(path)) {
     return const HomeRoute().location;
   }
   return null;

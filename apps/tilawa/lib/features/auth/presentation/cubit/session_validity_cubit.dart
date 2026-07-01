@@ -132,6 +132,9 @@ class SessionValidityCubit extends Cubit<SessionValidityState> {
     if (_handlingRevocation || state.revoked) {
       return;
     }
+    if (_authRepository.currentUser == null) {
+      return;
+    }
     _clearUnknownRetry();
     _handlingRevocation = true;
     emit(

@@ -356,6 +356,34 @@
     "@homeFeaturedTutorMySessions": {
         "description": "Secondary link on featured tutor card to open booked sessions"
     },
+    "settingsTeacherApplicationEntryTitle": "Apply as a Quran teacher",
+    "@settingsTeacherApplicationEntryTitle": {
+        "description": "Settings tile title for experienced Quran teacher application"
+    },
+    "settingsTeacherApplicationEntrySubtitle": "If you are a hafiz or have experience teaching the Quran, you can submit your application for review.",
+    "@settingsTeacherApplicationEntrySubtitle": {
+        "description": "Settings tile subtitle for teacher application entry"
+    },
+    "teacherApplicationOpenFormCta": "Open application form",
+    "@teacherApplicationOpenFormCta": {
+        "description": "CTA to open the external Google Form teacher application"
+    },
+    "teacherApplicationSheetTitle": "Are you a hafiz or Quran teacher?",
+    "@teacherApplicationSheetTitle": {
+        "description": "Title on teacher application bottom sheet"
+    },
+    "teacherApplicationSheetBody": "We are now accepting applications from experienced hafiz and Quran teachers to participate in the Learn Quran feature inside the app. You can fill out the application form, and our team will review it before enabling any permissions.",
+    "@teacherApplicationSheetBody": {
+        "description": "Body copy on teacher application bottom sheet"
+    },
+    "teacherApplicationLaterCta": "Later",
+    "@teacherApplicationLaterCta": {
+        "description": "Secondary dismiss action on teacher application bottom sheet"
+    },
+    "teacherApplicationFormOpenFailed": "Could not open the application form. Please try again.",
+    "@teacherApplicationFormOpenFailed": {
+        "description": "Error when external teacher application form fails to open"
+    },
     "homeQuickQuranReader": "Mushaf",
     "@homeQuickQuranReader": {
         "description": "Home quick action tile label for opening the Mushaf reader"

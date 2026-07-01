@@ -215,7 +215,10 @@ void main() {
 
       if (!getIt.isRegistered<AppLaunchConfig>()) {
         getIt.registerSingleton<AppLaunchConfig>(
-          const AppLaunchConfig(quranSessionsEnabled: true),
+          const AppLaunchConfig(
+            quranSessionsEnabled: true,
+            learnQuranStudentFeatureEnabled: true,
+          ),
         );
       }
       addTearDown(() async {

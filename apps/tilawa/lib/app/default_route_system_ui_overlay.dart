@@ -10,6 +10,7 @@ import '../core/bootstrap/first_frame_log.dart';
 import '../core/bootstrap/splash_launch_handoff.dart';
 import '../core/telemetry/startup_perf_log.dart';
 import '../router/app_router.dart';
+import '../router/shell_route_location.dart';
 import '../shared/widgets/quran_player_chrome.dart';
 
 /// Applies the route-driven [SystemUiOverlayStyle] for the whole app.
@@ -83,9 +84,10 @@ class _DefaultRouteSystemUiOverlayState
     if (override != null) {
       return override();
     }
-    return AppRouter.router.state.uri.path.isNotEmpty
-        ? AppRouter.router.state.uri.path
-        : AppRouter.router.state.matchedLocation;
+    // [GoRouter.state] throws StateError while matches are unresolved (e.g.
+    // Android resume after saveInstanceState). ShellRouteLocation reads
+    // [RouteMatchList] defensively — same pattern as [AppRouter._currentLocation].
+    return ShellRouteLocation.activeMatchedLocation();
   }
 
   @override

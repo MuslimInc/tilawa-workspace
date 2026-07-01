@@ -11,19 +11,8 @@ import 'package:tilawa_core/constants/analytics_constants.dart';
 import 'package:tilawa_core/services/analytics_service.dart';
 import 'package:tilawa_ui_kit/tilawa_ui_kit.dart';
 
+import '../../../../support/recording_analytics_service.dart';
 import '../../../../support/screen_scope_test_support.dart';
-
-final class _RecordingAnalyticsService implements AnalyticsService {
-  final List<String> events = <String>[];
-
-  @override
-  Future<void> logEvent(String name, {Map<String, Object>? parameters}) async {
-    events.add(name);
-  }
-
-  @override
-  dynamic noSuchMethod(Invocation invocation) => super.noSuchMethod(invocation);
-}
 
 final class _NullAuthSessionProvider implements AuthSessionProvider {
   @override
@@ -75,11 +64,14 @@ Future<void> _pumpCard(
 
 /// Pumps the card inside a [GoRouter] so taps can navigate without throwing.
 /// A null current user routes Learn Quran taps to a stub `/login`.
-Future<_RecordingAnalyticsService> _pumpRoutedCard(WidgetTester tester) async {
-  final analytics = _RecordingAnalyticsService();
+Future<RecordingAnalyticsService> _pumpRoutedCard(WidgetTester tester) async {
+  final analytics = RecordingAnalyticsService();
   getIt
     ..registerSingleton<AppLaunchConfig>(
-      const AppLaunchConfig(quranSessionsEnabled: true),
+      const AppLaunchConfig(
+        quranSessionsEnabled: true,
+        learnQuranStudentFeatureEnabled: true,
+      ),
     )
     ..registerSingleton<AnalyticsService>(analytics)
     ..registerSingleton<AuthSessionProvider>(_NullAuthSessionProvider());
@@ -123,7 +115,10 @@ void main() {
   ) async {
     await resetScopeGetIt();
     getIt.registerSingleton<AppLaunchConfig>(
-      const AppLaunchConfig(quranSessionsEnabled: true),
+      const AppLaunchConfig(
+        quranSessionsEnabled: true,
+        learnQuranStudentFeatureEnabled: true,
+      ),
     );
 
     await _pumpCard(tester);
@@ -149,7 +144,10 @@ void main() {
   ) async {
     await resetScopeGetIt();
     getIt.registerSingleton<AppLaunchConfig>(
-      const AppLaunchConfig(quranSessionsEnabled: true),
+      const AppLaunchConfig(
+        quranSessionsEnabled: true,
+        learnQuranStudentFeatureEnabled: true,
+      ),
     );
 
     await _pumpCard(tester, locale: const Locale('ar'));
@@ -167,7 +165,10 @@ void main() {
     (tester) async {
       await resetScopeGetIt();
       getIt.registerSingleton<AppLaunchConfig>(
-        const AppLaunchConfig(quranSessionsEnabled: true),
+        const AppLaunchConfig(
+          quranSessionsEnabled: true,
+          learnQuranStudentFeatureEnabled: true,
+        ),
       );
 
       tester.view.physicalSize = const Size(360, 712);
@@ -205,7 +206,10 @@ void main() {
     (tester) async {
       await resetScopeGetIt();
       getIt.registerSingleton<AppLaunchConfig>(
-        const AppLaunchConfig(quranSessionsEnabled: true),
+        const AppLaunchConfig(
+          quranSessionsEnabled: true,
+          learnQuranStudentFeatureEnabled: true,
+        ),
       );
 
       await _pumpCard(tester);
@@ -221,7 +225,10 @@ void main() {
   ) async {
     await resetScopeGetIt();
     getIt.registerSingleton<AppLaunchConfig>(
-      const AppLaunchConfig(quranSessionsEnabled: true),
+      const AppLaunchConfig(
+        quranSessionsEnabled: true,
+        learnQuranStudentFeatureEnabled: true,
+      ),
     );
 
     await _pumpCard(tester);
@@ -242,10 +249,13 @@ void main() {
     tester,
   ) async {
     await resetScopeGetIt();
-    final analytics = _RecordingAnalyticsService();
+    final analytics = RecordingAnalyticsService();
     getIt
       ..registerSingleton<AppLaunchConfig>(
-        const AppLaunchConfig(quranSessionsEnabled: true),
+        const AppLaunchConfig(
+          quranSessionsEnabled: true,
+          learnQuranStudentFeatureEnabled: true,
+        ),
       )
       ..registerSingleton<AnalyticsService>(analytics);
 
@@ -279,10 +289,13 @@ void main() {
     addTearDown(tester.view.resetPhysicalSize);
     addTearDown(tester.view.resetDevicePixelRatio);
 
-    final analytics = _RecordingAnalyticsService();
+    final analytics = RecordingAnalyticsService();
     getIt
       ..registerSingleton<AppLaunchConfig>(
-        const AppLaunchConfig(quranSessionsEnabled: true),
+        const AppLaunchConfig(
+          quranSessionsEnabled: true,
+          learnQuranStudentFeatureEnabled: true,
+        ),
       )
       ..registerSingleton<AnalyticsService>(analytics);
 
@@ -333,10 +346,13 @@ void main() {
     tester,
   ) async {
     await resetScopeGetIt();
-    final analytics = _RecordingAnalyticsService();
+    final analytics = RecordingAnalyticsService();
     getIt
       ..registerSingleton<AppLaunchConfig>(
-        const AppLaunchConfig(quranSessionsEnabled: false),
+        const AppLaunchConfig(
+          quranSessionsEnabled: true,
+          learnQuranStudentFeatureEnabled: false,
+        ),
       )
       ..registerSingleton<AnalyticsService>(analytics);
 

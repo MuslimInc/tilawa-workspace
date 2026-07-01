@@ -277,6 +277,31 @@ class AppLocalizationsEn extends AppLocalizations {
   String get homeFeaturedTutorMySessions => 'My sessions';
 
   @override
+  String get settingsTeacherApplicationEntryTitle => 'Apply as a Quran teacher';
+
+  @override
+  String get settingsTeacherApplicationEntrySubtitle =>
+      'If you are a hafiz or have experience teaching the Quran, you can submit your application for review.';
+
+  @override
+  String get teacherApplicationOpenFormCta => 'Open application form';
+
+  @override
+  String get teacherApplicationSheetTitle =>
+      'Are you a hafiz or Quran teacher?';
+
+  @override
+  String get teacherApplicationSheetBody =>
+      'We are now accepting applications from experienced hafiz and Quran teachers to participate in the Learn Quran feature inside the app. You can fill out the application form, and our team will review it before enabling any permissions.';
+
+  @override
+  String get teacherApplicationLaterCta => 'Later';
+
+  @override
+  String get teacherApplicationFormOpenFailed =>
+      'Could not open the application form. Please try again.';
+
+  @override
   String get homeQuickQuranReader => 'Mushaf';
 
   @override

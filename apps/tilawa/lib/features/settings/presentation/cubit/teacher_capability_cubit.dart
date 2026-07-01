@@ -76,7 +76,7 @@ class TeacherCapabilityCubit extends Cubit<SettingsTeacherCapabilityLoadState> {
     }
 
     final config = quranSessionsFeatureConfig();
-    if (!config.showProfileTeacherEntry) {
+    if (!config.quranSessionsEnabled) {
       if (isClosed || generation != _loadGeneration) return;
       emit(state.copyWith(isLoading: false, hasLoaded: true));
       return;

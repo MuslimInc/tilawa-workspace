@@ -50,16 +50,24 @@ class AppProviders {
       providers: providers,
       child: ChangeNotifierProvider<QuranPlayerChromeNotifier>(
         create: (_) => QuranPlayerChromeNotifier(),
-        child: BlocListener<AuthBloc, AuthState>(
-          listenWhen: (previous, current) =>
-              previous is! AuthAuthenticated && current is AuthAuthenticated,
-          listener: (context, state) {
-            context.read<SessionValidityCubit>().resetRevocation();
-            unawaited(PendingSessionRevokeStore.clear());
-            unawaited(context.read<SessionValidityCubit>().checkOnResume());
+        child: BlocListener<SessionValidityCubit, SessionValidityState>(
+          listenWhen:
+              (SessionValidityState previous, SessionValidityState current) =>
+                  !previous.revoked && current.revoked,
+          listener: (BuildContext context, SessionValidityState state) {
+            context.read<AuthBloc>().add(const SessionInvalidatedEvent());
           },
-          child: SessionRevokedNavigationListener(
-            child: AccountDeletionNavigationListener(child: child),
+          child: BlocListener<AuthBloc, AuthState>(
+            listenWhen: (previous, current) =>
+                previous is! AuthAuthenticated && current is AuthAuthenticated,
+            listener: (context, state) {
+              context.read<SessionValidityCubit>().resetRevocation();
+              unawaited(PendingSessionRevokeStore.clear());
+              unawaited(context.read<SessionValidityCubit>().checkOnResume());
+            },
+            child: SessionRevokedNavigationListener(
+              child: AccountDeletionNavigationListener(child: child),
+            ),
           ),
         ),
       ),

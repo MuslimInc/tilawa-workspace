@@ -22,6 +22,7 @@ interface CallableLike {
 const callable = registerActiveDevice as unknown as CallableLike;
 
 test.beforeEach(() => {
+  db();
   mock.method(adminAuth, "getAuth", () => ({
     revokeRefreshTokens: async () => {},
   }));
