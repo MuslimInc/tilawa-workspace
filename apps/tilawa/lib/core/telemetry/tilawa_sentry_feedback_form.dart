@@ -73,7 +73,8 @@ class _TilawaSentryFeedbackFormState extends State<TilawaSentryFeedbackForm> {
   void initState() {
     super.initState();
     _hub = widget.hub ?? HubAdapter();
-    _flutterOptions = widget.flutterOptions ??
+    _flutterOptions =
+        widget.flutterOptions ??
         // ignore: invalid_use_of_internal_member
         (_hub.options as SentryFlutterOptions);
 
