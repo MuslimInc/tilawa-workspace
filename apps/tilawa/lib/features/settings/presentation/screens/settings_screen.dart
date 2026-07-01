@@ -7,6 +7,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
 import 'package:tilawa/core/app_legal_urls.dart';
 import 'package:tilawa/core/telemetry/sentry_debug_verify_tile.dart';
+import 'package:tilawa/core/telemetry/sentry_report_bug_tile.dart';
 import 'package:tilawa/core/extensions.dart';
 import 'package:tilawa/core/layout/list_scroll_bottom_padding.dart';
 import 'package:tilawa/core/utils/legal_url_launcher.dart';
@@ -257,6 +258,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
                     leadingIcon: FluentIcons.person_support_24_regular,
                     children: [
                       const SettingsRateAppTile(),
+                      const SentryReportBugTile(),
                       TilawaSettingsTile(
                         title: l10n.whatsNewSettingsTile,
                         onTap: () =>

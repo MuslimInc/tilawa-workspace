@@ -2885,6 +2885,58 @@ class AppLocalizationsAr extends AppLocalizations {
   String get rateTilawaSubtitle => 'شاركنا رأيك في متجر التطبيقات.';
 
   @override
+  String get reportBugSettingsTileTitle => 'الإبلاغ عن خطأ';
+
+  @override
+  String get reportBugSettingsTileSubtitle =>
+      'أخبرنا بما حدث لنساعدك في إصلاحه.';
+
+  @override
+  String get reportBugTitle => 'الإبلاغ عن خطأ';
+
+  @override
+  String get reportBugFormTitle => 'الإبلاغ عن خطأ';
+
+  @override
+  String get reportBugMessageLabel => 'الوصف';
+
+  @override
+  String get reportBugMessagePlaceholder => 'ماذا حدث؟ ماذا كنت تتوقع؟';
+
+  @override
+  String get reportBugNameLabel => 'الاسم';
+
+  @override
+  String get reportBugNamePlaceholder => 'اسمك';
+
+  @override
+  String get reportBugEmailLabel => 'البريد الإلكتروني';
+
+  @override
+  String get reportBugEmailPlaceholder => 'your.email@example.com';
+
+  @override
+  String get reportBugSubmitButton => 'إرسال البلاغ';
+
+  @override
+  String get reportBugCancelButton => 'إلغاء';
+
+  @override
+  String get reportBugSuccessMessage => 'شكرًا على بلاغك.';
+
+  @override
+  String get reportBugRequiredLabel => ' (مطلوب)';
+
+  @override
+  String get reportBugValidationError => 'هذا الحقل مطلوب.';
+
+  @override
+  String get reportBugCaptureScreenshot => 'إرفاق لقطة شاشة';
+
+  @override
+  String get reportBugRemoveScreenshot => 'إزالة لقطة الشاشة';
+
+  @override
   String get shareTilawa => 'شارك أنا مسلم';
 
   @override

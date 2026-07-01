@@ -2898,6 +2898,59 @@ class AppLocalizationsEn extends AppLocalizations {
   String get rateTilawaSubtitle => 'Share your feedback on the app store.';
 
   @override
+  String get reportBugSettingsTileTitle => 'Report a bug';
+
+  @override
+  String get reportBugSettingsTileSubtitle =>
+      'Tell us what went wrong so we can fix it.';
+
+  @override
+  String get reportBugTitle => 'Report a bug';
+
+  @override
+  String get reportBugFormTitle => 'Report a bug';
+
+  @override
+  String get reportBugMessageLabel => 'Description';
+
+  @override
+  String get reportBugMessagePlaceholder =>
+      'What happened? What did you expect?';
+
+  @override
+  String get reportBugNameLabel => 'Name';
+
+  @override
+  String get reportBugNamePlaceholder => 'Your name';
+
+  @override
+  String get reportBugEmailLabel => 'Email';
+
+  @override
+  String get reportBugEmailPlaceholder => 'your.email@example.com';
+
+  @override
+  String get reportBugSubmitButton => 'Send report';
+
+  @override
+  String get reportBugCancelButton => 'Cancel';
+
+  @override
+  String get reportBugSuccessMessage => 'Thank you for your report.';
+
+  @override
+  String get reportBugRequiredLabel => ' (required)';
+
+  @override
+  String get reportBugValidationError => 'This field is required.';
+
+  @override
+  String get reportBugCaptureScreenshot => 'Attach screenshot';
+
+  @override
+  String get reportBugRemoveScreenshot => 'Remove screenshot';
+
+  @override
   String get shareTilawa => 'Share MeMuslim';
 
   @override

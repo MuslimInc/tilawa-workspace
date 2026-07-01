@@ -3,8 +3,12 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:sentry_flutter/sentry_flutter.dart';
 import 'package:tilawa/core/telemetry/crash_reporting_context.dart';
 import 'package:tilawa/core/telemetry/sentry_config.dart';
+import 'package:tilawa/core/telemetry/sentry_user_feedback.dart';
+import 'package:tilawa/router/app_router.dart';
 
 void main() {
+  tearDown(SentryUserFeedback.resetForTesting);
+
   group('SentryConfig', () {
     test('applyFlutterOptions wires Tilawa defaults', () {
       final SentryFlutterOptions options = SentryFlutterOptions();
@@ -14,14 +18,18 @@ void main() {
         autoInitializeNativeSdk: false,
       );
 
+      expect(SentryUserFeedback.boundFlutterOptions, same(options));
+
       expect(options.dsn, kProfileMode ? '' : SentryConfig.dsn);
       expect(options.environment, kReleaseMode ? 'production' : 'development');
       expect(options.debug, kDebugMode);
       expect(options.enableLogs, kReleaseMode);
       expect(options.autoInitializeNativeSdk, isFalse);
+      expect(options.navigatorKey, AppRouter.navigatorKey);
+      expect(options.attachScreenshot, isTrue);
       expect(
         options.beforeSend,
-        CrashReportingContext.filterBeforeSend,
+        SentryUserFeedback.filterBeforeSend,
       );
       expect(
         options.beforeSendLog,

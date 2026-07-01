@@ -3881,6 +3881,74 @@
     "@rateTilawaSubtitle": {
         "description": "Optional subtitle under the rate Tilawa settings row"
     },
+    "reportBugSettingsTileTitle": "Report a bug",
+    "@reportBugSettingsTileTitle": {
+        "description": "Settings row that opens the Sentry bug report form"
+    },
+    "reportBugSettingsTileSubtitle": "Tell us what went wrong so we can fix it.",
+    "@reportBugSettingsTileSubtitle": {
+        "description": "Subtitle under the report-a-bug settings row"
+    },
+    "reportBugTitle": "Report a bug",
+    "@reportBugTitle": {
+        "description": "App bar title for the Sentry feedback form"
+    },
+    "reportBugFormTitle": "Report a bug",
+    "@reportBugFormTitle": {
+        "description": "Heading inside the Sentry feedback form"
+    },
+    "reportBugMessageLabel": "Description",
+    "@reportBugMessageLabel": {
+        "description": "Label for the bug description field in Sentry feedback"
+    },
+    "reportBugMessagePlaceholder": "What happened? What did you expect?",
+    "@reportBugMessagePlaceholder": {
+        "description": "Placeholder for the bug description field in Sentry feedback"
+    },
+    "reportBugNameLabel": "Name",
+    "@reportBugNameLabel": {
+        "description": "Label for the name field in Sentry feedback"
+    },
+    "reportBugNamePlaceholder": "Your name",
+    "@reportBugNamePlaceholder": {
+        "description": "Placeholder for the name field in Sentry feedback"
+    },
+    "reportBugEmailLabel": "Email",
+    "@reportBugEmailLabel": {
+        "description": "Label for the email field in Sentry feedback"
+    },
+    "reportBugEmailPlaceholder": "your.email@example.com",
+    "@reportBugEmailPlaceholder": {
+        "description": "Placeholder for the email field in Sentry feedback"
+    },
+    "reportBugSubmitButton": "Send report",
+    "@reportBugSubmitButton": {
+        "description": "Submit button on the Sentry feedback form"
+    },
+    "reportBugCancelButton": "Cancel",
+    "@reportBugCancelButton": {
+        "description": "Cancel button on the Sentry feedback form"
+    },
+    "reportBugSuccessMessage": "Thank you for your report.",
+    "@reportBugSuccessMessage": {
+        "description": "Success message after submitting Sentry feedback"
+    },
+    "reportBugRequiredLabel": " (required)",
+    "@reportBugRequiredLabel": {
+        "description": "Suffix on required Sentry feedback field labels"
+    },
+    "reportBugValidationError": "This field is required.",
+    "@reportBugValidationError": {
+        "description": "Validation error on empty required Sentry feedback fields"
+    },
+    "reportBugCaptureScreenshot": "Attach screenshot",
+    "@reportBugCaptureScreenshot": {
+        "description": "Button to capture a screenshot for Sentry feedback"
+    },
+    "reportBugRemoveScreenshot": "Remove screenshot",
+    "@reportBugRemoveScreenshot": {
+        "description": "Button to remove an attached Sentry feedback screenshot"
+    },
     "shareTilawa": "Share MeMuslim",
     "@shareTilawa": {
         "description": "Settings row to share the app with others"

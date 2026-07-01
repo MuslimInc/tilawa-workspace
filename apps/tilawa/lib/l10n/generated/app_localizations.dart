@@ -5114,6 +5114,108 @@ abstract class AppLocalizations {
   /// **'Share your feedback on the app store.'**
   String get rateTilawaSubtitle;
 
+  /// Settings row that opens the Sentry bug report form
+  ///
+  /// In en, this message translates to:
+  /// **'Report a bug'**
+  String get reportBugSettingsTileTitle;
+
+  /// Subtitle under the report-a-bug settings row
+  ///
+  /// In en, this message translates to:
+  /// **'Tell us what went wrong so we can fix it.'**
+  String get reportBugSettingsTileSubtitle;
+
+  /// App bar title for the Sentry feedback form
+  ///
+  /// In en, this message translates to:
+  /// **'Report a bug'**
+  String get reportBugTitle;
+
+  /// Heading inside the Sentry feedback form
+  ///
+  /// In en, this message translates to:
+  /// **'Report a bug'**
+  String get reportBugFormTitle;
+
+  /// Label for the bug description field in Sentry feedback
+  ///
+  /// In en, this message translates to:
+  /// **'Description'**
+  String get reportBugMessageLabel;
+
+  /// Placeholder for the bug description field in Sentry feedback
+  ///
+  /// In en, this message translates to:
+  /// **'What happened? What did you expect?'**
+  String get reportBugMessagePlaceholder;
+
+  /// Label for the name field in Sentry feedback
+  ///
+  /// In en, this message translates to:
+  /// **'Name'**
+  String get reportBugNameLabel;
+
+  /// Placeholder for the name field in Sentry feedback
+  ///
+  /// In en, this message translates to:
+  /// **'Your name'**
+  String get reportBugNamePlaceholder;
+
+  /// Label for the email field in Sentry feedback
+  ///
+  /// In en, this message translates to:
+  /// **'Email'**
+  String get reportBugEmailLabel;
+
+  /// Placeholder for the email field in Sentry feedback
+  ///
+  /// In en, this message translates to:
+  /// **'your.email@example.com'**
+  String get reportBugEmailPlaceholder;
+
+  /// Submit button on the Sentry feedback form
+  ///
+  /// In en, this message translates to:
+  /// **'Send report'**
+  String get reportBugSubmitButton;
+
+  /// Cancel button on the Sentry feedback form
+  ///
+  /// In en, this message translates to:
+  /// **'Cancel'**
+  String get reportBugCancelButton;
+
+  /// Success message after submitting Sentry feedback
+  ///
+  /// In en, this message translates to:
+  /// **'Thank you for your report.'**
+  String get reportBugSuccessMessage;
+
+  /// Suffix on required Sentry feedback field labels
+  ///
+  /// In en, this message translates to:
+  /// **' (required)'**
+  String get reportBugRequiredLabel;
+
+  /// Validation error on empty required Sentry feedback fields
+  ///
+  /// In en, this message translates to:
+  /// **'This field is required.'**
+  String get reportBugValidationError;
+
+  /// Button to capture a screenshot for Sentry feedback
+  ///
+  /// In en, this message translates to:
+  /// **'Attach screenshot'**
+  String get reportBugCaptureScreenshot;
+
+  /// Button to remove an attached Sentry feedback screenshot
+  ///
+  /// In en, this message translates to:
+  /// **'Remove screenshot'**
+  String get reportBugRemoveScreenshot;
+
   /// Settings row to share the app with others
   ///
   /// In en, this message translates to:

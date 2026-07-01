@@ -3363,6 +3363,23 @@
     "@rateTilawaSubtitle": {
         "description": "Optional subtitle under the rate Tilawa settings row"
     },
+    "reportBugSettingsTileTitle": "الإبلاغ عن خطأ",
+    "reportBugSettingsTileSubtitle": "أخبرنا بما حدث لنساعدك في إصلاحه.",
+    "reportBugTitle": "الإبلاغ عن خطأ",
+    "reportBugFormTitle": "الإبلاغ عن خطأ",
+    "reportBugMessageLabel": "الوصف",
+    "reportBugMessagePlaceholder": "ماذا حدث؟ ماذا كنت تتوقع؟",
+    "reportBugNameLabel": "الاسم",
+    "reportBugNamePlaceholder": "اسمك",
+    "reportBugEmailLabel": "البريد الإلكتروني",
+    "reportBugEmailPlaceholder": "your.email@example.com",
+    "reportBugSubmitButton": "إرسال البلاغ",
+    "reportBugCancelButton": "إلغاء",
+    "reportBugSuccessMessage": "شكرًا على بلاغك.",
+    "reportBugRequiredLabel": " (مطلوب)",
+    "reportBugValidationError": "هذا الحقل مطلوب.",
+    "reportBugCaptureScreenshot": "إرفاق لقطة شاشة",
+    "reportBugRemoveScreenshot": "إزالة لقطة الشاشة",
     "shareTilawa": "شارك أنا مسلم",
     "@shareTilawa": {
         "description": "Settings row to share the app with others"

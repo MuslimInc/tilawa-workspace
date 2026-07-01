@@ -2,7 +2,9 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/widgets.dart';
 import 'package:sentry_flutter/sentry_flutter.dart';
 
+import '../../router/app_router.dart';
 import 'crash_reporting_context.dart';
+import 'sentry_user_feedback.dart';
 
 /// Sentry client configuration for Tilawa.
 ///
@@ -28,7 +30,10 @@ abstract final class SentryConfig {
     options.enableLogs = kReleaseMode;
     options.enableMetrics = true;
     options.autoInitializeNativeSdk = autoInitializeNativeSdk;
-    options.beforeSend = CrashReportingContext.filterBeforeSend;
+    SentryUserFeedback.bindFlutterOptions(options);
+    options.navigatorKey = AppRouter.navigatorKey;
+    options.attachScreenshot = true;
+    options.beforeSend = SentryUserFeedback.filterBeforeSend;
     options.beforeSendLog = CrashReportingContext.filterBeforeSendLog;
 
     // Session Replay: always capture error replays; sample normal sessions in
