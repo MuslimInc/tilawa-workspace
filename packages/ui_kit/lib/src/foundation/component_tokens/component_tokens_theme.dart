@@ -13,6 +13,7 @@ class MeMuslimComponentTokens extends ThemeExtension<MeMuslimComponentTokens> {
     required this.card,
     required this.iconBox,
     required this.loadingIndicator,
+    required this.skeleton,
     required this.divider,
     required this.emptyState,
     required this.alphabetScrollbar,
@@ -46,6 +47,7 @@ class MeMuslimComponentTokens extends ThemeExtension<MeMuslimComponentTokens> {
   final TilawaCardTokens card;
   final TilawaIconBoxTokens iconBox;
   final TilawaLoadingIndicatorTokens loadingIndicator;
+  final TilawaSkeletonTokens skeleton;
   final TilawaDividerTokens divider;
   final TilawaEmptyStateTokens emptyState;
   final TilawaAlphabetScrollbarTokens alphabetScrollbar;
@@ -103,6 +105,7 @@ class MeMuslimComponentTokens extends ThemeExtension<MeMuslimComponentTokens> {
       card: TilawaCardTokens.defaults(),
       iconBox: TilawaIconBoxTokens.fromColorScheme(effectiveColorScheme),
       loadingIndicator: TilawaLoadingIndicatorTokens.defaults(),
+      skeleton: TilawaSkeletonTokens.defaults(),
       divider: TilawaDividerTokens.defaults(),
       emptyState: TilawaEmptyStateTokens.defaults(),
       alphabetScrollbar: TilawaAlphabetScrollbarTokens.fromColorScheme(
@@ -163,6 +166,7 @@ class MeMuslimComponentTokens extends ThemeExtension<MeMuslimComponentTokens> {
     TilawaCardTokens? card,
     TilawaIconBoxTokens? iconBox,
     TilawaLoadingIndicatorTokens? loadingIndicator,
+    TilawaSkeletonTokens? skeleton,
     TilawaDividerTokens? divider,
     TilawaEmptyStateTokens? emptyState,
     TilawaAlphabetScrollbarTokens? alphabetScrollbar,
@@ -196,6 +200,7 @@ class MeMuslimComponentTokens extends ThemeExtension<MeMuslimComponentTokens> {
       card: card ?? this.card,
       iconBox: iconBox ?? this.iconBox,
       loadingIndicator: loadingIndicator ?? this.loadingIndicator,
+      skeleton: skeleton ?? this.skeleton,
       divider: divider ?? this.divider,
       emptyState: emptyState ?? this.emptyState,
       alphabetScrollbar: alphabetScrollbar ?? this.alphabetScrollbar,
@@ -249,6 +254,7 @@ class MeMuslimComponentTokens extends ThemeExtension<MeMuslimComponentTokens> {
         other.loadingIndicator,
         t,
       ),
+      skeleton: TilawaSkeletonTokens.lerp(skeleton, other.skeleton, t),
       divider: TilawaDividerTokens.lerp(divider, other.divider, t),
       emptyState: TilawaEmptyStateTokens.lerp(emptyState, other.emptyState, t),
       alphabetScrollbar: TilawaAlphabetScrollbarTokens.lerp(

@@ -438,7 +438,7 @@ class _NavButton extends StatelessWidget {
         child: AnimatedScale(
           scale: iconScale,
           duration: designTokens.durationFast,
-          curve: Curves.easeOutCubic,
+          curve: designTokens.curveEmphasized,
           child: iconWidget,
         ),
       ),

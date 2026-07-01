@@ -68,6 +68,9 @@ class MeMuslimDesignTokens extends ThemeExtension<MeMuslimDesignTokens> {
     required this.durationFast,
     required this.durationMedium,
     required this.durationSlow,
+    required this.curveStandard,
+    required this.curveEmphasized,
+    required this.curveSymmetric,
     required this.contentMaxWidthReader,
     required this.contentMaxWidthForm,
     required this.contentMaxWidthMedia,
@@ -233,6 +236,22 @@ class MeMuslimDesignTokens extends ThemeExtension<MeMuslimDesignTokens> {
   /// 600ms
   final Duration durationSlow;
 
+  /// [Curves.easeOut] — chrome fades, reveals, and in-place opacity shifts.
+  ///
+  /// Pair with [durationFast] for feedback strips, bottom action areas, and
+  /// other appearance changes that don't travel.
+  final Curve curveStandard;
+
+  /// [Curves.easeOutCubic] — spatial movement (slides, expands, scroll-to).
+  ///
+  /// The kit's dominant motion curve: fast start, soft landing. Use for
+  /// panels, sheets, shells, and progress sweeps.
+  final Curve curveEmphasized;
+
+  /// [Curves.easeInOut] — bidirectional transitions where enter and exit
+  /// should mirror each other (cross-fades, switchers).
+  final Curve curveSymmetric;
+
   /// Horizontal inset from the screen edge to toolbar leading/actions.
   double get appBarEdgePadding => spaceMedium;
 
@@ -359,6 +378,9 @@ class MeMuslimDesignTokens extends ThemeExtension<MeMuslimDesignTokens> {
       durationFast: const Duration(milliseconds: 200),
       durationMedium: const Duration(milliseconds: 400),
       durationSlow: const Duration(milliseconds: 600),
+      curveStandard: Curves.easeOut,
+      curveEmphasized: Curves.easeOutCubic,
+      curveSymmetric: Curves.easeInOut,
       contentMaxWidthReader: 720,
       contentMaxWidthForm: 560,
       contentMaxWidthMedia: 1200,
@@ -423,6 +445,9 @@ class MeMuslimDesignTokens extends ThemeExtension<MeMuslimDesignTokens> {
     Duration? durationFast,
     Duration? durationMedium,
     Duration? durationSlow,
+    Curve? curveStandard,
+    Curve? curveEmphasized,
+    Curve? curveSymmetric,
     double? contentMaxWidthReader,
     double? contentMaxWidthForm,
     double? contentMaxWidthMedia,
@@ -484,6 +509,9 @@ class MeMuslimDesignTokens extends ThemeExtension<MeMuslimDesignTokens> {
       durationFast: durationFast ?? this.durationFast,
       durationMedium: durationMedium ?? this.durationMedium,
       durationSlow: durationSlow ?? this.durationSlow,
+      curveStandard: curveStandard ?? this.curveStandard,
+      curveEmphasized: curveEmphasized ?? this.curveEmphasized,
+      curveSymmetric: curveSymmetric ?? this.curveSymmetric,
       contentMaxWidthReader:
           contentMaxWidthReader ?? this.contentMaxWidthReader,
       contentMaxWidthForm: contentMaxWidthForm ?? this.contentMaxWidthForm,
@@ -595,6 +623,9 @@ class MeMuslimDesignTokens extends ThemeExtension<MeMuslimDesignTokens> {
       durationFast: t < 0.5 ? durationFast : other.durationFast,
       durationMedium: t < 0.5 ? durationMedium : other.durationMedium,
       durationSlow: t < 0.5 ? durationSlow : other.durationSlow,
+      curveStandard: t < 0.5 ? curveStandard : other.curveStandard,
+      curveEmphasized: t < 0.5 ? curveEmphasized : other.curveEmphasized,
+      curveSymmetric: t < 0.5 ? curveSymmetric : other.curveSymmetric,
       contentMaxWidthReader: lerpDouble(
         contentMaxWidthReader,
         other.contentMaxWidthReader,

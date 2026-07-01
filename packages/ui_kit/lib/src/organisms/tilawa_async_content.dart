@@ -1,9 +1,10 @@
 import 'package:flutter/material.dart';
 
 import '../atoms/tilawa_empty_state.dart';
-import '../foundation/tilawa_icons.dart';
 import '../atoms/tilawa_error_state.dart';
 import '../atoms/tilawa_loading_indicator.dart';
+import '../foundation/design_tokens.dart';
+import '../foundation/tilawa_icons.dart';
 
 /// Screen-level async region states for [TilawaAsyncContent].
 enum TilawaAsyncContentState {
@@ -15,6 +16,11 @@ enum TilawaAsyncContentState {
 
 /// Switches between loading, empty, error, and content regions with kit
 /// defaults (spec 015 FR-C01).
+///
+/// Region changes cross-fade over [MeMuslimDesignTokens.durationFast] so the
+/// skeleton → content (or → empty / error) swap lands softly instead of
+/// hard-cutting. The transition collapses to an instant swap under reduced
+/// motion.
 class TilawaAsyncContent extends StatelessWidget {
   const TilawaAsyncContent({
     super.key,
@@ -59,7 +65,7 @@ class TilawaAsyncContent extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return switch (state) {
+    final Widget region = switch (state) {
       TilawaAsyncContentState.loading => _TilawaAsyncLoadingRegion(
         skeleton: skeleton,
         loadingBuilder: loadingBuilder,
@@ -83,6 +89,23 @@ class TilawaAsyncContent extends StatelessWidget {
             ),
       TilawaAsyncContentState.content => builder(context),
     };
+
+    final MeMuslimDesignTokens tokens = Theme.of(context).tokens;
+    final Duration duration = MediaQuery.disableAnimationsOf(context)
+        ? Duration.zero
+        : tokens.durationFast;
+
+    return AnimatedSwitcher(
+      duration: duration,
+      switchInCurve: tokens.curveSymmetric,
+      switchOutCurve: tokens.curveSymmetric,
+      // Key by state (not region identity) so content rebuilds within one
+      // state don't retrigger the cross-fade.
+      child: KeyedSubtree(
+        key: ValueKey<TilawaAsyncContentState>(state),
+        child: region,
+      ),
+    );
   }
 }
 

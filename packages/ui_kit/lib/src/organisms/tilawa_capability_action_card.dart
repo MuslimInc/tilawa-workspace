@@ -3,6 +3,7 @@ import 'dart:math' as math;
 import 'package:flutter/material.dart';
 
 import '../atoms/tilawa_icon_box.dart';
+import '../atoms/tilawa_skeleton.dart';
 import '../foundation/component_tokens.dart';
 import '../foundation/design_tokens.dart';
 import '../foundation/semantic_tints.dart';
@@ -99,7 +100,7 @@ class TilawaCapabilityActionCard extends StatelessWidget {
 /// Skeleton placeholder matching [TilawaCapabilityActionCard] layout.
 ///
 /// Use while capability metadata is loading so Settings keeps stable chrome.
-class TilawaCapabilityActionCardSkeleton extends StatefulWidget {
+class TilawaCapabilityActionCardSkeleton extends StatelessWidget {
   const TilawaCapabilityActionCardSkeleton({
     super.key,
     this.showBadge = true,
@@ -136,109 +137,58 @@ class TilawaCapabilityActionCardSkeleton extends StatefulWidget {
   final bool animate;
 
   @override
-  State<TilawaCapabilityActionCardSkeleton> createState() =>
-      _TilawaCapabilityActionCardSkeletonState();
-}
-
-class _TilawaCapabilityActionCardSkeletonState
-    extends State<TilawaCapabilityActionCardSkeleton>
-    with SingleTickerProviderStateMixin {
-  late final AnimationController _shimmerController;
-
-  @override
-  void initState() {
-    super.initState();
-    _shimmerController = AnimationController(vsync: this);
-  }
-
-  @override
-  void didChangeDependencies() {
-    super.didChangeDependencies();
-    final tokens = Theme.of(context).tokens;
-    _shimmerController.duration = tokens.durationSlow;
-    _syncAnimation();
-  }
-
-  @override
-  void didUpdateWidget(covariant TilawaCapabilityActionCardSkeleton oldWidget) {
-    super.didUpdateWidget(oldWidget);
-    if (oldWidget.animate != widget.animate) {
-      _syncAnimation();
-    }
-  }
-
-  void _syncAnimation() {
-    final bool shouldAnimate =
-        widget.animate && !MediaQuery.disableAnimationsOf(context);
-    if (!shouldAnimate) {
-      _shimmerController.stop();
-      _shimmerController.value = 0;
-      return;
-    }
-    if (!_shimmerController.isAnimating) {
-      _shimmerController.repeat();
-    }
-  }
-
-  @override
-  void dispose() {
-    _shimmerController.dispose();
-    super.dispose();
-  }
-
-  @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     final cardTokens = theme.componentTokens.capabilityActionCard;
-    final bool shouldAnimate =
-        widget.animate && !MediaQuery.disableAnimationsOf(context);
     final _CapabilityActionCardLayoutProfile profile =
         _CapabilityActionCardLayoutProfile(
-          titleLines: widget.titleLines,
-          subtitleLines: widget.subtitleLines,
-          showBadge: widget.showBadge || widget.mirrorBadgeLabel != null,
+          titleLines: titleLines,
+          subtitleLines: subtitleLines,
+          showBadge: showBadge || mirrorBadgeLabel != null,
         );
-    return _CapabilityActionCardLayout(
-      profile: profile,
-      title: widget.mirrorTitle,
-      subtitle: widget.mirrorSubtitle,
-      badgeLabel: widget.mirrorBadgeLabel,
-      margin: widget.margin,
-      builder: (context, metrics) {
-        return _CapabilityActionCardFrame(
-          useGradient: widget.useGradient,
-          margin: EdgeInsets.zero,
-          semanticLabel: widget.semanticLabel,
-          isButton: false,
-          bodyHeight: metrics.bodyHeight,
-          child: _CapabilityActionCardBody(
-            metrics: metrics,
-            cardTokens: cardTokens,
-            leading: _CapabilityActionCardSkeletonBone(
-              width: metrics.leadingExtent,
-              height: metrics.leadingExtent,
-              borderRadius: theme.tokens.resolveRadius(
-                family: TilawaRadiusFamily.decorative,
-              ),
-              shimmer: shouldAnimate ? _shimmerController : null,
-            ),
-            copy: _CapabilityActionCardSkeletonCopy(
+    // The frame's Semantics already labels the loading region, so the
+    // shimmer scope stays semantically transparent here.
+    return TilawaSkeleton(
+      animate: animate,
+      child: _CapabilityActionCardLayout(
+        profile: profile,
+        title: mirrorTitle,
+        subtitle: mirrorSubtitle,
+        badgeLabel: mirrorBadgeLabel,
+        margin: margin,
+        builder: (context, metrics) {
+          return _CapabilityActionCardFrame(
+            useGradient: useGradient,
+            margin: EdgeInsets.zero,
+            semanticLabel: semanticLabel,
+            isButton: false,
+            bodyHeight: metrics.bodyHeight,
+            child: _CapabilityActionCardBody(
               metrics: metrics,
-              profile: profile,
-              shimmer: shouldAnimate ? _shimmerController : null,
-            ),
-            trailing: Padding(
-              padding: EdgeInsets.only(top: theme.tokens.spaceTiny),
-              child: _CapabilityActionCardSkeletonBone(
-                width: cardTokens.trailingIconSize,
-                height: cardTokens.trailingIconSize,
-                borderRadius: theme.tokens.radiusSmall,
-                shimmer: shouldAnimate ? _shimmerController : null,
+              cardTokens: cardTokens,
+              leading: TilawaSkeletonBone(
+                width: metrics.leadingExtent,
+                height: metrics.leadingExtent,
+                borderRadius: theme.tokens.resolveRadius(
+                  family: TilawaRadiusFamily.decorative,
+                ),
+              ),
+              copy: _CapabilityActionCardSkeletonCopy(
+                metrics: metrics,
+                profile: profile,
+              ),
+              trailing: Padding(
+                padding: EdgeInsets.only(top: theme.tokens.spaceTiny),
+                child: TilawaSkeletonBone(
+                  width: cardTokens.trailingIconSize,
+                  height: cardTokens.trailingIconSize,
+                  borderRadius: theme.tokens.radiusSmall,
+                ),
               ),
             ),
-          ),
-        );
-      },
+          );
+        },
+      ),
     );
   }
 }
@@ -495,12 +445,10 @@ class _CapabilityActionCardSkeletonCopy extends StatelessWidget {
   const _CapabilityActionCardSkeletonCopy({
     required this.metrics,
     required this.profile,
-    required this.shimmer,
   });
 
   final _CapabilityActionCardLayoutMetrics metrics;
   final _CapabilityActionCardLayoutProfile profile;
-  final Animation<double>? shimmer;
 
   @override
   Widget build(BuildContext context) {
@@ -512,46 +460,37 @@ class _CapabilityActionCardSkeletonCopy extends StatelessWidget {
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         if (profile.titleLines == 1)
-          _CapabilityActionCardSkeletonBone(
+          TilawaSkeletonBone(
             width: double.infinity,
             height: metrics.titleBlockHeight,
-            borderRadius: designTokens.radiusSmall,
-            shimmer: shimmer,
           )
         else
           for (int index = 0; index < profile.titleLines; index++)
-            _CapabilityActionCardSkeletonBone(
+            TilawaSkeletonBone(
               width: double.infinity,
               height: metrics.titleBlockHeight / profile.titleLines,
-              borderRadius: designTokens.radiusSmall,
-              shimmer: shimmer,
             ),
         SizedBox(height: cardTokens.titleSubtitleSpacing),
         if (profile.subtitleLines == 1)
-          _CapabilityActionCardSkeletonBone(
+          TilawaSkeletonBone(
             width: double.infinity,
             height: metrics.subtitleBlockHeight,
-            borderRadius: designTokens.radiusSmall,
-            shimmer: shimmer,
           )
         else
           for (int index = 0; index < profile.subtitleLines; index++)
-            _CapabilityActionCardSkeletonBone(
+            TilawaSkeletonBone(
               width: double.infinity,
               height: metrics.subtitleBlockHeight / profile.subtitleLines,
-              borderRadius: designTokens.radiusSmall,
-              shimmer: shimmer,
             ),
         if (profile.showBadge) ...[
           SizedBox(height: cardTokens.badgeTopSpacing),
-          _CapabilityActionCardSkeletonBone(
+          TilawaSkeletonBone(
             width: 128,
             height: metrics.badgeHeight,
             borderRadius: designTokens.resolveRadius(
               family: TilawaRadiusFamily.chip,
               height: metrics.badgeHeight,
             ),
-            shimmer: shimmer,
           ),
         ],
       ],
@@ -693,62 +632,6 @@ class _CapabilityActionCardSurfaceFill extends StatelessWidget {
         constraints: BoxConstraints(minHeight: minHeight),
         child: child,
       ),
-    );
-  }
-}
-
-class _CapabilityActionCardSkeletonBone extends StatelessWidget {
-  const _CapabilityActionCardSkeletonBone({
-    this.width,
-    required this.height,
-    required this.borderRadius,
-    this.shimmer,
-  });
-
-  final double? width;
-  final double height;
-  final double borderRadius;
-  final Animation<double>? shimmer;
-
-  @override
-  Widget build(BuildContext context) {
-    final colorScheme = Theme.of(context).colorScheme;
-    final baseColor = colorScheme.onSurface.withValues(alpha: 0.08);
-    final highlightColor = colorScheme.onSurface.withValues(alpha: 0.16);
-
-    final Widget bone = RepaintBoundary(
-      child: Container(
-        width: width,
-        height: height,
-        decoration: BoxDecoration(
-          color: baseColor,
-          borderRadius: BorderRadius.circular(borderRadius),
-        ),
-      ),
-    );
-
-    if (shimmer == null) {
-      return bone;
-    }
-
-    return AnimatedBuilder(
-      animation: shimmer!,
-      builder: (context, child) {
-        return ShaderMask(
-          blendMode: BlendMode.srcATop,
-          shaderCallback: (bounds) {
-            final double slide = -1 + (shimmer!.value * 2);
-            return LinearGradient(
-              begin: Alignment(slide - 0.3, 0),
-              end: Alignment(slide + 0.3, 0),
-              colors: <Color>[baseColor, highlightColor, baseColor],
-              stops: const <double>[0.35, 0.5, 0.65],
-            ).createShader(bounds);
-          },
-          child: child,
-        );
-      },
-      child: bone,
     );
   }
 }

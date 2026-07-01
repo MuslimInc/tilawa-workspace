@@ -146,6 +146,38 @@ or rounded surfaces.
 controls are dead zones; parent `TilawaCard` only reacts from blank areas (see
 `CLAUDE.md`).
 
+### Motion curves
+
+Easing is tokenized alongside durations — do not write raw `Curves.*` in kit
+widgets:
+
+| Token | Value | Use |
+|-------|-------|-----|
+| `curveStandard` | `Curves.easeOut` | Chrome fades, reveals, in-place opacity shifts |
+| `curveEmphasized` | `Curves.easeOutCubic` | Spatial movement — slides, expands, scroll-to |
+| `curveSymmetric` | `Curves.easeInOut` | Cross-fades and switchers where enter/exit mirror |
+
+For `CurvedAnimation`s created in `initState`, sync the curve from tokens in
+`didChangeDependencies` (see `TilawaFeedbackHost`).
+
+---
+
+## 4.2 Loading states (skeletons)
+
+**Rule:** Regions that load structured content show a **skeleton mirroring the
+loaded layout**, not a bare spinner. Spinners remain for indeterminate work
+without stable geometry (submissions, refreshes).
+
+| Piece | Contract |
+|-------|----------|
+| Scope | `TilawaSkeleton` — one shared shimmer sweep per placeholder; freezes to static blocks under reduced motion; `semanticLabel` announces the region |
+| Bones | `TilawaSkeletonBone` (block / `.circle`), `TilawaSkeletonLine` (text-style-measured height) |
+| Appearance | `TilawaSkeletonTokens` — `onSurface` at `baseAlpha` (0.08) / `highlightAlpha` (0.16); band sweeps in reading direction (RTL-aware) |
+| Region swap | `TilawaAsyncContent` cross-fades loading → content/empty/error over `durationFast` (instant under reduced motion) |
+
+`TilawaCapabilityActionCardSkeleton` is the reference composition (measured
+bones matching loaded copy heights).
+
 ---
 
 ## 5. Testing contract

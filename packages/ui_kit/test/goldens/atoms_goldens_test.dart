@@ -638,5 +638,59 @@ void main() {
         ],
       ),
     );
+
+    goldenTest(
+      'TilawaSkeleton',
+      fileName: 'atoms/tilawa_skeleton',
+      builder: () => GoldenTestGroup(
+        scenarioConstraints: kUiKitGoldenScenarioConstraints,
+        children: [
+          GoldenTestScenario(
+            name: 'Light',
+            child: const TilawaPreviewWrapper(
+              child: _SkeletonGoldenLayout(),
+            ),
+          ),
+          GoldenTestScenario(
+            name: 'Dark',
+            child: const TilawaPreviewWrapper(
+              isDark: true,
+              child: _SkeletonGoldenLayout(),
+            ),
+          ),
+        ],
+      ),
+    );
   });
+}
+
+/// Representative row skeleton: avatar bone + two text lines.
+///
+/// `animate: false` keeps bones at the resting fill so the golden is
+/// deterministic.
+class _SkeletonGoldenLayout extends StatelessWidget {
+  const _SkeletonGoldenLayout();
+
+  @override
+  Widget build(BuildContext context) {
+    return TilawaSkeleton(
+      animate: false,
+      child: Row(
+        spacing: 12,
+        children: [
+          const TilawaSkeletonBone.circle(dimension: 40),
+          Expanded(
+            child: Column(
+              spacing: 8,
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                const TilawaSkeletonLine(width: 140),
+                const TilawaSkeletonLine(),
+              ],
+            ),
+          ),
+        ],
+      ),
+    );
+  }
 }

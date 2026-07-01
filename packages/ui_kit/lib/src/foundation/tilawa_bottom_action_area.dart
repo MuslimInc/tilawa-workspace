@@ -174,7 +174,7 @@ class _TilawaBottomActionAreaState extends State<TilawaBottomActionArea> {
               bottom: false,
               child: AnimatedPadding(
                 duration: _paddingAnimationDuration,
-                curve: Curves.easeOut,
+                curve: theme.tokens.curveStandard,
                 padding: EdgeInsets.fromLTRB(
                   side,
                   widget.top + footerPadding.top,

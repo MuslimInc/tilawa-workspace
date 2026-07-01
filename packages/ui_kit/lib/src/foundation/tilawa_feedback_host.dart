@@ -124,7 +124,7 @@ class _TilawaFeedbackHostState extends State<TilawaFeedbackHost>
   _TilawaToastRequest? _active;
   Timer? _dismissTimer;
   late final AnimationController _animationController;
-  late final Animation<double> _fadeAnimation;
+  late final CurvedAnimation _fadeAnimation;
   late final Animation<Offset> _slideAnimation;
 
   @override
@@ -139,6 +139,12 @@ class _TilawaFeedbackHostState extends State<TilawaFeedbackHost>
       begin: const Offset(0, 0.12),
       end: Offset.zero,
     ).animate(_fadeAnimation);
+  }
+
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    _fadeAnimation.curve = Theme.of(context).tokens.curveStandard;
   }
 
   @override

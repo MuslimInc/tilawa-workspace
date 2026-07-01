@@ -13,6 +13,7 @@ export 'tilawa_illustrated_state.dart';
 export 'tilawa_loading_indicator.dart';
 export 'tilawa_section_title.dart';
 export 'tilawa_sheet_handle.dart';
+export 'tilawa_skeleton.dart';
 export 'tilawa_state_visual.dart';
 export 'tilawa_checkbox.dart';
 export 'tilawa_switch.dart';

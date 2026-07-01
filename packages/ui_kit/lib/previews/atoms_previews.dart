@@ -51,6 +51,33 @@ Widget previewTilawaLoadingIndicatorThinStroke() {
   );
 }
 
+// --- TilawaSkeleton Previews ---
+
+@Preview(name: 'TilawaSkeleton / List row shimmer', group: 'Atoms')
+Widget previewTilawaSkeleton() {
+  return const TilawaPreviewWrapper(
+    child: TilawaSkeleton(
+      semanticLabel: 'Loading',
+      child: Row(
+        spacing: 12,
+        children: [
+          TilawaSkeletonBone.circle(dimension: 40),
+          Expanded(
+            child: Column(
+              spacing: 8,
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                TilawaSkeletonLine(width: 140),
+                TilawaSkeletonLine(),
+              ],
+            ),
+          ),
+        ],
+      ),
+    ),
+  );
+}
+
 // --- TilawaEmptyState Previews ---
 
 @Preview(name: 'TilawaEmptyState / Default', group: 'Atoms')

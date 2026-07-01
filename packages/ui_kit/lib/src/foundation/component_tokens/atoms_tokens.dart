@@ -461,3 +461,59 @@ class TilawaEmptyStateTokens {
     );
   }
 }
+
+/// Component tokens for [TilawaSkeleton] shimmer bones.
+@immutable
+class TilawaSkeletonTokens {
+  const TilawaSkeletonTokens({
+    required this.baseAlpha,
+    required this.highlightAlpha,
+    required this.shimmerBandWidth,
+  });
+
+  /// Alpha applied to `onSurface` for the resting bone fill.
+  final double baseAlpha;
+
+  /// Alpha applied to `onSurface` at the shimmer band's brightest point.
+  final double highlightAlpha;
+
+  /// Half-width of the travelling shimmer band, in alignment units
+  /// (`0.3` ≈ a band covering 30% of the bone at any instant).
+  final double shimmerBandWidth;
+
+  factory TilawaSkeletonTokens.defaults() {
+    return const TilawaSkeletonTokens(
+      baseAlpha: 0.08,
+      highlightAlpha: 0.16,
+      shimmerBandWidth: 0.3,
+    );
+  }
+
+  TilawaSkeletonTokens copyWith({
+    double? baseAlpha,
+    double? highlightAlpha,
+    double? shimmerBandWidth,
+  }) {
+    return TilawaSkeletonTokens(
+      baseAlpha: baseAlpha ?? this.baseAlpha,
+      highlightAlpha: highlightAlpha ?? this.highlightAlpha,
+      shimmerBandWidth: shimmerBandWidth ?? this.shimmerBandWidth,
+    );
+  }
+
+  static TilawaSkeletonTokens lerp(
+    TilawaSkeletonTokens a,
+    TilawaSkeletonTokens b,
+    double t,
+  ) {
+    return TilawaSkeletonTokens(
+      baseAlpha: lerpTokenDouble(a.baseAlpha, b.baseAlpha, t),
+      highlightAlpha: lerpTokenDouble(a.highlightAlpha, b.highlightAlpha, t),
+      shimmerBandWidth: lerpTokenDouble(
+        a.shimmerBandWidth,
+        b.shimmerBandWidth,
+        t,
+      ),
+    );
+  }
+}

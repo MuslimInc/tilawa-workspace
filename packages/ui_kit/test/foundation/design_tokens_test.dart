@@ -41,6 +41,9 @@ void main() {
       durationFast: Duration(milliseconds: 200),
       durationMedium: Duration(milliseconds: 400),
       durationSlow: Duration(milliseconds: 600),
+      curveStandard: Curves.easeOut,
+      curveEmphasized: Curves.easeOutCubic,
+      curveSymmetric: Curves.easeInOut,
       contentMaxWidthReader: 720,
       contentMaxWidthForm: 560,
       contentMaxWidthMedia: 1200,
@@ -105,6 +108,9 @@ void main() {
         expect(light.durationFast, const Duration(milliseconds: 200));
         expect(light.durationMedium, const Duration(milliseconds: 400));
         expect(light.durationSlow, const Duration(milliseconds: 600));
+        expect(light.curveStandard, Curves.easeOut);
+        expect(light.curveEmphasized, Curves.easeOutCubic);
+        expect(light.curveSymmetric, Curves.easeInOut);
         expect(light.contentMaxWidthReader, 720);
         expect(light.contentMaxWidthForm, 560);
         expect(light.contentMaxWidthMedia, 1200);
@@ -239,6 +245,9 @@ void main() {
           durationFast: Duration(milliseconds: 200),
           durationMedium: Duration(milliseconds: 400),
           durationSlow: Duration(milliseconds: 600),
+          curveStandard: Curves.easeOut,
+          curveEmphasized: Curves.easeOutCubic,
+          curveSymmetric: Curves.easeInOut,
           contentMaxWidthReader: 720,
           contentMaxWidthForm: 560,
           contentMaxWidthMedia: 1200,
@@ -300,6 +309,9 @@ void main() {
           durationFast: Duration(milliseconds: 300),
           durationMedium: Duration(milliseconds: 600),
           durationSlow: Duration(milliseconds: 900),
+          curveStandard: Curves.linear,
+          curveEmphasized: Curves.linear,
+          curveSymmetric: Curves.linear,
           contentMaxWidthReader: 900,
           contentMaxWidthForm: 700,
           contentMaxWidthMedia: 1400,
@@ -370,6 +382,9 @@ void main() {
           durationFast: Duration(milliseconds: 300),
           durationMedium: Duration(milliseconds: 600),
           durationSlow: Duration(milliseconds: 900),
+          curveStandard: Curves.linear,
+          curveEmphasized: Curves.linear,
+          curveSymmetric: Curves.linear,
           contentMaxWidthReader: 900,
           contentMaxWidthForm: 700,
           contentMaxWidthMedia: 1400,
@@ -438,6 +453,9 @@ void main() {
           durationFast: Duration(milliseconds: 200),
           durationMedium: Duration(milliseconds: 400),
           durationSlow: Duration(milliseconds: 600),
+          curveStandard: Curves.easeOut,
+          curveEmphasized: Curves.easeOutCubic,
+          curveSymmetric: Curves.easeInOut,
           contentMaxWidthReader: 720,
           contentMaxWidthForm: 560,
           contentMaxWidthMedia: 1200,
@@ -499,6 +517,9 @@ void main() {
           durationFast: Duration(milliseconds: 300),
           durationMedium: Duration(milliseconds: 600),
           durationSlow: Duration(milliseconds: 900),
+          curveStandard: Curves.linear,
+          curveEmphasized: Curves.linear,
+          curveSymmetric: Curves.linear,
           contentMaxWidthReader: 900,
           contentMaxWidthForm: 700,
           contentMaxWidthMedia: 1400,
@@ -573,6 +594,9 @@ void main() {
           durationFast: Duration(milliseconds: 200),
           durationMedium: Duration(milliseconds: 400),
           durationSlow: Duration(milliseconds: 600),
+          curveStandard: Curves.easeOut,
+          curveEmphasized: Curves.easeOutCubic,
+          curveSymmetric: Curves.easeInOut,
           contentMaxWidthReader: 720,
           contentMaxWidthForm: 560,
           contentMaxWidthMedia: 1200,
@@ -645,6 +669,9 @@ void main() {
             durationFast: Duration(milliseconds: 200),
             durationMedium: Duration(milliseconds: 400),
             durationSlow: Duration(milliseconds: 600),
+            curveStandard: Curves.easeOut,
+            curveEmphasized: Curves.easeOutCubic,
+            curveSymmetric: Curves.easeInOut,
             contentMaxWidthReader: 720,
             contentMaxWidthForm: 560,
             contentMaxWidthMedia: 1200,
@@ -706,6 +733,9 @@ void main() {
             durationFast: Duration(milliseconds: 300),
             durationMedium: Duration(milliseconds: 600),
             durationSlow: Duration(milliseconds: 900),
+            curveStandard: Curves.linear,
+            curveEmphasized: Curves.linear,
+            curveSymmetric: Curves.linear,
             contentMaxWidthReader: 900,
             contentMaxWidthForm: 700,
             contentMaxWidthMedia: 1400,
@@ -733,6 +763,8 @@ void main() {
 
           final lerped = first.lerp(second, 0.3);
           expect(lerped.durationFast, const Duration(milliseconds: 200));
+          expect(lerped.curveStandard, Curves.easeOut);
+          expect(lerped.curveEmphasized, Curves.easeOutCubic);
         },
       );
 

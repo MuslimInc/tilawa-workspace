@@ -54,7 +54,7 @@ class TilawaCountProgressRing extends StatelessWidget {
         children: [
           AnimatedContainer(
             duration: designTokens.durationFast,
-            curve: Curves.easeOutCubic,
+            curve: designTokens.curveEmphasized,
             width: size,
             height: size,
             decoration: BoxDecoration(
@@ -73,8 +73,8 @@ class TilawaCountProgressRing extends StatelessWidget {
             child: Center(
               child: AnimatedSwitcher(
                 duration: designTokens.durationFast,
-                switchInCurve: Curves.easeInOut,
-                switchOutCurve: Curves.easeInOut,
+                switchInCurve: designTokens.curveSymmetric,
+                switchOutCurve: designTokens.curveSymmetric,
                 transitionBuilder: (Widget child, Animation<double> animation) {
                   return ScaleTransition(
                     scale: animation,

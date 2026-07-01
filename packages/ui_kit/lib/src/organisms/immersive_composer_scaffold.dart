@@ -88,6 +88,7 @@ class ImmersiveComposerScaffold extends StatefulWidget {
 class _ImmersiveComposerScaffoldState extends State<ImmersiveComposerScaffold>
     with SingleTickerProviderStateMixin {
   late final AnimationController _controller;
+  late final CurvedAnimation _overlayCurve;
   late final Animation<Offset> _topOffset;
   late final Animation<Offset> _bottomOffset;
   bool _isVisible = true;
@@ -105,15 +106,26 @@ class _ImmersiveComposerScaffoldState extends State<ImmersiveComposerScaffold>
 
     _controller.value = _isVisible ? 1.0 : 0.0;
 
+    _overlayCurve = CurvedAnimation(
+      parent: _controller,
+      curve: Curves.easeOutCubic,
+    );
+
     _topOffset = Tween<Offset>(
       begin: const Offset(0, -1.2), // Off-screen top
       end: .zero,
-    ).animate(CurvedAnimation(parent: _controller, curve: Curves.easeOutCubic));
+    ).animate(_overlayCurve);
 
     _bottomOffset = Tween<Offset>(
       begin: const Offset(0, 1.2), // Off-screen bottom
       end: .zero,
-    ).animate(CurvedAnimation(parent: _controller, curve: Curves.easeOutCubic));
+    ).animate(_overlayCurve);
+  }
+
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    _overlayCurve.curve = Theme.of(context).tokens.curveEmphasized;
   }
 
   @override

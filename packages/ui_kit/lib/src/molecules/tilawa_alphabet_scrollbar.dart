@@ -196,7 +196,7 @@ class _TilawaAlphabetScrollbarState extends State<TilawaAlphabetScrollbar> {
     _railScrollController.animateTo(
       targetOffset,
       duration: theme.tokens.durationFast,
-      curve: Curves.easeOutCubic,
+      curve: theme.tokens.curveEmphasized,
     );
   }
 
@@ -455,7 +455,7 @@ class _TilawaAlphabetScrollbarState extends State<TilawaAlphabetScrollbar> {
                     ),
                 child: TweenAnimationBuilder<double>(
                   duration: theme.tokens.durationFast,
-                  curve: Curves.easeOutCubic,
+                  curve: theme.tokens.curveEmphasized,
                   tween: Tween(begin: 0.85, end: 1.0),
                   builder: (context, value, child) {
                     return Transform.scale(
@@ -563,7 +563,7 @@ class _TilawaAlphabetScrollbarState extends State<TilawaAlphabetScrollbar> {
                   alignment: Alignment.center,
                   child: AnimatedContainer(
                     duration: tokens.durationFast,
-                    curve: Curves.easeOutCubic,
+                    curve: tokens.curveEmphasized,
                     clipBehavior: Clip.antiAlias,
                     key: _trackKey,
                     width: componentTokens.width,
@@ -822,7 +822,7 @@ class _LetterItem extends StatelessWidget {
         child: AnimatedScale(
           scale: isSelected ? 1.0 : (isScrubbing ? 0.96 : 0.9),
           duration: tokens.durationFast,
-          curve: Curves.easeOutCubic,
+          curve: tokens.curveEmphasized,
           child: isSelected
               ? Container(
                   width: selectedIndicatorSize,
