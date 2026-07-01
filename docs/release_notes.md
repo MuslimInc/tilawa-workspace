@@ -12,8 +12,35 @@ the changelog for full engineering detail.
 
 | Field | Value |
 |-------|--------|
+| Version | **2.0.17** (build **70**) |
+| Git tag | `v2.0.17+70` (pending) |
+| Date | 2026-07-01 |
+| Track | Production |
+
+### What's new (en-US) — copy for Play Console
+
+```text
+• Bottom navigation: labels on every tab, clearer المصحف tab, calmer selection
+• Report bugs from Settings with an in-app feedback form
+• Cleaner Settings list
+```
+
+### ما الجديد (ar) — نص متجر Play
+
+```text
+• شريط التنقل: تسميات لكل تبويب وتبويب المصحف أوضح وتحديد أهدأ
+• الإبلاغ عن الأخطاء من الإعدادات عبر نموذج داخل التطبيق
+• قائمة إعدادات أبسط
+```
+
+---
+
+## Previous current release (2.0.17+69)
+
+| Field | Value |
+|-------|--------|
 | Version | **2.0.17** (build **69**) |
-| Git tag | `v2.0.17+69` (pending) |
+| Git tag | `v2.0.17+69` |
 | Date | 2026-07-01 |
 | Track | Production |
 

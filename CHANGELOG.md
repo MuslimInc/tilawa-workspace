@@ -7,6 +7,24 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [2.0.17+70] - 2026-07-01 [Google Play Production]
+
+### Added
+
+- **Telemetry**: In-app bug report (Settings → Report bug) via Sentry user
+  feedback with Tilawa-styled form UI.
+
+### Changed
+
+- **Navigation**: Phone bottom bar shows icon + label on every tab; المصحف
+  Arabic label; 24dp icons; selection uses color/weight only (no pill or splash).
+- **Settings**: Simpler list rows without leading icons or subtitles.
+
+### Fixed
+
+- **Telemetry**: Sentry feedback form options initialize reliably and match UI
+  kit patterns.
+
 ## [2.0.17+69] - 2026-07-01 [Google Play Production]
 
 Ships **2.0.17+68** changes that did not reach Play (build 68 cancelled), plus
