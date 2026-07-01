@@ -9,6 +9,22 @@ import 'package:tilawa_ui_kit/tilawa_ui_kit.dart';
 import 'settings_teacher_capability_scope.dart';
 import 'settings_widgets.dart';
 
+bool _suppressTeachingSectionForGoogleFormApply({
+  required QuranSessionsFeatureConfig config,
+  required TeacherCapability? capability,
+  required bool isLoading,
+}) {
+  if (!config.showTeacherApplicationEntry ||
+      config.showInAppTeacherApplicationEntry) {
+    return false;
+  }
+  if (isLoading) {
+    return true;
+  }
+  return capability?.navigationTarget ==
+      TeacherCapabilityNavigationTarget.apply;
+}
+
 /// Self-contained Settings block for teacher capability — no section header.
 ///
 /// Premium approved states render a standalone [TilawaCapabilityActionCard].
@@ -30,7 +46,17 @@ class SettingsTeachingOnMemuslimSection extends StatelessWidget {
       return const SizedBox.shrink();
     }
 
-    if (SettingsTeacherCapabilityScope.isTeachingSectionLoadingOf(context)) {
+    final isLoading = SettingsTeacherCapabilityScope.isTeachingSectionLoadingOf(
+      context,
+    );
+    if (isLoading) {
+      if (_suppressTeachingSectionForGoogleFormApply(
+        config: config,
+        capability: null,
+        isLoading: true,
+      )) {
+        return const SizedBox.shrink();
+      }
       final tokens = Theme.of(context).tokens;
       return Padding(
         padding: EdgeInsetsDirectional.only(
@@ -47,6 +73,14 @@ class SettingsTeachingOnMemuslimSection extends StatelessWidget {
       context,
     );
     if (capability == null) {
+      return const SizedBox.shrink();
+    }
+
+    if (_suppressTeachingSectionForGoogleFormApply(
+      config: config,
+      capability: capability,
+      isLoading: false,
+    )) {
       return const SizedBox.shrink();
     }
 
@@ -95,7 +129,17 @@ class SettingsTeachingOnMemuslimTile extends StatelessWidget {
       return const SizedBox.shrink();
     }
 
-    if (SettingsTeacherCapabilityScope.isTeachingSectionLoadingOf(context)) {
+    final isLoading = SettingsTeacherCapabilityScope.isTeachingSectionLoadingOf(
+      context,
+    );
+    if (isLoading) {
+      if (_suppressTeachingSectionForGoogleFormApply(
+        config: config,
+        capability: null,
+        isLoading: true,
+      )) {
+        return const SizedBox.shrink();
+      }
       return TilawaCapabilityActionCardSkeleton(
         margin: standaloneLayout ? EdgeInsets.zero : null,
       );
@@ -105,6 +149,14 @@ class SettingsTeachingOnMemuslimTile extends StatelessWidget {
       context,
     );
     if (capability == null) {
+      return const SizedBox.shrink();
+    }
+
+    if (_suppressTeachingSectionForGoogleFormApply(
+      config: config,
+      capability: capability,
+      isLoading: false,
+    )) {
       return const SizedBox.shrink();
     }
 

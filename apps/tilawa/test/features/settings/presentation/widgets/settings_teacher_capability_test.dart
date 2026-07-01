@@ -281,6 +281,42 @@ void main() {
     ).equals(0);
   });
 
+  testWidgets(
+    'google form apply-only mode hides duplicate teaching apply tile',
+    (tester) async {
+      await resetScopeGetIt();
+      scopeGetIt().registerSingleton<AppLaunchConfig>(
+        const AppLaunchConfig(
+          quranSessionsEnabled: true,
+          teacherApplicationEntryEnabled: true,
+          teacherApplicationEnabled: false,
+        ),
+      );
+      scopeGetIt().registerSingleton<AuthSessionProvider>(
+        const FakeAuthSessionProvider(userId: 'user_1'),
+      );
+      scopeGetIt().registerSingleton<TeacherCapabilityRefreshNotifier>(
+        TeacherCapabilityRefreshNotifier(),
+      );
+
+      await _pumpSettingsTeachingSection(
+        tester,
+        _mockAuthBloc,
+        const TeacherCapability(state: TeacherCapabilityState.none),
+      );
+
+      final en = await QuranSessionsLocalizations.delegate.load(
+        const Locale('en'),
+      );
+      check(
+        find.text(en.teachingOnMemuslimApply).evaluate().isEmpty,
+      ).isTrue();
+      check(
+        find.byType(SettingsTeachingOnMemuslimSection).evaluate().length,
+      ).equals(1);
+    },
+  );
+
   testWidgets('approved active card tap opens teacher dashboard route', (
     tester,
   ) async {
