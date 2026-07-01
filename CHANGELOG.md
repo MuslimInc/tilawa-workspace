@@ -7,10 +7,41 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [2.0.17+68] - 2026-07-01 [Google Play Production]
+
+### Added
+
+- **Telemetry**: Sentry Session Replay (error replays always; sampled sessions in
+  release).
+- **Quran Sessions**: Teacher apply-only rollout — student Learn Quran surfaces
+  off by default; optional Settings/Home entry to external Google Form when flags
+  are enabled.
+
+### Fixed
+
+- **Router**: Avoid `StateError` on Android resume when GoRouter matches are not
+  yet resolved (`ShellRouteLocation` defensive read).
+- **Auth**: Keep `AuthBloc` in sync after remote session revocation (FCM / resume
+  checks); faster redirect after Google sign-in.
+- **Settings**: Hide duplicate teacher-apply tile when Google Form entry section is
+  shown.
+- **Quran**: Restore 15-line grid alignment on mushaf pages 1–2.
+
+### Changed
+
+- **Performance (Quran reader)**: P0 fixes for layout freeze, unified providers,
+  and page-jump jank (`quran_image`).
+- **Home**: Cleaner quick-tools layout and Quran Sessions visibility gating.
+- **Tasbeeh**: History list uses `TilawaCard` for consistent tap feedback.
+
+## [2.0.16+66] - 2026-07-01 [Google Play Production]
+
 ### Changed
 
 - **Android**: Enforce arm64-v8a-only native libs via `ndk.abiFilters` in Gradle
   (local debug/release; complements CI `--target-platform android-arm64`).
+- **Android (Play)**: Release builds exclude Agora/LiveKit native SDKs (RTC stub in
+  CI); production uses no-RTC distribution.
 
 ## [2.0.16+65] - 2026-06-29 [Google Play Closed Testing]
 

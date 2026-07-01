@@ -12,27 +12,54 @@ the changelog for full engineering detail.
 
 | Field | Value |
 |-------|--------|
-| Version | **2.0.16** (build **61**) |
-| Git tag | `v2.0.16+61` |
-| Date | 2026-06-28 |
+| Version | **2.0.17** (build **68**) |
+| Git tag | `v2.0.17+68` (pending) |
+| Date | 2026-07-01 |
 | Track | Production |
 
 ### What's new (en-US) — copy for Play Console
 
 ```text
-• Quran Sessions: discover tutors and manage live recitation bookings
-• Refreshed home dashboard with next prayer, Today Plan, and quick tools
-• Clearer tap feedback on cards and buttons; warm green theme polish
-• Login, Tasbeeh layout, and My Sessions stability fixes
+• Smoother Quran reader scrolling and page jumps
+• More reliable sign-in and session handling after device changes
+• Fewer crashes when returning to the app on Android
+• Tasbeeh and Settings polish; stability improvements
 ```
 
 ### ما الجديد (ar) — نص متجر Play
 
 ```text
-• جلسات القرآن: اكتشف المعلّمين وأدر حجوزات التلاوة المباشرة
-• لوحة رئيسية محدّثة: الصلاة القادمة، خطة اليوم، وأدوات سريعة
-• ردود لمس أوضح على البطاقات والأزرار؛ تحسينات المظهر الأخضر الدافئ
-• إصلاحات تسجيل الدخول وتخطيط التسبيح وجلساتي
+• تمرير أنعم في مصحف القرآن وقفزات أوضح بين الصفحات
+• تسجيل دخول وجلسات أكثر موثوقية عند تغيير الجهاز
+• تعطّل أقل عند العودة للتطبيق على أندرويد
+• تحسينات التسبيح والإعدادات واستقرار عام
+```
+
+---
+
+## Previous current release (2.0.16+66)
+
+| Field | Value |
+|-------|--------|
+| Version | **2.0.16** (build **66**) |
+| Git tag | `v2.0.16+66` |
+| Date | 2026-07-01 |
+| Track | Production |
+
+### What's new (en-US) — copy for Play Console
+
+```text
+• Smaller, faster Android downloads (arm64-only native libraries)
+• Play production builds without live-call SDK overhead
+• Stability and packaging improvements
+```
+
+### ما الجديد (ar) — نص متجر Play
+
+```text
+• تنزيلات أصغر وأسرع على أندرويد (مكتبات arm64 فقط)
+• إصدارات متجر Play بدون حزم مكالمات مباشرة إضافية
+• تحسينات الاستقرار والتغليف
 ```
 
 ---
