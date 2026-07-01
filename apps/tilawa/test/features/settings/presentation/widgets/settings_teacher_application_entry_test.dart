@@ -57,10 +57,6 @@ void main() {
     );
 
     expect(find.text('التقديم كمعلّم قرآن'), findsOneWidget);
-    expect(
-      find.textContaining('إذا كنت محفّظًا'),
-      findsOneWidget,
-    );
   });
 
   testWidgets('settings tile tap opens bottom sheet', (tester) async {

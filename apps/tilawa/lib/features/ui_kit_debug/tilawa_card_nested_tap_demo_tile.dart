@@ -1,4 +1,3 @@
-import 'package:fluentui_system_icons/fluentui_system_icons.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:tilawa/features/ui_kit_debug/tilawa_card_demo_semantics_ids.dart';
@@ -18,7 +17,6 @@ class TilawaCardNestedTapDemoTile extends StatelessWidget {
     }
 
     return TilawaSettingsTile(
-      icon: FluentIcons.card_ui_24_regular,
       title: 'TilawaCard nested tap demo',
       showDivider: !isLast,
       semanticsIdentifier: TilawaCardDemoSemanticsIds.settingsTile,

@@ -180,7 +180,6 @@ class SettingsTeachingOnMemuslimTile extends StatelessWidget {
 
     return TilawaSettingsTile(
       title: title,
-      subtitle: subtitle,
       trailing: _TeachingSectionTrailing(
         badgeLabel: badgeLabel,
         actionTitle: title,

@@ -1,6 +1,5 @@
 import 'dart:async';
 
-import 'package:fluentui_system_icons/fluentui_system_icons.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:quran_sessions/quran_sessions.dart';
@@ -59,9 +58,7 @@ class _DebugLiveKitCallTileState extends State<DebugLiveKitCallTile> {
     }
 
     return TilawaSettingsTile(
-      icon: FluentIcons.video_24_regular,
       title: 'Test LiveKit video call',
-      subtitle: 'Join room $kDebugLiveKitRoomName (debug/staging only)',
       showDivider: !widget.isLast,
       onTap: () {
         if (_joinInProgress) {

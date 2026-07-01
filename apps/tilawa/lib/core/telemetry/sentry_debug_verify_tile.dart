@@ -1,4 +1,3 @@
-import 'package:fluentui_system_icons/fluentui_system_icons.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:sentry_flutter/sentry_flutter.dart';
@@ -19,7 +18,6 @@ class SentryDebugVerifyTile extends StatelessWidget {
     }
 
     return TilawaSettingsTile(
-      icon: FluentIcons.bug_24_regular,
       title: 'Verify Sentry setup',
       showDivider: !isLast,
       onTap: () => _sendTestEvent(context),

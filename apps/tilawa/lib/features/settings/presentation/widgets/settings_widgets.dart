@@ -267,7 +267,6 @@ class SettingsRateAppTile extends StatelessWidget {
 
         return TilawaSettingsTile(
           title: context.l10n.rateTilawa,
-          subtitle: context.l10n.rateTilawaSubtitle,
           showDivider: !isLast,
           trailing: state.isBusy
               ? SizedBox(

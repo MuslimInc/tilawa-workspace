@@ -1,4 +1,3 @@
-import 'package:fluentui_system_icons/fluentui_system_icons.dart';
 import 'package:flutter/material.dart';
 import 'package:tilawa/core/di/injection.dart';
 import 'package:tilawa/l10n/generated/app_localizations.dart';
@@ -17,7 +16,6 @@ class TourGuideDebugResetTile extends StatelessWidget {
     final AppLocalizations l10n = AppLocalizations.of(context);
 
     return TilawaSettingsTile(
-      icon: FluentIcons.arrow_reset_24_regular,
       title: l10n.tourDebugResetTitle,
       showDivider: !isLast,
       onTap: () async {

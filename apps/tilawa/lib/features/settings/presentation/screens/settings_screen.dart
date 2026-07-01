@@ -228,16 +228,12 @@ class _SettingsScreenState extends State<SettingsScreen> {
                       ),
                       TilawaSettingsTile(
                         title: l10n.manageStorage,
-                        subtitle: l10n.manageStorageSubtitle,
                         onTap: () => const DownloadsRoute().push(context),
                       ),
                       BlocBuilder<SettingsCubit, SettingsState>(
                         builder: (context, state) {
                           return TilawaSettingsTile(
                             title: l10n.concurrentDownloads,
-                            subtitle: l10n.concurrentDownloadsSubtitle(
-                              state.maxConcurrentDownloads,
-                            ),
                             trailing: settingsPickerTrailing(
                               context,
                               value: '${state.maxConcurrentDownloads}',
@@ -283,7 +279,6 @@ class _SettingsScreenState extends State<SettingsScreen> {
                       if (widget.supportTilawaEnabled)
                         TilawaSettingsTile(
                           title: l10n.supportTilawa,
-                          subtitle: l10n.supportHelpKeepFree,
                           onTap: () => const SupportRoute().push(context),
                         ),
                       TilawaSettingsTile(

@@ -48,7 +48,6 @@ class SettingsTeacherApplicationEntryTile extends StatelessWidget {
     final l10n = context.l10n;
     return TilawaSettingsTile(
       title: l10n.settingsTeacherApplicationEntryTitle,
-      subtitle: l10n.settingsTeacherApplicationEntrySubtitle,
       trailing: settingsPickerTrailing(
         context,
         value: l10n.teacherApplicationOpenFormCta,

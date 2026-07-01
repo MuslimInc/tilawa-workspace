@@ -1,4 +1,3 @@
-import 'package:fluentui_system_icons/fluentui_system_icons.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:tilawa/l10n/generated/app_localizations.dart';
@@ -19,7 +18,6 @@ class NotificationDebugLabTile extends StatelessWidget {
 
     final AppLocalizations l10n = AppLocalizations.of(context);
     return TilawaSettingsTile(
-      icon: FluentIcons.alert_24_regular,
       title: l10n.notificationDebugLabTitle,
       showDivider: !isLast,
       onTap: () => const NotificationDebugLabRoute().push(context),
