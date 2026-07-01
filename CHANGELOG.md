@@ -398,8 +398,7 @@ Superseded by **2.0.17+69** (build 68 release workflow cancelled).
   from the catalog.
 - **Reciters alphabet index**: Android-style A–Z scrubber with filter chip and Maestro
   coverage.
-- **Startup telemetry**: Cold-start phases logged to Crashlytics, Analytics, and
-  Firestore `app_startup_logs` (rules snippet in repo; merge before deploy).
+- **Startup telemetry**: Cold-start phases logged to Crashlytics and Analytics.
 - **Launch branding**: Green splash handoff, updated launcher icons, and stable
   cold-start frame gate.
 
@@ -979,3 +978,4 @@ ReciterDetailsRoute(reciterId: '123', reciter: reciter).go(context);
 ## Previous Versions
 
 _Previous changelog entries would be documented here_
+

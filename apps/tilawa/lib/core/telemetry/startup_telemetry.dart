@@ -11,28 +11,18 @@ import 'package:tilawa_core/constants/analytics_constants.dart';
 import 'package:tilawa_core/services/application_metrics_service.dart';
 
 import '../logging/app_logger.dart';
-import 'startup_health_log_sink.dart';
 
-/// Cold-start observability: Crashlytics breadcrumbs, Analytics funnel, and
-/// Firestore backend logs ([FirestoreStartupHealthLogSink.collectionName]).
+/// Cold-start observability: Crashlytics breadcrumbs and Analytics funnel.
 abstract final class StartupTelemetry {
   static final DateTime _processStartedAt = DateTime.now();
   static final String _sessionId =
       'startup_${_processStartedAt.microsecondsSinceEpoch}';
 
-  // Lazy: constructed on first write so FirebaseFirestore.instance is never
-  // called before Firebase.initializeApp() completes.
-  static StartupHealthLogSink? _healthLogSinkInstance;
-  static StartupHealthLogSink get _healthLogSink =>
-      _healthLogSinkInstance ??= FirestoreStartupHealthLogSink();
   static bool _crashlyticsPrimed = false;
   static String? _lastPhase;
   static String? _appVersion;
   static String? _buildNumber;
   static bool _contextLoaded = false;
-
-  @visibleForTesting
-  static bool firestoreLoggingEnabled = true;
 
   @visibleForTesting
   static bool analyticsLoggingEnabled = true;
@@ -45,18 +35,10 @@ abstract final class StartupTelemetry {
 
   @visibleForTesting
   static void configureForTesting({
-    StartupHealthLogSink? healthLogSink,
-    bool? firestoreLogging,
     bool? analyticsLogging,
     bool? crashlyticsLogging,
   }) {
     resetForTesting();
-    if (healthLogSink != null) {
-      _healthLogSinkInstance = healthLogSink;
-    }
-    if (firestoreLogging != null) {
-      firestoreLoggingEnabled = firestoreLogging;
-    }
     if (analyticsLogging != null) {
       analyticsLoggingEnabled = analyticsLogging;
     }
@@ -74,8 +56,6 @@ abstract final class StartupTelemetry {
     _appVersion = null;
     _buildNumber = null;
     _contextLoaded = false;
-    _healthLogSinkInstance = const NoopStartupHealthLogSink();
-    firestoreLoggingEnabled = true;
     analyticsLoggingEnabled = true;
     crashlyticsLoggingEnabled = true;
   }
@@ -114,16 +94,7 @@ abstract final class StartupTelemetry {
     final int elapsedMs = _elapsedMs();
     await _ensureContext();
 
-    final Map<String, Object?> payload = <String, Object?>{
-      'level': 'info',
-      'event': AnalyticsEvents.startupPhase,
-      'phase': name,
-      'elapsed_ms': elapsedMs,
-      ...?data,
-      ..._baseFields(),
-    };
-
-    logger.d('[StartupTelemetry] phase=$name elapsed_ms=$elapsedMs');
+    logger.d('[StartupTelemetry] phase=$name elapsed_ms=$elapsedMs data=$data');
 
     await _crashlyticsLog('startup_phase:$name');
     unawaited(
@@ -138,7 +109,6 @@ abstract final class StartupTelemetry {
         },
       ),
     );
-    unawaited(_writeHealthLog(payload));
   }
 
   /// Records a startup failure (non-blocking).
@@ -156,16 +126,6 @@ abstract final class StartupTelemetry {
     await _ensureContext();
 
     final String errorMessage = error.toString();
-    final Map<String, Object?> payload = <String, Object?>{
-      'level': 'error',
-      'event': AnalyticsEvents.startupFailed,
-      'phase': effectivePhase,
-      'reason': reason,
-      'error_type': error.runtimeType.toString(),
-      'error_message': _truncate(errorMessage, 500),
-      'elapsed_ms': elapsedMs,
-      ..._baseFields(),
-    };
 
     logger.e(
       '[StartupTelemetry] failure reason=$reason phase=$effectivePhase',
@@ -201,7 +161,6 @@ abstract final class StartupTelemetry {
         },
       ),
     );
-    unawaited(_writeHealthLog(payload));
   }
 
   /// Records successful cold start (first routed frame).
@@ -212,16 +171,9 @@ abstract final class StartupTelemetry {
     final int elapsedMs = _elapsedMs();
     await _ensureContext();
 
-    final Map<String, Object?> payload = <String, Object?>{
-      'level': 'info',
-      'event': AnalyticsEvents.startupCompleted,
-      'phase': 'startup_completed',
-      'elapsed_ms': elapsedMs,
-      ...?data,
-      ..._baseFields(),
-    };
-
-    logger.d('[StartupTelemetry] completed elapsed_ms=$elapsedMs');
+    logger.d(
+      '[StartupTelemetry] completed elapsed_ms=$elapsedMs data=$data',
+    );
 
     _recordApplicationMetrics(elapsedMs);
     unawaited(_crashlyticsLog('startup_completed'));
@@ -236,7 +188,6 @@ abstract final class StartupTelemetry {
         },
       ),
     );
-    unawaited(_writeHealthLog(payload));
   }
 
   static void _recordApplicationMetrics(int elapsedMs) {
@@ -320,28 +271,6 @@ abstract final class StartupTelemetry {
     }
   }
 
-  static Map<String, Object?> _baseFields() {
-    return <String, Object?>{
-      'session_id': _sessionId,
-      'client_timestamp_ms': DateTime.now().millisecondsSinceEpoch,
-      'app_version': _appVersion,
-      'build_number': _buildNumber,
-      'platform': _platformName(),
-      'build_mode': kReleaseMode
-          ? 'release'
-          : kProfileMode
-          ? 'profile'
-          : 'debug',
-    };
-  }
-
-  static String? _platformName() {
-    if (kIsWeb) {
-      return 'web';
-    }
-    return Platform.operatingSystem;
-  }
-
   static Future<void> _crashlyticsLog(String message) async {
     if (!crashlyticsLoggingEnabled || Firebase.apps.isEmpty) {
       return;
@@ -369,13 +298,6 @@ abstract final class StartupTelemetry {
     } catch (e) {
       logger.d('StartupTelemetry analytics: $e');
     }
-  }
-
-  static Future<void> _writeHealthLog(Map<String, Object?> entry) async {
-    if (!firestoreLoggingEnabled) {
-      return;
-    }
-    await _healthLogSink.write(entry);
   }
 
   static String _truncate(String value, int maxLength) {
