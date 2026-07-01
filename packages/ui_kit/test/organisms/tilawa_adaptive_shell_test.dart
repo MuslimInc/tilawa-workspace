@@ -5,6 +5,7 @@ import '../../lib/src/foundation/app_colors.dart';
 import '../../lib/src/foundation/app_theme.dart';
 import '../../lib/src/foundation/component_tokens.dart';
 import '../../lib/src/foundation/design_tokens.dart';
+import '../../lib/src/foundation/tilawa_interactive_surface.dart';
 import '../../lib/src/organisms/tilawa_adaptive_shell.dart';
 import '../rtl_test_matrix.dart';
 
@@ -114,6 +115,35 @@ void main() {
       final Rect dockRect = tester.getRect(find.byKey(_bottomNavDockKey));
       expect(dockRect.left, 0);
       expect(dockRect.width, 360);
+    });
+
+    testWidgets('phone bottom nav destinations suppress Material ink', (
+      tester,
+    ) async {
+      await _pumpShell(
+        tester,
+        size: const Size(360, 800),
+        direction: TextDirection.ltr,
+      );
+
+      for (final inkWell in tester.widgetList<InkWell>(
+        find.descendant(
+          of: find.byKey(_bottomNavKey),
+          matching: find.byType(InkWell),
+        ),
+      )) {
+        expect(inkWell.splashColor, Colors.transparent);
+        expect(inkWell.highlightColor, Colors.transparent);
+        expect(inkWell.hoverColor, Colors.transparent);
+      }
+
+      expect(
+        find.descendant(
+          of: find.byKey(_bottomNavKey),
+          matching: find.byType(TilawaInteractiveSurface),
+        ),
+        findsNWidgets(_destinations.length),
+      );
     });
 
     testWidgets(
@@ -384,8 +414,9 @@ void main() {
           selectedIndex: -1,
         );
         expect(find.byKey(_bottomNavKey), findsOneWidget);
-        expect(find.text('Home'), findsNothing);
-        expect(find.text('Library'), findsNothing);
+        expect(find.text('Home'), findsOneWidget);
+        expect(find.text('Library'), findsOneWidget);
+        expect(find.text('Settings'), findsOneWidget);
       },
     );
   });
@@ -427,7 +458,7 @@ void main() {
     });
 
     testWidgets(
-      'narrow width exposes destination labels through semantics only',
+      'narrow width shows labels on every destination',
       (tester) async {
         const destinations = <TilawaNavDestination>[
           TilawaNavDestination(label: 'Reciters', icon: Icons.person_outline),
@@ -461,11 +492,11 @@ void main() {
         );
         await tester.pump();
 
-        expect(find.text('Reciters'), findsNothing);
-        expect(find.text('Prayer'), findsNothing);
-        expect(find.text('Quran'), findsNothing);
-        expect(find.text('Athkar'), findsNothing);
-        expect(find.text('Settings'), findsNothing);
+        expect(find.text('Reciters'), findsOneWidget);
+        expect(find.text('Prayer'), findsOneWidget);
+        expect(find.text('Quran'), findsOneWidget);
+        expect(find.text('Athkar'), findsOneWidget);
+        expect(find.text('Settings'), findsOneWidget);
 
         expect(
           tester.getSemantics(find.byIcon(Icons.person_outline)).label,
@@ -478,14 +509,69 @@ void main() {
       },
     );
 
+    testWidgets(
+      'narrow width styles selected label with primary and bold weight',
+      (tester) async {
+        const destinations = <TilawaNavDestination>[
+          TilawaNavDestination(label: 'Reciters', icon: Icons.person_outline),
+          TilawaNavDestination(label: 'Prayer', icon: Icons.schedule),
+        ];
+
+        await tester.binding.setSurfaceSize(const Size(360, 800));
+        tester.view.physicalSize = const Size(360, 800);
+        tester.view.devicePixelRatio = 1.0;
+        addTearDown(() => tester.binding.setSurfaceSize(null));
+        addTearDown(tester.view.resetPhysicalSize);
+        addTearDown(tester.view.resetDevicePixelRatio);
+
+        await tester.pumpWidget(
+          _wrap(
+            direction: TextDirection.ltr,
+            child: TilawaAdaptiveShell(
+              destinations: destinations,
+              selectedIndex: 0,
+              onDestinationSelected: (_) {},
+              bottomPlayer: const SizedBox.shrink(),
+              child: const ColoredBox(color: Color(0xFFEEEEEE)),
+            ),
+          ),
+        );
+        await tester.pump();
+
+        final BuildContext context = tester.element(find.text('Reciters'));
+        final ThemeData theme = Theme.of(context);
+        final TextStyle selectedStyle = tester
+            .widget<Text>(
+              find.text('Reciters'),
+            )
+            .style!;
+        final TextStyle unselectedStyle = tester
+            .widget<Text>(
+              find.text('Prayer'),
+            )
+            .style!;
+
+        expect(selectedStyle.color, theme.colorScheme.primary);
+        expect(
+          selectedStyle.fontWeight,
+          theme.componentTokens.adaptiveShell.navButtonSelectedLabelWeight,
+        );
+        expect(unselectedStyle.color, theme.colorScheme.onSurfaceVariant);
+        expect(
+          unselectedStyle.fontWeight,
+          theme.componentTokens.adaptiveShell.navButtonUnselectedLabelWeight,
+        );
+      },
+    );
+
     testInBothDirections(
-      'narrow width exposes Arabic destination labels through semantics only',
+      'narrow width shows Arabic labels on every tab',
       (tester, direction) async {
         const destinations = <TilawaNavDestination>[
           TilawaNavDestination(label: 'القراء', icon: Icons.person_outline),
           TilawaNavDestination(label: 'الصلاة', icon: Icons.schedule),
           TilawaNavDestination(
-            label: 'القرآن',
+            label: 'المصحف',
             icon: Icons.menu_book_outlined,
           ),
         ];
@@ -511,8 +597,9 @@ void main() {
         );
         await tester.pump();
 
-        expect(find.text('الصلاة'), findsNothing);
-        expect(find.text('القراء'), findsNothing);
+        expect(find.text('الصلاة'), findsOneWidget);
+        expect(find.text('القراء'), findsOneWidget);
+        expect(find.text('المصحف'), findsOneWidget);
 
         expect(
           tester.getSemantics(find.byIcon(Icons.schedule)).label,
@@ -777,8 +864,10 @@ void main() {
     });
   });
 
-  group('TilawaAdaptiveShell — bottom nav selection indicator', () {
-    testWidgets('selected tab shows rounded pill indicator', (tester) async {
+  group('TilawaAdaptiveShell — bottom nav selection chrome', () {
+    testWidgets('selected tab has no background pill indicator', (
+      tester,
+    ) async {
       await tester.binding.setSurfaceSize(const Size(400, 800));
       tester.view.physicalSize = const Size(400, 800);
       tester.view.devicePixelRatio = 1.0;
@@ -800,22 +889,13 @@ void main() {
       );
       await tester.pump();
 
-      expect(find.byType(AnimatedPositionedDirectional), findsOneWidget);
-      expect(find.byKey(const Key('nav_pulse_1')), findsNothing);
-
-      final DecoratedBox indicator = tester.widget<DecoratedBox>(
-        find.descendant(
-          of: find.byType(AnimatedPositionedDirectional),
-          matching: find.byType(DecoratedBox),
-        ),
-      );
-      final BoxDecoration decoration = indicator.decoration as BoxDecoration;
-      final BorderRadius radius = decoration.borderRadius! as BorderRadius;
-      expect(radius.topLeft.x, greaterThan(20));
-      expect(radius.topLeft.x, radius.topRight.x);
+      expect(find.byType(AnimatedPositionedDirectional), findsNothing);
+      expect(find.text('Library'), findsOneWidget);
+      expect(find.text('Home'), findsOneWidget);
+      expect(find.text('Settings'), findsOneWidget);
     });
 
-    testWidgets('selection indicator moves on programmatic index change', (
+    testWidgets('programmatic index change keeps no pill indicator', (
       tester,
     ) async {
       final drive = await _pumpDrivableShell(
@@ -824,18 +904,12 @@ void main() {
         initialIndex: 0,
       );
 
-      final Offset firstPosition = tester.getTopLeft(
-        find.byType(AnimatedPositionedDirectional),
-      );
+      expect(find.byType(AnimatedPositionedDirectional), findsNothing);
 
       await drive(tester, 2);
       await tester.pumpAndSettle();
 
-      final Offset secondPosition = tester.getTopLeft(
-        find.byType(AnimatedPositionedDirectional),
-      );
-
-      expect(secondPosition.dx, greaterThan(firstPosition.dx));
+      expect(find.byType(AnimatedPositionedDirectional), findsNothing);
     });
 
     testWidgets('user tap fires onDestinationSelected callback', (
@@ -855,12 +929,83 @@ void main() {
       expect(tappedIndex, 2);
     });
 
-    testWidgets('selected pill uses nav press tint token', (tester) async {
-      final ThemeData theme = AppTheme.getLightTheme(
-        primaryColor: AppColors.defaultPrimary,
+    testWidgets('nav tap does not paint state-layer press wash', (
+      tester,
+    ) async {
+      await tester.binding.setSurfaceSize(const Size(400, 800));
+      tester.view.physicalSize = const Size(400, 800);
+      tester.view.devicePixelRatio = 1.0;
+      addTearDown(() => tester.binding.setSurfaceSize(null));
+      addTearDown(tester.view.resetPhysicalSize);
+      addTearDown(tester.view.resetDevicePixelRatio);
+
+      await tester.pumpWidget(
+        _wrap(
+          direction: TextDirection.ltr,
+          child: TilawaAdaptiveShell(
+            destinations: _destinations,
+            selectedIndex: 0,
+            onDestinationSelected: (_) {},
+            bottomPlayer: const SizedBox.shrink(),
+            child: const ColoredBox(color: Color(0xFFEEEEEE)),
+          ),
+        ),
       );
-      final TilawaAdaptiveShellTokens tokens =
-          theme.componentTokens.adaptiveShell;
+      await tester.pump();
+
+      final Finder navSurface = find.descendant(
+        of: find.byKey(const Key('nav_button_1')),
+        matching: find.byType(TilawaInteractiveSurface),
+      );
+      final TilawaInteractiveSurface surface = tester.widget(navSurface);
+      expect(surface.enableInk, isFalse);
+      expect(surface.enableStateLayer, isFalse);
+
+      final TestGesture gesture = await tester.startGesture(
+        tester.getCenter(find.byKey(const Key('nav_button_1'))),
+      );
+      await tester.pump();
+
+      final Iterable<DecoratedBox> washes = tester.widgetList<DecoratedBox>(
+        find.descendant(
+          of: navSurface,
+          matching: find.byWidgetPredicate(
+            (widget) =>
+                widget is DecoratedBox &&
+                widget.decoration is BoxDecoration &&
+                (widget.decoration as BoxDecoration).color != null &&
+                (widget.decoration as BoxDecoration).border == null,
+          ),
+        ),
+      );
+      expect(washes, isEmpty);
+
+      await gesture.up();
+      await tester.pump();
+    });
+
+    testWidgets('profile destination shows label when unselected', (
+      tester,
+    ) async {
+      final destinations = <TilawaNavDestination>[
+        const TilawaNavDestination(
+          label: 'Home',
+          icon: Icons.home_outlined,
+        ),
+        TilawaNavDestination(
+          label: 'Profile',
+          icon: Icons.person_outline,
+          selectionUsesBackground: false,
+          iconBuilder:
+              (
+                BuildContext context, {
+                required bool isSelected,
+                required Color color,
+              }) {
+                return Icon(Icons.person_outline, color: color);
+              },
+        ),
+      ];
 
       await tester.binding.setSurfaceSize(const Size(400, 800));
       tester.view.physicalSize = const Size(400, 800);
@@ -870,11 +1015,11 @@ void main() {
       addTearDown(tester.view.resetDevicePixelRatio);
 
       await tester.pumpWidget(
-        MaterialApp(
-          theme: theme,
-          home: TilawaAdaptiveShell(
-            destinations: _destinations,
-            selectedIndex: 1,
+        _wrap(
+          direction: TextDirection.ltr,
+          child: TilawaAdaptiveShell(
+            destinations: destinations,
+            selectedIndex: 0,
             onDestinationSelected: (_) {},
             bottomPlayer: const SizedBox.shrink(),
             child: const ColoredBox(color: Color(0xFFEEEEEE)),
@@ -883,76 +1028,11 @@ void main() {
       );
       await tester.pump();
 
-      final DecoratedBox indicator = tester.widget<DecoratedBox>(
-        find.descendant(
-          of: find.byType(AnimatedPositionedDirectional),
-          matching: find.byType(DecoratedBox),
-        ),
-      );
-      final BoxDecoration indicatorDecoration =
-          indicator.decoration as BoxDecoration;
-      expect(
-        indicatorDecoration.color,
-        tokens.navButtonSelectedBackgroundColor,
-      );
-      expect(
-        indicatorDecoration.color,
-        Color.alphaBlend(
-          theme.colorScheme.primary.withValues(alpha: 0.12),
-          tokens.bottomNavBackgroundColor,
-        ),
-      );
+      expect(find.text('Profile'), findsOneWidget);
+      expect(find.byType(AnimatedPositionedDirectional), findsNothing);
     });
 
-    testWidgets(
-      'profile destination with selectionUsesBackground false skips pill',
-      (tester) async {
-        final destinations = <TilawaNavDestination>[
-          const TilawaNavDestination(
-            label: 'Home',
-            icon: Icons.home_outlined,
-          ),
-          TilawaNavDestination(
-            label: 'Profile',
-            icon: Icons.person_outline,
-            selectionUsesBackground: false,
-            iconBuilder:
-                (
-                  BuildContext context, {
-                  required bool isSelected,
-                  required Color color,
-                }) {
-                  return Icon(Icons.person_outline, color: color);
-                },
-          ),
-        ];
-
-        await tester.binding.setSurfaceSize(const Size(400, 800));
-        tester.view.physicalSize = const Size(400, 800);
-        tester.view.devicePixelRatio = 1.0;
-        addTearDown(() => tester.binding.setSurfaceSize(null));
-        addTearDown(tester.view.resetPhysicalSize);
-        addTearDown(tester.view.resetDevicePixelRatio);
-
-        await tester.pumpWidget(
-          _wrap(
-            direction: TextDirection.ltr,
-            child: TilawaAdaptiveShell(
-              destinations: destinations,
-              selectedIndex: 1,
-              onDestinationSelected: (_) {},
-              bottomPlayer: const SizedBox.shrink(),
-              child: const ColoredBox(color: Color(0xFFEEEEEE)),
-            ),
-          ),
-        );
-        await tester.pump();
-
-        expect(find.byType(AnimatedPositionedDirectional), findsNothing);
-      },
-    );
-
-    testWidgets('selected icon scales up relative to unselected', (
+    testWidgets('selected and unselected icons use the same scale', (
       tester,
     ) async {
       await tester.binding.setSurfaceSize(const Size(400, 800));
@@ -989,7 +1069,78 @@ void main() {
         ),
       );
 
-      expect(selectedScale.scale, greaterThan(unselectedScale.scale));
+      expect(selectedScale.scale, unselectedScale.scale);
+    });
+
+    testWidgets('nav icon builders share the token icon box size', (
+      tester,
+    ) async {
+      const double customAvatarSize = 28;
+      final destinations = <TilawaNavDestination>[
+        const TilawaNavDestination(
+          label: 'Home',
+          icon: Icons.home_outlined,
+        ),
+        TilawaNavDestination(
+          label: 'Quran',
+          icon: Icons.menu_book_outlined,
+          iconBuilder:
+              (
+                BuildContext context, {
+                required bool isSelected,
+                required Color color,
+              }) {
+                return SizedBox(
+                  width: customAvatarSize,
+                  height: customAvatarSize,
+                  child: Icon(Icons.menu_book_outlined, color: color),
+                );
+              },
+        ),
+      ];
+
+      await tester.binding.setSurfaceSize(const Size(400, 800));
+      tester.view.physicalSize = const Size(400, 800);
+      tester.view.devicePixelRatio = 1.0;
+      addTearDown(() => tester.binding.setSurfaceSize(null));
+      addTearDown(tester.view.resetPhysicalSize);
+      addTearDown(tester.view.resetDevicePixelRatio);
+
+      await tester.pumpWidget(
+        _wrap(
+          direction: TextDirection.ltr,
+          child: TilawaAdaptiveShell(
+            destinations: destinations,
+            selectedIndex: 0,
+            onDestinationSelected: (_) {},
+            bottomPlayer: const SizedBox.shrink(),
+            child: const ColoredBox(color: Color(0xFFEEEEEE)),
+          ),
+        ),
+      );
+      await tester.pump();
+
+      final ThemeData theme = Theme.of(
+        tester.element(find.byType(TilawaAdaptiveShell)),
+      );
+      final double iconSize =
+          theme.componentTokens.adaptiveShell.navButtonIconSize;
+
+      for (final int index in <int>[0, 1]) {
+        final Finder iconBox = find.descendant(
+          of: find.byKey(Key('nav_button_$index')),
+          matching: find.byWidgetPredicate(
+            (widget) =>
+                widget is SizedBox &&
+                widget.width == iconSize &&
+                widget.height == iconSize &&
+                widget.child is Center &&
+                (widget.child as Center).child is FittedBox,
+          ),
+        );
+        expect(iconBox, findsOneWidget);
+        expect(tester.getSize(iconBox), Size(iconSize, iconSize));
+      }
     });
   });
 }

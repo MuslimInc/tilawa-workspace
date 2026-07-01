@@ -239,6 +239,31 @@ void main() {
       await gesture.up();
       await tester.pump();
     });
+
+    testWidgets('enableInk false suppresses Material ink colors', (
+      tester,
+    ) async {
+      await tester.pumpWidget(
+        _host(
+          TilawaInteractiveSurface(
+            onTap: () {},
+            enableInk: false,
+            borderRadius: BorderRadius.circular(12),
+            child: const SizedBox(width: 120, height: 48),
+          ),
+        ),
+      );
+
+      final inkWell = tester.widget<InkWell>(
+        find.descendant(
+          of: find.byType(TilawaInteractiveSurface),
+          matching: find.byType(InkWell),
+        ),
+      );
+      expect(inkWell.splashColor, Colors.transparent);
+      expect(inkWell.highlightColor, Colors.transparent);
+      expect(inkWell.hoverColor, Colors.transparent);
+    });
   });
 }
 

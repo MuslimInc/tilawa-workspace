@@ -68,7 +68,10 @@ List<AppShellNavDestination> buildPhoneShellNavDestinations(
       label: l10n.bottomNavQuran,
       icon: TilawaIcons.menuBook,
       iconBuilder: (context, {required Color color}) {
-        return TilawaIcons.quran.svg(color: color);
+        final double iconSize = Theme.of(
+          context,
+        ).componentTokens.adaptiveShell.navButtonIconSize;
+        return TilawaIcons.quran.svg(color: color, size: iconSize);
       },
       semanticsIdentifier: 'quran_index_nav',
     ),

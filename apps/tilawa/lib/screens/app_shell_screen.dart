@@ -113,7 +113,9 @@ class _AppShellScreenState extends State<AppShellScreen> {
       AuthAuthenticated(:final user) => user.displayName,
       _ => null,
     };
-    const double profileAvatarSize = 28;
+    final double profileAvatarSize = Theme.of(
+      context,
+    ).componentTokens.adaptiveShell.navButtonIconSize;
 
     return destinations.map((AppShellNavDestination d) {
       TilawaNavIconBuilder? iconBuilder;
@@ -149,7 +151,6 @@ class _AppShellScreenState extends State<AppShellScreen> {
         activeIcon: d.activeIcon,
         identifier: d.semanticsIdentifier,
         iconBuilder: iconBuilder,
-        selectionUsesBackground: !d.usesProfileAvatar,
       );
     }).toList();
   }

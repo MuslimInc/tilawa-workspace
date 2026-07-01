@@ -73,6 +73,7 @@ class TilawaInteractiveSurface extends StatefulWidget {
     this.stateLayerColor,
     this.splashColor,
     this.highlightColor,
+    this.enableInk = true,
     this.materialColor,
     this.materialShape,
     this.semanticLabel,
@@ -117,6 +118,12 @@ class TilawaInteractiveSurface extends StatefulWidget {
 
   /// Overrides [InkWell.highlightColor] base (defaults to [ColorScheme.onSurface]).
   final Color? highlightColor;
+
+  /// When `false`, suppresses Material ink splash/highlight/hover on [InkWell].
+  ///
+  /// State-layer washes, haptics, and focus ring are unchanged. Use for shell
+  /// nav destinations where scale/selection already communicate press.
+  final bool enableInk;
 
   /// When set, the surface owns the opaque [Material] fill so ink renders on
   /// the card/list surface instead of behind an opaque [child].
@@ -263,7 +270,7 @@ class _TilawaInteractiveSurfaceState extends State<TilawaInteractiveSurface> {
     ColorScheme colorScheme,
     MeMuslimDesignTokens tokens,
   ) {
-    if (_inkSuppressed) {
+    if (_inkSuppressed || !widget.enableInk) {
       return Colors.transparent;
     }
     final Color base = widget.splashColor ?? colorScheme.primary;
@@ -274,7 +281,7 @@ class _TilawaInteractiveSurfaceState extends State<TilawaInteractiveSurface> {
     ColorScheme colorScheme,
     MeMuslimDesignTokens tokens,
   ) {
-    if (_inkSuppressed) {
+    if (_inkSuppressed || !widget.enableInk) {
       return Colors.transparent;
     }
     final Color base =
@@ -288,7 +295,7 @@ class _TilawaInteractiveSurfaceState extends State<TilawaInteractiveSurface> {
     ColorScheme colorScheme,
     MeMuslimDesignTokens tokens,
   ) {
-    if (_inkSuppressed) {
+    if (_inkSuppressed || !widget.enableInk) {
       return Colors.transparent;
     }
     final Color base = widget.stateLayerColor ?? colorScheme.onSurface;

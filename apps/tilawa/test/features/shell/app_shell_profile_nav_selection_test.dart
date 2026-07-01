@@ -53,10 +53,10 @@ void main() {
       expect(_navIndexForTab(tabIndex!, destinations), 3);
     });
 
-    testWidgets('profile nav item uses ring instead of pill background', (
+    testWidgets('profile nav item has no pill or ring when selected', (
       tester,
     ) async {
-      const double profileAvatarSize = 28;
+      final l10n = await _loadL10n(tester);
 
       await tester.binding.setSurfaceSize(const Size(390, 844));
       tester.view.physicalSize = const Size(390, 844);
@@ -75,6 +75,9 @@ void main() {
             child: Builder(
               builder: (context) {
                 final l10n = AppLocalizations.of(context);
+                final double profileAvatarSize = Theme.of(
+                  context,
+                ).componentTokens.adaptiveShell.navButtonIconSize;
                 final destinations = <TilawaNavDestination>[
                   const TilawaNavDestination(
                     label: 'Home',
@@ -132,7 +135,81 @@ void main() {
               (widget.decoration as BoxDecoration).border != null,
         ),
       );
-      expect(profileRing, findsOneWidget);
+      expect(profileRing, findsNothing);
+      expect(find.text(l10n.bottomNavSettings), findsOneWidget);
+    });
+
+    testWidgets('profile nav item shows settings label when unselected', (
+      tester,
+    ) async {
+      final l10n = await _loadL10n(tester);
+
+      await tester.binding.setSurfaceSize(const Size(390, 844));
+      tester.view.physicalSize = const Size(390, 844);
+      tester.view.devicePixelRatio = 1.0;
+      addTearDown(() => tester.binding.setSurfaceSize(null));
+      addTearDown(tester.view.resetPhysicalSize);
+      addTearDown(tester.view.resetDevicePixelRatio);
+
+      await tester.pumpWidget(
+        MaterialApp(
+          theme: AppTheme.getLightTheme(primaryColor: AppColors.defaultPrimary),
+          localizationsDelegates: AppLocalizations.localizationsDelegates,
+          supportedLocales: AppLocalizations.supportedLocales,
+          home: Directionality(
+            textDirection: TextDirection.ltr,
+            child: Builder(
+              builder: (context) {
+                final l10n = AppLocalizations.of(context);
+                final double profileAvatarSize = Theme.of(
+                  context,
+                ).componentTokens.adaptiveShell.navButtonIconSize;
+                final destinations = <TilawaNavDestination>[
+                  const TilawaNavDestination(
+                    label: 'Home',
+                    icon: Icons.home_outlined,
+                  ),
+                  TilawaNavDestination(
+                    label: l10n.bottomNavSettings,
+                    icon: TilawaIcons.profile,
+                    selectionUsesBackground: false,
+                    iconBuilder:
+                        (
+                          BuildContext iconContext, {
+                          required bool isSelected,
+                          required Color color,
+                        }) {
+                          return SizedBox(
+                            width: profileAvatarSize,
+                            height: profileAvatarSize,
+                            child: DecoratedBox(
+                              decoration: BoxDecoration(
+                                color: color.withValues(alpha: 0.2),
+                                shape: BoxShape.circle,
+                              ),
+                              child: const Center(child: Text('T')),
+                            ),
+                          );
+                        },
+                  ),
+                ];
+
+                return TilawaAdaptiveShell(
+                  destinations: destinations,
+                  selectedIndex: 0,
+                  onDestinationSelected: (_) {},
+                  bottomPlayer: const SizedBox.shrink(),
+                  child: const ColoredBox(color: Color(0xFFEEEEEE)),
+                );
+              },
+            ),
+          ),
+        ),
+      );
+      await tester.pump();
+
+      expect(find.text(l10n.bottomNavSettings), findsOneWidget);
+      expect(find.byType(AnimatedPositionedDirectional), findsNothing);
     });
   });
 }

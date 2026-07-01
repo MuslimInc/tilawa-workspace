@@ -7,6 +7,7 @@ import 'package:flutter/services.dart';
 import '../foundation/component_tokens.dart';
 import '../foundation/design_tokens.dart';
 import '../foundation/tilawa_interactive_surface.dart';
+import '../foundation/tilawa_text_roles.dart';
 
 /// [ValueListenable] that is always `true` and never notifies.
 ///
@@ -70,17 +71,18 @@ class TilawaNavDestination {
   /// Maestro. Prefer this over Flutter Keys for E2E test targeting.
   final String? identifier;
 
-  /// When false, the selected tab uses only [iconBuilder] chrome (e.g. profile
-  /// photo with a ring) instead of the neutral pill fill.
+  /// Deprecated — selection chrome is icon/label color only; this flag is ignored.
   final bool selectionUsesBackground;
 }
 
 /// A shell with a shared bottom navigation bar on every window size.
 ///
 /// One [Scaffold] hosts tab [child] and a shared [Scaffold.bottomNavigationBar]
-/// (not a nested bar per tab). Phone bottom nav is **icon-only**; destination
-/// [TilawaNavDestination.label] values are exposed through semantics. Optional
-/// [phoneBottomNavigationBarVisible] can hide the bar (e.g. full-screen player).
+/// (not a nested bar per tab). Phone bottom nav shows icon + label under
+/// every destination. Selected tabs use primary + bold label; unselected use
+/// [ColorScheme.onSurfaceVariant] + regular weight. Optional
+/// [phoneBottomNavigationBarVisible] can hide
+/// the bar (e.g. full-screen player).
 ///
 /// Respects [DisplayFeature]s (hinges/folds) on foldable devices.
 class TilawaAdaptiveShell extends StatelessWidget {
@@ -233,12 +235,17 @@ class _BottomNavBar extends StatelessWidget {
         theme.componentTokens.bottomSheetScaffold;
     final MeMuslimDesignTokens designTokens = theme.tokens;
     final ColorScheme colorScheme = theme.colorScheme;
-    final double hitSize = tokens.navButtonIconOnlyMinHeight;
-    final double barHeight = hitSize + (2 * tokens.bottomNavInternalPadding);
+    final TextScaler textScaler = MediaQuery.textScalerOf(context);
+    final double rowHeight = tokens.phoneBottomNavLayoutHeight(textScaler);
+    final double iconAreaHeight = tokens.phoneBottomNavIconOnlyLayoutHeight(
+      textScaler,
+    );
+    final double barHeight = rowHeight + (2 * tokens.bottomNavInternalPadding);
     final double systemBottomInset = MediaQuery.viewPaddingOf(context).bottom;
-    final bool hasSelection = selectedIndex != null;
     final Color barColor = tokens.bottomNavBackgroundColor;
-    final BorderRadius indicatorRadius = BorderRadius.circular(hitSize / 2);
+    final BorderRadius indicatorRadius = BorderRadius.circular(
+      iconAreaHeight / 2,
+    );
 
     final SystemUiOverlayStyle bottomNavOverlayStyle = SystemUiOverlayStyle(
       systemNavigationBarColor: barColor.withValues(alpha: 1),
@@ -277,7 +284,7 @@ class _BottomNavBar extends StatelessWidget {
                       constraints.maxWidth / destinationCount;
                   final double indicatorWidth = math.min(
                     slotWidth - designTokens.spaceSmall,
-                    hitSize + designTokens.spaceMedium,
+                    iconAreaHeight + designTokens.spaceMedium,
                   );
 
                   return Material(
@@ -290,47 +297,26 @@ class _BottomNavBar extends StatelessWidget {
                         padding: EdgeInsets.symmetric(
                           vertical: tokens.bottomNavInternalPadding,
                         ),
-                        child: Stack(
-                          clipBehavior: Clip.none,
+                        child: Row(
                           children: [
-                            if (hasSelection &&
-                                destinations[selectedIndex!]
-                                    .selectionUsesBackground)
-                              AnimatedPositionedDirectional(
-                                duration: designTokens.durationFast,
-                                curve: Curves.easeOutCubic,
-                                start:
-                                    (selectedIndex! * slotWidth) +
-                                    ((slotWidth - indicatorWidth) / 2),
-                                width: indicatorWidth,
-                                height: hitSize,
-                                child: DecoratedBox(
-                                  decoration: BoxDecoration(
-                                    color:
-                                        tokens.navButtonSelectedBackgroundColor,
-                                    borderRadius: indicatorRadius,
+                            for (int i = 0; i < destinations.length; i++)
+                              Expanded(
+                                child: Align(
+                                  alignment: Alignment.center,
+                                  child: _NavButton(
+                                    key: Key('nav_button_$i'),
+                                    destination: destinations[i],
+                                    isSelected:
+                                        selectedIndex != null &&
+                                        selectedIndex == i,
+                                    onTap: () => onDestinationSelected(i),
+                                    indicatorRadius: indicatorRadius,
+                                    targetWidth: indicatorWidth,
+                                    rowHeight: rowHeight,
+                                    iconAreaHeight: iconAreaHeight,
                                   ),
                                 ),
                               ),
-                            Row(
-                              children: [
-                                for (int i = 0; i < destinations.length; i++)
-                                  Expanded(
-                                    child: Align(
-                                      alignment: Alignment.center,
-                                      child: _NavButton(
-                                        key: Key('nav_button_$i'),
-                                        destination: destinations[i],
-                                        isSelected:
-                                            hasSelection && selectedIndex == i,
-                                        onTap: () => onDestinationSelected(i),
-                                        indicatorRadius: indicatorRadius,
-                                        targetWidth: indicatorWidth,
-                                      ),
-                                    ),
-                                  ),
-                              ],
-                            ),
                           ],
                         ),
                       ),
@@ -354,6 +340,8 @@ class _NavButton extends StatelessWidget {
     required this.onTap,
     required this.indicatorRadius,
     required this.targetWidth,
+    required this.rowHeight,
+    required this.iconAreaHeight,
   });
 
   final TilawaNavDestination destination;
@@ -361,6 +349,8 @@ class _NavButton extends StatelessWidget {
   final VoidCallback onTap;
   final BorderRadius indicatorRadius;
   final double targetWidth;
+  final double rowHeight;
+  final double iconAreaHeight;
 
   Widget _buildIcon({
     required BuildContext context,
@@ -368,33 +358,57 @@ class _NavButton extends StatelessWidget {
     required Color selectedFg,
     required Color unselectedFg,
   }) {
-    final Widget baseIcon = destination.iconBuilder != null
-        ? destination.iconBuilder!(
-            context,
-            isSelected: isSelected,
-            color: isSelected ? selectedFg : unselectedFg,
+    final double iconSize = tokens.navButtonIconSize;
+    final Color iconColor = isSelected ? selectedFg : unselectedFg;
+    final Widget iconChild = destination.iconBuilder != null
+        ? IconTheme(
+            data: IconThemeData(size: iconSize, color: iconColor),
+            child: destination.iconBuilder!(
+              context,
+              isSelected: isSelected,
+              color: iconColor,
+            ),
           )
         : Icon(
             isSelected
                 ? (destination.activeIcon ?? destination.icon)
                 : destination.icon,
-            size: tokens.navButtonIconSize,
-            color: isSelected ? selectedFg : unselectedFg,
+            size: iconSize,
+            color: iconColor,
           );
 
-    if (!destination.selectionUsesBackground && isSelected) {
-      final MeMuslimDesignTokens designTokens = Theme.of(context).tokens;
-      final double ringWidth = designTokens.spaceExtraSmall / 2;
-      return DecoratedBox(
-        decoration: BoxDecoration(
-          shape: BoxShape.circle,
-          border: Border.all(color: selectedFg, width: ringWidth),
+    return SizedBox(
+      width: iconSize,
+      height: iconSize,
+      child: Center(
+        child: FittedBox(
+          fit: BoxFit.contain,
+          child: iconChild,
         ),
-        child: baseIcon,
+      ),
+    );
+  }
+
+  TextStyle _labelStyle({
+    required ThemeData theme,
+    required TilawaAdaptiveShellTokens tokens,
+    required ColorScheme colorScheme,
+    required bool isSelected,
+  }) {
+    final TextStyle base = tilawaResolveTextRole(
+      theme.textTheme,
+      tokens.navButtonLabelTextRole,
+    );
+    if (isSelected) {
+      return base.copyWith(
+        color: colorScheme.primary,
+        fontWeight: tokens.navButtonSelectedLabelWeight,
       );
     }
-
-    return baseIcon;
+    return base.copyWith(
+      color: colorScheme.onSurfaceVariant,
+      fontWeight: tokens.navButtonUnselectedLabelWeight,
+    );
   }
 
   @override
@@ -406,11 +420,6 @@ class _NavButton extends StatelessWidget {
     final ColorScheme colorScheme = theme.colorScheme;
     final Color selectedFg = colorScheme.primary;
     final Color unselectedFg = colorScheme.onSurfaceVariant;
-    final double hitSize = tokens.navButtonIconOnlyMinHeight;
-    final Color pressStateLayerColor =
-        colorScheme.brightness == Brightness.light
-        ? colorScheme.primary
-        : colorScheme.onSurface;
     final double iconScale = isSelected
         ? tokens.navButtonSelectedCenterScale
         : tokens.navButtonUnselectedScale;
@@ -422,6 +431,41 @@ class _NavButton extends StatelessWidget {
       unselectedFg: unselectedFg,
     );
 
+    final Widget iconSlot = SizedBox(
+      width: targetWidth,
+      height: iconAreaHeight,
+      child: Center(
+        child: AnimatedScale(
+          scale: iconScale,
+          duration: designTokens.durationFast,
+          curve: Curves.easeOutCubic,
+          child: iconWidget,
+        ),
+      ),
+    );
+
+    final Widget slotContent = Column(
+      mainAxisSize: MainAxisSize.min,
+      children: [
+        iconSlot,
+        SizedBox(height: tokens.navButtonGap),
+        ExcludeSemantics(
+          child: Text(
+            destination.label,
+            style: _labelStyle(
+              theme: theme,
+              tokens: tokens,
+              colorScheme: colorScheme,
+              isSelected: isSelected,
+            ),
+            maxLines: 1,
+            overflow: TextOverflow.ellipsis,
+            textAlign: TextAlign.center,
+          ),
+        ),
+      ],
+    );
+
     return TilawaInteractiveSurface(
       button: true,
       semanticLabel: destination.label,
@@ -429,20 +473,12 @@ class _NavButton extends StatelessWidget {
       selected: isSelected,
       onTap: onTap,
       borderRadius: indicatorRadius,
-      stateLayerColor: pressStateLayerColor,
-      splashColor: tokens.navButtonSplashColor,
-      highlightColor: tokens.navButtonHighlightColor,
+      enableInk: false,
+      enableStateLayer: false,
       child: SizedBox(
         width: targetWidth,
-        height: hitSize,
-        child: Center(
-          child: AnimatedScale(
-            scale: iconScale,
-            duration: designTokens.durationFast,
-            curve: Curves.easeOutCubic,
-            child: iconWidget,
-          ),
-        ),
+        height: rowHeight,
+        child: slotContent,
       ),
     );
   }

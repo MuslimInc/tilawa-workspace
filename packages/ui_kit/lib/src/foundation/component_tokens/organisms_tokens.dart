@@ -398,8 +398,6 @@ class TilawaAdaptiveShellTokens {
     required this.navButtonLabelTextRole,
     required this.navButtonSelectedLabelWeight,
     required this.navButtonUnselectedLabelWeight,
-    required this.navButtonSplashColor,
-    required this.navButtonHighlightColor,
     required this.navButtonSelectionContainerVerticalPadding,
     required this.navButtonIconOnlyMinHeight,
     required this.navButtonIconOnlyVerticalPadding,
@@ -472,12 +470,6 @@ class TilawaAdaptiveShellTokens {
   final FontWeight navButtonSelectedLabelWeight;
   final FontWeight navButtonUnselectedLabelWeight;
 
-  /// [InkWell.splashColor] for shell nav destinations (bottom + rail).
-  final Color navButtonSplashColor;
-
-  /// [InkWell.highlightColor] for shell nav destinations.
-  final Color navButtonHighlightColor;
-
   /// Vertical padding inside the phone nav item pill ([AnimatedContainer] in
   /// the shell). Included in [phoneBottomNavLayoutHeight] so reserved shell
   /// padding matches painted chrome.
@@ -492,12 +484,29 @@ class TilawaAdaptiveShellTokens {
   /// Pill vertical padding in icon-only phone nav (tighter than labeled).
   final double navButtonIconOnlySelectionContainerVerticalPadding;
 
-  /// Height of the phone bottom nav icon row for [textScaler].
+  /// Height of the phone bottom nav row for [textScaler].
   ///
-  /// Phone shell uses icon-only destinations. Use [phoneBottomNavPaintedHeight]
-  /// for the full dock including margins and system inset.
+  /// Matches each destination slot (icon + label). Use
+  /// [phoneBottomNavPaintedHeight] for the full dock including margins and
+  /// system inset.
   double phoneBottomNavLayoutHeight(TextScaler textScaler) =>
-      phoneBottomNavIconOnlyLayoutHeight(textScaler);
+      phoneBottomNavSelectedLabelLayoutHeight(textScaler);
+
+  /// Nominal line height for the selected bottom-nav label (labelSmall).
+  static const double navButtonLabelLineHeight = 16;
+
+  /// Height of the phone bottom nav row when the selected tab shows a label.
+  double phoneBottomNavSelectedLabelLayoutHeight(TextScaler textScaler) {
+    final double iconAreaHeight = phoneBottomNavIconOnlyLayoutHeight(
+      textScaler,
+    );
+    final double labelBlock =
+        navButtonGap + textScaler.scale(navButtonLabelLineHeight);
+    return math.max(
+      textScaler.scale(navButtonMinHeight),
+      iconAreaHeight + labelBlock,
+    );
+  }
 
   /// Total painted height of the phone bottom nav dock, including inner
   /// padding and the system navigation inset below the bar.
@@ -509,10 +518,9 @@ class TilawaAdaptiveShellTokens {
       phoneBottomNavLayoutHeight(textScaler) +
       systemBottomViewPadding;
 
-  /// Height of the phone bottom nav row in **icon-only** mode.
+  /// Height of the icon row in **icon-only** mode (no label block).
   ///
-  /// Matches [_NavButton] when labels are hidden; use with
-  /// [phoneBottomNavLayoutHeight] so scroll padding tracks the shorter bar.
+  /// Matches [_NavButton] icon area and the selection pill height.
   double phoneBottomNavIconOnlyLayoutHeight(TextScaler textScaler) =>
       TilawaAdaptiveShellTokens._phoneBottomNavIconOnlyLayoutHeight(
         navButtonIconOnlyMinHeight: navButtonIconOnlyMinHeight,
@@ -558,15 +566,15 @@ class TilawaAdaptiveShellTokens {
     final bool lightChrome = colorScheme.brightness == Brightness.light;
     const double navButtonMinHeight = 52;
     const double navButtonVerticalPadding = 4;
-    const double navButtonIconSize = 22;
+    const double navButtonIconSize = 24;
     const double navButtonSelectedCenterScale = 1.0;
-    const double navButtonGap = 4;
+    const double navButtonGap = 2;
     const double navButtonSelectionContainerVerticalPadding = 4;
     const double navButtonIconOnlyMinHeight = kMeMuslimMinInteractiveDimension;
     const double navButtonIconOnlyVerticalPadding = 4;
     const double navButtonIconOnlySelectionContainerVerticalPadding = 4;
     const TextScaler unitTextScaler = TextScaler.linear(1);
-    final double phoneBottomNavBarBaseHeight =
+    final double iconOnlyBarHeight =
         TilawaAdaptiveShellTokens._phoneBottomNavIconOnlyLayoutHeight(
           navButtonIconOnlyMinHeight: navButtonIconOnlyMinHeight,
           navButtonIconOnlyVerticalPadding: navButtonIconOnlyVerticalPadding,
@@ -576,6 +584,12 @@ class TilawaAdaptiveShellTokens {
           navButtonSelectedCenterScale: navButtonSelectedCenterScale,
           textScaler: unitTextScaler,
         );
+    final double phoneBottomNavBarBaseHeight = math.max(
+      navButtonMinHeight,
+      iconOnlyBarHeight +
+          navButtonGap +
+          TilawaAdaptiveShellTokens.navButtonLabelLineHeight,
+    );
     return TilawaAdaptiveShellTokens(
       phoneBottomNavBarBaseHeight: phoneBottomNavBarBaseHeight,
       bottomNavHorizontalMargin: 0,
@@ -602,7 +616,7 @@ class TilawaAdaptiveShellTokens {
       navButtonGap: navButtonGap,
       navButtonIconSize: navButtonIconSize,
       navButtonSelectedCenterScale: navButtonSelectedCenterScale,
-      navButtonUnselectedScale: 0.95,
+      navButtonUnselectedScale: 1.0,
       navButtonSelectedBackgroundColor: _navButtonSelectedBackgroundColor(
         colorScheme,
         bottomNavBackgroundColor,
@@ -611,9 +625,7 @@ class TilawaAdaptiveShellTokens {
       navButtonSelectedCenterOpacity: 0.25,
       navButtonLabelTextRole: TilawaTextRole.labelSmall,
       navButtonSelectedLabelWeight: FontWeight.w700,
-      navButtonUnselectedLabelWeight: FontWeight.w500,
-      navButtonSplashColor: _navButtonSplashColor(colorScheme),
-      navButtonHighlightColor: _navButtonHighlightColor(colorScheme),
+      navButtonUnselectedLabelWeight: FontWeight.w400,
       navButtonSelectionContainerVerticalPadding:
           navButtonSelectionContainerVerticalPadding,
       navButtonIconOnlyMinHeight: navButtonIconOnlyMinHeight,
@@ -621,14 +633,6 @@ class TilawaAdaptiveShellTokens {
       navButtonIconOnlySelectionContainerVerticalPadding:
           navButtonIconOnlySelectionContainerVerticalPadding,
     );
-  }
-
-  static Color _navButtonSplashColor(ColorScheme colorScheme) {
-    return colorScheme.onSurface.withValues(alpha: 0.06);
-  }
-
-  static Color _navButtonHighlightColor(ColorScheme colorScheme) {
-    return colorScheme.onSurface.withValues(alpha: 0.04);
   }
 
   /// Matches [MeMuslimDesignTokens.opacitySubtle] (0.1) on [ColorScheme.outlineVariant].
@@ -715,8 +719,6 @@ class TilawaAdaptiveShellTokens {
     TilawaTextRole? navButtonLabelTextRole,
     FontWeight? navButtonSelectedLabelWeight,
     FontWeight? navButtonUnselectedLabelWeight,
-    Color? navButtonSplashColor,
-    Color? navButtonHighlightColor,
     double? navButtonSelectionContainerVerticalPadding,
     double? navButtonIconOnlyMinHeight,
     double? navButtonIconOnlyVerticalPadding,
@@ -780,9 +782,6 @@ class TilawaAdaptiveShellTokens {
           navButtonSelectedLabelWeight ?? this.navButtonSelectedLabelWeight,
       navButtonUnselectedLabelWeight:
           navButtonUnselectedLabelWeight ?? this.navButtonUnselectedLabelWeight,
-      navButtonSplashColor: navButtonSplashColor ?? this.navButtonSplashColor,
-      navButtonHighlightColor:
-          navButtonHighlightColor ?? this.navButtonHighlightColor,
       navButtonSelectionContainerVerticalPadding:
           navButtonSelectionContainerVerticalPadding ??
           this.navButtonSelectionContainerVerticalPadding,
@@ -957,16 +956,6 @@ class TilawaAdaptiveShellTokens {
       navButtonUnselectedLabelWeight: FontWeight.lerp(
         a.navButtonUnselectedLabelWeight,
         b.navButtonUnselectedLabelWeight,
-        t,
-      )!,
-      navButtonSplashColor: Color.lerp(
-        a.navButtonSplashColor,
-        b.navButtonSplashColor,
-        t,
-      )!,
-      navButtonHighlightColor: Color.lerp(
-        a.navButtonHighlightColor,
-        b.navButtonHighlightColor,
         t,
       )!,
       navButtonSelectionContainerVerticalPadding: lerpTokenDouble(

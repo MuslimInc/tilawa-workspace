@@ -661,7 +661,7 @@ void main() {
   group('TilawaAdaptiveShellTokens', () {
     test('defaults creates expected values', () {
       final tokens = TilawaAdaptiveShellTokens.defaults();
-      expect(tokens.phoneBottomNavBarBaseHeight, closeTo(48.0, 0.1));
+      expect(tokens.phoneBottomNavBarBaseHeight, closeTo(66.0, 0.1));
       expect(tokens.navButtonSelectionContainerVerticalPadding, 4.0);
       expect(tokens.navButtonIconOnlyMinHeight, 48.0);
       expect(tokens.navButtonIconOnlyVerticalPadding, 4.0);
@@ -692,7 +692,7 @@ void main() {
       final scaled = tokens.phoneBottomNavLayoutHeight(
         TextScaler.linear(2),
       );
-      expect(unit, closeTo(48.0, 0.1));
+      expect(unit, closeTo(66.0, 0.1));
       expect(scaled, greaterThan(unit));
     });
 
@@ -750,14 +750,6 @@ void main() {
           scheme.primary.withValues(alpha: 0.14),
           scheme.surfaceContainerHigh,
         ),
-      );
-      expect(
-        tokens.navButtonSplashColor,
-        scheme.onSurface.withValues(alpha: 0.06),
-      );
-      expect(
-        tokens.navButtonHighlightColor,
-        scheme.onSurface.withValues(alpha: 0.04),
       );
       expect(
         tokens.bottomNavOutlineColor,
@@ -884,8 +876,6 @@ void main() {
         navButtonLabelTextRole: TilawaTextRole.labelSmall,
         navButtonSelectedLabelWeight: FontWeight.w700,
         navButtonUnselectedLabelWeight: FontWeight.w500,
-        navButtonSplashColor: Color(0x33000000),
-        navButtonHighlightColor: Color(0x22000000),
         navButtonSelectionContainerVerticalPadding: 5,
         navButtonIconOnlyMinHeight: 46,
         navButtonIconOnlyVerticalPadding: 2,
@@ -924,8 +914,6 @@ void main() {
         navButtonLabelTextRole: TilawaTextRole.labelMedium,
         navButtonSelectedLabelWeight: FontWeight.w800,
         navButtonUnselectedLabelWeight: FontWeight.w600,
-        navButtonSplashColor: Color(0x66000000),
-        navButtonHighlightColor: Color(0x44000000),
         navButtonSelectionContainerVerticalPadding: 6,
         navButtonIconOnlyMinHeight: 50,
         navButtonIconOnlyVerticalPadding: 3,
@@ -1001,22 +989,6 @@ void main() {
         Color.lerp(
           first.sideRailOutlineColor,
           second.sideRailOutlineColor,
-          0.5,
-        ),
-      );
-      expect(
-        result.navButtonSplashColor,
-        Color.lerp(
-          first.navButtonSplashColor,
-          second.navButtonSplashColor,
-          0.5,
-        ),
-      );
-      expect(
-        result.navButtonHighlightColor,
-        Color.lerp(
-          first.navButtonHighlightColor,
-          second.navButtonHighlightColor,
           0.5,
         ),
       );
