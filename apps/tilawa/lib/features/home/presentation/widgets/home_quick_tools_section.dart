@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:tilawa/core/extensions.dart';
 import 'package:tilawa/features/home/presentation/widgets/home_dashboard_elevated_surface.dart';
-import 'package:tilawa/features/home/presentation/widgets/home_dashboard_section.dart';
 import 'package:tilawa/router/app_router_config.dart';
 import 'package:tilawa_ui_kit/tilawa_ui_kit.dart';
 
@@ -28,26 +27,22 @@ class HomeQuickToolsSection extends StatelessWidget {
 
     final items = _QuickToolsCatalog.items(context);
 
-    return HomeDashboardSection(
-      title: context.l10n.homeQuickToolsTitle,
-      contentSpacing: tokens.spaceMedium,
-      child: IntrinsicHeight(
-        child: Row(
-          crossAxisAlignment: CrossAxisAlignment.stretch,
-          spacing: tokens.spaceMedium,
-          children: [
-            for (final item in items)
-              Expanded(
-                child: _QuickToolTile(
-                  icon: item.buildIcon(iconAccent, iconSize),
-                  label: item.label,
-                  iconAccent: iconAccent,
-                  radius: radius,
-                  onTap: item.onTap,
-                ),
+    return IntrinsicHeight(
+      child: Row(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        spacing: tokens.spaceMedium,
+        children: [
+          for (final item in items)
+            Expanded(
+              child: _QuickToolTile(
+                icon: item.buildIcon(iconAccent, iconSize),
+                label: item.label,
+                iconAccent: iconAccent,
+                radius: radius,
+                onTap: item.onTap,
               ),
-          ],
-        ),
+            ),
+        ],
       ),
     );
   }

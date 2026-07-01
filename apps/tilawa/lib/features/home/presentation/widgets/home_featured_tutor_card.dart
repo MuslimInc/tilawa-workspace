@@ -1,6 +1,7 @@
 import 'dart:math' as math;
 
 import 'package:fluentui_system_icons/fluentui_system_icons.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:tilawa/core/extensions.dart';
 import 'package:tilawa/features/quran_sessions/quran_sessions_feature_flags.dart';
@@ -12,6 +13,10 @@ import 'open_home_quran_sessions.dart';
 
 /// Minimum visible fraction that counts as an impression.
 const double _kImpressionVisibleFraction = 0.5;
+
+/// Hidden in release until Quran Sessions QA is complete; debug/profile keep it.
+bool _isHomeLearnQuranSectionVisible() =>
+    !kReleaseMode && quranSessionsFeatureConfig().quranSessionsEnabled;
 
 /// Layout metrics for the home featured tutor sliver.
 abstract final class HomeFeaturedTutorCardLayout {
@@ -107,7 +112,7 @@ abstract final class HomeFeaturedTutorCardLayout {
 
 /// Builds the featured tutor sliver when the feature flag is enabled.
 Widget? homeFeaturedTutorCardSliver(BuildContext context) {
-  if (!quranSessionsFeatureConfig().quranSessionsEnabled) {
+  if (!_isHomeLearnQuranSectionVisible()) {
     return null;
   }
 
@@ -140,7 +145,7 @@ class HomeFeaturedTutorCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    if (!quranSessionsFeatureConfig().quranSessionsEnabled) {
+    if (!_isHomeLearnQuranSectionVisible()) {
       return const SizedBox.shrink();
     }
 
@@ -171,7 +176,7 @@ class _HomeFeaturedTutorCardImpressionScopeState
     if (info.visibleFraction < _kImpressionVisibleFraction) {
       return;
     }
-    if (!quranSessionsFeatureConfig().quranSessionsEnabled) {
+    if (!_isHomeLearnQuranSectionVisible()) {
       return;
     }
     _loggedImpression = true;
