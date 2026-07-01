@@ -33,6 +33,7 @@ void main() {
     when(
       mockReadiness.waitUntilReady(prepareShell: anyNamed('prepareShell')),
     ).thenAnswer((_) async {});
+    when(mockReadiness.warmShellPrepInBackground()).thenReturn(null);
     when(mockReadiness.timedOut).thenReturn(false);
     when(mockReadiness.recitersDataReady).thenReturn(false);
     bloc = SplashBloc(
@@ -164,7 +165,7 @@ void main() {
     );
 
     blocTest<SplashBloc, SplashState>(
-      'emits login without shell prep',
+      'emits login and warms shell prep in background',
       build: () {
         when(
           mockGetSplashNextRouteUseCase.call(),
@@ -174,9 +175,8 @@ void main() {
       act: (bloc) => bloc.add(const SplashStarted()),
       expect: () => [const SplashNavigateToLogin()],
       verify: (_) {
-        verify(
-          mockReadiness.waitUntilReady(prepareShell: false),
-        ).called(1);
+        verifyNever(mockReadiness.waitUntilReady(prepareShell: true));
+        verify(mockReadiness.warmShellPrepInBackground()).called(1);
         verify(mockPrepareGoogleSignIn.call()).called(1);
       },
     );
@@ -235,12 +235,10 @@ void main() {
         ),
       ],
       verify: (_) {
-        verify(
-          mockReadiness.waitUntilReady(prepareShell: false),
-        ).called(1);
         verifyNever(
-          mockReadiness.waitUntilReady(prepareShell: true),
+          mockReadiness.waitUntilReady(prepareShell: anyNamed('prepareShell')),
         );
+        verifyNever(mockReadiness.warmShellPrepInBackground());
       },
     );
 
@@ -264,9 +262,9 @@ void main() {
         ),
       ],
       verify: (_) {
-        verify(
-          mockReadiness.waitUntilReady(prepareShell: false),
-        ).called(1);
+        verifyNever(
+          mockReadiness.waitUntilReady(prepareShell: anyNamed('prepareShell')),
+        );
       },
     );
 
@@ -284,12 +282,10 @@ void main() {
       act: (bloc) => bloc.add(const SplashStarted()),
       expect: () => [const SplashNavigateToHome(timedOut: false)],
       verify: (_) {
-        verify(
-          mockReadiness.waitUntilReady(prepareShell: false),
-        ).called(1);
         verifyNever(
-          mockReadiness.waitUntilReady(prepareShell: true),
+          mockReadiness.waitUntilReady(prepareShell: anyNamed('prepareShell')),
         );
+        verifyNever(mockReadiness.warmShellPrepInBackground());
       },
     );
 

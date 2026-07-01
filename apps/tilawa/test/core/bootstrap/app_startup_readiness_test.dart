@@ -146,6 +146,40 @@ void main() {
     );
   });
 
+  group('warmShellPrepInBackground', () {
+    test('starts shell prep without blocking caller', () {
+      when(mockGetReciters.call()).thenAnswer(
+        (_) async => Future<Either<Failure, List<ReciterEntity>>>.delayed(
+          const Duration(milliseconds: 500),
+          () => const Right<Failure, List<ReciterEntity>>(<ReciterEntity>[
+            sampleReciter,
+          ]),
+        ),
+      );
+
+      fakeAsync((FakeAsync async) {
+        readiness.warmShellPrepInBackground();
+        expect(readiness.shellPrepComplete, isFalse);
+        async.elapse(AppStartupReadiness.maxSplashDuration);
+        async.flushMicrotasks();
+        expect(readiness.shellPrepComplete, isTrue);
+      });
+    });
+
+    test('is a no-op when shell prep already finished', () async {
+      when(mockGetReciters.call()).thenAnswer(
+        (_) async =>
+            const Right<Failure, List<ReciterEntity>>(<ReciterEntity>[]),
+      );
+      await readiness.waitUntilReady(prepareShell: true);
+
+      readiness.warmShellPrepInBackground();
+      await Future<void>.delayed(Duration.zero);
+
+      verify(mockGetReciters.call()).called(1);
+    });
+  });
+
   group('resetForTesting', () {
     test('clears flags', () async {
       when(mockGetReciters.call()).thenAnswer(

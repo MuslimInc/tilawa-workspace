@@ -27,6 +27,7 @@ class SyncDeviceTokenUseCase {
     final result = await _registerActiveDeviceUseCase.registerExplicitSignIn(
       userId,
     );
+    _notifyWhenStale(result);
     return result.fold(Left.new, (_) => const Right(null));
   }
 

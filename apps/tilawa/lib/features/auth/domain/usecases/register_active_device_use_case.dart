@@ -3,12 +3,14 @@ import 'package:dartz_plus/dartz_plus.dart';
 import 'package:injectable/injectable.dart';
 import 'package:tilawa/core/firebase/app_check_failure.dart';
 import 'package:tilawa/core/services/device_token_service.dart';
+import 'package:tilawa_core/entities/app_info.dart';
 import 'package:tilawa_core/errors/failures.dart';
 import 'package:tilawa_core/services/interfaces/app_info_service.dart';
 
 import '../../data/datasources/active_device_remote_data_source.dart';
 import '../../data/services/device_identity_service.dart';
 import '../entities/auth_error_key.dart';
+import '../entities/device_info_snapshot.dart';
 import '../entities/session_registration.dart';
 import '../services/device_info_service.dart';
 import '../services/token_sync_cache.dart';
@@ -52,10 +54,18 @@ class RegisterActiveDeviceUseCase {
     required DeviceRegistrationMode registrationMode,
   }) async {
     try {
-      final String? token = await _deviceTokenService.getToken();
-      final deviceId = await _deviceIdentityService.getDeviceId();
-      final appInfo = await _appInfoService.getAppInfo();
-      final deviceInfo = await _deviceInfoService.getDeviceInfo();
+      final List<Object?> parallel = await Future.wait<Object?>(
+        <Future<Object?>>[
+          _deviceTokenService.getToken(),
+          _deviceIdentityService.getDeviceId(),
+          _appInfoService.getAppInfo(),
+          _deviceInfoService.getDeviceInfo(),
+        ],
+      );
+      final String? token = parallel[0] as String?;
+      final String deviceId = parallel[1]! as String;
+      final AppInfo appInfo = parallel[2]! as AppInfo;
+      final DeviceInfoSnapshot deviceInfo = parallel[3]! as DeviceInfoSnapshot;
 
       final registration = await _remoteDataSource.registerActiveDevice(
         deviceId: deviceId,

@@ -135,32 +135,37 @@ class AuthBloc extends HydratedBloc<AuthEvent, AuthState> {
       return;
     }
 
-    final Either<Failure, void> registration = await _syncDeviceToken
-        .registerExplicitSignIn(user.id);
-    if (generation != _interactiveSignInGeneration) {
-      return;
-    }
+    unawaited(_syncLanguagePreferenceAfterAuth());
+    emit(AuthState.authenticated(user: user));
+    unawaited(_registerDeviceAfterSignIn(user.id, generation));
+  }
 
-    final bool registered = registration.fold((_) => false, (_) => true);
-    if (!registered) {
-      await _signOut(skipServerTokenClear: true);
+  Future<void> _registerDeviceAfterSignIn(
+    String userId,
+    int generation,
+  ) async {
+    try {
+      final Either<Failure, void> registration = await _syncDeviceToken
+          .registerExplicitSignIn(userId);
       if (generation != _interactiveSignInGeneration) {
         return;
       }
-      emit(
-        AuthState.error(
-          message: registration.fold(
-            (failure) =>
-                failure.message ?? AuthErrorKey.deviceRegistrationFailed,
-            (_) => 'Sign-in could not be completed.',
-          ),
-        ),
+      registration.fold(
+        (Failure failure) {
+          logger.w(
+            'Background device registration after sign-in failed: '
+            '${failure.message ?? failure.runtimeType}',
+          );
+        },
+        (_) {},
       );
-      return;
+    } catch (error, stackTrace) {
+      logger.e(
+        'Background device registration after sign-in threw',
+        error: error,
+        stackTrace: stackTrace,
+      );
     }
-
-    unawaited(_syncLanguagePreferenceAfterAuth());
-    emit(AuthState.authenticated(user: user));
   }
 
   Future<void> _onSignOut(SignOutEvent event, Emitter<AuthState> emit) async {

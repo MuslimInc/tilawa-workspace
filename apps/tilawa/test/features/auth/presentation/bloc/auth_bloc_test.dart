@@ -253,7 +253,7 @@ void main() {
       );
 
       blocTest<AuthBloc, AuthState>(
-        'emits [loading, error] when device registration fails after Google success',
+        'emits [loading, authenticated] when device registration fails after Google success',
         build: () {
           when(
             mockSignInWithGoogleUseCase(),
@@ -265,21 +265,23 @@ void main() {
               Failure.serverError(AuthErrorKey.deviceRegistrationFailed),
             ),
           );
-          when(
-            mockSignOut(skipServerTokenClear: true),
-          ).thenAnswer((_) async {});
           return authBloc;
         },
         act: (bloc) => bloc.add(const SignInWithGoogleEvent()),
         expect: () => [
           const AuthState.loading(),
-          const AuthState.error(
-            message: AuthErrorKey.deviceRegistrationFailed,
-          ),
+          AuthState.authenticated(user: tUser),
         ],
-        verify: (_) {
-          verify(mockSignOut(skipServerTokenClear: true)).called(1);
-          verifyNever(mockGetCurrentLanguageUseCase());
+        verify: (_) async {
+          await Future<void>.delayed(Duration.zero);
+          verify(
+            mockSyncDeviceTokenUseCase.registerExplicitSignIn(tUser.id),
+          ).called(1);
+          verifyNever(
+            mockSignOut(
+              skipServerTokenClear: anyNamed('skipServerTokenClear'),
+            ),
+          );
         },
       );
 
@@ -296,8 +298,9 @@ void main() {
           const AuthState.loading(),
           AuthState.authenticated(user: tUser),
         ],
-        verify: (_) {
+        verify: (_) async {
           verify(mockSignInWithGoogleUseCase()).called(1);
+          await Future<void>.delayed(Duration.zero);
           verify(
             mockSyncDeviceTokenUseCase.registerExplicitSignIn(tUser.id),
           ).called(1);

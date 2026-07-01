@@ -30,6 +30,7 @@ void main() {
     when(
       mockReadiness.waitUntilReady(prepareShell: anyNamed('prepareShell')),
     ).thenAnswer((_) async {});
+    when(mockReadiness.warmShellPrepInBackground()).thenReturn(null);
     when(mockReadiness.timedOut).thenReturn(false);
     when(mockReadiness.recitersDataReady).thenReturn(false);
     coordinator = StartupLaunchCoordinator(
@@ -63,7 +64,8 @@ void main() {
 
     expect(plan.target, StartupLaunchTarget.login);
     expect(plan.location, const LoginRoute().location);
-    verify(mockReadiness.waitUntilReady(prepareShell: false)).called(1);
+    verifyNever(mockReadiness.waitUntilReady(prepareShell: true));
+    verify(mockReadiness.warmShellPrepInBackground()).called(1);
     verify(mockPrepareGoogleSignIn.call()).called(1);
   });
 
@@ -116,7 +118,10 @@ void main() {
 
     expect(plan.target, StartupLaunchTarget.notification);
     expect(plan.location, const SettingsRoute().location);
-    verify(mockReadiness.waitUntilReady(prepareShell: false)).called(1);
+    verifyNever(
+      mockReadiness.waitUntilReady(prepareShell: anyNamed('prepareShell')),
+    );
+    verifyNever(mockReadiness.warmShellPrepInBackground());
   });
 
   test('falls back to home when notification payload cannot resolve', () async {

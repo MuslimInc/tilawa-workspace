@@ -42,8 +42,7 @@ class SplashBloc extends Bloc<SplashEvent, SplashState> {
 
       final SplashRouteResult result = await _getSplashNextRoute();
 
-      final bool prepareShell = result.destination == SplashDestination.home;
-      await _readiness.waitUntilReady(prepareShell: prepareShell);
+      await _prepareShellForDestination(result.destination);
 
       String? location;
       Object? extra;
@@ -145,5 +144,19 @@ class SplashBloc extends Bloc<SplashEvent, SplashState> {
       return;
     }
     emit(SplashNavigateToHome(timedOut: AppRouter.bootLaunchTimedOut));
+  }
+
+  Future<void> _prepareShellForDestination(
+    SplashDestination destination,
+  ) async {
+    switch (destination) {
+      case SplashDestination.home:
+        await _readiness.waitUntilReady(prepareShell: true);
+      case SplashDestination.login:
+        _readiness.warmShellPrepInBackground();
+      case SplashDestination.onboarding:
+      case SplashDestination.notificationLaunch:
+        break;
+    }
   }
 }

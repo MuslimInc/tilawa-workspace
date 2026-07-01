@@ -48,6 +48,14 @@ class AppStartupReadiness {
   /// True when [maxSplashDuration] forced navigation to proceed.
   bool get timedOut => _timedOut;
 
+  /// Starts shell/tab prep without blocking (e.g. while login is visible).
+  void warmShellPrepInBackground() {
+    if (_shellPrepComplete) {
+      return;
+    }
+    unawaited(waitUntilReady(prepareShell: true));
+  }
+
   /// Waits until the app is ready to leave splash for [prepareShell] targets.
   Future<void> waitUntilReady({required bool prepareShell}) async {
     if (!prepareShell) {

@@ -86,6 +86,27 @@ void main() {
     await subscription.cancel();
   });
 
+  test('explicit stale failure notifies session revoked', () async {
+    var revoked = false;
+    final subscription = sessionRevokedNotifier.onSessionRevoked.listen((_) {
+      revoked = true;
+    });
+    when(
+      () => mockRegisterActiveDevice.registerExplicitSignIn('user_1'),
+    ).thenAnswer(
+      (_) async => const Left(
+        PermissionFailure(AuthErrorKey.staleDeviceRejected),
+      ),
+    );
+
+    final result = await useCase.registerExplicitSignIn('user_1');
+    await Future<void>.delayed(Duration.zero);
+
+    expect(result.isLeft(), isTrue);
+    expect(revoked, isTrue);
+    await subscription.cancel();
+  });
+
   test('requiresExplicitSignIn does not notify session revoked', () async {
     var revoked = false;
     final subscription = sessionRevokedNotifier.onSessionRevoked.listen((_) {

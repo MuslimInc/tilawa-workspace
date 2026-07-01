@@ -48,8 +48,6 @@ class _CredentialManagerUiTracker {
   }
 
   Future<void> finish() async {
-    // Native HiddenActivity teardown can arrive after the CM future completes.
-    await Future<void>.delayed(const Duration(milliseconds: 150));
     await _dismissSub?.cancel();
     _pollTimer?.cancel();
   }
