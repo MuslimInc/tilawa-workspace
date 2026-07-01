@@ -149,6 +149,7 @@ class _AppShellScreenState extends State<AppShellScreen> {
         activeIcon: d.activeIcon,
         identifier: d.semanticsIdentifier,
         iconBuilder: iconBuilder,
+        selectionUsesBackground: !d.usesProfileAvatar,
       );
     }).toList();
   }

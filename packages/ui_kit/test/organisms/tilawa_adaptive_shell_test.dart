@@ -903,6 +903,94 @@ void main() {
         ),
       );
     });
+
+    testWidgets(
+      'profile destination with selectionUsesBackground false skips pill',
+      (tester) async {
+        final destinations = <TilawaNavDestination>[
+          const TilawaNavDestination(
+            label: 'Home',
+            icon: Icons.home_outlined,
+          ),
+          TilawaNavDestination(
+            label: 'Profile',
+            icon: Icons.person_outline,
+            selectionUsesBackground: false,
+            iconBuilder:
+                (
+                  BuildContext context, {
+                  required bool isSelected,
+                  required Color color,
+                }) {
+                  return Icon(Icons.person_outline, color: color);
+                },
+          ),
+        ];
+
+        await tester.binding.setSurfaceSize(const Size(400, 800));
+        tester.view.physicalSize = const Size(400, 800);
+        tester.view.devicePixelRatio = 1.0;
+        addTearDown(() => tester.binding.setSurfaceSize(null));
+        addTearDown(tester.view.resetPhysicalSize);
+        addTearDown(tester.view.resetDevicePixelRatio);
+
+        await tester.pumpWidget(
+          _wrap(
+            direction: TextDirection.ltr,
+            child: TilawaAdaptiveShell(
+              destinations: destinations,
+              selectedIndex: 1,
+              onDestinationSelected: (_) {},
+              bottomPlayer: const SizedBox.shrink(),
+              child: const ColoredBox(color: Color(0xFFEEEEEE)),
+            ),
+          ),
+        );
+        await tester.pump();
+
+        expect(find.byType(AnimatedPositionedDirectional), findsNothing);
+      },
+    );
+
+    testWidgets('selected icon scales up relative to unselected', (
+      tester,
+    ) async {
+      await tester.binding.setSurfaceSize(const Size(400, 800));
+      tester.view.physicalSize = const Size(400, 800);
+      tester.view.devicePixelRatio = 1.0;
+      addTearDown(() => tester.binding.setSurfaceSize(null));
+      addTearDown(tester.view.resetPhysicalSize);
+      addTearDown(tester.view.resetDevicePixelRatio);
+
+      await tester.pumpWidget(
+        _wrap(
+          direction: TextDirection.ltr,
+          child: TilawaAdaptiveShell(
+            destinations: _destinations,
+            selectedIndex: 1,
+            onDestinationSelected: (_) {},
+            bottomPlayer: const SizedBox.shrink(),
+            child: const ColoredBox(color: Color(0xFFEEEEEE)),
+          ),
+        ),
+      );
+      await tester.pump();
+
+      final AnimatedScale selectedScale = tester.widget<AnimatedScale>(
+        find.descendant(
+          of: find.byKey(const Key('nav_button_1')),
+          matching: find.byType(AnimatedScale),
+        ),
+      );
+      final AnimatedScale unselectedScale = tester.widget<AnimatedScale>(
+        find.descendant(
+          of: find.byKey(const Key('nav_button_0')),
+          matching: find.byType(AnimatedScale),
+        ),
+      );
+
+      expect(selectedScale.scale, greaterThan(unselectedScale.scale));
+    });
   });
 }
 

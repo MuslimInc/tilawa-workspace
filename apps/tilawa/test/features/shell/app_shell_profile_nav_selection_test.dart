@@ -53,7 +53,7 @@ void main() {
       expect(_navIndexForTab(tabIndex!, destinations), 3);
     });
 
-    testWidgets('profile nav item shows circular selection background', (
+    testWidgets('profile nav item uses ring instead of pill background', (
       tester,
     ) async {
       const double profileAvatarSize = 28;
@@ -83,6 +83,7 @@ void main() {
                   TilawaNavDestination(
                     label: l10n.bottomNavSettings,
                     icon: TilawaIcons.profile,
+                    selectionUsesBackground: false,
                     iconBuilder:
                         (
                           BuildContext iconContext, {
@@ -118,8 +119,20 @@ void main() {
       );
       await tester.pump();
 
-      expect(find.byType(AnimatedPositionedDirectional), findsOneWidget);
+      expect(find.byType(AnimatedPositionedDirectional), findsNothing);
       expect(find.byKey(const Key('nav_button_1')), findsOneWidget);
+
+      final Finder profileRing = find.descendant(
+        of: find.byKey(const Key('nav_button_1')),
+        matching: find.byWidgetPredicate(
+          (widget) =>
+              widget is DecoratedBox &&
+              widget.decoration is BoxDecoration &&
+              (widget.decoration as BoxDecoration).shape == BoxShape.circle &&
+              (widget.decoration as BoxDecoration).border != null,
+        ),
+      );
+      expect(profileRing, findsOneWidget);
     });
   });
 }

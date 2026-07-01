@@ -4,7 +4,6 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 
-import '../foundation/app_colors.dart';
 import '../foundation/component_tokens.dart';
 import '../foundation/design_tokens.dart';
 import '../foundation/tilawa_interactive_surface.dart';
@@ -363,27 +362,13 @@ class _NavButton extends StatelessWidget {
   final BorderRadius indicatorRadius;
   final double targetWidth;
 
-  @override
-  Widget build(BuildContext context) {
-    final ThemeData theme = Theme.of(context);
-    final TilawaAdaptiveShellTokens tokens =
-        theme.componentTokens.adaptiveShell;
-    final ColorScheme colorScheme = theme.colorScheme;
-    final bool darkNavBg =
-        ThemeData.estimateBrightnessForColor(tokens.bottomNavBackgroundColor) ==
-        Brightness.dark;
-    final Color selectedFg = darkNavBg
-        ? AppColors.tripGlideInk
-        : colorScheme.primary;
-    final Color unselectedFg = darkNavBg
-        ? AppColors.tripGlideSurface
-        : colorScheme.onSurfaceVariant;
-    final double hitSize = tokens.navButtonIconOnlyMinHeight;
-    final Color pressStateLayerColor = darkNavBg
-        ? AppColors.tripGlideSurface
-        : colorScheme.primary;
-
-    final Widget iconWidget = destination.iconBuilder != null
+  Widget _buildIcon({
+    required BuildContext context,
+    required TilawaAdaptiveShellTokens tokens,
+    required Color selectedFg,
+    required Color unselectedFg,
+  }) {
+    final Widget baseIcon = destination.iconBuilder != null
         ? destination.iconBuilder!(
             context,
             isSelected: isSelected,
@@ -397,6 +382,46 @@ class _NavButton extends StatelessWidget {
             color: isSelected ? selectedFg : unselectedFg,
           );
 
+    if (!destination.selectionUsesBackground && isSelected) {
+      final MeMuslimDesignTokens designTokens = Theme.of(context).tokens;
+      final double ringWidth = designTokens.spaceExtraSmall / 2;
+      return DecoratedBox(
+        decoration: BoxDecoration(
+          shape: BoxShape.circle,
+          border: Border.all(color: selectedFg, width: ringWidth),
+        ),
+        child: baseIcon,
+      );
+    }
+
+    return baseIcon;
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final ThemeData theme = Theme.of(context);
+    final MeMuslimDesignTokens designTokens = theme.tokens;
+    final TilawaAdaptiveShellTokens tokens =
+        theme.componentTokens.adaptiveShell;
+    final ColorScheme colorScheme = theme.colorScheme;
+    final Color selectedFg = colorScheme.primary;
+    final Color unselectedFg = colorScheme.onSurfaceVariant;
+    final double hitSize = tokens.navButtonIconOnlyMinHeight;
+    final Color pressStateLayerColor =
+        colorScheme.brightness == Brightness.light
+        ? colorScheme.primary
+        : colorScheme.onSurface;
+    final double iconScale = isSelected
+        ? tokens.navButtonSelectedCenterScale
+        : tokens.navButtonUnselectedScale;
+
+    final Widget iconWidget = _buildIcon(
+      context: context,
+      tokens: tokens,
+      selectedFg: selectedFg,
+      unselectedFg: unselectedFg,
+    );
+
     return TilawaInteractiveSurface(
       button: true,
       semanticLabel: destination.label,
@@ -405,10 +430,19 @@ class _NavButton extends StatelessWidget {
       onTap: onTap,
       borderRadius: indicatorRadius,
       stateLayerColor: pressStateLayerColor,
+      splashColor: tokens.navButtonSplashColor,
+      highlightColor: tokens.navButtonHighlightColor,
       child: SizedBox(
         width: targetWidth,
         height: hitSize,
-        child: Center(child: iconWidget),
+        child: Center(
+          child: AnimatedScale(
+            scale: iconScale,
+            duration: designTokens.durationFast,
+            curve: Curves.easeOutCubic,
+            child: iconWidget,
+          ),
+        ),
       ),
     );
   }
