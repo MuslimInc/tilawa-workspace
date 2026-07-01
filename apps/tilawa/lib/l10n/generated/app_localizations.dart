@@ -566,6 +566,48 @@ abstract class AppLocalizations {
   /// **'My sessions'**
   String get homeFeaturedTutorMySessions;
 
+  /// Settings tile title for experienced Quran teacher application
+  ///
+  /// In en, this message translates to:
+  /// **'Apply as a Quran teacher'**
+  String get settingsTeacherApplicationEntryTitle;
+
+  /// Settings tile subtitle for teacher application entry
+  ///
+  /// In en, this message translates to:
+  /// **'If you are a hafiz or have experience teaching the Quran, you can submit your application for review.'**
+  String get settingsTeacherApplicationEntrySubtitle;
+
+  /// CTA to open the external Google Form teacher application
+  ///
+  /// In en, this message translates to:
+  /// **'Open application form'**
+  String get teacherApplicationOpenFormCta;
+
+  /// Title on teacher application bottom sheet
+  ///
+  /// In en, this message translates to:
+  /// **'Are you a hafiz or Quran teacher?'**
+  String get teacherApplicationSheetTitle;
+
+  /// Body copy on teacher application bottom sheet
+  ///
+  /// In en, this message translates to:
+  /// **'We are now accepting applications from experienced hafiz and Quran teachers to participate in the Learn Quran feature inside the app. You can fill out the application form, and our team will review it before enabling any permissions.'**
+  String get teacherApplicationSheetBody;
+
+  /// Secondary dismiss action on teacher application bottom sheet
+  ///
+  /// In en, this message translates to:
+  /// **'Later'**
+  String get teacherApplicationLaterCta;
+
+  /// Error when external teacher application form fails to open
+  ///
+  /// In en, this message translates to:
+  /// **'Could not open the application form. Please try again.'**
+  String get teacherApplicationFormOpenFailed;
+
   /// Home quick action tile label for opening the Mushaf reader
   ///
   /// In en, this message translates to:

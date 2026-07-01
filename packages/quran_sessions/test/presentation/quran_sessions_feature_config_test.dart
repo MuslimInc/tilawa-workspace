@@ -9,6 +9,7 @@ void main() {
       () {
         const enabled = QuranSessionsFeatureConfig(
           teacherApplicationEnabled: true,
+          learnQuranStudentFeatureEnabled: true,
           teacherApplicationDiscoverability:
               TeacherApplicationDiscoverability.profileAndEmptyState,
         );
@@ -17,6 +18,7 @@ void main() {
 
         const profileOnly = QuranSessionsFeatureConfig(
           teacherApplicationEnabled: true,
+          learnQuranStudentFeatureEnabled: true,
           teacherApplicationDiscoverability:
               TeacherApplicationDiscoverability.profileOnly,
         );
@@ -30,6 +32,7 @@ void main() {
 
         const killSwitch = QuranSessionsFeatureConfig(
           quranSessionsEnabled: false,
+          learnQuranStudentFeatureEnabled: true,
           teacherApplicationEnabled: true,
           teacherApplicationDiscoverability:
               TeacherApplicationDiscoverability.profileAndEmptyState,

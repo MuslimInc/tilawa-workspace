@@ -18,6 +18,10 @@ import 'package:flutter/foundation.dart';
 /// Example: `--dart-define=TILAWA_LAUNCH_TODAY_PLAN_ENABLED=true`
 /// Example: `--dart-define=TILAWA_LAUNCH_QURAN_SESSIONS_ENABLED=true`
 /// Example: `--dart-define=TILAWA_LAUNCH_TEACHER_APPLICATION_ENABLED=true`
+/// Example: `--dart-define=TILAWA_LAUNCH_TEACHER_APPLICATION_ENTRY_ENABLED=true`
+/// Example: `--dart-define=TILAWA_LAUNCH_HOME_TEACHER_APPLICATION_CARD_ENABLED=true`
+/// Example: `--dart-define=TILAWA_LAUNCH_LEARN_QURAN_STUDENT_FEATURE_ENABLED=true`
+/// Example: `--dart-define=TILAWA_LAUNCH_TEACHER_APPLICATION_FORM_URL=https://…`
 /// Example: `--dart-define=TILAWA_LAUNCH_TEACHER_APPLICATION_DISCOVERABILITY=profileAndEmptyState`
 /// Example: `--dart-define=TILAWA_LAUNCH_QURAN_SESSIONS_BOOKING_ENABLED=true`
 /// Example: `--dart-define=TILAWA_LAUNCH_QURAN_TUTOR_BOOKING_MODE=autoConfirm`
@@ -29,6 +33,10 @@ import 'package:flutter/foundation.dart';
 /// Staging / pre-production builds default QuranTutor beta flags ON via
 /// [quranSessionsStagingFlagsDefaultEnabled] (everything except
 /// `play_production`). Override per flag with `TILAWA_LAUNCH_*` dart-defines.
+/// Google Form for experienced Quran teacher/tutor applications (production default).
+const String kDefaultTeacherApplicationFormUrl =
+    'https://docs.google.com/forms/d/e/1FAIpQLScjFOySgVJqDxaY0IgR9GYDEnemxOkPSbW2QQea7KrORvRQQA/viewform';
+
 bool quranSessionsStagingFlagsDefaultEnabled() {
   const distribution = String.fromEnvironment(
     'TILAWA_DISTRIBUTION',
@@ -70,6 +78,10 @@ class AppLaunchConfig extends Equatable {
     this.todayPlanEnabled = false,
     this.notificationPermissionRequest = true,
     this.quranSessionsEnabled = true,
+    this.learnQuranStudentFeatureEnabled = false,
+    this.teacherApplicationEntryEnabled = false,
+    this.homeTeacherApplicationCardEnabled = false,
+    this.teacherApplicationFormUrl = kDefaultTeacherApplicationFormUrl,
     this.teacherApplicationEnabled = false,
     this.teacherApplicationDiscoverability = 'profileAndEmptyState',
     this.quranSessionsBookingEnabled = false,
@@ -207,6 +219,22 @@ class AppLaunchConfig extends Equatable {
         'TILAWA_LAUNCH_QURAN_SESSIONS_ENABLED',
         defaultValue: true,
       ),
+      learnQuranStudentFeatureEnabled: bool.fromEnvironment(
+        'TILAWA_LAUNCH_LEARN_QURAN_STUDENT_FEATURE_ENABLED',
+        defaultValue: false,
+      ),
+      teacherApplicationEntryEnabled: bool.fromEnvironment(
+        'TILAWA_LAUNCH_TEACHER_APPLICATION_ENTRY_ENABLED',
+        defaultValue: false,
+      ),
+      homeTeacherApplicationCardEnabled: bool.fromEnvironment(
+        'TILAWA_LAUNCH_HOME_TEACHER_APPLICATION_CARD_ENABLED',
+        defaultValue: false,
+      ),
+      teacherApplicationFormUrl: String.fromEnvironment(
+        'TILAWA_LAUNCH_TEACHER_APPLICATION_FORM_URL',
+        defaultValue: kDefaultTeacherApplicationFormUrl,
+      ),
       teacherApplicationEnabled: bool.fromEnvironment(
         'TILAWA_LAUNCH_TEACHER_APPLICATION_ENABLED',
         defaultValue: stagingFlagsOn,
@@ -274,6 +302,20 @@ class AppLaunchConfig extends Equatable {
   final bool todayPlanEnabled;
   final bool notificationPermissionRequest;
   final bool quranSessionsEnabled;
+
+  /// Student marketplace: hub, teachers list, booking, my sessions.
+  /// Default **false** in production — enable via dart-define for staging.
+  final bool learnQuranStudentFeatureEnabled;
+
+  /// Settings/Profile Google Form teacher application entry.
+  final bool teacherApplicationEntryEnabled;
+
+  /// Optional calm Home inline card for teacher application (no auto modal).
+  final bool homeTeacherApplicationCardEnabled;
+
+  /// External Google Form URL opened from teacher application entry points.
+  final String teacherApplicationFormUrl;
+
   final bool teacherApplicationEnabled;
 
   /// One of: `none`, `profileOnly`, `profileAndEmptyState`.
@@ -337,6 +379,10 @@ class AppLaunchConfig extends Equatable {
     todayPlanEnabled,
     notificationPermissionRequest,
     quranSessionsEnabled,
+    learnQuranStudentFeatureEnabled,
+    teacherApplicationEntryEnabled,
+    homeTeacherApplicationCardEnabled,
+    teacherApplicationFormUrl,
     teacherApplicationEnabled,
     teacherApplicationDiscoverability,
     quranSessionsBookingEnabled,

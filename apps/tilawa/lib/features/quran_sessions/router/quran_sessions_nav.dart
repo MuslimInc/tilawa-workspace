@@ -10,6 +10,7 @@ import 'package:tilawa/core/layout/list_scroll_bottom_padding.dart';
 import 'package:tilawa/features/quran_sessions/quran_sessions_launch_policy.dart';
 import 'package:tilawa/features/settings/presentation/widgets/settings_teacher_capability_scope.dart';
 import 'package:tilawa/features/quran_sessions/presentation/quran_sessions_analytics.dart';
+import 'package:tilawa/features/quran_sessions/presentation/teacher_application_entry.dart';
 import 'package:tilawa/features/quran_sessions/presentation/quran_sessions_scheduling_analytics.dart';
 import 'package:tilawa/features/quran_sessions/presentation/quran_sessions_user.dart';
 import 'package:tilawa/features/quran_sessions/quran_sessions_feature_flags.dart';
@@ -72,6 +73,12 @@ void navigateForTeacherCapability(
   switch (capability.navigationTarget) {
     case TeacherCapabilityNavigationTarget.apply:
       analytics.onTeacherApplyStarted?.call();
+      final config = quranSessionsFeatureConfig();
+      if (config.showTeacherApplicationEntry &&
+          !config.showInAppTeacherApplicationEntry) {
+        showTeacherApplicationEntrySheet(context);
+        return;
+      }
       navigate(QuranSessionsRoutes.teacherApply);
     case TeacherCapabilityNavigationTarget.applicationStatus:
       analytics.onTeacherApplicationStatusViewed?.call();
@@ -99,6 +106,12 @@ List<RouteBase> get quranSessionsRoutes => [
   ),
   GoRoute(
     path: QuranSessionsRoutes.home,
+    redirect: (context, state) {
+      if (!quranSessionsFeatureConfig().showLearnQuranStudentExperience) {
+        return const HomeRoute().location;
+      }
+      return null;
+    },
     builder: (context, state) => BlocProvider(
       create: (_) =>
           getIt<TeacherListBloc>()..add(const LoadTeachersRequested()),
@@ -120,6 +133,12 @@ List<RouteBase> get quranSessionsRoutes => [
   ),
   GoRoute(
     path: QuranSessionsRoutes.teacherList,
+    redirect: (context, state) {
+      if (!quranSessionsFeatureConfig().showLearnQuranStudentExperience) {
+        return const HomeRoute().location;
+      }
+      return null;
+    },
     builder: (context, state) => BlocProvider(
       create: (_) =>
           getIt<TeacherListBloc>()..add(const LoadTeachersRequested()),
@@ -146,6 +165,12 @@ List<RouteBase> get quranSessionsRoutes => [
   ),
   GoRoute(
     path: QuranSessionsRoutes.teacherProfile,
+    redirect: (context, state) {
+      if (!quranSessionsFeatureConfig().showLearnQuranStudentExperience) {
+        return const HomeRoute().location;
+      }
+      return null;
+    },
     builder: (context, state) {
       final teacherId = state.pathParameters['teacherId']!;
       final bookingEnabled =
@@ -180,6 +205,9 @@ List<RouteBase> get quranSessionsRoutes => [
   GoRoute(
     path: QuranSessionsRoutes.booking,
     redirect: (context, state) {
+      if (!quranSessionsFeatureConfig().showLearnQuranStudentExperience) {
+        return const HomeRoute().location;
+      }
       if (!quranSessionsFeatureConfig().quranSessionsBookingEnabled) {
         return QuranSessionsRoutes.home;
       }
@@ -234,7 +262,12 @@ List<RouteBase> get quranSessionsRoutes => [
   ),
   GoRoute(
     path: QuranSessionsRoutes.mySessions,
-    redirect: quranSessionsAuthRequiredRedirect,
+    redirect: (context, state) {
+      if (!quranSessionsFeatureConfig().showLearnQuranStudentExperience) {
+        return const HomeRoute().location;
+      }
+      return quranSessionsAuthRequiredRedirect(context, state);
+    },
     builder: (context, state) {
       return _QuranSessionsSignedInGate(
         builder: (studentId) => BlocProvider(
@@ -440,7 +473,12 @@ List<RouteBase> get quranSessionsRoutes => [
   GoRoute(
     path: QuranSessionsRoutes.teacherApply,
     redirect: (context, state) {
-      if (!quranSessionsFeatureConfig().teacherApplicationEnabled) {
+      final config = quranSessionsFeatureConfig();
+      if (config.showTeacherApplicationEntry &&
+          !config.showInAppTeacherApplicationEntry) {
+        return const HomeRoute().location;
+      }
+      if (!config.teacherApplicationEnabled) {
         return QuranSessionsRoutes.home;
       }
       return quranSessionsAuthRequiredRedirect(context, state);
@@ -493,7 +531,14 @@ List<RouteBase> get quranSessionsRoutes => [
 ];
 
 void _openTeacherApply(BuildContext context) {
-  if (!quranSessionsFeatureConfig().teacherApplicationEnabled) {
+  final config = quranSessionsFeatureConfig();
+  if (config.showTeacherApplicationEntry &&
+      !config.showInAppTeacherApplicationEntry) {
+    quranSessionsAnalyticsCallbacks().onTeacherApplyEntrySeen?.call();
+    showTeacherApplicationEntrySheet(context);
+    return;
+  }
+  if (!config.teacherApplicationEnabled) {
     TilawaFeedback.showToast(
       context,
       message: context.quranSessionsL10n.teacherApplicationDisabled,

@@ -137,9 +137,48 @@ void main() {
       }
     });
 
-    test('returns null when feature enabled (default)', () {
+    test('returns null when student feature enabled', () {
+      getIt.registerSingleton<AppLaunchConfig>(
+        const AppLaunchConfig(
+          quranSessionsEnabled: true,
+          learnQuranStudentFeatureEnabled: true,
+        ),
+      );
       final result = quranSessionsFeatureRedirect(
         FakeGoRouterState(QuranSessionsRoutes.home),
+      );
+      expect(result, isNull);
+    });
+
+    test('returns null when feature enabled (default) for teacher routes', () {
+      final result = quranSessionsFeatureRedirect(
+        FakeGoRouterState(QuranSessionsRoutes.teacherDashboard),
+      );
+      expect(result, isNull);
+    });
+
+    test('redirects student routes when student feature disabled', () {
+      getIt.registerSingleton<AppLaunchConfig>(
+        const AppLaunchConfig(
+          quranSessionsEnabled: true,
+          learnQuranStudentFeatureEnabled: false,
+        ),
+      );
+      final result = quranSessionsFeatureRedirect(
+        FakeGoRouterState(QuranSessionsRoutes.mySessions),
+      );
+      expect(result, const HomeRoute().location);
+    });
+
+    test('allows teacher dashboard when student feature disabled', () {
+      getIt.registerSingleton<AppLaunchConfig>(
+        const AppLaunchConfig(
+          quranSessionsEnabled: true,
+          learnQuranStudentFeatureEnabled: false,
+        ),
+      );
+      final result = quranSessionsFeatureRedirect(
+        FakeGoRouterState(QuranSessionsRoutes.teacherDashboard),
       );
       expect(result, isNull);
     });

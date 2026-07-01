@@ -89,6 +89,7 @@ class _QuickToolTile extends StatelessWidget {
           ),
           child: Column(
             mainAxisSize: MainAxisSize.min,
+            spacing: tokens.spaceMedium,
             children: [
               DecoratedBox(
                 decoration: BoxDecoration(
@@ -103,7 +104,6 @@ class _QuickToolTile extends StatelessWidget {
                   child: Center(child: icon),
                 ),
               ),
-              SizedBox(height: tokens.spaceExtraSmall),
               Text(
                 label,
                 maxLines: 1,

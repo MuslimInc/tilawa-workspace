@@ -86,7 +86,8 @@ class TeacherApplicationAccessCubit
     final generation = ++_loadGeneration;
 
     final config = quranSessionsFeatureConfig();
-    if (!config.teacherApplicationEnabled) {
+    if (!config.teacherApplicationEnabled &&
+        !config.teacherApplicationEntryEnabled) {
       if (isClosed || generation != _loadGeneration) return;
       emit(
         const TeacherApplicationAccessState(

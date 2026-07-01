@@ -9,7 +9,10 @@ import 'package:tilawa_ui_kit/tilawa_ui_kit.dart';
 void main() {
   testWidgets('extentFor covers rendered card height', (tester) async {
     getIt.registerSingleton<AppLaunchConfig>(
-      const AppLaunchConfig(quranSessionsEnabled: true),
+      const AppLaunchConfig(
+        quranSessionsEnabled: true,
+        learnQuranStudentFeatureEnabled: true,
+      ),
     );
     addTearDown(() async {
       if (getIt.isRegistered<AppLaunchConfig>()) {

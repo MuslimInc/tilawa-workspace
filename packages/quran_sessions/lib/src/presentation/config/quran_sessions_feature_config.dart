@@ -21,6 +21,10 @@ enum TeacherApplicationDiscoverability {
 class QuranSessionsFeatureConfig extends Equatable {
   const QuranSessionsFeatureConfig({
     this.quranSessionsEnabled = true,
+    this.learnQuranStudentFeatureEnabled = false,
+    this.teacherApplicationEntryEnabled = false,
+    this.homeTeacherApplicationCardEnabled = false,
+    this.teacherApplicationFormUrl = '',
     this.teacherApplicationEnabled = false,
     this.teacherApplicationDiscoverability =
         TeacherApplicationDiscoverability.none,
@@ -29,6 +33,10 @@ class QuranSessionsFeatureConfig extends Equatable {
   });
 
   final bool quranSessionsEnabled;
+  final bool learnQuranStudentFeatureEnabled;
+  final bool teacherApplicationEntryEnabled;
+  final bool homeTeacherApplicationCardEnabled;
+  final String teacherApplicationFormUrl;
   final bool teacherApplicationEnabled;
   final TeacherApplicationDiscoverability teacherApplicationDiscoverability;
   final bool quranSessionsBookingEnabled;
@@ -36,21 +44,41 @@ class QuranSessionsFeatureConfig extends Equatable {
   /// Wallet UI and routes — staging sandbox only (paid/refund scope).
   final bool walletEnabled;
 
-  bool get showProfileTeacherEntry =>
+  /// Student hub, teachers list, booking, and my sessions entry points.
+  bool get showLearnQuranStudentExperience =>
+      quranSessionsEnabled && learnQuranStudentFeatureEnabled;
+
+  /// Google Form teacher application entry in Settings/Profile.
+  bool get showTeacherApplicationEntry =>
+      quranSessionsEnabled && teacherApplicationEntryEnabled;
+
+  /// Optional Home inline card — never auto-shown as a modal.
+  bool get showHomeTeacherApplicationCard =>
+      showTeacherApplicationEntry && homeTeacherApplicationCardEnabled;
+
+  /// In-app teacher apply flow (legacy intake screen).
+  bool get showInAppTeacherApplicationEntry =>
       quranSessionsEnabled &&
+      learnQuranStudentFeatureEnabled &&
       teacherApplicationEnabled &&
       teacherApplicationDiscoverability !=
           TeacherApplicationDiscoverability.none;
 
+  bool get showProfileTeacherEntry =>
+      showTeacherApplicationEntry || showInAppTeacherApplicationEntry;
+
   bool get showEmptyStateTeacherEntry =>
-      quranSessionsEnabled &&
-      teacherApplicationEnabled &&
+      showInAppTeacherApplicationEntry &&
       teacherApplicationDiscoverability ==
           TeacherApplicationDiscoverability.profileAndEmptyState;
 
   @override
   List<Object?> get props => [
     quranSessionsEnabled,
+    learnQuranStudentFeatureEnabled,
+    teacherApplicationEntryEnabled,
+    homeTeacherApplicationCardEnabled,
+    teacherApplicationFormUrl,
     teacherApplicationEnabled,
     teacherApplicationDiscoverability,
     quranSessionsBookingEnabled,

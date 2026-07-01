@@ -15,7 +15,8 @@ class HomeDashboardFooter extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final tokens = context.tokens;
-    final sessionsEnabled = quranSessionsFeatureConfig().quranSessionsEnabled;
+    final sessionsEnabled =
+        quranSessionsFeatureConfig().showLearnQuranStudentExperience;
 
     return Padding(
       padding: EdgeInsets.only(top: tokens.spaceLarge),

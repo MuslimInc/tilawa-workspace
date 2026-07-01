@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:quran_sessions/quran_sessions.dart';
 import 'package:tilawa/features/quran_sessions/presentation/quran_sessions_analytics.dart';
+import 'package:tilawa/features/quran_sessions/presentation/teacher_application_entry.dart';
 import 'package:tilawa/features/quran_sessions/quran_sessions_feature_flags.dart';
 import 'package:tilawa_ui_kit/tilawa_ui_kit.dart';
 
@@ -18,7 +19,7 @@ class SettingsTeachingOnMemuslimSection extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final config = quranSessionsFeatureConfig();
-    if (!config.showProfileTeacherEntry) {
+    if (!config.quranSessionsEnabled) {
       return const SizedBox.shrink();
     }
 
@@ -86,7 +87,7 @@ class SettingsTeachingOnMemuslimTile extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final config = quranSessionsFeatureConfig();
-    if (!config.showProfileTeacherEntry) {
+    if (!config.quranSessionsEnabled) {
       return const SizedBox.shrink();
     }
 
@@ -143,6 +144,15 @@ class SettingsTeachingOnMemuslimTile extends StatelessWidget {
     QuranSessionsAnalyticsCallbacks analytics,
   ) {
     analytics.onTeacherApplyEntrySeen?.call();
+
+    final config = quranSessionsFeatureConfig();
+    if (capability.navigationTarget ==
+            TeacherCapabilityNavigationTarget.apply &&
+        !config.showInAppTeacherApplicationEntry &&
+        config.showTeacherApplicationEntry) {
+      showTeacherApplicationEntrySheet(context);
+      return;
+    }
 
     switch (capability.navigationTarget) {
       case TeacherCapabilityNavigationTarget.apply:
