@@ -27,7 +27,7 @@ class SurahListTile extends StatelessWidget {
     final double tileRadius = tokens.resolveRadius(
       family: TilawaRadiusFamily.card,
     );
-    final double badgeSize = tokens.iconSizeLarge + tokens.spaceExtraLarge;
+    final double badgeSize = tokens.iconBadgeSize;
     final Color activeFill = ReciterCatalogChrome.activeFill(colorScheme);
     final Color activeOnFill = ReciterCatalogChrome.activeOnFill(colorScheme);
     final Color idleFill = ReciterCatalogChrome.idleFill(colorScheme);

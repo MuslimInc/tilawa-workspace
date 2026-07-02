@@ -151,7 +151,7 @@ class _HomePrimaryActionIconWell extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final tokens = context.tokens;
-    final double iconBoxSize = tokens.iconSizeLarge + tokens.spaceMedium;
+    final double iconBoxSize = tokens.iconBoxSize;
 
     return DecoratedBox(
       decoration: BoxDecoration(

@@ -75,7 +75,7 @@ class _HomeQuranResumeLoadingCard extends StatelessWidget {
           : null,
       child: ConstrainedBox(
         constraints: BoxConstraints(
-          minHeight: tokens.iconSizeLarge + tokens.spaceMedium * 2,
+          minHeight: tokens.minInteractiveDimension,
         ),
         child: _ShimmerContainer(
           baseColor: shimmerBase,
@@ -376,8 +376,8 @@ class _ProgressRing extends StatelessWidget {
   Widget build(BuildContext context) {
     final tokens = context.tokens;
     return Container(
-      width: tokens.iconSizeLarge + tokens.spaceSmall,
-      height: tokens.iconSizeLarge + tokens.spaceSmall,
+      width: tokens.iconRingSize,
+      height: tokens.iconRingSize,
       decoration: BoxDecoration(
         shape: BoxShape.circle,
         boxShadow: [

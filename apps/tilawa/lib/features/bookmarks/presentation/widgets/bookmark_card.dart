@@ -44,8 +44,8 @@ class BookmarkCard extends StatelessWidget {
                 ClipRRect(
                   borderRadius: BorderRadius.circular(tokens.radiusLarge),
                   child: SizedBox(
-                    width: tokens.iconSizeLarge + tokens.spaceExtraLarge,
-                    height: tokens.iconSizeLarge + tokens.spaceExtraLarge,
+                    width: tokens.iconBadgeSize,
+                    height: tokens.iconBadgeSize,
                     child: bookmark.artworkUrl != null
                         ? CachedNetworkImage(
                             imageUrl: bookmark.artworkUrl!,

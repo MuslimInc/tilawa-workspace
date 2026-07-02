@@ -7,6 +7,7 @@ import '../foundation/design_tokens.dart';
 import '../foundation/tilawa_icons.dart';
 import '../foundation/tilawa_interaction_feedback.dart';
 import '../foundation/tilawa_interactive_surface.dart';
+import '../foundation/tilawa_type_scale.dart';
 
 /// Surface tier for [TilawaAppBar] / [TilawaSliverAppBar].
 ///
@@ -63,36 +64,124 @@ abstract final class TilawaAppBarConfig {
   }
 
   /// Bold [titleLarge] row height (matches catalog app bar title).
-  static double catalogTitleRowHeight(BuildContext context) {
+  static double catalogTitleRowHeight(
+    BuildContext context, {
+    String? title,
+    double? titleMaxWidth,
+    bool hasLeading = true,
+    int actionCount = 0,
+    bool centerTitle = false,
+    double? titleBlockHeight,
+  }) {
+    if (titleBlockHeight != null) {
+      return math.max(titleBlockHeight, kMeMuslimMinInteractiveDimension);
+    }
+
     final ThemeData theme = Theme.of(context);
-    final TextScaler textScaler = MediaQuery.textScalerOf(context);
     final TextStyle? titleStyle = theme.textTheme.titleLarge?.copyWith(
       fontWeight: FontWeight.w700,
     );
-    final double titleHeight = _singleLineTextHeight(
-      context,
-      titleStyle,
-      textScaler,
-    );
-    return math.max(titleHeight, kMeMuslimMinInteractiveDimension);
+    final double resolvedMaxWidth =
+        titleMaxWidth ??
+        (title != null
+            ? catalogTitleAreaWidth(
+                context,
+                hasLeading: hasLeading,
+                actionCount: actionCount,
+                centerTitle: centerTitle,
+              )
+            : 0);
+
+    final double titleHeight = title != null && resolvedMaxWidth > 0
+        ? tilawaMeasureTextHeight(
+            context: context,
+            style: titleStyle,
+            text: title,
+            maxWidth: resolvedMaxWidth,
+          )
+        : tilawaMeasureTextHeight(context: context, style: titleStyle);
+
+    return math.max(titleHeight, kMeMuslimMinInteractiveDimension) +
+        (MediaQuery.textScalerOf(context).scale(1.0) > 1.0
+            ? 1.0 / MediaQuery.devicePixelRatioOf(context)
+            : 0);
+  }
+
+  /// Title area width inside catalog chrome (title row [Expanded] slot).
+  static double catalogTitleAreaWidth(
+    BuildContext context, {
+    bool hasLeading = true,
+    int actionCount = 0,
+    bool centerTitle = false,
+  }) {
+    final MeMuslimDesignTokens tokens = Theme.of(context).tokens;
+    final EdgeInsets padding = catalogChromePadding(tokens);
+    var width = MediaQuery.sizeOf(context).width - padding.horizontal;
+    if (centerTitle) {
+      width -= tokens.minInteractiveDimension * 2;
+      if (actionCount > 0) {
+        width -=
+            (actionCount - 1) * tokens.minInteractiveDimension +
+            math.max(0, actionCount - 1) * tokens.spaceSmall;
+      }
+      return math.max(0, width);
+    }
+    if (hasLeading) {
+      width -= tokens.minInteractiveDimension + tokens.spaceSmall;
+    }
+    if (actionCount > 0) {
+      width -= actionCount * tokens.minInteractiveDimension;
+      if (actionCount > 1) {
+        width -= (actionCount - 1) * tokens.spaceSmall;
+      }
+    }
+    return math.max(0, width);
   }
 
   /// Title-only catalog header (Settings, Favorites, Athkar).
-  static double catalogTitleOnlyHeight(BuildContext context) {
+  static double catalogTitleOnlyHeight(
+    BuildContext context, {
+    String? title,
+    bool hasLeading = true,
+    int actionCount = 0,
+    bool centerTitle = false,
+    double? titleBlockHeight,
+  }) {
     final MeMuslimDesignTokens tokens = Theme.of(context).tokens;
     final EdgeInsets padding = catalogChromePadding(tokens);
-    final double raw = padding.vertical + catalogTitleRowHeight(context);
-    return _ceilToDevicePixels(context, raw);
+    final double raw =
+        padding.vertical +
+        catalogTitleRowHeight(
+          context,
+          title: title,
+          hasLeading: hasLeading,
+          actionCount: actionCount,
+          centerTitle: centerTitle,
+          titleBlockHeight: titleBlockHeight,
+        );
+    return tilawaLayoutHeight(context, raw);
   }
 
   /// Title + one catalog search field (Bookmarks, History, Playlists).
-  static double catalogTitleAndSearchHeight(BuildContext context) {
+  static double catalogTitleAndSearchHeight(
+    BuildContext context, {
+    String? title,
+    bool hasLeading = true,
+    int actionCount = 0,
+    bool centerTitle = false,
+    double? titleBlockHeight,
+  }) {
     final double searchHeight = Theme.of(
       context,
     ).componentTokens.searchField.height;
     return catalogTitleAndContentHeight(
       context,
       contentHeight: searchHeight,
+      title: title,
+      hasLeading: hasLeading,
+      actionCount: actionCount,
+      centerTitle: centerTitle,
+      titleBlockHeight: titleBlockHeight,
     );
   }
 
@@ -100,19 +189,36 @@ abstract final class TilawaAppBarConfig {
   static double catalogTitleAndContentHeight(
     BuildContext context, {
     required double contentHeight,
+    String? title,
+    bool hasLeading = true,
+    int actionCount = 0,
+    bool centerTitle = false,
+    double? titleBlockHeight,
   }) {
     final MeMuslimDesignTokens tokens = Theme.of(context).tokens;
     final EdgeInsets padding = catalogChromePadding(tokens);
     final double raw =
         padding.vertical +
-        catalogTitleRowHeight(context) +
+        catalogTitleRowHeight(
+          context,
+          title: title,
+          hasLeading: hasLeading,
+          actionCount: actionCount,
+          centerTitle: centerTitle,
+          titleBlockHeight: titleBlockHeight,
+        ) +
         tokens.spaceSmall +
         contentHeight;
-    return _ceilToDevicePixels(context, raw);
+    return tilawaLayoutHeight(context, raw);
   }
 
   /// Title + search + min-height filter row in catalog headers.
-  static double catalogTitleSearchAndFilterRowHeight(BuildContext context) {
+  static double catalogTitleSearchAndFilterRowHeight(
+    BuildContext context, {
+    String? title,
+    bool hasLeading = true,
+    int actionCount = 0,
+  }) {
     final MeMuslimDesignTokens tokens = Theme.of(context).tokens;
     final double searchHeight = Theme.of(
       context,
@@ -122,6 +228,9 @@ abstract final class TilawaAppBarConfig {
     return catalogTitleAndContentHeight(
       context,
       contentHeight: contentHeight,
+      title: title,
+      hasLeading: hasLeading,
+      actionCount: actionCount,
     );
   }
 
@@ -137,32 +246,7 @@ abstract final class TilawaAppBarConfig {
     final double rowHeight = math.max(searchHeight, trailingMinHeight);
     final EdgeInsets padding = catalogChromePadding(tokens);
     final double raw = padding.vertical + rowHeight;
-    return _ceilToDevicePixels(context, raw);
-  }
-
-  static double _singleLineTextHeight(
-    BuildContext context,
-    TextStyle? style,
-    TextScaler textScaler,
-  ) {
-    if (style == null) {
-      return 27.5;
-    }
-    final TextPainter painter = TextPainter(
-      text: TextSpan(text: 'Hg', style: style),
-      textScaler: textScaler,
-      textDirection: Directionality.of(context),
-      maxLines: 1,
-    )..layout();
-    return painter.height;
-  }
-
-  static double _ceilToDevicePixels(
-    BuildContext context,
-    double logicalPixels,
-  ) {
-    final double devicePixelRatio = MediaQuery.devicePixelRatioOf(context);
-    return (logicalPixels * devicePixelRatio).ceil() / devicePixelRatio;
+    return tilawaLayoutHeight(context, raw);
   }
 }
 

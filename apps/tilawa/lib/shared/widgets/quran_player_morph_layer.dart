@@ -188,7 +188,209 @@ class _MorphMetadata extends StatelessWidget {
         (theme.textTheme.bodySmall ?? const TextStyle()).copyWith(
           color: subtitleColor,
         );
+    final String subtitleText = artist ?? context.l10n.unknownReciter;
 
+    return LayoutBuilder(
+      builder: (context, constraints) {
+        final double maxWidth = constraints.maxWidth.isFinite
+            ? constraints.maxWidth
+            : double.infinity;
+        final double maxHeight = constraints.maxHeight.isFinite
+            ? constraints.maxHeight
+            : double.infinity;
+
+        if (!showSubtitle) {
+          return _MorphMetadataStacked(
+            title: title,
+            subtitle: null,
+            titleStyle: titleStyle,
+            subtitleStyle: subtitleStyle,
+            textAlign: textAlign,
+            titleMaxLines: maxLines,
+            spacing: spacing,
+          );
+        }
+
+        final int stackedTitleLines = _morphStackedTitleMaxLines(
+          context: context,
+          title: title,
+          subtitle: subtitleText,
+          titleStyle: titleStyle,
+          subtitleStyle: subtitleStyle,
+          requestedTitleMaxLines: maxLines,
+          spacing: spacing,
+          maxWidth: maxWidth,
+          maxHeight: maxHeight,
+        );
+
+        if (stackedTitleLines > 0) {
+          return _MorphMetadataStacked(
+            title: title,
+            subtitle: subtitleText,
+            titleStyle: titleStyle,
+            subtitleStyle: subtitleStyle,
+            textAlign: textAlign,
+            titleMaxLines: stackedTitleLines,
+            spacing: spacing,
+          );
+        }
+
+        if (_morphCompactMetadataFits(
+          context: context,
+          title: title,
+          subtitle: subtitleText,
+          titleStyle: titleStyle,
+          subtitleStyle: subtitleStyle,
+          maxWidth: maxWidth,
+          maxHeight: maxHeight,
+        )) {
+          return _MorphCompactMetadataLine(
+            title: title,
+            subtitle: subtitleText,
+            titleStyle: titleStyle,
+            subtitleStyle: subtitleStyle,
+            textAlign: textAlign,
+          );
+        }
+
+        return _MorphMetadataStacked(
+          title: title,
+          subtitle: null,
+          titleStyle: titleStyle,
+          subtitleStyle: subtitleStyle,
+          textAlign: textAlign,
+          titleMaxLines: 1,
+          spacing: spacing,
+        );
+      },
+    );
+  }
+}
+
+int _morphStackedTitleMaxLines({
+  required BuildContext context,
+  required String title,
+  required String subtitle,
+  required TextStyle titleStyle,
+  required TextStyle subtitleStyle,
+  required int requestedTitleMaxLines,
+  required double spacing,
+  required double maxWidth,
+  required double maxHeight,
+}) {
+  for (final int lines in <int>[requestedTitleMaxLines, 1]) {
+    if (_morphStackedMetadataFits(
+      context: context,
+      title: title,
+      subtitle: subtitle,
+      titleStyle: titleStyle,
+      subtitleStyle: subtitleStyle,
+      titleMaxLines: lines,
+      spacing: spacing,
+      maxWidth: maxWidth,
+      maxHeight: maxHeight,
+    )) {
+      return lines;
+    }
+  }
+  return 0;
+}
+
+bool _morphStackedMetadataFits({
+  required BuildContext context,
+  required String title,
+  required String subtitle,
+  required TextStyle titleStyle,
+  required TextStyle subtitleStyle,
+  required int titleMaxLines,
+  required double spacing,
+  required double maxWidth,
+  required double maxHeight,
+}) {
+  if (!maxHeight.isFinite) {
+    return true;
+  }
+  final double titleHeight = tilawaMeasureTextHeight(
+    context: context,
+    style: titleStyle,
+    text: title,
+    maxLines: titleMaxLines,
+    maxWidth: maxWidth,
+  );
+  final double subtitleHeight = tilawaMeasureTextHeight(
+    context: context,
+    style: subtitleStyle,
+    text: subtitle,
+    maxLines: 1,
+    maxWidth: maxWidth,
+  );
+  final double contentHeight = titleHeight + spacing + subtitleHeight;
+  return tilawaLayoutHeight(context, contentHeight) <= maxHeight;
+}
+
+bool _morphCompactMetadataFits({
+  required BuildContext context,
+  required String title,
+  required String subtitle,
+  required TextStyle titleStyle,
+  required TextStyle subtitleStyle,
+  required double maxWidth,
+  required double maxHeight,
+}) {
+  if (!maxHeight.isFinite) {
+    return true;
+  }
+  final double titleHeight = tilawaMeasureTextHeight(
+    context: context,
+    style: titleStyle,
+    text: title,
+    maxLines: 1,
+    maxWidth: maxWidth,
+  );
+  final double subtitleHeight = tilawaMeasureTextHeight(
+    context: context,
+    style: subtitleStyle,
+    text: subtitle,
+    maxLines: 1,
+    maxWidth: maxWidth,
+  );
+  final double separatorHeight = tilawaMeasureTextHeight(
+    context: context,
+    style: subtitleStyle,
+    text: ' · ',
+    maxLines: 1,
+    maxWidth: maxWidth,
+  );
+  final double contentHeight = titleHeight > subtitleHeight
+      ? titleHeight
+      : subtitleHeight;
+  final double rowHeight = contentHeight > separatorHeight
+      ? contentHeight
+      : separatorHeight;
+  return tilawaLayoutHeight(context, rowHeight) <= maxHeight;
+}
+
+class _MorphMetadataStacked extends StatelessWidget {
+  const _MorphMetadataStacked({
+    required this.title,
+    required this.subtitle,
+    required this.titleStyle,
+    required this.subtitleStyle,
+    required this.textAlign,
+    required this.titleMaxLines,
+    required this.spacing,
+  });
+
+  final String title;
+  final String? subtitle;
+  final TextStyle titleStyle;
+  final TextStyle subtitleStyle;
+  final TextAlign textAlign;
+  final int titleMaxLines;
+  final double spacing;
+
+  @override
+  Widget build(BuildContext context) {
     final CrossAxisAlignment crossAlign = textAlign == TextAlign.center
         ? CrossAxisAlignment.center
         : CrossAxisAlignment.start;
@@ -204,15 +406,15 @@ class _MorphMetadata extends StatelessWidget {
             title,
             style: titleStyle,
             textAlign: textAlign,
-            maxLines: maxLines,
+            maxLines: titleMaxLines,
             overflow: TextOverflow.ellipsis,
           ),
         ),
-        if (showSubtitle)
+        if (subtitle != null)
           Semantics(
             identifier: QuranPlayerSemanticsIds.expandedTrackArtist,
             child: Text(
-              artist ?? context.l10n.unknownReciter,
+              subtitle!,
               style: subtitleStyle,
               textAlign: textAlign,
               maxLines: 1,
@@ -221,5 +423,63 @@ class _MorphMetadata extends StatelessWidget {
           ),
       ],
     );
+  }
+}
+
+class _MorphCompactMetadataLine extends StatelessWidget {
+  const _MorphCompactMetadataLine({
+    required this.title,
+    required this.subtitle,
+    required this.titleStyle,
+    required this.subtitleStyle,
+    required this.textAlign,
+  });
+
+  final String title;
+  final String subtitle;
+  final TextStyle titleStyle;
+  final TextStyle subtitleStyle;
+  final TextAlign textAlign;
+
+  @override
+  Widget build(BuildContext context) {
+    final Widget line = Row(
+      mainAxisSize: MainAxisSize.min,
+      children: [
+        Flexible(
+          child: Semantics(
+            identifier: QuranPlayerSemanticsIds.expandedTrackTitle,
+            child: Text(
+              title,
+              style: titleStyle,
+              maxLines: 1,
+              overflow: TextOverflow.ellipsis,
+            ),
+          ),
+        ),
+        Text(
+          ' · ',
+          style: subtitleStyle,
+          maxLines: 1,
+        ),
+        Flexible(
+          child: Semantics(
+            identifier: QuranPlayerSemanticsIds.expandedTrackArtist,
+            child: Text(
+              subtitle,
+              style: subtitleStyle,
+              maxLines: 1,
+              overflow: TextOverflow.ellipsis,
+            ),
+          ),
+        ),
+      ],
+    );
+
+    return switch (textAlign) {
+      TextAlign.center => Center(child: line),
+      TextAlign.end => Align(alignment: Alignment.centerRight, child: line),
+      _ => line,
+    };
   }
 }

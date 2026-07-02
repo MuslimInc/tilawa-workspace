@@ -50,6 +50,52 @@ class TilawaCatalogAppBar extends StatelessWidget
   /// When true, the title is centered between balanced leading/trailing slots.
   final bool centerTitle;
 
+  /// Resolves [preferredHeight] from live chrome (title copy, leading, actions).
+  static double resolvePreferredHeight(
+    BuildContext context, {
+    String? title,
+    Widget? leading,
+    List<Widget>? actions,
+    bool automaticallyImplyLeading = true,
+    VoidCallback? onBackPressed,
+    bool centerTitle = false,
+    Widget? bottomContent,
+    double? bottomContentHeight,
+    double? titleBlockHeight,
+    int? actionCount,
+  }) {
+    final bool hasLeading =
+        TilawaAppBarChrome.resolveCatalogRowLeading(
+          context,
+          leading: leading,
+          automaticallyImplyLeading: automaticallyImplyLeading,
+          onBackPressed: onBackPressed,
+        ) !=
+        null;
+    final int resolvedActionCount = actionCount ?? actions?.length ?? 0;
+
+    if (bottomContentHeight != null) {
+      return TilawaAppBarConfig.catalogTitleAndContentHeight(
+        context,
+        contentHeight: bottomContentHeight,
+        title: title,
+        hasLeading: hasLeading,
+        actionCount: resolvedActionCount,
+        centerTitle: centerTitle,
+        titleBlockHeight: titleBlockHeight,
+      );
+    }
+
+    return TilawaAppBarConfig.catalogTitleOnlyHeight(
+      context,
+      title: title,
+      hasLeading: hasLeading,
+      actionCount: resolvedActionCount,
+      centerTitle: centerTitle,
+      titleBlockHeight: titleBlockHeight,
+    );
+  }
+
   /// Title-only catalog header.
   factory TilawaCatalogAppBar.titleOnly(
     BuildContext context, {
@@ -62,10 +108,20 @@ class TilawaCatalogAppBar extends StatelessWidget
     bool showBottomHairline = TilawaAppBarConfig.showBottomHairline,
     bool showElevationShadow = TilawaAppBarConfig.showElevationShadow,
     bool centerTitle = false,
+    double? titleBlockHeight,
   }) {
     return TilawaCatalogAppBar(
       key: key,
-      preferredHeight: TilawaAppBarConfig.catalogTitleOnlyHeight(context),
+      preferredHeight: resolvePreferredHeight(
+        context,
+        title: title,
+        leading: leading,
+        actions: actions,
+        automaticallyImplyLeading: automaticallyImplyLeading,
+        onBackPressed: onBackPressed,
+        centerTitle: centerTitle,
+        titleBlockHeight: titleBlockHeight,
+      ),
       title: title,
       leading: leading,
       actions: actions,

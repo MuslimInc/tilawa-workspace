@@ -2,9 +2,15 @@ import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:tilawa_ui_kit/tilawa_ui_kit.dart';
 
-Widget _themed(Widget child) {
+Widget _themed(Widget child, {TextScaler textScaler = TextScaler.noScaling}) {
   return MaterialApp(
     theme: ThemeData(extensions: [MeMuslimDesignTokens.light()]),
+    builder: (context, appChild) {
+      return MediaQuery(
+        data: MediaQuery.of(context).copyWith(textScaler: textScaler),
+        child: appChild!,
+      );
+    },
     home: Scaffold(body: Center(child: child)),
   );
 }
@@ -309,5 +315,37 @@ void main() {
 
       expect(barTapped, isTrue);
     });
+
+    testWidgets(
+      'shell dock mini player fits Arabic metadata at product scale',
+      (
+        WidgetTester tester,
+      ) async {
+        await tester.pumpWidget(
+          _themed(
+            SizedBox(
+              width: 360,
+              height: 56,
+              child: TilawaMediaPlayerBar(
+                layoutWidth: 360,
+                title: 'سورة الفاتحة',
+                subtitle: 'محمد كمال',
+                progress: 0.2,
+                isPlaying: true,
+                canGoPrevious: true,
+                canGoNext: true,
+                shellDockLayout: true,
+                onPlayPause: () {},
+              ),
+            ),
+            textScaler: tilawaProductTextScaler(
+              const TextScaler.linear(1),
+            ).clamp(minScaleFactor: 1, maxScaleFactor: 1.4),
+          ),
+        );
+
+        expect(tester.takeException(), isNull);
+      },
+    );
   });
 }

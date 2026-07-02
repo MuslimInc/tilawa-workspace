@@ -1,3 +1,5 @@
+import 'dart:math' as math;
+
 import 'package:flutter/material.dart';
 import 'package:tilawa/features/reciters/presentation/widgets/reciter_catalog_chrome.dart';
 import 'package:tilawa/features/reciters/presentation/widgets/reciter_search_header.dart';
@@ -30,9 +32,25 @@ class ReciterDetailsAppBar extends StatelessWidget {
     final double searchBottomHeight = reciterDetailsSearchHeaderExtent(
       context,
     );
+    final TextStyle? titleStyle = theme.textTheme.titleLarge?.copyWith(
+      color: foregroundColor,
+      fontWeight: FontWeight.w700,
+    );
+    const double avatarDiameter = 32;
+    final double titleHeight = tilawaMeasureTextHeight(
+      context: context,
+      style: titleStyle,
+      text: reciter.name,
+      maxLines: 1,
+    );
+    final double toolbarHeight = tilawaLayoutHeight(
+      context,
+      math.max(avatarDiameter, titleHeight),
+    );
 
     return TilawaSliverAppBar(
       surface: TilawaAppBarSurface.parchment,
+      toolbarHeight: toolbarHeight,
       leading: TilawaBackButton(color: foregroundColor),
       centerTitle: false,
       bottom: PreferredSize(
@@ -57,12 +75,7 @@ class ReciterDetailsAppBar extends StatelessWidget {
           Flexible(
             child: Text(
               reciter.name,
-              style: context
-                  .responsiveStyle((t) => t.titleLarge)
-                  ?.copyWith(
-                    color: foregroundColor,
-                    fontWeight: FontWeight.w700,
-                  ),
+              style: titleStyle,
               overflow: TextOverflow.ellipsis,
             ),
           ),

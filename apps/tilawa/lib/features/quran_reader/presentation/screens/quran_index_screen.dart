@@ -74,13 +74,16 @@ class _QuranIndexScreenState extends State<QuranIndexScreen> {
     final TilawaSettingsGroupTokens groupTokens =
         theme.componentTokens.settingsGroup;
     final double scrollBottomPadding = listScrollBottomPadding(context);
-    final double segmentBarHeight = tokens.minInteractiveDimension;
-
+    final double segmentBarHeight = TilawaSegmentedControl.layoutHeight(
+      context,
+    );
     return Scaffold(
       appBar: TilawaCatalogAppBar(
-        preferredHeight: TilawaAppBarConfig.catalogTitleAndContentHeight(
+        preferredHeight: TilawaCatalogAppBar.resolvePreferredHeight(
           context,
-          contentHeight: segmentBarHeight,
+          title: context.l10n.quranHubTitle,
+          automaticallyImplyLeading: false,
+          bottomContentHeight: segmentBarHeight + tokens.spaceSmall,
         ),
         title: context.l10n.quranHubTitle,
         automaticallyImplyLeading: false,

@@ -10,7 +10,6 @@ import 'app_colors.dart';
 import 'component_tokens.dart';
 import 'design_tokens.dart';
 import 'memuslim_product_colors.dart';
-import 'tilawa_type_scale.dart';
 
 /// Centralized app theme configuration
 class AppTheme {
@@ -59,13 +58,14 @@ class AppTheme {
 
   static TextTheme _getTextTheme(Brightness brightness) {
     final TextTheme base = _material3TypographyBase(brightness);
-    final TextTheme scaled = meMuslimScaleTextTheme(base);
     if (_isFlutterTestEnvironment()) {
-      return scaled;
+      return base;
     }
     // Apply the bundled brand typeface while preserving each M3 style's own
     // weight/size so Flutter resolves the matching bundled font file.
-    return scaled.apply(fontFamily: _fontFamily);
+    // Product readability scaling is applied via [tilawaProductTextScaler] on
+    // [MediaQueryData.textScaler], not by mutating theme font sizes.
+    return base.apply(fontFamily: _fontFamily);
   }
 
   static bool _isFlutterTestEnvironment() {

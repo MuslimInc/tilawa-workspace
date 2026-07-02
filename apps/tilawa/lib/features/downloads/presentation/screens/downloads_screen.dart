@@ -200,25 +200,50 @@ class _DownloadsScreenAppBar extends StatelessWidget
     int totalBytes,
   ) {
     if (totalBytes <= 0) {
-      return TilawaAppBarConfig.catalogTitleOnlyHeight(context);
+      return TilawaCatalogAppBar.resolvePreferredHeight(
+        context,
+        title: context.l10n.downloads,
+        leading: TilawaAppBarChrome.catalogBackButton(
+          context: context,
+        ),
+        actionCount: 2,
+      );
     }
 
     final ThemeData theme = Theme.of(context);
     final MeMuslimDesignTokens tokens = theme.tokens;
-    final TextScaler textScaler = MediaQuery.textScalerOf(context);
+    final TextStyle? titleStyle = theme.textTheme.titleLarge?.copyWith(
+      fontWeight: FontWeight.w700,
+    );
     final TextStyle? subtitleStyle = theme.textTheme.bodySmall?.copyWith(
       fontWeight: FontWeight.w500,
     );
-    final TextPainter painter = TextPainter(
-      text: TextSpan(text: 'Hg', style: subtitleStyle),
-      textScaler: textScaler,
-      textDirection: Directionality.of(context),
-      maxLines: 1,
-    )..layout();
+    final String title = context.l10n.downloads;
+    final String subtitle = context.l10n.storageUsed(
+      FileSizeFormatter.formatBytes(context, totalBytes),
+    );
+    final double titleBlockHeight =
+        tilawaMeasureTextHeight(
+          context: context,
+          style: titleStyle,
+          text: title,
+        ) +
+        tokens.spaceTiny +
+        tilawaMeasureTextHeight(
+          context: context,
+          style: subtitleStyle,
+          text: subtitle,
+          maxLines: 1,
+        );
 
-    return TilawaAppBarConfig.catalogTitleAndContentHeight(
+    return TilawaCatalogAppBar.resolvePreferredHeight(
       context,
-      contentHeight: painter.height + tokens.spaceTiny,
+      title: title,
+      leading: TilawaAppBarChrome.catalogBackButton(
+        context: context,
+      ),
+      actionCount: 2,
+      titleBlockHeight: titleBlockHeight,
     );
   }
 

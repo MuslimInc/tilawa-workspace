@@ -5,7 +5,6 @@ import 'package:tilawa_ui_kit/src/foundation/app_colors.dart';
 import 'package:tilawa_ui_kit/src/foundation/app_theme.dart';
 import 'package:tilawa_ui_kit/src/foundation/component_tokens.dart';
 import 'package:tilawa_ui_kit/src/foundation/design_tokens.dart';
-import 'package:tilawa_ui_kit/src/foundation/tilawa_type_scale.dart';
 
 @immutable
 class _ProbeThemeExtension extends ThemeExtension<_ProbeThemeExtension> {
@@ -49,7 +48,7 @@ void main() {
         if (baseTitleSize != null) {
           expect(
             theme.textTheme.titleLarge?.fontSize,
-            closeTo(baseTitleSize * kTilawaGlobalTextScaleFactor, 0.01),
+            closeTo(baseTitleSize, 0.01),
           );
         }
       },

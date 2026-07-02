@@ -187,6 +187,7 @@ class TilawaSliverAppBar extends StatelessWidget {
     this.snap = TilawaAppBarConfig.snap,
     this.stretch = TilawaAppBarConfig.stretch,
     this.expandedHeight,
+    this.toolbarHeight,
     this.surface = TilawaAppBarConfig.surface,
     this.showLeadingControlBackground =
         TilawaAppBarConfig.showLeadingControlBackground,
@@ -208,6 +209,7 @@ class TilawaSliverAppBar extends StatelessWidget {
   final bool snap;
   final bool stretch;
   final double? expandedHeight;
+  final double? toolbarHeight;
   final TilawaAppBarSurface surface;
   final bool showLeadingControlBackground;
   final bool showActionControlBackground;
@@ -233,6 +235,7 @@ class TilawaSliverAppBar extends StatelessWidget {
         snap: snap,
         stretch: stretch,
         expandedHeight: expandedHeight,
+        toolbarHeight: toolbarHeight,
         surface: surface,
         showBottomHairline: showBottomHairline,
         showElevationShadow: showElevationShadow,
@@ -259,6 +262,7 @@ class _TilawaSliverAppBarBody extends StatelessWidget {
     this.snap = TilawaAppBarConfig.snap,
     this.stretch = TilawaAppBarConfig.stretch,
     this.expandedHeight,
+    this.toolbarHeight,
   });
 
   final String? title;
@@ -273,6 +277,7 @@ class _TilawaSliverAppBarBody extends StatelessWidget {
   final bool snap;
   final bool stretch;
   final double? expandedHeight;
+  final double? toolbarHeight;
   final TilawaAppBarSurface surface;
   final bool showBottomHairline;
   final bool showElevationShadow;
@@ -313,6 +318,7 @@ class _TilawaSliverAppBarBody extends StatelessWidget {
       snap: snap,
       stretch: stretch,
       expandedHeight: expandedHeight,
+      toolbarHeight: toolbarHeight ?? kToolbarHeight,
       // Pinned slivers skip elevation at rest unless forced; match
       // [TilawaAppBar] which always paints the chrome shadow.
       forceElevated: showElevationShadow,

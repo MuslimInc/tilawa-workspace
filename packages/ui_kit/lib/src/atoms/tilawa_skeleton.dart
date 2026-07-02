@@ -355,6 +355,7 @@ class TilawaSkeletonLine extends StatelessWidget {
     final TextPainter painter = TextPainter(
       text: TextSpan(text: 'Hg', style: resolvedStyle),
       textDirection: Directionality.of(context),
+      textScaler: MediaQuery.textScalerOf(context),
       maxLines: 1,
     )..layout();
     final double lineHeight = painter.height;

@@ -72,7 +72,7 @@ class _ReciterAvatar extends StatelessWidget {
     final theme = Theme.of(context);
     final tokens = theme.tokens;
     final colorScheme = theme.colorScheme;
-    final double size = tokens.iconSizeLarge + tokens.spaceExtraLarge;
+    final double size = tokens.iconBadgeSize;
     final Color backgroundColor = _reciterAvatarBackground(
       reciterId,
       colorScheme,

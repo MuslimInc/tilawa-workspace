@@ -104,6 +104,12 @@ void main() {
           light.minInteractiveDimension,
           kMeMuslimMinInteractiveDimension,
         );
+        expect(light.minIconSize, kMinIconSize);
+        expect(light.iconBoxSize, kIconBoxSize);
+        expect(light.iconBadgeSize, kIconBadgeSize);
+        expect(light.iconShortcutExtent, light.iconSizeMedium + 24.0);
+        expect(light.iconHubExtent, light.iconSizeLarge + 32.0);
+        expect(light.iconRingSize, light.iconSizeLarge + light.spaceSmall);
         expect(light.textHeightLoose, 2.0);
         expect(light.durationFast, const Duration(milliseconds: 200));
         expect(light.durationMedium, const Duration(milliseconds: 400));

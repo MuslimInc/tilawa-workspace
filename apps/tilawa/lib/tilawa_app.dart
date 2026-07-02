@@ -340,10 +340,13 @@ class _ThemedMaterialApp extends StatelessWidget {
         );
         return MediaQuery(
           data: MediaQuery.of(context).copyWith(
-            textScaler: MediaQuery.textScalerOf(context).clamp(
-              minScaleFactor: textScaleClampMin,
-              maxScaleFactor: textScaleClampMax,
-            ),
+            textScaler:
+                tilawaProductTextScaler(
+                  MediaQuery.textScalerOf(context),
+                ).clamp(
+                  minScaleFactor: textScaleClampMin,
+                  maxScaleFactor: textScaleClampMax,
+                ),
           ),
           child: TilawaFeedbackHost(child: routedChild),
         );

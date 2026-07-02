@@ -68,7 +68,7 @@ class _QuickToolTile extends StatelessWidget {
     final tokens = context.tokens;
     final theme = Theme.of(context);
     final colorScheme = theme.colorScheme;
-    final double iconBoxSize = tokens.iconSizeMedium + tokens.spaceSmall;
+    final double iconBoxSize = tokens.minIconSize;
 
     final BorderRadius borderRadius = BorderRadius.circular(radius);
 

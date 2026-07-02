@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 
 import '../foundation/app_colors.dart';
 import '../foundation/app_theme.dart';
+import '../foundation/tilawa_type_scale.dart';
 
 /// A wrapper widget for Widget Previews and Golden Tests to ensure
 /// consistent environment configuration across themes, locales, and scales.
@@ -41,7 +42,7 @@ class TilawaPreviewWrapper extends StatelessWidget {
     return MediaQuery(
       data: baseData.copyWith(
         platformBrightness: isDark ? Brightness.dark : Brightness.light,
-        textScaler: TextScaler.linear(textScale),
+        textScaler: tilawaProductTextScaler(TextScaler.linear(textScale)),
       ),
       child: Theme(
         data: theme,

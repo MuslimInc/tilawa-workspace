@@ -196,5 +196,95 @@ void main() {
       await tester.pump();
       expect(find.text('Reciter'), findsOneWidget);
     });
+
+    testWidgets('RTL Arabic metadata fits at 1.4x during morph transition', (
+      tester,
+    ) async {
+      const audio = AudioEntity(
+        id: '1',
+        title: 'سورة الفاتحة',
+        url: 'https://example.com/1.mp3',
+        duration: Duration(minutes: 1),
+        artist: 'محمد البراك',
+      );
+
+      await tester.pumpWidget(
+        MaterialApp(
+          theme: AppTheme.getLightTheme(primaryColor: const Color(0xFF2E7D6F)),
+          localizationsDelegates: AppLocalizations.localizationsDelegates,
+          supportedLocales: AppLocalizations.supportedLocales,
+          locale: const Locale('ar'),
+          builder: (context, child) {
+            return MediaQuery(
+              data: MediaQuery.of(
+                context,
+              ).copyWith(textScaler: TextScaler.linear(1.4)),
+              child: child!,
+            );
+          },
+          home: Scaffold(
+            body: QuranPlayerMorphLayer(
+              audio: audio,
+              handoffT: 0.6,
+              layout: _layout(
+                progress: 0.55,
+                textDirection: TextDirection.rtl,
+              ),
+              onImageBackdrop: false,
+            ),
+          ),
+        ),
+      );
+      await tester.pump();
+
+      expect(tester.takeException(), isNull);
+      expect(find.text('سورة الفاتحة'), findsOneWidget);
+      expect(find.text('محمد البراك'), findsOneWidget);
+    });
+
+    testWidgets('RTL Arabic metadata fits at 1.4x in tight mini band', (
+      tester,
+    ) async {
+      const audio = AudioEntity(
+        id: '1',
+        title: 'سورة الفاتحة',
+        url: 'https://example.com/1.mp3',
+        duration: Duration(minutes: 1),
+        artist: 'محمد البراك',
+      );
+
+      await tester.pumpWidget(
+        MaterialApp(
+          theme: AppTheme.getLightTheme(primaryColor: const Color(0xFF2E7D6F)),
+          localizationsDelegates: AppLocalizations.localizationsDelegates,
+          supportedLocales: AppLocalizations.supportedLocales,
+          locale: const Locale('ar'),
+          builder: (context, child) {
+            return MediaQuery(
+              data: MediaQuery.of(
+                context,
+              ).copyWith(textScaler: TextScaler.linear(1.4)),
+              child: child!,
+            );
+          },
+          home: Scaffold(
+            body: QuranPlayerMorphLayer(
+              audio: audio,
+              handoffT: 0.6,
+              layout: _layout(
+                progress: 0.05,
+                textDirection: TextDirection.rtl,
+              ),
+              onImageBackdrop: false,
+            ),
+          ),
+        ),
+      );
+      await tester.pump();
+
+      expect(tester.takeException(), isNull);
+      expect(find.text('سورة الفاتحة'), findsOneWidget);
+      expect(find.text('محمد البراك'), findsOneWidget);
+    });
   });
 }

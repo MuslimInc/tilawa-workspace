@@ -9,6 +9,7 @@ import '../foundation/design_tokens.dart';
 import '../foundation/semantic_tints.dart';
 import '../foundation/tilawa_icons.dart';
 import '../foundation/tilawa_interactive_surface.dart';
+import '../foundation/tilawa_type_scale.dart';
 import '../molecules/tilawa_verified_teacher_badge.dart';
 
 /// Premium capability entry card for approved roles and elevated settings CTAs.
@@ -302,12 +303,7 @@ class _CapabilityActionCardLayoutMetrics {
     );
 
     double textLineHeight(TextStyle style) {
-      final TextPainter painter = TextPainter(
-        text: TextSpan(text: 'Hg', style: style),
-        textDirection: Directionality.of(context),
-        maxLines: 1,
-      )..layout();
-      return painter.height;
+      return tilawaMeasureTextHeight(context: context, style: style);
     }
 
     double measureTextBlockHeight({
@@ -315,12 +311,13 @@ class _CapabilityActionCardLayoutMetrics {
       required TextStyle style,
       required int maxLines,
     }) {
-      final TextPainter painter = TextPainter(
-        text: TextSpan(text: value, style: style),
-        textDirection: Directionality.of(context),
+      return tilawaMeasureTextHeight(
+        context: context,
+        style: style,
+        text: value,
         maxLines: maxLines,
-      )..layout(maxWidth: copyMaxWidth);
-      return painter.height;
+        maxWidth: copyMaxWidth,
+      );
     }
 
     final double titleBlockHeight = title == null

@@ -2,8 +2,9 @@ import 'package:flutter/material.dart';
 
 import 'breakpoints.dart';
 
-/// M3 2021 default sizes — ratios are applied to the already-scaled
-/// [ThemeData.textTheme] from [AppTheme], not re-scaled here.
+/// M3 2021 default sizes — ratios are applied to the ambient
+/// [ThemeData.textTheme] (Material base sizes). Product readability scaling
+/// is applied at render time via [tilawaProductTextScaler].
 abstract final class _M3TypographyDefaults {
   static const double displayLarge = 57;
   static const double displayMedium = 45;

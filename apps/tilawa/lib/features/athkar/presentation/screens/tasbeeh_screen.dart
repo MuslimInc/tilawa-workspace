@@ -97,33 +97,41 @@ class _TasbeehView extends StatelessWidget {
 
         final savedSession = state.activeSavedDhikr;
         final bool isSubView = state.viewMode != TasbeehViewMode.home;
+        final String appBarTitle = switch (state.viewMode) {
+          TasbeehViewMode.selectedCounting when savedSession != null =>
+            savedSession.text,
+          TasbeehViewMode.quickCount => context.l10n.tasbeehQuickCountTitle,
+          TasbeehViewMode.create => context.l10n.tasbeehAddNewOptionTitle,
+          _ => context.l10n.tasbeehCategory,
+        };
+        final Widget? appBarLeading = isSubView
+            ? TilawaBackButton(
+                compact: true,
+                onPressed: cubit.showHomeView,
+              )
+            : Navigator.canPop(context)
+            ? TilawaBackButton(
+                compact: true,
+                onPressed: () => context.pop(),
+              )
+            : null;
+        final List<Widget>? appBarActions = _TasbeehAppBarActions(
+          cubit: cubit,
+          state: state,
+          savedSession: savedSession,
+        ).build(context);
 
         return Scaffold(
           appBar: TilawaCatalogAppBar(
-            preferredHeight: TilawaAppBarConfig.catalogTitleOnlyHeight(context),
-            title: switch (state.viewMode) {
-              TasbeehViewMode.selectedCounting when savedSession != null =>
-                savedSession.text,
-              TasbeehViewMode.quickCount => context.l10n.tasbeehQuickCountTitle,
-              TasbeehViewMode.create => context.l10n.tasbeehAddNewOptionTitle,
-              _ => context.l10n.tasbeehCategory,
-            },
-            leading: isSubView
-                ? TilawaBackButton(
-                    compact: true,
-                    onPressed: cubit.showHomeView,
-                  )
-                : Navigator.canPop(context)
-                ? TilawaBackButton(
-                    compact: true,
-                    onPressed: () => context.pop(),
-                  )
-                : null,
-            actions: _TasbeehAppBarActions(
-              cubit: cubit,
-              state: state,
-              savedSession: savedSession,
-            ).build(context),
+            preferredHeight: TilawaCatalogAppBar.resolvePreferredHeight(
+              context,
+              title: appBarTitle,
+              leading: appBarLeading,
+              actions: appBarActions,
+            ),
+            title: appBarTitle,
+            leading: appBarLeading,
+            actions: appBarActions,
           ),
           body: Stack(
             children: [

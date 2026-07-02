@@ -35,8 +35,22 @@ class _PlaylistsScreenState extends State<PlaylistsScreen> {
 
     return Scaffold(
       appBar: TilawaCatalogAppBar(
-        preferredHeight: TilawaAppBarConfig.catalogTitleAndSearchHeight(
+        preferredHeight: TilawaCatalogAppBar.resolvePreferredHeight(
           context,
+          title: l10n.playlists,
+          actions: [
+            TilawaIconActionButton(
+              icon: Icons.refresh,
+              onTap: () {
+                context.read<PlaylistsBloc>().add(
+                  const RefreshPlaylistsEvent(),
+                );
+              },
+            ),
+          ],
+          bottomContentHeight: Theme.of(
+            context,
+          ).componentTokens.searchField.height,
         ),
         title: l10n.playlists,
         actions: [

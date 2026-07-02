@@ -12,6 +12,15 @@ void main() {
     });
   });
 
+  group('tilawaProductTextScaler', () {
+    test('applies the global readability factor', () {
+      expect(
+        tilawaProductTextScaler(TextScaler.noScaling).scale(16),
+        closeTo(16 * factor, 0.001),
+      );
+    });
+  });
+
   group('meMuslimScaleTextTheme', () {
     test('scales explicit font sizes and preserves hierarchy', () {
       const base = TextTheme(
@@ -44,6 +53,87 @@ void main() {
 
       expect(scaled.titleLarge?.fontSize, isNull);
       expect(scaled.titleLarge?.fontWeight, FontWeight.w600);
+    });
+  });
+
+  group('tilawaMeasureTextHeight', () {
+    testWidgets('uses MediaQuery textScaler', (WidgetTester tester) async {
+      late double unscaledHeight;
+      late double scaledHeight;
+
+      await tester.pumpWidget(
+        MaterialApp(
+          home: Builder(
+            builder: (context) {
+              unscaledHeight = tilawaMeasureTextHeight(
+                context: context,
+                style: const TextStyle(fontSize: 16),
+              );
+              return const SizedBox.shrink();
+            },
+          ),
+        ),
+      );
+
+      await tester.pumpWidget(
+        MaterialApp(
+          home: MediaQuery(
+            data: const MediaQueryData(
+              textScaler: TextScaler.linear(1.4),
+            ),
+            child: Builder(
+              builder: (context) {
+                scaledHeight = tilawaMeasureTextHeight(
+                  context: context,
+                  style: const TextStyle(fontSize: 16),
+                );
+                return const SizedBox.shrink();
+              },
+            ),
+          ),
+        ),
+      );
+
+      expect(scaledHeight, greaterThan(unscaledHeight));
+    });
+  });
+
+  group('tilawaLayoutSlack', () {
+    testWidgets('returns zero at unit scale', (WidgetTester tester) async {
+      late double slack;
+
+      await tester.pumpWidget(
+        MaterialApp(
+          home: Builder(
+            builder: (context) {
+              slack = tilawaLayoutSlack(context);
+              return const SizedBox.shrink();
+            },
+          ),
+        ),
+      );
+
+      expect(slack, 0);
+    });
+
+    testWidgets('adds slack above unit scale', (WidgetTester tester) async {
+      late double slack;
+
+      await tester.pumpWidget(
+        MaterialApp(
+          home: MediaQuery(
+            data: const MediaQueryData(textScaler: TextScaler.linear(1.4)),
+            child: Builder(
+              builder: (context) {
+                slack = tilawaLayoutSlack(context);
+                return const SizedBox.shrink();
+              },
+            ),
+          ),
+        ),
+      );
+
+      expect(slack, closeTo(5, 0.001));
     });
   });
 }

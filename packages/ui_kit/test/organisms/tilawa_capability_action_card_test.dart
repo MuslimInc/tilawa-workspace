@@ -33,11 +33,21 @@ Widget _wrap({
   required Widget child,
   required Brightness brightness,
   TextDirection textDirection = TextDirection.ltr,
+  TextScaler? textScaler,
 }) {
   return MaterialApp(
     theme: AppTheme.getLightTheme(primaryColor: AppColors.defaultPrimary),
     darkTheme: AppTheme.getDarkTheme(primaryColor: AppColors.defaultPrimary),
     themeMode: brightness == Brightness.dark ? ThemeMode.dark : ThemeMode.light,
+    builder: (context, appChild) {
+      final MediaQueryData mediaQuery = MediaQuery.of(context);
+      return MediaQuery(
+        data: textScaler == null
+            ? mediaQuery
+            : mediaQuery.copyWith(textScaler: textScaler),
+        child: appChild!,
+      );
+    },
     home: Directionality(
       textDirection: textDirection,
       child: Scaffold(body: child),
@@ -126,6 +136,37 @@ void main() {
       check(titleSize.height).isGreaterThan(0);
       check(subtitleSize.height).isGreaterThan(0);
     });
+
+    testWidgets(
+      'Arabic teacher dashboard copy fits at product text scale in RTL',
+      (WidgetTester tester) async {
+        await tester.binding.setSurfaceSize(const Size(390, 800));
+        addTearDown(() => tester.binding.setSurfaceSize(null));
+
+        await tester.pumpWidget(
+          _wrap(
+            brightness: Brightness.light,
+            textDirection: TextDirection.rtl,
+            textScaler: tilawaProductTextScaler(
+              const TextScaler.linear(1),
+            ).clamp(minScaleFactor: 1, maxScaleFactor: 1.4),
+            child: const SizedBox(
+              width: 350,
+              child: TilawaCapabilityActionCard(
+                title: 'لوحة تحكم المحفظ',
+                subtitle: 'يمكنك إدارة مواعيدك وجلساتك من هنا',
+                leadingIcon: TilawaIcons.teacherCapability,
+                badgeLabel: 'محفظ معتمد',
+                onTap: _noop,
+                margin: EdgeInsets.zero,
+              ),
+            ),
+          ),
+        );
+
+        expect(tester.takeException(), isNull);
+      },
+    );
 
     testWidgets('dark theme keeps readable title and subtitle colors', (
       WidgetTester tester,

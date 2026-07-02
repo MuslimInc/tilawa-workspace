@@ -81,8 +81,17 @@ class _QiblaScreenState extends State<QiblaScreen> {
           },
           child: Scaffold(
             appBar: TilawaCatalogAppBar(
-              preferredHeight: TilawaAppBarConfig.catalogTitleOnlyHeight(
+              preferredHeight: TilawaCatalogAppBar.resolvePreferredHeight(
                 context,
+                title: context.l10n.qiblaFinderTitle,
+                titleBlockHeight: tilawaMeasureTextHeight(
+                  context: context,
+                  style: theme.textTheme.titleMedium?.copyWith(
+                    fontWeight: FontWeight.w700,
+                    letterSpacing: 1.2,
+                  ),
+                  text: context.l10n.qiblaFinderTitle,
+                ),
               ),
               centerTitle: false,
               titleWidget: Text(

@@ -64,7 +64,7 @@ class SurahGridItem extends StatelessWidget {
     final double tileRadius = tokens.resolveRadius(
       family: TilawaRadiusFamily.card,
     );
-    final double badgeSize = tokens.iconSizeLarge + tokens.spaceExtraLarge;
+    final double badgeSize = tokens.iconBadgeSize;
 
     return Semantics(
       identifier: ReciterSemanticsIds.surahRow(item.semanticsKey),

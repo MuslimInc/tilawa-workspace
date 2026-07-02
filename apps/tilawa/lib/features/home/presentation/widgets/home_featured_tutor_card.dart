@@ -39,7 +39,7 @@ abstract final class HomeFeaturedTutorCardLayout {
     final TextDirection textDirection = Directionality.of(context);
 
     final double cardPadding = tokens.spaceMedium * 2;
-    final double iconBoxSize = tokens.iconSizeLarge + tokens.spaceMedium;
+    final double iconBoxSize = tokens.iconBoxSize;
 
     final TextStyle titleStyle =
         theme.textTheme.titleMedium?.copyWith(
@@ -684,7 +684,7 @@ class _FeaturedTutorIconWell extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final MeMuslimDesignTokens tokens = context.tokens;
-    final double iconBoxSize = tokens.iconSizeLarge + tokens.spaceMedium;
+    final double iconBoxSize = tokens.iconBoxSize;
 
     return DecoratedBox(
       decoration: BoxDecoration(

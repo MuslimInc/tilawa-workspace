@@ -27,6 +27,21 @@ import 'package:flutter/material.dart';
 /// which already provides the hit-slop and ripple.
 const double kMeMuslimMinInteractiveDimension = 48.0;
 
+/// Compact icon-container extent — default ramp
+/// ([iconSizeMedium] + [MeMuslimDesignTokens.spaceSmall], 28 dp).
+///
+/// Prefer [MeMuslimDesignTokens.minIconSize] (or `context.minIconSize`) when
+/// [BuildContext] tokens are available so themed ramps stay in sync.
+const double kMinIconSize = 28.0;
+
+/// Standard tinted icon well — default ramp
+/// ([iconSizeLarge] + [MeMuslimDesignTokens.spaceMedium], 36 dp).
+const double kIconBoxSize = 36.0;
+
+/// Badge / avatar icon well — default ramp
+/// ([iconSizeLarge] + [MeMuslimDesignTokens.spaceExtraLarge], 48 dp).
+const double kIconBadgeSize = 48.0;
+
 /// Design tokens for the MeMuslim UI Kit to avoid magic numbers
 /// and ensure consistency across components.
 @immutable
@@ -223,6 +238,27 @@ class MeMuslimDesignTokens extends ThemeExtension<MeMuslimDesignTokens> {
   /// for *all* in-product hit targets instead of Flutter's
   /// `kMinInteractiveDimension`.
   double get minInteractiveDimension => kMeMuslimMinInteractiveDimension;
+
+  /// Compact tinted icon well — [iconSizeMedium] glyph plus one [spaceSmall]
+  /// inset. Matches [kMinIconSize] on the default ramp.
+  double get minIconSize => iconSizeMedium + spaceSmall;
+
+  /// Standard tinted icon well — [iconSizeLarge] glyph plus one [spaceMedium]
+  /// inset. Matches [kIconBoxSize] on the default ramp.
+  double get iconBoxSize => iconSizeLarge + spaceMedium;
+
+  /// Badge-sized icon well — [iconSizeLarge] glyph plus one [spaceExtraLarge]
+  /// inset. Matches [kIconBadgeSize] on the default ramp.
+  double get iconBadgeSize => iconSizeLarge + spaceExtraLarge;
+
+  /// Shortcut-grid icon column extent.
+  double get iconShortcutExtent => iconSizeMedium + spaceMedium * 2;
+
+  /// Hub / category grid icon column extent.
+  double get iconHubExtent => iconSizeLarge + spaceLarge * 2;
+
+  /// Circular progress / ring chrome around a large icon glyph.
+  double get iconRingSize => iconSizeLarge + spaceSmall;
 
   /// 2.0 — relaxed line height for dense Arabic text.
   final double textHeightLoose;
@@ -763,6 +799,24 @@ extension MeMuslimIconSizeX on BuildContext {
   /// MeMuslim minimum interactive (hit-target) dimension. Use this instead of
   /// Flutter's `kMinInteractiveDimension`.
   double get minInteractiveDimension => tokens.minInteractiveDimension;
+
+  /// Compact tinted icon well ([kMinIconSize] on the default ramp).
+  double get minIconSize => tokens.minIconSize;
+
+  /// Standard tinted icon well ([kIconBoxSize] on the default ramp).
+  double get iconBoxSize => tokens.iconBoxSize;
+
+  /// Badge-sized icon well ([kIconBadgeSize] on the default ramp).
+  double get iconBadgeSize => tokens.iconBadgeSize;
+
+  /// Shortcut-grid icon column extent.
+  double get iconShortcutExtent => tokens.iconShortcutExtent;
+
+  /// Hub / category grid icon column extent.
+  double get iconHubExtent => tokens.iconHubExtent;
+
+  /// Circular progress / ring chrome around a large icon glyph.
+  double get iconRingSize => tokens.iconRingSize;
 }
 
 /// Helpers for keeping nested rounded containers visually concentric.

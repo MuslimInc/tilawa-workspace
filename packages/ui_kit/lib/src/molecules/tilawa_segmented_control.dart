@@ -4,6 +4,7 @@ import '../foundation/component_tokens.dart';
 import '../foundation/design_tokens.dart';
 import '../foundation/tilawa_interaction_feedback.dart';
 import '../foundation/tilawa_interactive_surface.dart';
+import '../foundation/tilawa_type_scale.dart';
 
 /// A segmented control widget for switching between a small number of options.
 ///
@@ -68,6 +69,25 @@ class TilawaSegmentedControl<T> extends StatelessWidget {
   /// Whether the control is interactive.
   final bool enabled;
 
+  /// Laid-out height for chrome that must reserve space around this control.
+  static double layoutHeight(BuildContext context) {
+    final ThemeData theme = Theme.of(context);
+    final TilawaSegmentedControlTokens tokens =
+        theme.componentTokens.segmentedControl;
+    final TextStyle? labelStyle = theme.textTheme.labelLarge;
+    final EdgeInsets itemPadding = tokens.itemPadding.resolve(
+      Directionality.of(context),
+    );
+    final EdgeInsets containerPadding = tokens.containerPadding.resolve(
+      Directionality.of(context),
+    );
+    final double labelHeight = tilawaMeasureTextHeight(
+      context: context,
+      style: labelStyle,
+    );
+    return containerPadding.vertical + itemPadding.vertical + labelHeight;
+  }
+
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
@@ -89,8 +109,10 @@ class TilawaSegmentedControl<T> extends StatelessWidget {
       Directionality.of(context),
     );
     final labelStyle = theme.textTheme.labelLarge;
-    final double labelHeight =
-        (labelStyle?.fontSize ?? 14) * (labelStyle?.height ?? 1.2);
+    final double labelHeight = tilawaMeasureTextHeight(
+      context: context,
+      style: labelStyle,
+    );
     final double itemHeight = itemPadding.vertical + labelHeight;
     final defaultRadii = designTokens.resolveSegmentedControlRadii(
       itemHeight: itemHeight,

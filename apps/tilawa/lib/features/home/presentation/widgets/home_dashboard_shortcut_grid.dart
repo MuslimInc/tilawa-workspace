@@ -13,7 +13,7 @@ int homeShortcutGridColumnCount(BuildContext context, {int? override}) {
 double homeShortcutGridTileHeight(BuildContext context) {
   final tokens = Theme.of(context).tokens;
   final textTheme = Theme.of(context).textTheme;
-  final double iconExtent = tokens.iconSizeMedium + tokens.spaceMedium * 2;
+  final double iconExtent = tokens.iconShortcutExtent;
   final double titleLineHeight = (textTheme.titleSmall?.fontSize ?? 14) * 1.25;
   final double subtitleLineHeight = (textTheme.bodySmall?.fontSize ?? 12) * 1.3;
   final double textBlockHeight =

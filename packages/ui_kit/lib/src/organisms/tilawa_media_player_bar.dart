@@ -5,6 +5,7 @@ import 'package:tilawa_ui_kit/src/foundation/component_tokens.dart';
 import 'package:tilawa_ui_kit/src/foundation/tilawa_icons.dart';
 import 'package:tilawa_ui_kit/src/foundation/design_tokens.dart';
 import 'package:tilawa_ui_kit/src/foundation/tilawa_interactive_surface.dart';
+import 'package:tilawa_ui_kit/src/foundation/tilawa_type_scale.dart';
 
 /// Minimum horizontal space reserved for surah + reciter before the bar
 /// collapses secondary transport controls (prev / sleep timer). Next track
@@ -242,15 +243,44 @@ class TilawaMediaPlayerBar extends StatelessWidget {
         : shellDockLayout || useCompactControls
         ? kTilawaMediaPlayerBarCompactArtworkSize
         : componentTokens.artworkSize;
-    final bool useSingleLineMetadata =
-        shellPillLayout || (tightHeight && !shellDockLayout);
-
     final double artworkInfoGap = isShellChrome
         ? designTokens.spaceExtraSmall
         : componentTokens.artworkInfoGap;
     final double infoControlsGap = isShellChrome
         ? designTokens.spaceExtraSmall
         : componentTokens.infoControlsGap;
+    final bool useCollapsedBandLayout =
+        isShellChrome ||
+        (constraints.hasBoundedHeight &&
+            constraints.maxHeight.isFinite &&
+            tightHeight);
+    final double metadataMaxWidth = math.max(
+      0,
+      resolvedLayoutWidth -
+          _tilawaMediaPlayerBarLeadingWidth(componentTokens, artworkSize) -
+          _tilawaMediaPlayerBarFullTransportWidth(
+            tokens: componentTokens,
+            showSleepTimer: showSleepTimer,
+          ) -
+          infoControlsGap,
+    );
+    final double metadataMaxHeight = useCollapsedBandLayout || shellDockLayout
+        ? componentTokens.playPauseButtonSize
+        : double.infinity;
+    final bool useSingleLineMetadata = _useCompactPlayerMetadata(
+      context: context,
+      shellPillLayout: shellPillLayout,
+      shellDockLayout: shellDockLayout,
+      tightHeight: tightHeight,
+      useCollapsedBandLayout: useCollapsedBandLayout,
+      title: title,
+      subtitle: subtitle,
+      titleStyle: titleStyle,
+      subtitleStyle: subtitleStyle,
+      infoGap: componentTokens.infoGap,
+      maxWidth: metadataMaxWidth,
+      maxHeight: metadataMaxHeight,
+    );
 
     final VoidCallback? identityTap = onTap;
     final bool usePillOutline =
@@ -350,11 +380,6 @@ class TilawaMediaPlayerBar extends StatelessWidget {
       ],
     );
 
-    final bool useCollapsedBandLayout =
-        isShellChrome ||
-        (constraints.hasBoundedHeight &&
-            constraints.maxHeight.isFinite &&
-            tightHeight);
     final double? availableInnerHeight =
         useCollapsedBandLayout &&
             constraints.hasBoundedHeight &&
@@ -512,6 +537,46 @@ double _tilawaMediaPlayerBarFullTransportWidth({
   final int controlCount = showSleepTimer ? 2 : 1;
   return controlCount * tokens.controlButtonSize +
       (controlCount - 1) * tokens.controlsGap;
+}
+
+bool _useCompactPlayerMetadata({
+  required BuildContext context,
+  required bool shellPillLayout,
+  required bool shellDockLayout,
+  required bool tightHeight,
+  required bool useCollapsedBandLayout,
+  required String title,
+  required String? subtitle,
+  required TextStyle titleStyle,
+  required TextStyle subtitleStyle,
+  required double infoGap,
+  required double maxWidth,
+  required double maxHeight,
+}) {
+  if (subtitle == null || subtitle.isEmpty) {
+    return shellPillLayout || (tightHeight && !shellDockLayout);
+  }
+  if (shellPillLayout || (tightHeight && !shellDockLayout)) {
+    return true;
+  }
+  if (!shellDockLayout && !useCollapsedBandLayout) {
+    return false;
+  }
+  final double titleHeight = tilawaMeasureTextHeight(
+    context: context,
+    style: titleStyle,
+    text: title,
+    maxLines: 1,
+    maxWidth: maxWidth,
+  );
+  final double subtitleHeight = tilawaMeasureTextHeight(
+    context: context,
+    style: subtitleStyle,
+    text: subtitle,
+    maxLines: 1,
+    maxWidth: maxWidth,
+  );
+  return titleHeight + infoGap + subtitleHeight > maxHeight + 0.5;
 }
 
 /// Single-line surah · reciter row for the compact shell mini player.

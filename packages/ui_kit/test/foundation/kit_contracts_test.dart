@@ -89,4 +89,17 @@ void main() {
       );
     },
   );
+
+  test('icon container extents use centralized token getters', () {
+    final tokens = MeMuslimDesignTokens.light();
+    expect(tokens.minIconSize, kMinIconSize);
+    expect(tokens.iconBoxSize, kIconBoxSize);
+    expect(tokens.iconBadgeSize, kIconBadgeSize);
+    expect(tokens.minIconSize, tokens.iconSizeMedium + tokens.spaceSmall);
+    expect(tokens.iconBoxSize, tokens.iconSizeLarge + tokens.spaceMedium);
+    expect(
+      tokens.iconBadgeSize,
+      tokens.iconSizeLarge + tokens.spaceExtraLarge,
+    );
+  });
 }

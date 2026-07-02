@@ -141,8 +141,7 @@ class _ReciterDetailsScreenState extends State<ReciterDetailsScreen> {
     final tokens = context.tokens;
     if (isGrid) {
       final double itemHeight =
-          tokens.iconSizeLarge +
-          tokens.spaceExtraLarge +
+          tokens.iconBadgeSize +
           tokens.spaceSmall +
           tokens.spaceExtraLarge * 2 +
           tokens.spaceLarge +
@@ -150,8 +149,7 @@ class _ReciterDetailsScreenState extends State<ReciterDetailsScreen> {
       final int row = playingIndex ~/ 2;
       itemOffset = row * (itemHeight + tokens.spaceSmall);
     } else {
-      final double tileHeight =
-          tokens.iconSizeLarge + tokens.spaceExtraLarge + tokens.spaceLarge * 2;
+      final double tileHeight = tokens.iconBadgeSize + tokens.spaceLarge * 2;
       itemOffset = playingIndex * (tileHeight + tokens.spaceExtraSmall);
     }
 
