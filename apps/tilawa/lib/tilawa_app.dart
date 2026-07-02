@@ -208,7 +208,7 @@ class _PlayerApp extends StatelessWidget {
 
   /// Matches [DESIGN.md] §3 — predictable layouts with moderate a11y scaling.
   static const double _kTextScaleClampMin = 1.0;
-  static const double _kTextScaleClampMax = 1.4;
+  static const double _kTextScaleClampMax = kTilawaGlobalTextScaleFactor;
 
   static Future<void> _reschedulePrayerNotificationsForLocaleChange() async {
     try {

@@ -338,9 +338,13 @@ void main() {
                 onPlayPause: () {},
               ),
             ),
-            textScaler: tilawaProductTextScaler(
-              const TextScaler.linear(1),
-            ).clamp(minScaleFactor: 1, maxScaleFactor: 1.4),
+            textScaler:
+                tilawaProductTextScaler(
+                  const TextScaler.linear(1),
+                ).clamp(
+                  minScaleFactor: 1,
+                  maxScaleFactor: kTilawaGlobalTextScaleFactor,
+                ),
           ),
         );
 

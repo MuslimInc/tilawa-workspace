@@ -147,9 +147,13 @@ void main() {
           _wrap(
             brightness: Brightness.light,
             textDirection: TextDirection.rtl,
-            textScaler: tilawaProductTextScaler(
-              const TextScaler.linear(1),
-            ).clamp(minScaleFactor: 1, maxScaleFactor: 1.4),
+            textScaler:
+                tilawaProductTextScaler(
+                  const TextScaler.linear(1),
+                ).clamp(
+                  minScaleFactor: 1,
+                  maxScaleFactor: kTilawaGlobalTextScaleFactor,
+                ),
             child: const SizedBox(
               width: 350,
               child: TilawaCapabilityActionCard(

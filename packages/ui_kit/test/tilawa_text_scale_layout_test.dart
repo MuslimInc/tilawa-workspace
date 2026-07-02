@@ -5,7 +5,7 @@ import 'package:tilawa_ui_kit/tilawa_ui_kit.dart';
 
 TextScaler _productTextScaler() => tilawaProductTextScaler(
   const TextScaler.linear(1),
-).clamp(minScaleFactor: 1, maxScaleFactor: 1.4);
+).clamp(minScaleFactor: 1, maxScaleFactor: kTilawaGlobalTextScaleFactor);
 
 Widget _scaledApp({
   required Widget child,

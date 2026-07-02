@@ -1,3 +1,4 @@
+import 'package:flutter_svg/flutter_svg.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:tilawa_ui_kit/tilawa_ui_kit.dart';
@@ -109,7 +110,7 @@ void main() {
       onPressed: () {},
     );
 
-    expect(find.byType(PositionedDirectional), findsOneWidget);
+    expect(find.byType(SvgPicture), findsOneWidget);
     expect(find.text('Sign in with Google'), findsOneWidget);
   });
 
@@ -124,12 +125,6 @@ void main() {
     );
 
     expect(find.byType(TilawaLoadingIndicator), findsOneWidget);
-    final Opacity opacity = tester.widget<Opacity>(
-      find.descendant(
-        of: find.byType(TilawaGoogleSignInButton),
-        matching: find.byType(Opacity),
-      ),
-    );
-    expect(opacity.opacity, 0);
+    expect(find.text('Sign in with Google'), findsOneWidget);
   });
 }

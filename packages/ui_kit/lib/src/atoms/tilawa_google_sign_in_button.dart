@@ -58,7 +58,7 @@ class TilawaGoogleSignInButton extends StatelessWidget {
     super.key,
     required this.label,
     this.onPressed,
-    this.isLoading = true,
+    this.isLoading = false,
     this.isFullWidth = true,
     this.appearance = GoogleSignInButtonAppearance.auto,
     this.semanticLabel,
@@ -126,7 +126,22 @@ class TilawaGoogleSignInButton extends StatelessWidget {
     );
     final BorderRadius borderRadius = BorderRadius.circular(cornerRadius);
 
-    final ShapeBorder shape = StadiumBorder();
+    final ShapeBorder shape = switch (resolved) {
+      GoogleSignInButtonAppearance.light => StadiumBorder(
+        side: const BorderSide(
+          color: GoogleSignInButtonBrand.lightBorder,
+          width: GoogleSignInButtonBrand.borderWidth,
+        ),
+      ),
+      GoogleSignInButtonAppearance.dark => StadiumBorder(
+        side: const BorderSide(
+          color: GoogleSignInButtonBrand.darkBorder,
+          width: GoogleSignInButtonBrand.borderWidth,
+        ),
+      ),
+      GoogleSignInButtonAppearance.neutral => const StadiumBorder(),
+      GoogleSignInButtonAppearance.auto => const StadiumBorder(),
+    };
 
     final Widget logoAndLabel = Padding(
       padding: const EdgeInsets.symmetric(

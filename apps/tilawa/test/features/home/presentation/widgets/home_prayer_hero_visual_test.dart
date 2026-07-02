@@ -103,13 +103,13 @@ void main() {
       await _expectGolden(tester, 'home_hero_small_screen');
     });
 
-    testWidgets('text scale 1.4', (tester) async {
+    testWidgets('text scale product', (tester) async {
       await _pumpHome(
         tester,
         size: const Size(393, 852),
-        textScale: 1.4,
+        textScale: 1,
       );
-      await _expectGolden(tester, 'home_hero_text_scale_1_4');
+      await _expectGolden(tester, 'home_hero_text_scale_product');
     });
   });
 }
@@ -138,7 +138,13 @@ Future<void> _pumpHome(
   await tester.pumpWidget(
     MediaQuery(
       data: MediaQueryData(
-        textScaler: TextScaler.linear(textScale),
+        textScaler:
+            tilawaProductTextScaler(
+              TextScaler.linear(textScale),
+            ).clamp(
+              minScaleFactor: 1.0,
+              maxScaleFactor: kTilawaGlobalTextScaleFactor,
+            ),
         size: size,
       ),
       child: MaterialApp(
