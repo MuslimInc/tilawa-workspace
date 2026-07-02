@@ -82,6 +82,13 @@ class DownloadsRepositoryImpl implements DownloadsRepository {
     await _downloadUpdatesController.close();
   }
 
+  void _emitDownloadUpdate(DownloadItem item) {
+    if (_downloadUpdatesController.isClosed) {
+      return;
+    }
+    _downloadUpdatesController.add(item);
+  }
+
   @override
   Future<List<DownloadItem>> getAllDownloads() async {
     final List<DownloadItem> downloads = await localDataSource.getDownloads();
@@ -153,13 +160,13 @@ class DownloadsRepositoryImpl implements DownloadsRepository {
   @override
   Future<void> addDownload(DownloadItem downloadItem) async {
     await localDataSource.addDownload(downloadItem);
-    _downloadUpdatesController.add(downloadItem);
+    _emitDownloadUpdate(downloadItem);
   }
 
   @override
   Future<void> updateDownload(DownloadItem downloadItem) async {
     await localDataSource.updateDownload(downloadItem);
-    _downloadUpdatesController.add(downloadItem);
+    _emitDownloadUpdate(downloadItem);
   }
 
   @override
@@ -434,7 +441,9 @@ class DownloadsRepositoryImpl implements DownloadsRepository {
       await localDataSource.addDownloads(dbItems);
 
       // Also emit updates to the stream for each item so listeners (UI) know they are pending
-      dbItems.forEach(_downloadUpdatesController.add);
+      for (final DownloadItem item in dbItems) {
+        _emitDownloadUpdate(item);
+      }
 
       // Get reciter name from first item (all items in batch are for same reciter)
       final String? reciterName = queueItems.isNotEmpty

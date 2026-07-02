@@ -70,12 +70,7 @@ void _showSignedInElsewhereDialog(BuildContext listenerContext) {
               onPressed: () {
                 Navigator.of(dialogContext).pop();
                 final loginLocation = const LoginRoute().location;
-                final currentLocation = AppRouter
-                    .router
-                    .routerDelegate
-                    .currentConfiguration
-                    .uri
-                    .path;
+                final String? currentLocation = AppRouter.safeActivePath;
                 if (currentLocation != loginLocation) {
                   AppRouter.router.go(loginLocation);
                 }

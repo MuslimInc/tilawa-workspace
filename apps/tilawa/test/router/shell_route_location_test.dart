@@ -14,4 +14,16 @@ void main() {
       expect(ShellRouteLocation.activeMatchedLocation(empty), '/');
     });
   });
+
+  group('ShellRouteLocation.safeUriPath', () {
+    test('returns null when the match list is empty', () {
+      final RouteMatchList empty = RouteMatchList(
+        matches: const <RouteMatchBase>[],
+        uri: Uri.parse('/'),
+        pathParameters: const <String, String>{},
+      );
+
+      expect(ShellRouteLocation.safeUriPath(empty), isNull);
+    });
+  });
 }

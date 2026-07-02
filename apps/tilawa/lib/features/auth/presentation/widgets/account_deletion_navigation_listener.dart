@@ -28,8 +28,7 @@ class AccountDeletionNavigationListener extends StatelessWidget {
       listener: (BuildContext context, AuthState state) {
         tracker.clearPendingLoginNavigation();
         final String loginLocation = const LoginRoute().location;
-        final String currentLocation =
-            AppRouter.router.routerDelegate.currentConfiguration.uri.path;
+        final String? currentLocation = AppRouter.safeActivePath;
         if (currentLocation == loginLocation) {
           logger.d(
             '[DeleteFirebaseUser] already on login after delete '

@@ -109,6 +109,9 @@ class FirebaseCrashlyticsServiceImpl implements CrashlyticsService {
     if (isIgnorableWakelockPlatformNoise(error)) {
       return false;
     }
+    if (CrashReportingContext.isIgnorableAuthSessionNoise(error)) {
+      return false;
+    }
     return true;
   }
 

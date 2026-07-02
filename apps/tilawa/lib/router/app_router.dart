@@ -481,13 +481,12 @@ class AppRouter {
       }
       return state.matchedLocation;
     } catch (_) {
-      try {
-        return r.routerDelegate.currentConfiguration.uri.toString();
-      } catch (__) {
-        return null;
-      }
+      return ShellRouteLocation.safeUriPath();
     }
   }
+
+  /// Defensive active path for auth/navigation listeners during teardown.
+  static String? get safeActivePath => ShellRouteLocation.safeUriPath();
 
   static List<NavigatorObserver> _getObservers() {
     final List<NavigatorObserver> observers = <NavigatorObserver>[];
@@ -588,8 +587,7 @@ class AppRouter {
 
     final String target = const PrayerNotificationStatusRoute().location;
     try {
-      final String activePath =
-          router.routerDelegate.currentConfiguration.uri.path;
+      final String? activePath = ShellRouteLocation.safeUriPath();
       if (activePath == target) {
         return true;
       }

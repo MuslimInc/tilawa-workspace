@@ -7,6 +7,27 @@ import 'app_router.dart';
 /// [RouteMatchList.matches].last is often the [ShellRouteMatch] (e.g. `/`),
 /// not the leaf screen (e.g. `/history`) pushed on the shell stack.
 abstract final class ShellRouteLocation {
+  /// Active route path, or null while [RouteMatchList] has no matches yet.
+  ///
+  /// Reading [RouteMatchList.uri] on an empty configuration throws
+  /// [StateError] (No element) during auth teardown or Android back gestures.
+  static String? safeUriPath([RouteMatchList? configuration]) {
+    try {
+      final RouteMatchList config =
+          configuration ?? AppRouter.router.routerDelegate.currentConfiguration;
+      if (config.isEmpty) {
+        return null;
+      }
+      final String path = config.uri.path;
+      if (path.isNotEmpty) {
+        return path;
+      }
+      return activeMatchedLocation(config);
+    } catch (_) {
+      return null;
+    }
+  }
+
   /// Active matched path for shell policy and bottom-nav routing.
   static String activeMatchedLocation([RouteMatchList? configuration]) {
     try {

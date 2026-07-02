@@ -268,4 +268,70 @@ void main() {
       );
     });
   });
+
+  group('filterExpectedSessionNoiseForMode', () {
+    test('drops invalid Firebase credential errors in release', () {
+      final SentryEvent event = SentryEvent(
+        throwable: StateError(
+          '[firebase_auth/unknown] credential is no longer valid',
+        ),
+      );
+
+      expect(
+        CrashReportingContext.filterExpectedSessionNoiseForMode(
+          event: event,
+          releaseMode: true,
+        ),
+        isNull,
+      );
+    });
+
+    test('drops No element StateError during didPopRoute in release', () {
+      final SentryEvent event = SentryEvent(
+        throwable: StateError('Bad state: No element'),
+        message: SentryMessage('WidgetsBindingObserver.didPopRoute'),
+      );
+
+      expect(
+        CrashReportingContext.filterExpectedSessionNoiseForMode(
+          event: event,
+          releaseMode: true,
+        ),
+        isNull,
+      );
+    });
+
+    test('keeps unrelated StateError in release', () {
+      final SentryEvent event = SentryEvent(
+        throwable: StateError('Bad state: unexpected'),
+      );
+
+      expect(
+        CrashReportingContext.filterExpectedSessionNoiseForMode(
+          event: event,
+          releaseMode: true,
+        ),
+        event,
+      );
+    });
+  });
+
+  group('filterAuthSessionLogsForMode', () {
+    test('drops auth invalidation logs in release', () {
+      final SentryLog log = SentryLog(
+        timestamp: DateTime.utc(2026),
+        level: SentryLogLevel.error,
+        body: "The user's credential is no longer valid",
+        attributes: <String, SentryAttribute>{},
+      );
+
+      expect(
+        CrashReportingContext.filterAuthSessionLogsForMode(
+          log: log,
+          releaseMode: true,
+        ),
+        isNull,
+      );
+    });
+  });
 }

@@ -87,7 +87,89 @@ abstract final class CrashReportingContext {
     if (afterEmulator == null) {
       return null;
     }
-    return filterWakelockPlatformNoiseInRelease(afterEmulator, hint);
+    final SentryEvent? afterWakelock = filterWakelockPlatformNoiseInRelease(
+      afterEmulator,
+      hint,
+    );
+    if (afterWakelock == null) {
+      return null;
+    }
+    return filterExpectedSessionNoiseInRelease(afterWakelock, hint);
+  }
+
+  /// Drops expected auth invalidation and empty-route [StateError] noise.
+  @visibleForTesting
+  static SentryEvent? filterExpectedSessionNoiseInRelease(
+    SentryEvent event,
+    Hint hint,
+  ) {
+    return filterExpectedSessionNoiseForMode(
+      event: event,
+      releaseMode: kReleaseMode,
+    );
+  }
+
+  @visibleForTesting
+  static SentryEvent? filterExpectedSessionNoiseForMode({
+    required SentryEvent event,
+    required bool releaseMode,
+  }) {
+    if (!releaseMode) {
+      return event;
+    }
+
+    final Object? throwable = event.throwable;
+    if (throwable != null) {
+      if (isIgnorableAuthSessionNoise(throwable)) {
+        return null;
+      }
+      if (isIgnorableEmptyRouteStateError(event)) {
+        return null;
+      }
+    }
+
+    final String formattedMessage = _eventMessageText(event);
+    if (formattedMessage.isNotEmpty &&
+        isIgnorableAuthSessionNoise(formattedMessage)) {
+      return null;
+    }
+
+    return event;
+  }
+
+  /// True for Firebase Auth invalid-credential / forced re-sign-in noise.
+  @visibleForTesting
+  static bool isIgnorableAuthSessionNoise(Object error) {
+    final String description = error.toString().toLowerCase();
+    return description.contains('credential is no longer valid') ||
+        description.contains('user must sign in again') ||
+        description.contains('user-token-expired') ||
+        description.contains('session_expired') ||
+        description.contains('[firebase_auth/');
+  }
+
+  /// True when [StateError] (No element) happens during Android back / route pop.
+  @visibleForTesting
+  static bool isIgnorableEmptyRouteStateError(SentryEvent event) {
+    final Object? throwable = event.throwable;
+    if (throwable is! StateError) {
+      return false;
+    }
+    final String message = throwable.message;
+    if (!message.contains('No element')) {
+      return false;
+    }
+    return _eventDiagnosticText(event).contains('didPopRoute');
+  }
+
+  static String _eventDiagnosticText(SentryEvent event) {
+    final StringBuffer buffer = StringBuffer(_eventMessageText(event));
+    for (final MapEntry<String, dynamic> entry in event.contexts.entries) {
+      buffer
+        ..write(entry.key)
+        ..write(entry.value);
+    }
+    return buffer.toString();
   }
 
   /// Drops wakelock/no-foreground-activity platform errors in release builds.
@@ -150,7 +232,33 @@ abstract final class CrashReportingContext {
     if (afterEmulator == null) {
       return null;
     }
-    return filterWakelockLogsInRelease(afterEmulator);
+    final SentryLog? afterWakelock = filterWakelockLogsInRelease(afterEmulator);
+    if (afterWakelock == null) {
+      return null;
+    }
+    return filterAuthSessionLogsInRelease(afterWakelock);
+  }
+
+  /// Drops auth invalidation structured logs in release builds.
+  @visibleForTesting
+  static SentryLog? filterAuthSessionLogsInRelease(SentryLog log) {
+    return filterAuthSessionLogsForMode(log: log, releaseMode: kReleaseMode);
+  }
+
+  @visibleForTesting
+  static SentryLog? filterAuthSessionLogsForMode({
+    required SentryLog log,
+    required bool releaseMode,
+  }) {
+    if (!releaseMode) {
+      return log;
+    }
+
+    if (isIgnorableAuthSessionNoise(log.body)) {
+      return null;
+    }
+
+    return log;
   }
 
   /// Drops wakelock/no-foreground-activity structured logs in release builds.

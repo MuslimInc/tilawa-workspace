@@ -672,6 +672,7 @@ class _TeacherDashboardScreenState extends State<TeacherDashboardScreen> {
                 s is TeacherDashboardEmpty ||
                 s is TeacherDashboardFailure;
           },
+          orElse: () => bloc.state,
         )
         .then((_) {});
 

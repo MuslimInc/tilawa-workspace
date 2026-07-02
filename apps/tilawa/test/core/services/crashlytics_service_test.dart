@@ -44,6 +44,16 @@ void main() {
           isFalse,
         );
       });
+
+      test('returns false for invalid Firebase credential noise', () {
+        expect(
+          service.shouldReportPlatformErrorFatally(
+            "[firebase_auth/unknown] The user's credential is no longer valid. "
+            'The user must sign in again.',
+          ),
+          isFalse,
+        );
+      });
     });
   });
 }

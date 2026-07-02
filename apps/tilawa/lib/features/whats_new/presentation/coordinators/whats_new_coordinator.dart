@@ -2,6 +2,7 @@ import 'package:injectable/injectable.dart';
 import 'package:tilawa/core/logging/app_logger.dart';
 import 'package:tilawa/features/tour_guide/domain/services/tour_flow_guard.dart';
 import 'package:tilawa/router/app_router.dart';
+import 'package:tilawa/router/shell_route_location.dart';
 import 'package:tilawa_core/constants/analytics_constants.dart';
 import 'package:tilawa_core/services/analytics_service.dart';
 
@@ -147,17 +148,8 @@ class WhatsNewCoordinator {
     };
   }
 
-  /// Returns null while the router has no matches yet — reading
-  /// [GoRouter.state] before the first route resolves throws a StateError.
   String? _currentRoutePath() {
-    if (AppRouter.router.routerDelegate.currentConfiguration.isEmpty) {
-      return null;
-    }
-    final String path = AppRouter.router.state.uri.path;
-    if (path.isNotEmpty) {
-      return path;
-    }
-    return AppRouter.router.state.matchedLocation;
+    return ShellRouteLocation.safeUriPath() ?? AppRouter.currentRouteLocation;
   }
 
   Future<void> _logSkipped(WhatsNewSkipReason reason) async {
