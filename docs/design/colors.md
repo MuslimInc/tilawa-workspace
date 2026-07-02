@@ -12,7 +12,8 @@ Tilawa's visual identity is **calm, modern, and premium**. The palette is intent
 The brand colour is **fixed**. Users do not pick a primary in production. The in-Settings colour picker is retained behind `--dart-define=TILAWA_SHOW_COLOR_PICKER=true` for dev/QA only.
 
 - **Primary:** Reference teal `#00897B` (`AppColors.primaryTeal` / `AppColors.defaultPrimary` / `PrimaryColorPreset.brandLocked`). Splash canvas uses the same teal; wordmark `#FFFFFF`.
-- **Light canvas / surface:** `#FFFFFF` (`ColorScheme.surface`, scaffold via `surfaceContainerLowest`).
+- **Light canvas (scaffold):** `#F4F2EE` (`AppColors.lightCanvas` → `ColorScheme.surfaceContainerLowest`).
+- **Light surface (cards):** `#FFFFFF` (`AppColors.lightSurface` → `ColorScheme.surface`).
 - **Ink (text):** `#212121` (`ColorScheme.onSurface`).
 - **Idle chips / upper container:** `#F5F5F5` → `ColorScheme.surfaceContainerHigh` (`AppColors.lightSurfaceContainerHighBase`).
 - **Hairline / outline:** `#EEEEEE` / `#E0E0E0` (`outlineVariant` / `outline`).
@@ -114,3 +115,4 @@ Regenerate after intentional visual changes:
 ```bash
 cd packages/ui_kit && flutter test test/goldens/ --update-goldens
 ```
+

@@ -7,7 +7,7 @@ import 'package:tilawa_ui_kit/tilawa_ui_kit.dart';
 void main() {
   group('AppBrandProbe', () {
     test(
-      'brand action green passes white onPrimary contrast (~4.7:1)',
+      'brand action green passes ink onPrimary contrast',
       () {
         final ratio = _contrastRatio(
           AppColors.lightSchemeOnPrimary,
@@ -16,7 +16,22 @@ void main() {
         expect(
           ratio,
           greaterThanOrEqualTo(4.5),
-          reason: 'white on #2B8659 (${ratio.toStringAsFixed(2)}:1)',
+          reason: 'ink onPrimary on #1DAB61 (${ratio.toStringAsFixed(2)}:1)',
+        );
+      },
+    );
+
+    test(
+      'dark brand primary passes ink onPrimary contrast',
+      () {
+        final ratio = _contrastRatio(
+          AppColors.lightSchemeOnPrimary,
+          AppColors.darkDefaultPrimary,
+        );
+        expect(
+          ratio,
+          greaterThanOrEqualTo(4.5),
+          reason: 'ink onPrimary on #6BC992 (${ratio.toStringAsFixed(2)}:1)',
         );
       },
     );

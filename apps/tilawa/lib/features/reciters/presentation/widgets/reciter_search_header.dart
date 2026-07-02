@@ -77,8 +77,6 @@ class ReciterDetailsSearchBar extends StatelessWidget {
                   icon: isList
                       ? FluentIcons.grid_24_regular
                       : FluentIcons.list_24_regular,
-                  isActive: !isList,
-                  toggled: !isList,
                   onTap: () {
                     context.read<ReciterDetailsBloc>().add(
                       const ToggleViewMode(),

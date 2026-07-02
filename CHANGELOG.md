@@ -14,6 +14,25 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   load, then crossfade to content; pull-to-refresh on loaded content never
   flashes the skeleton.
 
+### Fixed
+
+- **Offline guard**: Login/logout/delete-account connectivity checks respond
+  within ~3 seconds instead of hanging up to 10 seconds on degraded networks;
+  rapid repeated taps reuse a short-lived cached result instead of re-probing.
+- **Auth errors**: Unknown/unmapped auth failures now show a generic localized
+  message instead of raw exception text; diagnostic details stay in logs.
+- **Home dashboard**: Load/refresh failures are classified into typed kinds
+  (offline/timeout/unknown) with localized copy; pull-to-refresh failures keep
+  the cached dashboard visible and never surface raw error strings. Rapid
+  pull-to-refresh no longer queues a duplicate dashboard fetch.
+- **Session validity**: Firestore/session verification errors are logged and
+  mapped to typed failures instead of being silently swallowed; network
+  outages still degrade safely to "verification unknown" without signing the
+  user out.
+- **Bug report screenshots**: Frame waits during feedback screenshot capture
+  are now bounded, so the capture can no longer hang the feedback flow if the
+  app stops producing frames (e.g. backgrounded mid-capture).
+
 ## [2.0.17+71] - 2026-07-01 [Google Play Production]
 
 ### Added

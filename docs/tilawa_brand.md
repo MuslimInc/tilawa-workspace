@@ -20,7 +20,7 @@ brown + gold system.
 
 | Word | What it means in pixels |
 |---|---|
-| **Warm** | Soft neutral canvas (`#FAFAFA`), brown ink (`#8B5E3C`), gold featured cards (`#FFD28E`→`#FF9E44`). No cool porcelain, no sage-green chrome. |
+| **Warm** | Soft parchment canvas (`#F4F2EE`), brown ink (`#8B5E3C`), gold featured cards (`#FFD28E`→`#FF9E44`). No cool porcelain, no sage-green chrome. |
 | **Clear** | One primary accent per screen. Generous radius (20–24 dp cards). Readable metadata in warm grey-brown. |
 | **Faithful** | Arabic typography care (`textHeightLoose`), reverent reader surfaces, no stereotype chrome (mosques/crescents in app bars). |
 
@@ -44,13 +44,14 @@ brown + gold system.
 |---|---|---|
 | **Brown ink** | `colorScheme.primary` (`#8B5E3C`) | CTAs, active nav, selected pills/segments, link icons |
 | **Gold gilding** | `colorScheme.tertiary` / featured gradient stops | Hero cards, Last Read, surah header banners — not purchase buttons |
-| **Canvas** | `colorScheme.surfaceContainerLowest` (`#FAFAFA`) | Scaffold, canvas |
-| **Card white** | `colorScheme.surface` | List rows, settings tiles |
+| **Canvas** | `colorScheme.surfaceContainerLowest` (`#F4F2EE`) | Scaffold, canvas (~60% neutral) |
+| **Card white** | `colorScheme.surface` (`#FFFFFF`) | List rows, settings tiles (~30% secondary) |
 | **Warm beige** | `colorScheme.surfaceContainerHigh` | Idle chips, search rests |
 | **Hairline** | `colorScheme.outlineVariant` | Dividers at `borderWidthThin` |
 | **Featured text** | `AppColors.featuredGradientForeground` | Copy on gold gradient cards |
 
 **Anti-patterns:**
+- Don't flatten scaffold/canvas to pure white (`#FFFFFF`) — use warm parchment (`#F4F2EE`) so white cards lift.
 - Don't reintroduce sage green (`#219653`) as production primary.
 - Don't use cool grey porcelain (`#F4F5F7`) on lifestyle surfaces.
 - Don't use gold gradient on Support MeMuslim CTAs.
@@ -127,3 +128,4 @@ not Premium. See §8 in prior revision — strings live in `*.arb`.
 Unchanged ethics — see [`specs/016-support-tilawa/spec.md`](../specs/016-support-tilawa/spec.md)
 and [`packages/ui_kit/docs/support_visual_system.md`](../packages/ui_kit/docs/support_visual_system.md).
 Calm parchment surfaces; brown Ink CTA; no gold pay heroes.
+

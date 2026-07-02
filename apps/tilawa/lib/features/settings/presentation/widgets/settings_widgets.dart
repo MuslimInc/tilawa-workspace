@@ -158,60 +158,70 @@ class SettingsProfileHeader extends StatelessWidget {
           final u => settingsMemberSinceLabel(context, u.createdAt),
         };
         final photoUrl = user?.photoUrl?.trim() ?? '';
+        final double groupRadius = tokens.resolveRadius(
+          family: TilawaRadiusFamily.section,
+        );
 
         return TilawaSettingsGroupHorizontalInset(
-          child: Material(
-            color: Colors.transparent,
-            child: InkWell(
-              onTap: isGuest ? () => const LoginRoute().push(context) : null,
-              borderRadius: BorderRadius.circular(
-                tokens.resolveRadius(family: TilawaRadiusFamily.card),
-              ),
-              child: Padding(
-                padding: EdgeInsets.fromLTRB(
-                  tokens.spaceMedium,
-                  tokens.spaceLarge,
-                  tokens.spaceMedium,
-                  tokens.spaceMedium,
-                ),
-                child: Column(
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    ProfileAvatar(
-                      photoUrl: photoUrl,
-                      displayName: user?.displayName,
-                      size: 72,
+          child: TilawaSettingsGroupPanel(
+            children: [
+              Material(
+                color: Colors.transparent,
+                child: InkWell(
+                  onTap: isGuest
+                      ? () => const LoginRoute().push(context)
+                      : null,
+                  borderRadius: BorderRadius.circular(groupRadius),
+                  child: Padding(
+                    padding: EdgeInsets.fromLTRB(
+                      tokens.spaceMedium,
+                      tokens.spaceMedium,
+                      tokens.spaceMedium,
+                      tokens.spaceMedium,
                     ),
-                    SizedBox(height: tokens.spaceMedium),
-                    Text(
-                      title,
-                      textAlign: TextAlign.center,
-                      maxLines: 2,
-                      overflow: TextOverflow.ellipsis,
-                      style: theme.textTheme.titleMedium?.copyWith(
-                        fontWeight: FontWeight.w700,
-                        color: colorScheme.onSurface,
-                      ),
-                    ),
-                    if (subtitle != null) ...[
-                      SizedBox(height: tokens.spaceExtraSmall),
-                      Text(
-                        subtitle,
-                        textAlign: TextAlign.center,
-                        style: theme.textTheme.bodySmall?.copyWith(
-                          color: colorScheme.onSurfaceVariant,
+                    child: Column(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        ProfileAvatar(
+                          photoUrl: photoUrl,
+                          displayName: user?.displayName,
+                          size: 72,
                         ),
-                      ),
-                    ],
-                    if (!isGuest) ...[
-                      const _SettingsAdminBadge(),
-                      if (quranSessionsFeatureConfig().showProfileTeacherEntry)
-                        _SettingsVerifiedTeacherBadge(isGuest: isGuest),
-                    ],
-                  ],
+                        SizedBox(height: tokens.spaceMedium),
+                        Text(
+                          title,
+                          textAlign: TextAlign.center,
+                          maxLines: 2,
+                          overflow: TextOverflow.ellipsis,
+                          style: theme.textTheme.titleMedium?.copyWith(
+                            fontWeight: FontWeight.w700,
+                            color: colorScheme.onSurface,
+                          ),
+                        ),
+                        if (subtitle != null) ...[
+                          SizedBox(height: tokens.spaceExtraSmall),
+                          Text(
+                            subtitle,
+                            textAlign: TextAlign.center,
+                            style: theme.textTheme.bodySmall?.copyWith(
+                              color: colorScheme.onSurface.withValues(
+                                alpha: tokens.opacityEmphasis,
+                              ),
+                            ),
+                          ),
+                        ],
+                        if (!isGuest) ...[
+                          const _SettingsAdminBadge(),
+                          if (quranSessionsFeatureConfig()
+                              .showProfileTeacherEntry)
+                            _SettingsVerifiedTeacherBadge(isGuest: isGuest),
+                        ],
+                      ],
+                    ),
+                  ),
                 ),
               ),
-            ),
+            ],
           ),
         );
       },
@@ -236,6 +246,9 @@ class _SettingsAdminBadgeState extends State<_SettingsAdminBadge> {
   }
 
   Future<void> _load() async {
+    if (!getIt.isRegistered<AuthRepository>()) {
+      return;
+    }
     final bool isAdmin = await getIt<AuthRepository>().hasAdminClaim();
     if (mounted) {
       setState(() => _isAdmin = isAdmin);
@@ -584,7 +597,7 @@ class SettingsVersionFooter extends StatelessWidget {
             tokens.spaceMedium,
             tokens.spaceLarge,
             tokens.spaceMedium,
-            tokens.spaceExtraLarge,
+            tokens.spaceMedium,
           ),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.stretch,

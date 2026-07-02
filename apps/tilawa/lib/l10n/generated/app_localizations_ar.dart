@@ -1208,6 +1208,9 @@ class AppLocalizationsAr extends AppLocalizations {
       'لا يوجد اتصال بالإنترنت. يرجى إعادة الاتصال ثم المحاولة مرة أخرى.';
 
   @override
+  String get authErrorGenericMessage => 'حدث خطأ ما. يرجى المحاولة مرة أخرى.';
+
+  @override
   String get downloadLowStorageWarning =>
       'قد لا تكون مساحة التخزين المتاحة كافية لهذا التحميل. حرّر مساحة إذا فشل التحميل.';
 

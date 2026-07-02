@@ -10,10 +10,12 @@ class JuzIndexTile extends StatelessWidget {
     super.key,
     required this.juzNumber,
     required this.onTap,
+    this.grouped = false,
   });
 
   final int juzNumber;
   final VoidCallback onTap;
+  final bool grouped;
 
   @override
   Widget build(BuildContext context) {
@@ -29,6 +31,60 @@ class JuzIndexTile extends StatelessWidget {
     final ({int surah, int verse}) start = juz.start;
     final String surahName = getSurahName(start.surah);
 
+    final Widget row = Row(
+      children: [
+        _CatalogNumberBadge(
+          label: juzNumber.toString().padLeft(2, '0'),
+        ),
+        SizedBox(width: tokens.spaceMedium),
+        Expanded(
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(
+                '${context.l10n.juz} $juzNumber',
+                style: grouped
+                    ? theme.textTheme.bodyLarge?.copyWith(
+                        fontWeight: FontWeight.w600,
+                        color: colorScheme.onSurface,
+                      )
+                    : readerTheme.surahTileNameTextStyle,
+              ),
+              SizedBox(height: tokens.spaceExtraSmall),
+              Text(
+                surahName,
+                style: grouped
+                    ? theme.textTheme.bodySmall?.copyWith(
+                        color: colorScheme.onSurfaceVariant.withValues(
+                          alpha: tokens.opacityEmphasis,
+                        ),
+                      )
+                    : readerTheme.surahTileMetaTextStyle,
+              ),
+            ],
+          ),
+        ),
+        Icon(
+          TilawaIcons.chevronRight,
+          color: colorScheme.onSurfaceVariant,
+          size: tokens.iconSizeSmall,
+        ),
+      ],
+    );
+
+    if (grouped) {
+      return TilawaInteractiveSurface(
+        onTap: onTap,
+        child: Padding(
+          padding: EdgeInsets.symmetric(
+            horizontal: tokens.spaceMedium,
+            vertical: tokens.spaceMedium,
+          ),
+          child: row,
+        ),
+      );
+    }
+
     return TilawaCard(
       onTap: onTap,
       padding: EdgeInsets.symmetric(
@@ -37,35 +93,7 @@ class JuzIndexTile extends StatelessWidget {
       ),
       backgroundColor: colorScheme.surface,
       borderRadius: tokens.radiusCard,
-      child: Row(
-        children: [
-          _CatalogNumberBadge(
-            label: juzNumber.toString().padLeft(2, '0'),
-          ),
-          SizedBox(width: tokens.spaceMedium),
-          Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(
-                  '${context.l10n.juz} $juzNumber',
-                  style: readerTheme.surahTileNameTextStyle,
-                ),
-                SizedBox(height: tokens.spaceExtraSmall),
-                Text(
-                  surahName,
-                  style: readerTheme.surahTileMetaTextStyle,
-                ),
-              ],
-            ),
-          ),
-          Icon(
-            Icons.chevron_right_rounded,
-            color: colorScheme.onSurfaceVariant,
-            size: tokens.iconSizeSmall,
-          ),
-        ],
-      ),
+      child: row,
     );
   }
 }
@@ -76,10 +104,12 @@ class PageIndexTile extends StatelessWidget {
     super.key,
     required this.pageNumber,
     required this.onTap,
+    this.grouped = false,
   });
 
   final int pageNumber;
   final VoidCallback onTap;
+  final bool grouped;
 
   @override
   Widget build(BuildContext context) {
@@ -91,6 +121,60 @@ class PageIndexTile extends StatelessWidget {
     final PageSurahEntry first = pageData.first;
     final String surahName = getSurahName(first.surah);
 
+    final Widget row = Row(
+      children: [
+        _CatalogNumberBadge(
+          label: pageNumber.toString().padLeft(3, '0'),
+        ),
+        SizedBox(width: tokens.spaceMedium),
+        Expanded(
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(
+                '${context.l10n.page} $pageNumber',
+                style: grouped
+                    ? theme.textTheme.bodyLarge?.copyWith(
+                        fontWeight: FontWeight.w600,
+                        color: colorScheme.onSurface,
+                      )
+                    : readerTheme.surahTileNameTextStyle,
+              ),
+              SizedBox(height: tokens.spaceExtraSmall),
+              Text(
+                surahName,
+                style: grouped
+                    ? theme.textTheme.bodySmall?.copyWith(
+                        color: colorScheme.onSurfaceVariant.withValues(
+                          alpha: tokens.opacityEmphasis,
+                        ),
+                      )
+                    : readerTheme.surahTileMetaTextStyle,
+              ),
+            ],
+          ),
+        ),
+        Icon(
+          TilawaIcons.chevronRight,
+          color: colorScheme.onSurfaceVariant,
+          size: tokens.iconSizeSmall,
+        ),
+      ],
+    );
+
+    if (grouped) {
+      return TilawaInteractiveSurface(
+        onTap: onTap,
+        child: Padding(
+          padding: EdgeInsets.symmetric(
+            horizontal: tokens.spaceMedium,
+            vertical: tokens.spaceMedium,
+          ),
+          child: row,
+        ),
+      );
+    }
+
     return TilawaCard(
       onTap: onTap,
       padding: EdgeInsets.symmetric(
@@ -99,35 +183,7 @@ class PageIndexTile extends StatelessWidget {
       ),
       backgroundColor: colorScheme.surface,
       borderRadius: tokens.radiusCard,
-      child: Row(
-        children: [
-          _CatalogNumberBadge(
-            label: pageNumber.toString().padLeft(3, '0'),
-          ),
-          SizedBox(width: tokens.spaceMedium),
-          Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(
-                  '${context.l10n.page} $pageNumber',
-                  style: readerTheme.surahTileNameTextStyle,
-                ),
-                SizedBox(height: tokens.spaceExtraSmall),
-                Text(
-                  surahName,
-                  style: readerTheme.surahTileMetaTextStyle,
-                ),
-              ],
-            ),
-          ),
-          Icon(
-            Icons.chevron_right_rounded,
-            color: colorScheme.onSurfaceVariant,
-            size: tokens.iconSizeSmall,
-          ),
-        ],
-      ),
+      child: row,
     );
   }
 }

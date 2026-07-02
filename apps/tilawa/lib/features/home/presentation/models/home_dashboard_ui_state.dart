@@ -18,17 +18,15 @@ final class HomeDashboardUiState {
   const HomeDashboardUiState({
     required this.phase,
     this.dashboard,
-    this.failureMessage,
     this.failureIsOffline = false,
-    this.refreshErrorMessage,
+    this.refreshError,
     this.isRefreshingLocation = false,
   });
 
   final HomeDashboardUiPhase phase;
   final HomeDashboard? dashboard;
-  final String? failureMessage;
   final bool failureIsOffline;
-  final String? refreshErrorMessage;
+  final HomeDashboardFailureKind? refreshError;
   final bool isRefreshingLocation;
 
   bool get showFullSkeleton => phase == HomeDashboardUiPhase.initialSkeleton;
@@ -45,18 +43,17 @@ final class HomeDashboardUiState {
       ),
       HomeDashboardLoaded(
         :final dashboard,
-        :final refreshErrorMessage,
+        :final refreshError,
         :final isRefreshingLocation,
       ) =>
         HomeDashboardUiState(
           phase: HomeDashboardUiPhase.content,
           dashboard: dashboard,
-          refreshErrorMessage: refreshErrorMessage,
+          refreshError: refreshError,
           isRefreshingLocation: isRefreshingLocation,
         ),
-      HomeDashboardFailure(:final message, :final kind) => HomeDashboardUiState(
+      HomeDashboardFailure(:final kind) => HomeDashboardUiState(
         phase: HomeDashboardUiPhase.failure,
-        failureMessage: message,
         failureIsOffline: kind == HomeDashboardFailureKind.offline,
       ),
     };

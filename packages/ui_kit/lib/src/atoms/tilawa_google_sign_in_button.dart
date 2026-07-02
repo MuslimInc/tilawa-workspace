@@ -23,7 +23,7 @@ abstract final class GoogleSignInButtonBrand {
 
   static const double logoSize = 20;
   static const double borderWidth = 1;
-  static const double horizontalPadding = 12;
+  static const double horizontalPadding = 18;
   static const double logoTextGap = 12;
   static const double labelFontSize = 14;
   static const double labelLineHeight = 20;
@@ -58,7 +58,7 @@ class TilawaGoogleSignInButton extends StatelessWidget {
     super.key,
     required this.label,
     this.onPressed,
-    this.isLoading = false,
+    this.isLoading = true,
     this.isFullWidth = true,
     this.appearance = GoogleSignInButtonAppearance.auto,
     this.semanticLabel,
@@ -77,7 +77,7 @@ class TilawaGoogleSignInButton extends StatelessWidget {
 
   final String? semanticLabel;
 
-  bool get _isDisabled => onPressed == null || isLoading;
+  bool get _isDisabled => onPressed == null;
 
   GoogleSignInButtonAppearance _resolvedAppearance(BuildContext context) {
     if (appearance != GoogleSignInButtonAppearance.auto) {
@@ -100,12 +100,6 @@ class TilawaGoogleSignInButton extends StatelessWidget {
         GoogleSignInButtonBrand.neutralFill,
       GoogleSignInButtonAppearance.auto => GoogleSignInButtonBrand.lightFill,
     };
-    final Color? border = switch (resolved) {
-      GoogleSignInButtonAppearance.light => GoogleSignInButtonBrand.lightBorder,
-      GoogleSignInButtonAppearance.dark => GoogleSignInButtonBrand.darkBorder,
-      GoogleSignInButtonAppearance.neutral => null,
-      GoogleSignInButtonAppearance.auto => GoogleSignInButtonBrand.lightBorder,
-    };
     final Color labelColor = switch (resolved) {
       GoogleSignInButtonAppearance.light => GoogleSignInButtonBrand.lightLabel,
       GoogleSignInButtonAppearance.dark => GoogleSignInButtonBrand.darkLabel,
@@ -121,7 +115,7 @@ class TilawaGoogleSignInButton extends StatelessWidget {
       height:
           GoogleSignInButtonBrand.labelLineHeight /
           GoogleSignInButtonBrand.labelFontSize,
-      color: _isDisabled ? labelColor.withValues(alpha: 0.38) : labelColor,
+      color: labelColor,
     );
 
     final double height = tokens.minInteractiveDimension;
@@ -132,74 +126,54 @@ class TilawaGoogleSignInButton extends StatelessWidget {
     );
     final BorderRadius borderRadius = BorderRadius.circular(cornerRadius);
 
-    final ShapeBorder shape = border == null
-        ? StadiumBorder()
-        : StadiumBorder(
-            side: BorderSide(
-              color: _isDisabled ? border.withValues(alpha: 0.38) : border,
-              width: GoogleSignInButtonBrand.borderWidth,
-              strokeAlign: BorderSide.strokeAlignInside,
-            ),
-          );
+    final ShapeBorder shape = StadiumBorder();
 
-    final double logoBand =
-        GoogleSignInButtonBrand.horizontalPadding +
-        GoogleSignInButtonBrand.logoSize +
-        GoogleSignInButtonBrand.logoTextGap;
-
-    final Widget logoAndLabel = Stack(
-      alignment: Alignment.center,
-      children: <Widget>[
-        Padding(
-          padding: EdgeInsetsDirectional.only(
-            start: logoBand,
-            end: logoBand,
-          ),
-          child: Text(
-            label,
-            overflow: TextOverflow.ellipsis,
-            maxLines: 1,
-            textAlign: TextAlign.center,
-            style: labelStyle,
-          ),
-        ),
-        PositionedDirectional(
-          start: GoogleSignInButtonBrand.horizontalPadding,
-          top: 0,
-          bottom: 0,
-          child: Center(
+    final Widget logoAndLabel = Padding(
+      padding: const EdgeInsets.symmetric(
+        horizontal: GoogleSignInButtonBrand.horizontalPadding,
+      ),
+      child: Row(
+        mainAxisAlignment: .center,
+        mainAxisSize: .min,
+        spacing: GoogleSignInButtonBrand.logoTextGap,
+        children: <Widget>[
+          Center(
             child: const _GoogleSignInLogo(),
           ),
-        ),
-      ],
-    );
-
-    final Widget content = Stack(
-      alignment: Alignment.center,
-      children: <Widget>[
-        IgnorePointer(
-          ignoring: isLoading,
-          child: Opacity(
-            opacity: isLoading ? 0 : 1,
-            child: logoAndLabel,
-          ),
-        ),
-        if (isLoading)
-          SizedBox(
-            height: GoogleSignInButtonBrand.logoSize,
-            width: GoogleSignInButtonBrand.logoSize,
-            child: TilawaLoadingIndicator(
-              color: labelColor,
-              strokeWidth: 2,
+          Flexible(
+            child: Row(
+              spacing: GoogleSignInButtonBrand.logoTextGap,
+              children: [
+                Flexible(
+                  child: Text(
+                    label,
+                    overflow: TextOverflow.ellipsis,
+                    maxLines: 1,
+                    textAlign: TextAlign.center,
+                    style: labelStyle,
+                  ),
+                ),
+                (isLoading)
+                    ? SizedBox(
+                        width: 16,
+                        height: 16,
+                        child: TilawaLoadingIndicator(
+                          color: labelColor,
+                          strokeWidth: 2,
+                        ),
+                      )
+                    : const SizedBox.shrink(),
+              ],
             ),
           ),
-      ],
+        ],
+      ),
     );
 
     final Widget sizedContent = SizedBox(
       height: height,
       width: isFullWidth ? double.infinity : null,
-      child: content,
+      child: logoAndLabel,
     );
 
     // The whole branded button gets soft ink splash/highlight, state-layer press,

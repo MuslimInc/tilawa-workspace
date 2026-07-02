@@ -20,7 +20,7 @@ class SettingsTeacherApplicationEntrySection extends StatelessWidget {
     return Padding(
       padding: EdgeInsetsDirectional.only(
         top: tokens.spaceLarge,
-        bottom: tokens.spaceXXL,
+        bottom: tokens.spaceLarge,
       ),
       child: const TilawaSettingsGroupHorizontalInset(
         child: TilawaSettingsGroupPanel(

@@ -17,6 +17,20 @@ abstract final class TilawaFeedbackScreenshotCapture {
   static const int _minNonBlankPixels = 100;
   static const int _blankChannelThreshold = 10;
 
+  /// [WidgetsBinding.endOfFrame] never completes when the engine stops
+  /// producing frames (app backgrounded mid-capture, test bindings). Bound
+  /// every frame wait so capture degrades to a best-effort shot instead of
+  /// hanging the feedback flow.
+  static const Duration _frameWaitTimeout = Duration(seconds: 2);
+
+  static Future<void> _awaitNextFrame() async {
+    WidgetsBinding.instance.scheduleFrame();
+    await WidgetsBinding.instance.endOfFrame.timeout(
+      _frameWaitTimeout,
+      onTimeout: () {},
+    );
+  }
+
   @visibleForTesting
   static int readyFrameCount = _defaultReadyFrames;
 
@@ -44,8 +58,7 @@ abstract final class TilawaFeedbackScreenshotCapture {
     final int frames = frameCount ?? readyFrameCount;
     await Future<void>.delayed(Duration.zero);
     for (var frame = 0; frame < frames; frame++) {
-      WidgetsBinding.instance.scheduleFrame();
-      await WidgetsBinding.instance.endOfFrame;
+      await _awaitNextFrame();
     }
   }
 
@@ -178,8 +191,7 @@ abstract final class TilawaFeedbackScreenshotCapture {
         return boundary;
       }
 
-      WidgetsBinding.instance.scheduleFrame();
-      await WidgetsBinding.instance.endOfFrame;
+      await _awaitNextFrame();
     }
 
     return _findScreenshotBoundary();

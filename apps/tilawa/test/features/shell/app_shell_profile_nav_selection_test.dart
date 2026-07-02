@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:tilawa/l10n/generated/app_localizations.dart';
 import 'package:tilawa/screens/app_shell_nav_destinations.dart';
+import 'package:tilawa/shared/widgets/profile_avatar.dart';
 import 'package:tilawa/shared/widgets/quran_player_chrome.dart';
 import 'package:tilawa_ui_kit/tilawa_ui_kit.dart';
 
@@ -53,7 +54,7 @@ void main() {
       expect(_navIndexForTab(tabIndex!, destinations), 3);
     });
 
-    testWidgets('profile nav item has no pill or ring when selected', (
+    testWidgets('profile nav item shows selection ring when selected', (
       tester,
     ) async {
       final l10n = await _loadL10n(tester);
@@ -93,16 +94,11 @@ void main() {
                           required bool isSelected,
                           required Color color,
                         }) {
-                          return SizedBox(
-                            width: profileAvatarSize,
-                            height: profileAvatarSize,
-                            child: DecoratedBox(
-                              decoration: BoxDecoration(
-                                color: color.withValues(alpha: 0.2),
-                                shape: BoxShape.circle,
-                              ),
-                              child: const Center(child: Text('T')),
-                            ),
+                          return ProfileNavAvatar(
+                            size: profileAvatarSize,
+                            isSelected: isSelected,
+                            ringColor: color,
+                            displayName: 'Test User',
                           );
                         },
                   ),
@@ -135,7 +131,7 @@ void main() {
               (widget.decoration as BoxDecoration).border != null,
         ),
       );
-      expect(profileRing, findsNothing);
+      expect(profileRing, findsOneWidget);
       expect(find.text(l10n.bottomNavSettings), findsOneWidget);
     });
 

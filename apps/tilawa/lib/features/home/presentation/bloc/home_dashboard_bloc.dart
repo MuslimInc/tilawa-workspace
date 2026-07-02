@@ -1,6 +1,7 @@
 import 'dart:async';
 
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:tilawa/core/logging/app_logger.dart';
 import 'package:tilawa/core/network/network_error_message.dart';
 
 import '../../domain/entities/home_dashboard.dart';
@@ -28,11 +29,13 @@ final class HomeDashboardBloc
   Completer<void>? _refreshCompleter;
 
   /// Awaits the in-flight dashboard refresh started by pull-to-refresh.
+  ///
+  /// When a refresh is already pending, returns its future without queueing
+  /// a duplicate refresh event.
   Future<void> refreshAndWait({String? localeIdentifier}) {
     _localeIdentifier = localeIdentifier ?? _localeIdentifier;
     final Completer<void>? pending = _refreshCompleter;
     if (pending != null) {
-      add(HomeDashboardRefreshRequested(localeIdentifier: _localeIdentifier));
       return pending.future;
     }
 
@@ -70,7 +73,7 @@ final class HomeDashboardBloc
         emit(
           current.copyWith(
             isRefreshing: true,
-            clearRefreshErrorMessage: true,
+            clearRefreshError: true,
           ),
         );
         final HomeDashboard dashboard = await _getDashboard(
@@ -81,17 +84,17 @@ final class HomeDashboardBloc
       }
 
       await _loadInitial(emit);
-    } catch (error) {
+    } catch (error, stackTrace) {
       if (current is HomeDashboardLoaded) {
         emit(
           current.copyWith(
             isRefreshing: false,
-            refreshErrorMessage: error.toString(),
+            refreshError: _classifyError(error, stackTrace),
           ),
         );
         return;
       }
-      emit(_mapFailure(error));
+      emit(HomeDashboardFailure(_classifyError(error, stackTrace)));
     } finally {
       _completeRefreshWaiter();
     }
@@ -154,8 +157,8 @@ final class HomeDashboardBloc
         localeIdentifier: _localeIdentifier,
       );
       emit(HomeDashboardLoaded(dashboard));
-    } catch (error) {
-      emit(_mapFailure(error));
+    } catch (error, stackTrace) {
+      emit(HomeDashboardFailure(_classifyError(error, stackTrace)));
     }
   }
 
@@ -168,18 +171,33 @@ final class HomeDashboardBloc
         localeIdentifier: _localeIdentifier,
       );
       emit(HomeDashboardLoaded(dashboard));
-    } catch (_) {
+    } catch (error, stackTrace) {
+      logger.d(
+        'Silent home dashboard refresh failed; keeping cached snapshot',
+        error: error,
+        stackTrace: stackTrace,
+      );
       emit(HomeDashboardLoaded(cachedDashboard));
     }
   }
 
-  HomeDashboardFailure _mapFailure(Object error) {
-    final String message = error.toString();
-    final HomeDashboardFailureKind kind =
-        isNetworkConnectivityErrorMessage(message)
-        ? HomeDashboardFailureKind.offline
-        : HomeDashboardFailureKind.generic;
-    return HomeDashboardFailure(message, kind: kind);
+  /// Classifies a dashboard load error and keeps the raw details in logs
+  /// only; user-facing state carries just the [HomeDashboardFailureKind].
+  HomeDashboardFailureKind _classifyError(Object error, StackTrace stackTrace) {
+    final HomeDashboardFailureKind kind;
+    if (error is TimeoutException) {
+      kind = HomeDashboardFailureKind.timeout;
+    } else if (isNetworkConnectivityErrorMessage(error.toString())) {
+      kind = HomeDashboardFailureKind.offline;
+    } else {
+      kind = HomeDashboardFailureKind.unknown;
+    }
+    logger.w(
+      'Home dashboard load failed (${kind.name})',
+      error: error,
+      stackTrace: stackTrace,
+    );
+    return kind;
   }
 
   void _completeRefreshWaiter() {

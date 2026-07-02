@@ -12,9 +12,16 @@ import 'package:tilawa_ui_kit/tilawa_ui_kit.dart';
 
 /// Featured Mushaf resume card with streak and goal context.
 class HomeQuranResumeCard extends StatelessWidget {
-  const HomeQuranResumeCard({super.key, this.featured = false});
+  const HomeQuranResumeCard({
+    super.key,
+    this.featured = false,
+    this.hubLayout = false,
+  });
 
   final bool featured;
+
+  /// Tighter Quran hub chrome — icon well, kit chevron, no duplicate gradient.
+  final bool hubLayout;
 
   @override
   Widget build(BuildContext context) {
@@ -24,11 +31,13 @@ class HomeQuranResumeCard extends StatelessWidget {
           HomeQuranResumeStatus.loading ||
           HomeQuranResumeStatus.initial => _HomeQuranResumeLoadingCard(
             featured: featured,
+            hubLayout: hubLayout,
           ),
           HomeQuranResumeStatus.failure ||
           HomeQuranResumeStatus.ready => _HomeQuranResumeReadyCard(
             state: state,
             featured: featured,
+            hubLayout: hubLayout,
           ),
         };
       },
@@ -37,9 +46,13 @@ class HomeQuranResumeCard extends StatelessWidget {
 }
 
 class _HomeQuranResumeLoadingCard extends StatelessWidget {
-  const _HomeQuranResumeLoadingCard({required this.featured});
+  const _HomeQuranResumeLoadingCard({
+    required this.featured,
+    required this.hubLayout,
+  });
 
   final bool featured;
+  final bool hubLayout;
 
   @override
   Widget build(BuildContext context) {
@@ -57,6 +70,9 @@ class _HomeQuranResumeLoadingCard extends StatelessWidget {
     return HomeDashboardCard(
       surface: TilawaCardSurface.raised,
       useFeaturedGradient: featured,
+      borderRadius: hubLayout
+          ? tokens.resolveRadius(family: TilawaRadiusFamily.card)
+          : null,
       child: ConstrainedBox(
         constraints: BoxConstraints(
           minHeight: tokens.iconSizeLarge + tokens.spaceMedium * 2,
@@ -111,18 +127,20 @@ class _HomeQuranResumeReadyCard extends StatelessWidget {
   const _HomeQuranResumeReadyCard({
     required this.state,
     required this.featured,
+    required this.hubLayout,
   });
 
   final HomeQuranResumeState state;
   final bool featured;
+  final bool hubLayout;
 
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     final tokens = theme.tokens;
+    final ColorScheme colorScheme = theme.colorScheme;
     final cardTokens = theme.componentTokens.homeDashboardCard;
     final Color foreground = cardTokens.foregroundColor;
-    final double radius = tokens.resolveRadius(family: TilawaRadiusFamily.hero);
     final bool freshStart = _isFreshStart(state);
     final String title = freshStart
         ? context.l10n.homeStartQuranTitle
@@ -131,111 +149,129 @@ class _HomeQuranResumeReadyCard extends StatelessWidget {
     final double? progress = _shouldShowProgress(state)
         ? state.progressFraction(QuranMushafConstants.pageCount)
         : null;
+    final double cardRadius = hubLayout
+        ? tokens.resolveRadius(family: TilawaRadiusFamily.card)
+        : tokens.resolveRadius(family: TilawaRadiusFamily.hero);
+    final EdgeInsetsGeometry contentPadding = hubLayout
+        ? theme.componentTokens.capabilityActionCard.contentPadding
+        : EdgeInsets.all(tokens.spaceMedium);
 
-    return HomeDashboardCard(
+    final Widget leading = progress != null
+        ? _ProgressRing(progress: progress, foreground: foreground)
+        : _FeaturedResumeLeadingIcon(
+            foreground: foreground,
+            hubLayout: hubLayout,
+          );
+
+    final Widget content = Padding(
+      padding: contentPadding,
+      child: Row(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          leading,
+          SizedBox(width: tokens.spaceMedium),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  title,
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                  style: theme.textTheme.titleMedium?.copyWith(
+                    color: featured ? foreground : colorScheme.onSurface,
+                    fontWeight: FontWeight.w800,
+                    height: hubLayout ? 1.25 : null,
+                  ),
+                ),
+                SizedBox(height: tokens.spaceExtraSmall),
+                Text(
+                  subtitle,
+                  maxLines: 2,
+                  overflow: TextOverflow.ellipsis,
+                  style: theme.textTheme.bodySmall?.copyWith(
+                    color: featured
+                        ? foreground.withValues(alpha: 0.82)
+                        : colorScheme.onSurfaceVariant.withValues(
+                            alpha: tokens.opacityEmphasis,
+                          ),
+                    height: hubLayout ? 1.4 : null,
+                  ),
+                ),
+                if (!hubLayout && state.streakDays != null) ...[
+                  SizedBox(height: tokens.spaceSmall),
+                  Text(
+                    context.l10n.homeQuranStreakDays(state.streakDays!),
+                    style: theme.textTheme.labelMedium?.copyWith(
+                      color: foreground.withValues(alpha: 0.9),
+                      fontWeight: FontWeight.w700,
+                    ),
+                  ),
+                ],
+                if (!hubLayout && state.goalProgress != null) ...[
+                  SizedBox(height: tokens.spaceSmall),
+                  ClipRRect(
+                    borderRadius: BorderRadius.circular(tokens.radiusSmall),
+                    child: LinearProgressIndicator(
+                      value: state.goalProgress,
+                      backgroundColor: foreground.withValues(alpha: 0.20),
+                      valueColor: AlwaysStoppedAnimation<Color>(foreground),
+                      minHeight: 4,
+                    ),
+                  ),
+                  SizedBox(height: tokens.spaceExtraSmall),
+                  Text(
+                    context.l10n.homeQuranGoalProgress(
+                      (state.goalProgress! * 100).round(),
+                    ),
+                    style: theme.textTheme.labelSmall?.copyWith(
+                      color: foreground.withValues(alpha: 0.78),
+                    ),
+                  ),
+                ],
+                if (!hubLayout && state.hasActiveKhatmaPlan) ...[
+                  SizedBox(height: tokens.spaceExtraSmall),
+                  Text(
+                    context.l10n.khatmaProgressTitle,
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                    style: theme.textTheme.labelSmall?.copyWith(
+                      color: foreground.withValues(alpha: 0.72),
+                    ),
+                  ),
+                ],
+              ],
+            ),
+          ),
+          Padding(
+            padding: EdgeInsets.only(top: hubLayout ? tokens.spaceTiny : 0),
+            child: Icon(
+              TilawaIcons.chevronRightSmall,
+              color: featured
+                  ? foreground.withValues(alpha: 0.82)
+                  : colorScheme.onSurfaceVariant.withValues(
+                      alpha: theme
+                          .componentTokens
+                          .capabilityActionCard
+                          .trailingIconOpacity,
+                    ),
+              size: theme.componentTokens.capabilityActionCard.trailingIconSize,
+            ),
+          ),
+        ],
+      ),
+    );
+
+    final Widget card = HomeDashboardCard(
       surface: TilawaCardSurface.raised,
       useFeaturedGradient: featured,
       padding: EdgeInsets.zero,
-      borderRadius: radius,
+      borderRadius: cardRadius,
       onTap: () => const QuranLastReadRoute().push(context),
-      child: DecoratedBox(
-        decoration: BoxDecoration(
-          gradient: LinearGradient(
-            begin: AlignmentDirectional.topStart,
-            end: AlignmentDirectional.bottomEnd,
-            colors: [cardTokens.gradientStart, cardTokens.gradientEnd],
-          ),
-          borderRadius: BorderRadius.circular(radius),
-        ),
-        child: Padding(
-          padding: EdgeInsets.all(tokens.spaceMedium),
-          child: Row(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              if (progress != null)
-                _ProgressRing(progress: progress, foreground: foreground)
-              else
-                TilawaIcons.quran.svg(
-                  color: foreground,
-                  size: tokens.iconSizeLarge,
-                ),
-              SizedBox(width: tokens.spaceMedium),
-              Expanded(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(
-                      title,
-                      maxLines: 1,
-                      overflow: TextOverflow.ellipsis,
-                      style: theme.textTheme.titleMedium?.copyWith(
-                        color: foreground,
-                        fontWeight: FontWeight.w800,
-                      ),
-                    ),
-                    SizedBox(height: tokens.spaceExtraSmall),
-                    Text(
-                      subtitle,
-                      maxLines: 2,
-                      overflow: TextOverflow.ellipsis,
-                      style: theme.textTheme.bodySmall?.copyWith(
-                        color: foreground.withValues(alpha: 0.82),
-                      ),
-                    ),
-                    if (state.streakDays != null) ...[
-                      SizedBox(height: tokens.spaceSmall),
-                      Text(
-                        context.l10n.homeQuranStreakDays(state.streakDays!),
-                        style: theme.textTheme.labelMedium?.copyWith(
-                          color: foreground.withValues(alpha: 0.9),
-                          fontWeight: FontWeight.w700,
-                        ),
-                      ),
-                    ],
-                    if (state.goalProgress != null) ...[
-                      SizedBox(height: tokens.spaceSmall),
-                      ClipRRect(
-                        borderRadius: BorderRadius.circular(tokens.radiusSmall),
-                        child: LinearProgressIndicator(
-                          value: state.goalProgress,
-                          backgroundColor: foreground.withValues(alpha: 0.20),
-                          valueColor: AlwaysStoppedAnimation<Color>(foreground),
-                          minHeight: 4,
-                        ),
-                      ),
-                      SizedBox(height: tokens.spaceExtraSmall),
-                      Text(
-                        context.l10n.homeQuranGoalProgress(
-                          (state.goalProgress! * 100).round(),
-                        ),
-                        style: theme.textTheme.labelSmall?.copyWith(
-                          color: foreground.withValues(alpha: 0.78),
-                        ),
-                      ),
-                    ],
-                    if (state.hasActiveKhatmaPlan) ...[
-                      SizedBox(height: tokens.spaceExtraSmall),
-                      Text(
-                        context.l10n.khatmaProgressTitle,
-                        maxLines: 1,
-                        overflow: TextOverflow.ellipsis,
-                        style: theme.textTheme.labelSmall?.copyWith(
-                          color: foreground.withValues(alpha: 0.72),
-                        ),
-                      ),
-                    ],
-                  ],
-                ),
-              ),
-              Icon(
-                Icons.chevron_right_rounded,
-                color: foreground.withValues(alpha: 0.82),
-              ),
-            ],
-          ),
-        ),
-      ),
+      child: content,
     );
+
+    return card;
   }
 
   bool _isFreshStart(HomeQuranResumeState state) {
@@ -277,6 +313,56 @@ class _HomeQuranResumeReadyCard extends StatelessWidget {
       return l10n.homeQuranResumePage(page);
     }
     return l10n.homeContinueQuranSubtitle;
+  }
+}
+
+class _FeaturedResumeLeadingIcon extends StatelessWidget {
+  const _FeaturedResumeLeadingIcon({
+    required this.foreground,
+    required this.hubLayout,
+  });
+
+  final Color foreground;
+  final bool hubLayout;
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final tokens = context.tokens;
+    final capabilityTokens = theme.componentTokens.capabilityActionCard;
+    final iconBoxTokens = theme.componentTokens.iconBox;
+    final double iconSize = hubLayout
+        ? capabilityTokens.leadingIconSize
+        : tokens.iconSizeLarge;
+    final double boxSize = hubLayout
+        ? iconSize + iconBoxTokens.padding * 2
+        : tokens.iconSizeLarge;
+
+    if (!hubLayout) {
+      return TilawaIcons.quran.svg(
+        color: foreground,
+        size: iconSize,
+      );
+    }
+
+    return DecoratedBox(
+      decoration: BoxDecoration(
+        borderRadius: BorderRadius.circular(
+          tokens.resolveRadius(family: TilawaRadiusFamily.decorative),
+        ),
+        color: foreground.withValues(alpha: 0.12),
+      ),
+      child: SizedBox(
+        width: boxSize,
+        height: boxSize,
+        child: Center(
+          child: TilawaIcons.quran.svg(
+            color: foreground,
+            size: iconSize,
+          ),
+        ),
+      ),
+    );
   }
 }
 

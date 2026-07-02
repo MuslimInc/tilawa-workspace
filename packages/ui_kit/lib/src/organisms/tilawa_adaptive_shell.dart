@@ -1,9 +1,8 @@
-import 'dart:math' as math;
-
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 
+import '../foundation/safe_area_ext.dart';
 import '../foundation/component_tokens.dart';
 import '../foundation/design_tokens.dart';
 import '../foundation/tilawa_interactive_surface.dart';
@@ -233,7 +232,6 @@ class _BottomNavBar extends StatelessWidget {
         theme.componentTokens.adaptiveShell;
     final TilawaBottomSheetScaffoldTokens sheetTokens =
         theme.componentTokens.bottomSheetScaffold;
-    final MeMuslimDesignTokens designTokens = theme.tokens;
     final ColorScheme colorScheme = theme.colorScheme;
     final TextScaler textScaler = MediaQuery.textScalerOf(context);
     final double rowHeight = tokens.phoneBottomNavLayoutHeight(textScaler);
@@ -241,11 +239,8 @@ class _BottomNavBar extends StatelessWidget {
       textScaler,
     );
     final double barHeight = rowHeight + (2 * tokens.bottomNavInternalPadding);
-    final double systemBottomInset = MediaQuery.viewPaddingOf(context).bottom;
+    final double dockBottomInset = context.floatingBottomPadding;
     final Color barColor = tokens.bottomNavBackgroundColor;
-    final BorderRadius indicatorRadius = BorderRadius.circular(
-      iconAreaHeight / 2,
-    );
 
     final SystemUiOverlayStyle bottomNavOverlayStyle = SystemUiOverlayStyle(
       systemNavigationBarColor: barColor.withValues(alpha: 1),
@@ -273,7 +268,7 @@ class _BottomNavBar extends StatelessWidget {
             ),
           ),
           child: Padding(
-            padding: EdgeInsets.only(bottom: systemBottomInset),
+            padding: EdgeInsets.only(bottom: dockBottomInset),
             child: SizedBox(
               height: barHeight,
               width: double.infinity,
@@ -282,9 +277,8 @@ class _BottomNavBar extends StatelessWidget {
                   final int destinationCount = destinations.length;
                   final double slotWidth =
                       constraints.maxWidth / destinationCount;
-                  final double indicatorWidth = math.min(
-                    slotWidth - designTokens.spaceSmall,
-                    iconAreaHeight + designTokens.spaceMedium,
+                  final BorderRadius slotBorderRadius = BorderRadius.circular(
+                    iconAreaHeight / 2,
                   );
 
                   return Material(
@@ -310,8 +304,8 @@ class _BottomNavBar extends StatelessWidget {
                                         selectedIndex != null &&
                                         selectedIndex == i,
                                     onTap: () => onDestinationSelected(i),
-                                    indicatorRadius: indicatorRadius,
-                                    targetWidth: indicatorWidth,
+                                    borderRadius: slotBorderRadius,
+                                    slotWidth: slotWidth,
                                     rowHeight: rowHeight,
                                     iconAreaHeight: iconAreaHeight,
                                   ),
@@ -338,8 +332,8 @@ class _NavButton extends StatelessWidget {
     required this.destination,
     required this.isSelected,
     required this.onTap,
-    required this.indicatorRadius,
-    required this.targetWidth,
+    required this.borderRadius,
+    required this.slotWidth,
     required this.rowHeight,
     required this.iconAreaHeight,
   });
@@ -347,8 +341,8 @@ class _NavButton extends StatelessWidget {
   final TilawaNavDestination destination;
   final bool isSelected;
   final VoidCallback onTap;
-  final BorderRadius indicatorRadius;
-  final double targetWidth;
+  final BorderRadius borderRadius;
+  final double slotWidth;
   final double rowHeight;
   final double iconAreaHeight;
 
@@ -432,9 +426,10 @@ class _NavButton extends StatelessWidget {
     );
 
     final Widget iconSlot = SizedBox(
-      width: targetWidth,
+      width: slotWidth,
       height: iconAreaHeight,
-      child: Center(
+      child: Align(
+        alignment: Alignment.bottomCenter,
         child: AnimatedScale(
           scale: iconScale,
           duration: designTokens.durationFast,
@@ -450,17 +445,20 @@ class _NavButton extends StatelessWidget {
         iconSlot,
         SizedBox(height: tokens.navButtonGap),
         ExcludeSemantics(
-          child: Text(
-            destination.label,
-            style: _labelStyle(
-              theme: theme,
-              tokens: tokens,
-              colorScheme: colorScheme,
-              isSelected: isSelected,
+          child: SizedBox(
+            width: slotWidth,
+            child: Text(
+              destination.label,
+              style: _labelStyle(
+                theme: theme,
+                tokens: tokens,
+                colorScheme: colorScheme,
+                isSelected: isSelected,
+              ),
+              maxLines: 1,
+              overflow: TextOverflow.ellipsis,
+              textAlign: TextAlign.center,
             ),
-            maxLines: 1,
-            overflow: TextOverflow.ellipsis,
-            textAlign: TextAlign.center,
           ),
         ),
       ],
@@ -472,11 +470,11 @@ class _NavButton extends StatelessWidget {
       semanticsIdentifier: destination.identifier,
       selected: isSelected,
       onTap: onTap,
-      borderRadius: indicatorRadius,
+      borderRadius: borderRadius,
       enableInk: false,
       enableStateLayer: false,
       child: SizedBox(
-        width: targetWidth,
+        width: slotWidth,
         height: rowHeight,
         child: slotContent,
       ),

@@ -1,8 +1,9 @@
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:tilawa/core/extensions.dart';
+import 'package:tilawa/features/audio_player/presentation/bloc/audio_player_bloc.dart';
 import 'package:tilawa/features/reciters/presentation/widgets/reciter_catalog_chrome.dart';
+import 'package:tilawa/shared/widgets/quran_player_chrome.dart';
 import 'package:tilawa_core/entities/reciter_entity.dart';
 import 'package:tilawa_ui_kit/tilawa_ui_kit.dart';
 
@@ -23,6 +24,14 @@ class DownloadAllButton extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    context.watch<QuranPlayerChromeNotifier>();
+    context.select(
+      (AudioPlayerBloc bloc) => (
+        bloc.state.shouldShowBottomPlayer,
+        bloc.state.currentAudio?.id,
+      ),
+    );
+
     final theme = Theme.of(context);
     final colorScheme = theme.colorScheme;
     final tokens = theme.tokens;
@@ -33,8 +42,6 @@ class DownloadAllButton extends StatelessWidget {
         height: tokens.minInteractiveDimension,
       ),
     );
-    final Color idleFill = ReciterCatalogChrome.idleFill(colorScheme);
-    final Color hairline = ReciterCatalogChrome.hairline(colorScheme, tokens);
 
     return BlocListener<ReciterDownloadBloc, ReciterDownloadState>(
       listenWhen: (previous, current) => current.shouldShowError(previous),
@@ -63,12 +70,96 @@ class DownloadAllButton extends StatelessWidget {
           final double progress = state.progress;
           final bool isAllDownloaded = state.isAllDownloaded;
           final Color fill = isAllDownloaded || !isActive
-              ? idleFill
-              : ReciterCatalogChrome.downloadingFill(colorScheme);
+              ? ReciterCatalogChrome.controlIdleFill(context, colorScheme)
+              : ReciterCatalogChrome.controlDownloadingFill(
+                  context,
+                  colorScheme,
+                );
+          final Color hairline = ReciterCatalogChrome.controlBorder(
+            context,
+            colorScheme,
+            tokens,
+          );
           final EdgeInsetsGeometry chipPadding = chipTokens.inlinePadding.add(
             EdgeInsets.symmetric(
               horizontal: tokens.spaceSmall,
               vertical: tokens.spaceExtraSmall,
+            ),
+          );
+          final RoundedRectangleBorder chipShape = RoundedRectangleBorder(
+            borderRadius: borderRadius,
+            side: BorderSide(
+              color: hairline,
+              width: chipTokens.borderWidth,
+            ),
+          );
+
+          final Widget chipContent = Padding(
+            padding: chipPadding,
+            child: Row(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                if (isAllDownloaded) ...[
+                  Icon(
+                    Icons.check_circle_rounded,
+                    color: colorScheme.onSurface,
+                    size: chipTokens.inlineIconSize,
+                  ),
+                  SizedBox(width: tokens.spaceExtraSmall),
+                  Text(
+                    context.l10n.allDownloaded,
+                    style: theme.textTheme.labelSmall?.copyWith(
+                      color: colorScheme.onSurface,
+                      fontWeight: FontWeight.w700,
+                    ),
+                  ),
+                ] else if (isActive) ...[
+                  SizedBox(
+                    width: chipTokens.inlineIconSize,
+                    height: chipTokens.inlineIconSize,
+                    child: TilawaLoadingIndicator(
+                      strokeWidth: 2,
+                      value: isDownloading && progress > 0
+                          ? progress.clamp(0.0, 1.0)
+                          : null,
+                      color: colorScheme.onSurface,
+                      backgroundColor: colorScheme.onSurface.withValues(
+                        alpha: tokens.opacitySubtle,
+                      ),
+                    ),
+                  ),
+                  SizedBox(width: tokens.spaceSmall),
+                  Text(
+                    '${state.downloadedCount}/${state.totalCount}',
+                    style: theme.textTheme.labelSmall?.copyWith(
+                      color: colorScheme.onSurface,
+                      fontWeight: FontWeight.w700,
+                    ),
+                  ),
+                  if (isDownloading) ...[
+                    SizedBox(width: tokens.spaceExtraSmall),
+                    Icon(
+                      Icons.pause_rounded,
+                      color: colorScheme.onSurface,
+                      size: chipTokens.inlineIconSize,
+                    ),
+                  ],
+                ] else ...[
+                  Icon(
+                    Icons.download_rounded,
+                    color: colorScheme.onSurfaceVariant,
+                    size: chipTokens.inlineIconSize,
+                  ),
+                  SizedBox(width: tokens.spaceExtraSmall),
+                  Text(
+                    '${state.downloadedCount}/${state.totalCount}',
+                    style: theme.textTheme.labelSmall?.copyWith(
+                      color: colorScheme.onSurfaceVariant,
+                      fontWeight: FontWeight.w500,
+                    ),
+                  ),
+                ],
+              ],
             ),
           );
 
@@ -77,34 +168,13 @@ class DownloadAllButton extends StatelessWidget {
               identifier:
                   ReciterSemanticsIds.reciterDetailsDownloadAllCompleted,
               child: Container(
+                key: const Key('reciter_details_download_all_button'),
                 height: tokens.minInteractiveDimension,
-                padding: chipPadding,
-                decoration: BoxDecoration(
+                decoration: ShapeDecoration(
                   color: fill,
-                  borderRadius: borderRadius,
-                  border: Border.all(
-                    color: hairline,
-                    width: chipTokens.borderWidth,
-                  ),
+                  shape: chipShape,
                 ),
-                child: Row(
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    Icon(
-                      Icons.check_circle_rounded,
-                      color: colorScheme.onSurface,
-                      size: chipTokens.inlineIconSize,
-                    ),
-                    SizedBox(width: tokens.spaceExtraSmall),
-                    Text(
-                      context.l10n.allDownloaded,
-                      style: theme.textTheme.labelSmall?.copyWith(
-                        color: colorScheme.onSurface,
-                        fontWeight: FontWeight.w700,
-                      ),
-                    ),
-                  ],
-                ),
+                child: chipContent,
               ),
             );
           }
@@ -115,91 +185,29 @@ class DownloadAllButton extends StatelessWidget {
                 : ReciterSemanticsIds.reciterDetailsDownloadAllIdle,
             child: SizedBox(
               height: tokens.minInteractiveDimension,
-              child: Material(
-                color: fill,
+              child: TilawaInteractiveSurface(
+                key: const Key('reciter_details_download_all_button'),
+                onTap: state.isPending
+                    ? null
+                    : () {
+                        if (isDownloading) {
+                          context.read<ReciterDownloadBloc>().add(
+                            CancelReciterDownloadAll(reciterName: reciter.name),
+                          );
+                        } else {
+                          context.read<ReciterDownloadBloc>().add(
+                            StartReciterDownloadAll(
+                              reciter: reciter,
+                              surahs: surahs,
+                            ),
+                          );
+                        }
+                      },
+                haptic: TilawaHaptic.lightImpact,
                 borderRadius: borderRadius,
-                child: InkWell(
-                  key: const Key('reciter_details_download_all_button'),
-                  onTap: () {
-                    if (state.isPending) return;
-                    HapticFeedback.lightImpact();
-                    if (isDownloading) {
-                      context.read<ReciterDownloadBloc>().add(
-                        CancelReciterDownloadAll(reciterName: reciter.name),
-                      );
-                    } else {
-                      context.read<ReciterDownloadBloc>().add(
-                        StartReciterDownloadAll(
-                          reciter: reciter,
-                          surahs: surahs,
-                        ),
-                      );
-                    }
-                  },
-                  borderRadius: borderRadius,
-                  child: Container(
-                    padding: chipPadding,
-                    decoration: BoxDecoration(
-                      color: fill,
-                      borderRadius: borderRadius,
-                      border: Border.all(
-                        color: hairline,
-                        width: chipTokens.borderWidth,
-                      ),
-                    ),
-                    child: Row(
-                      mainAxisSize: MainAxisSize.min,
-                      children: [
-                        if (isActive) ...[
-                          SizedBox(
-                            width: chipTokens.inlineIconSize,
-                            height: chipTokens.inlineIconSize,
-                            child: TilawaLoadingIndicator(
-                              strokeWidth: 2,
-                              value: isDownloading && progress > 0
-                                  ? progress.clamp(0.0, 1.0)
-                                  : null,
-                              color: colorScheme.onSurface,
-                              backgroundColor: colorScheme.onSurface.withValues(
-                                alpha: tokens.opacitySubtle,
-                              ),
-                            ),
-                          ),
-                          SizedBox(width: tokens.spaceSmall),
-                          Text(
-                            '${state.downloadedCount}/${state.totalCount}',
-                            style: theme.textTheme.labelSmall?.copyWith(
-                              color: colorScheme.onSurface,
-                              fontWeight: FontWeight.w700,
-                            ),
-                          ),
-                          if (isDownloading) ...[
-                            SizedBox(width: tokens.spaceExtraSmall),
-                            Icon(
-                              Icons.pause_rounded,
-                              color: colorScheme.onSurface,
-                              size: chipTokens.inlineIconSize,
-                            ),
-                          ],
-                        ] else ...[
-                          Icon(
-                            Icons.download_rounded,
-                            color: colorScheme.onSurfaceVariant,
-                            size: chipTokens.inlineIconSize,
-                          ),
-                          SizedBox(width: tokens.spaceExtraSmall),
-                          Text(
-                            '${state.downloadedCount}/${state.totalCount}',
-                            style: theme.textTheme.labelSmall?.copyWith(
-                              color: colorScheme.onSurfaceVariant,
-                              fontWeight: FontWeight.w500,
-                            ),
-                          ),
-                        ],
-                      ],
-                    ),
-                  ),
-                ),
+                materialColor: fill,
+                materialShape: chipShape,
+                child: chipContent,
               ),
             ),
           );

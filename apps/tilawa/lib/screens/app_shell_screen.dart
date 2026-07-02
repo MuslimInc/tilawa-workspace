@@ -127,11 +127,12 @@ class _AppShellScreenState extends State<AppShellScreen> {
               required bool isSelected,
               required Color color,
             }) {
-              return ProfileAvatar(
+              return ProfileNavAvatar(
                 photoUrl: photoUrl,
                 displayName: displayName,
                 size: profileAvatarSize,
-                fallbackStyle: ProfileAvatarFallbackStyle.initial,
+                isSelected: isSelected,
+                ringColor: color,
               );
             };
       } else if (d.iconBuilder != null) {

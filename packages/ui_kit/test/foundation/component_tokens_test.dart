@@ -464,11 +464,11 @@ void main() {
       expect(tokens.groupSurfaceColor, scheme.surface);
       expect(
         tokens.groupContainerBorderColor,
-        scheme.outlineVariant.withValues(alpha: 0.05 * 2),
+        scheme.outlineVariant,
       );
       expect(
         tokens.selectionTileDividerColor,
-        scheme.outlineVariant.withValues(alpha: 0.05),
+        scheme.outlineVariant,
       );
       // M3 standard ON state: full-primary track, onPrimary thumb.
       expect(tokens.switchActiveTrackColor, scheme.primary);
@@ -661,23 +661,23 @@ void main() {
   group('TilawaAdaptiveShellTokens', () {
     test('defaults creates expected values', () {
       final tokens = TilawaAdaptiveShellTokens.defaults();
-      expect(tokens.phoneBottomNavBarBaseHeight, closeTo(66.0, 0.1));
+      expect(tokens.phoneBottomNavBarBaseHeight, closeTo(48.0, 0.1));
       expect(tokens.navButtonSelectionContainerVerticalPadding, 4.0);
-      expect(tokens.navButtonIconOnlyMinHeight, 48.0);
-      expect(tokens.navButtonIconOnlyVerticalPadding, 4.0);
+      expect(tokens.navButtonIconOnlyMinHeight, 28.0);
+      expect(tokens.navButtonIconOnlyVerticalPadding, 0.0);
       expect(
         tokens.navButtonIconOnlySelectionContainerVerticalPadding,
-        4.0,
+        0.0,
       );
       expect(tokens.bottomNavIconOnlyVerticalMargin, 2.0);
       expect(
         tokens.phoneBottomNavIconOnlyLayoutHeight(TextScaler.linear(1)),
-        closeTo(48.0, 0.05),
+        closeTo(28.0, 0.05),
       );
       expect(tokens.bottomNavHorizontalMargin, 0.0);
       expect(tokens.bottomNavThumbSideMargin, 16.0);
       expect(tokens.bottomNavBottomLift, 0.0);
-      expect(tokens.navButtonMinHeight, 52.0);
+      expect(tokens.navButtonMinHeight, 48.0);
       expect(tokens.bottomNavBackgroundColor, isA<Color>());
       expect(
         tokens.bottomNavBackgroundColor,
@@ -692,7 +692,7 @@ void main() {
       final scaled = tokens.phoneBottomNavLayoutHeight(
         TextScaler.linear(2),
       );
-      expect(unit, closeTo(66.0, 0.1));
+      expect(unit, closeTo(48.0, 0.1));
       expect(scaled, greaterThan(unit));
     });
 
@@ -719,7 +719,7 @@ void main() {
       final scaled = tokens.phoneBottomNavIconOnlyLayoutHeight(
         TextScaler.linear(2),
       );
-      expect(unit, closeTo(48.0, 0.05));
+      expect(unit, closeTo(28.0, 0.05));
       expect(scaled, greaterThan(unit));
     });
 

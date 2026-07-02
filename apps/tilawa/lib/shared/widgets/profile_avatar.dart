@@ -10,6 +10,53 @@ export 'package:tilawa_ui_kit/src/molecules/tilawa_profile_avatar.dart'
 
 typedef ProfileAvatarFallbackStyle = TilawaProfileAvatarFallbackStyle;
 
+/// Profile avatar for the phone bottom nav settings tab.
+///
+/// When [isSelected], draws a primary ring outside the circular photo.
+class ProfileNavAvatar extends StatelessWidget {
+  const ProfileNavAvatar({
+    super.key,
+    required this.size,
+    required this.isSelected,
+    required this.ringColor,
+    this.photoUrl,
+    this.displayName,
+  });
+
+  final String? photoUrl;
+  final String? displayName;
+  final double size;
+  final bool isSelected;
+  final Color ringColor;
+
+  @override
+  Widget build(BuildContext context) {
+    final double ringWidth = Theme.of(context).tokens.focusRingWidth;
+    final double avatarSize = isSelected ? size - ringWidth * 2 : size;
+
+    return SizedBox(
+      width: size,
+      height: size,
+      child: DecoratedBox(
+        decoration: BoxDecoration(
+          shape: BoxShape.circle,
+          border: isSelected
+              ? Border.all(color: ringColor, width: ringWidth)
+              : null,
+        ),
+        child: Center(
+          child: ProfileAvatar(
+            photoUrl: photoUrl,
+            displayName: displayName,
+            size: avatarSize,
+            fallbackStyle: ProfileAvatarFallbackStyle.initial,
+          ),
+        ),
+      ),
+    );
+  }
+}
+
 /// App-facing profile avatar — delegates circular layout to [TilawaProfileAvatar]
 /// and uses [CachedNetworkImage] for remote photos.
 class ProfileAvatar extends StatelessWidget {

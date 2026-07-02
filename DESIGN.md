@@ -48,11 +48,13 @@ borders and icons clear WCAG 3:1 on green-tinted surfaces.
 
 ### Neutral surfaces (light) — soft neutral canvas
 
-Light surfaces use a **soft neutral** family — near-white canvas, white cards, quiet neutral idle chips.
+Light surfaces use a **soft neutral** family — warm near-white canvas, white cards, quiet neutral idle chips.
+
+**60-30-10 (light):** ~60% warm canvas (`surfaceContainerLowest`), ~30% white elevated surfaces (`surface`, chips), ~10% brand accent (`primary`). Do **not** flatten scaffold to pure white — cards need a quieter canvas to lift.
 
 | Token / role | Hex (base) | Notes |
 |--------------|------------|--------|
-| Canvas / scaffold | `#FFFFFF` | `lightCanvas` / `surfaceContainerLowest` |
+| Canvas / scaffold | `#F4F2EE` | `lightCanvas` / `surfaceContainerLowest` |
 | Surface (cards, sheets) | `#FFFFFF` | `lightSurface` |
 | Ink / onSurface | `#212121` | `lightInk` |
 | Body / mute | `#212121`, `#757575` | `lightInk`, `lightMute` |
@@ -328,7 +330,7 @@ reference hex into feature code unless it becomes a deliberate token in
 | Field | Detail |
 |-------|--------|
 | **Visual reference** | [`design-md/pinterest/DESIGN.md`](design-md/pinterest/DESIGN.md) — catalog calm + accent discipline only. |
-| **Default primary** | Sage `#219653`; light neutrals white / `#E5E7EB` / black ink. |
+| **Default primary** | Sage `#219653`; light neutrals `#F4F2EE` canvas / `#FFFFFF` cards / black ink. |
 | **Catalog header** | `TilawaCatalogAppBar` + catalog search/pills on major list screens. |
 | **Allowed changes** | New kit components; critical bugs; documented feature palettes (Quran reader, share output). |
 | **Enforcement** | `app_theme_color_roles_test.dart`, `app_theme_spec_compliance_test.dart`, `test/goldens/`. |
@@ -342,3 +344,4 @@ Replace this section when the freeze lifts or a new global visual initiative sta
 ## Document format note
 
 This file follows the same *intent* as community **DESIGN.md** collections (e.g. [awesome-design-md](https://github.com/VoltAgent/awesome-design-md), [getdesign.md](https://getdesign.md/)): a single markdown spec agents can read. It describes **this product’s** implementation, not an external brand.
+

@@ -68,11 +68,36 @@ void main() {
     expect(localizedAuthBlocErrorMessage('', l10n), l10n.deleteAccountFailed);
   });
 
-  test('passes through unknown error messages unchanged', () {
+  test('maps device registration key to localized copy', () {
+    expect(
+      localizedAuthBlocErrorMessage(
+        AuthErrorKey.deviceRegistrationFailed,
+        l10n,
+      ),
+      l10n.authDeviceRegistrationFailed,
+    );
+  });
+
+  test('never displays unknown error messages; falls back to generic copy', () {
     expect(
       localizedAuthBlocErrorMessage('boom', l10n),
-      'boom',
+      l10n.authErrorGenericMessage,
     );
+  });
+
+  test('never displays raw Firebase/exception text', () {
+    const rawMessages = <String>[
+      '[firebase_auth/internal-error] An internal error has occurred.',
+      'PlatformException(sign_in_failed, com.google.android.gms.common.api.ApiException: 10, null, null)',
+      "Exception: type 'Null' is not a subtype of type 'String'",
+      'FirebaseFunctionsException(internal, INTERNAL, null)',
+    ];
+
+    for (final raw in rawMessages) {
+      final resolved = localizedAuthBlocErrorMessage(raw, l10n);
+      expect(resolved, l10n.authErrorGenericMessage, reason: raw);
+      expect(resolved, isNot(contains('Exception')), reason: raw);
+    }
   });
 
   test('maps raw Firebase network copy to offline message', () async {

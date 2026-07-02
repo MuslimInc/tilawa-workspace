@@ -44,7 +44,8 @@ quick tools, which load immediately under the sliver stack.
 
 **Spacing rhythm** (do not change casually without cause): within a zone
 `tokens.spaceLarge`; between unrelated zones `tokens.spaceExtraLarge`; More
-uses `HomeDashboardSection(compact: true)`.
+uses `HomeDashboardSection(compact: true)` for tighter subtitle/content gaps
+only — section titles share one `titleMedium` style across zones.
 
 This is **not** a multi-tab launcher grid. Preserve the calm, polished,
 RTL-first dashboard — two featured primary tiles, one compact tools row, flat
@@ -266,3 +267,4 @@ flutter test test/features/home/
 
 Manual: light + dark, RTL Arabic, text scale 1.4, hero snap, tutor pin when
 flag on.
+

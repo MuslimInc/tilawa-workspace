@@ -127,6 +127,28 @@ void main() {
       },
     );
 
+    test(
+      'custom source with retired brand green migrates to brand green preset',
+      () {
+        final restored = cubit.fromJson({
+          'mode': 'light',
+          'primaryColor': PrimaryColorPreset.legacyBrandGreenPrimaryArgb,
+          'primaryColorSource': 'custom',
+          'primaryPresetId': null,
+          'useSystemTheme': false,
+          'preset': AppThemePreset.defaultMode.name,
+        });
+
+        expect(restored, isNotNull);
+        expect(restored!.primaryColorSource, PrimaryColorSource.preset);
+        expect(restored.primaryPresetId, PrimaryColorPreset.brandGreen.id);
+        expect(
+          restored.primaryColorArgb,
+          PrimaryColorPreset.brandGreen.valueArgb,
+        );
+      },
+    );
+
     test('custom source restores exact stored primary color', () {
       const customColor = Color(0xFF224466);
 
@@ -165,6 +187,26 @@ void main() {
         },
       );
     }
+
+    test(
+      'legacy payload with retired brand green ARGB migrates to brandGreen',
+      () {
+        final restored = cubit.fromJson({
+          'mode': 'light',
+          'primaryColor': PrimaryColorPreset.legacyBrandGreenPrimaryArgb,
+          'useSystemTheme': false,
+          'preset': AppThemePreset.defaultMode.name,
+        });
+
+        expect(restored, isNotNull);
+        expect(restored!.primaryColorSource, PrimaryColorSource.preset);
+        expect(restored.primaryPresetId, PrimaryColorPreset.brandGreen.id);
+        expect(
+          restored.primaryColorArgb,
+          PrimaryColorPreset.brandGreen.valueArgb,
+        );
+      },
+    );
 
     test('legacy payload with custom color migrates to custom source', () {
       const customColor = Color(0xFF0F9D58);

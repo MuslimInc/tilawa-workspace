@@ -103,10 +103,60 @@ void main() {
           .having((s) => s.isRefreshing, 'isRefreshing', isFalse)
           .having((s) => s.dashboard, 'dashboard', _dashboard)
           .having(
-            (s) => s.refreshErrorMessage,
-            'refreshErrorMessage',
-            contains('SocketException'),
+            (s) => s.refreshError,
+            'refreshError',
+            HomeDashboardFailureKind.offline,
           ),
+    ],
+  );
+
+  blocTest<HomeDashboardBloc, HomeDashboardState>(
+    'refresh failure never exposes raw exception text in state',
+    build: () {
+      repository.shouldThrowOnGetDashboard = true;
+      repository.throwMessage = 'super secret internal diagnostic';
+      return bloc;
+    },
+    seed: () => HomeDashboardLoaded(_dashboard),
+    act: (bloc) => bloc.add(
+      const HomeDashboardRefreshRequested(localeIdentifier: 'en'),
+    ),
+    verify: (bloc) {
+      final HomeDashboardState state = bloc.state;
+      expect(
+        state,
+        isA<HomeDashboardLoaded>().having(
+          (s) => s.refreshError,
+          'refreshError',
+          HomeDashboardFailureKind.unknown,
+        ),
+      );
+      // The state must carry no raw error strings at all.
+      expect(state.props.whereType<String>(), isEmpty);
+    },
+  );
+
+  blocTest<HomeDashboardBloc, HomeDashboardState>(
+    'timeout errors are classified as timeout refresh error',
+    build: () {
+      repository.errorToThrow = TimeoutException('dashboard load');
+      return bloc;
+    },
+    seed: () => HomeDashboardLoaded(_dashboard),
+    act: (bloc) => bloc.add(
+      const HomeDashboardRefreshRequested(localeIdentifier: 'en'),
+    ),
+    expect: () => [
+      isA<HomeDashboardLoaded>().having(
+        (s) => s.isRefreshing,
+        'isRefreshing',
+        isTrue,
+      ),
+      isA<HomeDashboardLoaded>().having(
+        (s) => s.refreshError,
+        'refreshError',
+        HomeDashboardFailureKind.timeout,
+      ),
     ],
   );
 
@@ -160,6 +210,29 @@ void main() {
       ),
     );
   });
+
+  test('rapid refreshAndWait calls share one in-flight refresh', () async {
+    bloc.add(const HomeDashboardStarted(localeIdentifier: 'en'));
+    await bloc.stream.firstWhere((state) => state is HomeDashboardLoaded);
+    expect(repository.getDashboardCallCount, 1);
+
+    final Completer<HomeDashboard> pending = Completer<HomeDashboard>();
+    repository.pendingDashboard = pending;
+
+    final Future<void> first = bloc.refreshAndWait(localeIdentifier: 'en');
+    final Future<void> second = bloc.refreshAndWait(localeIdentifier: 'en');
+    await Future<void>.delayed(Duration.zero);
+
+    pending.complete(_dashboard);
+    await first;
+    await second;
+    // Let any (erroneously) queued duplicate refresh event drain.
+    await Future<void>.delayed(Duration.zero);
+    await Future<void>.delayed(Duration.zero);
+
+    // One call for the cold start plus a single shared refresh.
+    expect(repository.getDashboardCallCount, 2);
+  });
 }
 
 final HomeDashboard _dashboard = HomeDashboard(
@@ -185,11 +258,16 @@ class _FakeHomeDashboardRepository implements HomeDashboardRepository {
   int getDashboardCallCount = 0;
   bool shouldThrowOnGetDashboard = false;
   String throwMessage = 'boom';
+  Object? errorToThrow;
   Completer<HomeDashboard>? pendingDashboard;
 
   @override
   Future<HomeDashboard> getDashboard({String? localeIdentifier}) async {
     getDashboardCallCount++;
+    final Object? error = errorToThrow;
+    if (error != null) {
+      throw error;
+    }
     if (shouldThrowOnGetDashboard) {
       throw Exception(throwMessage);
     }

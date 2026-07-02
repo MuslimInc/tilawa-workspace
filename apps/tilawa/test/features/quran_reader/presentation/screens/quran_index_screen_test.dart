@@ -66,7 +66,6 @@ void main() {
     );
 
     expect(find.text(l10n.quranHubTitle), findsOneWidget);
-    expect(find.text(l10n.quranCatalogSectionTitle), findsOneWidget);
     expect(find.text(l10n.surahPrefix), findsOneWidget);
     expect(find.text(l10n.juz), findsOneWidget);
     expect(find.text(l10n.page), findsOneWidget);

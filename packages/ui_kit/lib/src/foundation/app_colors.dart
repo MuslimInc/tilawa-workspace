@@ -4,7 +4,7 @@ import 'package:flutter/material.dart';
 ///
 /// The Tilawa palette is intentionally **small and calm**:
 /// white canvas ([tripGlideCanvas] `#FFFFFF`), green global accent
-/// ([defaultPrimary] `#2B8659`), neutral text ink ([tripGlideInk] `#212121`),
+/// ([defaultPrimary] `#1DAB61`), neutral text ink ([tripGlideInk] `#212121`),
 /// and restrained category accent hues for hub tiles.
 ///
 /// Some `tripGlide*` names remain as compatibility aliases for the current
@@ -40,30 +40,49 @@ abstract final class AppColors {
   ///
   /// This is the default runtime primary and the bottom stop of the launch
   /// gradient.
+  /// Legacy default green — retained exclusively for users who saved this
+  /// theme prior to the 60-30-10 migration. Do not use for new features.
+  /// The new global primary is [brandActionGreen] (`#1DAB61`).
   static const Color primarySage = Color(0xFF219653);
 
-  /// Forest green theme option (dev/QA picker; not gold).
+  /// Historical dev/QA theme option named "gold" but is actually a deep forest green.
+  /// Retained for migration compatibility only.
   static const Color primaryGold = Color(0xFF2D6B47);
 
   /// Brand splash canvas — flat launch / native splash green (`#2A9C64`).
+  /// Restricted to splash and launch screens only. Do not use in UI components.
   static const Color brandSplashGreen = Color(0xFF2A9C64);
 
-  /// Global accent — nav, switches, selected states, CTAs (`#2B8659`).
-  static const Color brandActionGreen = Color(0xFF2B8659);
+  /// Global accent — nav, switches, selected states, CTAs (`#1DAB61`).
+  static const Color brandActionGreen = Color(0xFF1DAB61);
+
+  /// Accessible variant of the global accent for solid buttons and links (`#148048`).
+  static const Color brandActionGreenAccessible = Color(0xFF148048);
+
+  /// Gold accent for verses, occasions, and quiet alerts (`#F2AC1F`).
+  static const Color brandGoldAccent = Color(0xFFF2AC1F);
 
   /// Green alias retained for saved theme migration.
   static const Color primaryGreen = primarySage;
 
   /// Default primary color used throughout the app.
   ///
-  /// Green global accent (`#2B8659`) for CTAs, active nav, selected controls,
+  /// Green global accent (`#1DAB61`) for CTAs, active nav, selected controls,
   /// and Home dashboard micro-accents.
   static const Color defaultPrimary = brandActionGreen;
 
-  /// High-emphasis text ink for headings and body copy (`#212121`).
+  // ===========================================================================
+  // UI Kit Semantic Colors (Legacy 'TripGlide' and 'HomeTravel' Aliases)
+  // ===========================================================================
+  // NOTE: These names are retained temporarily for compatibility during the
+  // 60-30-10 migration. New widgets should NOT use these names directly.
+  // Instead, use Material [ColorScheme], product tokens, or semantic UI Kit tokens.
+  // ---------------------------------------------------------------------------
+
+  /// High-emphasis text ink for headings and body copy (`#1A2E24`).
   ///
   /// Compatibility alias retained for existing travel-inspired Home widgets.
-  static const Color tripGlideInk = Color(0xFF212121);
+  static const Color tripGlideInk = Color(0xFF1A2E24);
 
   /// Screen canvas (`#FFFFFF`).
   ///
@@ -73,11 +92,11 @@ abstract final class AppColors {
   /// Elevated surfaces — cards, search (`#FFFFFF`).
   static const Color tripGlideSurface = Color(0xFFFFFFFF);
 
-  /// Medium-emphasis secondary copy (`#757575`).
-  static const Color tripGlideMuted = Color(0xFF757575);
+  /// Medium-emphasis secondary copy (`#6B7F74`).
+  static const Color tripGlideMuted = Color(0xFF6B7F74);
 
-  /// Idle tier for chips, search rests, and header bands (`#F5F5F5`).
-  static const Color tripGlideCanvasElevated = Color(0xFFF5F5F5);
+  /// Idle tier for chips, search rests, and header bands (`#F0F7F2`).
+  static const Color tripGlideCanvasElevated = Color(0xFFF0F7F2);
 
   /// Hairline / highest surface tier (`#EEEEEE`).
   static const Color tripGlideCanvasDusk = Color(0xFFEEEEEE);
@@ -115,7 +134,7 @@ abstract final class AppColors {
   /// Travel-layout destination header tint — warm beige.
   static const Color homeTravelDestinationTintNeutral = tripGlideCanvasElevated;
 
-  /// Neutral sheet on the Home travel-inspired dashboard (`#FAFAFA`).
+  /// Neutral sheet on the Home travel-inspired dashboard (`#FFFFFF`).
   static const Color homeTravelSheetSurface = tripGlideCanvas;
 
   /// White search field on the Home travel dashboard (`#FFFFFF`).
@@ -152,8 +171,8 @@ abstract final class AppColors {
   /// Day hero mid — intentional warm gold between parchment and sage mist.
   static const Color homeNextPrayerGradientDayMid = Color(0xFFF2E6C9);
 
-  /// Day hero bottom — sage mist with stronger green presence (V3).
-  static const Color homeNextPrayerGradientBottom = Color(0xFFC0E0D1);
+  /// Day hero bottom — sage mist with a softer, calmer tint.
+  static const Color homeNextPrayerGradientBottom = Color(0xFFCFE8DA);
 
   /// Pre-dawn hero top — cool mist ivory (Fajr, not forest night).
   static const Color homeNextPrayerGradientPreDawnTop = Color(0xFFF4F7F5);
@@ -180,13 +199,13 @@ abstract final class AppColors {
   static const Color homeNextPrayerGradientNightForeground = Color(0xFFF5F0E6);
 
   /// Home screen canvas — soft warm off-white top stop.
-  static const Color homeBackgroundGradientStart = Color(0xFFFAF9F7);
+  static const Color homeBackgroundGradientStart = Color(0xFFF4F2EE);
 
   /// Home screen canvas — calm warm beige mid stop.
-  static const Color homeBackgroundGradientMiddle = Color(0xFFF7F5F2);
+  static const Color homeBackgroundGradientMiddle = Color(0xFFF4F2EE);
 
   /// Home screen canvas — neutral dashboard bottom.
-  static const Color homeBackgroundGradientEnd = Color(0xFFF3F1ED);
+  static const Color homeBackgroundGradientEnd = Color(0xFFF4F2EE);
 
   /// Radial glow accent behind the Home hero / next-prayer area.
   static const Color homeBackgroundGlow = Color(0xFFF0EBE4);
@@ -203,7 +222,7 @@ abstract final class AppColors {
   /// Radial glow accent on dark Home canvas.
   static const Color homeBackgroundGlowDark = Color(0xFF2A3D38);
 
-  /// Neutral dashboard canvas — lifestyle reference (#FAFAFA).
+  /// Neutral dashboard canvas — lifestyle reference (`#F4F2EE`).
   static const Color homeDashboardCanvas = lightCanvas;
 
   /// Elevated card surface on the Home dashboard.
@@ -359,11 +378,12 @@ abstract final class AppColors {
   static const double launchSplashLogoSize = 288;
 
   // ---------------------------------------------------------------------------
-  // Light neutral ramp — soft neutral canvas + white cards
-  // (#FAFAFA / #FFFFFF / warm neutral ink). One temperature family end-to-end.
+  // Light neutral ramp — warm near-white canvas + white cards
+  // (#F4F2EE / #FFFFFF / warm neutral ink). One temperature family end-to-end.
+  // 60-30-10: canvas (~60%), elevated surfaces (~30%), accent (~10%).
   // ---------------------------------------------------------------------------
 
-  /// App canvas / scaffold — warm off-white matching Home (`#FAF9F7`).
+  /// App canvas / scaffold — warm parchment matching Home (`#F4F2EE`).
   ///
   /// Cards use [lightSurface] (`#FFFFFF`) for quiet lift with soft shadows.
   static const Color lightCanvas = homeBackgroundGradientStart;
@@ -453,8 +473,12 @@ abstract final class AppColors {
   // AppTheme — light ColorScheme roles (brand-locked M3 palette).
   // ---------------------------------------------------------------------------
 
-  /// Light [ColorScheme.onPrimary] on brand green (`#FFFFFF`).
-  static const Color lightSchemeOnPrimary = Color(0xFFFFFFFF);
+  /// Light [ColorScheme.onPrimary] on brand green — deep green ink (`#003317`).
+  ///
+  /// Brand green `#1DAB61` is too light for white foregrounds (~3.0:1), so
+  /// on-primary labels/icons use dark green ink instead (≥4.5:1 AA on
+  /// [brandActionGreen], higher on [darkDefaultPrimary]).
+  static const Color lightSchemeOnPrimary = Color(0xFF003317);
 
   /// Light [ColorScheme.secondary] — neutral chrome (`#E5E5E0`).
   static const Color lightSchemeSecondary = lightSurfaceContainerHighBase;
@@ -544,18 +568,26 @@ abstract final class AppColors {
   /// Blue-grey accent — sessions / neutral category glyph.
   static const Color categoryAccentBlueGrey = Color(0xFF78909C);
 
-  // ---------------------------------------------------------------------------
-  // Semantic colors — meaning, not decoration.
-  // ---------------------------------------------------------------------------
+  // ===========================================================================
+  // UI Kit Semantic Colors (Legacy 'TripGlide' and 'HomeTravel' Aliases)
+  // ===========================================================================
+  // NOTE: These names are retained temporarily for compatibility during the
+  // 60-30-10 migration. New widgets should NOT use these names directly.
+  // Instead, use Material [ColorScheme], product tokens, or semantic UI Kit tokens.
+  // ===========================================================================
+
+  /// Pure surface default (`#FFFFFF`).
+  static const Color surface = Color(0xFFFFFFFF);
 
   /// Reference soft red/pink for inactive status surfaces (`#E57373`).
   static const Color errorSoft = Color(0xFFE57373);
 
-  /// Error / failure — maps to light [ColorScheme.error] (`#D32F2F`).
+  /// Error / failure — maps to light [ColorScheme.error] (`#C74545`).
   ///
-  /// Slightly deeper than [errorSoft] so icons and [onError] pass contrast on
-  /// white surfaces while staying in the reference red family.
-  static const Color error = Color(0xFFD32F2F);
+  /// Deeper than [errorSoft] so white [onError] labels and error icons on
+  /// white surfaces both pass WCAG AA (≥4.5:1) while staying in the
+  /// reference soft-red family.
+  static const Color error = Color(0xFFC74545);
 
   /// Light [ColorScheme.errorContainer] — pale soft red from the reference mock.
   static const Color lightSchemeErrorContainer = errorSoft;
@@ -596,7 +628,7 @@ abstract final class AppColors {
   static const Color brandSecondary = lightSchemeSecondary;
 
   /// Brand tertiary used by FlexColorScheme assembly only.
-  static const Color brandTertiary = brandActionGreen;
+  static const Color brandTertiary = brandGoldAccent;
 }
 
 /// Fixed “studio” palette for the **share audio / reel composer** (dark

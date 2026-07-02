@@ -241,7 +241,7 @@ abstract final class QuranPlayerLayoutInsets {
     final TextScaler textScaler = MediaQuery.textScalerOf(context);
     final double rowHeight = shellTokens.phoneBottomNavPaintedHeight(
       textScaler,
-      context.systemBottomSafeArea,
+      mediaQueryContext(context).floatingBottomPadding,
     );
     return rowHeight;
   }

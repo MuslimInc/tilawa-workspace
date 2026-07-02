@@ -127,7 +127,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
               child: ListView(
                 controller: _scrollController,
                 padding: EdgeInsets.only(
-                  top: tokens.spaceMedium,
+                  top: tokens.spaceSmall,
                   bottom: listScrollBottomPadding(context),
                 ),
                 children: [

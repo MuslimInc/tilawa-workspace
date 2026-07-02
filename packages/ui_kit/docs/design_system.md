@@ -57,11 +57,13 @@ color picker and persisted user choices.
 — primary CTA, active bottom nav, selected pills/segments, progress fill,
 switch ON. **Not** for scaffold fills (use the neutral canvas).
 
-### Light neutral ramp (white canvas + white cards)
+### Light neutral ramp (warm near-white canvas + white cards)
+
+60-30-10: canvas ~60% (`lightCanvas`), elevated surfaces ~30% (`lightSurface`, chips), accent ~10% (`primary`). Scaffold stays warm near-white — not pure white.
 
 | `AppColors` | Hex | `ColorScheme` / usage |
 |-------------|-----|------------------------|
-| `lightCanvas` / `lightBackground` | `#FAF9F7` | Scaffold, `surfaceContainerLowest` |
+| `lightCanvas` / `lightBackground` | `#F4F2EE` | Scaffold, `surfaceContainerLowest` |
 | `lightSurface` | `#FFFFFF` | Cards, sheets, dialogs |
 | `lightInk` | `#212121` | `onSurface` |
 | `lightMute` | `#757575` | Muted labels (`onSurfaceVariant`) |
@@ -223,3 +225,4 @@ Previews and goldens set `AppTheme.useGoogleFonts = false` and
 | [`feedback_system.md`](feedback_system.md) | Toast vs inline validation channel rules |
 | [`specs/017-catalog-theme-freeze/`](../../../specs/017-catalog-theme-freeze/spec.md) | Freeze acceptance criteria |
 | [`specs/006-ui-kit-expansion/ui-kit-inventory.md`](../../../specs/006-ui-kit-expansion/ui-kit-inventory.md) | Component inventory |
+

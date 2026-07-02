@@ -23,9 +23,12 @@ String localizedAuthBlocErrorMessage(
       l10n.deleteAccountServiceUnavailable,
     DeleteAccountErrorKey.notSignedIn => l10n.deleteAccountNotSignedIn,
     DeleteAccountErrorKey.failed => l10n.deleteAccountFailed,
+    AuthErrorKey.deviceRegistrationFailed => l10n.authDeviceRegistrationFailed,
     '' => l10n.deleteAccountFailed,
     _ when isNetworkConnectivityErrorMessage(message) =>
       l10n.serverActionOfflineMessage,
-    _ => message,
+    // Unknown values are raw failure/exception text meant for logs, never
+    // for users; fall back to generic copy instead of displaying them.
+    _ => l10n.authErrorGenericMessage,
   };
 }

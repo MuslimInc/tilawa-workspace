@@ -97,13 +97,12 @@ class _HomeScreenState extends State<HomeScreen> {
       child: BlocListener<HomeDashboardBloc, HomeDashboardState>(
         listenWhen: (HomeDashboardState previous, HomeDashboardState current) {
           return current is HomeDashboardLoaded &&
-              current.refreshErrorMessage != null &&
+              current.refreshError != null &&
               (previous is! HomeDashboardLoaded ||
-                  previous.refreshErrorMessage != current.refreshErrorMessage);
+                  previous.refreshError != current.refreshError);
         },
         listener: (BuildContext context, HomeDashboardState state) {
-          if (state is! HomeDashboardLoaded ||
-              state.refreshErrorMessage == null) {
+          if (state is! HomeDashboardLoaded || state.refreshError == null) {
             return;
           }
 
@@ -119,7 +118,7 @@ class _HomeScreenState extends State<HomeScreen> {
               content: Text(
                 homeDashboardRefreshErrorMessage(
                   context,
-                  state.refreshErrorMessage!,
+                  state.refreshError!,
                 ),
               ),
             ),

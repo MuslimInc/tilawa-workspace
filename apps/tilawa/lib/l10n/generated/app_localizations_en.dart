@@ -1212,6 +1212,10 @@ class AppLocalizationsEn extends AppLocalizations {
       'No internet connection. Please reconnect and try again.';
 
   @override
+  String get authErrorGenericMessage =>
+      'Something went wrong. Please try again.';
+
+  @override
   String get downloadLowStorageWarning =>
       'Available storage may not be enough for this download. Free up space if downloads fail.';
 

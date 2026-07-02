@@ -1,7 +1,9 @@
+import 'dart:async';
 import 'dart:io';
 import 'dart:typed_data';
 
 import 'package:connectivity_plus/connectivity_plus.dart';
+import 'package:fake_async/fake_async.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:mocktail/mocktail.dart';
 import 'package:tilawa_core/network/network_info_impl.dart';
@@ -109,6 +111,127 @@ void main() {
 
       // assert
       expect(result, false);
+    });
+    test('gives up on a slow lookup after lookupTimeout', () {
+      fakeAsync((async) {
+        when(
+          () => mockConnectivity.checkConnectivity(),
+        ).thenAnswer((_) async => [ConnectivityResult.wifi]);
+
+        final Completer<List<InternetAddress>> neverCompletes =
+            Completer<List<InternetAddress>>();
+        networkInfo = NetworkInfoImpl(
+          mockConnectivity,
+          internetLookup:
+              (
+                String host, {
+                InternetAddressType type = InternetAddressType.any,
+              }) => neverCompletes.future,
+        );
+
+        bool? result;
+        networkInfo.isConnected.then((value) => result = value);
+
+        async.elapse(
+          NetworkInfoImpl.lookupTimeout - const Duration(milliseconds: 1),
+        );
+        expect(result, isNull);
+
+        async.elapse(const Duration(milliseconds: 2));
+        expect(result, false);
+      });
+    });
+
+    test('reuses the cached result within the TTL', () async {
+      when(
+        () => mockConnectivity.checkConnectivity(),
+      ).thenAnswer((_) async => [ConnectivityResult.wifi]);
+
+      final mockInternetLookup = MockInternetLookup();
+      when(
+        () => mockInternetLookup.call(any()),
+      ).thenAnswer((_) async => [MockInternetAddress()]);
+
+      networkInfo = NetworkInfoImpl(
+        mockConnectivity,
+        internetLookup: mockInternetLookup.call,
+      );
+
+      expect(await networkInfo.isConnected, true);
+      expect(await networkInfo.isConnected, true);
+      expect(await networkInfo.isConnected, true);
+
+      verify(() => mockInternetLookup.call(any())).called(1);
+      verify(() => mockConnectivity.checkConnectivity()).called(1);
+    });
+
+    test('caches an offline result for rapid repeated checks', () async {
+      when(
+        () => mockConnectivity.checkConnectivity(),
+      ).thenAnswer((_) async => [ConnectivityResult.none]);
+
+      networkInfo = NetworkInfoImpl(mockConnectivity);
+
+      expect(await networkInfo.isConnected, false);
+      expect(await networkInfo.isConnected, false);
+
+      verify(() => mockConnectivity.checkConnectivity()).called(1);
+    });
+
+    test('re-probes after the cache TTL expires', () async {
+      when(
+        () => mockConnectivity.checkConnectivity(),
+      ).thenAnswer((_) async => [ConnectivityResult.wifi]);
+
+      final mockInternetLookup = MockInternetLookup();
+      when(
+        () => mockInternetLookup.call(any()),
+      ).thenAnswer((_) async => [MockInternetAddress()]);
+
+      DateTime current = DateTime(2026, 7, 2, 12);
+      networkInfo = NetworkInfoImpl(
+        mockConnectivity,
+        internetLookup: mockInternetLookup.call,
+        now: () => current,
+      );
+
+      expect(await networkInfo.isConnected, true);
+      current = current.add(
+        NetworkInfoImpl.resultCacheTtl + const Duration(seconds: 1),
+      );
+      expect(await networkInfo.isConnected, true);
+
+      verify(() => mockInternetLookup.call(any())).called(2);
+    });
+
+    test('deduplicates concurrent checks into one probe', () async {
+      when(
+        () => mockConnectivity.checkConnectivity(),
+      ).thenAnswer((_) async => [ConnectivityResult.wifi]);
+
+      final Completer<List<InternetAddress>> lookupCompleter =
+          Completer<List<InternetAddress>>();
+      int lookupCalls = 0;
+      networkInfo = NetworkInfoImpl(
+        mockConnectivity,
+        internetLookup:
+            (
+              String host, {
+              InternetAddressType type = InternetAddressType.any,
+            }) {
+              lookupCalls++;
+              return lookupCompleter.future;
+            },
+      );
+
+      final Future<bool> first = networkInfo.isConnected;
+      final Future<bool> second = networkInfo.isConnected;
+
+      lookupCompleter.complete([MockInternetAddress()]);
+
+      expect(await first, true);
+      expect(await second, true);
+      expect(lookupCalls, 1);
     });
   });
 

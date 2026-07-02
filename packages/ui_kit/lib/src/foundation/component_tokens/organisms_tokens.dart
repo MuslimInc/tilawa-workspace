@@ -564,15 +564,15 @@ class TilawaAdaptiveShellTokens {
     final bottomNavBackgroundColor = _bottomNavBackgroundColor(colorScheme);
     final shellChromeOutline = _shellChromeOutlineColor(colorScheme);
     final bool lightChrome = colorScheme.brightness == Brightness.light;
-    const double navButtonMinHeight = 52;
+    const double navButtonMinHeight = 48;
     const double navButtonVerticalPadding = 4;
     const double navButtonIconSize = 24;
     const double navButtonSelectedCenterScale = 1.0;
     const double navButtonGap = 2;
     const double navButtonSelectionContainerVerticalPadding = 4;
-    const double navButtonIconOnlyMinHeight = kMeMuslimMinInteractiveDimension;
-    const double navButtonIconOnlyVerticalPadding = 4;
-    const double navButtonIconOnlySelectionContainerVerticalPadding = 4;
+    const double navButtonIconOnlyMinHeight = 28;
+    const double navButtonIconOnlyVerticalPadding = 0;
+    const double navButtonIconOnlySelectionContainerVerticalPadding = 0;
     const TextScaler unitTextScaler = TextScaler.linear(1);
     final double iconOnlyBarHeight =
         TilawaAdaptiveShellTokens._phoneBottomNavIconOnlyLayoutHeight(
@@ -1050,10 +1050,10 @@ class TilawaSettingsGroupTokens {
   /// Rounded panel fill behind settings rows ([TilawaSettingsGroup]).
   final Color groupSurfaceColor;
 
-  /// Hairline border around the group panel (`outlineVariant` × `tileDividerOpacity` × 2).
+  /// Hairline border around the group panel (`outlineVariant`).
   final Color groupContainerBorderColor;
 
-  /// Divider under [TilawaSelectionTile] rows (`outlineVariant` × [tileDividerOpacity]).
+  /// Divider under settings / selection rows (`outlineVariant`).
   final Color selectionTileDividerColor;
 
   /// [Switch.adaptive] active track — full [ColorScheme.primary] (M3
@@ -1079,7 +1079,9 @@ class TilawaSettingsGroupTokens {
   factory TilawaSettingsGroupTokens.fromColorScheme(ColorScheme colorScheme) {
     const tileIconContainerOpacity = 0.1;
     const selectionTileSelectedBackgroundColor = Colors.transparent;
-    const tileDividerOpacity = 0.05;
+    // Full outlineVariant — calm hairlines visible on white settings cards
+    // (matches Home grouped-list dividers).
+    const tileDividerOpacity = 1.0;
     final groupSurfaceColor = colorScheme.surface;
     final groupContainerBorderColor = _groupContainerBorderColor(
       colorScheme,
@@ -1095,7 +1097,7 @@ class TilawaSettingsGroupTokens {
       groupHorizontalPadding: 20,
       groupHeaderPadding: const EdgeInsetsDirectional.fromSTEB(
         0,
-        24,
+        12,
         0,
         8,
       ),
@@ -1146,7 +1148,9 @@ class TilawaSettingsGroupTokens {
     ColorScheme colorScheme,
     double tileDividerOpacity,
   ) {
-    return colorScheme.outlineVariant.withValues(alpha: tileDividerOpacity * 2);
+    return colorScheme.outlineVariant.withValues(
+      alpha: tileDividerOpacity.clamp(0.0, 1.0),
+    );
   }
 
   TilawaSettingsGroupTokens copyWith({

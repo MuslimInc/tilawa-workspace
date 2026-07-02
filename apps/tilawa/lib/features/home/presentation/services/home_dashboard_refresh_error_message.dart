@@ -1,14 +1,15 @@
 import 'package:flutter/widgets.dart';
 
 import 'package:tilawa/core/extensions.dart';
-import 'package:tilawa/core/network/network_error_message.dart';
+
+import '../bloc/home_dashboard_state.dart';
 
 /// Localized snackbar copy for a failed Home pull-to-refresh.
 String homeDashboardRefreshErrorMessage(
   BuildContext context,
-  String message,
+  HomeDashboardFailureKind kind,
 ) {
-  if (isNetworkConnectivityErrorMessage(message)) {
+  if (kind == HomeDashboardFailureKind.offline) {
     return context.l10n.homeRefreshOfflineMessage;
   }
   return context.l10n.homeRefreshFailedMessage;

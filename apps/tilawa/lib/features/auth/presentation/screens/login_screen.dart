@@ -530,7 +530,7 @@ class _LoginGoogleSignInActionsState extends State<_LoginGoogleSignInActions>
                         child: TilawaGoogleSignInButton(
                           label: context.l10n.continueWithGoogle,
                           semanticLabel: context.l10n.continueWithGoogle,
-                          appearance: GoogleSignInButtonAppearance.light,
+                          appearance: GoogleSignInButtonAppearance.dark,
                           isLoading: isLoading,
                           onPressed: isLoading
                               ? null

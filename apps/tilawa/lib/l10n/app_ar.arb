@@ -1124,6 +1124,10 @@
     "@serverActionOfflineMessage": {
         "description": "Message shown when a server-dependent action is blocked while offline"
     },
+    "authErrorGenericMessage": "حدث خطأ ما. يرجى المحاولة مرة أخرى.",
+    "@authErrorGenericMessage": {
+        "description": "Fallback shown for unmapped auth errors so raw exception text never reaches users"
+    },
     "downloadLowStorageWarning": "قد لا تكون مساحة التخزين المتاحة كافية لهذا التحميل. حرّر مساحة إذا فشل التحميل.",
     "@downloadLowStorageWarning": {
         "description": "Toast shown when device free storage is likely below the estimated download size"

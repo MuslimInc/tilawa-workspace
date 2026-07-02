@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:tilawa/features/audio_player/presentation/bloc/audio_player_bloc.dart';
 import 'package:tilawa/features/audio_player/presentation/widgets/quran_player/quran_player_widget.dart';
+import 'package:tilawa/shared/widgets/quran_player_chrome.dart';
 import 'package:tilawa_ui_kit/tilawa_ui_kit.dart';
 
 /// Bottom padding for scrollable lists so the last item clears shell chrome
@@ -12,6 +13,11 @@ double listScrollBottomPadding(BuildContext context) {
   final double shell = context.shellHostedScrollBottomPadding;
   if (shell > 0) {
     return shell;
+  }
+  if (AppShellRoutePolicy.isPhoneBottomNavigationVisible(
+    QuranPlayerRoutePolicy.currentMatchedLocation(),
+  )) {
+    return context.tokens.spaceMedium;
   }
   return _standaloneScrollBottomPadding(context);
 }

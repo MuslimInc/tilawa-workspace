@@ -1,12 +1,12 @@
-import 'dart:math' as math;
 import 'dart:io';
+import 'dart:math' as math;
 
 import 'package:flex_color_scheme/flex_color_scheme.dart';
 import 'package:flutter/foundation.dart' show defaultTargetPlatform, kIsWeb;
 import 'package:flutter/material.dart';
 
-import 'app_colors.dart';
 import 'app_brand_probe.dart';
+import 'app_colors.dart';
 import 'component_tokens.dart';
 import 'design_tokens.dart';
 import 'memuslim_product_colors.dart';
@@ -255,7 +255,9 @@ class AppTheme {
       surfaceContainerHigh: AppColors.lightSurfaceContainerHighBase,
       surfaceContainerHighest: AppColors.lightSurfaceContainerHighestBase,
       tertiary: AppColors.brandTertiary,
-      onTertiary: AppColors.tripGlideSurface,
+      // Tertiary tracks brand green, so it shares the ink on-color (white
+      // fails contrast on #1DAB61).
+      onTertiary: AppColors.lightSchemeOnPrimary,
       tertiaryContainer: AppColors.tripGlideCanvasElevated,
       onTertiaryContainer: AppColors.tripGlideInk,
       outline: AppColors.lightOutline,
@@ -444,10 +446,32 @@ class AppTheme {
         ),
       ),
       filledButtonTheme: FilledButtonThemeData(
-        style: _buttonStyleWithKitShape(
-          theme.filledButtonTheme.style,
-          designTokens,
-        ),
+        style:
+            _buttonStyleWithKitShape(
+              theme.filledButtonTheme.style,
+              designTokens,
+            )?.copyWith(
+              backgroundColor: WidgetStateProperty.resolveWith((states) {
+                if (states.contains(WidgetState.disabled)) {
+                  return colorScheme.onSurface.withValues(alpha: 0.12);
+                }
+                return AppBrandProbe.usesBrandLockedSchemeRoles(
+                      colorScheme.primary.toARGB32(),
+                    )
+                    ? AppColors.brandActionGreenAccessible
+                    : colorScheme.primary;
+              }),
+              foregroundColor: WidgetStateProperty.resolveWith((states) {
+                if (states.contains(WidgetState.disabled)) {
+                  return colorScheme.onSurface.withValues(alpha: 0.38);
+                }
+                return AppBrandProbe.usesBrandLockedSchemeRoles(
+                      colorScheme.primary.toARGB32(),
+                    )
+                    ? const Color(0xFFFFFFFF)
+                    : colorScheme.onPrimary;
+              }),
+            ),
       ),
       outlinedButtonTheme: OutlinedButtonThemeData(
         style: _buttonStyleWithKitShape(

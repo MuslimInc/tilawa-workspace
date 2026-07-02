@@ -2192,6 +2192,12 @@ abstract class AppLocalizations {
   /// **'No internet connection. Please reconnect and try again.'**
   String get serverActionOfflineMessage;
 
+  /// Fallback shown for unmapped auth errors so raw exception text never reaches users
+  ///
+  /// In en, this message translates to:
+  /// **'Something went wrong. Please try again.'**
+  String get authErrorGenericMessage;
+
   /// Toast shown when device free storage is likely below the estimated download size
   ///
   /// In en, this message translates to:

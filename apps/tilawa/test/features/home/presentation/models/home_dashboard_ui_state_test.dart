@@ -29,10 +29,7 @@ void main() {
 
   test('maps failure to hero error without full skeleton', () {
     final HomeDashboardUiState ui = HomeDashboardUiState.from(
-      const HomeDashboardFailure(
-        'offline',
-        kind: HomeDashboardFailureKind.offline,
-      ),
+      const HomeDashboardFailure(HomeDashboardFailureKind.offline),
     );
 
     expect(ui.showFullSkeleton, isFalse);

@@ -1308,19 +1308,22 @@ class QuranPlayerWidgetState extends State<QuranPlayerWidget>
       ),
     );
 
-    return Column(
-      mainAxisSize: MainAxisSize.min,
-      children: [
-        miniBar,
-        if (bottomSpacing > 0)
-          ColoredBox(
-            color: theme.scaffoldBackgroundColor,
-            child: SizedBox(
+    final Color footerChromeColor =
+        theme.componentTokens.mediaPlayerBar.shellBackgroundColor;
+
+    return ColoredBox(
+      color: footerChromeColor,
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          miniBar,
+          if (bottomSpacing > 0)
+            SizedBox(
               height: bottomSpacing,
               width: double.infinity,
             ),
-          ),
-      ],
+        ],
+      ),
     );
   }
 

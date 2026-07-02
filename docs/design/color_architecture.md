@@ -2,6 +2,15 @@
 
 How colour flows through the monorepo. Implementation truth: `packages/ui_kit/lib/src/foundation/`.
 
+## Light neutral proportion (60-30-10)
+
+| Share | Role | Token |
+| ~60% | Warm canvas / scaffold | `surfaceContainerLowest` (`#F4F2EE`) |
+| ~30% | White cards, sheets, idle chips | `surface`, `surfaceContainerHigh` |
+| ~10% | Brand accent (CTA, nav, selection) | `primary` |
+
+Scaffold is intentionally **not** pure white so elevated `surface` cards retain quiet lift.
+
 ## Layers (bottom → top)
 
 | Layer | Code | Who may import |
@@ -87,3 +96,4 @@ Kit-owned formulas (search field, bottom nav, hero prayer gradients via `homeNex
 - [`colors.md`](colors.md) — policy
 - [`../packages/ui_kit/docs/design_system.md`](../packages/ui_kit/docs/design_system.md) — kit contracts
 - [`../DESIGN.md`](../DESIGN.md) — human spec
+

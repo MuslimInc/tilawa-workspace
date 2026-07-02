@@ -5,6 +5,7 @@ import '../../lib/src/foundation/app_colors.dart';
 import '../../lib/src/foundation/app_theme.dart';
 import '../../lib/src/foundation/component_tokens.dart';
 import '../../lib/src/foundation/design_tokens.dart';
+import '../../lib/src/foundation/safe_area_ext.dart';
 import '../../lib/src/foundation/tilawa_interactive_surface.dart';
 import '../../lib/src/organisms/tilawa_adaptive_shell.dart';
 import '../rtl_test_matrix.dart';
@@ -655,7 +656,7 @@ void main() {
         ).scale(1.0).clamp(0.01, 1.0);
         final double expectedHeight = tokens.phoneBottomNavPaintedHeight(
           TextScaler.linear(bottomBarTextScale),
-          systemInset,
+          dockContext.floatingBottomPadding,
         );
 
         final Rect dockRect = tester.getRect(find.byKey(_bottomNavDockKey));

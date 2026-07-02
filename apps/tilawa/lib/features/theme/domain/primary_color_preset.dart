@@ -28,7 +28,7 @@ enum PrimaryColorPreset {
 
   /// Default primary preset for fresh installs and corrupt-payload fallback.
   ///
-  /// Brand-locked to green global accent (`#2B8659`) for the Tilawa palette
+  /// Brand-locked to green global accent (`#1DAB61`) for the Tilawa palette
   /// system (see `Env.kShowColorPicker`).
   static const PrimaryColorPreset defaultPreset = PrimaryColorPreset.brandGreen;
 
@@ -49,6 +49,10 @@ enum PrimaryColorPreset {
   /// Deprecated brown primary ARGB — migrates to [brandGreen].
   static const int legacyBrownPrimaryArgb = 0xFF8B5E3C;
 
+  /// Retired brand green ARGB (`#2B8659`, pre-`#1DAB61` rebrand) — migrates
+  /// to [brandGreen] so persisted payloads pick up the new brand color.
+  static const int legacyBrandGreenPrimaryArgb = 0xFF2B8659;
+
   static PrimaryColorPreset? findById(String? id) {
     if (id == null) return null;
     if (id == legacyPurplePresetId || id == legacyBrownPresetId) {
@@ -61,7 +65,9 @@ enum PrimaryColorPreset {
   }
 
   static PrimaryColorPreset? findByArgb(int argb) {
-    if (argb == legacyPurplePrimaryArgb || argb == legacyBrownPrimaryArgb) {
+    if (argb == legacyPurplePrimaryArgb ||
+        argb == legacyBrownPrimaryArgb ||
+        argb == legacyBrandGreenPrimaryArgb) {
       return brandGreen;
     }
     for (final p in values) {
@@ -70,9 +76,12 @@ enum PrimaryColorPreset {
     return null;
   }
 
-  /// Normalizes a stored primary ARGB, remapping deprecated purple/brown to green.
+  /// Normalizes a stored primary ARGB, remapping deprecated purple/brown and
+  /// the retired pre-rebrand green to the current brand green.
   static int migrateLegacyPrimaryArgb(int argb) {
-    if (argb == legacyPurplePrimaryArgb || argb == legacyBrownPrimaryArgb) {
+    if (argb == legacyPurplePrimaryArgb ||
+        argb == legacyBrownPrimaryArgb ||
+        argb == legacyBrandGreenPrimaryArgb) {
       return brandGreen.valueArgb;
     }
     return argb;

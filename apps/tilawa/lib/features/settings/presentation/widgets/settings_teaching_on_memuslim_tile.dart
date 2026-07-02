@@ -60,11 +60,14 @@ class SettingsTeachingOnMemuslimSection extends StatelessWidget {
       final tokens = Theme.of(context).tokens;
       return Padding(
         padding: EdgeInsetsDirectional.only(
-          top: tokens.spaceLarge,
-          bottom: tokens.spaceXXL,
+          top: tokens.spaceMedium,
+          bottom: tokens.spaceLarge,
         ),
         child: const TilawaSettingsGroupHorizontalInset(
-          child: TilawaCapabilityActionCardSkeleton(margin: EdgeInsets.zero),
+          child: TilawaCapabilityActionCardSkeleton(
+            margin: EdgeInsets.zero,
+            useGradient: false,
+          ),
         ),
       );
     }
@@ -92,8 +95,8 @@ class SettingsTeachingOnMemuslimSection extends StatelessWidget {
 
     return Padding(
       padding: EdgeInsetsDirectional.only(
-        top: tokens.spaceLarge,
-        bottom: tokens.spaceXXL,
+        top: tokens.spaceMedium,
+        bottom: tokens.spaceLarge,
       ),
       child: TilawaSettingsGroupHorizontalInset(
         child: capability.showsPremiumSettingsCapabilityCard
@@ -142,6 +145,7 @@ class SettingsTeachingOnMemuslimTile extends StatelessWidget {
       }
       return TilawaCapabilityActionCardSkeleton(
         margin: standaloneLayout ? EdgeInsets.zero : null,
+        useGradient: false,
       );
     }
 
@@ -172,6 +176,7 @@ class SettingsTeachingOnMemuslimTile extends StatelessWidget {
         subtitle: subtitle ?? '',
         leadingIcon: TilawaIcons.teacherCapability,
         badgeLabel: badgeLabel,
+        useGradient: false,
         onTap: () => _onTap(context, capability, analytics),
         semanticLabel: subtitle == null ? title : '$title. $subtitle',
         margin: standaloneLayout ? EdgeInsets.zero : null,
