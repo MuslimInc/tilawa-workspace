@@ -193,23 +193,20 @@ class AuthBloc extends HydratedBloc<AuthEvent, AuthState> {
     );
     _interactiveSignInGeneration++;
     _accountDeletionFlow.markDeletionStarted();
-    emit(const AuthState.loading());
 
     final result = await _deleteAccount();
 
     await result.fold(
       (failure) async {
-        _accountDeletionFlow.markDeletionEndedWithoutSuccess();
         logger.d(
           '[DeleteFirebaseUser] Bloc: failed with ${failure.runtimeType} '
           'message=${failure.message}',
         );
         if (failure is UserCancelledFailure) {
-          if (userBeforeDelete != null) {
-            emit(AuthState.authenticated(user: userBeforeDelete));
-          } else {
-            emit(const AuthState.unauthenticated());
-          }
+          _restoreSessionAfterFailedDeletion(
+            emit: emit,
+            userBeforeDelete: userBeforeDelete,
+          );
           return;
         }
 
@@ -219,13 +216,10 @@ class AuthBloc extends HydratedBloc<AuthEvent, AuthState> {
           error: failure,
         );
         emit(AuthState.error(message: message));
-
-        final UserEntity? currentUser = _getCurrentUser();
-        if (currentUser != null) {
-          emit(AuthState.authenticated(user: currentUser));
-        } else {
-          emit(const AuthState.unauthenticated());
-        }
+        _restoreSessionAfterFailedDeletion(
+          emit: emit,
+          userBeforeDelete: userBeforeDelete,
+        );
       },
       (_) async {
         _accountDeletionFlow.markDeletionSucceeded();
@@ -287,6 +281,19 @@ class AuthBloc extends HydratedBloc<AuthEvent, AuthState> {
 
   bool _isStaleDeviceFailure(Failure failure) {
     return failure.message == AuthErrorKey.staleDeviceRejected;
+  }
+
+  void _restoreSessionAfterFailedDeletion({
+    required Emitter<AuthState> emit,
+    required UserEntity? userBeforeDelete,
+  }) {
+    final UserEntity? currentUser = _getCurrentUser() ?? userBeforeDelete;
+    if (currentUser != null) {
+      emit(AuthState.authenticated(user: currentUser));
+    } else {
+      emit(const AuthState.unauthenticated());
+    }
+    _accountDeletionFlow.markDeletionEndedWithoutSuccess();
   }
 
   Future<void> _syncLanguagePreferenceAfterAuth() async {

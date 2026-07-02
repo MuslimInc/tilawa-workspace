@@ -519,7 +519,7 @@ void main() {
 
     group('DeleteAccountEvent', () {
       blocTest<AuthBloc, AuthState>(
-        'emits [loading, unauthenticated] when delete succeeds',
+        'emits [unauthenticated] when delete succeeds',
         build: () {
           when(mockGetCurrentUserUseCase()).thenReturn(tUser);
           when(
@@ -527,11 +527,9 @@ void main() {
           ).thenAnswer((_) async => const Right(null));
           return authBloc;
         },
+        seed: () => AuthState.authenticated(user: tUser),
         act: (bloc) => bloc.add(const DeleteAccountEvent()),
-        expect: () => [
-          const AuthState.loading(),
-          const AuthState.unauthenticated(),
-        ],
+        expect: () => [const AuthState.unauthenticated()],
       );
 
       blocTest<AuthBloc, AuthState>(
@@ -545,10 +543,11 @@ void main() {
         },
         seed: () => AuthState.authenticated(user: tUser),
         act: (bloc) => bloc.add(const DeleteAccountEvent()),
-        expect: () => [
-          const AuthState.loading(),
-          AuthState.authenticated(user: tUser),
-        ],
+        expect: () => <AuthState>[],
+        verify: (_) {
+          expect(authBloc.state, AuthState.authenticated(user: tUser));
+          expect(accountDeletionFlowTracker.deletionInProgress, isFalse);
+        },
       );
 
       blocTest<AuthBloc, AuthState>(
@@ -562,14 +561,11 @@ void main() {
           return authBloc;
         },
         act: (bloc) => bloc.add(const DeleteAccountEvent()),
-        expect: () => [
-          const AuthState.loading(),
-          const AuthState.unauthenticated(),
-        ],
+        expect: () => [const AuthState.unauthenticated()],
       );
 
       blocTest<AuthBloc, AuthState>(
-        'emits [loading, error, authenticated] when delete fails and the '
+        'emits [error, authenticated] when delete fails and the '
         'user is still signed in',
         build: () {
           when(mockGetCurrentUserUseCase()).thenReturn(tUser);
@@ -581,19 +577,17 @@ void main() {
         seed: () => AuthState.authenticated(user: tUser),
         act: (bloc) => bloc.add(const DeleteAccountEvent()),
         expect: () => [
-          const AuthState.loading(),
           const AuthState.error(message: 'boom'),
           AuthState.authenticated(user: tUser),
         ],
       );
 
       blocTest<AuthBloc, AuthState>(
-        'emits [loading, error, unauthenticated] when delete fails and the '
-        'session is gone',
+        'emits [error, authenticated] when delete fails but Firebase '
+        'session is still available via cached user',
         build: () {
           int calls = 0;
           when(mockGetCurrentUserUseCase()).thenAnswer((_) {
-            // Signed in before the delete, gone afterwards.
             return calls++ == 0 ? tUser : null;
           });
           when(mockDeleteAccount()).thenAnswer(
@@ -601,9 +595,26 @@ void main() {
           );
           return authBloc;
         },
+        seed: () => AuthState.authenticated(user: tUser),
         act: (bloc) => bloc.add(const DeleteAccountEvent()),
         expect: () => [
-          const AuthState.loading(),
+          const AuthState.error(message: DeleteAccountErrorKey.failed),
+          AuthState.authenticated(user: tUser),
+        ],
+      );
+
+      blocTest<AuthBloc, AuthState>(
+        'emits [error, unauthenticated] when delete fails and the '
+        'session is gone',
+        build: () {
+          when(mockGetCurrentUserUseCase()).thenReturn(null);
+          when(mockDeleteAccount()).thenAnswer(
+            (_) async => const Left(UnexpectedFailure(null)),
+          );
+          return authBloc;
+        },
+        act: (bloc) => bloc.add(const DeleteAccountEvent()),
+        expect: () => [
           const AuthState.error(message: DeleteAccountErrorKey.failed),
           const AuthState.unauthenticated(),
         ],

@@ -1,9 +1,9 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:tilawa/core/di/injection.dart';
 import 'package:tilawa/core/extensions.dart';
 import 'package:tilawa_ui_kit/tilawa_ui_kit.dart';
 
-import '../bloc/auth_bloc.dart';
+import '../../application/account_deletion_flow_tracker.dart';
 
 /// Shows a non-dismissible progress dialog while [DeleteAccountEvent] runs.
 Future<void> showDeleteAccountProgressDialog(BuildContext context) {
@@ -19,8 +19,49 @@ Future<void> showDeleteAccountProgressDialog(BuildContext context) {
 }
 
 /// Centered card with loading state for account deletion.
-class DeleteAccountProgressDialog extends StatelessWidget {
+class DeleteAccountProgressDialog extends StatefulWidget {
   const DeleteAccountProgressDialog({super.key});
+
+  @override
+  State<DeleteAccountProgressDialog> createState() =>
+      _DeleteAccountProgressDialogState();
+}
+
+class _DeleteAccountProgressDialogState
+    extends State<DeleteAccountProgressDialog> {
+  AccountDeletionFlowTracker? _tracker;
+
+  @override
+  void initState() {
+    super.initState();
+    if (getIt.isRegistered<AccountDeletionFlowTracker>()) {
+      _tracker = getIt<AccountDeletionFlowTracker>();
+      _tracker!.addListener(_onDeletionFlowChanged);
+      _onDeletionFlowChanged();
+    }
+  }
+
+  @override
+  void dispose() {
+    _tracker?.removeListener(_onDeletionFlowChanged);
+    super.dispose();
+  }
+
+  void _onDeletionFlowChanged() {
+    if (!mounted) {
+      return;
+    }
+    setState(() {});
+    if (_tracker?.deletionInProgress != false) {
+      return;
+    }
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (!mounted) {
+        return;
+      }
+      Navigator.of(context, rootNavigator: true).pop();
+    });
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -30,49 +71,41 @@ class DeleteAccountProgressDialog extends StatelessWidget {
     final String message = context.l10n.deleteAccountInProgress;
     final double maxWidth = tokens.contentMaxWidthForm * 0.78;
 
-    return BlocListener<AuthBloc, AuthState>(
-      listenWhen: (AuthState previous, AuthState current) {
-        return previous is AuthLoading && current is! AuthLoading;
-      },
-      listener: (BuildContext context, AuthState state) {
-        Navigator.of(context, rootNavigator: true).pop();
-      },
-      child: PopScope(
-        canPop: false,
-        child: Dialog(
-          backgroundColor: colorScheme.surface,
-          insetPadding: EdgeInsets.symmetric(
-            horizontal: tokens.spaceExtraLarge,
-            vertical: tokens.spaceExtraLarge,
+    return PopScope(
+      canPop: _tracker?.deletionInProgress != true,
+      child: Dialog(
+        backgroundColor: colorScheme.surface,
+        insetPadding: EdgeInsets.symmetric(
+          horizontal: tokens.spaceExtraLarge,
+          vertical: tokens.spaceExtraLarge,
+        ),
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(
+            tokens.resolveRadius(family: TilawaRadiusFamily.card),
           ),
-          shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(
-              tokens.resolveRadius(family: TilawaRadiusFamily.card),
-            ),
-          ),
-          child: ConstrainedBox(
-            constraints: BoxConstraints(maxWidth: maxWidth),
-            child: Padding(
-              padding: EdgeInsets.all(tokens.spaceExtraLarge),
-              child: Semantics(
-                label: message,
-                liveRegion: true,
-                child: Column(
-                  mainAxisSize: MainAxisSize.min,
-                  children: <Widget>[
-                    const ExcludeSemantics(
-                      child: TilawaLoadingIndicator(),
+        ),
+        child: ConstrainedBox(
+          constraints: BoxConstraints(maxWidth: maxWidth),
+          child: Padding(
+            padding: EdgeInsets.all(tokens.spaceExtraLarge),
+            child: Semantics(
+              label: message,
+              liveRegion: true,
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                children: <Widget>[
+                  const ExcludeSemantics(
+                    child: TilawaLoadingIndicator(),
+                  ),
+                  SizedBox(height: tokens.spaceMedium),
+                  Text(
+                    message,
+                    style: theme.textTheme.bodyLarge?.copyWith(
+                      color: colorScheme.onSurface,
                     ),
-                    SizedBox(height: tokens.spaceMedium),
-                    Text(
-                      message,
-                      style: theme.textTheme.bodyLarge?.copyWith(
-                        color: colorScheme.onSurface,
-                      ),
-                      textAlign: TextAlign.center,
-                    ),
-                  ],
-                ),
+                    textAlign: TextAlign.center,
+                  ),
+                ],
               ),
             ),
           ),

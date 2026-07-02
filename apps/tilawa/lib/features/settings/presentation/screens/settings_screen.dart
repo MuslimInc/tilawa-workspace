@@ -93,7 +93,9 @@ class _SettingsScreenState extends State<SettingsScreen> {
                 getIt.isRegistered<AccountDeletionFlowTracker>()
                 ? getIt<AccountDeletionFlowTracker>()
                 : null;
-            if (deletionFlow != null && deletionFlow.suppressLoginAutoSignIn) {
+            if (deletionFlow != null &&
+                (deletionFlow.suppressLoginAutoSignIn ||
+                    deletionFlow.deletionInProgress)) {
               // [AccountDeletionNavigationListener] routes to login on success.
               return;
             }

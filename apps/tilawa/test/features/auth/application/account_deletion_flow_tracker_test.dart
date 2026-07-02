@@ -49,4 +49,15 @@ void main() {
 
     expect(tracker.suppressLoginAutoSignIn, isFalse);
   });
+
+  test('notifies listeners when deletion ends without success', () {
+    var notifications = 0;
+    tracker.addListener(() => notifications++);
+
+    tracker.markDeletionStarted();
+    tracker.markDeletionEndedWithoutSuccess();
+
+    expect(notifications, 2);
+    expect(tracker.deletionInProgress, isFalse);
+  });
 }
