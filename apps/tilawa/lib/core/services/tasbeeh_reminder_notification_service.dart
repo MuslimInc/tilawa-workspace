@@ -5,6 +5,7 @@ import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 import 'package:flutter_timezone/flutter_timezone.dart';
 import 'package:injectable/injectable.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:tilawa/core/config/android_notification_defaults.dart';
 import 'package:tilawa/core/config/notification_config.dart';
 import 'package:tilawa/core/logging/app_logger.dart';
 import 'package:tilawa/core/services/navigation_service.dart';
@@ -249,6 +250,8 @@ class TasbeehReminderNotificationService implements TasbeehReminderScheduler {
       channelDescription: _channelDescription,
       importance: Importance.defaultImportance,
       priority: Priority.defaultPriority,
+      icon: NotificationConfig.androidSmallIcon,
+      color: AndroidNotificationDefaults.accentColor,
     ),
     iOS: const DarwinNotificationDetails(),
   );

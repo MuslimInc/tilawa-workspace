@@ -8,6 +8,7 @@ import 'package:tilawa/core/logging/app_logger.dart';
 import 'package:tilawa/router/app_router.dart';
 import 'package:tilawa_core/services/interfaces/notification_dispatcher_interface.dart';
 
+import '../config/android_notification_defaults.dart';
 import '../config/notification_config.dart';
 
 /// Handler registration data
@@ -81,9 +82,8 @@ class NotificationDispatcher implements INotificationDispatcher {
 
     try {
       if (!_initialized) {
-        const androidSettings = AndroidInitializationSettings(
-          'ic_launcher_monochrome',
-        );
+        const androidSettings =
+            AndroidNotificationDefaults.initializationSettings;
         const iosSettings = DarwinInitializationSettings();
 
         const initSettings = InitializationSettings(
@@ -111,6 +111,7 @@ class NotificationDispatcher implements INotificationDispatcher {
           'High Importance Notifications',
           description: 'This channel is used for important notifications.',
           importance: Importance.max,
+          ledColor: AndroidNotificationDefaults.accentColor,
         );
 
         await _notifications

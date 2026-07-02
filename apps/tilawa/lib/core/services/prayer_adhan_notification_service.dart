@@ -1144,7 +1144,7 @@ class PrayerAdhanNotificationService
         channelDescription: channelDescription,
         importance: Importance.high,
         priority: Priority.high,
-        icon: 'ic_launcher_monochrome',
+        icon: NotificationConfig.androidSmallIcon,
         color: AppColors.notificationAccent,
         sound: playAdhan && !adhanHandledNatively
             ? RawResourceAndroidNotificationSound(

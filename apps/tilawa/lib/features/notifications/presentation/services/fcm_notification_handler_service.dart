@@ -8,6 +8,7 @@ import 'package:logger/logger.dart';
 import 'package:tilawa/core/navigation/notification_destination.dart';
 import 'package:tilawa/core/services/navigation_service.dart';
 import 'package:tilawa/router/deep_link_resolver.dart';
+import 'package:tilawa/core/config/android_notification_defaults.dart';
 import 'package:tilawa_core/services/interfaces/notification_dispatcher_interface.dart';
 
 @lazySingleton
@@ -84,6 +85,8 @@ class FCMNotificationHandlerService {
         priority: Priority.max,
         fullScreenIntent: true,
         category: AndroidNotificationCategory.call,
+        icon: AndroidNotificationDefaults.smallIcon,
+        color: AndroidNotificationDefaults.accentColor,
         actions: <AndroidNotificationAction>[
           AndroidNotificationAction('accept_call', 'Join'),
           AndroidNotificationAction('decline_call', 'Decline'),
@@ -95,6 +98,8 @@ class FCMNotificationHandlerService {
         'High Importance Notifications',
         importance: Importance.max,
         priority: Priority.high,
+        icon: AndroidNotificationDefaults.smallIcon,
+        color: AndroidNotificationDefaults.accentColor,
       );
     }
 

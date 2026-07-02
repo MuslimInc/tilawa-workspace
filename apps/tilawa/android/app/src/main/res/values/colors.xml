@@ -5,4 +5,7 @@
          Logo size: @dimen/splash_logo_size == AppColors.launchSplashLogoSize. -->
     <!-- Production: brand splash green #2A9C64 -->
     <color name="launch_background">#2A9C64</color>
+    <!-- Matches AppColors.notificationAccent (#1DAB61) for FCM / system metadata. -->
+    <color name="notification_accent">#FF1DAB61</color>
 </resources>
+

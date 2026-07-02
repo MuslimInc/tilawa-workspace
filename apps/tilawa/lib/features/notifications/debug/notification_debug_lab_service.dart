@@ -3,6 +3,7 @@ import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 import 'package:injectable/injectable.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:tilawa/core/bootstrap/app_launch_config.dart';
+import 'package:tilawa/core/config/android_notification_defaults.dart';
 import 'package:tilawa/core/bootstrap/app_startup_tasks.dart';
 import 'package:tilawa/core/navigation/notification_destination.dart';
 import 'package:tilawa/core/navigation/notification_launch_dedup.dart';
@@ -93,6 +94,8 @@ class NotificationDebugLabService {
           'Debug Lab',
           importance: Importance.high,
           priority: Priority.high,
+          icon: AndroidNotificationDefaults.smallIcon,
+          color: AndroidNotificationDefaults.accentColor,
         );
     const DarwinNotificationDetails iosDetails = DarwinNotificationDetails();
     await _dispatcher.notificationsPlugin.show(

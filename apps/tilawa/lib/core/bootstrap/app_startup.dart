@@ -36,6 +36,7 @@ import '../../router/app_router.dart';
 import '../../tilawa_app.dart';
 import '../di/injection.dart';
 import '../di/quran_image_dependencies_module.dart';
+import '../config/notification_config.dart';
 import '../logging/app_logger.dart';
 
 part 'app_bootstrapper_phases.dart';
@@ -100,7 +101,7 @@ Future<void> _showIncomingCallNotification(RemoteMessage message) async {
   // We must re-initialize since this is a separate isolate
   const local_notifications.AndroidInitializationSettings androidSettings =
       local_notifications.AndroidInitializationSettings(
-        'ic_launcher_monochrome',
+        NotificationConfig.androidSmallIcon,
       );
   const local_notifications.InitializationSettings initSettings =
       local_notifications.InitializationSettings(
@@ -118,6 +119,8 @@ Future<void> _showIncomingCallNotification(RemoteMessage message) async {
     priority: local_notifications.Priority.max,
     fullScreenIntent: true,
     category: local_notifications.AndroidNotificationCategory.call,
+    icon: NotificationConfig.androidSmallIcon,
+    color: AppColors.notificationAccent,
     actions: <local_notifications.AndroidNotificationAction>[
       local_notifications.AndroidNotificationAction(
         'accept_call',

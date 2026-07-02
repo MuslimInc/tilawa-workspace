@@ -85,6 +85,7 @@ class DownloadNotificationService implements IDownloadNotificationService {
             description: _downloadChannelDescription,
             importance: Importance.low,
             showBadge: false,
+            ledColor: AppColors.notificationAccent,
           ),
         );
       }
@@ -232,7 +233,7 @@ class DownloadNotificationService implements IDownloadNotificationService {
           progress: progress,
           category: AndroidNotificationCategory.progress,
           autoCancel: false,
-          icon: 'ic_launcher_monochrome',
+          icon: NotificationConfig.androidSmallIcon,
           color: AppColors.notificationAccent,
         );
 
@@ -336,7 +337,7 @@ class DownloadNotificationService implements IDownloadNotificationService {
           progress: progress,
           category: AndroidNotificationCategory.progress,
           autoCancel: false,
-          icon: 'ic_launcher_monochrome',
+          icon: NotificationConfig.androidSmallIcon,
           color: AppColors.notificationAccent,
         );
 
@@ -531,7 +532,7 @@ class DownloadNotificationService implements IDownloadNotificationService {
         _downloadChannelId,
         _downloadChannelName,
         channelDescription: _downloadChannelDescription,
-        icon: 'ic_launcher_monochrome',
+        icon: NotificationConfig.androidSmallIcon,
         color: AppColors.notificationAccent,
         ongoing: false,
         showProgress: false,
@@ -582,7 +583,7 @@ class DownloadNotificationService implements IDownloadNotificationService {
         _downloadChannelId,
         _downloadChannelName,
         channelDescription: _downloadChannelDescription,
-        icon: 'ic_launcher_monochrome',
+        icon: NotificationConfig.androidSmallIcon,
         color: AppColors.error,
         ongoing: false,
         showProgress: false,

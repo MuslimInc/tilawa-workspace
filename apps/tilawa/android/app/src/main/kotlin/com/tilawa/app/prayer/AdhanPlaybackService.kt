@@ -17,6 +17,7 @@ import android.os.Build
 import android.os.IBinder
 import android.os.PowerManager
 import android.util.Log
+import androidx.core.content.ContextCompat
 import com.tilawa.app.MainActivity
 import com.tilawa.app.R
 
@@ -457,7 +458,8 @@ internal class AdhanPlaybackService : Service() {
         }
 
         return builder
-            .setSmallIcon(R.drawable.ic_launcher_monochrome)
+            .setSmallIcon(R.drawable.ic_notification)
+            .setColor(ContextCompat.getColor(this, R.color.notification_accent))
             .setContentTitle(title)
             .setContentText(contentText)
             .setContentIntent(openIntent)
@@ -549,3 +551,4 @@ internal class AdhanPlaybackService : Service() {
         }
     }
 }
+

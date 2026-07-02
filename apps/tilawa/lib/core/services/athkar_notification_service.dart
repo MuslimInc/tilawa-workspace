@@ -5,6 +5,7 @@ import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 import 'package:flutter_timezone/flutter_timezone.dart';
 import 'package:injectable/injectable.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:tilawa/core/config/notification_config.dart';
 import 'package:tilawa/core/logging/app_logger.dart';
 import 'package:tilawa/core/navigation/notification_destination.dart';
 import 'package:tilawa/core/services/navigation_service.dart';
@@ -19,7 +20,6 @@ import 'package:timezone/timezone.dart' as tz;
 
 import '../../features/prayer_times/domain/entities/prayer_settings_entity.dart';
 import '../../features/prayer_times/domain/entities/prayer_time_entity.dart';
-import '../config/notification_config.dart';
 import '../di/injection.dart';
 
 /// Service for scheduling daily athkar (remembrance) notifications
@@ -721,6 +721,7 @@ class AthkarNotificationService implements IAthkarNotificationService {
         channelDescription: _athkarChannelDescription,
         importance: Importance.high,
         priority: Priority.high,
+        icon: NotificationConfig.androidSmallIcon,
         color: AppColors.notificationAccent,
       );
 
@@ -789,7 +790,7 @@ class AthkarNotificationService implements IAthkarNotificationService {
         channelDescription: _athkarChannelDescription,
         importance: Importance.high,
         priority: Priority.high,
-        icon: 'ic_launcher_monochrome',
+        icon: NotificationConfig.androidSmallIcon,
         color: AppColors.notificationAccent,
       );
 
@@ -998,7 +999,7 @@ class AthkarNotificationService implements IAthkarNotificationService {
           channelDescription: _athkarChannelDescription,
           importance: Importance.high,
           priority: Priority.high,
-          icon: 'ic_launcher_monochrome',
+          icon: NotificationConfig.androidSmallIcon,
           color: AppColors.notificationAccent,
         ),
         iOS: DarwinNotificationDetails(
