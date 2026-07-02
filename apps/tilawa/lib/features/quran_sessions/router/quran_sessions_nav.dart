@@ -7,6 +7,7 @@ import 'package:quran_sessions_rtc/quran_sessions_rtc.dart';
 import 'package:tilawa/core/bootstrap/app_launch_config.dart';
 import 'package:tilawa/core/di/injection.dart';
 import 'package:tilawa/core/layout/list_scroll_bottom_padding.dart';
+import 'package:tilawa/core/telemetry/tilawa_sentry_route_display.dart';
 import 'package:tilawa/features/quran_sessions/quran_sessions_launch_policy.dart';
 import 'package:tilawa/features/settings/presentation/widgets/settings_teacher_capability_scope.dart';
 import 'package:tilawa/features/quran_sessions/presentation/quran_sessions_analytics.dart';
@@ -556,7 +557,11 @@ void _openProfileCompletion(BuildContext context) async {
 
 /// Wraps student-facing Quran Tutor screens with the feature theme scope.
 Widget _withQuranSessionsTheme(Widget child) {
-  return QuranSessionsThemeScope(child: child);
+  return QuranSessionsThemeScope(
+    child: TilawaSentryRouteDisplay(
+      child: TilawaSentryRouteReporter(when: true, child: child),
+    ),
+  );
 }
 
 InAppCallSurfaceBuilder? buildQuranSessionsInAppCallSurface() {

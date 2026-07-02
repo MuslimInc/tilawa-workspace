@@ -89,8 +89,8 @@ void main() {
         ..sessions = [
           makeSession(
             lifecycleStatus: SessionLifecycleStatus.scheduled,
-            startsAt: DateTime.utc(2026, 7, 1, 9),
-            endsAt: DateTime.utc(2026, 7, 1, 9, 30),
+            startsAt: DateTime.utc(2026, 7, 10, 9),
+            endsAt: DateTime.utc(2026, 7, 10, 9, 30),
           ),
         ];
       final scheduleRepo = FakeScheduleRepository()
@@ -136,7 +136,7 @@ void main() {
         ..store['booking_1'] = makeAggregate(
           id: 'booking_1',
           status: SessionLifecycleStatus.scheduled,
-          startsAt: DateTime.utc(2026, 7, 1, 9),
+          startsAt: DateTime.utc(2026, 7, 10, 9),
           paymentReference: null,
           pricingType: SessionPricingType.free,
         );
@@ -144,8 +144,8 @@ void main() {
         ..sessions = [
           makeSession(
             lifecycleStatus: SessionLifecycleStatus.scheduled,
-            startsAt: DateTime.utc(2026, 7, 1, 9),
-            endsAt: DateTime.utc(2026, 7, 1, 9, 30),
+            startsAt: DateTime.utc(2026, 7, 10, 9),
+            endsAt: DateTime.utc(2026, 7, 10, 9, 30),
           ),
         ];
       final scheduleRepo = FakeScheduleRepository()
@@ -194,14 +194,14 @@ void main() {
           ..store['booking_1'] = makeAggregate(
             id: 'booking_1',
             status: SessionLifecycleStatus.scheduled,
-            startsAt: DateTime.utc(2026, 7, 1, 9),
+            startsAt: DateTime.utc(2026, 7, 10, 9),
             paymentReference: null,
             pricingType: SessionPricingType.free,
           );
         final session = makeSession(
           lifecycleStatus: SessionLifecycleStatus.scheduled,
-          startsAt: DateTime.utc(2026, 7, 1, 9),
-          endsAt: DateTime.utc(2026, 7, 1, 9, 30),
+          startsAt: DateTime.utc(2026, 7, 10, 9),
+          endsAt: DateTime.utc(2026, 7, 10, 9, 30),
         );
         final sessionRepo = FakeSessionRepository()..sessions = [session];
         final scheduleRepo = FakeScheduleRepository()

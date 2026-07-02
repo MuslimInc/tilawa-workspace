@@ -78,9 +78,7 @@ void main() {
       await tester.pumpWidget(
         MaterialApp(
           home: MediaQuery(
-            data: const MediaQueryData(
-              textScaler: TextScaler.linear(1.4),
-            ),
+            data: const MediaQueryData(textScaler: TextScaler.linear(1.4)),
             child: Builder(
               builder: (context) {
                 scaledHeight = tilawaMeasureTextHeight(

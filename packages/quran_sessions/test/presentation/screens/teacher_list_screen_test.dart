@@ -151,7 +151,7 @@ void main() {
     testWidgets('renders 360x800 Arabic list with availability labels', (
       tester,
     ) async {
-      final now = DateTime.now();
+      final anchor = DateTime(2026, 6, 15, 10);
       final teachers = [
         makeTeacher(
           id: 't1',
@@ -184,15 +184,18 @@ void main() {
                   teachers: teachers,
                   hasMore: false,
                   availabilitySummaries: {
-                    't1': TeacherAvailabilitySummaryPresenter().fromSlots(
-                      teacherId: 't1',
-                      slots: [
-                        makeSlot(
+                    't1':
+                        TeacherAvailabilitySummaryPresenter(
+                          now: () => anchor,
+                        ).fromSlots(
                           teacherId: 't1',
-                          startsAt: now.add(const Duration(hours: 2)),
+                          slots: [
+                            makeSlot(
+                              teacherId: 't1',
+                              startsAt: anchor.add(const Duration(hours: 2)),
+                            ),
+                          ],
                         ),
-                      ],
-                    ),
                     't2': const TeacherAvailabilitySummary(
                       teacherId: 't2',
                       status: TeacherAvailabilityStatus.noSlots,

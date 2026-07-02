@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter/scheduler.dart';
@@ -7,6 +9,7 @@ import 'package:tilawa/core/bootstrap/launch_splash_canvas.dart';
 import 'package:tilawa/core/bootstrap/logo_height_log.dart';
 import 'package:tilawa/core/bootstrap/splash_launch_handoff.dart';
 import 'package:tilawa/core/di/injection.dart';
+import 'package:tilawa/core/telemetry/tilawa_sentry_route_display.dart';
 import 'package:tilawa/router/app_router.dart';
 import 'package:tilawa/router/app_router_config.dart';
 import 'package:tilawa/core/extensions.dart';
@@ -45,6 +48,9 @@ class _SplashScreenState extends State<SplashScreen> {
     SchedulerBinding.instance.addPostFrameCallback((_) {
       firstFrameLog('SplashScreen first post-frame → mark handoff');
       SplashLaunchHandoff.markSplashRoutePainted();
+      if (mounted) {
+        unawaited(TilawaSentryRouteDisplay.reportFullyDisplayed(context));
+      }
     });
   }
 

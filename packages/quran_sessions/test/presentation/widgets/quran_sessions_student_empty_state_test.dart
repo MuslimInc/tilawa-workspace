@@ -5,6 +5,7 @@ import 'package:quran_sessions/src/presentation/widgets/quran_sessions_student_e
 import '../../helpers/widget_pump.dart';
 
 const _entryEnabledConfig = QuranSessionsFeatureConfig(
+  learnQuranStudentFeatureEnabled: true,
   teacherApplicationEnabled: true,
   teacherApplicationDiscoverability:
       TeacherApplicationDiscoverability.profileAndEmptyState,

@@ -2,7 +2,10 @@ import 'dart:async';
 
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:tilawa/core/telemetry/tilawa_sentry_route_display.dart';
 import 'package:tilawa/features/home/debug/home_skeleton_debug.dart';
+import 'package:tilawa/screens/cubit/main_screen_cubit.dart';
+import 'package:tilawa/screens/cubit/main_screen_state.dart';
 import 'package:tilawa/features/home/presentation/cubit/home_listening_resume_cubit.dart';
 import 'package:tilawa/features/shell/application/shell_tab_reselect.dart';
 import 'package:tilawa/features/shell/presentation/shell_tab_reselect_listener.dart';
@@ -91,113 +94,118 @@ class _HomeScreenState extends State<HomeScreen> {
         theme.componentTokens.homeScreen.backgroundGradientEnd;
     final double topInset = MediaQuery.paddingOf(context).top;
 
-    return ShellTabReselectListener(
-      tabIndex: 0,
-      onReselect: _onShellTabReselect,
-      child: BlocListener<HomeDashboardBloc, HomeDashboardState>(
-        listenWhen: (HomeDashboardState previous, HomeDashboardState current) {
-          return current is HomeDashboardLoaded &&
-              current.refreshError != null &&
-              (previous is! HomeDashboardLoaded ||
-                  previous.refreshError != current.refreshError);
-        },
-        listener: (BuildContext context, HomeDashboardState state) {
-          if (state is! HomeDashboardLoaded || state.refreshError == null) {
-            return;
-          }
+    return _HomeTtfdScope(
+      child: ShellTabReselectListener(
+        tabIndex: 0,
+        onReselect: _onShellTabReselect,
+        child: BlocListener<HomeDashboardBloc, HomeDashboardState>(
+          listenWhen:
+              (HomeDashboardState previous, HomeDashboardState current) {
+                return current is HomeDashboardLoaded &&
+                    current.refreshError != null &&
+                    (previous is! HomeDashboardLoaded ||
+                        previous.refreshError != current.refreshError);
+              },
+          listener: (BuildContext context, HomeDashboardState state) {
+            if (state is! HomeDashboardLoaded || state.refreshError == null) {
+              return;
+            }
 
-          final ScaffoldMessengerState? messenger = ScaffoldMessenger.maybeOf(
-            context,
-          );
-          if (messenger == null) {
-            return;
-          }
+            final ScaffoldMessengerState? messenger = ScaffoldMessenger.maybeOf(
+              context,
+            );
+            if (messenger == null) {
+              return;
+            }
 
-          messenger.showSnackBar(
-            SnackBar(
-              content: Text(
-                homeDashboardRefreshErrorMessage(
-                  context,
-                  state.refreshError!,
-                ),
-              ),
-            ),
-          );
-        },
-        child: Scaffold(
-          backgroundColor: canvasBottom,
-          body: Stack(
-            fit: StackFit.expand,
-            children: [
-              const Positioned.fill(child: HomeScreenBackground()),
-              RefreshIndicator.adaptive(
-                edgeOffset: topInset,
-                displacement: context.tokens.spaceExtraLarge,
-                onRefresh: _refreshHome,
-                child: NotificationListener<ScrollNotification>(
-                  onNotification: (notification) =>
-                      _onScrollNotification(context, notification),
-                  // Debug-only review toggle (Settings → Developer → Force
-                  // Home skeleton). [HomeSkeletonDebug.isForced] is always
-                  // false in release, so this wrapper is inert in production.
-                  child: ValueListenableBuilder<bool>(
-                    valueListenable: HomeSkeletonDebug.forceSkeleton,
-                    builder: (context, _, _) =>
-                        BlocBuilder<HomeDashboardBloc, HomeDashboardState>(
-                          builder: (context, blocState) {
-                            final HomeDashboardState state =
-                                HomeSkeletonDebug.isForced
-                                ? const HomeDashboardLoading()
-                                : blocState;
-                            final HomeDashboardUiState ui =
-                                HomeDashboardUiState.from(state);
-                            final Widget? tutorHeaderSliver =
-                                ui.showFullSkeleton
-                                ? null
-                                : homeFeaturedTutorCardSliver(context);
-
-                            return CustomScrollView(
-                              controller: _scrollController,
-                              physics: const AlwaysScrollableScrollPhysics(
-                                parent: BouncingScrollPhysics(),
-                              ),
-                              slivers: [
-                                ...HomeNextPrayerTime.buildSlivers(
-                                  context: context,
-                                  state: state,
-                                  onOpenPrayer: widget.onOpenPrayer,
-                                ),
-                                ?tutorHeaderSliver,
-                                HomeDashboardContentSliver(
-                                  child: AnimatedSwitcher(
-                                    duration: context.tokens.durationMedium,
-                                    switchInCurve: Curves.easeOut,
-                                    switchOutCurve: Curves.easeIn,
-                                    layoutBuilder:
-                                        (currentChild, previousChildren) {
-                                          return Stack(
-                                            alignment:
-                                                AlignmentDirectional.topStart,
-                                            children: <Widget>[
-                                              ...previousChildren,
-                                              ?currentChild,
-                                            ],
-                                          );
-                                        },
-                                    child: HomeDashboardBody(
-                                      key: ValueKey<bool>(ui.showFullSkeleton),
-                                      skeleton: ui.showFullSkeleton,
-                                    ),
-                                  ),
-                                ),
-                              ],
-                            );
-                          },
-                        ),
+            messenger.showSnackBar(
+              SnackBar(
+                content: Text(
+                  homeDashboardRefreshErrorMessage(
+                    context,
+                    state.refreshError!,
                   ),
                 ),
               ),
-            ],
+            );
+          },
+          child: Scaffold(
+            backgroundColor: canvasBottom,
+            body: Stack(
+              fit: StackFit.expand,
+              children: [
+                const Positioned.fill(child: HomeScreenBackground()),
+                RefreshIndicator.adaptive(
+                  edgeOffset: topInset,
+                  displacement: context.tokens.spaceExtraLarge,
+                  onRefresh: _refreshHome,
+                  child: NotificationListener<ScrollNotification>(
+                    onNotification: (notification) =>
+                        _onScrollNotification(context, notification),
+                    // Debug-only review toggle (Settings → Developer → Force
+                    // Home skeleton). [HomeSkeletonDebug.isForced] is always
+                    // false in release, so this wrapper is inert in production.
+                    child: ValueListenableBuilder<bool>(
+                      valueListenable: HomeSkeletonDebug.forceSkeleton,
+                      builder: (context, _, _) =>
+                          BlocBuilder<HomeDashboardBloc, HomeDashboardState>(
+                            builder: (context, blocState) {
+                              final HomeDashboardState state =
+                                  HomeSkeletonDebug.isForced
+                                  ? const HomeDashboardLoading()
+                                  : blocState;
+                              final HomeDashboardUiState ui =
+                                  HomeDashboardUiState.from(state);
+                              final Widget? tutorHeaderSliver =
+                                  ui.showFullSkeleton
+                                  ? null
+                                  : homeFeaturedTutorCardSliver(context);
+
+                              return CustomScrollView(
+                                controller: _scrollController,
+                                physics: const AlwaysScrollableScrollPhysics(
+                                  parent: BouncingScrollPhysics(),
+                                ),
+                                slivers: [
+                                  ...HomeNextPrayerTime.buildSlivers(
+                                    context: context,
+                                    state: state,
+                                    onOpenPrayer: widget.onOpenPrayer,
+                                  ),
+                                  ?tutorHeaderSliver,
+                                  HomeDashboardContentSliver(
+                                    child: AnimatedSwitcher(
+                                      duration: context.tokens.durationMedium,
+                                      switchInCurve: Curves.easeOut,
+                                      switchOutCurve: Curves.easeIn,
+                                      layoutBuilder:
+                                          (currentChild, previousChildren) {
+                                            return Stack(
+                                              alignment:
+                                                  AlignmentDirectional.topStart,
+                                              children: <Widget>[
+                                                ...previousChildren,
+                                                ?currentChild,
+                                              ],
+                                            );
+                                          },
+                                      child: HomeDashboardBody(
+                                        key: ValueKey<bool>(
+                                          ui.showFullSkeleton,
+                                        ),
+                                        skeleton: ui.showFullSkeleton,
+                                      ),
+                                    ),
+                                  ),
+                                ],
+                              );
+                            },
+                          ),
+                    ),
+                  ),
+                ),
+              ],
+            ),
           ),
         ),
       ),
@@ -295,5 +303,53 @@ class _HomeScreenState extends State<HomeScreen> {
       return null;
     }
     return Scrollable.maybeOf(context)?.position;
+  }
+}
+
+class _HomeTtfdScope extends StatelessWidget {
+  const _HomeTtfdScope({required this.child});
+
+  final Widget child;
+
+  @override
+  Widget build(BuildContext context) {
+    final MainScreenCubit? shellCubit = _readMainScreenCubit(context);
+    final Widget reporter = BlocBuilder<HomeDashboardBloc, HomeDashboardState>(
+      builder: (context, dashboardState) {
+        final MainScreenState? shellState = shellCubit?.state;
+        final bool shellReady =
+            shellState == null ||
+            (shellState.isShellActivated && shellState.isInitialTabMounted);
+        final HomeDashboardState effectiveState = HomeSkeletonDebug.isForced
+            ? const HomeDashboardLoading()
+            : dashboardState;
+        final HomeDashboardUiState ui = HomeDashboardUiState.from(
+          effectiveState,
+        );
+        final bool dashboardReady =
+            effectiveState is HomeDashboardLoaded && !ui.showFullSkeleton;
+
+        return TilawaSentryRouteReporter(
+          when: dashboardReady && shellReady,
+          child: child,
+        );
+      },
+    );
+
+    if (shellCubit == null) {
+      return reporter;
+    }
+
+    return BlocBuilder<MainScreenCubit, MainScreenState>(
+      builder: (context, _) => reporter,
+    );
+  }
+
+  MainScreenCubit? _readMainScreenCubit(BuildContext context) {
+    try {
+      return context.read<MainScreenCubit>();
+    } on ProviderNotFoundException {
+      return null;
+    }
   }
 }

@@ -24,6 +24,9 @@ void main() {
       expect(options.environment, kReleaseMode ? 'production' : 'development');
       expect(options.debug, kDebugMode);
       expect(options.enableLogs, kReleaseMode);
+      expect(options.tracesSampleRate, kReleaseMode ? 0.1 : 1.0);
+      expect(options.enableTimeToFullDisplayTracing, isTrue);
+      expect(options.profilesSampleRate, kReleaseMode ? 0.1 : 1.0);
       expect(options.autoInitializeNativeSdk, isFalse);
       expect(options.navigatorKey, AppRouter.navigatorKey);
       expect(options.attachScreenshot, isTrue);

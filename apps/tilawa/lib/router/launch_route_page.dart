@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
+import 'package:tilawa/core/telemetry/tilawa_sentry_route_display.dart';
 
 /// Instant route page for cold-start destinations shown under [BootGate].
 ///
@@ -9,10 +10,17 @@ import 'package:go_router/go_router.dart';
 Page<void> launchRoutePage({
   required GoRouterState state,
   required Widget child,
+  bool reportOnFirstFrame = true,
 }) {
+  final Widget wrappedChild = TilawaSentryRouteDisplay(
+    child: reportOnFirstFrame
+        ? TilawaSentryRouteReporter(when: true, child: child)
+        : child,
+  );
+
   return CustomTransitionPage<void>(
     key: state.pageKey,
-    child: child,
+    child: wrappedChild,
     transitionDuration: Duration.zero,
     reverseTransitionDuration: Duration.zero,
     transitionsBuilder:

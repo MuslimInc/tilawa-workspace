@@ -29,6 +29,11 @@ abstract final class SentryConfig {
     options.debug = kDebugMode;
     options.enableLogs = kReleaseMode;
     options.enableMetrics = true;
+    options.tracesSampleRate = kReleaseMode ? 0.1 : 1.0;
+    options.enableTimeToFullDisplayTracing = true;
+    // Relative to [tracesSampleRate]; 1.0 profiles all sampled transactions.
+    // Alpha on iOS/macOS only (Sentry Flutter SDK >= 7.12.0).
+    options.profilesSampleRate = kReleaseMode ? 0.1 : 1.0;
     options.autoInitializeNativeSdk = autoInitializeNativeSdk;
     SentryUserFeedback.bindFlutterOptions(options);
     options.navigatorKey = AppRouter.navigatorKey;
@@ -37,7 +42,7 @@ abstract final class SentryConfig {
     options.beforeSendLog = CrashReportingContext.filterBeforeSendLog;
 
     // Session Replay: always capture error replays; sample normal sessions in
-    // production to limit volume (no separate traces sample rate in Tilawa yet).
+    // production to limit volume. Traces sample rate matches replay cadence.
     options.replay.onErrorSampleRate = 1.0;
     options.replay.sessionSampleRate = kReleaseMode ? 0.1 : 1.0;
 

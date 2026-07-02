@@ -17,6 +17,7 @@ import 'package:go_router/go_router.dart';
 import 'package:tilawa/core/bootstrap/cold_start_navigation_metrics.dart';
 import 'package:tilawa/core/extensions.dart';
 import 'package:tilawa/core/logging/app_logger.dart';
+import 'package:tilawa/core/telemetry/sentry_navigator_observer.dart';
 import 'package:tilawa/router/app_links_config.dart';
 import 'package:tilawa_core/constants/app_strings.dart';
 import 'package:tilawa_core/entities/reciter_entity.dart';
@@ -489,7 +490,9 @@ class AppRouter {
   static String? get safeActivePath => ShellRouteLocation.safeUriPath();
 
   static List<NavigatorObserver> _getObservers() {
-    final List<NavigatorObserver> observers = <NavigatorObserver>[];
+    final List<NavigatorObserver> observers = <NavigatorObserver>[
+      TilawaSentryNavigatorObserver.create(),
+    ];
     try {
       observers.add(
         FirebaseAnalyticsObserver(analytics: FirebaseAnalytics.instance),

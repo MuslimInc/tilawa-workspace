@@ -13,6 +13,7 @@ import 'package:tilawa/features/support/presentation/bloc/support_event.dart';
 import 'package:tilawa_core/entities/reciter_entity.dart';
 import 'package:tilawa_ui_kit/tilawa_ui_kit.dart';
 
+import '../core/telemetry/tilawa_sentry_route_display.dart';
 import '../features/app_review/domain/entities/app_review_blocked_flow.dart';
 import '../features/app_review/presentation/widgets/app_review_sacred_flow_scope.dart';
 import '../features/athkar/presentation/screens/athkar_details_screen.dart';
@@ -56,6 +57,7 @@ import 'launch_route_page.dart';
 import 'app_navigator_keys.dart';
 import 'prayer_alerts_permission_nav_extra.dart';
 import 'share_composer_extra.dart';
+import 'tilawa_route_data.dart';
 
 part 'app_router_config.g.dart';
 
@@ -102,14 +104,27 @@ class HomeRoute extends GoRouteData with $HomeRoute {
   Page<void> buildPage(BuildContext context, GoRouterState state) {
     return launchRoutePage(
       state: state,
+      reportOnFirstFrame: false,
       child: build(context, state),
     );
   }
 
   @override
   Widget build(BuildContext context, GoRouterState state) {
-    return const MainScreen();
+    return const _HomeRouteDisplayHost();
   }
+}
+
+class _HomeRouteDisplayHost extends StatefulWidget {
+  const _HomeRouteDisplayHost();
+
+  @override
+  State<_HomeRouteDisplayHost> createState() => _HomeRouteDisplayHostState();
+}
+
+class _HomeRouteDisplayHostState extends State<_HomeRouteDisplayHost> {
+  @override
+  Widget build(BuildContext context) => const MainScreen();
 }
 
 class RecitersSearchRoute extends GoRouteData with $RecitersSearchRoute {
@@ -134,7 +149,12 @@ class RecitersSearchRoute extends GoRouteData with $RecitersSearchRoute {
               child: child,
             );
           },
-      child: build(context, state),
+      child: TilawaSentryRouteDisplay(
+        child: TilawaSentryRouteReporter(
+          when: true,
+          child: build(context, state),
+        ),
+      ),
     );
   }
 
@@ -205,7 +225,8 @@ class OnboardingRoute extends GoRouteData with $OnboardingRoute {
   }
 }
 
-class ReciterDetailsRoute extends GoRouteData with $ReciterDetailsRoute {
+class ReciterDetailsRoute extends GoRouteData
+    with $ReciterDetailsRoute, TilawaRouteData {
   const ReciterDetailsRoute({this.$extra, this.reciterId});
 
   final ReciterEntity? $extra;
@@ -245,7 +266,7 @@ class ReciterDetailsRoute extends GoRouteData with $ReciterDetailsRoute {
   }
 }
 
-class SupportRoute extends GoRouteData with $SupportRoute {
+class SupportRoute extends GoRouteData with $SupportRoute, TilawaRouteData {
   const SupportRoute();
 
   @override
@@ -258,7 +279,7 @@ class SupportRoute extends GoRouteData with $SupportRoute {
 }
 
 /// Legacy `/premium` path — same screen as [SupportRoute].
-class PremiumRoute extends GoRouteData with $PremiumRoute {
+class PremiumRoute extends GoRouteData with $PremiumRoute, TilawaRouteData {
   const PremiumRoute();
 
   @override
@@ -270,7 +291,7 @@ class PremiumRoute extends GoRouteData with $PremiumRoute {
   }
 }
 
-class SettingsRoute extends GoRouteData with $SettingsRoute {
+class SettingsRoute extends GoRouteData with $SettingsRoute, TilawaRouteData {
   const SettingsRoute();
 
   @override
@@ -297,7 +318,7 @@ class LoginRoute extends GoRouteData with $LoginRoute {
   }
 }
 
-class DownloadsRoute extends GoRouteData with $DownloadsRoute {
+class DownloadsRoute extends GoRouteData with $DownloadsRoute, TilawaRouteData {
   const DownloadsRoute();
 
   @override
@@ -306,7 +327,7 @@ class DownloadsRoute extends GoRouteData with $DownloadsRoute {
   }
 }
 
-class ErrorRoute extends GoRouteData with $ErrorRoute {
+class ErrorRoute extends GoRouteData with $ErrorRoute, TilawaRouteData {
   const ErrorRoute({this.error});
 
   final String? error;
@@ -324,7 +345,7 @@ class ErrorRoute extends GoRouteData with $ErrorRoute {
   }
 }
 
-class FavoritesRoute extends GoRouteData with $FavoritesRoute {
+class FavoritesRoute extends GoRouteData with $FavoritesRoute, TilawaRouteData {
   const FavoritesRoute();
 
   @override
@@ -334,7 +355,8 @@ class FavoritesRoute extends GoRouteData with $FavoritesRoute {
 }
 
 @TypedGoRoute<AthkarCategoriesRoute>(path: '/athkar')
-class AthkarCategoriesRoute extends GoRouteData with $AthkarCategoriesRoute {
+class AthkarCategoriesRoute extends GoRouteData
+    with $AthkarCategoriesRoute, TilawaRouteData {
   const AthkarCategoriesRoute();
 
   @override
@@ -344,7 +366,7 @@ class AthkarCategoriesRoute extends GoRouteData with $AthkarCategoriesRoute {
 }
 
 @TypedGoRoute<TasbeehRoute>(path: '/athkar/tasbeeh')
-class TasbeehRoute extends GoRouteData with $TasbeehRoute {
+class TasbeehRoute extends GoRouteData with $TasbeehRoute, TilawaRouteData {
   const TasbeehRoute({this.dhikrId});
 
   final String? dhikrId;
@@ -356,7 +378,8 @@ class TasbeehRoute extends GoRouteData with $TasbeehRoute {
 }
 
 @TypedGoRoute<AthkarDetailsRoute>(path: '/athkar/:categoryId')
-class AthkarDetailsRoute extends GoRouteData with $AthkarDetailsRoute {
+class AthkarDetailsRoute extends GoRouteData
+    with $AthkarDetailsRoute, TilawaRouteData {
   const AthkarDetailsRoute({
     required this.categoryId,
     required this.categoryName,
@@ -376,7 +399,7 @@ class AthkarDetailsRoute extends GoRouteData with $AthkarDetailsRoute {
   }
 }
 
-class QiblaRoute extends GoRouteData with $QiblaRoute {
+class QiblaRoute extends GoRouteData with $QiblaRoute, TilawaRouteData {
   const QiblaRoute();
 
   @override
@@ -385,7 +408,8 @@ class QiblaRoute extends GoRouteData with $QiblaRoute {
   }
 }
 
-class SmartKhatmaHubRoute extends GoRouteData with $SmartKhatmaHubRoute {
+class SmartKhatmaHubRoute extends GoRouteData
+    with $SmartKhatmaHubRoute, TilawaRouteData {
   const SmartKhatmaHubRoute();
 
   @override
@@ -394,7 +418,7 @@ class SmartKhatmaHubRoute extends GoRouteData with $SmartKhatmaHubRoute {
   }
 }
 
-class RouteListRoute extends GoRouteData with $RouteListRoute {
+class RouteListRoute extends GoRouteData with $RouteListRoute, TilawaRouteData {
   const RouteListRoute();
 
   @override
@@ -409,7 +433,7 @@ class RouteListRoute extends GoRouteData with $RouteListRoute {
 }
 
 class NotificationDebugLabRoute extends GoRouteData
-    with $NotificationDebugLabRoute {
+    with $NotificationDebugLabRoute, TilawaRouteData {
   const NotificationDebugLabRoute();
 
   @override
@@ -424,7 +448,7 @@ class NotificationDebugLabRoute extends GoRouteData
 }
 
 class TilawaCardNestedTapDemoRoute extends GoRouteData
-    with $TilawaCardNestedTapDemoRoute {
+    with $TilawaCardNestedTapDemoRoute, TilawaRouteData {
   const TilawaCardNestedTapDemoRoute();
 
   @override
@@ -446,6 +470,7 @@ class SplashRoute extends GoRouteData with $SplashRoute {
   Page<void> buildPage(BuildContext context, GoRouterState state) {
     return launchRoutePage(
       state: state,
+      reportOnFirstFrame: false,
       child: build(context, state),
     );
   }
@@ -456,7 +481,7 @@ class SplashRoute extends GoRouteData with $SplashRoute {
   }
 }
 
-class BookmarksRoute extends GoRouteData with $BookmarksRoute {
+class BookmarksRoute extends GoRouteData with $BookmarksRoute, TilawaRouteData {
   const BookmarksRoute();
 
   @override
@@ -469,7 +494,7 @@ class BookmarksRoute extends GoRouteData with $BookmarksRoute {
   }
 }
 
-class HistoryRoute extends GoRouteData with $HistoryRoute {
+class HistoryRoute extends GoRouteData with $HistoryRoute, TilawaRouteData {
   const HistoryRoute();
 
   @override
@@ -483,7 +508,7 @@ class HistoryRoute extends GoRouteData with $HistoryRoute {
 }
 
 class PrayerNotificationStatusRoute extends GoRouteData
-    with $PrayerNotificationStatusRoute {
+    with $PrayerNotificationStatusRoute, TilawaRouteData {
   const PrayerNotificationStatusRoute({this.$extra});
 
   final String? $extra;
@@ -494,7 +519,8 @@ class PrayerNotificationStatusRoute extends GoRouteData
   }
 }
 
-class PrayerTimesRoute extends GoRouteData with $PrayerTimesRoute {
+class PrayerTimesRoute extends GoRouteData
+    with $PrayerTimesRoute, TilawaRouteData {
   const PrayerTimesRoute();
 
   @override
@@ -506,7 +532,8 @@ class PrayerTimesRoute extends GoRouteData with $PrayerTimesRoute {
   }
 }
 
-class QuranIndexRoute extends GoRouteData with $QuranIndexRoute {
+class QuranIndexRoute extends GoRouteData
+    with $QuranIndexRoute, TilawaRouteData {
   const QuranIndexRoute();
 
   @override
@@ -519,7 +546,8 @@ class QuranIndexRoute extends GoRouteData with $QuranIndexRoute {
 }
 
 @TypedGoRoute<QuranLastReadRoute>(path: '/quran-last-read')
-class QuranLastReadRoute extends GoRouteData with $QuranLastReadRoute {
+class QuranLastReadRoute extends GoRouteData
+    with $QuranLastReadRoute, TilawaRouteData {
   const QuranLastReadRoute();
 
   @override
@@ -532,7 +560,8 @@ class QuranLastReadRoute extends GoRouteData with $QuranLastReadRoute {
 }
 
 @TypedGoRoute<QuranReaderRoute>(path: '/quran-reader/:surahNumber')
-class QuranReaderRoute extends GoRouteData with $QuranReaderRoute {
+class QuranReaderRoute extends GoRouteData
+    with $QuranReaderRoute, TilawaRouteData {
   const QuranReaderRoute({required this.surahNumber, this.ayahNumber});
 
   final int surahNumber;
@@ -552,7 +581,7 @@ class QuranReaderRoute extends GoRouteData with $QuranReaderRoute {
 
 @TypedGoRoute<ScreenshotComposerRoute>(path: '/share/screenshot')
 class ScreenshotComposerRoute extends GoRouteData
-    with $ScreenshotComposerRoute {
+    with $ScreenshotComposerRoute, TilawaRouteData {
   const ScreenshotComposerRoute({this.$extra});
 
   final ScreenshotComposerNavExtra? $extra;
@@ -606,13 +635,19 @@ class QuranPlayerExpandedRoute extends GoRouteData
               child: child,
             );
           },
-      child: const QuranPlayerExpandedPage(),
+      child: const TilawaSentryRouteDisplay(
+        child: TilawaSentryRouteReporter(
+          when: true,
+          child: QuranPlayerExpandedPage(),
+        ),
+      ),
     );
   }
 }
 
 @TypedGoRoute<VideoReelComposerRoute>(path: '/share/video-reel')
-class VideoReelComposerRoute extends GoRouteData with $VideoReelComposerRoute {
+class VideoReelComposerRoute extends GoRouteData
+    with $VideoReelComposerRoute, TilawaRouteData {
   const VideoReelComposerRoute({this.$extra});
 
   final VideoReelComposerNavExtra? $extra;
@@ -638,7 +673,8 @@ class VideoReelComposerRoute extends GoRouteData with $VideoReelComposerRoute {
   }
 }
 
-class QuranRenderDemoRoute extends GoRouteData with $QuranRenderDemoRoute {
+class QuranRenderDemoRoute extends GoRouteData
+    with $QuranRenderDemoRoute, TilawaRouteData {
   const QuranRenderDemoRoute();
 
   @override
@@ -656,7 +692,8 @@ class QuranRenderDemoRoute extends GoRouteData with $QuranRenderDemoRoute {
 /// screen. The route is always present but its dependencies are only registered
 /// when `genUiAssistantEnabled` is on; when off, [getIt] has nothing to resolve
 /// and the route degrades to a safe "unavailable" view.
-class SmartQuranPlanRoute extends GoRouteData with $SmartQuranPlanRoute {
+class SmartQuranPlanRoute extends GoRouteData
+    with $SmartQuranPlanRoute, TilawaRouteData {
   const SmartQuranPlanRoute();
 
   @override
