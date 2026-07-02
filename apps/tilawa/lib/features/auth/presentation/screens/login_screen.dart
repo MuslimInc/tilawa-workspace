@@ -10,6 +10,7 @@ import 'package:tilawa/core/di/injection.dart';
 import 'package:tilawa/core/extensions.dart';
 import 'package:tilawa/core/logging/app_logger.dart';
 import 'package:tilawa/core/utils/legal_url_launcher.dart';
+import 'package:tilawa_core/errors/failures.dart';
 import 'package:tilawa_core/services/app_system_chrome_style.dart';
 import 'package:tilawa_ui_kit/tilawa_ui_kit.dart';
 
@@ -245,8 +246,29 @@ class _LoginScreenBodyState extends State<_LoginScreenBody>
         _dispatchSignInWithGoogle(manual: manual, trigger: trigger);
       case LoginGoogleSignInRejected(:final readiness):
         _showLaunchBlockedFeedback(readiness, trigger: trigger);
+      case LoginGoogleSignInBlocked(:final failure):
+        _showServerActionBlockedFeedback(failure, trigger: trigger);
     }
     launchCubit.clearLaunchAttempt();
+  }
+
+  void _showServerActionBlockedFeedback(
+    Failure failure, {
+    required GoogleSignInLaunchTrigger trigger,
+  }) {
+    _logGoogleSignInButton(
+      'launchInteractiveSignIn serverActionBlocked reason=$trigger',
+    );
+    if (trigger != GoogleSignInLaunchTrigger.manual) {
+      return;
+    }
+    TilawaFeedback.showToast(
+      context,
+      message:
+          failure.localizedMessage(context) ??
+          context.l10n.serverActionOfflineMessage,
+      variant: TilawaFeedbackVariant.error,
+    );
   }
 
   void _showLaunchBlockedFeedback(

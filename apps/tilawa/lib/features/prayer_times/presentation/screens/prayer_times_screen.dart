@@ -816,7 +816,7 @@ class _UtilityInlineAction extends StatelessWidget {
     final colorScheme = theme.colorScheme;
 
     // Concentric corner rule: row radius = card radius - card horizontal padding.
-    // _BottomUtilitiesCard: cardRadius=radiusExtraLarge, hPad=spaceSmall.
+    // _BottomUtilitiesCard: cardRadius=TilawaRadiusFamily.card, hPad=spaceSmall.
     final double inkRadius = tokens.concentricInner(
       outerRadius: tokens.resolveRadius(family: TilawaRadiusFamily.card),
       padding: tokens.spaceSmall,
@@ -1062,7 +1062,7 @@ class _TodayPrayerListRow extends StatelessWidget {
         : (hasPassed ? tokens.opacityEmphasis : 1);
 
     // Concentric corner rule: row radius = card radius - card horizontal padding.
-    // _TodayPrayerListSection: cardRadius=radiusExtraLarge, hPad=spaceMedium.
+    // _TodayPrayerListSection: cardRadius=TilawaRadiusFamily.card, hPad=spaceMedium.
     final double rowRadius = tokens.concentricInner(
       outerRadius: tokens.resolveRadius(family: TilawaRadiusFamily.card),
       padding: tokens.spaceMedium,

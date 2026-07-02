@@ -100,6 +100,9 @@
     "homeExploreShowAsList": "عرض كقائمة",
     "homeExploreShowAsGrid": "عرض كشبكة",
     "homeDashboardLoadError": "تعذّر تحميل المواقيت. تحقق من اتصالك وحاول مجددًا.",
+    "homeDashboardOfflineError": "أنت غير متصل ولا توجد مواقيت محفوظة بعد. أعد الاتصال وحاول مجددًا.",
+    "homeRefreshOfflineMessage": "أنت غير متصل. نعرض آخر بيانات محفوظة لديك.",
+    "homeRefreshFailedMessage": "تعذّر التحديث. ما زالت آخر بيانات محفوظة لديك معروضة.",
     "homeSearchHint": "ابحث في السور أو الأجزاء أو الصفحة",
     "homeFeaturedTitle": "مختارة لك",
     "homeFeaturedSubtitle": "المزيد ليومك",
@@ -707,6 +710,10 @@
     "@retry": {
         "description": "Retry button text"
     },
+    "loading": "جاري التحميل",
+    "@loading": {
+        "description": "Accessibility label announced for skeleton loading regions"
+    },
     "downloadStatusChecked": "تم فحص حالة التحميل",
     "@downloadStatusChecked": {
         "description": "Download status checked message"
@@ -1112,6 +1119,10 @@
     "networkError": "يرجى التحقق من اتصالك بالإنترنت",
     "@networkError": {
         "description": "Network error message"
+    },
+    "serverActionOfflineMessage": "لا يوجد اتصال بالإنترنت. يرجى إعادة الاتصال ثم المحاولة مرة أخرى.",
+    "@serverActionOfflineMessage": {
+        "description": "Message shown when a server-dependent action is blocked while offline"
     },
     "downloadLowStorageWarning": "قد لا تكون مساحة التخزين المتاحة كافية لهذا التحميل. حرّر مساحة إذا فشل التحميل.",
     "@downloadLowStorageWarning": {
@@ -3408,6 +3419,13 @@
     "reportBugValidationError": "هذا الحقل مطلوب.",
     "reportBugCaptureScreenshot": "إرفاق لقطة شاشة",
     "reportBugRemoveScreenshot": "إزالة لقطة الشاشة",
+    "reportBugPreviewScreenshot": "معاينة لقطة الشاشة",
+    "reportBugScreenshotPreviewTitle": "لقطة الشاشة",
+    "reportBugCaptureScreenshotFromAnotherScreen": "إرفاق من شاشة أخرى",
+    "reportBugScreenshotCaptureHint": "انتقل إلى الشاشة المطلوبة، ثم اضغط التقاط.",
+    "reportBugScreenshotCaptureNow": "التقاط",
+    "reportBugScreenshotCaptureCancel": "العودة إلى البلاغ",
+    "reportBugScreenshotCaptureFailed": "تعذّر التقاط لقطة الشاشة. يمكنك إرسال البلاغ بدونها.",
     "shareTilawa": "شارك أنا مسلم",
     "@shareTilawa": {
         "description": "Settings row to share the app with others"

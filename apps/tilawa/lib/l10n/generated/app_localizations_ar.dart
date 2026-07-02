@@ -136,6 +136,18 @@ class AppLocalizationsAr extends AppLocalizations {
       'تعذّر تحميل المواقيت. تحقق من اتصالك وحاول مجددًا.';
 
   @override
+  String get homeDashboardOfflineError =>
+      'أنت غير متصل ولا توجد مواقيت محفوظة بعد. أعد الاتصال وحاول مجددًا.';
+
+  @override
+  String get homeRefreshOfflineMessage =>
+      'أنت غير متصل. نعرض آخر بيانات محفوظة لديك.';
+
+  @override
+  String get homeRefreshFailedMessage =>
+      'تعذّر التحديث. ما زالت آخر بيانات محفوظة لديك معروضة.';
+
+  @override
   String get homeSearchHint => 'ابحث في السور أو الأجزاء أو الصفحة';
 
   @override
@@ -815,6 +827,9 @@ class AppLocalizationsAr extends AppLocalizations {
   String get retry => 'إعادة المحاولة';
 
   @override
+  String get loading => 'جاري التحميل';
+
+  @override
   String get downloadStatusChecked => 'تم فحص حالة التحميل';
 
   @override
@@ -1187,6 +1202,10 @@ class AppLocalizationsAr extends AppLocalizations {
 
   @override
   String get networkError => 'يرجى التحقق من اتصالك بالإنترنت';
+
+  @override
+  String get serverActionOfflineMessage =>
+      'لا يوجد اتصال بالإنترنت. يرجى إعادة الاتصال ثم المحاولة مرة أخرى.';
 
   @override
   String get downloadLowStorageWarning =>
@@ -2962,6 +2981,30 @@ class AppLocalizationsAr extends AppLocalizations {
 
   @override
   String get reportBugRemoveScreenshot => 'إزالة لقطة الشاشة';
+
+  @override
+  String get reportBugPreviewScreenshot => 'معاينة لقطة الشاشة';
+
+  @override
+  String get reportBugScreenshotPreviewTitle => 'لقطة الشاشة';
+
+  @override
+  String get reportBugCaptureScreenshotFromAnotherScreen =>
+      'إرفاق من شاشة أخرى';
+
+  @override
+  String get reportBugScreenshotCaptureHint =>
+      'انتقل إلى الشاشة المطلوبة، ثم اضغط التقاط.';
+
+  @override
+  String get reportBugScreenshotCaptureNow => 'التقاط';
+
+  @override
+  String get reportBugScreenshotCaptureCancel => 'العودة إلى البلاغ';
+
+  @override
+  String get reportBugScreenshotCaptureFailed =>
+      'تعذّر التقاط لقطة الشاشة. يمكنك إرسال البلاغ بدونها.';
 
   @override
   String get shareTilawa => 'شارك أنا مسلم';

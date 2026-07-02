@@ -29,6 +29,29 @@ final class NetworkFailure extends Failure {
   const NetworkFailure([super.message]);
 }
 
+/// Stable failure keys for server-dependent action guards.
+abstract final class ServerActionFailureKey {
+  static const String offline = 'serverActionOfflineMessage';
+}
+
+enum ServerActionFailureReason { offline }
+
+/// Network failure for actions that must be blocked before server calls.
+final class ServerActionFailure extends NetworkFailure {
+  const ServerActionFailure([
+    super.message,
+    this.reason = ServerActionFailureReason.offline,
+  ]);
+
+  const ServerActionFailure.offline()
+    : this(ServerActionFailureKey.offline, ServerActionFailureReason.offline);
+
+  final ServerActionFailureReason reason;
+
+  @override
+  List<Object?> get props => [message, reason];
+}
+
 final class AudioFailure extends Failure {
   const AudioFailure([super.message]);
 }

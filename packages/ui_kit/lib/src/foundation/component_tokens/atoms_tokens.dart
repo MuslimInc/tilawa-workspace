@@ -469,6 +469,7 @@ class TilawaSkeletonTokens {
     required this.baseAlpha,
     required this.highlightAlpha,
     required this.shimmerBandWidth,
+    this.shimmerPeriod = const Duration(milliseconds: 1000),
   });
 
   /// Alpha applied to `onSurface` for the resting bone fill.
@@ -477,9 +478,12 @@ class TilawaSkeletonTokens {
   /// Alpha applied to `onSurface` at the shimmer band's brightest point.
   final double highlightAlpha;
 
-  /// Half-width of the travelling shimmer band, in alignment units
-  /// (`0.3` ≈ a band covering 30% of the bone at any instant).
+  /// Fraction of the shimmer gradient span covered by the highlight band
+  /// (`0.3` ≈ cookbook stops `[0.1, 0.3, 0.4]`).
   final double shimmerBandWidth;
+
+  /// Time for one full shimmer sweep across the [TilawaSkeleton] scope.
+  final Duration shimmerPeriod;
 
   factory TilawaSkeletonTokens.defaults() {
     return const TilawaSkeletonTokens(
@@ -493,11 +497,13 @@ class TilawaSkeletonTokens {
     double? baseAlpha,
     double? highlightAlpha,
     double? shimmerBandWidth,
+    Duration? shimmerPeriod,
   }) {
     return TilawaSkeletonTokens(
       baseAlpha: baseAlpha ?? this.baseAlpha,
       highlightAlpha: highlightAlpha ?? this.highlightAlpha,
       shimmerBandWidth: shimmerBandWidth ?? this.shimmerBandWidth,
+      shimmerPeriod: shimmerPeriod ?? this.shimmerPeriod,
     );
   }
 
@@ -514,6 +520,7 @@ class TilawaSkeletonTokens {
         b.shimmerBandWidth,
         t,
       ),
+      shimmerPeriod: t < 0.5 ? a.shimmerPeriod : b.shimmerPeriod,
     );
   }
 }

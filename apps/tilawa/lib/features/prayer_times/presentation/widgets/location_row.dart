@@ -33,7 +33,7 @@ class LocationRow extends StatelessWidget {
         return TilawaCard(
           onTap: null,
           backgroundColor: colorScheme.surfaceContainerLow,
-          borderRadius: tokens.radiusExtraLarge,
+          borderRadius: tokens.resolveRadius(family: TilawaRadiusFamily.card),
           borderColor: colorScheme.outlineVariant.withValues(
             alpha: tokens.opacityMedium,
           ),

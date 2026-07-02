@@ -55,7 +55,7 @@ class _HomeDashboardSheetBody extends StatelessWidget {
           horizontalInset,
           topPadding,
           horizontalInset,
-          TilawaShellPadding.of(context) + tokens.spaceMedium,
+          TilawaShellPadding.of(context) + tokens.spaceLarge,
         ),
         child: child,
       ),

@@ -3,6 +3,8 @@ import 'dart:typed_data';
 
 import 'package:flutter/material.dart';
 import 'package:sentry_flutter/sentry_flutter.dart';
+import 'package:tilawa/core/extensions.dart';
+import 'package:tilawa/core/telemetry/tilawa_feedback_screenshot_session.dart';
 import 'package:tilawa_ui_kit/tilawa_ui_kit.dart';
 
 /// Key used by Sentry replay to recognize widget-submitted feedback.
@@ -14,12 +16,18 @@ class TilawaSentryFeedbackForm extends StatefulWidget {
     super.key,
     this.associatedEventId,
     this.screenshot,
+    this.initialName,
+    this.initialEmail,
+    this.initialMessage,
     this.hub,
     this.flutterOptions,
   }) : assert(associatedEventId != const SentryId.empty());
 
   final SentryId? associatedEventId;
   final SentryAttachment? screenshot;
+  final String? initialName;
+  final String? initialEmail;
+  final String? initialMessage;
   final Hub? hub;
   final SentryFlutterOptions? flutterOptions;
 
@@ -27,6 +35,9 @@ class TilawaSentryFeedbackForm extends StatefulWidget {
     BuildContext context, {
     SentryId? associatedEventId,
     SentryAttachment? screenshot,
+    String? initialName,
+    String? initialEmail,
+    String? initialMessage,
     RouteSettings? routeSettings,
     Hub? hub,
     SentryFlutterOptions? flutterOptions,
@@ -43,6 +54,9 @@ class TilawaSentryFeedbackForm extends StatefulWidget {
         builder: (BuildContext context) => TilawaSentryFeedbackForm(
           associatedEventId: associatedEventId,
           screenshot: screenshot,
+          initialName: initialName,
+          initialEmail: initialEmail,
+          initialMessage: initialMessage,
           hub: hub,
           flutterOptions: flutterOptions,
         ),
@@ -68,6 +82,7 @@ class _TilawaSentryFeedbackFormState extends State<TilawaSentryFeedbackForm> {
   Future<Uint8List>? _screenshotFuture;
   bool _isSubmitting = false;
   bool _isCapturingScreenshot = false;
+  bool _isCapturingFromAnotherScreen = false;
 
   @override
   void initState() {
@@ -81,6 +96,8 @@ class _TilawaSentryFeedbackFormState extends State<TilawaSentryFeedbackForm> {
     if (_flutterOptions.feedback.useSentryUser) {
       _prefillFromSentryUser();
     }
+
+    _applyDraftValues();
 
     final SentryAttachment? screenshot = widget.screenshot;
     if (screenshot != null) {
@@ -161,7 +178,8 @@ class _TilawaSentryFeedbackFormState extends State<TilawaSentryFeedbackForm> {
                     _validationError(value, isRequired: true),
               ),
               if (_screenshotFuture != null) _buildScreenshotPreview(tokens),
-              if (_screenshot == null && feedback.showCaptureScreenshot)
+              if (_screenshot == null &&
+                  feedback.showCaptureScreenshot) ...<Widget>[
                 TilawaButton(
                   key: const ValueKey(
                     'tilawa_sentry_feedback_capture_screenshot',
@@ -170,8 +188,26 @@ class _TilawaSentryFeedbackFormState extends State<TilawaSentryFeedbackForm> {
                   variant: TilawaButtonVariant.outline,
                   isFullWidth: true,
                   isLoading: _isCapturingScreenshot,
-                  onPressed: _isCapturingScreenshot ? null : _attachScreenshot,
+                  onPressed:
+                      _isCapturingScreenshot || _isCapturingFromAnotherScreen
+                      ? null
+                      : _attachScreenshot,
                 ),
+                TilawaButton(
+                  key: const ValueKey(
+                    'tilawa_sentry_feedback_capture_screenshot_other_screen',
+                  ),
+                  text:
+                      context.l10n.reportBugCaptureScreenshotFromAnotherScreen,
+                  variant: TilawaButtonVariant.ghost,
+                  isFullWidth: true,
+                  isLoading: _isCapturingFromAnotherScreen,
+                  onPressed:
+                      _isCapturingScreenshot || _isCapturingFromAnotherScreen
+                      ? null
+                      : _attachScreenshotFromAnotherScreen,
+                ),
+              ],
             ],
           ),
         ),
@@ -203,6 +239,9 @@ class _TilawaSentryFeedbackFormState extends State<TilawaSentryFeedbackForm> {
 
   Widget _buildScreenshotPreview(MeMuslimDesignTokens tokens) {
     final feedback = _flutterOptions.feedback;
+    final BorderRadius borderRadius = BorderRadius.circular(
+      tokens.resolveRadius(family: TilawaRadiusFamily.chrome),
+    );
 
     return Row(
       spacing: tokens.spaceSmall,
@@ -210,29 +249,36 @@ class _TilawaSentryFeedbackFormState extends State<TilawaSentryFeedbackForm> {
         SizedBox(
           width: tokens.minInteractiveDimension,
           height: tokens.minInteractiveDimension,
-          child: ClipRRect(
-            borderRadius: BorderRadius.circular(
-              tokens.resolveRadius(family: TilawaRadiusFamily.chrome),
-            ),
-            child: FutureBuilder<Uint8List>(
-              future: _screenshotFuture,
-              builder:
-                  (
-                    BuildContext context,
-                    AsyncSnapshot<Uint8List> snapshot,
-                  ) {
-                    if (snapshot.connectionState == ConnectionState.waiting) {
-                      return const Center(child: CircularProgressIndicator());
-                    }
-                    if (snapshot.hasError || !snapshot.hasData) {
-                      return Icon(
-                        Icons.broken_image_outlined,
-                        color: Theme.of(context).colorScheme.error,
-                      );
-                    }
-                    return Image.memory(snapshot.data!, fit: BoxFit.cover);
-                  },
-            ),
+          child: FutureBuilder<Uint8List>(
+            future: _screenshotFuture,
+            builder: (BuildContext context, AsyncSnapshot<Uint8List> snapshot) {
+              if (snapshot.connectionState == ConnectionState.waiting) {
+                return const Center(child: CircularProgressIndicator());
+              }
+              if (snapshot.hasError || !snapshot.hasData) {
+                return Icon(
+                  Icons.broken_image_outlined,
+                  color: Theme.of(context).colorScheme.error,
+                );
+              }
+
+              final Uint8List bytes = snapshot.data!;
+              return TilawaInteractiveSurface(
+                key: const ValueKey(
+                  'tilawa_sentry_feedback_screenshot_thumbnail',
+                ),
+                onTap: () => TilawaSentryScreenshotPreview.show(
+                  context,
+                  bytes,
+                ),
+                borderRadius: borderRadius,
+                semanticLabel: context.l10n.reportBugPreviewScreenshot,
+                child: ClipRRect(
+                  borderRadius: borderRadius,
+                  child: Image.memory(bytes, fit: BoxFit.contain),
+                ),
+              );
+            },
           ),
         ),
         Expanded(
@@ -265,21 +311,65 @@ class _TilawaSentryFeedbackFormState extends State<TilawaSentryFeedbackForm> {
     return null;
   }
 
+  TilawaFeedbackScreenshotDraft _draftFields() {
+    return TilawaFeedbackScreenshotDraft(
+      name: _nameController.text,
+      email: _emailController.text,
+      message: _messageController.text,
+      associatedEventId: widget.associatedEventId,
+    );
+  }
+
+  TilawaFeedbackScreenshotCaptureCopy _captureCopy(BuildContext context) {
+    final l10n = context.l10n;
+    return TilawaFeedbackScreenshotCaptureCopy(
+      hint: l10n.reportBugScreenshotCaptureHint,
+      capture: l10n.reportBugScreenshotCaptureNow,
+      cancel: l10n.reportBugScreenshotCaptureCancel,
+      captureFailed: l10n.reportBugScreenshotCaptureFailed,
+    );
+  }
+
   Future<void> _attachScreenshot() async {
     setState(() => _isCapturingScreenshot = true);
+
     try {
-      final SentryAttachment? screenshot =
-          await SentryFlutter.captureScreenshot();
-      if (!mounted || screenshot == null) {
+      if (!context.mounted) {
         return;
       }
-      setState(() {
-        _screenshot = screenshot;
-        _screenshotFuture = Future<Uint8List>.value(screenshot.bytes);
-      });
+
+      await TilawaFeedbackScreenshotSession.attachFromCurrentScreen(
+        formContext: context,
+        draft: _draftFields(),
+        hub: _hub,
+        flutterOptions: _flutterOptions,
+        captureFailedCopy: _captureCopy(context),
+      );
     } finally {
       if (mounted) {
         setState(() => _isCapturingScreenshot = false);
+      }
+    }
+  }
+
+  Future<void> _attachScreenshotFromAnotherScreen() async {
+    setState(() => _isCapturingFromAnotherScreen = true);
+
+    try {
+      if (!context.mounted) {
+        return;
+      }
+
+      await TilawaFeedbackScreenshotSession.attachFromAnotherScreen(
+        formContext: context,
+        draft: _draftFields(),
+        hub: _hub,
+        flutterOptions: _flutterOptions,
+        overlayCopy: _captureCopy(context),
+      );
+    } finally {
+      if (mounted) {
+        setState(() => _isCapturingFromAnotherScreen = false);
       }
     }
   }
@@ -368,12 +458,29 @@ class _TilawaSentryFeedbackFormState extends State<TilawaSentryFeedbackForm> {
     }
 
     final String? userName = user!.name;
-    if (userName != null) {
+    if (userName != null && _nameController.text.isEmpty) {
       _nameController.text = userName;
     }
     final String? userEmail = user!.email;
-    if (userEmail != null) {
+    if (userEmail != null && _emailController.text.isEmpty) {
       _emailController.text = userEmail;
+    }
+  }
+
+  void _applyDraftValues() {
+    final String? initialName = widget.initialName;
+    if (initialName != null && initialName.isNotEmpty) {
+      _nameController.text = initialName;
+    }
+
+    final String? initialEmail = widget.initialEmail;
+    if (initialEmail != null && initialEmail.isNotEmpty) {
+      _emailController.text = initialEmail;
+    }
+
+    final String? initialMessage = widget.initialMessage;
+    if (initialMessage != null && initialMessage.isNotEmpty) {
+      _messageController.text = initialMessage;
     }
   }
 
@@ -386,5 +493,49 @@ class _TilawaSentryFeedbackFormState extends State<TilawaSentryFeedbackForm> {
       await (integration as dynamic).captureReplay();
       return;
     }
+  }
+}
+
+/// Full-screen preview for a Sentry feedback screenshot attachment.
+class TilawaSentryScreenshotPreview extends StatelessWidget {
+  const TilawaSentryScreenshotPreview({super.key, required this.bytes});
+
+  final Uint8List bytes;
+
+  static Future<void> show(BuildContext context, Uint8List bytes) {
+    return Navigator.of(context).push<void>(
+      MaterialPageRoute<void>(
+        fullscreenDialog: true,
+        builder: (BuildContext context) =>
+            TilawaSentryScreenshotPreview(bytes: bytes),
+      ),
+    );
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final MeMuslimDesignTokens tokens = Theme.of(context).tokens;
+
+    return Scaffold(
+      appBar: AppBar(
+        title: Text(context.l10n.reportBugScreenshotPreviewTitle),
+      ),
+      body: SafeArea(
+        child: Padding(
+          padding: EdgeInsets.all(tokens.spaceMedium),
+          child: InteractiveViewer(
+            key: const ValueKey(
+              'tilawa_sentry_feedback_screenshot_preview_image',
+            ),
+            child: Image.memory(
+              bytes,
+              fit: BoxFit.contain,
+              width: double.infinity,
+              height: double.infinity,
+            ),
+          ),
+        ),
+      ),
+    );
   }
 }

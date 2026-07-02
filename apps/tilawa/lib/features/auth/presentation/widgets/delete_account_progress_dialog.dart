@@ -55,12 +55,24 @@ class _DeleteAccountProgressDialogState
     if (_tracker?.deletionInProgress != false) {
       return;
     }
-    WidgetsBinding.instance.addPostFrameCallback((_) {
-      if (!mounted) {
-        return;
-      }
-      Navigator.of(context, rootNavigator: true).pop();
-    });
+    if (_tracker?.pendingLoginNavigationAfterDeletion == true) {
+      // Successful deletion navigates to login; popping here races GoRouter.
+      return;
+    }
+    WidgetsBinding.instance.addPostFrameCallback(
+      (_) => _dismissIfStillMounted(),
+    );
+  }
+
+  void _dismissIfStillMounted() {
+    if (!mounted) {
+      return;
+    }
+    final ModalRoute<void>? route = ModalRoute.of(context);
+    if (route == null || !route.isActive) {
+      return;
+    }
+    Navigator.of(context, rootNavigator: true).maybePop();
   }
 
   @override

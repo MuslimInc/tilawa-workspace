@@ -320,6 +320,24 @@ abstract class AppLocalizations {
   /// **'Could not load prayer times. Check your connection and try again.'**
   String get homeDashboardLoadError;
 
+  /// Home hero message when the initial dashboard load fails offline without cache
+  ///
+  /// In en, this message translates to:
+  /// **'You\'re offline and we don\'t have saved prayer times yet. Reconnect and try again.'**
+  String get homeDashboardOfflineError;
+
+  /// Snack bar when Home pull-to-refresh fails due to no internet
+  ///
+  /// In en, this message translates to:
+  /// **'You\'re offline. Showing your last saved data.'**
+  String get homeRefreshOfflineMessage;
+
+  /// Snack bar when Home pull-to-refresh fails for a non-network reason
+  ///
+  /// In en, this message translates to:
+  /// **'Couldn\'t refresh. Your last saved data is still shown.'**
+  String get homeRefreshFailedMessage;
+
   /// Read-only Home search field hint; opens Quran index
   ///
   /// In en, this message translates to:
@@ -1460,6 +1478,12 @@ abstract class AppLocalizations {
   /// **'Retry'**
   String get retry;
 
+  /// Accessibility label announced for skeleton loading regions
+  ///
+  /// In en, this message translates to:
+  /// **'Loading'**
+  String get loading;
+
   /// Download status checked message
   ///
   /// In en, this message translates to:
@@ -2161,6 +2185,12 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Please check your internet connection'**
   String get networkError;
+
+  /// Message shown when a server-dependent action is blocked while offline
+  ///
+  /// In en, this message translates to:
+  /// **'No internet connection. Please reconnect and try again.'**
+  String get serverActionOfflineMessage;
 
   /// Toast shown when device free storage is likely below the estimated download size
   ///
@@ -5257,6 +5287,48 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Remove screenshot'**
   String get reportBugRemoveScreenshot;
+
+  /// Accessibility label for opening a full-screen Sentry feedback screenshot preview
+  ///
+  /// In en, this message translates to:
+  /// **'Preview screenshot'**
+  String get reportBugPreviewScreenshot;
+
+  /// Title for the full-screen Sentry feedback screenshot preview
+  ///
+  /// In en, this message translates to:
+  /// **'Screenshot'**
+  String get reportBugScreenshotPreviewTitle;
+
+  /// Button to navigate elsewhere before capturing a bug-report screenshot
+  ///
+  /// In en, this message translates to:
+  /// **'Attach from another screen'**
+  String get reportBugCaptureScreenshotFromAnotherScreen;
+
+  /// Hint shown while navigating to capture a bug-report screenshot
+  ///
+  /// In en, this message translates to:
+  /// **'Go to the screen you want, then tap Capture.'**
+  String get reportBugScreenshotCaptureHint;
+
+  /// Button to capture the visible screen during navigate-then-capture
+  ///
+  /// In en, this message translates to:
+  /// **'Capture'**
+  String get reportBugScreenshotCaptureNow;
+
+  /// Button to cancel navigate-then-capture and return to the bug form
+  ///
+  /// In en, this message translates to:
+  /// **'Back to report'**
+  String get reportBugScreenshotCaptureCancel;
+
+  /// Shown when navigate-then-capture or attach fails to produce a screenshot
+  ///
+  /// In en, this message translates to:
+  /// **'We couldn\'t capture a screenshot. You can still send your report.'**
+  String get reportBugScreenshotCaptureFailed;
 
   /// Settings row to share the app with others
   ///

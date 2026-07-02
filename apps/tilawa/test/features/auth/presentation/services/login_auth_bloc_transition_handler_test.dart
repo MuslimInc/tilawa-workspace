@@ -1,5 +1,6 @@
 import 'package:checks/checks.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:tilawa/core/domain/server_action_guard.dart';
 import 'package:tilawa/features/auth/domain/entities/auth_error_key.dart';
 import 'package:tilawa/features/auth/domain/entities/auth_result.dart';
 import 'package:tilawa/features/auth/domain/entities/user_entity.dart';
@@ -11,7 +12,10 @@ import 'package:tilawa/features/auth/domain/usecases/resolve_google_sign_in_laun
 import 'package:tilawa/features/auth/presentation/bloc/auth_bloc.dart';
 import 'package:tilawa/features/auth/presentation/cubit/login_google_sign_in_cubit.dart';
 import 'package:tilawa/features/auth/presentation/services/login_auth_bloc_transition_handler.dart';
+import 'package:tilawa_core/errors/failures.dart';
 import 'package:tilawa_ui_kit/tilawa_ui_kit.dart';
+
+import '../../../../support/fake_network_info.dart';
 
 class _NoopAuthRepository implements AuthRepository {
   @override
@@ -45,6 +49,7 @@ void main() {
   );
 
   late LoginGoogleSignInCubit cubit;
+  late FakeNetworkInfo networkInfo;
   final List<String> logs = <String>[];
   int navigateCount = 0;
   final List<(String message, TilawaFeedbackVariant variant)> toasts =
@@ -54,17 +59,20 @@ void main() {
       LoginAuthBlocTransitionMessages(
         authErrorFallback: 'fallback',
         noGoogleAccounts: 'no accounts',
+        serverActionOffline: 'offline action blocked',
       );
 
   setUp(() {
     final GoogleSignInLaunchReadinessStore store =
         GoogleSignInLaunchReadinessStore();
+    networkInfo = FakeNetworkInfo();
     cubit = LoginGoogleSignInCubit(
       PrewarmGoogleSignInLaunchUseCase(
         PrepareGoogleSignInUseCase(_NoopAuthRepository()),
         store,
       ),
       ResolveGoogleSignInLaunchUseCase(store),
+      ServerActionGuard(networkInfo),
     );
     logs.clear();
     navigateCount = 0;
@@ -73,6 +81,7 @@ void main() {
 
   tearDown(() async {
     await cubit.close();
+    await networkInfo.dispose();
   });
 
   void handle(AuthState state, {bool shouldSkipAutoSignIn = false}) {
@@ -132,6 +141,19 @@ void main() {
       check(toasts.single.$2).equals(TilawaFeedbackVariant.error);
     });
 
+    test('raw Firebase network copy maps to offline message', () {
+      handle(
+        const AuthState.error(
+          message:
+              'A network error (such as timeout, interrupted connection or '
+              'unreachable host) has occurred.',
+        ),
+      );
+
+      check(toasts.single.$1).equals('offline action blocked');
+      check(toasts.single.$2).equals(TilawaFeedbackVariant.error);
+    });
+
     test('error uses fallback when message empty', () {
       handle(const AuthState.error(message: ''));
 
@@ -158,6 +180,13 @@ void main() {
       );
 
       check(toasts.single.$1).equals('app check setup hint');
+      check(toasts.single.$2).equals(TilawaFeedbackVariant.error);
+    });
+
+    test('server action offline key shows dedicated message', () {
+      handle(const AuthState.error(message: ServerActionFailureKey.offline));
+
+      check(toasts.single.$1).equals('offline action blocked');
       check(toasts.single.$2).equals(TilawaFeedbackVariant.error);
     });
 

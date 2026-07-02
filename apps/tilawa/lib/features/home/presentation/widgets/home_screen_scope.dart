@@ -38,7 +38,7 @@ class HomeScreenScope extends StatelessWidget {
   /// When set (e.g. in widget tests), replaces [HomeScreen].
   final Widget? child;
 
-  static HomeDashboardBloc _createHomeDashboardBloc(String localeIdentifier) {
+  static HomeDashboardBloc _createHomeDashboardBloc() {
     return HomeDashboardBloc(
       GetHomeDashboardUseCase(
         HomeDashboardRepositoryImpl(
@@ -51,7 +51,7 @@ class HomeScreenScope extends StatelessWidget {
         ),
       ),
       getIt<NotifyPrayerLocationUpdatedUseCase>(),
-    )..add(HomeDashboardStarted(localeIdentifier: localeIdentifier));
+    );
   }
 
   static void _deferToNextFrame(VoidCallback action) {
@@ -84,7 +84,6 @@ class HomeScreenScope extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final localeIdentifier = Localizations.localeOf(context).languageCode;
     final Widget homeContent = _HomeLocalizationListener(
       child: child ?? HomeScreen(onOpenPrayer: onOpenPrayer),
     );
@@ -92,7 +91,7 @@ class HomeScreenScope extends StatelessWidget {
     return MultiBlocProvider(
       providers: [
         BlocProvider(
-          create: (_) => _createHomeDashboardBloc(localeIdentifier),
+          create: (_) => _createHomeDashboardBloc(),
         ),
         BlocProvider(
           create: (_) {

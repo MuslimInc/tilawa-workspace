@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:bloc_test/bloc_test.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
@@ -10,16 +12,19 @@ import 'package:tilawa/core/di/injection.dart';
 import 'package:tilawa/features/audio_player/presentation/bloc/audio_player_bloc.dart';
 import 'package:tilawa/features/history/domain/entities/history_entity.dart';
 import 'package:tilawa/features/history/domain/repositories/history_repository.dart';
+import 'package:tilawa/features/home/data/datasources/home_dashboard_memory_cache.dart';
 import 'package:tilawa/features/home/domain/entities/home_dashboard.dart';
 import 'package:tilawa/features/home/domain/entities/home_prayer_slot.dart';
 import 'package:tilawa/features/home/domain/repositories/home_dashboard_repository.dart';
 import 'package:tilawa/features/home/domain/usecases/get_home_dashboard_use_case.dart';
+import 'package:tilawa/features/home/debug/home_skeleton_debug.dart';
 import 'package:tilawa/features/home/presentation/bloc/home_dashboard_bloc.dart';
 import 'package:tilawa/features/home/presentation/bloc/home_dashboard_event.dart';
 import 'package:tilawa/features/home/presentation/cubit/home_listening_resume_cubit.dart';
 import 'package:tilawa/features/home/presentation/screens/home_screen.dart';
 import 'package:tilawa/features/home/presentation/widgets/home_next_prayer_time.dart';
 import 'package:tilawa/features/home/presentation/widgets/home_daily_inspiration_section.dart';
+import 'package:tilawa/features/home/presentation/widgets/home_dashboard_body_skeleton.dart';
 import 'package:tilawa/features/home/presentation/widgets/home_more_actions_group.dart';
 import 'package:tilawa/features/home/presentation/widgets/home_primary_actions_section.dart';
 import 'package:tilawa/features/home/presentation/widgets/home_quick_tools_section.dart';
@@ -49,9 +54,206 @@ void main() {
   });
 
   tearDown(() async {
+    HomeDashboardMemoryCache.shared.clear();
     if (GetIt.I.isRegistered<SharedPreferencesAsync>()) {
       await GetIt.I.unregister<SharedPreferencesAsync>();
     }
+  });
+
+  testWidgets('shows hero and body skeletons during the initial load', (
+    tester,
+  ) async {
+    final repository = _PendingHomeDashboardRepository();
+    final bloc = HomeDashboardBloc(
+      GetHomeDashboardUseCase(repository),
+      NotifyPrayerLocationUpdatedUseCase(PrayerLocationUpdateNotifier()),
+    )..add(const HomeDashboardStarted(localeIdentifier: 'en'));
+    addTearDown(bloc.close);
+    // Runs before bloc.close (LIFO) so close never awaits a stuck handler.
+    addTearDown(repository.release);
+
+    await tester.pumpWidget(_HomeScreenHarness(bloc: bloc, locale: 'en'));
+    await tester.pump();
+
+    // One shimmer scope in the prayer hero, one in the dashboard body.
+    expect(find.byType(TilawaSkeleton), findsNWidgets(2));
+    expect(find.byType(HomeDashboardBodySkeleton), findsOneWidget);
+    expect(find.byType(HomePrimaryActionsSection), findsNothing);
+    expect(find.byType(HomeQuickToolsSection), findsNothing);
+
+    // Completing the load swaps the skeletons for the real dashboard.
+    repository.release();
+    await tester.pump();
+    await tester.pump(const Duration(milliseconds: 450));
+    for (var frame = 0; frame < 5; frame++) {
+      await tester.pump(const Duration(milliseconds: 16));
+    }
+
+    expect(find.byType(HomeDashboardBodySkeleton), findsNothing);
+    expect(find.byType(TilawaSkeleton), findsNothing);
+    expect(find.byType(HomePrimaryActionsSection), findsOneWidget);
+    expect(find.byType(HomeQuickToolsSection), findsOneWidget);
+  });
+
+  testWidgets('debug force-skeleton toggle pins Home to the skeleton state', (
+    tester,
+  ) async {
+    final bloc = HomeDashboardBloc(
+      GetHomeDashboardUseCase(_FakeHomeDashboardRepository()),
+      NotifyPrayerLocationUpdatedUseCase(PrayerLocationUpdateNotifier()),
+    )..add(const HomeDashboardStarted(localeIdentifier: 'en'));
+    addTearDown(bloc.close);
+    addTearDown(() => HomeSkeletonDebug.forceSkeleton.value = false);
+
+    await tester.pumpWidget(_HomeScreenHarness(bloc: bloc, locale: 'en'));
+    await tester.pump();
+    for (var frame = 0; frame < 30; frame++) {
+      await tester.pump(const Duration(milliseconds: 16));
+    }
+    expect(find.byType(HomePrimaryActionsSection), findsOneWidget);
+
+    HomeSkeletonDebug.forceSkeleton.value = true;
+    await tester.pump();
+    // Let the crossfade drop the outgoing real body.
+    await tester.pump(const Duration(milliseconds: 450));
+
+    expect(find.byType(HomeDashboardBodySkeleton), findsOneWidget);
+    expect(find.byType(HomePrimaryActionsSection), findsNothing);
+
+    HomeSkeletonDebug.forceSkeleton.value = false;
+    await tester.pump();
+    await tester.pump(const Duration(milliseconds: 450));
+    for (var frame = 0; frame < 5; frame++) {
+      await tester.pump(const Duration(milliseconds: 16));
+    }
+
+    expect(find.byType(HomeDashboardBodySkeleton), findsNothing);
+    expect(find.byType(HomePrimaryActionsSection), findsOneWidget);
+  });
+
+  testWidgets('keeps loaded content when a refresh is requested', (
+    tester,
+  ) async {
+    final repository = _PendingRefreshHomeDashboardRepository();
+    final useCase = GetHomeDashboardUseCase(
+      repository,
+      HomeDashboardMemoryCache(),
+    );
+    final bloc = HomeDashboardBloc(
+      useCase,
+      NotifyPrayerLocationUpdatedUseCase(PrayerLocationUpdateNotifier()),
+    )..add(const HomeDashboardStarted(localeIdentifier: 'en'));
+    addTearDown(bloc.close);
+
+    await tester.pumpWidget(_HomeScreenHarness(bloc: bloc, locale: 'en'));
+    await tester.pump();
+    repository.completeInitialLoad();
+    await tester.pump();
+    for (var frame = 0; frame < 30; frame++) {
+      await tester.pump(const Duration(milliseconds: 16));
+    }
+    expect(find.byType(HomePrimaryActionsSection), findsOneWidget);
+
+    final Future<void> refreshFuture = bloc.refreshAndWait(
+      localeIdentifier: 'en',
+    );
+    await tester.pump();
+
+    expect(find.byType(HomeDashboardBodySkeleton), findsNothing);
+    expect(find.byType(HomePrimaryActionsSection), findsOneWidget);
+    expect(find.byType(TilawaSkeleton), findsNothing);
+
+    repository.completeRefresh();
+    await refreshFuture;
+    await tester.pump();
+    for (var frame = 0; frame < 5; frame++) {
+      await tester.pump(const Duration(milliseconds: 16));
+    }
+
+    expect(find.byType(TilawaSkeleton), findsNothing);
+    expect(find.byType(HomePrimaryActionsSection), findsOneWidget);
+  });
+
+  testWidgets('renders cached dashboard immediately without full shimmer', (
+    tester,
+  ) async {
+    final cache = HomeDashboardMemoryCache();
+    cache.write(_dashboard);
+    final repository = _FakeHomeDashboardRepository();
+    final bloc = HomeDashboardBloc(
+      GetHomeDashboardUseCase(repository, cache),
+      NotifyPrayerLocationUpdatedUseCase(PrayerLocationUpdateNotifier()),
+    );
+    addTearDown(bloc.close);
+
+    bloc.add(const HomeDashboardStarted(localeIdentifier: 'en'));
+    await tester.pump();
+
+    await tester.pumpWidget(_HomeScreenHarness(bloc: bloc, locale: 'en'));
+    await tester.pump();
+    await tester.pump(const Duration(milliseconds: 500));
+
+    expect(find.byType(HomeDashboardBodySkeleton), findsNothing);
+    expect(find.byType(HomePrimaryActionsSection), findsOneWidget);
+    expect(find.byType(TilawaSkeleton), findsNothing);
+  });
+
+  testWidgets('offline cold start without cache shows failure not skeleton', (
+    tester,
+  ) async {
+    final repository = _RefreshFailingHomeDashboardRepository()
+      ..shouldFailInitialLoad = true;
+    final bloc = HomeDashboardBloc(
+      GetHomeDashboardUseCase(repository, HomeDashboardMemoryCache()),
+      NotifyPrayerLocationUpdatedUseCase(PrayerLocationUpdateNotifier()),
+    );
+    addTearDown(bloc.close);
+
+    bloc.add(const HomeDashboardStarted(localeIdentifier: 'en'));
+    await tester.pumpWidget(_HomeScreenHarness(bloc: bloc, locale: 'en'));
+    await tester.pump();
+    await tester.pump();
+    await tester.pump(const Duration(milliseconds: 500));
+
+    expect(find.byType(HomeDashboardBodySkeleton), findsNothing);
+    expect(
+      find.text(
+        "You're offline and we don't have saved prayer times yet. Reconnect and try again.",
+      ),
+      findsOneWidget,
+    );
+  });
+
+  testWidgets('shows offline snackbar when refresh fails on loaded content', (
+    tester,
+  ) async {
+    final repository = _RefreshFailingHomeDashboardRepository();
+    final bloc = HomeDashboardBloc(
+      GetHomeDashboardUseCase(repository),
+      NotifyPrayerLocationUpdatedUseCase(PrayerLocationUpdateNotifier()),
+    )..add(const HomeDashboardStarted(localeIdentifier: 'en'));
+    addTearDown(bloc.close);
+
+    await tester.pumpWidget(_HomeScreenHarness(bloc: bloc, locale: 'en'));
+    await tester.pump();
+    for (var frame = 0; frame < 30; frame++) {
+      await tester.pump(const Duration(milliseconds: 16));
+    }
+    expect(find.byType(HomePrimaryActionsSection), findsOneWidget);
+
+    repository.shouldFailRefresh = true;
+    await bloc.refreshAndWait(localeIdentifier: 'en');
+    await tester.pump();
+    await tester.pump();
+
+    expect(find.byType(HomeDashboardBodySkeleton), findsNothing);
+    expect(find.byType(HomePrimaryActionsSection), findsOneWidget);
+    expect(
+      find.text(
+        "You're offline. Showing your last saved data.",
+      ),
+      findsOneWidget,
+    );
   });
 
   testWidgets('home screen hero does not pin', (
@@ -316,6 +518,40 @@ class _HomeScreenHarness extends StatelessWidget {
   }
 }
 
+class _PendingRefreshHomeDashboardRepository
+    implements HomeDashboardRepository {
+  final Completer<HomeDashboard> _initialCompleter = Completer<HomeDashboard>();
+  Completer<HomeDashboard>? _refreshCompleter;
+  int _callCount = 0;
+
+  void completeInitialLoad() {
+    if (!_initialCompleter.isCompleted) {
+      _initialCompleter.complete(_dashboard);
+    }
+  }
+
+  void completeRefresh() {
+    final Completer<HomeDashboard>? refreshCompleter = _refreshCompleter;
+    if (refreshCompleter != null && !refreshCompleter.isCompleted) {
+      refreshCompleter.complete(_dashboard);
+    }
+  }
+
+  @override
+  Future<HomeDashboard> getDashboard({String? localeIdentifier}) {
+    _callCount++;
+    if (_callCount == 1) {
+      return _initialCompleter.future;
+    }
+    _refreshCompleter ??= Completer<HomeDashboard>();
+    return _refreshCompleter!.future;
+  }
+
+  @override
+  Future<HomeDashboard> refreshLocation({String? localeIdentifier}) async =>
+      _dashboard;
+}
+
 class _FakeHomeDashboardRepository implements HomeDashboardRepository {
   @override
   Future<HomeDashboard> getDashboard({String? localeIdentifier}) async =>
@@ -324,6 +560,56 @@ class _FakeHomeDashboardRepository implements HomeDashboardRepository {
   @override
   Future<HomeDashboard> refreshLocation({String? localeIdentifier}) async =>
       _dashboard;
+}
+
+class _RefreshFailingHomeDashboardRepository
+    implements HomeDashboardRepository {
+  bool shouldFailRefresh = false;
+  bool shouldFailInitialLoad = false;
+  int _callCount = 0;
+
+  @override
+  Future<HomeDashboard> getDashboard({String? localeIdentifier}) async {
+    _callCount++;
+    if (shouldFailInitialLoad && _callCount == 1) {
+      throw Exception(
+        'SocketException: Failed host lookup: example.com',
+      );
+    }
+    if (shouldFailRefresh && _callCount > 1) {
+      throw Exception(
+        'SocketException: Failed host lookup: example.com',
+      );
+    }
+    return _dashboard;
+  }
+
+  @override
+  Future<HomeDashboard> refreshLocation({String? localeIdentifier}) async =>
+      _dashboard;
+}
+
+/// Holds the dashboard load in-flight until [release] completes it.
+///
+/// Always release (directly or via `addTearDown`) before closing the bloc:
+/// [HomeDashboardBloc.close] awaits the active event handler, so a
+/// never-completing future would hang the test until its timeout.
+class _PendingHomeDashboardRepository implements HomeDashboardRepository {
+  final Completer<HomeDashboard> _completer = Completer<HomeDashboard>();
+
+  void release() {
+    if (!_completer.isCompleted) {
+      _completer.complete(_dashboard);
+    }
+  }
+
+  @override
+  Future<HomeDashboard> getDashboard({String? localeIdentifier}) =>
+      _completer.future;
+
+  @override
+  Future<HomeDashboard> refreshLocation({String? localeIdentifier}) =>
+      _completer.future;
 }
 
 final HomeDashboard _dashboard = HomeDashboard(

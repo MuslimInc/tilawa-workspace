@@ -38,6 +38,8 @@ extension FailureExtensions on Failure {
     );
 
     return switch (this) {
+      ServerActionFailure(reason: ServerActionFailureReason.offline) =>
+        l10n.serverActionOfflineMessage,
       OfflinePlaybackFailure(reason: final reason) => switch (reason) {
         OfflinePlaybackReason.notDownloaded => l10n.offlinePlaybackError,
         OfflinePlaybackReason.fileMissing => l10n.offlineFileMissingError,

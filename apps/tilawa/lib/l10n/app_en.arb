@@ -166,6 +166,18 @@
     "@homeDashboardLoadError": {
         "description": "Home hero message when dashboard data fails to load"
     },
+    "homeDashboardOfflineError": "You're offline and we don't have saved prayer times yet. Reconnect and try again.",
+    "@homeDashboardOfflineError": {
+        "description": "Home hero message when the initial dashboard load fails offline without cache"
+    },
+    "homeRefreshOfflineMessage": "You're offline. Showing your last saved data.",
+    "@homeRefreshOfflineMessage": {
+        "description": "Snack bar when Home pull-to-refresh fails due to no internet"
+    },
+    "homeRefreshFailedMessage": "Couldn't refresh. Your last saved data is still shown.",
+    "@homeRefreshFailedMessage": {
+        "description": "Snack bar when Home pull-to-refresh fails for a non-network reason"
+    },
     "homeSearchHint": "Search surahs, juz, or page",
     "@homeSearchHint": {
         "description": "Read-only Home search field hint; opens Quran index"
@@ -1068,6 +1080,10 @@
     "@retry": {
         "description": "Retry button text"
     },
+    "loading": "Loading",
+    "@loading": {
+        "description": "Accessibility label announced for skeleton loading regions"
+    },
     "downloadStatusChecked": "Download status checked",
     "@downloadStatusChecked": {
         "description": "Download status checked message"
@@ -1582,6 +1598,10 @@
     "networkError": "Please check your internet connection",
     "@networkError": {
         "description": "Network error message"
+    },
+    "serverActionOfflineMessage": "No internet connection. Please reconnect and try again.",
+    "@serverActionOfflineMessage": {
+        "description": "Message shown when a server-dependent action is blocked while offline"
     },
     "downloadLowStorageWarning": "Available storage may not be enough for this download. Free up space if downloads fail.",
     "@downloadLowStorageWarning": {
@@ -3976,6 +3996,34 @@
     "reportBugRemoveScreenshot": "Remove screenshot",
     "@reportBugRemoveScreenshot": {
         "description": "Button to remove an attached Sentry feedback screenshot"
+    },
+    "reportBugPreviewScreenshot": "Preview screenshot",
+    "@reportBugPreviewScreenshot": {
+        "description": "Accessibility label for opening a full-screen Sentry feedback screenshot preview"
+    },
+    "reportBugScreenshotPreviewTitle": "Screenshot",
+    "@reportBugScreenshotPreviewTitle": {
+        "description": "Title for the full-screen Sentry feedback screenshot preview"
+    },
+    "reportBugCaptureScreenshotFromAnotherScreen": "Attach from another screen",
+    "@reportBugCaptureScreenshotFromAnotherScreen": {
+        "description": "Button to navigate elsewhere before capturing a bug-report screenshot"
+    },
+    "reportBugScreenshotCaptureHint": "Go to the screen you want, then tap Capture.",
+    "@reportBugScreenshotCaptureHint": {
+        "description": "Hint shown while navigating to capture a bug-report screenshot"
+    },
+    "reportBugScreenshotCaptureNow": "Capture",
+    "@reportBugScreenshotCaptureNow": {
+        "description": "Button to capture the visible screen during navigate-then-capture"
+    },
+    "reportBugScreenshotCaptureCancel": "Back to report",
+    "@reportBugScreenshotCaptureCancel": {
+        "description": "Button to cancel navigate-then-capture and return to the bug form"
+    },
+    "reportBugScreenshotCaptureFailed": "We couldn't capture a screenshot. You can still send your report.",
+    "@reportBugScreenshotCaptureFailed": {
+        "description": "Shown when navigate-then-capture or attach fails to produce a screenshot"
     },
     "shareTilawa": "Share MeMuslim",
     "@shareTilawa": {

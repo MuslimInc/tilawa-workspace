@@ -3,6 +3,7 @@ import 'package:flutter/widgets.dart';
 import 'package:sentry_flutter/sentry_flutter.dart';
 import 'package:tilawa/core/extensions.dart';
 import 'package:tilawa/core/telemetry/crash_reporting_context.dart';
+import 'package:tilawa/core/telemetry/tilawa_feedback_screenshot_session.dart';
 import 'package:tilawa/core/telemetry/tilawa_sentry_feedback_form.dart';
 import 'package:tilawa/l10n/generated/app_localizations.dart';
 import 'package:tilawa/router/app_router.dart';
@@ -57,7 +58,7 @@ abstract final class SentryUserFeedback {
 
     applyLocalizedLabels(context.l10n);
     final SentryAttachment? screenshot =
-        await SentryFlutter.captureScreenshot();
+        await TilawaFeedbackScreenshotSession.captureDeferredEntry();
     if (!context.mounted) {
       return;
     }
@@ -129,7 +130,7 @@ abstract final class SentryUserFeedback {
 
     applyLocalizedLabels(context.l10n);
     final SentryAttachment? screenshot =
-        await SentryFlutter.captureScreenshot();
+        await TilawaFeedbackScreenshotSession.captureDeferredEntry();
     if (!context.mounted) {
       return;
     }

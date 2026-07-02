@@ -1,10 +1,14 @@
+import 'package:dartz_plus/dartz_plus.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:mockito/mockito.dart';
+import 'package:tilawa/core/domain/server_action_guard.dart';
 import 'package:tilawa/features/auth/domain/entities/user_entity.dart';
 import 'package:tilawa/features/auth/domain/usecases/sign_out.dart';
+import 'package:tilawa_core/errors/failures.dart';
 
 import '../../../premium/domain/usecases/check_feature_access_use_case_test.mocks.dart';
 import '../../helpers/auth_mock_helper.mocks.dart';
+import '../../../../support/fake_network_info.dart';
 
 void main() {
   late SignOut useCase;
@@ -12,6 +16,7 @@ void main() {
   late MockSyncDeviceTokenUseCase mockSyncDeviceTokenUseCase;
   late MockPremiumRepository mockPremiumRepository;
   late MockTokenSyncCache mockTokenSyncCache;
+  late FakeNetworkInfo networkInfo;
 
   final tUser = UserEntity(
     id: 'user_123',
@@ -25,13 +30,19 @@ void main() {
     mockSyncDeviceTokenUseCase = MockSyncDeviceTokenUseCase();
     mockPremiumRepository = MockPremiumRepository();
     mockTokenSyncCache = MockTokenSyncCache();
+    networkInfo = FakeNetworkInfo();
     useCase = SignOut(
       mockAuthRepository,
       mockSyncDeviceTokenUseCase,
       mockPremiumRepository,
       mockTokenSyncCache,
+      ServerActionGuard(networkInfo),
     );
     when(mockTokenSyncCache.clearSession()).thenAnswer((_) async {});
+  });
+
+  tearDown(() async {
+    await networkInfo.dispose();
   });
 
   test(
@@ -41,8 +52,11 @@ void main() {
       when(mockPremiumRepository.clearPremiumStatus()).thenAnswer((_) async {});
       when(mockAuthRepository.signOut()).thenAnswer((_) async {});
 
-      await useCase(skipServerTokenClear: true);
+      final Either<Failure, void> result = await useCase(
+        skipServerTokenClear: true,
+      );
 
+      expect(result.isRight(), isTrue);
       verifyNever(mockSyncDeviceTokenUseCase.removeCurrentTokenForUser(any));
       verifyInOrder([
         mockTokenSyncCache.clearSession(),
@@ -60,8 +74,9 @@ void main() {
     when(mockPremiumRepository.clearPremiumStatus()).thenAnswer((_) async {});
     when(mockAuthRepository.signOut()).thenAnswer((_) async {});
 
-    await useCase();
+    final Either<Failure, void> result = await useCase();
 
+    expect(result.isRight(), isTrue);
     verifyInOrder([
       mockSyncDeviceTokenUseCase.removeCurrentTokenForUser(tUser.id),
       mockTokenSyncCache.clearSession(),
@@ -77,8 +92,9 @@ void main() {
       when(mockPremiumRepository.clearPremiumStatus()).thenAnswer((_) async {});
       when(mockAuthRepository.signOut()).thenAnswer((_) async {});
 
-      await useCase();
+      final Either<Failure, void> result = await useCase();
 
+      expect(result.isRight(), isTrue);
       verifyNever(mockSyncDeviceTokenUseCase.removeCurrentTokenForUser(any));
       verify(mockTokenSyncCache.clearSession()).called(1);
       verify(mockPremiumRepository.clearPremiumStatus()).called(1);
@@ -96,11 +112,29 @@ void main() {
       when(mockPremiumRepository.clearPremiumStatus()).thenAnswer((_) async {});
       when(mockAuthRepository.signOut()).thenAnswer((_) async {});
 
-      await useCase();
+      final Either<Failure, void> result = await useCase();
 
+      expect(result.isRight(), isTrue);
       verify(mockTokenSyncCache.clearSession()).called(1);
       verify(mockPremiumRepository.clearPremiumStatus()).called(1);
       verify(mockAuthRepository.signOut()).called(1);
     },
   );
+
+  test('blocks logout without calling repositories when offline', () async {
+    networkInfo.connected = false;
+    when(mockAuthRepository.currentUser).thenReturn(tUser);
+
+    final Either<Failure, void> result = await useCase();
+
+    expect(result.isLeft(), isTrue);
+    result.fold((failure) {
+      expect(failure, isA<ServerActionFailure>());
+      expect(failure.message, ServerActionFailureKey.offline);
+    }, (_) => fail('expected left'));
+    verifyNever(mockSyncDeviceTokenUseCase.removeCurrentTokenForUser(any));
+    verifyNever(mockTokenSyncCache.clearSession());
+    verifyNever(mockPremiumRepository.clearPremiumStatus());
+    verifyNever(mockAuthRepository.signOut());
+  });
 }

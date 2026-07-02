@@ -34,7 +34,7 @@ class HomeDailyInspirationSection extends StatelessWidget {
                 useArabicTypography: context.isArabic,
               ),
               Padding(
-                padding: EdgeInsetsDirectional.only(start: tokens.spaceMedium),
+                padding: EdgeInsets.symmetric(horizontal: tokens.spaceMedium),
                 child: TilawaDivider(
                   height: tokens.borderWidthThin,
                   color: dividerColor,
@@ -148,10 +148,10 @@ class _DailyInspirationRow extends StatelessWidget {
     final colorScheme = theme.colorScheme;
 
     final TextStyle bodyStyle = theme.textTheme.bodyMedium!.copyWith(
-      color: colorScheme.onSurfaceVariant,
+      color: colorScheme.onSurfaceVariant.withValues(alpha: 0.88),
       height: useArabicTypography
-          ? tokens.textHeightLoose
-          : theme.textTheme.bodyMedium?.height,
+          ? tokens.textHeightLoose + 0.08
+          : (theme.textTheme.bodyMedium?.height ?? 1.4) + 0.05,
       fontWeight: useArabicTypography ? FontWeight.w500 : FontWeight.w400,
     );
 
@@ -159,23 +159,32 @@ class _DailyInspirationRow extends StatelessWidget {
       padding: EdgeInsetsDirectional.only(
         start: tokens.spaceMedium,
         end: tokens.spaceMedium,
-        top: tokens.spaceSmall,
-        bottom: tokens.spaceSmall,
+        top: tokens.spaceMedium,
+        bottom: tokens.spaceMedium,
       ),
       child: ConstrainedBox(
         constraints: BoxConstraints(
-          minHeight: tokens.minInteractiveDimension + tokens.spaceSmall,
+          minHeight: tokens.minInteractiveDimension,
         ),
         child: Row(
           crossAxisAlignment: CrossAxisAlignment.start,
-          spacing: tokens.spaceSmall,
+          spacing: tokens.spaceMedium,
           children: [
             Container(
               width: tokens.spaceExtraSmall,
               height: tokens.spaceExtraLarge + tokens.spaceSmall,
               decoration: BoxDecoration(
-                color: colorScheme.tertiary.withValues(
-                  alpha: tokens.opacitySubtle * 3.5,
+                gradient: LinearGradient(
+                  begin: Alignment.topCenter,
+                  end: Alignment.bottomCenter,
+                  colors: <Color>[
+                    colorScheme.tertiary.withValues(
+                      alpha: tokens.opacitySubtle * 4,
+                    ),
+                    colorScheme.tertiary.withValues(
+                      alpha: tokens.opacitySubtle * 1.5,
+                    ),
+                  ],
                 ),
                 borderRadius: BorderRadius.circular(
                   tokens.resolveRadius(family: TilawaRadiusFamily.decorative),
@@ -184,11 +193,13 @@ class _DailyInspirationRow extends StatelessWidget {
             ),
             Expanded(
               child: Column(
-                spacing: tokens.spaceExtraSmall,
+                spacing: tokens.spaceSmall,
                 crossAxisAlignment: CrossAxisAlignment.start,
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
                   Row(
+                    crossAxisAlignment: CrossAxisAlignment.baseline,
+                    textBaseline: TextBaseline.alphabetic,
                     spacing: tokens.spaceSmall,
                     children: [
                       Expanded(

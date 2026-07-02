@@ -1,4 +1,7 @@
+import 'dart:async';
+
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:tilawa/core/network/network_error_message.dart';
 
 import '../../domain/entities/home_dashboard.dart';
 import '../../domain/usecases/get_home_dashboard_use_case.dart';
@@ -22,13 +25,37 @@ final class HomeDashboardBloc
   final GetHomeDashboardUseCase _getDashboard;
   final NotifyPrayerLocationUpdatedUseCase _notifyPrayerLocationUpdated;
   String? _localeIdentifier;
+  Completer<void>? _refreshCompleter;
+
+  /// Awaits the in-flight dashboard refresh started by pull-to-refresh.
+  Future<void> refreshAndWait({String? localeIdentifier}) {
+    _localeIdentifier = localeIdentifier ?? _localeIdentifier;
+    final Completer<void>? pending = _refreshCompleter;
+    if (pending != null) {
+      add(HomeDashboardRefreshRequested(localeIdentifier: _localeIdentifier));
+      return pending.future;
+    }
+
+    final Completer<void> completer = Completer<void>();
+    _refreshCompleter = completer;
+    add(HomeDashboardRefreshRequested(localeIdentifier: _localeIdentifier));
+    return completer.future;
+  }
 
   Future<void> _onStarted(
     HomeDashboardStarted event,
     Emitter<HomeDashboardState> emit,
   ) async {
     _localeIdentifier = event.localeIdentifier ?? _localeIdentifier;
-    await _load(emit, showLoading: true);
+
+    final HomeDashboard? cached = _getDashboard.readCachedDashboard();
+    if (cached != null) {
+      emit(HomeDashboardLoaded(cached));
+      await _refreshSilently(emit, cachedDashboard: cached);
+      return;
+    }
+
+    await _loadInitial(emit);
   }
 
   Future<void> _onRefreshRequested(
@@ -36,7 +63,38 @@ final class HomeDashboardBloc
     Emitter<HomeDashboardState> emit,
   ) async {
     _localeIdentifier = event.localeIdentifier ?? _localeIdentifier;
-    await _load(emit, showLoading: state is! HomeDashboardLoaded);
+    final HomeDashboardState current = state;
+
+    try {
+      if (current is HomeDashboardLoaded) {
+        emit(
+          current.copyWith(
+            isRefreshing: true,
+            clearRefreshErrorMessage: true,
+          ),
+        );
+        final HomeDashboard dashboard = await _getDashboard(
+          localeIdentifier: _localeIdentifier,
+        );
+        emit(HomeDashboardLoaded(dashboard));
+        return;
+      }
+
+      await _loadInitial(emit);
+    } catch (error) {
+      if (current is HomeDashboardLoaded) {
+        emit(
+          current.copyWith(
+            isRefreshing: false,
+            refreshErrorMessage: error.toString(),
+          ),
+        );
+        return;
+      }
+      emit(_mapFailure(error));
+    } finally {
+      _completeRefreshWaiter();
+    }
   }
 
   Future<void> _onLocaleChanged(
@@ -47,7 +105,16 @@ final class HomeDashboardBloc
       return;
     }
     _localeIdentifier = event.localeIdentifier;
-    await _load(emit, showLoading: state is! HomeDashboardLoaded);
+
+    final HomeDashboardState current = state;
+    if (current is HomeDashboardLoaded) {
+      add(
+        HomeDashboardRefreshRequested(localeIdentifier: event.localeIdentifier),
+      );
+      return;
+    }
+
+    await _loadInitial(emit);
   }
 
   Future<void> _onLocationRefreshRequested(
@@ -80,20 +147,53 @@ final class HomeDashboardBloc
     }
   }
 
-  Future<void> _load(
-    Emitter<HomeDashboardState> emit, {
-    required bool showLoading,
-  }) async {
-    if (showLoading) {
-      emit(const HomeDashboardLoading());
-    }
+  Future<void> _loadInitial(Emitter<HomeDashboardState> emit) async {
+    emit(const HomeDashboardLoading());
     try {
-      final dashboard = await _getDashboard(
+      final HomeDashboard dashboard = await _getDashboard(
         localeIdentifier: _localeIdentifier,
       );
       emit(HomeDashboardLoaded(dashboard));
     } catch (error) {
-      emit(HomeDashboardFailure(error.toString()));
+      emit(_mapFailure(error));
     }
+  }
+
+  Future<void> _refreshSilently(
+    Emitter<HomeDashboardState> emit, {
+    required HomeDashboard cachedDashboard,
+  }) async {
+    try {
+      final HomeDashboard dashboard = await _getDashboard(
+        localeIdentifier: _localeIdentifier,
+      );
+      emit(HomeDashboardLoaded(dashboard));
+    } catch (_) {
+      emit(HomeDashboardLoaded(cachedDashboard));
+    }
+  }
+
+  HomeDashboardFailure _mapFailure(Object error) {
+    final String message = error.toString();
+    final HomeDashboardFailureKind kind =
+        isNetworkConnectivityErrorMessage(message)
+        ? HomeDashboardFailureKind.offline
+        : HomeDashboardFailureKind.generic;
+    return HomeDashboardFailure(message, kind: kind);
+  }
+
+  void _completeRefreshWaiter() {
+    final Completer<void>? completer = _refreshCompleter;
+    if (completer == null || completer.isCompleted) {
+      return;
+    }
+    completer.complete();
+    _refreshCompleter = null;
+  }
+
+  @override
+  Future<void> close() {
+    _completeRefreshWaiter();
+    return super.close();
   }
 }

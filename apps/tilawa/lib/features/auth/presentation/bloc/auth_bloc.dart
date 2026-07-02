@@ -174,19 +174,37 @@ class AuthBloc extends HydratedBloc<AuthEvent, AuthState> {
   Future<void> _onSignOut(SignOutEvent event, Emitter<AuthState> emit) async {
     _interactiveSignInGeneration++;
     try {
-      await _signOut();
-      emit(const AuthState.unauthenticated());
+      final result = await _signOut();
+      result.fold(
+        (Failure failure) {
+          emit(AuthState.error(message: _messageForFailure(failure)));
+        },
+        (_) {
+          emit(const AuthState.unauthenticated());
+        },
+      );
     } catch (error, stackTrace) {
       logger.e('Sign out failed', error: error, stackTrace: stackTrace);
       emit(const AuthState.unauthenticated());
     }
   }
 
+  UserEntity? _liveOrCachedUser() {
+    final UserEntity? liveUser = _getCurrentUser();
+    if (liveUser != null) {
+      return liveUser;
+    }
+    return switch (state) {
+      AuthAuthenticated(:final user) => user,
+      _ => null,
+    };
+  }
+
   Future<void> _onDeleteAccount(
     DeleteAccountEvent event,
     Emitter<AuthState> emit,
   ) async {
-    final UserEntity? userBeforeDelete = _getCurrentUser();
+    final UserEntity? userBeforeDelete = _liveOrCachedUser();
     logger.d(
       '[DeleteFirebaseUser] Bloc: delete requested '
       'signedIn=${userBeforeDelete != null}',
@@ -283,11 +301,16 @@ class AuthBloc extends HydratedBloc<AuthEvent, AuthState> {
     return failure.message == AuthErrorKey.staleDeviceRejected;
   }
 
+  String _messageForFailure(Failure failure) {
+    return failure.message ?? 'Authentication failed';
+  }
+
   void _restoreSessionAfterFailedDeletion({
     required Emitter<AuthState> emit,
     required UserEntity? userBeforeDelete,
   }) {
-    final UserEntity? currentUser = _getCurrentUser() ?? userBeforeDelete;
+    final UserEntity? currentUser =
+        _getCurrentUser() ?? userBeforeDelete ?? _liveOrCachedUser();
     if (currentUser != null) {
       emit(AuthState.authenticated(user: currentUser));
     } else {

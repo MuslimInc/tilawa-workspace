@@ -136,6 +136,18 @@ class AppLocalizationsEn extends AppLocalizations {
       'Could not load prayer times. Check your connection and try again.';
 
   @override
+  String get homeDashboardOfflineError =>
+      'You\'re offline and we don\'t have saved prayer times yet. Reconnect and try again.';
+
+  @override
+  String get homeRefreshOfflineMessage =>
+      'You\'re offline. Showing your last saved data.';
+
+  @override
+  String get homeRefreshFailedMessage =>
+      'Couldn\'t refresh. Your last saved data is still shown.';
+
+  @override
   String get homeSearchHint => 'Search surahs, juz, or page';
 
   @override
@@ -818,6 +830,9 @@ class AppLocalizationsEn extends AppLocalizations {
   String get retry => 'Retry';
 
   @override
+  String get loading => 'Loading';
+
+  @override
   String get downloadStatusChecked => 'Download status checked';
 
   @override
@@ -1191,6 +1206,10 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get networkError => 'Please check your internet connection';
+
+  @override
+  String get serverActionOfflineMessage =>
+      'No internet connection. Please reconnect and try again.';
 
   @override
   String get downloadLowStorageWarning =>
@@ -2977,6 +2996,30 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get reportBugRemoveScreenshot => 'Remove screenshot';
+
+  @override
+  String get reportBugPreviewScreenshot => 'Preview screenshot';
+
+  @override
+  String get reportBugScreenshotPreviewTitle => 'Screenshot';
+
+  @override
+  String get reportBugCaptureScreenshotFromAnotherScreen =>
+      'Attach from another screen';
+
+  @override
+  String get reportBugScreenshotCaptureHint =>
+      'Go to the screen you want, then tap Capture.';
+
+  @override
+  String get reportBugScreenshotCaptureNow => 'Capture';
+
+  @override
+  String get reportBugScreenshotCaptureCancel => 'Back to report';
+
+  @override
+  String get reportBugScreenshotCaptureFailed =>
+      'We couldn\'t capture a screenshot. You can still send your report.';
 
   @override
   String get shareTilawa => 'Share MeMuslim';

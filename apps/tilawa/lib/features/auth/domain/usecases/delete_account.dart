@@ -2,12 +2,15 @@ import 'package:cloud_functions/cloud_functions.dart';
 import 'package:dartz_plus/dartz_plus.dart';
 import 'package:injectable/injectable.dart';
 import 'package:tilawa/core/logging/app_logger.dart';
+import 'package:tilawa/core/network/network_error_message.dart';
 import 'package:tilawa_core/errors/failures.dart';
 
+import '../../../../core/domain/server_action_guard.dart';
 import '../../../premium/domain/repositories/premium_repository.dart';
 import '../../data/datasources/account_deletion_remote_data_source.dart';
 import '../entities/auth_error_key.dart';
 import '../repositories/auth_repository.dart';
+import 'await_auth_restoration_use_case.dart';
 import 'sync_device_token_use_case.dart';
 
 const _selfDeletionReason = 'Self-service account deletion from mobile app';
@@ -19,14 +22,19 @@ class DeleteAccount {
     this._accountDeletionRemoteDataSource,
     this._syncDeviceTokenUseCase,
     this._premiumRepository,
+    this._serverActionGuard,
+    this._awaitAuthRestoration,
   );
 
   final AuthRepository _authRepository;
   final AccountDeletionRemoteDataSource _accountDeletionRemoteDataSource;
   final SyncDeviceTokenUseCase _syncDeviceTokenUseCase;
   final PremiumRepository _premiumRepository;
+  final ServerActionGuard _serverActionGuard;
+  final AwaitAuthRestorationUseCase _awaitAuthRestoration;
 
   Future<Either<Failure, void>> call() async {
+    await _awaitAuthRestoration();
     final currentUser = _authRepository.currentUser;
     if (currentUser == null) {
       logger.d('[DeleteFirebaseUser] Usecase: not signed in, aborting');
@@ -37,6 +45,18 @@ class DeleteAccount {
 
     final String userId = currentUser.id;
     logger.d('[DeleteFirebaseUser] Usecase: start userId=$userId');
+
+    final guardResult = await _serverActionGuard.ensureCanRun(
+      ServerActionType.deleteAccount,
+    );
+    final Failure? blockedFailure = guardResult.fold(
+      (failure) => failure,
+      (_) => null,
+    );
+    if (blockedFailure != null) {
+      logger.d('[DeleteFirebaseUser] Usecase: blocked by server action guard');
+      return Left(blockedFailure);
+    }
 
     try {
       final confirmEmail = currentUser.email.isNotEmpty
@@ -66,7 +86,11 @@ class DeleteAccount {
       logger.d(
         '[DeleteFirebaseUser] Usecase: unexpected ${e.runtimeType}: $e',
       );
-      return Left(UnexpectedFailure(e.toString()));
+      final String errorText = e.toString();
+      if (isNetworkConnectivityErrorMessage(errorText)) {
+        return const Left(ServerActionFailure.offline());
+      }
+      return Left(UnexpectedFailure(errorText));
     }
   }
 
@@ -83,7 +107,9 @@ class DeleteAccount {
       'permission-denied' => PermissionFailure(message),
       'unauthenticated' => PermissionFailure(message),
       'not-found' => ValidationFailure(message),
-      'internal' || 'unavailable' || 'deadline-exceeded' => ServerFailure(
+      'unavailable' ||
+      'deadline-exceeded' => const ServerActionFailure.offline(),
+      'internal' => ServerFailure(
         DeleteAccountErrorKey.failed,
       ),
       _ => UnexpectedFailure(DeleteAccountErrorKey.failed),

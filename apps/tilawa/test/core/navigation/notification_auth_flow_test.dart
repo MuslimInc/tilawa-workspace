@@ -1,6 +1,7 @@
 import 'dart:async';
 
 import 'package:bloc_test/bloc_test.dart';
+import 'package:dartz_plus/dartz_plus.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_test/flutter_test.dart';
@@ -333,7 +334,7 @@ void main() {
         () => mockSignOut(
           skipServerTokenClear: any(named: 'skipServerTokenClear'),
         ),
-      ).thenAnswer((_) async {});
+      ).thenAnswer((_) async => const Right(null));
 
       when(
         () => mockStartupNotifications.consumePendingNotification(),

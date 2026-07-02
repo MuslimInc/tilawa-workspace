@@ -1,10 +1,13 @@
 import 'package:flutter_test/flutter_test.dart';
 import 'package:mockito/mockito.dart';
+import 'package:tilawa/core/domain/server_action_guard.dart';
 import 'package:tilawa/features/auth/domain/entities/auth_result.dart';
 import 'package:tilawa/features/auth/domain/entities/user_entity.dart';
 import 'package:tilawa/features/auth/domain/usecases/sign_in_with_google_use_case.dart';
+import 'package:tilawa_core/errors/failures.dart';
 
 import '../../helpers/auth_mock_helper.mocks.dart';
+import '../../../../support/fake_network_info.dart';
 
 void main() {
   TestWidgetsFlutterBinding.ensureInitialized();
@@ -12,14 +15,21 @@ void main() {
   late SignInWithGoogleUseCase useCase;
   late MockAuthRepository mockAuthRepository;
   late MockUserRepository mockUserRepository;
+  late FakeNetworkInfo networkInfo;
 
   setUp(() {
     mockAuthRepository = MockAuthRepository();
     mockUserRepository = MockUserRepository();
+    networkInfo = FakeNetworkInfo();
     useCase = SignInWithGoogleUseCase(
       mockAuthRepository,
       mockUserRepository,
+      ServerActionGuard(networkInfo),
     );
+  });
+
+  tearDown(() async {
+    await networkInfo.dispose();
   });
 
   final tUser = UserEntity(
@@ -84,6 +94,22 @@ void main() {
     // Assert
     expect(result, const AuthResult.failure(message: tMessage, code: tCode));
     verify(mockAuthRepository.signInWithGoogle()).called(1);
+    verifyNever(mockUserRepository.saveUserData(any));
+  });
+
+  test('should not call auth repository when offline', () async {
+    networkInfo.connected = false;
+
+    final AuthResult result = await useCase();
+
+    expect(
+      result,
+      const AuthResult.failure(
+        message: ServerActionFailureKey.offline,
+        code: 'offline',
+      ),
+    );
+    verifyNever(mockAuthRepository.signInWithGoogle());
     verifyNever(mockUserRepository.saveUserData(any));
   });
 }

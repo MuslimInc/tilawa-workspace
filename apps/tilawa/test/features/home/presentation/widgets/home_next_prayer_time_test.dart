@@ -19,6 +19,129 @@ void main() {
 
   tearDown(StartupBlurShaderWarmup.resetForTest);
 
+  testWidgets('shows shimmer skeleton while dashboard is loading', (
+    tester,
+  ) async {
+    final view = tester.view;
+    view.devicePixelRatio = 1;
+    view.physicalSize = const Size(360, 640);
+    addTearDown(view.resetDevicePixelRatio);
+    addTearDown(view.resetPhysicalSize);
+
+    await tester.pumpWidget(
+      MaterialApp(
+        locale: const Locale('ar'),
+        localizationsDelegates: AppLocalizations.localizationsDelegates,
+        supportedLocales: AppLocalizations.supportedLocales,
+        theme: AppTheme.getLightTheme(primaryColor: AppColors.defaultPrimary),
+        home: Builder(
+          builder: (context) {
+            return CustomScrollView(
+              slivers: [
+                ...HomeNextPrayerTime.buildSlivers(
+                  context: context,
+                  state: const HomeDashboardLoading(),
+                  onOpenPrayer: () {},
+                ),
+              ],
+            );
+          },
+        ),
+      ),
+    );
+    await tester.pump();
+
+    expect(find.byType(TilawaSkeleton), findsOneWidget);
+    expect(find.text('Cairo'), findsNothing);
+
+    final HomeDashboardCard prayerCard = tester.widget<HomeDashboardCard>(
+      find.byType(HomeDashboardCard),
+    );
+    expect(prayerCard.onTap, isNull);
+  });
+
+  testWidgets('keeps prayer content visible during pull-to-refresh', (
+    tester,
+  ) async {
+    final view = tester.view;
+    view.devicePixelRatio = 1;
+    view.physicalSize = const Size(360, 640);
+    addTearDown(view.resetDevicePixelRatio);
+    addTearDown(view.resetPhysicalSize);
+
+    final HomeDashboardLoaded loadedState =
+        _homeDashboardState() as HomeDashboardLoaded;
+
+    await tester.pumpWidget(
+      MaterialApp(
+        locale: const Locale('ar'),
+        localizationsDelegates: AppLocalizations.localizationsDelegates,
+        supportedLocales: AppLocalizations.supportedLocales,
+        theme: AppTheme.getLightTheme(primaryColor: AppColors.defaultPrimary),
+        home: Builder(
+          builder: (context) {
+            return CustomScrollView(
+              slivers: [
+                ...HomeNextPrayerTime.buildSlivers(
+                  context: context,
+                  state: HomeDashboardLoaded(
+                    loadedState.dashboard,
+                    isRefreshing: true,
+                  ),
+                  onOpenPrayer: () {},
+                ),
+              ],
+            );
+          },
+        ),
+      ),
+    );
+    await tester.pump();
+
+    expect(find.byType(TilawaSkeleton), findsNothing);
+    expect(find.text('Cairo'), findsOneWidget);
+  });
+
+  testWidgets('does not open prayer while dashboard is loading', (
+    tester,
+  ) async {
+    final view = tester.view;
+    view.devicePixelRatio = 1;
+    view.physicalSize = const Size(360, 640);
+    addTearDown(view.resetDevicePixelRatio);
+    addTearDown(view.resetPhysicalSize);
+
+    var openPrayerTapped = false;
+
+    await tester.pumpWidget(
+      MaterialApp(
+        locale: const Locale('ar'),
+        localizationsDelegates: AppLocalizations.localizationsDelegates,
+        supportedLocales: AppLocalizations.supportedLocales,
+        theme: AppTheme.getLightTheme(primaryColor: AppColors.defaultPrimary),
+        home: Builder(
+          builder: (context) {
+            return CustomScrollView(
+              slivers: [
+                ...HomeNextPrayerTime.buildSlivers(
+                  context: context,
+                  state: const HomeDashboardLoading(),
+                  onOpenPrayer: () => openPrayerTapped = true,
+                ),
+              ],
+            );
+          },
+        ),
+      ),
+    );
+    await tester.pump();
+
+    await tester.tap(find.byType(HomeDashboardCard));
+    await tester.pump();
+
+    expect(openPrayerTapped, isFalse);
+  });
+
   testWidgets('renders scrollable next-prayer card on neutral canvas', (
     tester,
   ) async {
@@ -53,16 +176,12 @@ void main() {
     expect(find.byIcon(Icons.mosque_outlined), findsNothing);
     expect(find.byIcon(FluentIcons.location_24_regular), findsOneWidget);
 
-    final screenTokens = Theme.of(
-      scrollContext,
-    ).componentTokens.homeScreen;
     expect(find.byType(HomeDashboardCard), findsOneWidget);
-    expect(find.byType(TilawaCard), findsOneWidget);
-    final TilawaCard prayerCard = tester.widget<TilawaCard>(
-      find.byType(TilawaCard).first,
+    final HomeDashboardCard prayerCard = tester.widget<HomeDashboardCard>(
+      find.byType(HomeDashboardCard).first,
     );
-    expect(prayerCard.surface, TilawaCardSurface.flat);
-    expect(prayerCard.backgroundColor, screenTokens.homeContentSheetSurface);
+    expect(prayerCard.padding, isNotNull);
+    expect(find.byType(TilawaCard), findsOneWidget);
   });
 
   testWidgets('hero has no collapse scroll extent', (tester) async {

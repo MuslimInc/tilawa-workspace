@@ -7,6 +7,7 @@ import 'package:tilawa/features/home/presentation/cubit/home_listening_resume_cu
 import 'package:tilawa/features/home/presentation/cubit/home_listening_resume_state.dart';
 import 'package:tilawa/features/home/presentation/widgets/home_daily_inspiration_section.dart';
 import 'package:tilawa/features/home/presentation/widgets/home_dashboard_body.dart';
+import 'package:tilawa/features/home/presentation/widgets/home_dashboard_body_skeleton.dart';
 import 'package:tilawa/features/home/presentation/widgets/home_more_actions_group.dart';
 import 'package:tilawa/features/home/presentation/widgets/home_primary_actions_section.dart';
 import 'package:tilawa/features/home/presentation/widgets/home_quick_tools_section.dart';
@@ -22,6 +23,33 @@ class _MockMainScreenCubit extends MockCubit<MainScreenState>
     implements MainScreenCubit {}
 
 void main() {
+  testWidgets('renders skeleton placeholders while dashboard load is pending', (
+    tester,
+  ) async {
+    await tester.pumpWidget(
+      MaterialApp(
+        theme: AppTheme.getLightTheme(primaryColor: AppColors.defaultPrimary),
+        locale: const Locale('en'),
+        localizationsDelegates: AppLocalizations.localizationsDelegates,
+        supportedLocales: AppLocalizations.supportedLocales,
+        home: const Scaffold(
+          body: SingleChildScrollView(
+            child: HomeDashboardBody(skeleton: true),
+          ),
+        ),
+      ),
+    );
+    // Shimmer repeats forever, so pump bounded frames instead of settling.
+    await tester.pump();
+
+    expect(find.byType(HomeDashboardBodySkeleton), findsOneWidget);
+    expect(find.byType(TilawaSkeleton), findsOneWidget);
+    expect(find.byType(HomePrimaryActionsSection), findsNothing);
+    expect(find.byType(HomeQuickToolsSection), findsNothing);
+    expect(find.byType(HomeMoreActionsGroup), findsNothing);
+    expect(find.byType(HomeDailyInspirationSection), findsNothing);
+  });
+
   testWidgets('shows primary actions, quick tools, more, and inspiration', (
     tester,
   ) async {
@@ -56,7 +84,7 @@ void main() {
         ),
       ),
     );
-    await tester.pump();
+    await tester.pumpAndSettle();
 
     final l10n = AppLocalizations.of(
       tester.element(find.byType(HomeDashboardBody)),

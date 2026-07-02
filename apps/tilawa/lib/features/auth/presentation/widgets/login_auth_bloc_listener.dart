@@ -40,6 +40,7 @@ class LoginAuthBlocListener extends StatelessWidget {
             authErrorFallback: context.l10n.unableToSignInWithThirdPartyAccount,
             deviceRegistrationFailed: context.l10n.authDeviceRegistrationFailed,
             appCheckFailed: AppCheckUxMessages.authSignIn(context.l10n),
+            serverActionOffline: context.l10n.serverActionOfflineMessage,
             noGoogleAccounts: context.l10n.googleSignInNoAccountsOnDevice,
           ),
           onNavigateToHome: onNavigateToHome,

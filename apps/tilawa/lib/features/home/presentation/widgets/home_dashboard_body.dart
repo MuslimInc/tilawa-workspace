@@ -8,6 +8,7 @@ import 'package:tilawa_ui_kit/tilawa_ui_kit.dart';
 import '../cubit/home_listening_resume_cubit.dart';
 import '../cubit/home_listening_resume_state.dart';
 import 'home_daily_inspiration_section.dart';
+import 'home_dashboard_body_skeleton.dart';
 import 'home_listening_resume_row.dart';
 import 'home_more_actions_group.dart';
 import 'home_primary_actions_section.dart';
@@ -33,7 +34,12 @@ import 'home_quick_tools_section.dart';
 /// - Between zones: `spaceExtraLarge` for unrelated zones; `spaceLarge` for
 ///   related secondary zones.
 class HomeDashboardBody extends StatelessWidget {
-  const HomeDashboardBody({super.key});
+  const HomeDashboardBody({super.key, this.skeleton = false});
+
+  /// When true (initial dashboard load only), renders
+  /// [HomeDashboardBodySkeleton] instead of the live sections. Refreshes on
+  /// already-loaded content never set this, so existing content stays put.
+  final bool skeleton;
 
   @override
   Widget build(BuildContext context) {
@@ -41,11 +47,15 @@ class HomeDashboardBody extends StatelessWidget {
     final double zoneGap = tokens.spaceExtraLarge;
     final double sectionGap = tokens.spaceLarge;
 
+    if (skeleton) {
+      return const HomeDashboardBodySkeleton();
+    }
+
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
         const HomePrimaryActionsSection(),
-        SizedBox(height: sectionGap),
+        SizedBox(height: sectionGap + tokens.spaceExtraSmall),
         const HomeQuickToolsSection(),
         DeferredAfterFirstFrame(
           child: Column(
@@ -109,8 +119,8 @@ class _HomeDashboardClosingMark extends StatelessWidget {
 
     return Padding(
       padding: EdgeInsets.only(
-        top: tokens.spaceExtraLarge + tokens.spaceMedium,
-        bottom: tokens.spaceMedium,
+        top: tokens.spaceExtraLarge,
+        bottom: tokens.spaceLarge,
       ),
       child: Center(
         child: Column(

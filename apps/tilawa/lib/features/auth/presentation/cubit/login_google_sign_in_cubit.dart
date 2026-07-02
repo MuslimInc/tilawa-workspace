@@ -2,7 +2,9 @@ import 'package:equatable/equatable.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:injectable/injectable.dart';
 import 'package:tilawa/core/logging/app_logger.dart';
+import 'package:tilawa_core/errors/failures.dart';
 
+import '../../../../core/domain/server_action_guard.dart';
 import '../../domain/entities/google_sign_in_launch_readiness.dart';
 import '../../domain/gateways/google_sign_in_launch_gateway.dart';
 import '../../domain/usecases/prewarm_google_sign_in_launch_use_case.dart';
@@ -26,6 +28,12 @@ final class LoginGoogleSignInAllowed extends LoginGoogleSignInAttempt {
 final class LoginGoogleSignInRejected extends LoginGoogleSignInAttempt {
   const LoginGoogleSignInRejected(this.readiness);
   final GoogleSignInLaunchReadiness readiness;
+}
+
+/// Launch blocked by a server-action policy; show feedback in UI.
+final class LoginGoogleSignInBlocked extends LoginGoogleSignInAttempt {
+  const LoginGoogleSignInBlocked(this.failure);
+  final Failure failure;
 }
 
 class LoginGoogleSignInState extends Equatable {
@@ -68,10 +76,12 @@ class LoginGoogleSignInCubit extends Cubit<LoginGoogleSignInState> {
   LoginGoogleSignInCubit(
     this._prewarmLaunch,
     this._resolveLaunch,
+    this._serverActionGuard,
   ) : super(const LoginGoogleSignInState());
 
   final PrewarmGoogleSignInLaunchUseCase _prewarmLaunch;
   final ResolveGoogleSignInLaunchUseCase _resolveLaunch;
+  final ServerActionGuard _serverActionGuard;
 
   Future<void> prewarm({GoogleSignInLaunchGateway? gateway}) {
     _logGoogleSignInButton('prewarmGoogleSignIn starting');
@@ -93,6 +103,26 @@ class LoginGoogleSignInCubit extends Cubit<LoginGoogleSignInState> {
     emit(state.copyWith(clearLaunchAttempt: true, isLaunchPending: true));
 
     try {
+      final guardResult = await _serverActionGuard.ensureCanRun(
+        ServerActionType.googleSignIn,
+      );
+
+      if (isClosed) return;
+
+      final Failure? blockedFailure = guardResult.fold(
+        (failure) => failure,
+        (_) => null,
+      );
+      if (blockedFailure != null) {
+        emit(
+          state.copyWith(
+            isLaunchPending: false,
+            launchAttempt: LoginGoogleSignInBlocked(blockedFailure),
+          ),
+        );
+        return;
+      }
+
       final GoogleSignInLaunchReadiness readiness = await _resolveLaunch(
         trigger: trigger,
         gateway: gateway,

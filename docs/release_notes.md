@@ -12,8 +12,8 @@ the changelog for full engineering detail.
 
 | Field | Value |
 |-------|--------|
-| Version | **2.0.17** (build **70**) |
-| Git tag | `v2.0.17+70` (pending) |
+| Version | **2.0.17** (build **71**) |
+| Git tag | `v2.0.17+71` (pending) |
 | Date | 2026-07-01 |
 | Track | Production |
 

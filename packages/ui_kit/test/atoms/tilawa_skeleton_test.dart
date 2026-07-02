@@ -74,12 +74,18 @@ void main() {
       );
       final decoration = container.decoration! as BoxDecoration;
 
+      // Opaque composite: srcATop shader strength is capped by child alpha,
+      // so bones must be solid for the shimmer band to stay visible.
       expect(
         decoration.color,
-        theme.colorScheme.onSurface.withValues(
-          alpha: theme.componentTokens.skeleton.baseAlpha,
+        Color.alphaBlend(
+          theme.colorScheme.onSurface.withValues(
+            alpha: theme.componentTokens.skeleton.baseAlpha,
+          ),
+          theme.colorScheme.surface,
         ),
       );
+      expect(decoration.color!.a, 1.0);
       expect(
         decoration.borderRadius,
         BorderRadius.circular(theme.tokens.radiusSmall),

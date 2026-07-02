@@ -51,7 +51,7 @@ void main() {
     when(() => mockAuthRepository.currentUser).thenReturn(tUser);
     when(
       () => mockSignOut(skipServerTokenClear: true),
-    ).thenAnswer((_) async {});
+    ).thenAnswer((_) async => const Right(null));
   });
 
   tearDown(() {

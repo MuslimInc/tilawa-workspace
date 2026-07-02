@@ -69,7 +69,7 @@ class NextPrayerCountdownCard extends StatelessWidget {
       ),
       child: TilawaCard(
         surface: TilawaCardSurface.raised,
-        borderRadius: tokens.radiusExtraLarge,
+        borderRadius: tokens.resolveRadius(family: TilawaRadiusFamily.card),
         backgroundColor: colorScheme.surface,
         padding: EdgeInsets.fromLTRB(
           tokens.spaceLarge,

@@ -74,4 +74,17 @@ void main() {
       'boom',
     );
   });
+
+  test('maps raw Firebase network copy to offline message', () async {
+    final arL10n = await AppLocalizations.delegate.load(const Locale('ar'));
+
+    expect(
+      localizedAuthBlocErrorMessage(
+        'A network error (such as timeout, interrupted connection or '
+        'unreachable host) has occurred.',
+        arL10n,
+      ),
+      arL10n.serverActionOfflineMessage,
+    );
+  });
 }

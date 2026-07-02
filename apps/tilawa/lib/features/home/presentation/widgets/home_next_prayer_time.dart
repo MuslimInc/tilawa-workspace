@@ -7,6 +7,7 @@ import 'package:tilawa/features/home/domain/entities/home_dashboard.dart';
 import 'package:tilawa/features/home/presentation/bloc/home_dashboard_bloc.dart';
 import 'package:tilawa/features/home/presentation/bloc/home_dashboard_event.dart';
 import 'package:tilawa/features/home/presentation/bloc/home_dashboard_state.dart';
+import 'package:tilawa/features/home/presentation/models/home_dashboard_ui_state.dart';
 import 'package:tilawa/features/home/presentation/widgets/home_dashboard_card.dart';
 import 'package:tilawa/features/home/presentation/widgets/home_prayer_hero_context_row.dart';
 import 'package:tilawa/features/prayer_times/domain/entities/prayer_time_entity.dart';
@@ -21,9 +22,10 @@ abstract final class HomeNextPrayerTime {
     required HomeDashboardState state,
     required VoidCallback onOpenPrayer,
   }) {
+    final HomeDashboardUiState ui = HomeDashboardUiState.from(state);
     return [
       _HomeNextPrayerTimeSliver(
-        state: state,
+        ui: ui,
         onOpenPrayer: onOpenPrayer,
       ),
     ];
@@ -51,30 +53,32 @@ abstract final class HomeNextPrayerTime {
     final bool tightCard =
         MediaQuery.sizeOf(context).width - horizontalGutter < 320;
     final double contextRow = 36 * textScale;
-    final double prayerBlock = 135 * textScale;
+    final double cardVerticalPadding = tokens.spaceLarge * 2;
+    final double contextToMetricsGap = tokens.spaceMedium;
+    final double prayerBlock = 172 * textScale;
     final double tightSlack = tightCard ? tokens.spaceExtraLarge : 0;
 
     // Mirrors [_HomeNextPrayerTimeSliver] padding + card layout, plus small
     // slack for countdown pill / text-scale layout drift vs estimates.
     return tokens.spaceSmall +
-        (tokens.spaceMedium * 2) +
+        cardVerticalPadding +
         contextRow +
-        tokens.spaceSmall +
+        contextToMetricsGap +
         prayerBlock +
         tokens.spaceMedium +
         (tokens.borderWidthThin * 2) +
         tightSlack +
-        12;
+        18;
   }
 }
 
 class _HomeNextPrayerTimeSliver extends StatelessWidget {
   const _HomeNextPrayerTimeSliver({
-    required this.state,
+    required this.ui,
     required this.onOpenPrayer,
   });
 
-  final HomeDashboardState state;
+  final HomeDashboardUiState ui;
   final VoidCallback onOpenPrayer;
 
   @override
@@ -83,21 +87,8 @@ class _HomeNextPrayerTimeSliver extends StatelessWidget {
     final double topInset = MediaQuery.paddingOf(context).top;
     final double horizontalInset =
         TilawaHomeScreenTokens.screenHorizontalPadding(tokens);
-    final HomeDashboard? dashboard = switch (state) {
-      HomeDashboardLoaded(:final dashboard) => dashboard,
-      _ => null,
-    };
-    final bool isRefreshingLocation = switch (state) {
-      HomeDashboardLoaded(:final isRefreshingLocation) => isRefreshingLocation,
-      _ => true,
-    };
-    final HomeNextPrayer? nextPrayer = switch (state) {
-      HomeDashboardLoaded(:final dashboard) => dashboard.nextPrayer,
-      _ => null,
-    };
-    final bool metricsLoading =
-        state is! HomeDashboardLoaded && state is! HomeDashboardFailure;
-    final bool dashboardFailed = state is HomeDashboardFailure;
+    final HomeDashboard? dashboard = ui.dashboard;
+    final HomeNextPrayer? nextPrayer = dashboard?.nextPrayer;
     final String? locationName = dashboard?.locationLabel;
 
     return SliverToBoxAdapter(
@@ -110,19 +101,22 @@ class _HomeNextPrayerTimeSliver extends StatelessWidget {
         ),
         child: _HomeNextPrayerTimeCard(
           locationName: locationName,
-          isRefreshingLocation: isRefreshingLocation,
-          onRefreshLocation: () {
-            context.read<HomeDashboardBloc>().add(
-              HomeDashboardLocationRefreshRequested(
-                localeIdentifier: Localizations.localeOf(
-                  context,
-                ).languageCode,
-              ),
-            );
-          },
+          isRefreshingLocation: ui.isRefreshingLocation,
+          onRefreshLocation: ui.showContent
+              ? () {
+                  context.read<HomeDashboardBloc>().add(
+                    HomeDashboardLocationRefreshRequested(
+                      localeIdentifier: Localizations.localeOf(
+                        context,
+                      ).languageCode,
+                    ),
+                  );
+                }
+              : null,
           nextPrayer: nextPrayer,
-          metricsLoading: metricsLoading,
-          dashboardFailed: dashboardFailed,
+          showFullSkeleton: ui.showFullSkeleton,
+          showFailure: ui.showFailure,
+          failureIsOffline: ui.failureIsOffline,
           onRetryDashboard: () {
             context.read<HomeDashboardBloc>().add(
               HomeDashboardRefreshRequested(
@@ -145,8 +139,9 @@ class _HomeNextPrayerTimeCard extends StatelessWidget {
     required this.isRefreshingLocation,
     required this.onRefreshLocation,
     required this.nextPrayer,
-    required this.metricsLoading,
-    required this.dashboardFailed,
+    required this.showFullSkeleton,
+    required this.showFailure,
+    required this.failureIsOffline,
     required this.onRetryDashboard,
     required this.onOpenPrayer,
   });
@@ -155,8 +150,9 @@ class _HomeNextPrayerTimeCard extends StatelessWidget {
   final bool isRefreshingLocation;
   final VoidCallback? onRefreshLocation;
   final HomeNextPrayer? nextPrayer;
-  final bool metricsLoading;
-  final bool dashboardFailed;
+  final bool showFullSkeleton;
+  final bool showFailure;
+  final bool failureIsOffline;
   final VoidCallback onRetryDashboard;
   final VoidCallback onOpenPrayer;
 
@@ -168,10 +164,14 @@ class _HomeNextPrayerTimeCard extends StatelessWidget {
     final Color ink = colorScheme.onSurface;
     final Color muted = colorScheme.onSurfaceVariant;
 
-    final Widget metricsChild = dashboardFailed
-        ? _HomeNextPrayerTimeFailure(onCard: ink, onRetry: onRetryDashboard)
-        : metricsLoading
-        ? _HomeNextPrayerTimeSkeleton(onCard: ink)
+    final Widget metricsChild = showFailure
+        ? _HomeNextPrayerTimeFailure(
+            onCard: ink,
+            onRetry: onRetryDashboard,
+            message: failureIsOffline
+                ? context.l10n.homeDashboardOfflineError
+                : context.l10n.homeDashboardLoadError,
+          )
         : _HomeNextPrayerTimeFocus(
             nextPrayer: nextPrayer,
             onCard: ink,
@@ -181,25 +181,61 @@ class _HomeNextPrayerTimeCard extends StatelessWidget {
           );
 
     return Semantics(
-      button: !dashboardFailed,
+      button: !showFailure && !showFullSkeleton,
       label: context.l10n.nextPrayer,
       child: HomeDashboardCard(
         surface: TilawaCardSurface.flat,
-        onTap: dashboardFailed ? null : onOpenPrayer,
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.stretch,
-          spacing: tokens.spaceSmall,
-          children: [
-            HomePrayerHeroContextRow(
-              locationName: locationName,
-              isRefreshingLocation: isRefreshingLocation,
-              onRefreshLocation: onRefreshLocation,
-              ink: ink,
-              muted: muted,
-            ),
-            metricsChild,
-          ],
-        ),
+        padding: EdgeInsets.all(tokens.spaceLarge),
+        onTap: showFailure || showFullSkeleton ? null : onOpenPrayer,
+        child: showFullSkeleton
+            ? _HomeHeroSkeletonScope(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.stretch,
+                  spacing: tokens.spaceMedium,
+                  children: const [
+                    _HomePrayerHeroContextRowSkeleton(),
+                    _HomeNextPrayerTimeMetricsSkeleton(),
+                  ],
+                ),
+              )
+            : Column(
+                crossAxisAlignment: CrossAxisAlignment.stretch,
+                spacing: tokens.spaceMedium,
+                children: [
+                  HomePrayerHeroContextRow(
+                    locationName: locationName,
+                    isRefreshingLocation: isRefreshingLocation,
+                    onRefreshLocation: onRefreshLocation,
+                    ink: ink,
+                    muted: muted,
+                  ),
+                  metricsChild,
+                ],
+              ),
+      ),
+    );
+  }
+}
+
+/// Skeleton scope tinted for [HomeDashboardCard]'s sheet surface.
+class _HomeHeroSkeletonScope extends StatelessWidget {
+  const _HomeHeroSkeletonScope({required this.child});
+
+  final Widget child;
+
+  @override
+  Widget build(BuildContext context) {
+    final ThemeData theme = Theme.of(context);
+    final Color sheetSurface =
+        theme.componentTokens.homeScreen.homeContentSheetSurface;
+
+    return Theme(
+      data: theme.copyWith(
+        colorScheme: theme.colorScheme.copyWith(surface: sheetSurface),
+      ),
+      child: TilawaSkeleton(
+        semanticLabel: context.l10n.loading,
+        child: child,
       ),
     );
   }
@@ -245,34 +281,40 @@ class _HomeNextPrayerTimeFocus extends StatelessWidget {
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
-      spacing: tokens.spaceExtraSmall,
+      spacing: tokens.spaceMedium,
       children: [
         Text(
           context.l10n.nextPrayer,
-          style: theme.textTheme.labelMedium?.copyWith(
-            color: onMuted,
-            fontWeight: FontWeight.w700,
-            letterSpacing: 0.3,
+          style: theme.textTheme.labelSmall?.copyWith(
+            color: onMuted.withValues(alpha: 0.88),
+            fontWeight: FontWeight.w600,
+            letterSpacing: 0.4,
           ),
         ),
-        Text(
-          prayerName,
-          maxLines: 1,
-          overflow: TextOverflow.ellipsis,
-          style: theme.textTheme.titleLarge?.copyWith(
-            color: onCard,
-            fontWeight: FontWeight.w700,
-            height: 1.05,
-          ),
-        ),
-        Text(
-          timeLabel,
-          style: timeStyle?.copyWith(
-            color: onCard,
-            fontWeight: FontWeight.w800,
-            fontFeatures: const [FontFeature.tabularFigures()],
-            height: 0.98,
-          ),
+        Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          spacing: tokens.spaceSmall,
+          children: [
+            Text(
+              prayerName,
+              maxLines: 1,
+              overflow: TextOverflow.ellipsis,
+              style: theme.textTheme.titleLarge?.copyWith(
+                color: onCard.withValues(alpha: 0.92),
+                fontWeight: FontWeight.w600,
+                height: 1.08,
+              ),
+            ),
+            Text(
+              timeLabel,
+              style: timeStyle?.copyWith(
+                color: onCard,
+                fontWeight: FontWeight.w800,
+                fontFeatures: const [FontFeature.tabularFigures()],
+                height: 0.98,
+              ),
+            ),
+          ],
         ),
         _HomeNextPrayerTimeRemainingText(
           prayerType: prayer.type,
@@ -361,26 +403,26 @@ class _HomeNextPrayerTimeRemainingTextState
       alignment: AlignmentDirectional.centerStart,
       child: DecoratedBox(
         decoration: BoxDecoration(
-          color: widget.color.withValues(alpha: 0.10),
+          color: widget.color.withValues(alpha: 0.08),
           borderRadius: BorderRadius.circular(tokens.radiusLarge),
           border: Border.all(
-            color: widget.color.withValues(alpha: 0.22),
+            color: widget.color.withValues(alpha: 0.18),
             width: tokens.borderWidthThin,
           ),
         ),
         child: Padding(
           padding: EdgeInsetsDirectional.symmetric(
-            horizontal: tokens.spaceSmall,
-            vertical: tokens.spaceExtraSmall * 0.75,
+            horizontal: tokens.spaceMedium,
+            vertical: tokens.spaceExtraSmall,
           ),
           child: Text(
             _formatCountdown(context, _remaining, widget.prayerType),
             maxLines: 1,
             overflow: TextOverflow.ellipsis,
-            style: theme.textTheme.titleSmall?.copyWith(
+            style: theme.textTheme.labelLarge?.copyWith(
               color: widget.color,
-              fontWeight: FontWeight.w700,
-              height: 1.05,
+              fontWeight: FontWeight.w600,
+              height: 1.1,
             ),
           ),
         ),
@@ -389,29 +431,75 @@ class _HomeNextPrayerTimeRemainingTextState
   }
 }
 
-class _HomeNextPrayerTimeSkeleton extends StatelessWidget {
-  const _HomeNextPrayerTimeSkeleton({required this.onCard});
-
-  final Color onCard;
+class _HomePrayerHeroContextRowSkeleton extends StatelessWidget {
+  const _HomePrayerHeroContextRowSkeleton();
 
   @override
   Widget build(BuildContext context) {
-    final ThemeData theme = Theme.of(context);
-    final MeMuslimDesignTokens tokens = theme.tokens;
-    final Color muted = theme.colorScheme.onSurfaceVariant;
+    final tokens = context.tokens;
+    final theme = Theme.of(context);
+
+    return Row(
+      crossAxisAlignment: CrossAxisAlignment.center,
+      spacing: tokens.spaceSmall,
+      children: [
+        Flexible(
+          child: Align(
+            alignment: AlignmentDirectional.centerStart,
+            child: TilawaSkeletonBone(
+              width: 112,
+              height: tokens.minInteractiveDimension * 0.58,
+              borderRadius: tokens.radiusLarge,
+            ),
+          ),
+        ),
+        TilawaSkeletonLine(
+          width: 88,
+          style: theme.textTheme.labelSmall,
+        ),
+      ],
+    );
+  }
+}
+
+class _HomeNextPrayerTimeMetricsSkeleton extends StatelessWidget {
+  const _HomeNextPrayerTimeMetricsSkeleton();
+
+  @override
+  Widget build(BuildContext context) {
+    final tokens = context.tokens;
+    final theme = Theme.of(context);
+    final double textScale = MediaQuery.textScalerOf(context).scale(1);
+    final TextStyle? timeStyle = textScale > 1.2
+        ? theme.textTheme.displaySmall
+        : theme.textTheme.displayMedium;
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
-      spacing: tokens.spaceSmall,
+      spacing: tokens.spaceMedium,
       children: [
-        TilawaLoadingIndicator(
-          centered: false,
-          strokeWidth: 2,
-          color: onCard,
+        TilawaSkeletonLine(
+          width: 72,
+          style: theme.textTheme.labelSmall,
         ),
-        Text(
-          context.l10n.homeNextPrayerUnavailable,
-          style: theme.textTheme.bodyMedium?.copyWith(color: muted),
+        Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          spacing: tokens.spaceSmall,
+          children: [
+            TilawaSkeletonLine(
+              width: 120,
+              style: theme.textTheme.titleLarge,
+            ),
+            TilawaSkeletonLine(width: 160, style: timeStyle),
+          ],
+        ),
+        Align(
+          alignment: AlignmentDirectional.centerStart,
+          child: TilawaSkeletonBone(
+            width: 148,
+            height: tokens.spaceLarge + tokens.spaceExtraSmall,
+            borderRadius: tokens.radiusLarge,
+          ),
         ),
       ],
     );
@@ -422,10 +510,12 @@ class _HomeNextPrayerTimeFailure extends StatelessWidget {
   const _HomeNextPrayerTimeFailure({
     required this.onCard,
     required this.onRetry,
+    required this.message,
   });
 
   final Color onCard;
   final VoidCallback onRetry;
+  final String message;
 
   @override
   Widget build(BuildContext context) {
@@ -438,7 +528,7 @@ class _HomeNextPrayerTimeFailure extends StatelessWidget {
       spacing: tokens.spaceSmall,
       children: [
         Text(
-          context.l10n.homeDashboardLoadError,
+          message,
           style: theme.textTheme.bodyMedium?.copyWith(color: muted),
         ),
         Align(

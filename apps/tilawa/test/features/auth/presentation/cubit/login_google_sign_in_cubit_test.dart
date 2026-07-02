@@ -1,5 +1,6 @@
 import 'package:checks/checks.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:tilawa/core/domain/server_action_guard.dart';
 import 'package:tilawa/features/auth/domain/entities/auth_result.dart';
 import 'package:tilawa/features/auth/domain/entities/google_sign_in_launch_readiness.dart';
 import 'package:tilawa/features/auth/domain/entities/user_entity.dart';
@@ -10,6 +11,8 @@ import 'package:tilawa/features/auth/domain/usecases/prewarm_google_sign_in_laun
 import 'package:tilawa/features/auth/domain/usecases/prepare_google_sign_in_use_case.dart';
 import 'package:tilawa/features/auth/domain/usecases/resolve_google_sign_in_launch_use_case.dart';
 import 'package:tilawa/features/auth/presentation/cubit/login_google_sign_in_cubit.dart';
+
+import '../../../../support/fake_network_info.dart';
 
 class _FakeAuthRepository implements AuthRepository {
   @override
@@ -40,9 +43,13 @@ class FakeGoogleSignInLaunchGateway implements GoogleSignInLaunchGateway {
   });
 
   GoogleSignInLaunchReadiness readiness;
+  int readinessChecks = 0;
 
   @override
-  Future<GoogleSignInLaunchReadiness> checkReadiness() async => readiness;
+  Future<GoogleSignInLaunchReadiness> checkReadiness() async {
+    readinessChecks++;
+    return readiness;
+  }
 
   @override
   Future<void> runAfterUiSettled(Future<void> Function() action) async {
@@ -66,21 +73,25 @@ void main() {
   late GoogleSignInLaunchReadinessStore store;
   late LoginGoogleSignInCubit cubit;
   late FakeGoogleSignInLaunchGateway gateway;
+  late FakeNetworkInfo networkInfo;
 
   setUp(() {
     store = GoogleSignInLaunchReadinessStore();
     gateway = FakeGoogleSignInLaunchGateway();
+    networkInfo = FakeNetworkInfo();
     cubit = LoginGoogleSignInCubit(
       PrewarmGoogleSignInLaunchUseCase(
         PrepareGoogleSignInUseCase(_FakeAuthRepository()),
         store,
       ),
       ResolveGoogleSignInLaunchUseCase(store),
+      ServerActionGuard(networkInfo),
     );
   });
 
   tearDown(() async {
     await cubit.close();
+    await networkInfo.dispose();
   });
 
   test('prewarm caches readiness from gateway', () async {
@@ -112,6 +123,39 @@ void main() {
 
     check(cubit.state.launchAttempt).isA<LoginGoogleSignInRejected>();
     check(cubit.state.isLaunchPending).isFalse();
+  });
+
+  test('manual launch blocks offline before readiness check', () async {
+    networkInfo.connected = false;
+
+    await cubit.attemptLaunch(
+      trigger: GoogleSignInLaunchTrigger.manual,
+      gateway: gateway,
+    );
+
+    check(cubit.state.launchAttempt).isA<LoginGoogleSignInBlocked>();
+    check(cubit.state.isLaunchPending).isFalse();
+    check(gateway.readinessChecks).equals(0);
+  });
+
+  test('rapid offline launch taps share one guard check', () async {
+    networkInfo
+      ..connected = false
+      ..delay = const Duration(milliseconds: 20);
+
+    await Future.wait([
+      cubit.attemptLaunch(
+        trigger: GoogleSignInLaunchTrigger.manual,
+        gateway: gateway,
+      ),
+      cubit.attemptLaunch(
+        trigger: GoogleSignInLaunchTrigger.manual,
+        gateway: gateway,
+      ),
+    ]);
+
+    check(networkInfo.isConnectedCalls).equals(1);
+    check(gateway.readinessChecks).equals(0);
   });
 
   test('auto launch allows sign-in without awaiting manual result', () async {

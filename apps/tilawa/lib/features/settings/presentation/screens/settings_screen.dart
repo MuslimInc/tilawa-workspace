@@ -26,6 +26,7 @@ import '../../../share/domain/usecases/share_content_use_case.dart';
 import '../../../theme/presentation/cubit/theme_cubit.dart';
 import '../../../theme/presentation/theme_state_material.dart';
 import '../../../home/presentation/widgets/home_hero_phase_debug_tile.dart';
+import '../../../home/presentation/widgets/home_skeleton_debug_tile.dart';
 import '../../../notifications/debug/notification_debug_lab_tile.dart';
 import '../../../ui_kit_debug/tilawa_card_nested_tap_demo_tile.dart';
 import '../../../tour_guide/presentation/widgets/tour_guide_debug_reset_tile.dart';
@@ -318,6 +319,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
                         ),
                         const SentryDebugVerifyTile(),
                         const HomeHeroPhaseDebugTile(),
+                        const HomeSkeletonDebugTile(),
                         const NotificationDebugLabTile(),
                         const TilawaCardNestedTapDemoTile(),
                         const TourGuideDebugResetTile(isLast: true),

@@ -58,9 +58,9 @@ class HomeGroupedListRow extends StatelessWidget {
           minHeight: tokens.minInteractiveDimension,
         ),
         child: Padding(
-          padding: EdgeInsets.symmetric(
+          padding: EdgeInsetsDirectional.symmetric(
             horizontal: tokens.spaceMedium,
-            vertical: tokens.spaceSmall,
+            vertical: tokens.spaceSmall + tokens.spaceExtraSmall,
           ),
           child: Row(
             spacing: tokens.spaceMedium,
@@ -86,6 +86,7 @@ class HomeGroupedListRow extends StatelessWidget {
                       style: theme.textTheme.titleSmall?.copyWith(
                         color: colorScheme.onSurface,
                         fontWeight: FontWeight.w700,
+                        height: 1.2,
                       ),
                     ),
                     if (subtitle != null)
@@ -94,7 +95,10 @@ class HomeGroupedListRow extends StatelessWidget {
                         maxLines: 1,
                         overflow: TextOverflow.ellipsis,
                         style: theme.textTheme.bodySmall?.copyWith(
-                          color: colorScheme.onSurfaceVariant,
+                          color: colorScheme.onSurfaceVariant.withValues(
+                            alpha: 0.9,
+                          ),
+                          height: 1.35,
                         ),
                       ),
                   ],
@@ -103,12 +107,23 @@ class HomeGroupedListRow extends StatelessWidget {
               if (trailingWidget != null)
                 trailingWidget!
               else if (showChevron)
-                // Keep the right chevron in both LTR and RTL; this icon
-                // reads correctly in Arabic and avoids unwanted mirroring.
-                Icon(
-                  Icons.chevron_right_rounded,
-                  size: tokens.iconSizeSmall,
-                  color: colorScheme.onSurfaceVariant,
+                DecoratedBox(
+                  decoration: BoxDecoration(
+                    color: colorScheme.surfaceContainerHighest.withValues(
+                      alpha: 0.55,
+                    ),
+                    shape: BoxShape.circle,
+                  ),
+                  child: Padding(
+                    padding: EdgeInsets.all(tokens.spaceExtraSmall * 0.5),
+                    child: Icon(
+                      Icons.chevron_right_rounded,
+                      size: tokens.iconSizeSmall,
+                      color: colorScheme.onSurfaceVariant.withValues(
+                        alpha: tokens.opacitySubtle * 3,
+                      ),
+                    ),
+                  ),
                 ),
             ],
           ),

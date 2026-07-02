@@ -6,9 +6,11 @@ import 'package:intl/intl.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:tilawa/core/app_legal_urls.dart';
 import 'package:quran_sessions/core/l10n_extensions.dart';
+import 'package:tilawa/core/domain/server_action_guard.dart';
 import 'package:tilawa/core/extensions.dart';
 import 'package:tilawa/core/utils/legal_url_launcher.dart';
 import 'package:tilawa/shared/widgets/profile_avatar.dart';
+import 'package:tilawa_core/errors/failures.dart';
 import 'package:tilawa_ui_kit/tilawa_ui_kit.dart';
 
 import '../../../../core/di/injection.dart';
@@ -435,15 +437,64 @@ class SettingsGuestAccountGroup extends StatelessWidget {
   }
 }
 
-class SettingsAccountActions extends StatelessWidget {
+class SettingsAccountActions extends StatefulWidget {
   const SettingsAccountActions({
     super.key,
     required this.onLogout,
     required this.onDeleteAccount,
+    this.serverActionGuard,
   });
 
-  final VoidCallback onLogout;
-  final VoidCallback onDeleteAccount;
+  final FutureOr<void> Function() onLogout;
+  final FutureOr<void> Function() onDeleteAccount;
+  final ServerActionGuard? serverActionGuard;
+
+  @override
+  State<SettingsAccountActions> createState() => _SettingsAccountActionsState();
+}
+
+class _SettingsAccountActionsState extends State<SettingsAccountActions> {
+  bool _actionCheckInProgress = false;
+
+  Future<void> _guardAndRun(
+    ServerActionType action,
+    FutureOr<void> Function() run,
+  ) async {
+    if (_actionCheckInProgress) {
+      return;
+    }
+
+    setState(() => _actionCheckInProgress = true);
+    try {
+      final guardResult =
+          await (widget.serverActionGuard ?? getIt<ServerActionGuard>())
+              .ensureCanRun(action);
+      if (!mounted) {
+        return;
+      }
+
+      final Failure? blockedFailure = guardResult.fold(
+        (failure) => failure,
+        (_) => null,
+      );
+      if (blockedFailure != null) {
+        TilawaFeedback.showToast(
+          context,
+          message:
+              blockedFailure.localizedMessage(context) ??
+              context.l10n.serverActionOfflineMessage,
+          variant: TilawaFeedbackVariant.error,
+        );
+        return;
+      }
+
+      await run();
+    } finally {
+      if (mounted) {
+        setState(() => _actionCheckInProgress = false);
+      }
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -469,13 +520,20 @@ class SettingsAccountActions extends StatelessWidget {
                   backgroundColor: colorScheme.onSurface,
                   foregroundColor: colorScheme.surface,
                   isFullWidth: true,
-                  onPressed: onLogout,
+                  onPressed: () => unawaited(
+                    _guardAndRun(ServerActionType.logout, widget.onLogout),
+                  ),
                 ),
                 TilawaButton(
                   text: context.l10n.deleteAccount,
                   variant: TilawaButtonVariant.dangerOutline,
                   isFullWidth: true,
-                  onPressed: onDeleteAccount,
+                  onPressed: () => unawaited(
+                    _guardAndRun(
+                      ServerActionType.deleteAccount,
+                      widget.onDeleteAccount,
+                    ),
+                  ),
                 ),
               ],
             ),

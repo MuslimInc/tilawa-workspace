@@ -17,7 +17,6 @@ class HomePrimaryActionsSection extends StatelessWidget {
 
     return HomeDashboardSection(
       title: context.l10n.homeMainActionsTitle,
-      contentSpacing: tokens.spaceMedium,
       child: IntrinsicHeight(
         child: Row(
           crossAxisAlignment: CrossAxisAlignment.stretch,
@@ -27,7 +26,7 @@ class HomePrimaryActionsSection extends StatelessWidget {
               child: HomePrimaryActionTile(
                 goldAccentOnStart: true,
                 icon: TilawaIcons.quran.svg(
-                  size: tokens.iconSizeLarge,
+                  size: tokens.iconSizeLarge + tokens.spaceExtraSmall * 0.5,
                   color: iconAccent,
                 ),
                 label: context.l10n.homeQuickQuranReader,
@@ -40,7 +39,7 @@ class HomePrimaryActionsSection extends StatelessWidget {
                 goldAccentOnStart: false,
                 icon: Icon(
                   Icons.brightness_7_outlined,
-                  size: tokens.iconSizeLarge,
+                  size: tokens.iconSizeLarge + tokens.spaceExtraSmall * 0.5,
                   color: iconAccent,
                 ),
                 label: context.l10n.homeQuickAthkar,

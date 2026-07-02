@@ -6,6 +6,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:get_it/get_it.dart';
 import 'package:mockito/mockito.dart';
+import 'package:tilawa/core/domain/server_action_guard.dart';
 import 'package:tilawa/core/bootstrap/splash_launch_handoff.dart';
 import 'package:tilawa/features/auth/application/account_deletion_flow_tracker.dart';
 import 'package:tilawa/features/auth/data/services/android_sign_in_platform_policy.dart';
@@ -31,6 +32,7 @@ import 'package:tilawa_ui_kit/tilawa_ui_kit.dart';
 
 import '../../../../helpers/hydrated_bloc_test_helper.dart';
 import '../../../../support/map_backed_shared_preferences_async.dart';
+import '../../../../support/fake_network_info.dart';
 import '../bloc/auth_bloc_test.mocks.dart';
 import '../services/google_sign_in_interactive_launcher_test.mocks.dart';
 
@@ -43,10 +45,14 @@ class TestGoogleSignInInteractiveLauncher
       );
 
   GoogleSignInLaunchReadiness readiness = const GoogleSignInLaunchReady();
+  int readinessChecks = 0;
   int settledInvocations = 0;
 
   @override
-  Future<GoogleSignInLaunchReadiness> checkReadiness() async => readiness;
+  Future<GoogleSignInLaunchReadiness> checkReadiness() async {
+    readinessChecks++;
+    return readiness;
+  }
 
   @override
   Future<void> runAfterUiSettled(Future<void> Function() action) async {
@@ -101,6 +107,7 @@ void main() {
   late AccountDeletionFlowTracker accountDeletionFlowTracker;
   late GoogleSignInSessionTracker sessionTracker;
   late TestGoogleSignInInteractiveLauncher testLauncher;
+  late FakeNetworkInfo networkInfo;
   late AuthBloc authBloc;
   late MapBackedSharedPreferencesAsync defaultRevokePrefs;
 
@@ -140,6 +147,7 @@ void main() {
     accountDeletionFlowTracker = AccountDeletionFlowTracker();
     sessionTracker = GoogleSignInSessionTracker();
     testLauncher = TestGoogleSignInInteractiveLauncher();
+    networkInfo = FakeNetworkInfo();
 
     when(mockGetCurrentUserUseCase()).thenReturn(null);
     when(mockSyncDeviceTokenUseCase(any)).thenAnswer(
@@ -166,6 +174,7 @@ void main() {
     );
 
     getIt.registerSingleton<GoogleSignInLaunchGateway>(testLauncher);
+    getIt.registerSingleton<ServerActionGuard>(ServerActionGuard(networkInfo));
     getIt.registerSingleton<GoogleSignInLaunchReadinessStore>(
       GoogleSignInLaunchReadinessStore(),
     );
@@ -178,6 +187,7 @@ void main() {
         ResolveGoogleSignInLaunchUseCase(
           getIt<GoogleSignInLaunchReadinessStore>(),
         ),
+        getIt<ServerActionGuard>(),
       ),
     );
     getIt.registerSingleton<AndroidSignInPlatformPolicy>(
@@ -196,6 +206,7 @@ void main() {
     PendingSessionRevokeStore.setPrefsFactoryForTesting(null);
     sessionTracker.markFinished();
     await authBloc.close();
+    await networkInfo.dispose();
     await getIt.reset();
   });
 
@@ -328,6 +339,7 @@ void main() {
 
       await pumpLoginScreen(tester);
       await pumpLoginInitFrames(tester);
+      testLauncher.readinessChecks = 0;
 
       await tester.tap(googleButtonFinder());
       await tester.pump();
@@ -335,6 +347,27 @@ void main() {
       verifyNever(mockSignInWithGoogleUseCase());
       expect(isGoogleButtonLoading(tester), isFalse);
       expect(find.text('blocked'), findsOneWidget);
+    });
+
+    testWidgets('manual tap while offline shows message without sign-in flow', (
+      WidgetTester tester,
+    ) async {
+      networkInfo.connected = false;
+
+      await pumpLoginScreen(tester);
+      await pumpLoginInitFrames(tester);
+      testLauncher.readinessChecks = 0;
+
+      await tester.tap(googleButtonFinder());
+      await tester.pump();
+
+      verifyNever(mockSignInWithGoogleUseCase());
+      expect(testLauncher.readinessChecks, 0);
+      expect(isGoogleButtonLoading(tester), isFalse);
+      expect(
+        find.text('No internet connection. Please reconnect and try again.'),
+        findsOneWidget,
+      );
     });
 
     testWidgets('prewarms readiness into store on screen create', (

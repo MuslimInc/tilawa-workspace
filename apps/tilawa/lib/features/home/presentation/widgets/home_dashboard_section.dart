@@ -41,7 +41,8 @@ class HomeDashboardSection extends StatelessWidget {
               style: theme.textTheme.titleMedium?.copyWith(
                 fontWeight: FontWeight.w800,
                 color: theme.colorScheme.onSurface,
-                height: 1.2,
+                height: 1.15,
+                letterSpacing: -0.2,
               ),
             ),
           );
@@ -59,15 +60,24 @@ class HomeDashboardSection extends StatelessWidget {
             ],
           ),
         if (subtitle != null) ...[
-          SizedBox(height: tokens.spaceExtraSmall),
+          SizedBox(
+            height: compact ? tokens.spaceExtraSmall : tokens.spaceSmall,
+          ),
           Text(
             subtitle!,
             style: theme.textTheme.bodySmall?.copyWith(
               color: theme.colorScheme.onSurfaceVariant,
+              height: 1.35,
             ),
           ),
         ],
-        SizedBox(height: contentSpacing ?? tokens.spaceMedium),
+        SizedBox(
+          height:
+              contentSpacing ??
+              (compact
+                  ? tokens.spaceMedium + tokens.spaceExtraSmall
+                  : tokens.spaceLarge + tokens.spaceExtraSmall),
+        ),
         child,
       ],
     );

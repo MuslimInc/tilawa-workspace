@@ -142,7 +142,7 @@ void main() {
           );
           when(
             mockSignOut(skipServerTokenClear: true),
-          ).thenAnswer((_) async {});
+          ).thenAnswer((_) async => const Right(null));
           return authBloc;
         },
         act: (bloc) => bloc.add(const CheckAuthStatusEvent()),
@@ -381,7 +381,7 @@ void main() {
           when(
             mockSyncDeviceTokenUseCase.registerExplicitSignIn(tUser.id),
           ).thenAnswer((_) => registrationCompleter.future);
-          when(mockSignOut()).thenAnswer((_) async {});
+          when(mockSignOut()).thenAnswer((_) async => const Right(null));
           return authBloc;
         },
         act: (bloc) async {
@@ -496,7 +496,7 @@ void main() {
       blocTest<AuthBloc, AuthState>(
         'emits [unauthenticated] when sign out works',
         build: () {
-          when(mockSignOut()).thenAnswer((_) async => {});
+          when(mockSignOut()).thenAnswer((_) async => const Right(null));
           return authBloc;
         },
         act: (bloc) => bloc.add(const SignOutEvent()),
@@ -504,6 +504,23 @@ void main() {
         verify: (_) {
           verify(mockSignOut()).called(1);
         },
+      );
+
+      blocTest<AuthBloc, AuthState>(
+        'emits [error] when sign out is blocked by server action guard',
+        build: () {
+          when(mockSignOut()).thenAnswer(
+            (_) async => const Left(
+              ServerActionFailure.offline(),
+            ),
+          );
+          return authBloc;
+        },
+        seed: () => AuthState.authenticated(user: tUser),
+        act: (bloc) => bloc.add(const SignOutEvent()),
+        expect: () => const [
+          AuthState.error(message: ServerActionFailureKey.offline),
+        ],
       );
 
       blocTest<AuthBloc, AuthState>(
@@ -599,6 +616,26 @@ void main() {
         act: (bloc) => bloc.add(const DeleteAccountEvent()),
         expect: () => [
           const AuthState.error(message: DeleteAccountErrorKey.failed),
+          AuthState.authenticated(user: tUser),
+        ],
+      );
+
+      blocTest<AuthBloc, AuthState>(
+        'emits [error, authenticated] when delete fails with not signed in '
+        'but hydrated auth state still has a user',
+        build: () {
+          when(mockGetCurrentUserUseCase()).thenReturn(null);
+          when(mockDeleteAccount()).thenAnswer(
+            (_) async => const Left(
+              ValidationFailure(DeleteAccountErrorKey.notSignedIn),
+            ),
+          );
+          return authBloc;
+        },
+        seed: () => AuthState.authenticated(user: tUser),
+        act: (bloc) => bloc.add(const DeleteAccountEvent()),
+        expect: () => [
+          const AuthState.error(message: DeleteAccountErrorKey.notSignedIn),
           AuthState.authenticated(user: tUser),
         ],
       );

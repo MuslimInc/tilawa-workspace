@@ -79,4 +79,20 @@ void main() {
 
     expect(find.byType(DeleteAccountProgressDialog), findsOneWidget);
   });
+
+  testWidgets('does not pop when deletion succeeds and login navigation runs', (
+    tester,
+  ) async {
+    tracker.markDeletionStarted();
+    await openDialog(tester);
+
+    expect(find.byType(DeleteAccountProgressDialog), findsOneWidget);
+
+    tracker.markDeletionSucceeded();
+    await tester.pump();
+    await tester.pump(const Duration(milliseconds: 300));
+
+    expect(find.byType(DeleteAccountProgressDialog), findsOneWidget);
+    expect(tracker.pendingLoginNavigationAfterDeletion, isTrue);
+  });
 }

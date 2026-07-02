@@ -3,16 +3,23 @@ import 'package:dartz_plus/dartz_plus.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:mockito/annotations.dart';
 import 'package:mockito/mockito.dart';
+import 'package:tilawa/core/domain/server_action_guard.dart';
 import 'package:tilawa/features/auth/data/datasources/account_deletion_remote_data_source.dart';
 import 'package:tilawa/features/auth/domain/entities/user_entity.dart';
 import 'package:tilawa/features/auth/domain/repositories/auth_repository.dart';
 import 'package:tilawa/features/auth/domain/entities/auth_error_key.dart';
+import 'package:tilawa/features/auth/domain/usecases/await_auth_restoration_use_case.dart';
 import 'package:tilawa/features/auth/domain/usecases/delete_account.dart';
 import 'package:tilawa/features/auth/domain/usecases/sync_device_token_use_case.dart';
 import 'package:tilawa/features/premium/domain/repositories/premium_repository.dart';
 import 'package:tilawa_core/errors/failures.dart';
 
 import 'delete_account_test.mocks.dart';
+import '../../../../support/fake_network_info.dart';
+
+class _FakeAwaitAuthRestoration extends AwaitAuthRestorationUseCase {
+  _FakeAwaitAuthRestoration(MockAuthRepository super.repository);
+}
 
 @GenerateMocks([
   AuthRepository,
@@ -26,6 +33,8 @@ void main() {
   late MockAccountDeletionRemoteDataSource mockAccountDeletionRemoteDataSource;
   late MockSyncDeviceTokenUseCase mockSyncDeviceTokenUseCase;
   late MockPremiumRepository mockPremiumRepository;
+  late FakeNetworkInfo networkInfo;
+  late _FakeAwaitAuthRestoration awaitAuthRestoration;
 
   const tResult = AccountDeletionRequestResult(
     status: 'pending_deletion',
@@ -41,15 +50,19 @@ void main() {
 
   setUp(() {
     mockAuthRepository = MockAuthRepository();
+    awaitAuthRestoration = _FakeAwaitAuthRestoration(mockAuthRepository);
     mockAccountDeletionRemoteDataSource = MockAccountDeletionRemoteDataSource();
     mockSyncDeviceTokenUseCase = MockSyncDeviceTokenUseCase();
     mockPremiumRepository = MockPremiumRepository();
+    networkInfo = FakeNetworkInfo();
 
     useCase = DeleteAccount(
       mockAuthRepository,
       mockAccountDeletionRemoteDataSource,
       mockSyncDeviceTokenUseCase,
       mockPremiumRepository,
+      ServerActionGuard(networkInfo),
+      awaitAuthRestoration,
     );
 
     when(mockAuthRepository.currentUser).thenReturn(tUser);
@@ -64,6 +77,10 @@ void main() {
       ),
     ).thenAnswer((_) async => tResult);
     when(mockAuthRepository.signOut()).thenAnswer((_) async {});
+  });
+
+  tearDown(() async {
+    await networkInfo.dispose();
   });
 
   test('returns ValidationFailure when no user is signed in', () async {
@@ -97,6 +114,27 @@ void main() {
       mockPremiumRepository.clearPremiumStatus(),
       mockAuthRepository.signOut(),
     ]);
+  });
+
+  test('returns offline failure without calling remote dependencies', () async {
+    networkInfo.connected = false;
+
+    final Either<Failure, void> result = await useCase();
+
+    expect(result.isLeft(), isTrue);
+    result.fold((failure) {
+      expect(failure, isA<ServerActionFailure>());
+      expect(failure.message, ServerActionFailureKey.offline);
+    }, (_) => fail('expected left'));
+    verifyNever(
+      mockAccountDeletionRemoteDataSource.requestSelfAccountDeletion(
+        reason: anyNamed('reason'),
+        confirmEmail: anyNamed('confirmEmail'),
+      ),
+    );
+    verifyNever(mockSyncDeviceTokenUseCase.removeCurrentTokenForUser(any));
+    verifyNever(mockPremiumRepository.clearPremiumStatus());
+    verifyNever(mockAuthRepository.signOut());
   });
 
   test('uses uid confirmation when email is missing', () async {
@@ -264,5 +302,51 @@ void main() {
       expect(failure, isA<UnexpectedFailure>());
       expect(failure.message, contains('boom'));
     }, (_) => fail('expected left'));
+  });
+
+  test('maps unavailable callable errors to offline failure', () async {
+    when(
+      mockAccountDeletionRemoteDataSource.requestSelfAccountDeletion(
+        reason: anyNamed('reason'),
+        confirmEmail: anyNamed('confirmEmail'),
+      ),
+    ).thenThrow(
+      FirebaseFunctionsException(
+        code: 'unavailable',
+        message: 'Service unavailable',
+      ),
+    );
+
+    final Either<Failure, void> result = await useCase();
+
+    expect(result.isLeft(), isTrue);
+    result.fold((failure) {
+      expect(failure, isA<ServerActionFailure>());
+      expect(failure.message, ServerActionFailureKey.offline);
+    }, (_) => fail('expected left'));
+    verifyNever(mockAuthRepository.signOut());
+  });
+
+  test('maps unexpected network exceptions to offline failure', () async {
+    when(
+      mockAccountDeletionRemoteDataSource.requestSelfAccountDeletion(
+        reason: anyNamed('reason'),
+        confirmEmail: anyNamed('confirmEmail'),
+      ),
+    ).thenThrow(
+      Exception(
+        'A network error (such as timeout, interrupted connection or '
+        'unreachable host) has occurred.',
+      ),
+    );
+
+    final Either<Failure, void> result = await useCase();
+
+    expect(result.isLeft(), isTrue);
+    result.fold((failure) {
+      expect(failure, isA<ServerActionFailure>());
+      expect(failure.message, ServerActionFailureKey.offline);
+    }, (_) => fail('expected left'));
+    verifyNever(mockAuthRepository.signOut());
   });
 }

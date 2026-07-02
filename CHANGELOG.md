@@ -7,7 +7,14 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
-## [2.0.17+70] - 2026-07-01 [Google Play Production]
+### Added
+
+- **Home**: Skeleton shimmer loading for the dashboard — the prayer hero and
+  body sections render layout-matching shimmer placeholders during the initial
+  load, then crossfade to content; pull-to-refresh on loaded content never
+  flashes the skeleton.
+
+## [2.0.17+71] - 2026-07-01 [Google Play Production]
 
 ### Added
 

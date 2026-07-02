@@ -30,7 +30,7 @@ class HomeQuickToolsSection extends StatelessWidget {
     return IntrinsicHeight(
       child: Row(
         crossAxisAlignment: CrossAxisAlignment.stretch,
-        spacing: tokens.spaceMedium,
+        spacing: tokens.spaceSmall,
         children: [
           for (final item in items)
             Expanded(
@@ -68,7 +68,7 @@ class _QuickToolTile extends StatelessWidget {
     final tokens = context.tokens;
     final theme = Theme.of(context);
     final colorScheme = theme.colorScheme;
-    final double iconBoxSize = tokens.iconSizeMedium + tokens.spaceSmall * 2;
+    final double iconBoxSize = tokens.iconSizeMedium + tokens.spaceSmall;
 
     final BorderRadius borderRadius = BorderRadius.circular(radius);
 
@@ -84,7 +84,7 @@ class _QuickToolTile extends StatelessWidget {
         ),
         child: Padding(
           padding: EdgeInsets.symmetric(
-            vertical: tokens.spaceSmall,
+            vertical: tokens.spaceSmall + tokens.spaceExtraSmall,
             horizontal: tokens.spaceExtraSmall,
           ),
           child: Column(
@@ -94,9 +94,7 @@ class _QuickToolTile extends StatelessWidget {
               DecoratedBox(
                 decoration: BoxDecoration(
                   color: iconAccent.withValues(alpha: 0.10),
-                  borderRadius: BorderRadius.circular(
-                    tokens.radiusMedium,
-                  ),
+                  borderRadius: BorderRadius.circular(tokens.radiusMedium),
                 ),
                 child: SizedBox(
                   width: iconBoxSize,
@@ -109,9 +107,10 @@ class _QuickToolTile extends StatelessWidget {
                 maxLines: 1,
                 overflow: TextOverflow.ellipsis,
                 textAlign: TextAlign.center,
-                style: theme.textTheme.labelMedium?.copyWith(
-                  color: colorScheme.onSurface,
+                style: theme.textTheme.labelSmall?.copyWith(
+                  color: colorScheme.onSurface.withValues(alpha: 0.9),
                   fontWeight: FontWeight.w600,
+                  height: 1.2,
                 ),
               ),
             ],
