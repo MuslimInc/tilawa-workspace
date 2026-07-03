@@ -3,6 +3,7 @@ import 'package:mocktail/mocktail.dart';
 import 'package:tilawa/features/auth/domain/entities/user_entity.dart';
 import 'package:tilawa/features/auth/domain/usecases/await_auth_restoration_use_case.dart';
 import 'package:tilawa/features/auth/domain/usecases/get_current_user_use_case.dart';
+import 'package:tilawa/features/auth/domain/usecases/get_persisted_authenticated_user_use_case.dart';
 import 'package:tilawa/features/onboarding/domain/usecases/check_onboarding_status.dart';
 import 'package:tilawa/features/splash/domain/repositories/startup_notification_repository.dart';
 import 'package:tilawa/features/splash/domain/usecases/get_splash_next_route_use_case.dart';
@@ -17,11 +18,16 @@ class MockStartupNotificationRepository extends Mock
 class MockAwaitAuthRestorationUseCase extends Mock
     implements AwaitAuthRestorationUseCase {}
 
+class MockGetPersistedAuthenticatedUserUseCase extends Mock
+    implements GetPersistedAuthenticatedUserUseCase {}
+
 void main() {
   late MockGetCurrentUserUseCase mockGetCurrentUserUseCase;
   late MockCheckOnboardingStatus mockCheckOnboardingStatus;
   late MockStartupNotificationRepository mockNotificationRepository;
   late MockAwaitAuthRestorationUseCase mockAwaitAuthRestoration;
+  late MockGetPersistedAuthenticatedUserUseCase
+  mockGetPersistedAuthenticatedUser;
   late GetSplashNextRouteUseCase useCase;
 
   final UserEntity signedInUser = UserEntity(
@@ -36,16 +42,24 @@ void main() {
     mockCheckOnboardingStatus = MockCheckOnboardingStatus();
     mockNotificationRepository = MockStartupNotificationRepository();
     mockAwaitAuthRestoration = MockAwaitAuthRestorationUseCase();
+    mockGetPersistedAuthenticatedUser =
+        MockGetPersistedAuthenticatedUserUseCase();
     useCase = GetSplashNextRouteUseCase(
       mockGetCurrentUserUseCase,
       mockCheckOnboardingStatus,
       mockNotificationRepository,
       mockAwaitAuthRestoration,
+      mockGetPersistedAuthenticatedUser,
     );
     when(
       () => mockNotificationRepository.consumePendingNotification(),
     ).thenReturn(null);
-    when(() => mockAwaitAuthRestoration()).thenAnswer((_) async {});
+    when(
+      () => mockAwaitAuthRestoration(sessionUser: any(named: 'sessionUser')),
+    ).thenAnswer((_) async {});
+    when(
+      () => mockGetPersistedAuthenticatedUser(),
+    ).thenAnswer((_) async => null);
     when(() => mockCheckOnboardingStatus()).thenAnswer((_) async => true);
   });
 
@@ -62,7 +76,10 @@ void main() {
 
         expect(result.destination, SplashDestination.notificationLaunch);
         expect(result.notificationData, {'type': 'settings'});
-        verify(() => mockAwaitAuthRestoration()).called(1);
+        verify(
+          () =>
+              mockAwaitAuthRestoration(sessionUser: any(named: 'sessionUser')),
+        ).called(1);
         verify(() => mockGetCurrentUserUseCase()).called(1);
       },
     );
@@ -79,7 +96,10 @@ void main() {
 
         expect(result.destination, SplashDestination.notificationLaunch);
         expect(result.notificationData, {'type': 'quran', 'surahNumber': '2'});
-        verify(() => mockAwaitAuthRestoration()).called(1);
+        verify(
+          () =>
+              mockAwaitAuthRestoration(sessionUser: any(named: 'sessionUser')),
+        ).called(1);
       },
     );
 
@@ -90,7 +110,9 @@ void main() {
 
       expect(result.destination, SplashDestination.home);
       expect(result.notificationData, isNull);
-      verify(() => mockAwaitAuthRestoration()).called(1);
+      verify(
+        () => mockAwaitAuthRestoration(sessionUser: any(named: 'sessionUser')),
+      ).called(1);
     });
 
     test(
@@ -108,7 +130,10 @@ void main() {
         final result = await useCase();
 
         expect(result.destination, SplashDestination.login);
-        verify(() => mockAwaitAuthRestoration()).called(1);
+        verify(
+          () =>
+              mockAwaitAuthRestoration(sessionUser: any(named: 'sessionUser')),
+        ).called(1);
       },
     );
 
@@ -123,7 +148,10 @@ void main() {
         final result = await useCase();
 
         expect(result.destination, SplashDestination.login);
-        verify(() => mockAwaitAuthRestoration()).called(1);
+        verify(
+          () =>
+              mockAwaitAuthRestoration(sessionUser: any(named: 'sessionUser')),
+        ).called(1);
         verify(() => mockCheckOnboardingStatus()).called(1);
       },
     );
@@ -140,7 +168,10 @@ void main() {
 
         expect(result.destination, SplashDestination.notificationLaunch);
         expect(result.notificationData, isNull);
-        verify(() => mockAwaitAuthRestoration()).called(1);
+        verify(
+          () =>
+              mockAwaitAuthRestoration(sessionUser: any(named: 'sessionUser')),
+        ).called(1);
       },
     );
 
@@ -150,8 +181,27 @@ void main() {
       final result = await useCase();
 
       expect(result.destination, SplashDestination.login);
-      verify(() => mockAwaitAuthRestoration()).called(1);
+      verify(
+        () => mockAwaitAuthRestoration(sessionUser: any(named: 'sessionUser')),
+      ).called(1);
     });
+
+    test(
+      'returns home when Firebase user is missing but persisted session exists',
+      () async {
+        when(() => mockGetCurrentUserUseCase()).thenReturn(null);
+        when(
+          () => mockGetPersistedAuthenticatedUser(),
+        ).thenAnswer((_) async => signedInUser);
+
+        final result = await useCase();
+
+        expect(result.destination, SplashDestination.home);
+        verify(
+          () => mockAwaitAuthRestoration(sessionUser: signedInUser),
+        ).called(1);
+      },
+    );
 
     test('returns onboarding when not yet completed', () async {
       when(() => mockCheckOnboardingStatus()).thenAnswer((_) async => false);
@@ -159,7 +209,9 @@ void main() {
       final result = await useCase();
 
       expect(result.destination, SplashDestination.onboarding);
-      verifyNever(() => mockAwaitAuthRestoration());
+      verifyNever(
+        () => mockAwaitAuthRestoration(sessionUser: any(named: 'sessionUser')),
+      );
       verifyNever(() => mockGetCurrentUserUseCase.call());
       verifyNever(
         () => mockNotificationRepository.consumePendingNotification(),

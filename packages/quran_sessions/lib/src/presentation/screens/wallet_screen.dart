@@ -4,6 +4,8 @@ import 'package:intl/intl.dart';
 import 'package:quran_sessions/quran_sessions.dart';
 import 'package:tilawa_ui_kit/tilawa_ui_kit.dart';
 
+import '../failure_ui/quran_sessions_failure_body.dart';
+
 /// Read-only wallet balance and transaction history.
 class WalletScreen extends StatefulWidget {
   const WalletScreen({super.key, required this.userId});
@@ -35,8 +37,12 @@ class _WalletScreenState extends State<WalletScreen> {
           WalletInitial() || WalletLoading() => const Center(
             child: CircularProgressIndicator(),
           ),
-          WalletFailure(:final failure) => Center(
-            child: Text(failure.toLocalizedMessage(context)),
+          WalletFailure(:final failure) => buildQuranSessionsFailureBody(
+            context,
+            failure: failure,
+            onRetry: () => context.read<WalletBloc>().add(
+              WalletLoadRequested(userId: widget.userId),
+            ),
           ),
           WalletSuccess(:final wallet, :final transactions) => RefreshIndicator(
             onRefresh: () async {

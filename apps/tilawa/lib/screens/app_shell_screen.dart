@@ -62,6 +62,8 @@ class _AppShellScreenState extends State<AppShellScreen> {
   int _lastHandledIndex = 0;
   late final MainScreenCubit _mainScreenCubit;
   QuranPlayerChromeNotifier? _chromeNotifier;
+  bool _isKeyboardOpen = false;
+  double _bottomNavBarHeight = 0;
 
   @override
   void initState() {
@@ -75,6 +77,13 @@ class _AppShellScreenState extends State<AppShellScreen> {
     super.didChangeDependencies();
     // Ancestor lookups are unsafe in dispose(); cache the notifier here.
     _chromeNotifier = context.read<QuranPlayerChromeNotifier>();
+    // Cached here (rather than inside the nested BlocBuilder below) so a
+    // cubit-driven rebuild never repeats a Theme/MediaQuery ancestor lookup
+    // on a context that GlobalKey reparenting may have briefly deactivated.
+    _isKeyboardOpen = context.isKeyboardVisible;
+    _bottomNavBarHeight = QuranPlayerLayoutInsets.phoneShellBottomReserve(
+      context,
+    );
   }
 
   @override
@@ -285,9 +294,8 @@ class _AppShellScreenState extends State<AppShellScreen> {
           },
           child: BlocBuilder<MainScreenCubit, MainScreenState>(
             builder: (context, state) {
-              final bool isKeyboardOpen = context.isKeyboardVisible;
-              final double bottomNavBarHeight =
-                  QuranPlayerLayoutInsets.phoneShellBottomReserve(context);
+              final bool isKeyboardOpen = _isKeyboardOpen;
+              final double bottomNavBarHeight = _bottomNavBarHeight;
 
               final List<AppShellNavDestination> navDestinations =
                   _buildDestinations(context);
@@ -436,17 +444,25 @@ class _AppShellChrome extends StatelessWidget {
                 )
               : null;
 
-          return TilawaAdaptiveShell(
-            destinations: adaptiveDestinations,
-            selectedIndex: selectedIndex,
-            onDestinationSelected: onDestinationSelected,
-            onAdjacentDestinationSelected: onAdjacentDestinationSelected,
-            phoneBottomNavigationBarVisible: bottomNavVisibility,
-            phoneFooterAboveNav: shellFooterPlayer,
-            bottomPlayer: MainBottomOverlay(
-              isOfflineIndicatorReady: state.isOfflineIndicatorReady,
-            ),
-            child: shellChild,
+          return Column(
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            children: [
+              MainBottomOverlay(
+                isOfflineIndicatorReady: state.isOfflineIndicatorReady,
+              ),
+              Expanded(
+                child: TilawaAdaptiveShell(
+                  destinations: adaptiveDestinations,
+                  selectedIndex: selectedIndex,
+                  onDestinationSelected: onDestinationSelected,
+                  onAdjacentDestinationSelected: onAdjacentDestinationSelected,
+                  phoneBottomNavigationBarVisible: bottomNavVisibility,
+                  phoneFooterAboveNav: shellFooterPlayer,
+                  bottomPlayer: const SizedBox.shrink(),
+                  child: shellChild,
+                ),
+              ),
+            ],
           );
         },
       ),

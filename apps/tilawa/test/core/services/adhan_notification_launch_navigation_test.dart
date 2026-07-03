@@ -15,6 +15,7 @@ import 'package:tilawa/features/auth/domain/entities/auth_result.dart';
 import 'package:tilawa/features/auth/domain/repositories/auth_repository.dart';
 import 'package:tilawa/features/auth/domain/usecases/await_auth_restoration_use_case.dart';
 import 'package:tilawa/features/auth/domain/usecases/get_current_user_use_case.dart';
+import 'package:tilawa/features/auth/domain/usecases/get_persisted_authenticated_user_use_case.dart';
 import 'package:tilawa/features/auth/domain/usecases/prepare_google_sign_in_use_case.dart';
 import 'package:tilawa/features/onboarding/domain/usecases/check_onboarding_status.dart';
 import 'package:tilawa/features/prayer_times/domain/services/adhan_alarm_player_interface.dart';
@@ -50,6 +51,14 @@ class _FakeAuthRepository implements AuthRepository {
 
   @override
   Future<bool> hasAdminClaim() async => false;
+}
+
+class _NullGetPersistedAuthenticatedUserUseCase
+    implements GetPersistedAuthenticatedUserUseCase {
+  const _NullGetPersistedAuthenticatedUserUseCase();
+
+  @override
+  Future<UserEntity?> call() async => null;
 }
 
 /// Regression tests for the cold-start adhan notification navigation race:
@@ -307,6 +316,7 @@ void main() {
             mockCheckOnboarding,
             mockNotificationRepository,
             AwaitAuthRestorationUseCase(_FakeAuthRepository()),
+            const _NullGetPersistedAuthenticatedUserUseCase(),
           );
 
           final result = await useCase();

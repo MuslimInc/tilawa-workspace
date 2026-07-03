@@ -211,6 +211,21 @@ void main() {
       );
 
       blocTest<AuthBloc, AuthState>(
+        'keeps hydrated authenticated user when live Firebase user is missing',
+        build: () {
+          when(mockGetCurrentUserUseCase()).thenReturn(null);
+          return authBloc;
+        },
+        seed: () => AuthState.authenticated(user: tUser),
+        act: (bloc) => bloc.add(const CheckAuthStatusEvent()),
+        expect: () => <AuthState>[],
+        verify: (bloc) {
+          expect(bloc.state, AuthState.authenticated(user: tUser));
+          verify(mockSyncDeviceTokenUseCase(tUser.id)).called(1);
+        },
+      );
+
+      blocTest<AuthBloc, AuthState>(
         'emits [unauthenticated] when user is NOT logged in',
         build: () {
           when(mockGetCurrentUserUseCase()).thenReturn(null);
@@ -536,11 +551,28 @@ void main() {
 
     group('DeleteAccountEvent', () {
       blocTest<AuthBloc, AuthState>(
+        'passes cached session user to delete use case',
+        build: () {
+          when(mockGetCurrentUserUseCase()).thenReturn(null);
+          when(
+            mockDeleteAccount(sessionUser: tUser),
+          ).thenAnswer((_) async => const Right(null));
+          return authBloc;
+        },
+        seed: () => AuthState.authenticated(user: tUser),
+        act: (bloc) => bloc.add(const DeleteAccountEvent()),
+        expect: () => [const AuthState.unauthenticated()],
+        verify: (_) {
+          verify(mockDeleteAccount(sessionUser: tUser)).called(1);
+        },
+      );
+
+      blocTest<AuthBloc, AuthState>(
         'emits [unauthenticated] when delete succeeds',
         build: () {
           when(mockGetCurrentUserUseCase()).thenReturn(tUser);
           when(
-            mockDeleteAccount(),
+            mockDeleteAccount(sessionUser: anyNamed('sessionUser')),
           ).thenAnswer((_) async => const Right(null));
           return authBloc;
         },
@@ -553,7 +585,9 @@ void main() {
         'returns to authenticated when delete is cancelled',
         build: () {
           when(mockGetCurrentUserUseCase()).thenReturn(tUser);
-          when(mockDeleteAccount()).thenAnswer(
+          when(
+            mockDeleteAccount(sessionUser: anyNamed('sessionUser')),
+          ).thenAnswer(
             (_) async => const Left(UserCancelledFailure()),
           );
           return authBloc;
@@ -572,7 +606,9 @@ void main() {
         'was signed in',
         build: () {
           when(mockGetCurrentUserUseCase()).thenReturn(null);
-          when(mockDeleteAccount()).thenAnswer(
+          when(
+            mockDeleteAccount(sessionUser: anyNamed('sessionUser')),
+          ).thenAnswer(
             (_) async => const Left(UserCancelledFailure()),
           );
           return authBloc;
@@ -586,7 +622,9 @@ void main() {
         'user is still signed in',
         build: () {
           when(mockGetCurrentUserUseCase()).thenReturn(tUser);
-          when(mockDeleteAccount()).thenAnswer(
+          when(
+            mockDeleteAccount(sessionUser: anyNamed('sessionUser')),
+          ).thenAnswer(
             (_) async => const Left(UnexpectedFailure('boom')),
           );
           return authBloc;
@@ -607,7 +645,9 @@ void main() {
           when(mockGetCurrentUserUseCase()).thenAnswer((_) {
             return calls++ == 0 ? tUser : null;
           });
-          when(mockDeleteAccount()).thenAnswer(
+          when(
+            mockDeleteAccount(sessionUser: anyNamed('sessionUser')),
+          ).thenAnswer(
             (_) async => const Left(UnexpectedFailure(null)),
           );
           return authBloc;
@@ -625,7 +665,9 @@ void main() {
         'but hydrated auth state still has a user',
         build: () {
           when(mockGetCurrentUserUseCase()).thenReturn(null);
-          when(mockDeleteAccount()).thenAnswer(
+          when(
+            mockDeleteAccount(sessionUser: anyNamed('sessionUser')),
+          ).thenAnswer(
             (_) async => const Left(
               ValidationFailure(DeleteAccountErrorKey.notSignedIn),
             ),
@@ -645,7 +687,9 @@ void main() {
         'session is gone',
         build: () {
           when(mockGetCurrentUserUseCase()).thenReturn(null);
-          when(mockDeleteAccount()).thenAnswer(
+          when(
+            mockDeleteAccount(sessionUser: anyNamed('sessionUser')),
+          ).thenAnswer(
             (_) async => const Left(UnexpectedFailure(null)),
           );
           return authBloc;

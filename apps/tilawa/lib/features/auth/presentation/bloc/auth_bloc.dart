@@ -212,7 +212,7 @@ class AuthBloc extends HydratedBloc<AuthEvent, AuthState> {
     _interactiveSignInGeneration++;
     _accountDeletionFlow.markDeletionStarted();
 
-    final result = await _deleteAccount();
+    final result = await _deleteAccount(sessionUser: userBeforeDelete);
 
     await result.fold(
       (failure) async {
@@ -276,7 +276,7 @@ class AuthBloc extends HydratedBloc<AuthEvent, AuthState> {
       return;
     }
 
-    final UserEntity? user = _getCurrentUser();
+    final UserEntity? user = _liveOrCachedUser();
     if (user != null) {
       final Either<Failure, void> registration = await _syncDeviceToken(
         user.id,

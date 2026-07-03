@@ -5,6 +5,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:quran_sessions/quran_sessions.dart';
 import 'package:tilawa_ui_kit/tilawa_ui_kit.dart';
 
+import '../failure_ui/quran_sessions_failure_body.dart';
 import '../layout/quran_sessions_scroll_padding.dart';
 
 enum _MySessionsTab { upcoming, past, cancelled }
@@ -173,24 +174,10 @@ class _MySessionsScreenState extends State<MySessionsScreen> {
             MySessionsEmpty() => const Center(
               child: _EmptyState(),
             ),
-            MySessionsFailure(:final failure) => Center(
-              child: Padding(
-                padding: EdgeInsets.all(
-                  Theme.of(context).tokens.spaceLarge,
-                ),
-                child: Column(
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    Text(failure.toLocalizedMessage(context)),
-                    SizedBox(height: Theme.of(context).tokens.spaceMedium),
-                    TilawaButton(
-                      text: l10n.retry,
-                      variant: TilawaButtonVariant.primary,
-                      onPressed: _reload,
-                    ),
-                  ],
-                ),
-              ),
+            MySessionsFailure(:final failure) => buildQuranSessionsFailureBody(
+              context,
+              failure: failure,
+              onRetry: _reload,
             ),
             final MySessionsSuccess success => _SuccessBody(
               success: success,

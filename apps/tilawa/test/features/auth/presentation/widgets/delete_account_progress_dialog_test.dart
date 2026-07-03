@@ -69,6 +69,47 @@ void main() {
     expect(find.byType(DeleteAccountProgressDialog), findsNothing);
   });
 
+  testWidgets(
+    'defers pop until the dialog push transition finishes',
+    (tester) async {
+      tracker.markDeletionStarted();
+      await tester.pumpWidget(
+        MaterialApp(
+          theme: AppTheme.getLightTheme(
+            primaryColor: PrimaryColorPreset.defaultPreset.value,
+          ),
+          localizationsDelegates: AppLocalizations.localizationsDelegates,
+          supportedLocales: AppLocalizations.supportedLocales,
+          home: Builder(
+            builder: (BuildContext context) {
+              return Scaffold(
+                body: TextButton(
+                  onPressed: () {
+                    unawaited(showDeleteAccountProgressDialog(context));
+                  },
+                  child: const Text('open'),
+                ),
+              );
+            },
+          ),
+        ),
+      );
+
+      await tester.tap(find.text('open'));
+      await tester.pump();
+
+      // Deletion ends before the dialog's push transition settles.
+      tracker.markDeletionEndedWithoutSuccess();
+      await tester.pump();
+
+      expect(find.byType(DeleteAccountProgressDialog), findsOneWidget);
+
+      await tester.pumpAndSettle();
+
+      expect(find.byType(DeleteAccountProgressDialog), findsNothing);
+    },
+  );
+
   testWidgets('stays open while deletion is in progress', (tester) async {
     tracker.markDeletionStarted();
     await openDialog(tester);

@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:intl/date_symbol_data_local.dart';
 import 'package:quran_sessions/src/domain/entities/session_lifecycle_status.dart';
+import 'package:quran_sessions/src/presentation/widgets/teacher_dashboard_schedule_section.dart';
 import 'package:quran_sessions/src/presentation/widgets/teacher_dashboard_inline_empty_state.dart';
 import 'package:quran_sessions/src/presentation/widgets/tutor_dashboard_section.dart';
 import 'package:quran_sessions/src/presentation/widgets/tutor_session_compact_card.dart';
@@ -20,10 +21,10 @@ void main() {
     testWidgets('section header ar rtl', (tester) async {
       await pumpInApp(
         tester,
-        const TutorDashboardSection(title: 'طلبات الحجز (0)'),
+        const TutorDashboardSection(title: 'طلبات الحجز'),
         locale: const Locale('ar'),
         textDirection: TextDirection.rtl,
-        surfaceSize: const Size(390, 56),
+        surfaceSize: const Size(390, 150),
       );
 
       await expectLater(
@@ -32,16 +33,39 @@ void main() {
       );
     });
 
+    testWidgets('secondary section header with schedule action ar rtl', (
+      tester,
+    ) async {
+      await pumpInApp(
+        tester,
+        TutorDashboardSection(
+          title: 'المواعيد القابلة للحجز',
+          variant: TutorDashboardSectionVariant.secondary,
+          trailing: TeacherDashboardScheduleSection(
+            actionLabel: 'تعديل الجدول الأسبوعي',
+            onManageSchedule: () {},
+          ),
+        ),
+        locale: const Locale('ar'),
+        textDirection: TextDirection.rtl,
+        surfaceSize: const Size(390, 150),
+      );
+
+      await expectLater(
+        find.byType(TutorDashboardSection),
+        matchesGoldenFile('goldens/teacher_dashboard_section_secondary_ar.png'),
+      );
+    });
+
     testWidgets('inline empty pending ar rtl', (tester) async {
       await pumpInApp(
         tester,
         const TeacherDashboardInlineEmptyState(
-          icon: Icons.mark_email_unread_outlined,
           title: 'لا توجد طلبات حجز حاليًا',
         ),
         locale: const Locale('ar'),
         textDirection: TextDirection.rtl,
-        surfaceSize: const Size(390, 96),
+        surfaceSize: const Size(390, 150),
       );
 
       await expectLater(
@@ -54,12 +78,11 @@ void main() {
       await pumpInApp(
         tester,
         const TeacherDashboardInlineEmptyState(
-          icon: Icons.event_note_outlined,
           title: 'لا توجد حصص قادمة',
         ),
         locale: const Locale('ar'),
         textDirection: TextDirection.rtl,
-        surfaceSize: const Size(390, 96),
+        surfaceSize: const Size(390, 150),
       );
 
       await expectLater(
@@ -68,19 +91,15 @@ void main() {
       );
     });
 
-    testWidgets('inline empty bookable with action ar rtl', (tester) async {
+    testWidgets('inline empty bookable ar rtl', (tester) async {
       await pumpInApp(
         tester,
-        TeacherDashboardInlineEmptyState(
-          icon: Icons.calendar_view_week_outlined,
-          title: 'لا توجد مواعيد قابلة للحجز هذا الأسبوع',
-          subtitle: 'الأيام المفتوحة في جدولك الأسبوعي تتحول إلى مواعيد هنا.',
-          actionLabel: 'تعديل الجدول الأسبوعي',
-          onAction: () {},
+        const TeacherDashboardInlineEmptyState(
+          title: 'لا توجد مواعيد قابلة للحجز هذا الأسبوع.',
         ),
         locale: const Locale('ar'),
         textDirection: TextDirection.rtl,
-        surfaceSize: const Size(390, 180),
+        surfaceSize: const Size(390, 120),
       );
 
       await expectLater(

@@ -238,5 +238,55 @@ void main() {
             .having((s) => s.upcomingSessions.length, 'still listed', 1),
       ],
     );
+
+    blocTest<TeacherDashboardBloc, TeacherDashboardState>(
+      'reload clears stale sessionCancelFailure',
+      build: () {
+        final scheduleRepo = FakeScheduleRepository()
+          ..schedule = makeWeeklySchedule();
+        final sessionRepo = FakeSessionRepository()
+          ..sessions = [upcomingSession];
+        return buildTestTeacherDashboardBloc(
+          sessionRepo: sessionRepo,
+          getAvailability: buildGetTeacherAvailabilityUseCase(
+            scheduleRepository: scheduleRepo,
+            bookedSlotLockRepository: FakeBookedSlotLockRepository(),
+          ),
+          blockGeneratedSlot: BlockGeneratedSlotUseCase(scheduleRepo),
+          availabilityProvider: FakeAvailabilityProvider(),
+          cancelSession: buildCancelSessionViaServerUseCase(),
+          completeSession: buildCompleteSessionViaServerUseCase(),
+          scheduleRepo: scheduleRepo,
+        );
+      },
+      seed: () =>
+          seedTeacherDashboardSuccess(
+            upcomingSessions: [upcomingSession],
+          ).copyWith(
+            sessionCancelFailure: const InvalidTransitionFailure(
+              action: 'cancelByTeacher',
+              actorRole: 'teacher',
+              reasonCode: 'invalid_transition',
+            ),
+          ),
+      act: (b) => b.add(
+        const TeacherDashboardLoadRequested(teacherId: 'teacher_1'),
+      ),
+      expect: () => [
+        isA<TeacherDashboardSuccess>()
+            .having((s) => s.isRefreshing, 'refreshing', isTrue)
+            .having(
+              (s) => s.sessionCancelFailure,
+              'cleared on refresh start',
+              isNull,
+            )
+            .having(
+              (s) => s.sessionCancelSucceeded,
+              'success cleared on refresh start',
+              isFalse,
+            ),
+        anything,
+      ],
+    );
   });
 }

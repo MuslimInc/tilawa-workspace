@@ -53,6 +53,7 @@ class TeacherDashboardBloc
     WeekCalendar? weekCalendar,
     CommitTimerFactory? commitTimerFactory,
     DateTime Function()? now,
+    Future<bool> Function()? isConnected,
     this._commitDelay = const Duration(seconds: 5),
   }) : _getTeacherDashboard = dashboardUseCase,
        _invalidateCache = cacheInvalidator,
@@ -70,6 +71,7 @@ class TeacherDashboardBloc
        _weekCalendar = weekCalendar ?? const WeekCalendar(),
        _now = now ?? DateTime.now,
        _commitTimerFactory = commitTimerFactory ?? _defaultCommitTimerFactory,
+       _isConnected = isConnected ?? (() async => true),
        super(const TeacherDashboardInitial()) {
     // Concurrency: destructive slot deletes use [sequential] — every tap is
     // processed in order; duplicate slot ids are no-oped in the handler.
@@ -123,6 +125,7 @@ class TeacherDashboardBloc
   final DateTime Function() _now;
   final String _teacherId;
   final CommitTimerFactory _commitTimerFactory;
+  final Future<bool> Function() _isConnected;
   final Duration _commitDelay;
 
   static const _dashboardHorizonDays = 14;
@@ -182,11 +185,22 @@ class TeacherDashboardBloc
           clearUndoableSlotId: true,
           isRefreshing: true,
           clearSlotFailure: true,
+          clearSessionCancelFailure: true,
+          clearSessionCancelSucceeded: true,
           clearRefreshDiscardedPendingCount: true,
         ),
       );
     } else {
       emit(const TeacherDashboardLoading());
+    }
+
+    if (!await _isConnected()) {
+      if (priorSuccess is TeacherDashboardSuccess) {
+        emit(priorSuccess.copyWith(isRefreshing: false));
+      } else {
+        emit(const TeacherDashboardFailure(NetworkFailure()));
+      }
+      return;
     }
 
     final now = _now();

@@ -184,19 +184,18 @@ void main() {
   });
 
   group('TeacherDashboardInlineEmptyState compact', () {
-    testWidgets('renders single-line empty title without large card', (
+    testWidgets('renders text-only empty title without card chrome', (
       tester,
     ) async {
       await pumpInApp(
         tester,
         const TeacherDashboardInlineEmptyState(
-          icon: Icons.event_note_outlined,
           title: 'No upcoming sessions',
         ),
       );
 
       expect(find.text('No upcoming sessions'), findsOneWidget);
-      expect(find.byType(TilawaCard), findsOneWidget);
+      expect(find.byType(TilawaCard), findsNothing);
     });
   });
 

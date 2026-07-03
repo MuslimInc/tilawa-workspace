@@ -9,8 +9,9 @@ import '../../../../core/domain/server_action_guard.dart';
 import '../../../premium/domain/repositories/premium_repository.dart';
 import '../../data/datasources/account_deletion_remote_data_source.dart';
 import '../entities/auth_error_key.dart';
+import '../entities/user_entity.dart';
 import '../repositories/auth_repository.dart';
-import 'await_auth_restoration_use_case.dart';
+import 'resolve_authenticated_user_use_case.dart';
 import 'sync_device_token_use_case.dart';
 
 const _selfDeletionReason = 'Self-service account deletion from mobile app';
@@ -23,7 +24,7 @@ class DeleteAccount {
     this._syncDeviceTokenUseCase,
     this._premiumRepository,
     this._serverActionGuard,
-    this._awaitAuthRestoration,
+    this._resolveAuthenticatedUser,
   );
 
   final AuthRepository _authRepository;
@@ -31,11 +32,12 @@ class DeleteAccount {
   final SyncDeviceTokenUseCase _syncDeviceTokenUseCase;
   final PremiumRepository _premiumRepository;
   final ServerActionGuard _serverActionGuard;
-  final AwaitAuthRestorationUseCase _awaitAuthRestoration;
+  final ResolveAuthenticatedUserUseCase _resolveAuthenticatedUser;
 
-  Future<Either<Failure, void>> call() async {
-    await _awaitAuthRestoration();
-    final currentUser = _authRepository.currentUser;
+  Future<Either<Failure, void>> call({UserEntity? sessionUser}) async {
+    final UserEntity? currentUser = await _resolveAuthenticatedUser(
+      sessionUser: sessionUser,
+    );
     if (currentUser == null) {
       logger.d('[DeleteFirebaseUser] Usecase: not signed in, aborting');
       return const Left(

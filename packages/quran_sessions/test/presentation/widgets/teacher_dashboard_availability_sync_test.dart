@@ -289,7 +289,7 @@ void main() {
       expect(find.text(l10n.bookableTimesWeekScopedTitle), findsOneWidget);
     });
 
-    testWidgets('edit weekly template uses app bar icon not section header', (
+    testWidgets('edit weekly template lives in bookable section header', (
       tester,
     ) async {
       scheduleRepo.schedule = makeWeeklySchedule();
@@ -302,6 +302,10 @@ void main() {
       );
       await tester.pumpAndSettle();
 
+      final l10n = QuranSessionsLocalizations.of(
+        tester.element(find.byType(TeacherDashboardScreen)),
+      );
+
       expect(find.byType(TilawaPrimaryFab), findsNothing);
       expect(
         find.descendant(
@@ -310,16 +314,41 @@ void main() {
         ),
         findsOneWidget,
       );
+      await tester.scrollUntilVisible(
+        find.text(l10n.editWeeklyTemplate),
+        200,
+        scrollable: find.byType(Scrollable).first,
+      );
+      expect(find.text(l10n.editWeeklyTemplate), findsOneWidget);
+    });
+
+    testWidgets('edit weekly template stays in app bar when slots are empty', (
+      tester,
+    ) async {
+      scheduleRepo.schedule = makeWeeklySchedule(rules: const {});
+      sessionRepo.sessions = [
+        makeSession(
+          teacherId: 'teacher_1',
+          lifecycleStatus: SessionLifecycleStatus.pendingTutorApproval,
+          startsAt: DateTime.now().add(const Duration(days: 2)),
+        ),
+      ];
+      final bloc = buildBloc();
+
+      await _pumpDashboard(
+        tester,
+        bloc: bloc,
+        onManageSchedule: () async {},
+      );
+      await tester.pumpAndSettle();
+
+      expect(bloc.state, isA<TeacherDashboardSuccess>());
       expect(
         find.descendant(
-          of: find.text(
-            QuranSessionsLocalizations.of(
-              tester.element(find.byType(TeacherDashboardScreen)),
-            ).bookableTimesWeekScopedTitle,
-          ),
+          of: find.byType(AppBar),
           matching: find.byIcon(Icons.edit_calendar_outlined),
         ),
-        findsNothing,
+        findsOneWidget,
       );
     });
   });

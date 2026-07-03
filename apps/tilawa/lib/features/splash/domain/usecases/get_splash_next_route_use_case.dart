@@ -4,6 +4,7 @@ import 'package:tilawa/core/logging/app_logger.dart';
 import '../../../auth/domain/entities/user_entity.dart';
 import '../../../auth/domain/usecases/await_auth_restoration_use_case.dart';
 import '../../../auth/domain/usecases/get_current_user_use_case.dart';
+import '../../../auth/domain/usecases/get_persisted_authenticated_user_use_case.dart';
 import '../../../onboarding/domain/usecases/check_onboarding_status.dart';
 import '../repositories/startup_notification_repository.dart';
 
@@ -22,12 +23,14 @@ class GetSplashNextRouteUseCase {
     this._checkOnboardingStatus,
     this._startupNotificationRepository,
     this._awaitAuthRestoration,
+    this._getPersistedAuthenticatedUser,
   );
 
   final GetCurrentUserUseCase _getCurrentUserUseCase;
   final CheckOnboardingStatus _checkOnboardingStatus;
   final StartupNotificationRepository _startupNotificationRepository;
   final AwaitAuthRestorationUseCase _awaitAuthRestoration;
+  final GetPersistedAuthenticatedUserUseCase _getPersistedAuthenticatedUser;
 
   Future<SplashRouteResult> call() async {
     logger.d('[DebugNotificationAuthFlow] startup route resolution started');
@@ -45,8 +48,9 @@ class GetSplashNextRouteUseCase {
     );
 
     logger.d('[DebugNotificationAuthFlow] auth restoration started');
-    await _awaitAuthRestoration();
-    final UserEntity? user = _getCurrentUserUseCase();
+    final UserEntity? persistedUser = await _getPersistedAuthenticatedUser();
+    await _awaitAuthRestoration(sessionUser: persistedUser);
+    final UserEntity? user = _getCurrentUserUseCase() ?? persistedUser;
 
     if (user != null) {
       if (notificationData != null) {

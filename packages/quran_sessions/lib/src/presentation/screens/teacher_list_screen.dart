@@ -4,7 +4,7 @@ import 'package:quran_sessions/core/l10n_extensions.dart';
 import 'package:quran_sessions/l10n/quran_sessions_localizations.dart';
 import 'package:tilawa_ui_kit/tilawa_ui_kit.dart';
 
-import '../failure_ui/quran_sessions_failure_ui.dart';
+import '../failure_ui/quran_sessions_failure_body.dart';
 import '../../domain/entities/quran_teacher.dart';
 import '../blocs/teacher_list/teacher_list_bloc.dart';
 import '../blocs/teacher_list/teacher_list_event.dart';
@@ -147,8 +147,9 @@ class _TeacherListScreenState extends State<TeacherListScreen> {
                     onTeacherApplyEntry: widget.onTeacherApplyEntry,
                     onEmptyStateSeen: widget.onEmptyStateSeen,
                   ),
-          TeacherListFailure(:final failure) => _ErrorView(
-            message: failure.toLocalizedMessage(context),
+          TeacherListFailure(:final failure) => buildQuranSessionsFailureBody(
+            context,
+            failure: failure,
             onRetry: _retry,
           ),
           TeacherListSuccess(
@@ -337,28 +338,6 @@ class _FilteredEmptyView extends StatelessWidget {
           text: l10n.clearTeacherFilters,
           variant: TilawaButtonVariant.secondary,
           onPressed: onClearFilters,
-        ),
-      ),
-    );
-  }
-}
-
-class _ErrorView extends StatelessWidget {
-  const _ErrorView({required this.message, required this.onRetry});
-  final String message;
-  final VoidCallback onRetry;
-
-  @override
-  Widget build(BuildContext context) {
-    final l10n = context.quranSessionsL10n;
-
-    return Center(
-      child: TilawaIllustratedState(
-        icon: Icons.error_outline,
-        title: message,
-        primaryAction: TilawaButton(
-          text: l10n.retry,
-          onPressed: onRetry,
         ),
       ),
     );

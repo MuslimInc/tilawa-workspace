@@ -30,6 +30,7 @@ class DeleteAccountProgressDialog extends StatefulWidget {
 class _DeleteAccountProgressDialogState
     extends State<DeleteAccountProgressDialog> {
   AccountDeletionFlowTracker? _tracker;
+  Animation<double>? _pendingRouteAnimation;
 
   @override
   void initState() {
@@ -44,6 +45,7 @@ class _DeleteAccountProgressDialogState
   @override
   void dispose() {
     _tracker?.removeListener(_onDeletionFlowChanged);
+    _pendingRouteAnimation?.removeStatusListener(_onRouteAnimationStatus);
     super.dispose();
   }
 
@@ -60,8 +62,39 @@ class _DeleteAccountProgressDialogState
       return;
     }
     WidgetsBinding.instance.addPostFrameCallback(
-      (_) => _dismissIfStillMounted(),
+      (_) => _dismissWhenRouteSettled(),
     );
+  }
+
+  /// Pops only once the dialog's push transition has finished.
+  ///
+  /// Popping while the route is still animating in leaves its Navigator
+  /// history entry in a non-idle lifecycle state, which trips the
+  /// `entry.currentState == _RouteLifecycle.idle` assertion.
+  void _dismissWhenRouteSettled() {
+    if (!mounted || _pendingRouteAnimation != null) {
+      return;
+    }
+    final ModalRoute<void>? route = ModalRoute.of(context);
+    if (route == null || !route.isActive) {
+      return;
+    }
+    final Animation<double>? animation = route.animation;
+    if (animation == null || animation.status == AnimationStatus.completed) {
+      _dismissIfStillMounted();
+      return;
+    }
+    _pendingRouteAnimation = animation;
+    animation.addStatusListener(_onRouteAnimationStatus);
+  }
+
+  void _onRouteAnimationStatus(AnimationStatus status) {
+    if (status != AnimationStatus.completed) {
+      return;
+    }
+    _pendingRouteAnimation?.removeStatusListener(_onRouteAnimationStatus);
+    _pendingRouteAnimation = null;
+    _dismissIfStillMounted();
   }
 
   void _dismissIfStillMounted() {

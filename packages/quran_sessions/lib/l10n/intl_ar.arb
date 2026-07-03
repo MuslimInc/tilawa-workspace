@@ -1,6 +1,7 @@
 {
     "@@locale": "ar",
     "errorNetwork": "لا يوجد اتصال بالإنترنت.",
+    "offlineConnectionRequired": "يلزم اتصال بالإنترنت.",
     "errorTimeout": "انتهت مهلة الطلب. يرجى المحاولة مجدداً.",
     "errorSessionExpired": "انتهت الجلسة. يرجى تسجيل الدخول مجدداً.",
     "errorForbidden": "ليس لديك صلاحية لتنفيذ هذا الإجراء.",
@@ -886,8 +887,16 @@
             }
         }
     },
+    "teacherPendingBookingRequestsSectionTitle": "طلبات الحجز",
+    "upcomingSessionsSectionTitle": "الحصص القادمة",
     "teacherPendingBookingRequestsEmptyTitle": "لا توجد طلبات حجز حاليًا",
     "teacherPendingBookingRequestsEmptySubtitle": "ستظهر طلبات الطلاب هنا عند إرسالها",
+    "teacherDashboardStatPendingRequests": "طلبات معلقة",
+    "teacherDashboardStatUpcomingSessions": "حصص قادمة",
+    "teacherDashboardStatBookableSlotsThisWeek": "مواعيد مفتوحة هذا الأسبوع",
+    "teacherDashboardStatBookableSlotsHorizon": "مواعيد مفتوحة (14 يومًا)",
+    "teacherDashboardWeeklyScheduleSectionTitle": "الجدول الأسبوعي",
+    "teacherDashboardWeeklyScheduleSectionSubtitle": "ساعات عملك المتكررة تُنشئ المواعيد القابلة للحجز للطلاب.",
     "teacherAcceptBookingRequest": "قبول",
     "teacherRejectBookingRequest": "رفض",
     "tutorRejectBookingSheetTitle": "رفض طلب الحجز؟",

@@ -179,6 +179,7 @@ TeacherDashboardBloc buildTestTeacherDashboardBloc({
   CommitTimerFactory? commitTimerFactory,
   Duration commitDelay = const Duration(days: 365),
   DateTime Function()? now,
+  Future<bool> Function()? isConnected,
   String teacherId = 'teacher_1',
 }) {
   final configRepo =
@@ -217,6 +218,7 @@ TeacherDashboardBloc buildTestTeacherDashboardBloc({
     commitTimerFactory: commitTimerFactory,
     commitDelay: commitDelay,
     now: now,
+    isConnected: isConnected,
   );
 }
 

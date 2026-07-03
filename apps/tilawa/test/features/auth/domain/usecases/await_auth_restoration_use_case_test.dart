@@ -45,6 +45,51 @@ void main() {
   });
 
   test(
+    'skips auth stream wait when currentUser is already available',
+    () async {
+      when(() => mockAuthRepository.currentUser).thenReturn(
+        UserEntity(
+          id: 'user_1',
+          email: 'user@example.com',
+          displayName: 'User',
+          createdAt: DateTime.utc(2024),
+        ),
+      );
+
+      await useCase();
+
+      verifyNever(() => mockAuthRepository.authStateChanges);
+    },
+  );
+
+  test(
+    'waits for session user after initial null emission when hint provided',
+    () async {
+      final controller = StreamController<UserEntity?>.broadcast();
+      final UserEntity sessionUser = UserEntity(
+        id: 'user_1',
+        email: 'user@example.com',
+        displayName: 'User',
+        createdAt: DateTime.utc(2024),
+      );
+      when(() => mockAuthRepository.authStateChanges).thenAnswer(
+        (_) => controller.stream,
+      );
+      when(() => mockAuthRepository.currentUser).thenReturn(null);
+
+      final Future<void> pending = useCase(sessionUser: sessionUser);
+      await Future<void>.delayed(Duration.zero);
+      controller.add(null);
+      await Future<void>.delayed(const Duration(milliseconds: 50));
+      controller.add(sessionUser);
+      await controller.close();
+      await pending;
+
+      verify(() => mockAuthRepository.authStateChanges).called(greaterThan(0));
+    },
+  );
+
+  test(
     'timeout does not block callers when currentUser is already set',
     () async {
       when(() => mockAuthRepository.authStateChanges).thenAnswer(
@@ -61,7 +106,7 @@ void main() {
 
       await useCase();
 
-      verify(() => mockAuthRepository.authStateChanges).called(1);
+      verifyNever(() => mockAuthRepository.authStateChanges);
     },
   );
 }

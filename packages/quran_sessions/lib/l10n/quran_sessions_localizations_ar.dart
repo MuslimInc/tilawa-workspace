@@ -12,6 +12,9 @@ class QuranSessionsLocalizationsAr extends QuranSessionsLocalizations {
   String get errorNetwork => 'لا يوجد اتصال بالإنترنت.';
 
   @override
+  String get offlineConnectionRequired => 'يلزم اتصال بالإنترنت.';
+
+  @override
   String get errorTimeout => 'انتهت مهلة الطلب. يرجى المحاولة مجدداً.';
 
   @override
@@ -2162,12 +2165,39 @@ class QuranSessionsLocalizationsAr extends QuranSessionsLocalizations {
   }
 
   @override
+  String get teacherPendingBookingRequestsSectionTitle => 'طلبات الحجز';
+
+  @override
+  String get upcomingSessionsSectionTitle => 'الحصص القادمة';
+
+  @override
   String get teacherPendingBookingRequestsEmptyTitle =>
       'لا توجد طلبات حجز حاليًا';
 
   @override
   String get teacherPendingBookingRequestsEmptySubtitle =>
       'ستظهر طلبات الطلاب هنا عند إرسالها';
+
+  @override
+  String get teacherDashboardStatPendingRequests => 'طلبات معلقة';
+
+  @override
+  String get teacherDashboardStatUpcomingSessions => 'حصص قادمة';
+
+  @override
+  String get teacherDashboardStatBookableSlotsThisWeek =>
+      'مواعيد مفتوحة هذا الأسبوع';
+
+  @override
+  String get teacherDashboardStatBookableSlotsHorizon =>
+      'مواعيد مفتوحة (14 يومًا)';
+
+  @override
+  String get teacherDashboardWeeklyScheduleSectionTitle => 'الجدول الأسبوعي';
+
+  @override
+  String get teacherDashboardWeeklyScheduleSectionSubtitle =>
+      'ساعات عملك المتكررة تُنشئ المواعيد القابلة للحجز للطلاب.';
 
   @override
   String get teacherAcceptBookingRequest => 'قبول';

@@ -107,6 +107,12 @@ abstract class QuranSessionsLocalizations {
   /// **'No internet connection.'**
   String get errorNetwork;
 
+  /// No description provided for @offlineConnectionRequired.
+  ///
+  /// In en, this message translates to:
+  /// **'An internet connection is required.'**
+  String get offlineConnectionRequired;
+
   /// No description provided for @errorTimeout.
   ///
   /// In en, this message translates to:
@@ -3935,6 +3941,18 @@ abstract class QuranSessionsLocalizations {
   /// **'Booking requests ({count})'**
   String teacherPendingBookingRequestsSection(int count);
 
+  /// No description provided for @teacherPendingBookingRequestsSectionTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Booking requests'**
+  String get teacherPendingBookingRequestsSectionTitle;
+
+  /// No description provided for @upcomingSessionsSectionTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Upcoming sessions'**
+  String get upcomingSessionsSectionTitle;
+
   /// No description provided for @teacherPendingBookingRequestsEmptyTitle.
   ///
   /// In en, this message translates to:
@@ -3946,6 +3964,42 @@ abstract class QuranSessionsLocalizations {
   /// In en, this message translates to:
   /// **'Student requests will appear here'**
   String get teacherPendingBookingRequestsEmptySubtitle;
+
+  /// No description provided for @teacherDashboardStatPendingRequests.
+  ///
+  /// In en, this message translates to:
+  /// **'Pending requests'**
+  String get teacherDashboardStatPendingRequests;
+
+  /// No description provided for @teacherDashboardStatUpcomingSessions.
+  ///
+  /// In en, this message translates to:
+  /// **'Upcoming sessions'**
+  String get teacherDashboardStatUpcomingSessions;
+
+  /// No description provided for @teacherDashboardStatBookableSlotsThisWeek.
+  ///
+  /// In en, this message translates to:
+  /// **'Open slots this week'**
+  String get teacherDashboardStatBookableSlotsThisWeek;
+
+  /// No description provided for @teacherDashboardStatBookableSlotsHorizon.
+  ///
+  /// In en, this message translates to:
+  /// **'Open slots (14 days)'**
+  String get teacherDashboardStatBookableSlotsHorizon;
+
+  /// No description provided for @teacherDashboardWeeklyScheduleSectionTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Weekly schedule'**
+  String get teacherDashboardWeeklyScheduleSectionTitle;
+
+  /// No description provided for @teacherDashboardWeeklyScheduleSectionSubtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Your recurring working hours generate bookable times for students.'**
+  String get teacherDashboardWeeklyScheduleSectionSubtitle;
 
   /// No description provided for @teacherAcceptBookingRequest.
   ///

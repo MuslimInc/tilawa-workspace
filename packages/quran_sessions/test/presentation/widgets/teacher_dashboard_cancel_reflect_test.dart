@@ -186,6 +186,52 @@ void main() {
       check(state.upcomingSessions).isEmpty();
     });
 
+    testWidgets('cancel failure shows friendly tutor error toast', (
+      tester,
+    ) async {
+      addTearDown(tester.view.resetPhysicalSize);
+      final session = makeSession(
+        lifecycleStatus: SessionLifecycleStatus.scheduled,
+        startsAt: DateTime.utc(2026, 7, 10, 9),
+        endsAt: DateTime.utc(2026, 7, 10, 9, 30),
+      );
+      final scheduleRepo = FakeScheduleRepository()
+        ..schedule = makeWeeklySchedule();
+      final bloc = buildTestTeacherDashboardBloc(
+        sessionRepo: FakeSessionRepository()..sessions = [session],
+        getAvailability: buildGetTeacherAvailabilityUseCase(
+          scheduleRepository: scheduleRepo,
+          bookedSlotLockRepository: FakeBookedSlotLockRepository(),
+        ),
+        blockGeneratedSlot: BlockGeneratedSlotUseCase(scheduleRepo),
+        availabilityProvider: FakeAvailabilityProvider(),
+        cancelSession: buildCancelSessionViaServerUseCase(),
+        completeSession: buildCompleteSessionViaServerUseCase(),
+        scheduleRepo: scheduleRepo,
+        userProfileRepo: FakeUserProfileRepository(),
+      );
+
+      await pumpDashboard(tester, bloc: bloc);
+
+      bloc.emit(
+        (bloc.state as TeacherDashboardSuccess).copyWith(
+          sessionCancelFailure: const InvalidTransitionFailure(
+            action: 'cancelByTeacher',
+            actorRole: 'teacher',
+            reasonCode: 'invalid_transition',
+          ),
+        ),
+      );
+      await tester.pumpAndSettle();
+
+      expect(find.byType(TilawaFeedbackStrip), findsOneWidget);
+      expect(
+        find.textContaining('Could not cancel the session'),
+        findsOneWidget,
+      );
+      expect(find.textContaining('invalid_transition'), findsNothing);
+    });
+
     testWidgets(
       'pull-to-refresh restores upcoming card when session doc stays scheduled',
       (tester) async {

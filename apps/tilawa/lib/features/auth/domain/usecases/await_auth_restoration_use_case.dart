@@ -3,6 +3,7 @@ import 'dart:async';
 import 'package:injectable/injectable.dart';
 import 'package:tilawa/core/logging/app_logger.dart';
 
+import '../entities/user_entity.dart';
 import '../repositories/auth_repository.dart';
 
 /// Waits for Firebase Auth to finish restoring persisted credentials.
@@ -18,9 +19,31 @@ class AwaitAuthRestorationUseCase {
 
   final AuthRepository _authRepository;
 
-  Future<void> call() async {
+  Future<void> call({UserEntity? sessionUser}) async {
+    if (_authRepository.currentUser != null) {
+      logger.d(
+        '[DebugNotificationAuthFlow] auth restoration skipped '
+        'signedIn=true',
+      );
+      return;
+    }
+
     try {
-      await _authRepository.authStateChanges.first.timeout(startupTimeout);
+      final DateTime deadline = DateTime.now().add(startupTimeout);
+      await _waitForInitialAuthEmission(deadline);
+
+      if (_authRepository.currentUser != null) {
+        logger.d(
+          '[DebugNotificationAuthFlow] auth restoration completed '
+          'signedIn=true',
+        );
+        return;
+      }
+
+      if (sessionUser != null) {
+        await _waitForSessionUser(sessionUser, deadline);
+      }
+
       logger.d(
         '[DebugNotificationAuthFlow] auth restoration completed '
         'signedIn=${_authRepository.currentUser != null}',
@@ -36,6 +59,34 @@ class AwaitAuthRestorationUseCase {
         '[DebugNotificationAuthFlow] auth restoration finished without '
         'emission signedIn=${_authRepository.currentUser != null}',
       );
+    }
+  }
+
+  Future<void> _waitForInitialAuthEmission(DateTime deadline) async {
+    final Duration remaining = deadline.difference(DateTime.now());
+    if (remaining <= Duration.zero) {
+      throw TimeoutException('auth restoration deadline elapsed');
+    }
+
+    await _authRepository.authStateChanges.first.timeout(remaining);
+  }
+
+  Future<void> _waitForSessionUser(
+    UserEntity sessionUser,
+    DateTime deadline,
+  ) async {
+    final Duration remaining = deadline.difference(DateTime.now());
+    if (remaining <= Duration.zero) {
+      return;
+    }
+
+    try {
+      await _authRepository.authStateChanges
+          .where((UserEntity? user) => user?.id == sessionUser.id)
+          .timeout(remaining)
+          .first;
+    } on TimeoutException {
+      // Caller logs final signedIn state.
     }
   }
 }

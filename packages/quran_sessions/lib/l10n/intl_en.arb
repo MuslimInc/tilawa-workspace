@@ -1,6 +1,7 @@
 {
     "@@locale": "en",
     "errorNetwork": "No internet connection.",
+    "offlineConnectionRequired": "An internet connection is required.",
     "errorTimeout": "Request timed out. Please try again.",
     "errorSessionExpired": "Your session expired. Please sign in again.",
     "errorForbidden": "You do not have permission to perform this action.",
@@ -881,8 +882,16 @@
             }
         }
     },
+    "teacherPendingBookingRequestsSectionTitle": "Booking requests",
+    "upcomingSessionsSectionTitle": "Upcoming sessions",
     "teacherPendingBookingRequestsEmptyTitle": "No booking requests right now",
     "teacherPendingBookingRequestsEmptySubtitle": "Student requests will appear here",
+    "teacherDashboardStatPendingRequests": "Pending requests",
+    "teacherDashboardStatUpcomingSessions": "Upcoming sessions",
+    "teacherDashboardStatBookableSlotsThisWeek": "Open slots this week",
+    "teacherDashboardStatBookableSlotsHorizon": "Open slots (14 days)",
+    "teacherDashboardWeeklyScheduleSectionTitle": "Weekly schedule",
+    "teacherDashboardWeeklyScheduleSectionSubtitle": "Your recurring working hours generate bookable times for students.",
     "teacherAcceptBookingRequest": "Accept",
     "teacherRejectBookingRequest": "Decline",
     "tutorRejectBookingSheetTitle": "Decline booking request?",

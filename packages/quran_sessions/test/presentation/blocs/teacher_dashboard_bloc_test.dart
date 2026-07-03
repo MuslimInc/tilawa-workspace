@@ -55,6 +55,7 @@ void main() {
 
   TeacherDashboardBloc buildBloc({
     Duration commitDelay = const Duration(days: 365),
+    Future<bool> Function()? isConnected,
   }) {
     return buildTestTeacherDashboardBloc(
       sessionRepo: sessionRepo,
@@ -71,6 +72,7 @@ void main() {
       commitTimerFactory: testCommitTimerFactory,
       commitDelay: commitDelay,
       now: () => fixedNow,
+      isConnected: isConnected,
     );
   }
 
@@ -165,6 +167,22 @@ void main() {
       expect: () => [
         isA<TeacherDashboardLoading>(),
         isA<TeacherDashboardFailure>(),
+      ],
+    );
+
+    blocTest<TeacherDashboardBloc, TeacherDashboardState>(
+      'emits [Loading, Failure(NetworkFailure)] when offline before fetch',
+      build: () => buildBloc(isConnected: () async => false),
+      act: (b) => b.add(
+        const TeacherDashboardLoadRequested(teacherId: 'teacher_1'),
+      ),
+      expect: () => [
+        isA<TeacherDashboardLoading>(),
+        isA<TeacherDashboardFailure>().having(
+          (s) => s.failure,
+          'failure',
+          isA<NetworkFailure>(),
+        ),
       ],
     );
 

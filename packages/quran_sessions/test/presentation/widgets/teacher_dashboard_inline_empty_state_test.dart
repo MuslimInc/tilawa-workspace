@@ -7,28 +7,37 @@ import '../../helpers/widget_pump.dart';
 
 void main() {
   group('TeacherDashboardInlineEmptyState', () {
-    testWidgets('renders title and icon, hides optional subtitle/action', (
-      tester,
-    ) async {
-      await pumpInApp(
-        tester,
-        const TeacherDashboardInlineEmptyState(
-          icon: Icons.event_busy_outlined,
-          title: 'No upcoming sessions',
-        ),
-      );
+    testWidgets(
+      'renders quiet start-aligned line without chrome when no icon given',
+      (tester) async {
+        await pumpInApp(
+          tester,
+          const Directionality(
+            textDirection: TextDirection.rtl,
+            child: TeacherDashboardInlineEmptyState(
+              title: 'No upcoming sessions',
+            ),
+          ),
+          textDirection: TextDirection.rtl,
+        );
 
-      expect(find.text('No upcoming sessions'), findsOneWidget);
-      expect(find.byType(TilawaIconBox), findsOneWidget);
-      expect(find.byType(TilawaCard), findsOneWidget);
-      expect(find.byType(TilawaButton), findsNothing);
-    });
+        expect(find.text('No upcoming sessions'), findsOneWidget);
+        expect(find.byType(TilawaCard), findsNothing);
+        expect(find.byType(TilawaIconBox), findsNothing);
+        expect(
+          find.descendant(
+            of: find.byType(TeacherDashboardInlineEmptyState),
+            matching: find.byType(DecoratedBox),
+          ),
+          findsNothing,
+        );
+      },
+    );
 
     testWidgets('renders subtitle when provided', (tester) async {
       await pumpInApp(
         tester,
         const TeacherDashboardInlineEmptyState(
-          icon: Icons.event_busy_outlined,
           title: 'No upcoming sessions',
           subtitle: 'Students will appear here once they book.',
         ),
@@ -40,40 +49,28 @@ void main() {
       );
     });
 
-    testWidgets('shows action and invokes onAction when both provided', (
-      tester,
-    ) async {
-      var taps = 0;
-      await pumpInApp(
-        tester,
-        TeacherDashboardInlineEmptyState(
-          icon: Icons.event_busy_outlined,
-          title: 'No availability',
-          actionLabel: 'Set availability',
-          onAction: () => taps++,
-          iconTone: TilawaStateVisualTone.error,
-        ),
-      );
+    testWidgets(
+      'renders guidance container with quiet icon box when icon provided',
+      (tester) async {
+        await pumpInApp(
+          tester,
+          const TeacherDashboardInlineEmptyState(
+            icon: Icons.event_busy_outlined,
+            title: 'No bookable times this week',
+            subtitle: 'Open days in your weekly schedule become times here.',
+          ),
+        );
 
-      expect(find.text('Set availability'), findsOneWidget);
-      await tester.tap(find.text('Set availability'));
-      await tester.pump();
-      expect(taps, 1);
-    });
-
-    testWidgets('hides action when label given without callback', (
-      tester,
-    ) async {
-      await pumpInApp(
-        tester,
-        const TeacherDashboardInlineEmptyState(
-          icon: Icons.event_busy_outlined,
-          title: 'No availability',
-          actionLabel: 'Set availability',
-        ),
-      );
-
-      expect(find.byType(TilawaButton), findsNothing);
-    });
+        expect(find.byType(TilawaIconBox), findsOneWidget);
+        expect(find.byIcon(Icons.event_busy_outlined), findsOneWidget);
+        expect(find.text('No bookable times this week'), findsOneWidget);
+        expect(
+          find.text('Open days in your weekly schedule become times here.'),
+          findsOneWidget,
+        );
+        // Guidance weight stays a soft container, not a raised card.
+        expect(find.byType(TilawaCard), findsNothing);
+      },
+    );
   });
 }

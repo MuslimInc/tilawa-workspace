@@ -12,6 +12,9 @@ class QuranSessionsLocalizationsEn extends QuranSessionsLocalizations {
   String get errorNetwork => 'No internet connection.';
 
   @override
+  String get offlineConnectionRequired => 'An internet connection is required.';
+
+  @override
   String get errorTimeout => 'Request timed out. Please try again.';
 
   @override
@@ -2188,12 +2191,38 @@ class QuranSessionsLocalizationsEn extends QuranSessionsLocalizations {
   }
 
   @override
+  String get teacherPendingBookingRequestsSectionTitle => 'Booking requests';
+
+  @override
+  String get upcomingSessionsSectionTitle => 'Upcoming sessions';
+
+  @override
   String get teacherPendingBookingRequestsEmptyTitle =>
       'No booking requests right now';
 
   @override
   String get teacherPendingBookingRequestsEmptySubtitle =>
       'Student requests will appear here';
+
+  @override
+  String get teacherDashboardStatPendingRequests => 'Pending requests';
+
+  @override
+  String get teacherDashboardStatUpcomingSessions => 'Upcoming sessions';
+
+  @override
+  String get teacherDashboardStatBookableSlotsThisWeek =>
+      'Open slots this week';
+
+  @override
+  String get teacherDashboardStatBookableSlotsHorizon => 'Open slots (14 days)';
+
+  @override
+  String get teacherDashboardWeeklyScheduleSectionTitle => 'Weekly schedule';
+
+  @override
+  String get teacherDashboardWeeklyScheduleSectionSubtitle =>
+      'Your recurring working hours generate bookable times for students.';
 
   @override
   String get teacherAcceptBookingRequest => 'Accept';

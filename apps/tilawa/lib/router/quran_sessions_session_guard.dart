@@ -45,18 +45,8 @@ bool isStudentFacingQuranSessionsPath(String path) {
     return true;
   }
 
-  const detailPrefix = '${QuranSessionsRoutes.home}/detail/';
-  if (normalized.startsWith(detailPrefix) &&
-      normalized.length > detailPrefix.length) {
-    return true;
-  }
-
-  const reschedulePrefix = '${QuranSessionsRoutes.home}/reschedule/';
-  if (normalized.startsWith(reschedulePrefix) &&
-      normalized.length > reschedulePrefix.length) {
-    return true;
-  }
-
+  // Session detail and reschedule are shared by teachers (dashboard) and
+  // students (my sessions). Do not gate them behind learn-quran student UX.
   return false;
 }
 

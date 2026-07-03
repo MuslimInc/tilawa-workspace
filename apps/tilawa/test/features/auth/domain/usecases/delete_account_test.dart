@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:cloud_functions/cloud_functions.dart';
 import 'package:dartz_plus/dartz_plus.dart';
 import 'package:flutter_test/flutter_test.dart';
@@ -10,6 +12,7 @@ import 'package:tilawa/features/auth/domain/repositories/auth_repository.dart';
 import 'package:tilawa/features/auth/domain/entities/auth_error_key.dart';
 import 'package:tilawa/features/auth/domain/usecases/await_auth_restoration_use_case.dart';
 import 'package:tilawa/features/auth/domain/usecases/delete_account.dart';
+import 'package:tilawa/features/auth/domain/usecases/resolve_authenticated_user_use_case.dart';
 import 'package:tilawa/features/auth/domain/usecases/sync_device_token_use_case.dart';
 import 'package:tilawa/features/premium/domain/repositories/premium_repository.dart';
 import 'package:tilawa_core/errors/failures.dart';
@@ -17,8 +20,16 @@ import 'package:tilawa_core/errors/failures.dart';
 import 'delete_account_test.mocks.dart';
 import '../../../../support/fake_network_info.dart';
 
-class _FakeAwaitAuthRestoration extends AwaitAuthRestorationUseCase {
-  _FakeAwaitAuthRestoration(MockAuthRepository super.repository);
+class _FakeResolveAuthenticatedUser extends ResolveAuthenticatedUserUseCase {
+  _FakeResolveAuthenticatedUser(
+    MockAuthRepository repository,
+    this._resolvedUser,
+  ) : super(repository, AwaitAuthRestorationUseCase(repository));
+
+  final UserEntity? _resolvedUser;
+
+  @override
+  Future<UserEntity?> call({UserEntity? sessionUser}) async => _resolvedUser;
 }
 
 @GenerateMocks([
@@ -34,7 +45,7 @@ void main() {
   late MockSyncDeviceTokenUseCase mockSyncDeviceTokenUseCase;
   late MockPremiumRepository mockPremiumRepository;
   late FakeNetworkInfo networkInfo;
-  late _FakeAwaitAuthRestoration awaitAuthRestoration;
+  late _FakeResolveAuthenticatedUser resolveAuthenticatedUser;
 
   const tResult = AccountDeletionRequestResult(
     status: 'pending_deletion',
@@ -50,11 +61,14 @@ void main() {
 
   setUp(() {
     mockAuthRepository = MockAuthRepository();
-    awaitAuthRestoration = _FakeAwaitAuthRestoration(mockAuthRepository);
     mockAccountDeletionRemoteDataSource = MockAccountDeletionRemoteDataSource();
     mockSyncDeviceTokenUseCase = MockSyncDeviceTokenUseCase();
     mockPremiumRepository = MockPremiumRepository();
     networkInfo = FakeNetworkInfo();
+    resolveAuthenticatedUser = _FakeResolveAuthenticatedUser(
+      mockAuthRepository,
+      tUser,
+    );
 
     useCase = DeleteAccount(
       mockAuthRepository,
@@ -62,10 +76,9 @@ void main() {
       mockSyncDeviceTokenUseCase,
       mockPremiumRepository,
       ServerActionGuard(networkInfo),
-      awaitAuthRestoration,
+      resolveAuthenticatedUser,
     );
 
-    when(mockAuthRepository.currentUser).thenReturn(tUser);
     when(
       mockSyncDeviceTokenUseCase.removeCurrentTokenForUser(any),
     ).thenAnswer((_) async {});
@@ -84,7 +97,18 @@ void main() {
   });
 
   test('returns ValidationFailure when no user is signed in', () async {
-    when(mockAuthRepository.currentUser).thenReturn(null);
+    resolveAuthenticatedUser = _FakeResolveAuthenticatedUser(
+      mockAuthRepository,
+      null,
+    );
+    useCase = DeleteAccount(
+      mockAuthRepository,
+      mockAccountDeletionRemoteDataSource,
+      mockSyncDeviceTokenUseCase,
+      mockPremiumRepository,
+      ServerActionGuard(networkInfo),
+      resolveAuthenticatedUser,
+    );
 
     final Either<Failure, void> result = await useCase();
 
@@ -138,13 +162,22 @@ void main() {
   });
 
   test('uses uid confirmation when email is missing', () async {
-    when(mockAuthRepository.currentUser).thenReturn(
+    resolveAuthenticatedUser = _FakeResolveAuthenticatedUser(
+      mockAuthRepository,
       UserEntity(
         id: 'user-1',
         email: '',
         displayName: 'Test User',
         createdAt: DateTime.utc(2024),
       ),
+    );
+    useCase = DeleteAccount(
+      mockAuthRepository,
+      mockAccountDeletionRemoteDataSource,
+      mockSyncDeviceTokenUseCase,
+      mockPremiumRepository,
+      ServerActionGuard(networkInfo),
+      resolveAuthenticatedUser,
     );
 
     final Either<Failure, void> result = await useCase();
@@ -348,5 +381,104 @@ void main() {
       expect(failure.message, ServerActionFailureKey.offline);
     }, (_) => fail('expected left'));
     verifyNever(mockAuthRepository.signOut());
+  });
+
+  group('first-login session sync', () {
+    late ResolveAuthenticatedUserUseCase resolveAuthenticatedUserUseCase;
+
+    setUp(() {
+      resolveAuthenticatedUserUseCase = ResolveAuthenticatedUserUseCase(
+        mockAuthRepository,
+        AwaitAuthRestorationUseCase(mockAuthRepository),
+      );
+      useCase = DeleteAccount(
+        mockAuthRepository,
+        mockAccountDeletionRemoteDataSource,
+        mockSyncDeviceTokenUseCase,
+        mockPremiumRepository,
+        ServerActionGuard(networkInfo),
+        resolveAuthenticatedUserUseCase,
+      );
+    });
+
+    test(
+      'does not return notSignedIn when session hint syncs after delayed null',
+      () async {
+        final controller = StreamController<UserEntity?>.broadcast();
+        when(mockAuthRepository.currentUser).thenReturn(null);
+        when(mockAuthRepository.authStateChanges).thenAnswer(
+          (_) => controller.stream,
+        );
+
+        final Future<Either<Failure, void>> pending = useCase(
+          sessionUser: tUser,
+        );
+        await Future<void>.delayed(Duration.zero);
+        controller.add(null);
+        await Future<void>.delayed(const Duration(milliseconds: 50));
+        controller.add(tUser);
+        await controller.close();
+
+        final Either<Failure, void> result = await pending;
+
+        expect(result.isRight(), isTrue);
+        verify(
+          mockAccountDeletionRemoteDataSource.requestSelfAccountDeletion(
+            reason: 'Self-service account deletion from mobile app',
+            confirmEmail: 'test@example.com',
+          ),
+        ).called(1);
+      },
+    );
+
+    test(
+      'does not return notSignedIn when session hint syncs on auth stream',
+      () async {
+        when(mockAuthRepository.currentUser).thenReturn(null);
+        when(mockAuthRepository.authStateChanges).thenAnswer(
+          (_) => Stream<UserEntity?>.value(tUser),
+        );
+
+        final Either<Failure, void> result = await useCase(
+          sessionUser: tUser,
+        );
+
+        expect(result.isRight(), isTrue);
+        verify(
+          mockAccountDeletionRemoteDataSource.requestSelfAccountDeletion(
+            reason: 'Self-service account deletion from mobile app',
+            confirmEmail: 'test@example.com',
+          ),
+        ).called(1);
+      },
+    );
+
+    test(
+      'returns notSignedIn when session hint never syncs to Firebase',
+      () async {
+        when(mockAuthRepository.currentUser).thenReturn(null);
+        when(mockAuthRepository.authStateChanges).thenAnswer(
+          (_) => const Stream<UserEntity?>.empty(),
+        );
+
+        final Either<Failure, void> result = await useCase(sessionUser: tUser);
+
+        expect(result.isLeft(), isTrue);
+        result.fold((failure) {
+          expect(failure, isA<ValidationFailure>());
+          expect(failure.message, DeleteAccountErrorKey.notSignedIn);
+        }, (_) => fail('expected left'));
+        verifyNever(
+          mockAccountDeletionRemoteDataSource.requestSelfAccountDeletion(
+            reason: anyNamed('reason'),
+            confirmEmail: anyNamed('confirmEmail'),
+          ),
+        );
+      },
+      timeout: Timeout(
+        ResolveAuthenticatedUserUseCase.postSignInSyncTimeout +
+            const Duration(seconds: 2),
+      ),
+    );
   });
 }

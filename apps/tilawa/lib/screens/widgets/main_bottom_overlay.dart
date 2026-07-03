@@ -19,15 +19,6 @@ class MainBottomOverlay extends StatelessWidget {
       return const SizedBox.shrink();
     }
 
-    return const Stack(
-      children: [
-        Positioned(
-          top: 0,
-          left: 0,
-          right: 0,
-          child: OfflineIndicatorWidget(),
-        ),
-      ],
-    );
+    return const OfflineIndicatorWidget();
   }
 }

@@ -71,12 +71,7 @@ void main() {
     blocTest<TeacherListBloc, TeacherListState>(
       'emits availability summaries from generated availability use case',
       build: () {
-        final anchor = DateTime(
-          DateTime.now().year,
-          DateTime.now().month,
-          DateTime.now().day,
-          12,
-        );
+        final DateTime slotStart = DateTime.now().add(const Duration(hours: 2));
         repo.teachers = [makeTeacher(id: 'teacher_with_slots')];
         return TeacherListBloc(
           GetTeachersUseCase(repo),
@@ -84,7 +79,7 @@ void main() {
             'teacher_with_slots': [
               makeSlot(
                 teacherId: 'teacher_with_slots',
-                startsAt: anchor.add(const Duration(hours: 2)),
+                startsAt: slotStart,
               ),
             ],
           }),

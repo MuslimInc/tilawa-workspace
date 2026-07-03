@@ -44,6 +44,37 @@ void main() {
     }
   });
 
+  group('isStudentFacingQuranSessionsPath', () {
+    test('matches browse and booking flows only', () {
+      expect(
+        isStudentFacingQuranSessionsPath(QuranSessionsRoutes.mySessions),
+        isTrue,
+      );
+      expect(
+        isStudentFacingQuranSessionsPath(
+          QuranSessionsRoutes.sessionDetail.replaceFirst(
+            ':bookingId',
+            'booking-1',
+          ),
+        ),
+        isFalse,
+      );
+      expect(
+        isStudentFacingQuranSessionsPath(
+          QuranSessionsRoutes.rescheduleSession.replaceFirst(
+            ':bookingId',
+            'booking-1',
+          ),
+        ),
+        isFalse,
+      );
+      expect(
+        isStudentFacingQuranSessionsPath(QuranSessionsRoutes.teacherDashboard),
+        isFalse,
+      );
+    });
+  });
+
   group('isAuthRequiredQuranSessionsPath', () {
     test('matches session detail and other signed-in flows', () {
       expect(
@@ -179,6 +210,42 @@ void main() {
       );
       final result = quranSessionsFeatureRedirect(
         FakeGoRouterState(QuranSessionsRoutes.teacherDashboard),
+      );
+      expect(result, isNull);
+    });
+
+    test('allows session detail when student feature disabled', () {
+      getIt.registerSingleton<AppLaunchConfig>(
+        const AppLaunchConfig(
+          quranSessionsEnabled: true,
+          learnQuranStudentFeatureEnabled: false,
+        ),
+      );
+      final result = quranSessionsFeatureRedirect(
+        FakeGoRouterState(
+          QuranSessionsRoutes.sessionDetail.replaceFirst(
+            ':bookingId',
+            'booking-1',
+          ),
+        ),
+      );
+      expect(result, isNull);
+    });
+
+    test('allows reschedule when student feature disabled', () {
+      getIt.registerSingleton<AppLaunchConfig>(
+        const AppLaunchConfig(
+          quranSessionsEnabled: true,
+          learnQuranStudentFeatureEnabled: false,
+        ),
+      );
+      final result = quranSessionsFeatureRedirect(
+        FakeGoRouterState(
+          QuranSessionsRoutes.rescheduleSession.replaceFirst(
+            ':bookingId',
+            'booking-1',
+          ),
+        ),
       );
       expect(result, isNull);
     });

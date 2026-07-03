@@ -3,6 +3,7 @@ import 'package:quran_sessions/quran_sessions.dart';
 import 'package:tilawa/core/bootstrap/app_launch_config.dart';
 import 'package:tilawa/core/di/get_it_idempotent.dart';
 import 'package:tilawa/features/quran_sessions/quran_sessions_launch_policy.dart';
+import 'package:tilawa_core/network/network_info.dart';
 
 import '../data/fake_auth_session_provider.dart';
 import '../data/fake_mvp_availability_provider.dart';
@@ -419,6 +420,9 @@ class QuranSessionsMvpModule {
         completeSessionUseCase: sl<CompleteSessionViaServerUseCase>(),
         fridayReminderStore: sl<FridayReviewReminderStore>(),
         teacherUserId: sl<AuthSessionProvider>().currentUserId ?? 'teacher_mvp',
+        isConnected: sl.isRegistered<NetworkInfo>()
+            ? () => sl<NetworkInfo>().isConnected
+            : null,
       ),
     );
     sl.registerFactoryIfAbsent(

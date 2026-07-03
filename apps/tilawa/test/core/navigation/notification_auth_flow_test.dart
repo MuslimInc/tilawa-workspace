@@ -14,6 +14,7 @@ import 'package:tilawa/features/auth/domain/entities/user_entity.dart';
 import 'package:tilawa/features/auth/domain/repositories/auth_repository.dart';
 import 'package:tilawa/features/auth/domain/usecases/await_auth_restoration_use_case.dart';
 import 'package:tilawa/features/auth/domain/usecases/get_current_user_use_case.dart';
+import 'package:tilawa/features/auth/domain/usecases/get_persisted_authenticated_user_use_case.dart';
 import 'package:tilawa/features/auth/domain/usecases/sign_out.dart';
 import 'package:tilawa/features/auth/presentation/bloc/auth_bloc.dart';
 import 'package:tilawa/features/auth/presentation/cubit/session_validity_cubit.dart';
@@ -47,6 +48,9 @@ class MockSessionValidityCubit extends MockCubit<SessionValidityState>
 
 class MockAuthBloc extends MockBloc<AuthEvent, AuthState> implements AuthBloc {}
 
+class MockGetPersistedAuthenticatedUserUseCase extends Mock
+    implements GetPersistedAuthenticatedUserUseCase {}
+
 class FakeGoRouterState extends Fake implements GoRouterState {
   FakeGoRouterState(this.path);
 
@@ -62,6 +66,8 @@ void main() {
   late MockGetCurrentUserUseCase mockGetCurrentUser;
   late MockCheckOnboardingStatus mockOnboarding;
   late MockStartupNotificationRepository mockStartupNotifications;
+  late MockGetPersistedAuthenticatedUserUseCase
+  mockGetPersistedAuthenticatedUser;
   late GetSplashNextRouteUseCase splashRouteUseCase;
   late UserEntity signedInUser;
 
@@ -86,6 +92,8 @@ void main() {
     mockGetCurrentUser = MockGetCurrentUserUseCase();
     mockOnboarding = MockCheckOnboardingStatus();
     mockStartupNotifications = MockStartupNotificationRepository();
+    mockGetPersistedAuthenticatedUser =
+        MockGetPersistedAuthenticatedUserUseCase();
     mockReadiness = MockAppStartupReadiness();
     mockPrepareGoogleSignIn = MockPrepareGoogleSignInUseCase();
     signedInUser = UserEntity(
@@ -107,6 +115,9 @@ void main() {
     when(() => mockReadiness.timedOut).thenReturn(false);
     when(() => mockReadiness.recitersDataReady).thenReturn(false);
     when(() => mockPrepareGoogleSignIn()).thenAnswer((_) async {});
+    when(
+      () => mockGetPersistedAuthenticatedUser(),
+    ).thenAnswer((_) async => null);
   });
 
   tearDown(AppRouter.resetForTesting);
@@ -125,6 +136,7 @@ void main() {
       mockOnboarding,
       mockStartupNotifications,
       awaitAuth,
+      mockGetPersistedAuthenticatedUser,
     );
   }
 
@@ -366,6 +378,7 @@ void main() {
           mockOnboarding,
           mockStartupNotifications,
           awaitAuth,
+          mockGetPersistedAuthenticatedUser,
         );
 
         final SplashRouteResult result = await splashRouteUseCase();
