@@ -78,6 +78,15 @@ void main() {
       expect(() => service.gauge('broken.metric', 1), returnsNormally);
       expect(() => service.distribution('broken.metric', 1), returnsNormally);
     });
+    test('forwards count without attributes', () {
+      final _FakeSentryMetrics sentryMetrics = _FakeSentryMetrics();
+      final SentryApplicationMetricsService service =
+          SentryApplicationMetricsService.withMetrics(sentryMetrics);
+
+      service.count('simple.counter');
+
+      expect(sentryMetrics.calls.single.attributes, isNull);
+    });
   });
 }
 

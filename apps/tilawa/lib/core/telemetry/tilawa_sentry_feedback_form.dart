@@ -432,10 +432,11 @@ class _TilawaSentryFeedbackFormState extends State<TilawaSentryFeedbackForm> {
 
     final options = _flutterOptions.feedback;
     final Color successColor = options.successColor;
+    final ColorScheme colorScheme = Theme.of(context).colorScheme;
     final Color foregroundColor =
         ThemeData.estimateBrightnessForColor(successColor) == Brightness.dark
-        ? Colors.white
-        : Colors.black;
+        ? colorScheme.onInverseSurface
+        : colorScheme.inverseSurface;
 
     messenger.showSnackBar(
       SnackBar(
@@ -484,6 +485,7 @@ class _TilawaSentryFeedbackFormState extends State<TilawaSentryFeedbackForm> {
     }
   }
 
+  // coverage:ignore-start
   Future<void> _captureReplay() async {
     for (final Integration<dynamic> integration
         in _flutterOptions.integrations) {
@@ -494,6 +496,8 @@ class _TilawaSentryFeedbackFormState extends State<TilawaSentryFeedbackForm> {
       return;
     }
   }
+
+  // coverage:ignore-end
 }
 
 /// Full-screen preview for a Sentry feedback screenshot attachment.

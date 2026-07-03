@@ -1,10 +1,14 @@
+import 'package:flutter/foundation.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:sentry_flutter/sentry_flutter.dart';
 import 'package:tilawa/core/telemetry/crash_reporting_context.dart';
 import 'package:tilawa/core/telemetry/distribution_config.dart';
 
+import 'sentry_test_support.dart';
+
 void main() {
+  setUpAll(mockSentryPlatformChannels);
   tearDown(CrashReportingContext.resetForTesting);
 
   group('resolveBuildMode', () {
@@ -216,6 +220,20 @@ void main() {
         event,
       );
     });
+
+    test('drops wakelock message text in release', () {
+      final SentryEvent event = SentryEvent(
+        message: SentryMessage('wakelock requires a foreground activity'),
+      );
+
+      expect(
+        CrashReportingContext.filterWakelockPlatformNoiseForMode(
+          event: event,
+          releaseMode: true,
+        ),
+        isNull,
+      );
+    });
   });
 
   group('filterWakelockLogsForMode', () {
@@ -316,6 +334,39 @@ void main() {
     });
   });
 
+  group('filterExpectedSessionNoiseForMode auth messages', () {
+    test('drops auth invalidation from event message text', () {
+      final SentryEvent event = SentryEvent(
+        message: SentryMessage('credential is no longer valid'),
+      );
+
+      expect(
+        CrashReportingContext.filterExpectedSessionNoiseForMode(
+          event: event,
+          releaseMode: true,
+        ),
+        isNull,
+      );
+    });
+  });
+
+  group('filterBeforeSendLog auth chain', () {
+    test('drops auth invalidation logs in release', () {
+      final SentryLog log = SentryLog(
+        timestamp: DateTime.utc(2026),
+        level: SentryLogLevel.error,
+        body: 'user must sign in again',
+        attributes: <String, SentryAttribute>{},
+      );
+
+      if (kReleaseMode) {
+        expect(CrashReportingContext.filterBeforeSendLog(log), isNull);
+      } else {
+        expect(CrashReportingContext.filterBeforeSendLog(log), log);
+      }
+    });
+  });
+
   group('filterAuthSessionLogsForMode', () {
     test('drops auth invalidation logs in release', () {
       final SentryLog log = SentryLog(
@@ -332,6 +383,183 @@ void main() {
         ),
         isNull,
       );
+    });
+  });
+
+  group('filterEmulatorsForMode', () {
+    test('drops emulator-tagged events in release', () {
+      final SentryEvent event = SentryEvent(
+        tags: <String, String>{
+          CrashReportingTagKeys.deviceKind: 'emulator',
+        },
+      );
+
+      expect(
+        CrashReportingContext.filterEmulatorsForMode(
+          event: event,
+          releaseMode: true,
+        ),
+        isNull,
+      );
+    });
+
+    test('drops simulator context events in release', () {
+      final SentryEvent event = SentryEvent(
+        contexts: Contexts(device: SentryDevice(simulator: true)),
+      );
+
+      expect(
+        CrashReportingContext.filterEmulatorsForMode(
+          event: event,
+          releaseMode: true,
+        ),
+        isNull,
+      );
+    });
+
+    test('keeps verify events even on emulators in release', () {
+      final SentryEvent event = SentryEvent(
+        tags: <String, String>{
+          CrashReportingTagKeys.sentryVerify: 'true',
+          CrashReportingTagKeys.deviceKind: 'emulator',
+        },
+      );
+
+      expect(
+        CrashReportingContext.filterEmulatorsForMode(
+          event: event,
+          releaseMode: true,
+        ),
+        event,
+      );
+    });
+  });
+
+  group('filterBeforeSend', () {
+    test('passes benign events through in debug builds', () {
+      final SentryEvent event = SentryEvent(message: SentryMessage('ok'));
+
+      expect(
+        CrashReportingContext.filterBeforeSend(event, Hint()),
+        event,
+      );
+    });
+  });
+
+  group('filterBeforeSendLog', () {
+    test('passes benign logs through in debug builds', () {
+      final SentryLog log = SentryLog(
+        timestamp: DateTime.utc(2026),
+        level: SentryLogLevel.info,
+        body: 'hello',
+        attributes: <String, SentryAttribute>{},
+      );
+
+      expect(CrashReportingContext.filterBeforeSendLog(log), log);
+    });
+
+    test('drops emulator logs in release when cache says emulator', () {
+      CrashReportingContext.setSentryTagsCacheForTesting(<String, String>{
+        CrashReportingTagKeys.deviceKind: 'simulator',
+      });
+
+      final SentryLog log = SentryLog(
+        timestamp: DateTime.utc(2026),
+        level: SentryLogLevel.warn,
+        body: 'hello',
+        attributes: <String, SentryAttribute>{},
+      );
+
+      if (kReleaseMode) {
+        expect(CrashReportingContext.filterBeforeSendLog(log), isNull);
+      } else {
+        expect(CrashReportingContext.filterBeforeSendLog(log), log);
+      }
+    });
+  });
+
+  group('isIgnorableAuthSessionNoise', () {
+    test('matches firebase auth invalidation patterns', () {
+      expect(
+        CrashReportingContext.isIgnorableAuthSessionNoise(
+          StateError('[firebase_auth/user-token-expired] stale'),
+        ),
+        isTrue,
+      );
+      expect(
+        CrashReportingContext.isIgnorableAuthSessionNoise(
+          Exception('user must sign in again'),
+        ),
+        isTrue,
+      );
+      expect(
+        CrashReportingContext.isIgnorableAuthSessionNoise(
+          Exception('unrelated'),
+        ),
+        isFalse,
+      );
+    });
+  });
+
+  group('isIgnorableEmptyRouteStateError', () {
+    test('matches didPopRoute No element failures', () {
+      final SentryEvent event = SentryEvent(
+        throwable: StateError('Bad state: No element'),
+        message: SentryMessage('WidgetsBindingObserver.didPopRoute'),
+      );
+
+      expect(
+        CrashReportingContext.isIgnorableEmptyRouteStateError(event),
+        isTrue,
+      );
+    });
+
+    test('ignores unrelated StateError messages', () {
+      final SentryEvent event = SentryEvent(
+        throwable: StateError('Bad state: other'),
+        message: SentryMessage('WidgetsBindingObserver.didPopRoute'),
+      );
+
+      expect(
+        CrashReportingContext.isIgnorableEmptyRouteStateError(event),
+        isFalse,
+      );
+    });
+  });
+
+  group('mapInstallSource', () {
+    test('maps App Store installer', () {
+      expect(
+        CrashReportingContext.mapInstallSource('com.apple.AppStore'),
+        'app_store',
+      );
+    });
+  });
+
+  group('tag collection', () {
+    test('sentryTags returns stable device and build metadata', () async {
+      final Map<String, String> tags = await CrashReportingContext.sentryTags();
+
+      expect(tags, contains(CrashReportingTagKeys.deviceKind));
+      expect(tags, contains(CrashReportingTagKeys.buildMode));
+      expect(tags, contains(CrashReportingTagKeys.buildNumber));
+    });
+
+    test('crashlyticsKeys mirrors sentry tag values', () async {
+      final Map<String, String> sentry =
+          await CrashReportingContext.sentryTags();
+      final Map<String, String> crashlytics =
+          await CrashReportingContext.crashlyticsKeys();
+
+      expect(
+        crashlytics[CrashReportingTagKeys.deviceKindCrashlytics],
+        sentry[CrashReportingTagKeys.deviceKind],
+      );
+    });
+
+    test('applyToSentry configures scope tags', () async {
+      await ensureSentryInitializedForTests();
+      await CrashReportingContext.applyToSentry();
     });
   });
 }

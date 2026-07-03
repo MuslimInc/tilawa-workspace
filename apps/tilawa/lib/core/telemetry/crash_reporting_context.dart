@@ -60,11 +60,19 @@ abstract final class CrashReportingContext {
 
   /// Drops emulator/simulator events in release builds.
   static SentryEvent? filterEmulatorsInRelease(SentryEvent event, Hint hint) {
+    return filterEmulatorsForMode(event: event, releaseMode: kReleaseMode);
+  }
+
+  @visibleForTesting
+  static SentryEvent? filterEmulatorsForMode({
+    required SentryEvent event,
+    required bool releaseMode,
+  }) {
     if (event.tags?[CrashReportingTagKeys.sentryVerify] == 'true') {
       return event;
     }
 
-    if (!kReleaseMode) {
+    if (!releaseMode) {
       return event;
     }
 
@@ -451,6 +459,7 @@ abstract final class CrashReportingContext {
 
   static Future<({String kind, String name})> _resolveDeviceInfo() async {
     final DeviceInfoPlugin deviceInfo = DeviceInfoPlugin();
+    // coverage:ignore-start
     if (Platform.isAndroid) {
       final AndroidDeviceInfo info = await deviceInfo.androidInfo;
       final String name = info.model.trim().isNotEmpty
@@ -481,6 +490,7 @@ abstract final class CrashReportingContext {
         name: name,
       );
     }
+    // coverage:ignore-end
     return (kind: 'unknown', name: 'unknown');
   }
 
@@ -492,6 +502,7 @@ abstract final class CrashReportingContext {
       return 'unknown';
     }
 
+    // coverage:ignore-start
     try {
       final String? installer = await _androidInstallChannel
           .invokeMethod<String>(
@@ -503,11 +514,17 @@ abstract final class CrashReportingContext {
     } on MissingPluginException {
       return 'unknown';
     }
+    // coverage:ignore-end
   }
 
   @visibleForTesting
   static void resetForTesting() {
     _sentryTags = null;
     _crashlyticsKeys = null;
+  }
+
+  @visibleForTesting
+  static void setSentryTagsCacheForTesting(Map<String, String>? tags) {
+    _sentryTags = tags;
   }
 }

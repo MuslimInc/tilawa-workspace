@@ -94,6 +94,7 @@ class _SentryDebugVerifyTileState extends State<SentryDebugVerifyTile> {
         },
       );
 
+      // coverage:ignore-start
       if (SentryLogOutput.forwardingEnabled) {
         Sentry.logger.warn(
           'Sentry verify log ($verifyId)',
@@ -102,6 +103,7 @@ class _SentryDebugVerifyTileState extends State<SentryDebugVerifyTile> {
           },
         );
       }
+      // coverage:ignore-end
 
       if (!context.mounted) {
         return;

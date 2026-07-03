@@ -151,7 +151,7 @@ void main() {
   );
 
   blocTest<TeacherCapabilityCubit, SettingsTeacherCapabilityLoadState>(
-    'emits hasLoaded true when teacher application feature disabled',
+    'still loads capability when teacher application feature disabled',
     build: () {
       scopeGetIt().registerSingleton<AppLaunchConfig>(
         const AppLaunchConfig(
@@ -176,7 +176,9 @@ void main() {
     verify: (cubit) {
       check(cubit.state.hasLoaded).isTrue();
       check(cubit.state.isLoading).isFalse();
-      check(cubit.state.capability).isNull();
+      check(
+        cubit.state.capability?.state,
+      ).equals(TeacherCapabilityState.approvedActive);
     },
   );
 

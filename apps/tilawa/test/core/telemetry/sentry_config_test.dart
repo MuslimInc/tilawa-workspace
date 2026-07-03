@@ -1,4 +1,5 @@
 import 'package:flutter/foundation.dart';
+import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:sentry_flutter/sentry_flutter.dart';
 import 'package:tilawa/core/telemetry/crash_reporting_context.dart';
@@ -26,6 +27,7 @@ void main() {
       expect(options.enableLogs, kReleaseMode);
       expect(options.tracesSampleRate, kReleaseMode ? 0.1 : 1.0);
       expect(options.enableTimeToFullDisplayTracing, isTrue);
+      // ignore: experimental_member_use
       expect(options.profilesSampleRate, kReleaseMode ? 0.1 : 1.0);
       expect(options.autoInitializeNativeSdk, isFalse);
       expect(options.navigatorKey, AppRouter.navigatorKey);
@@ -42,6 +44,12 @@ void main() {
       expect(options.replay.sessionSampleRate, kReleaseMode ? 0.1 : 1.0);
       expect(options.privacy.maskAllText, isTrue);
       expect(options.privacy.maskAllImages, isTrue);
+    });
+
+    test('wrapRootWidget wraps child in SentryWidget', () {
+      final Widget child = SentryConfig.wrapRootWidget(const Text('root'));
+
+      expect(child, isA<SentryWidget>());
     });
   });
 }

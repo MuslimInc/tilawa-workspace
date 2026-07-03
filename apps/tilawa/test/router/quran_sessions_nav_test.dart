@@ -121,6 +121,7 @@ void main() {
       getIt.registerSingleton<AppLaunchConfig>(
         const AppLaunchConfig(
           quranSessionsEnabled: true,
+          learnQuranStudentFeatureEnabled: true,
           quranSessionsBookingEnabled: false,
         ),
       );
@@ -136,6 +137,7 @@ void main() {
       getIt.registerSingleton<AppLaunchConfig>(
         const AppLaunchConfig(
           quranSessionsEnabled: true,
+          learnQuranStudentFeatureEnabled: true,
           quranSessionsBookingEnabled: true,
         ),
       );

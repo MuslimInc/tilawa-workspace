@@ -51,6 +51,7 @@ Future<void> pumpQuranImagePageGolden(
     ),
   );
   await tester.pump();
+  await tester.pump(const Duration(milliseconds: 100));
 }
 
 String goldenPath({required int pageNumber, required String viewportLabel}) {

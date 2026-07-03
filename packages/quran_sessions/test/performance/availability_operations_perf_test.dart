@@ -106,7 +106,7 @@ void main() {
       check(withOverrides.length).isLessThan(without.length);
     });
 
-    test('grouping 1000 slots stays within ceiling', () {
+    test('grouping 1000 pre-sorted slots stays within ceiling', () {
       final now = DateTime.utc(2026, 6, 22, 9);
       final slots = List.generate(
         1000,

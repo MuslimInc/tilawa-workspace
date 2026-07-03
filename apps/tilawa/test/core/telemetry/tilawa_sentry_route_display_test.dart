@@ -30,5 +30,52 @@ void main() {
         tester.element(find.text('outside')),
       );
     });
+
+    testWidgets('reporter reports once when when flips to true', (
+      tester,
+    ) async {
+      var ready = false;
+
+      await tester.pumpWidget(
+        MaterialApp(
+          home: TilawaSentryRouteDisplay(
+            child: StatefulBuilder(
+              builder: (context, setState) {
+                return Column(
+                  children: [
+                    TilawaSentryRouteReporter(
+                      when: ready,
+                      child: const Text('ready-content'),
+                    ),
+                    TextButton(
+                      onPressed: () => setState(() => ready = true),
+                      child: const Text('mark-ready'),
+                    ),
+                  ],
+                );
+              },
+            ),
+          ),
+        ),
+      );
+
+      await tester.tap(find.text('mark-ready'));
+      await tester.pump();
+      expect(find.text('ready-content'), findsOneWidget);
+    });
+
+    test('reportFullyDisplayed returns early when unmounted', () async {
+      await TilawaSentryRouteDisplay.reportFullyDisplayed(
+        _UnmountedContext(),
+      );
+    });
   });
+}
+
+class _UnmountedContext implements BuildContext {
+  @override
+  bool get mounted => false;
+
+  @override
+  dynamic noSuchMethod(Invocation invocation) => super.noSuchMethod(invocation);
 }

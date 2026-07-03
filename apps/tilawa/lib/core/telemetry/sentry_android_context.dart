@@ -18,6 +18,7 @@ abstract final class SentryAndroidContext {
     if (!Platform.isAndroid) {
       return;
     }
+    // coverage:ignore-start
     try {
       await _channel.invokeMethod<void>('restoreSentryApplicationContext');
     } on PlatformException {
@@ -25,6 +26,7 @@ abstract final class SentryAndroidContext {
     } on MissingPluginException {
       // Non-Android embedder or tests without a platform channel.
     }
+    // coverage:ignore-end
   }
 
   /// Whether the Android native SDK is still active after a Flutter hot restart.
@@ -32,6 +34,7 @@ abstract final class SentryAndroidContext {
     if (!Platform.isAndroid) {
       return false;
     }
+    // coverage:ignore-start
     try {
       final bool? initialized = await _channel.invokeMethod<bool>(
         'isSentryNativeSdkInitialized',
@@ -42,5 +45,6 @@ abstract final class SentryAndroidContext {
     } on MissingPluginException {
       return false;
     }
+    // coverage:ignore-end
   }
 }

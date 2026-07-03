@@ -4,9 +4,42 @@ import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:sentry_flutter/sentry_flutter.dart';
 import 'package:tilawa/core/telemetry/sentry_user_feedback.dart';
+import 'package:tilawa/core/telemetry/tilawa_feedback_screenshot_capture.dart';
 import 'package:tilawa/core/telemetry/tilawa_sentry_feedback_form.dart';
 import 'package:tilawa/l10n/generated/app_localizations.dart';
+import 'package:tilawa/router/app_router.dart';
 import 'package:tilawa_ui_kit/tilawa_ui_kit.dart';
+
+class _FakeFeedbackHub implements Hub {
+  _FakeFeedbackHub({SentryFlutterOptions? options, this.sentryUser})
+    : _options = options ?? SentryFlutterOptions();
+
+  final SentryFlutterOptions _options;
+  final SentryUser? sentryUser;
+  int captureFeedbackCalls = 0;
+
+  @override
+  void configureScope(void Function(Scope scope) callback) {
+    final Scope scope = Scope(_options);
+    if (sentryUser != null) {
+      scope.setUser(sentryUser);
+    }
+    callback(scope);
+  }
+
+  @override
+  Future<SentryId> captureFeedback(
+    SentryFeedback feedback, {
+    Hint? hint,
+    ScopeCallback? withScope,
+  }) async {
+    captureFeedbackCalls++;
+    return SentryId.newId();
+  }
+
+  @override
+  dynamic noSuchMethod(Invocation invocation) => super.noSuchMethod(invocation);
+}
 
 final Uint8List _k1x1TransparentPng = Uint8List.fromList(<int>[
   0x89,
@@ -79,6 +112,17 @@ final Uint8List _k1x1TransparentPng = Uint8List.fromList(<int>[
 
 void main() {
   tearDown(SentryUserFeedback.resetForTesting);
+
+  setUp(() {
+    TilawaFeedbackScreenshotCapture.resetTestConfiguration();
+    TilawaFeedbackScreenshotCapture.readyFrameCount = 0;
+    TilawaFeedbackScreenshotCapture.boundaryReadyFrames = 0;
+    TilawaFeedbackScreenshotCapture.maxCaptureAttempts = 1;
+    TilawaFeedbackScreenshotCapture.renderBoundaryOverride = (_) async =>
+        _k1x1TransparentPng;
+  });
+
+  tearDown(TilawaFeedbackScreenshotCapture.resetTestConfiguration);
 
   Future<void> pumpForm(
     WidgetTester tester, {
@@ -322,6 +366,310 @@ void main() {
             .controller
             ?.text,
         'draft message',
+      );
+    });
+
+    testWidgets('submits valid feedback through injected hub', (tester) async {
+      final SentryFlutterOptions options = SentryFlutterOptions();
+      final _FakeFeedbackHub hub = _FakeFeedbackHub(options: options);
+      SentryUserFeedback.bindFlutterOptions(options);
+
+      await tester.pumpWidget(
+        MaterialApp(
+          theme: AppTheme.getLightTheme(primaryColor: AppColors.defaultPrimary),
+          localizationsDelegates: AppLocalizations.localizationsDelegates,
+          supportedLocales: AppLocalizations.supportedLocales,
+          home: Builder(
+            builder: (BuildContext context) {
+              SentryUserFeedback.applyLocalizedLabels(
+                AppLocalizations.of(context),
+              );
+              return Scaffold(
+                body: Center(
+                  child: ElevatedButton(
+                    onPressed: () => TilawaSentryFeedbackForm.show(
+                      context,
+                      hub: hub,
+                      flutterOptions: options,
+                    ),
+                    child: const Text('open-form'),
+                  ),
+                ),
+              );
+            },
+          ),
+        ),
+      );
+      await tester.pumpAndSettle();
+
+      await tester.tap(find.text('open-form'));
+      await tester.pumpAndSettle();
+
+      await tester.enterText(
+        find.byKey(const ValueKey('tilawa_sentry_feedback_message')),
+        'Something broke on the home screen.',
+      );
+      await tester.tap(
+        find.byKey(const ValueKey('tilawa_sentry_feedback_submit')),
+      );
+      await tester.pumpAndSettle();
+
+      expect(hub.captureFeedbackCalls, 1);
+      expect(find.byType(TilawaSentryFeedbackForm), findsNothing);
+    });
+
+    testWidgets('remove screenshot clears preview controls', (tester) async {
+      final SentryAttachment screenshot = SentryAttachment.fromUint8List(
+        _k1x1TransparentPng,
+        'screenshot.png',
+        contentType: 'image/png',
+      );
+
+      await pumpForm(tester, screenshot: screenshot);
+      expect(
+        find.byKey(
+          const ValueKey('tilawa_sentry_feedback_remove_screenshot'),
+        ),
+        findsOneWidget,
+      );
+
+      await tester.tap(
+        find.byKey(const ValueKey('tilawa_sentry_feedback_remove_screenshot')),
+      );
+      await tester.pumpAndSettle();
+
+      expect(
+        find.byKey(
+          const ValueKey('tilawa_sentry_feedback_remove_screenshot'),
+        ),
+        findsNothing,
+      );
+    });
+
+    testWidgets('prefills name and email from sentry user scope', (
+      tester,
+    ) async {
+      final SentryFlutterOptions options = SentryFlutterOptions();
+      final _FakeFeedbackHub hub = _FakeFeedbackHub(
+        options: options,
+        sentryUser: SentryUser(name: 'Tilawa User', email: 'user@example.com'),
+      );
+      SentryUserFeedback.bindFlutterOptions(options);
+
+      await tester.pumpWidget(
+        MaterialApp(
+          theme: AppTheme.getLightTheme(primaryColor: AppColors.defaultPrimary),
+          localizationsDelegates: AppLocalizations.localizationsDelegates,
+          supportedLocales: AppLocalizations.supportedLocales,
+          home: Builder(
+            builder: (BuildContext context) {
+              SentryUserFeedback.applyLocalizedLabels(
+                AppLocalizations.of(context),
+              );
+              return Scaffold(
+                body: TilawaSentryFeedbackForm(
+                  hub: hub,
+                  flutterOptions: options,
+                ),
+              );
+            },
+          ),
+        ),
+      );
+      await tester.pumpAndSettle();
+
+      expect(
+        tester
+            .widget<TilawaTextField>(
+              find.byKey(const ValueKey('tilawa_sentry_feedback_name')),
+            )
+            .controller
+            ?.text,
+        'Tilawa User',
+      );
+      expect(
+        tester
+            .widget<TilawaTextField>(
+              find.byKey(const ValueKey('tilawa_sentry_feedback_email')),
+            )
+            .controller
+            ?.text,
+        'user@example.com',
+      );
+    });
+
+    testWidgets('shows success snackbar after submit when enabled', (
+      tester,
+    ) async {
+      final SentryFlutterOptions options = SentryFlutterOptions()
+        ..feedback.showSuccessMessage = true;
+      final _FakeFeedbackHub hub = _FakeFeedbackHub(options: options);
+      SentryUserFeedback.bindFlutterOptions(options);
+
+      await tester.pumpWidget(
+        MaterialApp(
+          theme: AppTheme.getLightTheme(primaryColor: AppColors.defaultPrimary),
+          localizationsDelegates: AppLocalizations.localizationsDelegates,
+          supportedLocales: AppLocalizations.supportedLocales,
+          home: Builder(
+            builder: (BuildContext context) {
+              SentryUserFeedback.applyLocalizedLabels(
+                AppLocalizations.of(context),
+              );
+              return Scaffold(
+                body: Center(
+                  child: ElevatedButton(
+                    onPressed: () => TilawaSentryFeedbackForm.show(
+                      context,
+                      hub: hub,
+                      flutterOptions: options,
+                    ),
+                    child: const Text('open-form'),
+                  ),
+                ),
+              );
+            },
+          ),
+        ),
+      );
+      await tester.pumpAndSettle();
+
+      await tester.tap(find.text('open-form'));
+      await tester.pumpAndSettle();
+
+      await tester.enterText(
+        find.byKey(const ValueKey('tilawa_sentry_feedback_message')),
+        'Captured a layout glitch.',
+      );
+      await tester.tap(
+        find.byKey(const ValueKey('tilawa_sentry_feedback_submit')),
+      );
+      await tester.pumpAndSettle();
+
+      expect(hub.captureFeedbackCalls, 1);
+      expect(find.text('Thank you for your report.'), findsOneWidget);
+      expect(find.byType(TilawaSentryFeedbackForm), findsNothing);
+    });
+
+    testWidgets('submits feedback with screenshot attachment', (tester) async {
+      final SentryFlutterOptions options = SentryFlutterOptions();
+      final _FakeFeedbackHub hub = _FakeFeedbackHub(options: options);
+      SentryUserFeedback.bindFlutterOptions(options);
+      final SentryAttachment screenshot = SentryAttachment.fromUint8List(
+        _k1x1TransparentPng,
+        'screenshot.png',
+        contentType: 'image/png',
+      );
+
+      await tester.pumpWidget(
+        MaterialApp(
+          theme: AppTheme.getLightTheme(primaryColor: AppColors.defaultPrimary),
+          localizationsDelegates: AppLocalizations.localizationsDelegates,
+          supportedLocales: AppLocalizations.supportedLocales,
+          home: Builder(
+            builder: (BuildContext context) {
+              SentryUserFeedback.applyLocalizedLabels(
+                AppLocalizations.of(context),
+              );
+              return Scaffold(
+                body: Center(
+                  child: ElevatedButton(
+                    onPressed: () => TilawaSentryFeedbackForm.show(
+                      context,
+                      hub: hub,
+                      flutterOptions: options,
+                      screenshot: screenshot,
+                    ),
+                    child: const Text('open-form'),
+                  ),
+                ),
+              );
+            },
+          ),
+        ),
+      );
+      await tester.pumpAndSettle();
+
+      await tester.tap(find.text('open-form'));
+      await tester.pumpAndSettle();
+
+      await tester.enterText(
+        find.byKey(const ValueKey('tilawa_sentry_feedback_message')),
+        'Screen froze after opening player.',
+      );
+      await tester.tap(
+        find.byKey(const ValueKey('tilawa_sentry_feedback_submit')),
+      );
+      await tester.pumpAndSettle();
+
+      expect(hub.captureFeedbackCalls, 1);
+    });
+
+    testWidgets('captures screenshot from current screen and reopens form', (
+      tester,
+    ) async {
+      final SentryFlutterOptions options = SentryFlutterOptions()
+        ..feedback.showCaptureScreenshot = true
+        ..navigatorKey = AppRouter.navigatorKey;
+      SentryUserFeedback.bindFlutterOptions(options);
+
+      await tester.pumpWidget(
+        MaterialApp(
+          navigatorKey: AppRouter.navigatorKey,
+          theme: AppTheme.getLightTheme(primaryColor: AppColors.defaultPrimary),
+          localizationsDelegates: AppLocalizations.localizationsDelegates,
+          supportedLocales: AppLocalizations.supportedLocales,
+          home: Builder(
+            builder: (BuildContext context) {
+              SentryUserFeedback.applyLocalizedLabels(
+                AppLocalizations.of(context),
+              );
+              return Scaffold(
+                body: Center(
+                  child: ElevatedButton(
+                    onPressed: () => TilawaSentryFeedbackForm.show(
+                      context,
+                      flutterOptions: options,
+                    ),
+                    child: const Text('open-form'),
+                  ),
+                ),
+              );
+            },
+          ),
+        ),
+      );
+      await tester.pumpAndSettle();
+
+      await tester.tap(find.text('open-form'));
+      await tester.pumpAndSettle();
+
+      await tester.enterText(
+        find.byKey(const ValueKey('tilawa_sentry_feedback_message')),
+        'draft while capturing',
+      );
+      await tester.tap(
+        find.byKey(
+          const ValueKey('tilawa_sentry_feedback_capture_screenshot'),
+        ),
+      );
+      await tester.pumpAndSettle();
+
+      expect(find.byType(TilawaSentryFeedbackForm), findsOneWidget);
+      expect(
+        find.byKey(
+          const ValueKey('tilawa_sentry_feedback_capture_screenshot'),
+        ),
+        findsOneWidget,
+      );
+      expect(
+        tester
+            .widget<TilawaTextField>(
+              find.byKey(const ValueKey('tilawa_sentry_feedback_message')),
+            )
+            .controller
+            ?.text,
+        'draft while capturing',
       );
     });
   });

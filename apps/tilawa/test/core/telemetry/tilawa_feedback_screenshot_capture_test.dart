@@ -77,7 +77,10 @@ void main() {
 
       expect(bytes, isNotNull);
       expect(bytes!.length, greaterThan(1000));
-      expect(await _countNonBlankPixels(bytes), greaterThan(100));
+      final int nonBlankPixels = (await tester.runAsync<int>(
+        () => _countNonBlankPixels(bytes),
+      ))!;
+      expect(nonBlankPixels, greaterThan(100));
     });
 
     testWidgets('returns null when SentryScreenshotWidget is absent', (
@@ -98,6 +101,16 @@ void main() {
       expect(bytes, isNull);
     });
 
+    testWidgets('waitForScreenReady uses configured default frame count', (
+      tester,
+    ) async {
+      TilawaFeedbackScreenshotCapture.readyFrameCount = 0;
+
+      await tester.runAsync<void>(
+        TilawaFeedbackScreenshotCapture.waitForScreenReady,
+      );
+    });
+
     testWidgets('waits for delayed route render before capturing', (
       tester,
     ) async {
@@ -106,11 +119,12 @@ void main() {
       await tester.pumpWidget(
         SentryWidget(
           child: MaterialApp(
+            debugShowCheckedModeBanner: false,
             theme: AppTheme.getLightTheme(
               primaryColor: AppColors.defaultPrimary,
             ),
-            home: Builder(
-              builder: (BuildContext context) {
+            home: StatefulBuilder(
+              builder: (BuildContext context, StateSetter setState) {
                 return Scaffold(
                   body: Center(
                     child: showContent
@@ -119,7 +133,7 @@ void main() {
                             child: SizedBox(width: 180, height: 100),
                           )
                         : TextButton(
-                            onPressed: () => showContent = true,
+                            onPressed: () => setState(() => showContent = true),
                             child: const Text('reveal'),
                           ),
                   ),
@@ -141,13 +155,17 @@ void main() {
       );
 
       expect(bytes, isNotNull);
-      expect(await _countNonBlankPixels(bytes!), greaterThan(100));
+      final int nonBlankPixels = (await tester.runAsync<int>(
+        () => _countNonBlankPixels(bytes!),
+      ))!;
+      expect(nonBlankPixels, greaterThan(100));
     });
 
     testWidgets('rejects mostly blank captures', (tester) async {
       await tester.pumpWidget(
         SentryWidget(
           child: MaterialApp(
+            debugShowCheckedModeBanner: false,
             theme: AppTheme.getLightTheme(
               primaryColor: AppColors.defaultPrimary,
             ),
@@ -162,7 +180,7 @@ void main() {
 
       final Uint8List? bytes = await tester.runAsync<Uint8List?>(
         () => TilawaFeedbackScreenshotCapture.capturePngBytes(
-          waitForReady: true,
+          waitForReady: false,
           rejectBlankCaptures: true,
           maxAttempts: 1,
         ),
@@ -171,33 +189,54 @@ void main() {
       expect(bytes, isNull);
     });
 
-    testWidgets('isMostlyBlank flags near-black PNGs', (tester) async {
-      await tester.pumpWidget(
-        SentryWidget(
-          child: MaterialApp(
-            theme: AppTheme.getLightTheme(
-              primaryColor: AppColors.defaultPrimary,
-            ),
-            home: const Scaffold(
-              backgroundColor: Colors.black,
-              body: SizedBox.shrink(),
-            ),
-          ),
-        ),
-      );
-      await tester.pumpAndSettle();
+    testWidgets('continues when boundary rendering times out', (tester) async {
+      TilawaFeedbackScreenshotCapture.renderBoundaryOverride = (_) async =>
+          throw StateError('Screenshot toImage timed out');
+      await _pumpCaptureProbe(tester);
 
       final Uint8List? bytes = await tester.runAsync<Uint8List?>(
         () => TilawaFeedbackScreenshotCapture.capturePngBytes(
           rejectBlankCaptures: false,
-          maxAttempts: 1,
         ),
       );
-      expect(bytes, isNotNull);
+
+      expect(bytes, isNull);
+    });
+
+    testWidgets('uses render override for test-safe attachments', (
+      tester,
+    ) async {
+      final Uint8List pngBytes = Uint8List.fromList(<int>[1, 2, 3]);
+      TilawaFeedbackScreenshotCapture.renderBoundaryOverride = (_) async =>
+          pngBytes;
+      await _pumpCaptureProbe(tester);
+
+      final Uint8List? bytes = await tester.runAsync<Uint8List?>(
+        () => TilawaFeedbackScreenshotCapture.capturePngBytes(
+          rejectBlankCaptures: false,
+        ),
+      );
+      final SentryAttachment? attachment =
+          await TilawaFeedbackScreenshotCapture.captureAttachment(
+            rejectBlankCaptures: false,
+          );
+
+      expect(bytes, same(pngBytes));
+      expect(attachment, isNotNull);
+      expect(attachment!.bytes, same(pngBytes));
+    });
+
+    test('returns attachment override when configured', () async {
+      final SentryAttachment attachment = SentryAttachment.fromUint8List(
+        Uint8List.fromList(<int>[4, 5, 6]),
+        'override.png',
+      );
+      TilawaFeedbackScreenshotCapture.attachmentOverride = () async =>
+          attachment;
 
       expect(
-        await TilawaFeedbackScreenshotCapture.isMostlyBlank(bytes!),
-        isTrue,
+        await TilawaFeedbackScreenshotCapture.captureAttachment(),
+        same(attachment),
       );
     });
 
@@ -212,7 +251,9 @@ void main() {
 
       expect(bytes, isNotNull);
       expect(
-        await TilawaFeedbackScreenshotCapture.isMostlyBlank(bytes!),
+        await tester.runAsync<bool>(
+          () => TilawaFeedbackScreenshotCapture.isMostlyBlank(bytes!),
+        ),
         isFalse,
       );
     });

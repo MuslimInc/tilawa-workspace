@@ -33,6 +33,7 @@ abstract final class SentryConfig {
     options.enableTimeToFullDisplayTracing = true;
     // Relative to [tracesSampleRate]; 1.0 profiles all sampled transactions.
     // Alpha on iOS/macOS only (Sentry Flutter SDK >= 7.12.0).
+    // ignore: experimental_member_use
     options.profilesSampleRate = kReleaseMode ? 0.1 : 1.0;
     options.autoInitializeNativeSdk = autoInitializeNativeSdk;
     SentryUserFeedback.bindFlutterOptions(options);

@@ -29,6 +29,16 @@ void main() {
         later.startsAt.millisecondsSinceEpoch,
       ]);
     });
+
+    test('reuses pre-sorted input without copying', () {
+      final slots = [
+        _slot(DateTime.utc(2026, 6, 22, 9)),
+        _slot(DateTime.utc(2026, 6, 23, 14)),
+      ];
+
+      check(isTeacherAvailabilitySortedByStart(slots)).isTrue();
+      check(identical(sortTeacherAvailabilityByStart(slots), slots)).isTrue();
+    });
   });
 
   group('groupTeacherAvailabilityByLocalDay', () {

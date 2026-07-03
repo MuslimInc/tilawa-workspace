@@ -46,10 +46,17 @@ abstract final class TilawaFeedbackScreenshotCapture {
     boundaryReadyFrames = _boundaryReadyFrames;
     maxCaptureAttempts = _defaultMaxAttempts;
     attachmentOverride = null;
+    renderBoundaryOverride = null;
   }
 
   @visibleForTesting
   static Future<SentryAttachment?> Function()? attachmentOverride;
+
+  /// Bypasses [RenderRepaintBoundary.toImage] in widget tests where engine
+  /// capture can hang indefinitely.
+  @visibleForTesting
+  static Future<Uint8List?> Function(RenderRepaintBoundary boundary)?
+  renderBoundaryOverride;
 
   /// Waits for route transition, layout, and [frameCount] painted frames.
   static Future<void> waitForScreenReady({
@@ -71,8 +78,7 @@ abstract final class TilawaFeedbackScreenshotCapture {
     final int attempts = maxAttempts ?? maxCaptureAttempts;
     for (var attempt = 0; attempt < attempts; attempt++) {
       if (waitForReady || attempt > 0) {
-        final int readyFrames = attempt == 0 ? 3 : readyFrameCount;
-        await waitForScreenReady(frameCount: readyFrames);
+        await waitForScreenReady(frameCount: readyFrameCount);
       }
 
       final RenderRepaintBoundary? boundary =
@@ -81,7 +87,12 @@ abstract final class TilawaFeedbackScreenshotCapture {
         continue;
       }
 
-      final Uint8List? bytes = await _renderBoundaryToPng(boundary);
+      final Uint8List? bytes;
+      try {
+        bytes = await _renderBoundaryToPng(boundary);
+      } on StateError {
+        continue;
+      }
       if (bytes == null) {
         continue;
       }
@@ -160,10 +171,21 @@ abstract final class TilawaFeedbackScreenshotCapture {
   static Future<Uint8List?> _renderBoundaryToPng(
     RenderRepaintBoundary boundary,
   ) async {
+    final Future<Uint8List?> Function(RenderRepaintBoundary boundary)?
+    override = renderBoundaryOverride;
+    if (override != null) {
+      return override(boundary);
+    }
+
     final double pixelRatio =
         WidgetsBinding.instance.platformDispatcher.views.first.devicePixelRatio;
 
-    final ui.Image image = await boundary.toImage(pixelRatio: pixelRatio);
+    final ui.Image image = await boundary
+        .toImage(pixelRatio: pixelRatio)
+        .timeout(
+          _frameWaitTimeout,
+          onTimeout: () => throw StateError('Screenshot toImage timed out'),
+        );
     try {
       final ByteData? byteData = await image.toByteData(
         format: ui.ImageByteFormat.png,

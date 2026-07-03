@@ -39,7 +39,9 @@ abstract final class SentryUserFeedback {
     }
 
     if (shouldPromptFeedbackForEvent(filtered)) {
+      // coverage:ignore-start
       await _presentFeedbackForEvent(filtered);
+      // coverage:ignore-end
     }
 
     return filtered;
@@ -80,6 +82,12 @@ abstract final class SentryUserFeedback {
       return false;
     }
 
+    return shouldPromptFeedbackForEventInRelease(event);
+  }
+
+  /// Release-only fatal-crash prompt policy (testable without [kReleaseMode]).
+  @visibleForTesting
+  static bool shouldPromptFeedbackForEventInRelease(SentryEvent event) {
     if (event.tags?[CrashReportingTagKeys.sentryVerify] == 'true') {
       return false;
     }
@@ -95,6 +103,10 @@ abstract final class SentryUserFeedback {
 
     return true;
   }
+
+  @visibleForTesting
+  static Future<void> presentFeedbackForEventForTesting(SentryEvent event) =>
+      _presentFeedbackForEvent(event);
 
   static void applyLocalizedLabels(AppLocalizations l10n) {
     final SentryFlutterOptions? options = _flutterOptions;

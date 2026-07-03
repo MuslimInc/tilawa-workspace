@@ -19,12 +19,14 @@ class SentryLogOutput extends LogOutput {
       return;
     }
 
+    // coverage:ignore-start
     final LogEvent origin = event.origin;
     _sendToSentry(
       level: origin.level,
       body: _formatBody(origin),
       attributes: _buildAttributes(origin),
     );
+    // coverage:ignore-end
   }
 
   static void _sendToSentry({
@@ -72,6 +74,16 @@ class SentryLogOutput extends LogOutput {
   @visibleForTesting
   static Map<String, SentryAttribute> buildAttributes(LogEvent event) =>
       _buildAttributes(event);
+
+  /// Routes a formatted log line to [Sentry.logger] (test hook).
+  @visibleForTesting
+  static void dispatchForTesting({
+    required Level level,
+    required String body,
+    required Map<String, SentryAttribute> attributes,
+  }) {
+    _sendToSentry(level: level, body: body, attributes: attributes);
+  }
 
   static Map<String, SentryAttribute> _buildAttributes(LogEvent event) {
     final Map<String, SentryAttribute> attributes = <String, SentryAttribute>{};

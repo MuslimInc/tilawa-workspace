@@ -1,6 +1,7 @@
 import 'dart:convert';
 import 'dart:io';
 import 'dart:typed_data';
+import 'dart:ui' as ui;
 
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
@@ -20,56 +21,23 @@ Widget wrapQuranImageTestApp(Widget home) {
 }
 
 /// 1×1 solid PNG for golden tests (visible when stretched with [BoxFit.fill]).
-Uint8List onePixelSolidPng({required int r, required int g, required int b}) {
-  final raw = Uint8List.fromList([0, r, g, b]);
-  final compressed = Uint8List.fromList(ZLibCodec().encode(raw));
-
-  Uint8List chunk(String type, Uint8List data) {
-    final typeBytes = utf8.encode(type);
-    final length = ByteData(4)..setUint32(0, data.length);
-    final crcInput = Uint8List.fromList([...typeBytes, ...data]);
-    final crc = ByteData(4)..setUint32(0, _pngCrc32(crcInput));
-    return Uint8List.fromList([
-      ...length.buffer.asUint8List(),
-      ...typeBytes,
-      ...data,
-      ...crc.buffer.asUint8List(),
-    ]);
-  }
-
-  final ihdr = ByteData(13)
-    ..setUint32(0, 1)
-    ..setUint32(4, 1)
-    ..setUint8(8, 8)
-    ..setUint8(9, 2)
-    ..setUint8(10, 0)
-    ..setUint8(11, 0)
-    ..setUint8(12, 0);
-
-  return Uint8List.fromList([
-    0x89,
-    0x50,
-    0x4E,
-    0x47,
-    0x0D,
-    0x0A,
-    0x1A,
-    0x0A,
-    ...chunk('IHDR', ihdr.buffer.asUint8List()),
-    ...chunk('IDAT', compressed),
-    ...chunk('IEND', Uint8List(0)),
-  ]);
-}
-
-int _pngCrc32(List<int> data) {
-  var crc = 0xFFFFFFFF;
-  for (final byte in data) {
-    crc ^= byte;
-    for (var bit = 0; bit < 8; bit++) {
-      crc = (crc & 1) != 0 ? 0xEDB88320 ^ (crc >> 1) : crc >> 1;
-    }
-  }
-  return crc ^ 0xFFFFFFFF;
+Future<Uint8List> onePixelSolidPng({
+  required int r,
+  required int g,
+  required int b,
+}) async {
+  final recorder = ui.PictureRecorder();
+  final canvas = ui.Canvas(recorder);
+  canvas.drawRect(
+    const ui.Rect.fromLTWH(0, 0, 1, 1),
+    ui.Paint()..color = ui.Color.fromARGB(255, r, g, b),
+  );
+  final picture = recorder.endRecording();
+  final image = await picture.toImage(1, 1);
+  final byteData = await image.toByteData(format: ui.ImageByteFormat.png);
+  image.dispose();
+  picture.dispose();
+  return byteData!.buffer.asUint8List();
 }
 
 /// Shared DI + temp assets for [QuranImagePage] widget tests.
@@ -88,13 +56,14 @@ Future<Directory> bootstrapQuranImagePageTest({
       'iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mP8/x8AAwMCAO+a5m0AAAAASUVORK5CYII=';
   final transparentBytes = base64Decode(transparentPixel);
   final lineBytes = visiblePlaceholders
-      ? onePixelSolidPng(r: 0xE6, g: 0xE6, b: 0xE6)
+      ? await onePixelSolidPng(r: 0xE6, g: 0xE6, b: 0xE6)
       : transparentBytes;
   final headerBytes = visiblePlaceholders
-      ? onePixelSolidPng(r: 0xC8, g: 0xA8, b: 0x6E)
+      ? await onePixelSolidPng(r: 0xC8, g: 0xA8, b: 0x6E)
       : transparentBytes;
 
   final linePathsByPage = <int, Map<int, String>>{};
+  final bytesByPath = <String, Uint8List>{};
   for (final pageNumber in pageNumbers) {
     final linePaths = <int, String>{};
     for (var line = 1; line <= 15; line++) {
@@ -103,12 +72,14 @@ Future<Directory> bootstrapQuranImagePageTest({
       );
       await file.writeAsBytes(lineBytes);
       linePaths[line] = file.path;
+      bytesByPath[file.path] = lineBytes;
     }
     linePathsByPage[pageNumber] = linePaths;
   }
 
   final headerFile = File('${tempDirectory.path}/sura_header_banner.png');
   await headerFile.writeAsBytes(headerBytes);
+  bytesByPath[headerFile.path] = headerBytes;
 
   final imageCacheRepository = _ReadyQuranImageCacheRepository(
     linePathsByPage: linePathsByPage,
@@ -122,7 +93,9 @@ Future<Directory> bootstrapQuranImagePageTest({
 
   await sl.unregister<DecodedQuranImageCache>();
   sl.registerLazySingleton<DecodedQuranImageCache>(
-    () => _FakeDecodedQuranImageCache(),
+    () => visiblePlaceholders
+        ? _BytesDecodedQuranImageCache(bytesByPath)
+        : _FakeDecodedQuranImageCache(),
   );
 
   await sl.unregister<VerseMarkerRepository>();
@@ -171,6 +144,49 @@ class _ReadyQuranImageCacheRepository implements QuranImageCacheRepository {
 
   @override
   String? surahHeaderBannerFilePath() => headerPath;
+}
+
+class _BytesDecodedQuranImageCache implements DecodedQuranImageCache {
+  const _BytesDecodedQuranImageCache(this._bytesByPath);
+
+  final Map<String, Uint8List> _bytesByPath;
+
+  ImageProvider<Object> _provider(String imagePath, {int? cacheWidth}) {
+    final Uint8List? bytes = _bytesByPath[imagePath];
+    if (bytes == null || bytes.isEmpty) {
+      return MemoryImage(Uint8List(0));
+    }
+    final MemoryImage memoryImage = MemoryImage(bytes);
+    if (cacheWidth == null) {
+      return memoryImage;
+    }
+    return ResizeImage.resizeIfNeeded(cacheWidth, null, memoryImage);
+  }
+
+  @override
+  void handleMemoryPressure() {}
+
+  @override
+  ImageProvider<Object> fileImageProvider({required String imagePath}) {
+    return _provider(imagePath);
+  }
+
+  @override
+  ImageProvider<Object> lineImageProvider({
+    required String imagePath,
+    required int cacheWidth,
+  }) {
+    return _provider(imagePath, cacheWidth: cacheWidth);
+  }
+
+  @override
+  Future<void> prewarmFileImage(String imagePath) async {}
+
+  @override
+  Future<void> prewarmLineImage({
+    required String imagePath,
+    required int cacheWidth,
+  }) async {}
 }
 
 class _FakeDecodedQuranImageCache implements DecodedQuranImageCache {
