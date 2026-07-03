@@ -1,347 +1,526 @@
-# Tilawa — DESIGN.md
+---
+version: alpha
+spec: "https://stitch.withgoogle.com/docs/design-md/specification"
+name: MeMuslim
+tagline: Calm Islamic lifestyle companion — Quran, prayer, dhikr, and learning in a warm, readable, premium shell.
+description: >-
+  MeMuslim / أنا مسلم (formerly Tilawa) uses Material 3 with a small, calm palette:
+  green global accent for CTAs and active chrome, warm parchment canvas, white elevated
+  cards, gold featured heroes, and restrained shadows. Implementation truth lives in
+  packages/ui_kit and apps/tilawa — this file is the single source of truth for humans
+  and AI agents making UI/UX changes.
 
-Design system snapshot for **Tilawa UI Kit** (`packages/ui_kit`) and the **Tilawa app** (`apps/tilawa`). This document is for humans and coding agents. Implementation truth lives in code; update this file when tokens or theme behavior change in meaningful ways.
+colors:
+  # Brand / action (production-locked)
+  primary: "#1DAB61"
+  primary-accessible: "#148048"
+  on-primary: "#003317"
+  primary-dark: "#6BC992"
+  primary-container-light: "#E0F2F1"
+  splash-green: "#2A9C64"
 
-**Companion:** `AGENTS.md` (how to build). This file is how the product should **look and feel**.
-**Brand intent layer:** [`docs/tilawa_brand.md`](docs/tilawa_brand.md) — Behance warm lifestyle reference (parchment, brown ink, gold featured cards). When intent and implementation conflict, this file wins on implementation; [`docs/tilawa_brand.md`](docs/tilawa_brand.md) wins on intent.
-**Voluntary support (monetization UX):** [`specs/016-support-tilawa/spec.md`](specs/016-support-tilawa/spec.md) — product ethics and entry points; [`packages/ui_kit/docs/support_visual_system.md`](packages/ui_kit/docs/support_visual_system.md) — support screen visuals.
+  # Semantic feedback
+  success: "#43A047"
+  success-dark: "#6BCF7F"
+  warning: "#C2410C"
+  warning-dark: "#FB923C"
+  error: "#C74545"
+  error-soft: "#E57373"
+  error-dark: "#FFB4AB"
+  on-error: "#FFFFFF"
+
+  # Light surfaces (60-30-10)
+  canvas: "#F4F2EE"
+  surface: "#FFFFFF"
+  surface-container-high: "#F0F7F2"
+  surface-container-highest: "#EEEEEE"
+  ink: "#1A2E24"
+  body: "#1A2E24"
+  mute: "#6B7F74"
+  ash: "#BDBDBD"
+  outline: "#E0E0E0"
+  hairline: "#EEEEEE"
+
+  # Featured / warm accents (not pay CTAs)
+  gold-start: "#FFD28E"
+  gold-end: "#FF9E44"
+  gold-accent: "#F2AC1F"
+  gold-foreground: "#1A2E24"
+
+  # Dark surfaces
+  canvas-dark: "#0E1413"
+  surface-dark: "#141D1B"
+  surface-container-dark: "#1A2624"
+  surface-container-high-dark: "#2A3432"
+  outline-dark: "#4A5C57"
+
+  # Chrome
+  bottom-nav: "#212528"
+
+typography:
+  font-family: "IBM Plex Sans Arabic"
+  font-source: "packages/tilawa_ui_kit/IBMPlexSansArabic (bundled)"
+  display-large:
+    role: displayLarge
+    fontSize: 57px
+    fontWeight: 400
+    lineHeight: 1.12
+  title-large:
+    role: titleLarge
+    fontSize: 22px
+    fontWeight: 700
+    lineHeight: 1.27
+    usage: "Screen titles, catalog app bars"
+  title-medium:
+    role: titleMedium
+    fontSize: 16px
+    fontWeight: 700
+    lineHeight: 1.5
+    usage: "Section headers, dashboard zones"
+  body-large:
+    role: bodyLarge
+    fontSize: 16px
+    fontWeight: 400
+    lineHeight: 1.5
+  body-medium:
+    role: bodyMedium
+    fontSize: 14px
+    fontWeight: 400
+    lineHeight: 1.43
+  body-small:
+    role: bodySmall
+    fontSize: 12px
+    fontWeight: 400
+    lineHeight: 1.33
+    usage: "Metadata, captions"
+  label-large:
+    role: labelLarge
+    fontSize: 14px
+    fontWeight: 500
+    lineHeight: 1.43
+    usage: "Buttons, pills"
+  arabic-loose-line-height: 2.0
+
+spacing:
+  tiny: 2px
+  extra-small: 4px
+  small: 8px
+  medium: 12px
+  large: 16px
+  extra-large: 24px
+  section: 20px
+  xxl: 32px
+  huge: 48px
+
+rounded:
+  small: 8px
+  medium: 12px
+  large: 20px
+  extra-large: 24px
+  hero: 28px
+  card: 24px
+  pill: 9999px
+
+elevation:
+  shadow-alpha: 0.04
+  shadow-strong-alpha: 0.08
+  shadow-offset-small: "0 1"
+  shadow-offset-medium: "0 2"
+  blur-shadow: 8
+  border-width-thin: 0.5
+
+motion:
+  duration-fast: 200ms
+  duration-medium: 400ms
+  duration-slow: 600ms
+  curve-standard: easeOut
+  curve-emphasized: easeOutCubic
+  curve-symmetric: easeInOut
+
+accessibility:
+  min-touch-target: 48
+  text-scale-clamp-min: 1.0
+  text-scale-clamp-max: 1.0
+  hero-text-scale-clamp-max: 1.3
+---
+
+# MeMuslim — DESIGN.md
+
+Design system for **MeMuslim / أنا مسلم** (internal package name `tilawa`). Read this file before any UI/UX change.
+
+**Read order:** `AGENTS.md` (how to build) → **this file** (how it looks) → [`docs/tilawa_brand.md`](docs/tilawa_brand.md) (brand intent). When intent and implementation conflict, **this file and code win on tokens**; [`docs/tilawa_brand.md`](docs/tilawa_brand.md) wins on product voice and moodboard direction.
+
+**Companion docs:** [`packages/ui_kit/docs/design_system.md`](packages/ui_kit/docs/design_system.md) (freeze contract), [`docs/design/color_architecture.md`](docs/design/color_architecture.md), [`packages/ui_kit/docs/feedback_system.md`](packages/ui_kit/docs/feedback_system.md).
 
 ---
 
-## 1. Visual theme and atmosphere
+## Visual theme and atmosphere
 
-- **Material 3** via **FlexColorScheme**: surfaces, containers, and component themes are assembled in `AppTheme` and refined with Tilawa-specific ramps (`AppColors`).
-- **Calm, content-first:** small palette, quiet warm neutrals, one **user-selectable primary** accent from **curated presets** (default **warm brown** `#8B5E3C`); optional **custom** primary appears **in the same primary-color list** in Settings and may be **soft-clamped in light mode** for contrast (see `AppTheme._safePrimaryForLight`). Surfaces use a soft near-white neutral canvas in light mode; dark mode uses a deep green-tinted neutral stack (with an optional **true-black / OLED** preset).
-- **Readable for Arabic:** line-height token `textHeightLoose` supports dense script in readers and lists (see `TilawaDesignTokens`).
-- **Comfortable density:** `FlexColorScheme.comfortablePlatformDensity` (not compact VisualDensity).
-- **Premium depth:** layered shadows (`opacityShadow` / `opacityShadowStrong`), optional **glass** tokens (`blurGlass`, `opacityGlass`) for overlays and chrome — use consistently, not everywhere.
-
----
-
-## 2. Color palette and roles
-
-### User-selectable primary (accent)
-
-Offered in app settings (`PrimaryColorPreset`) when `TILAWA_SHOW_COLOR_PICKER=true`. **Production** builds lock **reference teal `#00897B`** (`PrimaryColorPreset.brandLocked`). Custom hex may be soft-clamped in light theme for readability (`AppTheme._safePrimaryForLight`).
-
-| Preset | Hex (reference) | Notes |
-|--------|-----------------|--------|
-| Coral | `#E60023` | Dev/QA picker |
-| Teal | `#00897B` | **Brand-locked default** |
-| Sage | `#219653` | Legacy scholarly green |
-| Forest (picker) | `#2D6B47` | Dev/QA preset |
-| Brown | `#8B5E3C` | Legacy warm mockup |
-| Purple | `#7A5C89` | Muted purple |
-
-Product UI uses **`ColorScheme`**, **`theme.productColors`**, and **`theme.componentTokens`** — not raw `AppColors` hex. See [`docs/design/color_architecture.md`](docs/design/color_architecture.md).
-
-### Fixed semantic colors (`AppColors`)
-
-| Role | Light hex | Dark hex (via `ColorScheme.success` / `.warning`) | Usage |
-|------|-----------|---------------------------------------------------|--------|
-| Error | `#DC2626` | `#FFB4AB` (`darkSchemeError`) | Destructive / failures |
-| Success | `#43A047` | `#6BCF7F` (`successDark`) | Positive outcomes |
-| Warning | `#C2410C` | `#FB923C` (`warningDark`) | Caution (deep orange, not gold) |
-
-Dark success/warning are brightness-tuned in `TilawaStatusColors` so status
-borders and icons clear WCAG 3:1 on green-tinted surfaces.
-
-### Neutral surfaces (light) — soft neutral canvas
-
-Light surfaces use a **soft neutral** family — warm near-white canvas, white cards, quiet neutral idle chips.
-
-**60-30-10 (light):** ~60% warm canvas (`surfaceContainerLowest`), ~30% white elevated surfaces (`surface`, chips), ~10% brand accent (`primary`). Do **not** flatten scaffold to pure white — cards need a quieter canvas to lift.
-
-| Token / role | Hex (base) | Notes |
-|--------------|------------|--------|
-| Canvas / scaffold | `#F4F2EE` | `lightCanvas` / `surfaceContainerLowest` |
-| Surface (cards, sheets) | `#FFFFFF` | `lightSurface` |
-| Ink / onSurface | `#212121` | `lightInk` |
-| Body / mute | `#212121`, `#757575` | `lightInk`, `lightMute` |
-| Ash icons | `#BDBDBD` | `lightAsh` |
-| High (idle chips) | `#F5F5F5` | `lightSurfaceContainerHighBase` |
-| Highest / hairline | `#EEEEEE` | `outlineVariant` tier |
-| Outline (strong) | `#E0E0E0` | `lightOutline` |
-
-Featured cards (Last Read) use gold gradient `#FFD28E` → `#FF9E44` via `AppColors.featuredGradientStart` / `featuredGradientEnd`.
-
-See [`packages/ui_kit/docs/design_system.md`](packages/ui_kit/docs/design_system.md) and [`specs/017-catalog-theme-freeze/spec.md`](specs/017-catalog-theme-freeze/spec.md).
-
-### Neutral surfaces (dark, standard)
-
-Approximately: background `#101816`, surface `#16201D`, containers stepping through `#1C2925` → higher tiers with optional primary blend.
-
-### True-black (OLED) mode
-
-Separate ramp (`darkTrueBlack*` in `AppColors`) when `AppThemePreset.trueBlack` is active.
-
-### Secondary / tertiary (Flex assembly)
-
-- Secondary reference: `#65734F`
-- Tertiary reference: `#8C681F` (gold tone for scheme harmony)
-
-**Rule:** Widgets consume **`Theme.of(context).colorScheme`**, **`theme.productColors`**, and **`theme.componentTokens`**, not `AppColors` directly (except rare platform-fixed cases like notification accent, documented in code).
+- **Material 3** via **FlexColorScheme**, refined in `AppTheme` with palette from `AppColors`.
+- **Calm, content-first:** small palette, warm parchment canvas (`#F4F2EE`), white cards (`#FFFFFF`), one **green global accent** (`#1DAB61`) for CTAs and active chrome. No legacy purple. Brown/warm tones appear only as approved secondary micro-accents (gold featured cards, warm hero gradients, metadata browns) — never as a new primary.
+- **Not e-commerce / admin:** avoid dense data grids, heavy gradients on chrome, stacked shadows, or crowded multi-accent layouts.
+- **Readable Arabic:** `textHeightLoose` (2.0) for dense script; bundled **IBM Plex Sans Arabic** on all M3 roles.
+- **Comfortable density:** `FlexColorScheme.comfortablePlatformDensity` — not compact.
+- **Premium but quiet depth:** low-alpha shadows (`opacityShadow` 0.04, `opacityShadowStrong` 0.08); optional glass tokens for floating chrome only.
+- **Surface tint off:** `surfaceTintColor` → transparent on cards, dialogs, sheets, app bars so user primary does not wash neutrals.
 
 ---
 
-## 3. Typography
+## Color palette and roles
 
-- **Primary font:** **Alexandria** via **Google Fonts** when `AppTheme.useGoogleFonts` is true (tests/previews may disable for stability).
-- **Text theme:** Built from `GoogleFonts.alexandriaTextTheme()` and wired through Flex light/dark theme factories in `AppTheme.getLightTheme` / `getDarkTheme`.
-- **Hierarchy:** Follow Material 3 `TextTheme` roles (`display*`, `title*`, `body*`, `label*`). Prefer `Theme.of(context).textTheme` over hard-coded sizes.
-- **App text scaling:** `MaterialApp` builder clamps `TextScaler`` between **1.0 and 1.4** (`tilawa_app.dart`) so layouts stay predictable while allowing moderate accessibility scaling.
+### Production primary (brand-locked green)
+
+| Token | Hex | Usage |
+|-------|-----|--------|
+| `brandActionGreen` | `#1DAB61` | **Default primary** — CTAs, active nav, selected pills, switch ON, progress |
+| `brandActionGreenAccessible` | `#148048` | Solid buttons/links needing higher contrast |
+| `lightSchemeOnPrimary` | `#003317` | Labels/icons on green fills (AA on `#1DAB61`) |
+| `darkDefaultPrimary` | `#6BC992` | Lifted green on dark surfaces |
+
+Production locks `PrimaryColorPreset.brandGreen` (`#1DAB61`). Legacy purple (`#7A5C89`), brown (`#8B5E3C`), sage (`#219653`), and teal (`#00897B`) presets migrate to brand green on read — **do not reintroduce purple** or add new accent hues.
+
+Dev/QA only (`TILAWA_SHOW_COLOR_PICKER=true`): coral, teal, sage, forest presets remain for testing; never ship new UI assuming a user-picked primary other than green.
+
+### Semantic colors
+
+| Role | Light | Dark | Access |
+|------|-------|------|--------|
+| Success | `#43A047` | `#6BCF7F` | `colorScheme.success` |
+| Warning | `#C2410C` | `#FB923C` | `colorScheme.warning` |
+| Error | `#C74545` | `#FFB4AB` | `colorScheme.error` |
+
+### Light neutral ramp (60-30-10)
+
+~60% warm canvas, ~30% white elevated surfaces, ~10% green accent.
+
+| Role | Hex | `ColorScheme` / API |
+|------|-----|-------------------|
+| Canvas / scaffold | `#F4F2EE` | `surfaceContainerLowest` |
+| Cards, sheets | `#FFFFFF` | `surface` |
+| Ink / onSurface | `#1A2E24` | `onSurface` |
+| Muted labels | `#6B7F74` | `onSurfaceVariant` |
+| Idle chips / search rest | `#F0F7F2` | `surfaceContainerHigh` |
+| Hairline | `#EEEEEE` | `outlineVariant` |
+| Strong outline | `#E0E0E0` | `outline` |
+
+### Warm / gold accents (secondary, not CTAs)
+
+| Role | Hex | Usage |
+|------|-----|--------|
+| Featured gradient | `#FFD28E` → `#FF9E44` | Last Read, hero resume cards — ceremonial, not purchase chrome |
+| `brandGoldAccent` | `#F2AC1F` | Verses, quiet alerts — maps to `colorScheme.tertiary` |
+| Home hero gradients | prayer-period tokens in `AppColors.homeNextPrayerGradient*` | Home hero only |
+
+**Rule:** Widgets consume `Theme.of(context).colorScheme`, `theme.productColors`, and `theme.componentTokens` — not raw `AppColors` hex (except documented platform-fixed cases).
+
+### Dark mode
+
+Deep green-tinted stack: background `#0E1413`, surface `#141D1B`, containers stepping through `#1A2624` → `#2A3432`. Optional **true-black OLED** preset (`AppThemePreset.trueBlack`).
+
+### Accent discipline (one-accent rule)
+
+Green primary for **one emphasis lane per screen** — primary CTA, active bottom nav, selected filter, switch ON. **Not** for catalog search fills, chip idle backgrounds, or app-bar washes (stay neutral).
 
 ---
 
-## 4. Spacing, radii, and motion (`TilawaDesignTokens`)
+## Typography
 
-Registered as a `ThemeExtension` on `ThemeData` (access: `Theme.of(context).extension<TilawaDesignTokens>()` or project extensions such as `context.tokens`).
-
-| Category | Values (default) |
-|----------|------------------|
-| Space scale | 2, 4, 8, 12, 16, 24 |
-| Corner radii | 8, 12, 16, 24 |
-| Icon sizes | 12, 16, 20, 24, 42, 44 |
-| Min touch target | **44 dp** (`kTilawaMinInteractiveDimension`) |
-| Durations | 200 ms / 400 ms / 600 ms (fast / medium / slow) |
-| Line height (loose) | 2.0 for dense Arabic-friendly layouts |
-
-### Content max widths (`TilawaContentBounds`)
-
-| Kind | Max width (px) | Typical use |
-|------|----------------|-------------|
-| Reader | 720 | Quran reader body |
-| Form | 560 | Sheets, dialogs, auth |
-| Media | 1200 | Share / gallery style |
-| Settings | 760 | Settings detail columns |
+- **Font:** bundled **IBM Plex Sans Arabic** (`AppTheme` → `_fontFamily`).
+- **Roles:** Material 3 `TextTheme` (`display*` … `label*`). Use `Theme.of(context).textTheme`, not hard-coded sizes.
+- **Titles:** `titleLarge` / `titleMedium`, `FontWeight.w700` for screen and section headers.
+- **Arabic content:** `titleSmall` w700 + `textHeightLoose` (2.0).
+- **Metadata:** `bodySmall`, `onSurfaceVariant`.
+- **Scaling:** `tilawaProductTextScaler` on `MaterialApp.builder`; clamped **1.0–1.0** globally (`tilawa_app.dart`). Home prayer hero uses **1.0–1.3** for extent math. Quran reader mushaf uses dedicated reader settings — not global scale.
+- **Tests/previews:** `AppTheme.useGoogleFonts = false` in goldens for CI stability.
 
 ---
 
-## 5. Layout and breakpoints
+## Spacing, radii, and motion
 
-- **Window size classes** (`TilawaBreakpoints` / `TilawaWindowSize`): narrow `< 600`, medium `< 840`, expanded `< 1200`, large `≥ 1200`.
-- **Branch on `context.windowSize` (or helpers)** instead of raw widths for shell and two-pane patterns.
-- **Adaptive shell** (`TilawaAdaptiveShell` + `componentTokens.adaptiveShell`): main app chrome — bottom navigation, optional rail, **labels shown** on phone bottom nav; system navigation bar color is synced to match floating bottom nav for visual continuity (`_DefaultRouteSystemUiOverlay` in `tilawa_app.dart`).
+Access via `Theme.of(context).extension<MeMuslimDesignTokens>()` or `context.tokens`.
+
+### Spacing scale (dp)
+
+| Token | Value |
+|-------|-------|
+| `spaceTiny` | 2 |
+| `spaceExtraSmall` | 4 |
+| `spaceSmall` | 8 |
+| `spaceMedium` | 12 |
+| `spaceLarge` | 16 |
+| `spaceExtraLarge` | 24 |
+| `spaceSection` | 20 |
+| `spaceXXL` | 32 |
+| `spaceHuge` | 48 |
+
+**Home rhythm:** within zone `spaceLarge`; between zones `spaceExtraLarge`.
+
+### Corner radii (dp)
+
+| Token | Value | Use |
+|-------|-------|-----|
+| `radiusSmall` | 8 | Chips, decorative |
+| `radiusMedium` | 12 | Nested controls |
+| `radiusLarge` | 20 | Search, segment tracks |
+| `radiusExtraLarge` / `radiusCard` | 24 | Content cards, pills |
+| `radiusHero` | 28 | Hub summary groups |
+
+Use `tokens.resolveRadius(family: TilawaRadiusFamily.*)` — do not hardcode radii.
+
+### Motion
+
+| Token | Value |
+|-------|-------|
+| `durationFast` | 200 ms |
+| `durationMedium` | 400 ms |
+| `durationSlow` | 600 ms |
+| `curveStandard` | `Curves.easeOut` |
+| `curveEmphasized` | `Curves.easeOutCubic` |
+| `curveSymmetric` | `Curves.easeInOut` |
+
+Reader page-turn stays slowest in the app.
+
+### Content max widths
+
+| Kind | Max (px) | Use |
+|------|----------|-----|
+| Reader | 720 | Quran body |
+| Form | 560 | Sheets, auth |
+| Media | 1200 | Share / gallery |
+| Settings | 760 | Settings columns |
+
+---
+
+## Layout and breakpoints
+
+- **Window classes** (`TilawaWindowSize`): narrow `< 600`, medium `< 840`, expanded `< 1200`, large `≥ 1200`.
+- Branch on `context.windowSize`, not raw widths.
+- **Adaptive shell** (`TilawaAdaptiveShell`): bottom nav with labels; floating pill on `#212528`; sync system nav bar color for continuity.
+- **Min touch target:** **48 dp** (`kMeMuslimMinInteractiveDimension`) — WCAG 2.5.5 AAA target size.
+
+---
+
+## Components
+
+Component styling lives in `MeMuslimComponentTokens` (access: `theme.componentTokens`).
+
+**Prefer kit widgets:** `TilawaButton`, `TilawaCard`, `TilawaEmptyState`, `TilawaErrorState`, `TilawaSkeleton`, `TilawaAsyncContent`, `TilawaCatalogAppBar`, `TilawaSearchField`, `TilawaSelectionPill`, `TilawaSettingsGroup`, `TilawaAdaptiveShell`, `TilawaMediaPlayerBar`.
+
+### Catalog chrome (frozen)
+
+`TilawaCatalogAppBar` on list/catalog screens:
+
+- Surface: `TilawaAppBarSurface.parchment`
+- Title: left-aligned `titleLarge` w700
+- Search: catalog variant — white fill + hairline, not primary-tinted
+- Filters: `TilawaSelectionPillStyle.catalog` — selected `primary` + `onPrimary`; unselected `surfaceContainerHigh`
+
+### Cards and interaction
+
+- **TilawaCard:** parent `onTap` from blank areas only; nested enabled controls keep their action. Conflicting actions → sibling `Row` (see `CLAUDE.md`).
+- **TilawaInteractiveSurface:** ink splash 0.08 primary, highlight 0.04 onSurface, state layers 0.12 pressed / 0.08 hover.
+
+### Empty, error, loading
+
+| State | Component | Contract |
+|-------|-----------|----------|
+| Empty | `TilawaEmptyState` | Icon + title + optional subtitle + optional action |
+| Error | `TilawaErrorState` | Icon + title + retry |
+| Loading (structured) | `TilawaSkeleton` + bones | Mirror loaded layout; RTL-aware shimmer |
+| Region swap | `TilawaAsyncContent` | Cross-fade over `durationFast`; static under reduced motion |
+| Spinner | `TilawaLoadingIndicator` | Indeterminate work without stable geometry only |
+
+### Feedback / toasts
+
+Use **`TilawaFeedback.showToast`** / **`showActionable`** — not `SnackBar` or third-party toast packages.
+
+| Channel | Component |
+|---------|-----------|
+| Success confirmation | `TilawaFeedbackVariant.success` toast |
+| Destructive undo | Actionable toast, 4 s default |
+| Field validation | Inline under field — **never** toast |
+| Network failure | `TilawaFeedbackVariant.error` toast |
+
+Host: `TilawaFeedbackHost` wraps `MaterialApp.builder` child.
+
+---
+
+## Depth and elevation
+
+- **Shadows:** alpha **0.04** default, **0.08** floating chrome; offsets `(0,1)` and `(0,2)`; blur **8**.
+- **Borders:** `borderWidthThin` **0.5** hairlines where tokens apply.
+- **No heavy elevation stacks** or decorative gradients on standard chrome.
+
+---
+
+## Screen-specific guidance
 
 ### Home dashboard
 
-Approved layout — do not redesign or reorder unless the user asks.
-**Technical:** [home-dashboard-patterns.md](.agents/skills/tilawa-apply-ui-principles/references/home-dashboard-patterns.md).
-**Design:** [home_screen_design_artifacts.md](docs/design/home_screen_design_artifacts.md).
+**Product-approved layout — do not redesign or reorder** unless explicitly requested.
+
+Technical: [home-dashboard-patterns.md](.agents/skills/tilawa-apply-ui-principles/references/home-dashboard-patterns.md). Design intent: [home_screen_design_artifacts.md](docs/design/home_screen_design_artifacts.md).
+
+Approved stack: `HomeNextPrayerTime` → optional tutor sliver → `HomePrimaryActionsSection` → `HomeQuickToolsSection` → deferred More / listening / inspiration / closing mark. Two primary tiles (Mushaf, Athkar), three quick tools — not a multi-tab launcher grid.
+
+### Quran Sessions
+
+Package: `packages/quran_sessions/`. Performance → UX → UI (see [`docs/quran_sessions/performance_first_review_framework.md`](docs/quran_sessions/performance_first_review_framework.md)).
+
+- Reuse kit empty/error/offline: `QuranSessionsOfflineState`, `buildQuranSessionsFailureBody`, `TilawaEmptyState`.
+- Teacher dashboard: overview card, schedule section, summary stats, week-scope pills, next-action resolver — calm hierarchy, grouped sections, inline empty states per tab.
+- Session cards: `TutorSessionCompactCard` — compact, scannable metadata.
+- No raw hex in presentation chrome; no amber/debug colors in production paths.
+- Toasts for undo/cancel flows via `TilawaFeedback`, not ad-hoc `SnackBar`.
+
+### Teacher Dashboard
+
+- **Hierarchy:** summary stats → next action → schedule timeline → pending/upcoming lists.
+- **Empty states:** `TeacherDashboardInlineEmptyState` — icon + title + description + optional CTA.
+- **Offline:** `QuranSessionsOfflineState` centered with retry.
+- **Week scope:** pills use catalog selection pattern (green selected, neutral idle).
+
+### Settings
+
+- `TilawaSettingsGroup` + list rows; catalog app bar on list screens.
+- Support MeMuslim: calm surfaces, brown/green Ink CTA, no gold pay heroes (see § Support).
+- Form sheets: cap width with `contentMaxWidthForm` (560).
+
+### Empty states (global rule)
+
+Every empty region: **`TilawaEmptyState`** or **`TilawaIllustratedState`** — icon + title + description (+ optional single primary action). No bare text-only placeholders.
 
 ---
 
-## 6. Components (`TilawaComponentTokens`)
+## Accessibility
 
-Component styling is tokenized per family (atoms → organisms). Factories: `TilawaComponentTokens.light` / `.dark` with live `ColorScheme`.
-
-Includes (non-exhaustive): section titles, sheet handle, **card**, icon box, loading indicator, dividers, empty/error states, alphabet scrollbar, feedback strip, **glass panel**, icon action button, **chip**, **segmented control**, seek bar, search field, count progress ring, **player background**, footer bar, **media player bar**, **adaptive shell**, settings group, immersive composer, icon toggle, permission banner, prayer alert row, bottom sheet scaffold.
-
-**Rule:** Prefer **`context.theme.componentTokens.<family>`** (or equivalent project API) over one-off `BoxDecoration` values when building kit-aligned UI.
-
-### Catalog chrome (frozen pattern)
-
-List and catalog screens use **`TilawaCatalogAppBar`** (`packages/ui_kit/lib/src/molecules/tilawa_catalog_app_bar.dart`):
-
-- **Surface:** `TilawaAppBarSurface.parchment` (white light / dark `surface`).
-- **Title:** left-aligned, bold `titleLarge`.
-- **Heights:** `TilawaAppBarConfig.catalogTitleOnlyHeight`, `catalogTitleAndSearchHeight`, `catalogTitleSearchAndFilterRowHeight` — `preferredSize` must match laid-out content (device-pixel ceil).
-- **Search:** `TilawaSearchField` (default **catalog** variant); white `surface` fill and hairline border — not primary-tinted.
-- **Filters:** `TilawaSelectionPillStyle.catalog` — selected `primary` fill + `onPrimary` label; unselected `surfaceContainerHigh`.
-- **Back on pushed routes:** `automaticallyImplyLeading: true` and `onBackPressed: () => context.pop()` with GoRouter; compact leading via `TilawaAppBarChrome.resolveCatalogRowLeading`.
-
-**Accent discipline:** user primary is for CTAs, active nav, favorites, switch ON — **not** catalog search/chip/app-bar backgrounds.
+- **Touch targets:** ≥ **48 dp** on all in-app interactive elements.
+- **Contrast:** body text vs surface ≥ WCAG AA; green `#1DAB61` uses `#003317` on-primary for labels.
+- **RTL / Arabic:** use `EdgeInsetsDirectional`, `AlignmentDirectional`, skeleton sweep follows reading direction; test Arabic layouts.
+- **State:** never color-only — pair with icon, label, or pattern (selected pill fill + label weight).
+- **Loading / empty / error / disabled:** distinct visuals; announce skeleton regions via `semanticLabel`.
+- **Text scale:** test layouts at system max within app clamp; Home hero at 1.3.
+- **Reduced motion:** skeletons freeze to static blocks; `TilawaAsyncContent` instant swap.
 
 ---
 
-## 7. Depth and elevation
+## Support MeMuslim (voluntary contribution)
 
-- **Shadows:** `BoxShadow` alphas **0.18** (default elevated) and **0.28** (strong / floating), with small vertical offsets (2 and 4 logical px).
-- **Borders:** thin hairline **0.5** where tokens apply.
-- **Material elevation tint:** Component `surfaceTintColor` is driven to **transparent** on cards, dialogs, and sheets in `AppTheme._applySurfaceScale` for a cleaner, less “washed” M3 look.
-- **Switches:** Custom OFF-track treatment blends outline into `surfaceContainerLow` so purple/teal primaries do not tint the track mud.
-
----
-
-## 8. Tilawa app integration
-
-- **Theme state:** `ThemeCubit` supplies `primaryColor`, preset source, `themeMode`, and `AppThemePreset` (including true black).
-- **Themes:** `AppTheme.getLightTheme` / `getDarkTheme` with extra extensions — e.g. **`QuranReaderTheme`** for reader-specific overrides.
-- **Localization:** `MaterialApp.router` uses generated `AppLocalizations` + additional delegates (e.g. `quran_image` l10n).
-- **Scrim / overlap:** Screens that use **`NestedScrollView`** + **`SliverOverlapAbsorber` / `SliverOverlapInjector`** (e.g. prayer times) must keep test harnesses consistent with that structure.
-
----
-
-## 9. Support Tilawa surfaces (voluntary contribution)
-
-Tilawa uses **Support Tilawa**, not “Premium” or “Pro,” for optional financial
-contribution. Full product rules live in
-[`specs/016-support-tilawa/spec.md`](specs/016-support-tilawa/spec.md); visual
-detail in
-[`packages/ui_kit/docs/support_visual_system.md`](packages/ui_kit/docs/support_visual_system.md).
-
-### Terminology (user-facing)
+Product: [`specs/016-support-tilawa/spec.md`](specs/016-support-tilawa/spec.md). Visuals: [`packages/ui_kit/docs/support_visual_system.md`](packages/ui_kit/docs/support_visual_system.md).
 
 | Avoid | Use |
 |-------|-----|
-| Premium, Pro, VIP, Unlock, Upgrade | Support Tilawa, Supporter, Help keep Tilawa free |
+| Premium, Pro, VIP | Support MeMuslim, Supporter |
 
-### UX placement (allowed vs forbidden)
-
-| Allowed | Forbidden |
-|---------|-----------|
-| Settings, About, Profile | Quran reader, prayer times, athkar, onboarding, cold-start popups |
-
-### Visual rules (summary)
-
-- **Calm:** `surfaceContainerLow`, hairlines, one **Ink** (`primary`) CTA per screen.
-- **No gold pay chrome:** Gilding (`tertiary`) is not for purchase buttons (see brand doc §3).
-- **No aggressive success UI:** `TilawaEmptyState` thank-you — no confetti, gold gradients, or “benefits unlocked” lists.
-- **Transparent:** impact bullets + “Payments processed by Google Play” footer.
-
-### MVP implementation constraints (design-relevant)
-
-- Android + Google Play consumables only; prices from Play strings, not hard-coded currency.
-- Feature flag: `TILAWA_LAUNCH_SUPPORT_TILAWA_ENABLED` (default **on**; set `false` to hide entries).
-- No subscription/perk UI in MVP.
+Calm parchment surfaces; one green CTA per screen; no gold pay chrome; no worship-surface entry points.
 
 ---
 
-## 11. Product tours (contextual coach marks)
+## AI agent rules
 
-In-app **product tours** highlight existing controls with a dark scrim and
-token-backed tooltip cards. They are separate from first-run **onboarding**
-(full-screen carousel).
+**Mandatory before any UI change:**
 
-### UX placement (allowed vs forbidden)
+1. Read **this file** and [`packages/ui_kit/docs/design_system.md`](packages/ui_kit/docs/design_system.md).
+2. Use **`ColorScheme`**, **`context.tokens`**, **`theme.componentTokens`**, **`theme.productColors`** — no new hex, spacing, radius, or typography unless explicitly requested and added to tokens first.
+3. **Green `#1DAB61`** is the production primary for CTAs (Start, Continue, Save, Book, etc.). **No legacy purple.** Brown/warm/gold only where already tokenized.
+4. **Prefer UI Kit components.** New reusable widgets go in `packages/ui_kit` first, then consume from features.
+5. **No hardcoded** `Color(0x…)`, raw dp, or `Curves.*` in feature code — extend tokens/theme.
+6. **Dashboard / complex screens:** clear hierarchy, grouped sections, scannable rows, approved empty states, skeleton loading.
+7. **Home:** preserve approved order — link [home-dashboard-patterns.md](.agents/skills/tilawa-apply-ui-principles/references/home-dashboard-patterns.md); do not wire stale Home widgets listed there.
+8. **Feedback:** `TilawaFeedback` toasts only; inline validation stays inline.
+9. **l10n:** `context.l10n` / feature delegates — no hard-coded user strings in presentation.
+10. **External moodboards** (`design-md/`): inspiration only — never paste reference hex into features.
 
-| Allowed | Forbidden |
-|---------|-----------|
-| Feature discovery after calm entry (e.g. Reciters tab mounted) | Quran reader, prayer times, athkar during active worship |
-| Settings-triggered debug replay (developer builds) | Cold-start popups, launch overlays |
+**Prompt templates:**
 
-### Visual rules
-
-- Scrim: ~72% opacity neutral shadow (adaptive light/dark).
-- Tooltip: `surfaceContainerHigh`, `radiusLarge`, primary **Next** / **Got it**
-  CTA; secondary **Skip** text button.
-- Focus ring padding: 8 dp; respect safe areas and text-scale clamp (§3).
-
-Implementation: `apps/tilawa/lib/features/tour_guide/` — see feature README.
+- *"Implement with MeMuslim UI Kit — `colorScheme`, `context.tokens`, `componentTokens`; no raw hex."*
+- *"Primary CTA uses `colorScheme.primary` / brand green; catalog chrome stays neutral."*
+- *"Empty state: `TilawaEmptyState` with icon, title, subtitle."*
+- *"Loading: `TilawaSkeleton` mirroring final layout via `TilawaAsyncContent`."*
 
 ---
 
-## 12. Do’s and don’ts
+## Do's and don'ts
 
 **Do**
 
-- Use `ColorScheme` and **design/component tokens** for color, space, type, and radii.
-- Respect **44 dp** minimum interactive sizes for in-app hit targets.
-- Cap wide layouts with **`TilawaContentBounds`** and the correct `TilawaContentKind`.
-- Use **`TilawaWindowSize`** for adaptive layout decisions.
-- Prefer **Material 3** widgets and kit components (`TilawaButton`, `TilawaIconActionButton`, etc.) for consistent state layers.
+- Use tokens and kit components for all chrome.
+- Respect **48 dp** minimum interactive sizes.
+- Cap wide content with `TilawaContentBounds` / `resolveContentWidth`.
+- Branch layout on `context.windowSize`.
+- Match catalog app bar + neutral search/pills on list screens.
 
-**Don’t**
+**Don't**
 
-- Sprinkle raw hex or `Color(0xFF…)` in features; extend the theme or tokens if a new semantic is needed.
-- Rely on Flutter’s default **48 dp** minimum when Tilawa tokens specify **44 dp** — follow the kit.
-- Assume **compact** VisualDensity; the kit is tuned for **comfortable** density.
-- Ignore **text scaler clamp** when auditing layouts (test at scale **1.4**).
-- Add support/donation UI only per **§9** entry-point policy — never on worship surfaces.
-
----
-
-## 11. Responsive behavior (checklist)
-
-- [ ] Narrow: single column; bottom nav with icon + label where shell applies.
-- [ ] Medium / expanded: consider rails, split columns, and larger content caps via `resolveContentWidth`.
-- [ ] Touch targets ≥ **44 dp**; spacing from the 8-point grid (token scale).
-- [ ] Contrast: body text vs surface ≥ **WCAG AA** where feasible; validate primary/onPrimary for custom colors (light theme clamps pathological primaries in `AppTheme._safePrimaryForLight`).
+- Add purple, random accent colors, or e-commerce-style dense dashboards.
+- Use heavy gradients, excessive shadows, or primary-tinted catalog backgrounds.
+- Toast field validation errors.
+- Flatten scaffold to pure white — use warm canvas `#F4F2EE` so white cards lift.
+- Put support/donation UI on worship surfaces (reader, prayer, athkar).
 
 ---
 
-## 12. Agent prompt guide
+## Validation
 
-Short prompts that align outputs with this repo:
+Validate this file after edits:
 
-- *“Implement using **Tilawa UI Kit** — `Theme.of(context).colorScheme`, **`TilawaDesignTokens`**, and **`TilawaComponentTokens`**, no raw hex.”*
-- *“Use **`TilawaContentBounds`** with kind **form** for this settings sheet content.”*
-- *“Branch layout on **`context.windowSize`** (narrow vs expanded), not raw `MediaQuery` width.”*
-- *“Primary is user-configurable; use **`ColorScheme.primary`** / **onPrimary**, not `AppColors.primaryTeal` in feature code.”*
-- *“Match **adaptive shell** bottom nav: use component tokens for nav height, spacing, and label styling.”*
-- *“Support flow: read **§9** and `specs/016-support-tilawa/spec.md` — calm surfaces, no Premium copy, no reader/prayer entry points.”*
+```bash
+# From repo root — requires network for first npx fetch
+npx @google/design.md lint --format=text DESIGN.md
+
+# Structured output for CI/agents
+npx @google/design.md lint --format=json DESIGN.md
+
+# macOS/Linux: exit 0 = pass (warnings OK); exit 1 = errors
+```
+
+Windows PowerShell (if `design.md` opens as a file):
+
+```bash
+npx -p @google/design.md designmd lint DESIGN.md
+```
+
+Manual YAML check:
+
+```bash
+python3 -c "import yaml, pathlib; yaml.safe_load(pathlib.Path('DESIGN.md').read_text().split('---',2)[1])"
+```
+
+Theme compliance tests (code vs spec):
+
+```bash
+cd packages/ui_kit && flutter test test/theme/
+```
 
 ---
 
-## 13. Key file map
+## Key file map
 
 | Area | Path |
 |------|------|
 | Theme assembly | `packages/ui_kit/lib/src/foundation/app_theme.dart` |
 | Core palette | `packages/ui_kit/lib/src/foundation/app_colors.dart` |
 | Spatial / motion tokens | `packages/ui_kit/lib/src/foundation/design_tokens.dart` |
-| Content width helper | `packages/ui_kit/lib/src/foundation/content_bounds.dart` |
-| Breakpoints | `packages/ui_kit/lib/src/foundation/breakpoints.dart` |
 | Component tokens | `packages/ui_kit/lib/src/foundation/component_tokens/` |
-| Export / composer fixed palettes (DESIGN §9 exceptions) | `packages/ui_kit/lib/src/foundation/app_colors.dart` — `AppShareComposerColors`, `AppExportScreenshotColors`, `AppVideoReelDesignDefaults` |
-| App theme wiring | `apps/tilawa/lib/tilawa_app.dart` |
-| Bottom sheet shell | `packages/ui_kit/lib/src/foundation/tilawa_bottom_sheet_scaffold.dart` |
+| Product semantic colors | `packages/ui_kit/lib/src/foundation/memuslim_product_colors.dart` |
+| Content width | `packages/ui_kit/lib/src/foundation/content_bounds.dart` |
+| Breakpoints | `packages/ui_kit/lib/src/foundation/breakpoints.dart` |
+| Feedback / toasts | `packages/ui_kit/lib/src/foundation/tilawa_feedback.dart` |
 | Primary presets | `apps/tilawa/lib/features/theme/domain/primary_color_preset.dart` |
-| Deeper color docs | `docs/design/colors.md` |
-| UI kit design system (freeze contract) | `packages/ui_kit/docs/design_system.md` |
-| Catalog app bar | `packages/ui_kit/lib/src/molecules/tilawa_catalog_app_bar.dart` |
-| Theme freeze spec | `specs/017-catalog-theme-freeze/spec.md` |
-| Support product spec | `specs/016-support-tilawa/spec.md` |
-| Support visual rules | `packages/ui_kit/docs/support_visual_system.md` |
-| Play product IDs | `docs/support_play_products.md` |
-| External DESIGN.md catalog (index) | `docs/design/awesome-design-md-readme.md` |
-| Third-party reference designs (per brand) | `design-md/<brand>/DESIGN.md` |
+| App theme wiring | `apps/tilawa/lib/tilawa_app.dart` |
+| UI kit freeze contract | `packages/ui_kit/docs/design_system.md` |
+| Brand intent | `docs/tilawa_brand.md` |
+| Home dashboard patterns | `.agents/skills/tilawa-apply-ui-principles/references/home-dashboard-patterns.md` |
+| External moodboard library | `design-md/` (index: `docs/design/awesome-design-md-readme.md`) |
 
 ---
 
-## 14. External design references
+## Theme freeze status
 
-**Canonical for Tilawa:** this file (`DESIGN.md` at repo root) plus code in `packages/ui_kit`.
-
-**Primary external moodboard (2026):** [Behance — Islamic App Mobile UI/UX Design for Muslim Lifestyle](https://www.behance.net/gallery/230050359/Islamic-App-Mobile-UIUX-Design-for-Muslim-Lifestyle) — warm parchment, brown ink, gold featured cards. See [`docs/tilawa_brand.md`](docs/tilawa_brand.md).
-
-**Local library:** the `design-md/` directory is a snapshot of
-[VoltAgent/awesome-design-md](https://github.com/VoltAgent/awesome-design-md)
-(see the catalog and usage notes in
-[`docs/design/awesome-design-md-readme.md`](docs/design/awesome-design-md-readme.md)).
-Use **one** `design-md/<brand>/DESIGN.md` per initiative as a **moodboard**
-(layout rhythm, elevation, patterns)—not as a replacement palette.
-
-**Agent workflow:** subordinate any external file to this spec: implement with
-`TilawaDesignTokens`, `TilawaComponentTokens`, and `ColorScheme`; do not paste
-reference hex into feature code unless it becomes a deliberate token in
-`AppColors` / theme refinement.
-
-**Updating the library:** refresh `design-md/` from upstream (copy, re-clone, or
-`git submodule`) when you want new references; keep the snapshot license
-(MIT) in mind.
+**Frozen baseline** (2026-05-23): [`specs/017-catalog-theme-freeze/spec.md`](specs/017-catalog-theme-freeze/spec.md). Allowed: new kit components, critical bugs, documented feature palettes (Quran reader, share output). Enforcement: `app_theme_color_roles_test.dart`, `app_theme_spec_compliance_test.dart`, `test/goldens/`.
 
 ---
 
-## 15. Theme & UI kit freeze (2026-05-23)
+## Document format
 
-**Status:** **Frozen** for long-term stability — see [`specs/017-catalog-theme-freeze/spec.md`](specs/017-catalog-theme-freeze/spec.md) and [`packages/ui_kit/docs/design_system.md`](packages/ui_kit/docs/design_system.md).
-
-| Field | Detail |
-|-------|--------|
-| **Visual reference** | [`design-md/pinterest/DESIGN.md`](design-md/pinterest/DESIGN.md) — catalog calm + accent discipline only. |
-| **Default primary** | Sage `#219653`; light neutrals `#F4F2EE` canvas / `#FFFFFF` cards / black ink. |
-| **Catalog header** | `TilawaCatalogAppBar` + catalog search/pills on major list screens. |
-| **Allowed changes** | New kit components; critical bugs; documented feature palettes (Quran reader, share output). |
-| **Enforcement** | `app_theme_color_roles_test.dart`, `app_theme_spec_compliance_test.dart`, `test/goldens/`. |
-
-**Parallel initiative:** Support Tilawa — [`specs/016-support-tilawa/spec.md`](specs/016-support-tilawa/spec.md), DESIGN §9.
-
-Replace this section when the freeze lifts or a new global visual initiative starts.
-
----
-
-## Document format note
-
-This file follows the same *intent* as community **DESIGN.md** collections (e.g. [awesome-design-md](https://github.com/VoltAgent/awesome-design-md), [getdesign.md](https://getdesign.md/)): a single markdown spec agents can read. It describes **this product’s** implementation, not an external brand.
-
+Follows [Google design.md](https://stitch.withgoogle.com/docs/design-md/overview/) (YAML frontmatter + human spec). Machine-readable tokens in frontmatter mirror `AppColors` and `MeMuslimDesignTokens`; prose sections add agent-enforceable rules. Update frontmatter when token values change in code.
