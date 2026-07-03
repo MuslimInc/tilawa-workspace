@@ -146,7 +146,6 @@ abstract final class CrashReportingContext {
   }
 
   /// True for Firebase Auth invalid-credential / forced re-sign-in noise.
-  @visibleForTesting
   static bool isIgnorableAuthSessionNoise(Object error) {
     final String description = error.toString().toLowerCase();
     return description.contains('credential is no longer valid') ||
