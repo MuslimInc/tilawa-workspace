@@ -3,30 +3,22 @@ import 'package:flutter_svg/flutter_svg.dart';
 
 import '../foundation/design_tokens.dart';
 import '../foundation/tilawa_interactive_surface.dart';
+import '../foundation/tilawa_text_roles.dart';
 import './tilawa_loading_indicator.dart';
 
 /// Google Identity palette for the branded sign-in button.
 ///
 /// Values follow the public Sign in with Google branding guidelines
-/// (light / dark / neutral themes, pill shape, 1 dp stroke where applicable).
+/// (light / dark / neutral themes, pill shape).
 abstract final class GoogleSignInButtonBrand {
   static const Color lightFill = Color(0xFFFFFFFF);
-  static const Color lightBorder = Color(0xFF747775);
   static const Color lightLabel = Color(0xFF1F1F1F);
 
   static const Color darkFill = Color(0xFF131314);
-  static const Color darkBorder = Color(0xFF8E918F);
   static const Color darkLabel = Color(0xFFE3E3E3);
 
   static const Color neutralFill = Color(0xFFF2F2F2);
   static const Color neutralLabel = Color(0xFF1F1F1F);
-
-  static const double logoSize = 20;
-  static const double borderWidth = 1;
-  static const double horizontalPadding = 18;
-  static const double logoTextGap = 12;
-  static const double labelFontSize = 14;
-  static const double labelLineHeight = 20;
 
   static const String logoAsset = 'assets/icons/google_g_logo.svg';
   static const String logoPackage = 'tilawa_ui_kit';
@@ -34,10 +26,10 @@ abstract final class GoogleSignInButtonBrand {
 
 /// Visual theme for [TilawaGoogleSignInButton].
 enum GoogleSignInButtonAppearance {
-  /// White fill, `#747775` stroke, `#1F1F1F` label.
+  /// White fill, `#1F1F1F` label.
   light,
 
-  /// `#131314` fill, `#8E918F` stroke, `#E3E3E3` label.
+  /// `#131314` fill, `#E3E3E3` label.
   dark,
 
   /// `#F2F2F2` fill, no stroke, `#1F1F1F` label.
@@ -50,8 +42,9 @@ enum GoogleSignInButtonAppearance {
 /// Branded **Sign in with Google** control.
 ///
 /// Uses Google's prescribed colors, pill corners via [TilawaRadiusFamily.pill],
-/// Roboto Medium 14/20 label, and the standard multicolor G mark. Logo sits on
-/// the leading edge; label is optically centered in the button.
+/// [TilawaTextRole.labelLarge] label typography from the app theme, and the
+/// standard multicolor G mark. Logo sits on the leading edge; label is
+/// optically centered in the button.
 class TilawaGoogleSignInButton extends StatelessWidget {
   /// Creates a Google-branded sign-in button.
   const TilawaGoogleSignInButton({
@@ -90,7 +83,8 @@ class TilawaGoogleSignInButton extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final MeMuslimDesignTokens tokens = Theme.of(context).tokens;
+    final ThemeData theme = Theme.of(context);
+    final MeMuslimDesignTokens tokens = theme.tokens;
     final GoogleSignInButtonAppearance resolved = _resolvedAppearance(context);
 
     final Color fill = switch (resolved) {
@@ -108,17 +102,19 @@ class TilawaGoogleSignInButton extends StatelessWidget {
       GoogleSignInButtonAppearance.auto => GoogleSignInButtonBrand.lightLabel,
     };
 
-    final TextStyle labelStyle = TextStyle(
-      fontFamily: 'Roboto',
-      fontSize: GoogleSignInButtonBrand.labelFontSize,
+    final TextStyle labelStyle = tilawaResolveTextRole(
+      theme.textTheme,
+      TilawaTextRole.labelLarge,
+    ).copyWith(
       fontWeight: FontWeight.w500,
-      height:
-          GoogleSignInButtonBrand.labelLineHeight /
-          GoogleSignInButtonBrand.labelFontSize,
       color: labelColor,
     );
 
     final double height = tokens.minInteractiveDimension;
+    final double logoSize = tokens.iconSizeMedium;
+    final double horizontalPadding = tokens.spaceLarge;
+    final double contentGap = tokens.spaceMedium;
+    final double loadingIndicatorSize = tokens.iconSizeSmall;
 
     final double cornerRadius = tokens.resolveRadius(
       family: TilawaRadiusFamily.pill,
@@ -126,38 +122,21 @@ class TilawaGoogleSignInButton extends StatelessWidget {
     );
     final BorderRadius borderRadius = BorderRadius.circular(cornerRadius);
 
-    final ShapeBorder shape = switch (resolved) {
-      GoogleSignInButtonAppearance.light => StadiumBorder(
-        side: const BorderSide(
-          color: GoogleSignInButtonBrand.lightBorder,
-          width: GoogleSignInButtonBrand.borderWidth,
-        ),
-      ),
-      GoogleSignInButtonAppearance.dark => StadiumBorder(
-        side: const BorderSide(
-          color: GoogleSignInButtonBrand.darkBorder,
-          width: GoogleSignInButtonBrand.borderWidth,
-        ),
-      ),
-      GoogleSignInButtonAppearance.neutral => const StadiumBorder(),
-      GoogleSignInButtonAppearance.auto => const StadiumBorder(),
-    };
+    const ShapeBorder shape = StadiumBorder();
 
     final Widget logoAndLabel = Padding(
-      padding: const EdgeInsets.symmetric(
-        horizontal: GoogleSignInButtonBrand.horizontalPadding,
-      ),
+      padding: EdgeInsets.symmetric(horizontal: horizontalPadding),
       child: Row(
         mainAxisAlignment: .center,
         mainAxisSize: .min,
-        spacing: GoogleSignInButtonBrand.logoTextGap,
+        spacing: contentGap,
         children: <Widget>[
           Center(
-            child: const _GoogleSignInLogo(),
+            child: _GoogleSignInLogo(size: logoSize),
           ),
           Flexible(
             child: Row(
-              spacing: GoogleSignInButtonBrand.logoTextGap,
+              spacing: contentGap,
               children: [
                 Flexible(
                   child: Text(
@@ -170,8 +149,8 @@ class TilawaGoogleSignInButton extends StatelessWidget {
                 ),
                 (isLoading)
                     ? SizedBox(
-                        width: 16,
-                        height: 16,
+                        width: loadingIndicatorSize,
+                        height: loadingIndicatorSize,
                         child: TilawaLoadingIndicator(
                           color: labelColor,
                           strokeWidth: 2,
@@ -230,15 +209,17 @@ class TilawaGoogleSignInButton extends StatelessWidget {
 
 /// Cached multicolor G mark — kept mounted while loading toggles.
 class _GoogleSignInLogo extends StatelessWidget {
-  const _GoogleSignInLogo();
+  const _GoogleSignInLogo({required this.size});
+
+  final double size;
 
   @override
   Widget build(BuildContext context) {
     return SvgPicture.asset(
       GoogleSignInButtonBrand.logoAsset,
       package: GoogleSignInButtonBrand.logoPackage,
-      width: GoogleSignInButtonBrand.logoSize,
-      height: GoogleSignInButtonBrand.logoSize,
+      width: size,
+      height: size,
       fit: BoxFit.contain,
     );
   }

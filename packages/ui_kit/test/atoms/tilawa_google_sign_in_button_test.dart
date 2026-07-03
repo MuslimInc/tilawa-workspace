@@ -35,7 +35,7 @@ void main() {
     );
   }
 
-  testWidgets('uses Google brand fill, border, and pill shape in light mode', (
+  testWidgets('uses Google brand fill and pill shape in light mode', (
     WidgetTester tester,
   ) async {
     final ThemeData theme = AppTheme.getLightTheme(
@@ -58,14 +58,20 @@ void main() {
 
     expect(material.color, GoogleSignInButtonBrand.lightFill);
     expect(material.elevation, 0);
-    expect(shape.side.color, GoogleSignInButtonBrand.lightBorder);
-    expect(shape.side.width, GoogleSignInButtonBrand.borderWidth);
+    expect(shape.side, BorderSide.none);
     expect(expectedRadius, 24.0);
 
     final Text label = tester.widget(find.text('Sign in with Google'));
-    expect(label.style?.fontFamily, 'Roboto');
+    final TextStyle expectedLabelStyle = tilawaResolveTextRole(
+      theme.textTheme,
+      TilawaTextRole.labelLarge,
+    ).copyWith(
+      fontWeight: FontWeight.w500,
+      color: GoogleSignInButtonBrand.lightLabel,
+    );
+    expect(label.style?.fontFamily, expectedLabelStyle.fontFamily);
     expect(label.style?.fontWeight, FontWeight.w500);
-    expect(label.style?.fontSize, GoogleSignInButtonBrand.labelFontSize);
+    expect(label.style?.fontSize, expectedLabelStyle.fontSize);
     expect(label.style?.color, GoogleSignInButtonBrand.lightLabel);
   });
 
@@ -83,7 +89,7 @@ void main() {
     final StadiumBorder shape = material.shape! as StadiumBorder;
 
     expect(material.color, GoogleSignInButtonBrand.darkFill);
-    expect(shape.side.color, GoogleSignInButtonBrand.darkBorder);
+    expect(shape.side, BorderSide.none);
   });
 
   testWidgets('uses neutral fill without stroke', (WidgetTester tester) async {
