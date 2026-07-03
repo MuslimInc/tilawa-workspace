@@ -1,4 +1,5 @@
 export 'hidden_thumb_shape.dart';
+export 'tilawa_app_brand_badge.dart';
 export 'tilawa_button.dart';
 export 'tilawa_google_sign_in_button.dart';
 export 'tilawa_card.dart';

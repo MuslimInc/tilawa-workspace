@@ -24,6 +24,8 @@ import 'package:tilawa/features/auth/presentation/bloc/auth_bloc.dart';
 import 'package:tilawa/features/auth/presentation/cubit/login_google_sign_in_cubit.dart';
 import 'package:tilawa/features/auth/presentation/screens/login_screen.dart';
 import 'package:tilawa/features/auth/presentation/services/google_sign_in_interactive_launcher.dart';
+import 'package:tilawa/features/localization/presentation/bloc/localization_bloc.dart';
+import 'package:tilawa/features/localization/presentation/widgets/app_language_switcher.dart';
 import 'package:tilawa/features/theme/domain/primary_color_preset.dart';
 import 'package:tilawa/l10n/generated/app_localizations.dart';
 import 'package:tilawa_core/config/language_config.dart';
@@ -31,10 +33,13 @@ import 'package:tilawa_core/errors/failures.dart';
 import 'package:tilawa_ui_kit/tilawa_ui_kit.dart';
 
 import '../../../../helpers/hydrated_bloc_test_helper.dart';
+import '../../../../helpers/noop_sync_user_language_preference_use_case.dart';
 import '../../../../support/map_backed_shared_preferences_async.dart';
 import '../../../../support/fake_network_info.dart';
 import '../bloc/auth_bloc_test.mocks.dart';
 import '../services/google_sign_in_interactive_launcher_test.mocks.dart';
+import '../../../localization/presentation/bloc/localization_bloc_test.mocks.dart'
+    as localization_mocks;
 
 class TestGoogleSignInInteractiveLauncher
     extends GoogleSignInInteractiveLauncher {
@@ -104,6 +109,9 @@ void main() {
   late MockSyncDeviceTokenUseCase mockSyncDeviceTokenUseCase;
   late MockGetCurrentLanguageUseCase mockGetCurrentLanguageUseCase;
   late MockSyncUserLanguagePreferenceUseCase mockSyncUserLanguagePreference;
+  late localization_mocks.MockSetLanguageUseCase mockSetLanguageUseCase;
+  late localization_mocks.MockGetRecitersUseCase mockGetRecitersUseCase;
+  late LocalizationBloc localizationBloc;
   late AccountDeletionFlowTracker accountDeletionFlowTracker;
   late GoogleSignInSessionTracker sessionTracker;
   late TestGoogleSignInInteractiveLauncher testLauncher;
@@ -144,6 +152,8 @@ void main() {
     mockSyncDeviceTokenUseCase = MockSyncDeviceTokenUseCase();
     mockGetCurrentLanguageUseCase = MockGetCurrentLanguageUseCase();
     mockSyncUserLanguagePreference = MockSyncUserLanguagePreferenceUseCase();
+    mockSetLanguageUseCase = localization_mocks.MockSetLanguageUseCase();
+    mockGetRecitersUseCase = localization_mocks.MockGetRecitersUseCase();
     accountDeletionFlowTracker = AccountDeletionFlowTracker();
     sessionTracker = GoogleSignInSessionTracker();
     testLauncher = TestGoogleSignInInteractiveLauncher();
@@ -160,6 +170,17 @@ void main() {
       mockGetCurrentLanguageUseCase(),
     ).thenAnswer((_) async => Right(LanguageConfig.defaultLanguageCode));
     when(mockSyncUserLanguagePreference(any)).thenAnswer((_) async {});
+    when(
+      mockSetLanguageUseCase(any),
+    ).thenAnswer((_) async => const Right(null));
+    when(mockGetRecitersUseCase.invalidateCache()).thenReturn(null);
+
+    localizationBloc = LocalizationBloc(
+      mockGetCurrentLanguageUseCase,
+      mockSetLanguageUseCase,
+      mockGetRecitersUseCase,
+      noopSyncUserLanguagePreferenceUseCase(),
+    );
 
     authBloc = AuthBloc(
       mockSignInWithGoogleUseCase,
@@ -206,6 +227,7 @@ void main() {
     PendingSessionRevokeStore.setPrefsFactoryForTesting(null);
     sessionTracker.markFinished();
     await authBloc.close();
+    await localizationBloc.close();
     await networkInfo.dispose();
     await getIt.reset();
   });
@@ -222,8 +244,11 @@ void main() {
         builder: (BuildContext context, Widget? child) {
           return TilawaFeedbackHost(child: child!);
         },
-        home: BlocProvider<AuthBloc>.value(
-          value: authBloc,
+        home: MultiBlocProvider(
+          providers: <BlocProvider<dynamic>>[
+            BlocProvider<AuthBloc>.value(value: authBloc),
+            BlocProvider<LocalizationBloc>.value(value: localizationBloc),
+          ],
           child: const LoginScreen(),
         ),
       ),
@@ -284,6 +309,9 @@ void main() {
       expect(find.text('Welcome to MeMuslim'), findsOneWidget);
       expect(find.text('Sign in with Google'), findsOneWidget);
       expect(find.text('Privacy policy'), findsOneWidget);
+      expect(find.byType(AppLanguageSwitcher), findsOneWidget);
+      expect(find.text('English'), findsOneWidget);
+      expect(find.text('العربية'), findsOneWidget);
     });
 
     testWidgets(

@@ -16,6 +16,7 @@ import 'package:tilawa_ui_kit/tilawa_ui_kit.dart';
 
 import '../../../../router/app_router.dart';
 import '../../../../router/app_router_config.dart';
+import '../../../localization/presentation/widgets/app_language_switcher.dart';
 import '../../application/account_deletion_flow_tracker.dart';
 import '../../data/services/android_sign_in_platform_policy.dart';
 import '../../data/services/google_sign_in_session_tracker.dart';
@@ -350,23 +351,28 @@ class _LoginScreenBodyState extends State<_LoginScreenBody>
       child: AnnotatedRegion<SystemUiOverlayStyle>(
         value: overlayStyle,
         child: Scaffold(
-          body: LoginAuthBlocListener(
-            shouldSkipAutoSignIn: _shouldSkipAutoSignIn,
-            onNavigateToHome: () => _navigateToHome(context),
-            child: TilawaThumbReachLayout(
-              useSafeArea: true,
-              content: RepaintBoundary(
-                child: _LoginHeroContent(loginScheme: loginScheme),
-              ),
-              actions: DeferredAfterFirstFrame(
-                perfEvent: 'login_actions',
-                child: _LoginGoogleSignInActions(
-                  onPressed: _onGoogleSignInPressed,
-                  logButtonStateIfChanged: _logButtonStateIfChanged,
-                  logAuthStateIfChanged: _logAuthStateIfChanged,
+          body: Stack(
+            children: <Widget>[
+              LoginAuthBlocListener(
+                shouldSkipAutoSignIn: _shouldSkipAutoSignIn,
+                onNavigateToHome: () => _navigateToHome(context),
+                child: TilawaThumbReachLayout(
+                  useSafeArea: true,
+                  content: RepaintBoundary(
+                    child: _LoginHeroContent(loginScheme: loginScheme),
+                  ),
+                  actions: DeferredAfterFirstFrame(
+                    perfEvent: 'login_actions',
+                    child: _LoginGoogleSignInActions(
+                      onPressed: _onGoogleSignInPressed,
+                      logButtonStateIfChanged: _logButtonStateIfChanged,
+                      logAuthStateIfChanged: _logAuthStateIfChanged,
+                    ),
+                  ),
                 ),
               ),
-            ),
+              const _LoginLanguageSwitcherBar(),
+            ],
           ),
         ),
       ),
@@ -405,23 +411,7 @@ class _LoginHeroContent extends StatelessWidget {
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: <Widget>[
             Center(
-              child: Container(
-                width:
-                    tokens.minInteractiveDimension * 2 + tokens.spaceExtraSmall,
-                height:
-                    tokens.minInteractiveDimension * 2 + tokens.spaceExtraSmall,
-                decoration: BoxDecoration(
-                  color: loginScheme.primary.withValues(
-                    alpha: tokens.opacitySubtle,
-                  ),
-                  shape: BoxShape.circle,
-                ),
-                child: Icon(
-                  Icons.auto_stories_rounded,
-                  size: tokens.minInteractiveDimension,
-                  color: loginScheme.primary,
-                ),
-              ),
+              child: TilawaAppBrandBadge(accentColor: loginScheme.primary),
             ),
             SizedBox(height: tokens.spaceExtraLarge),
             Text(
@@ -443,6 +433,24 @@ class _LoginHeroContent extends StatelessWidget {
           ],
         ),
       ),
+    );
+  }
+}
+
+/// Top-trailing locale control for returning unauthenticated users.
+class _LoginLanguageSwitcherBar extends StatelessWidget {
+  const _LoginLanguageSwitcherBar();
+
+  @override
+  Widget build(BuildContext context) {
+    final MeMuslimDesignTokens tokens = Theme.of(context).tokens;
+    final EdgeInsets viewPadding = MediaQuery.paddingOf(context);
+
+    return Positioned.directional(
+      textDirection: Directionality.of(context),
+      top: viewPadding.top + tokens.spaceSmall,
+      end: tokens.spaceLarge,
+      child: const AppLanguageSwitcher(compact: true),
     );
   }
 }

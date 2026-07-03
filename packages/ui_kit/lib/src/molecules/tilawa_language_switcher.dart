@@ -4,6 +4,7 @@ import '../atoms/tilawa_loading_indicator.dart';
 import '../foundation/component_tokens.dart';
 import '../foundation/design_tokens.dart';
 import '../foundation/tilawa_interactive_surface.dart';
+import '../foundation/tilawa_text_roles.dart';
 
 /// Switches [languages] with the same chrome as [TilawaSegmentedControl].
 class TilawaLanguageSwitcher extends StatelessWidget {
@@ -15,6 +16,7 @@ class TilawaLanguageSwitcher extends StatelessWidget {
     required this.getLanguageName,
     this.enabled = true,
     this.isLoading = false,
+    this.compact = false,
   });
 
   final String currentLanguage;
@@ -24,6 +26,10 @@ class TilawaLanguageSwitcher extends StatelessWidget {
   final bool enabled;
   final bool isLoading;
 
+  /// Tighter padding and [TilawaTextRole.labelMedium] for chrome slots
+  /// (login app bar, settings header).
+  final bool compact;
+
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
@@ -31,24 +37,36 @@ class TilawaLanguageSwitcher extends StatelessWidget {
     final tokens = theme.componentTokens.segmentedControl;
 
     final ColorScheme colorScheme = theme.colorScheme;
-    final itemPadding = tokens.itemPadding.resolve(Directionality.of(context));
-    final containerPadding = tokens.containerPadding.resolve(
-      Directionality.of(context),
-    );
-    final labelStyle = theme.textTheme.labelLarge;
+    final TextDirection direction = Directionality.of(context);
+    final EdgeInsetsGeometry itemPadding = compact
+        ? EdgeInsets.symmetric(
+            horizontal: designTokens.spaceSmall,
+            vertical: designTokens.spaceExtraSmall,
+          )
+        : tokens.itemPadding.resolve(direction);
+    final EdgeInsetsGeometry containerPadding = compact
+        ? EdgeInsets.all(designTokens.spaceExtraSmall)
+        : tokens.containerPadding.resolve(direction);
+    final TextStyle labelStyle = compact
+        ? tilawaResolveTextRole(
+            theme.textTheme,
+            TilawaTextRole.labelMedium,
+          )
+        : theme.textTheme.labelLarge ?? const TextStyle();
     final double labelHeight =
-        (labelStyle?.fontSize ?? 14) * (labelStyle?.height ?? 1.2);
-    final double itemHeight = itemPadding.vertical + labelHeight;
+        (labelStyle.fontSize ?? 14) * (labelStyle.height ?? 1.2);
+    final double itemHeight =
+        itemPadding.resolve(direction).vertical + labelHeight;
     final radii = designTokens.resolveSegmentedControlRadii(
       itemHeight: itemHeight,
-      containerPadding: containerPadding.top,
+      containerPadding: containerPadding.resolve(direction).top,
       trackFamily: TilawaRadiusFamily.pill,
     );
     final containerBorderRadius = BorderRadius.circular(radii.containerRadius);
     final itemBorderRadius = BorderRadius.circular(radii.itemRadius);
 
     return Container(
-      padding: tokens.containerPadding,
+      padding: containerPadding,
       decoration: BoxDecoration(
         color: colorScheme.primary,
         borderRadius: containerBorderRadius,
@@ -73,31 +91,32 @@ class TilawaLanguageSwitcher extends StatelessWidget {
                 borderRadius: itemBorderRadius,
               ),
               child: ConstrainedBox(
-                constraints: BoxConstraints(minWidth: tokens.minItemWidth),
+                constraints: BoxConstraints(
+                  minWidth: compact ? 0 : tokens.minItemWidth,
+                ),
                 child: Padding(
-                  padding: tokens.itemPadding,
-                  child: Center(
-                    child: isLoading && isSelected
-                        ? SizedBox.square(
-                            dimension: theme.tokens.iconSizeSmall,
-                            child: TilawaLoadingIndicator(
-                              centered: false,
-                              strokeWidth: 2,
-                              color: colorScheme.primary,
-                            ),
-                          )
-                        : Text(
-                            label,
-                            style: theme.textTheme.labelLarge?.copyWith(
-                              color: isSelected
-                                  ? colorScheme.primary
-                                  : colorScheme.onPrimary,
-                              fontWeight: isSelected
-                                  ? tokens.selectedFontWeight
-                                  : tokens.unselectedFontWeight,
-                            ),
+                  padding: itemPadding,
+                  child: isLoading && isSelected
+                      ? SizedBox.square(
+                          dimension: theme.tokens.iconSizeSmall,
+                          child: TilawaLoadingIndicator(
+                            centered: false,
+                            strokeWidth: 2,
+                            color: colorScheme.primary,
                           ),
-                  ),
+                        )
+                      : Text(
+                          label,
+                          textAlign: TextAlign.center,
+                          style: labelStyle.copyWith(
+                            color: isSelected
+                                ? colorScheme.primary
+                                : colorScheme.onPrimary,
+                            fontWeight: isSelected
+                                ? tokens.selectedFontWeight
+                                : tokens.unselectedFontWeight,
+                          ),
+                        ),
                 ),
               ),
             ),

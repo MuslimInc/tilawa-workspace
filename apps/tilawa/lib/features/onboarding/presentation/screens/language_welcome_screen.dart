@@ -37,27 +37,7 @@ class LanguageWelcomeScreen extends StatelessWidget {
                 mainAxisAlignment: MainAxisAlignment.center,
                 crossAxisAlignment: CrossAxisAlignment.stretch,
                 children: <Widget>[
-                  Center(
-                    child: Container(
-                      width:
-                          tokens.minInteractiveDimension * 2 +
-                          tokens.spaceExtraSmall,
-                      height:
-                          tokens.minInteractiveDimension * 2 +
-                          tokens.spaceExtraSmall,
-                      decoration: BoxDecoration(
-                        color: colorScheme.primary.withValues(
-                          alpha: tokens.opacitySubtle,
-                        ),
-                        shape: BoxShape.circle,
-                      ),
-                      child: Icon(
-                        Icons.auto_stories_rounded,
-                        size: tokens.minInteractiveDimension,
-                        color: colorScheme.primary,
-                      ),
-                    ),
-                  ),
+                  const Center(child: TilawaAppBrandBadge()),
                   SizedBox(height: tokens.spaceExtraLarge),
                   Text(
                     context.l10n.welcomeToApp,

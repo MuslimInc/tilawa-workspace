@@ -138,14 +138,17 @@ class TilawaGoogleSignInButton extends StatelessWidget {
           Flexible(
             child: Row(
               spacing: contentGap,
+              mainAxisSize: .min,
               children: [
                 Flexible(
-                  child: Text(
-                    label,
-                    overflow: TextOverflow.ellipsis,
-                    maxLines: 1,
-                    textAlign: TextAlign.center,
-                    style: labelStyle,
+                  child: Center(
+                    child: Text(
+                      label,
+                      overflow: TextOverflow.ellipsis,
+                      maxLines: 1,
+                      textAlign: TextAlign.center,
+                      style: labelStyle,
+                    ),
                   ),
                 ),
                 (isLoading)

@@ -439,27 +439,6 @@ class _FontLoaderAmbientPainter extends CustomPainter {
   }
 }
 
-class _BrandIcon extends StatelessWidget {
-  const _BrandIcon();
-
-  @override
-  Widget build(BuildContext context) {
-    final theme = Theme.of(context);
-    final primary = theme.colorScheme.primary;
-    final tokens = theme.tokens;
-
-    return Container(
-      width: 88,
-      height: 88,
-      decoration: BoxDecoration(
-        color: primary.withValues(alpha: tokens.opacitySubtle),
-        shape: BoxShape.circle,
-      ),
-      child: Icon(Icons.menu_book_rounded, size: 44, color: primary),
-    );
-  }
-}
-
 // ─── View: downloading ───────────────────────────────────────────────────────
 
 class _DownloadView extends StatelessWidget {
@@ -505,7 +484,7 @@ class _DownloadView extends StatelessWidget {
         mainAxisSize: MainAxisSize.min,
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
-          Center(child: const _BrandIcon()),
+          Center(child: const TilawaAppBrandBadge()),
           SizedBox(height: tokens.spaceExtraLarge),
           Text(
             context.l10n.preparingFonts,
