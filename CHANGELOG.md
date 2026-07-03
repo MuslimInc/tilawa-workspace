@@ -7,31 +7,25 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [2.1.1+72] - 2026-07-03 [Google Play Production]
+
 ### Added
 
-- **Home**: Skeleton shimmer loading for the dashboard — the prayer hero and
-  body sections render layout-matching shimmer placeholders during the initial
-  load, then crossfade to content; pull-to-refresh on loaded content never
-  flashes the skeleton.
+- **Auth**: Language switcher on the login screen for faster onboarding.
+
+### Changed
+
+- **UI**: Consistent error and empty states across library screens with retry
+  actions; standardized illustrated-state sizing and app bar search layout.
+- **Home**: Status bar chrome matches bottom navigation; dashboard content stays
+  below the system status area.
+- **Sign-in**: Google sign-in button theming and label styling improvements.
 
 ### Fixed
 
-- **Offline guard**: Login/logout/delete-account connectivity checks respond
-  within ~3 seconds instead of hanging up to 10 seconds on degraded networks;
-  rapid repeated taps reuse a short-lived cached result instead of re-probing.
-- **Auth errors**: Unknown/unmapped auth failures now show a generic localized
-  message instead of raw exception text; diagnostic details stay in logs.
-- **Home dashboard**: Load/refresh failures are classified into typed kinds
-  (offline/timeout/unknown) with localized copy; pull-to-refresh failures keep
-  the cached dashboard visible and never surface raw error strings. Rapid
-  pull-to-refresh no longer queues a duplicate dashboard fetch.
-- **Session validity**: Firestore/session verification errors are logged and
-  mapped to typed failures instead of being silently swallowed; network
-  outages still degrade safely to "verification unknown" without signing the
-  user out.
-- **Bug report screenshots**: Frame waits during feedback screenshot capture
-  are now bounded, so the capture can no longer hang the feedback flow if the
-  app stops producing frames (e.g. backgrounded mid-capture).
+- **Offline indicator**: Banner respects the top safe area and no longer overlaps
+  system UI.
+- **Telemetry**: Crash reporting context and Sentry route tracking improvements.
 
 ## [2.0.17+71] - 2026-07-01 [Google Play Production]
 

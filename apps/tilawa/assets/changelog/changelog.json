@@ -3,6 +3,25 @@
   "lastUpdatedAt": "2026-06-14T12:00:00Z",
   "releases": [
     {
+      "id": "2.1.1+72",
+      "version": "2.1.1",
+      "buildNumber": 72,
+      "highlights": {
+        "en": [
+          "Clearer error and empty states across library screens with consistent retry actions",
+          "Home status bar matches bottom navigation; content no longer overlaps the system clock",
+          "Language switcher on the login screen for faster onboarding",
+          "Improved Google sign-in button styling and readability"
+        ],
+        "ar": [
+          "حالات خطأ وفراغ أوضح في شاشات المكتبة مع إجراءات إعادة المحاولة",
+          "شريط الحالة في الرئيسية يطابق شريط التنقل؛ المحتوى لا يتداخل مع ساعة النظام",
+          "مبدّل اللغة في شاشة تسجيل الدخول لتسريع البدء",
+          "تحسين مظهر زر تسجيل الدخول عبر Google ووضوح النص"
+        ]
+      }
+    },
+    {
       "id": "2.0.16+65",
       "version": "2.0.16",
       "buildNumber": 65,
