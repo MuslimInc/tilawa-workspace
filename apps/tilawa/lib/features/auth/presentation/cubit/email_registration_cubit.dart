@@ -250,6 +250,22 @@ class EmailRegistrationCubit extends Cubit<EmailRegistrationState> {
 
   EmailRegistrationDraft buildSubmissionDraft() => state.draft;
 
+  void onRegistrationAuthFailed({String? emailErrorKey}) {
+    final Map<String, String?> fieldErrors = emailErrorKey == null
+        ? state.fieldErrors
+        : <String, String?>{
+            ...state.fieldErrors,
+            'email': emailErrorKey,
+          };
+    emit(
+      state.copyWith(
+        status: EmailRegistrationStatus.editing,
+        currentStep: EmailRegistrationStep.account,
+        fieldErrors: fieldErrors,
+      ),
+    );
+  }
+
   void markProfilePersistenceFailed(UserEntity user) {
     emit(
       state.copyWith(

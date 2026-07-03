@@ -213,6 +213,11 @@ class TilawaButton extends StatelessWidget {
           resolvedMinHeight,
         ),
       ),
+      // Cap height so full-width buttons in Columns with [Expanded] siblings
+      // (unbounded max height on non-flex children) do not stretch vertically.
+      maximumSize: WidgetStateProperty.all(
+        Size(double.infinity, resolvedMinHeight),
+      ),
       padding: WidgetStateProperty.all(resolvedPadding),
       tapTargetSize: shrinkWrapTapTarget
           ? MaterialTapTargetSize.shrinkWrap

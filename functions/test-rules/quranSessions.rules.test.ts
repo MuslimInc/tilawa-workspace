@@ -197,6 +197,87 @@ test("rules: unauthenticated user cannot read quran_slot_locks", async () => {
   await assertFails(getDoc(doc(guestDb, "quran_slot_locks/lock1")));
 });
 
+async function seedPublicSessionConfig(): Promise<void> {
+  await testEnv.withSecurityRulesDisabled(async (context) => {
+    const adminDb = context.firestore();
+    await setDoc(doc(adminDb, "quran_session_platform_config/global"), {
+      childAgeThreshold: 13,
+      minimumStudentAgeYears: 5,
+      requireGuardianApprovalForChildren: true,
+      updatedAt: new Date(),
+    });
+    await setDoc(doc(adminDb, "quran_session_market_configs/EG"), {
+      countryCode: "EG",
+      countryName: "Egypt",
+      currencyCode: "EGP",
+      timezone: "Africa/Cairo",
+      isEnabled: true,
+      sortOrder: 0,
+      updatedAt: new Date(),
+    });
+    await setDoc(doc(adminDb, "quran_session_market_configs/EG/cities/cairo"), {
+      cityId: "cairo",
+      cityName: "Cairo",
+      countryCode: "EG",
+      timezone: "Africa/Cairo",
+      currencyCode: "EGP",
+      isEnabled: true,
+      sortOrder: 0,
+      updatedAt: new Date(),
+    });
+  });
+}
+
+test("rules: unauthenticated user can read public session config", async () => {
+  await testEnv.clearFirestore();
+  await seedPublicSessionConfig();
+
+  const guestDb = testEnv.unauthenticatedContext().firestore();
+  await assertSucceeds(
+    getDoc(doc(guestDb, "quran_session_platform_config/global")),
+  );
+  await assertSucceeds(getDoc(doc(guestDb, "quran_session_market_configs/EG")));
+  await assertSucceeds(
+    getDoc(doc(guestDb, "quran_session_market_configs/EG/cities/cairo")),
+  );
+  await assertSucceeds(
+    getDocs(
+      query(
+        collection(guestDb, "quran_session_market_configs"),
+        where("isEnabled", "==", true),
+        orderBy("sortOrder"),
+      ),
+    ),
+  );
+  await assertSucceeds(
+    getDocs(
+      query(
+        collection(guestDb, "quran_session_market_configs/EG/cities"),
+        where("isEnabled", "==", true),
+        orderBy("sortOrder"),
+      ),
+    ),
+  );
+});
+
+test("rules: unauthenticated user cannot write public session config", async () => {
+  await testEnv.clearFirestore();
+  await seedPublicSessionConfig();
+
+  const guestDb = testEnv.unauthenticatedContext().firestore();
+  await assertFails(
+    setDoc(doc(guestDb, "quran_session_platform_config/global"), {
+      childAgeThreshold: 99,
+    }),
+  );
+  await assertFails(
+    setDoc(doc(guestDb, "quran_session_market_configs/EG"), {
+      countryCode: "EG",
+      isEnabled: false,
+    }),
+  );
+});
+
 test("rules: verified teacher owner can update externalMeetingUrl", async () => {
   await testEnv.clearFirestore();
   await testEnv.withSecurityRulesDisabled(async (context) => {

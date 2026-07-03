@@ -9,6 +9,9 @@ import 'package:tilawa/features/auth/application/account_deletion_flow_tracker.d
 import 'package:tilawa/features/auth/data/services/google_sign_in_session_tracker.dart';
 import 'package:tilawa/features/auth/domain/entities/auth_error_key.dart';
 import 'package:tilawa/features/auth/domain/entities/auth_result.dart';
+import 'package:tilawa/features/auth/domain/entities/email_auth_failure_key.dart';
+import 'package:tilawa/features/auth/domain/entities/email_registration_draft.dart';
+import 'package:tilawa/features/auth/domain/entities/register_with_email_result.dart';
 import 'package:tilawa/features/auth/domain/entities/user_entity.dart';
 import 'package:tilawa/features/auth/domain/usecases/delete_account.dart';
 import 'package:tilawa/features/auth/domain/usecases/get_current_user_use_case.dart';
@@ -746,6 +749,40 @@ void main() {
         verify: (_) {
           verify(mockSignInWithGoogleUseCase()).called(1);
           verifyNever(mockSyncDeviceTokenUseCase(any));
+        },
+      );
+    });
+
+    group('RegisterWithEmailEvent', () {
+      const EmailRegistrationDraft draft = EmailRegistrationDraft(
+        email: 'mm@gmail.com',
+        password: 'Password1!',
+        confirmPassword: 'Password1!',
+      );
+
+      blocTest<AuthBloc, AuthState>(
+        'emits loading then error without authenticated on duplicate email',
+        build: () {
+          when(
+            mockRegisterWithEmailUseCase(draft: draft),
+          ).thenAnswer(
+            (_) async => const RegisterWithEmailResult.authFailed(
+              message: EmailAuthFailureKey.emailAlreadyInUse,
+              code: 'email-already-in-use',
+            ),
+          );
+          return authBloc;
+        },
+        act: (bloc) => bloc.add(const RegisterWithEmailEvent(draft: draft)),
+        expect: () => <AuthState>[
+          const AuthState.loading(),
+          const AuthState.error(
+            message: EmailAuthFailureKey.emailAlreadyInUse,
+          ),
+        ],
+        verify: (_) {
+          verify(mockRegisterWithEmailUseCase(draft: draft)).called(1);
+          verifyNever(mockSyncDeviceTokenUseCase.registerExplicitSignIn(any));
         },
       );
     });

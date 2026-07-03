@@ -1,7 +1,9 @@
 import 'dart:async';
 
+import 'package:firebase_core/firebase_core.dart';
 import 'package:injectable/injectable.dart';
 import 'package:tilawa/core/logging/app_logger.dart';
+import 'package:tilawa/core/network/network_error_message.dart';
 import 'package:tilawa_core/errors/failures.dart';
 
 import '../../../../core/domain/server_action_guard.dart';
@@ -87,8 +89,13 @@ class RegisterWithEmailUseCase {
         user: mergedUser,
       );
     } catch (error, stackTrace) {
+      final String detail = switch (error) {
+        FirebaseException(:final code, :final message) => '$code: $message',
+        _ when isNetworkConnectivityErrorMessage(error.toString()) => 'network',
+        _ => error.runtimeType.toString(),
+      };
       logger.w(
-        'Registered but failed to persist complete profile',
+        'Registered but failed to persist complete profile ($detail)',
         error: error,
         stackTrace: stackTrace,
       );

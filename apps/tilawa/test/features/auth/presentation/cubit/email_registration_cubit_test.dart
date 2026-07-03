@@ -2,6 +2,7 @@ import 'package:bloc_test/bloc_test.dart';
 import 'package:dartz_plus/dartz_plus.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:quran_sessions/quran_sessions.dart';
+import 'package:tilawa/features/auth/domain/entities/email_auth_failure_key.dart';
 import 'package:tilawa/features/auth/domain/entities/email_registration_step.dart';
 import 'package:tilawa/features/auth/presentation/cubit/email_registration_cubit.dart';
 import 'package:tilawa/features/auth/presentation/cubit/email_registration_state.dart';
@@ -143,6 +144,28 @@ void main() {
     verify: (EmailRegistrationCubit c) {
       expect(c.state.currentStep, EmailRegistrationStep.account);
       expect(c.state.fieldError('email'), isNotNull);
+    },
+  );
+
+  blocTest<EmailRegistrationCubit, EmailRegistrationState>(
+    'registration auth failure returns to account step with email error',
+    build: () => cubit,
+    seed: () => EmailRegistrationState(
+      currentStep: EmailRegistrationStep.review,
+      isLoadingMarketData: false,
+    ),
+    act: (EmailRegistrationCubit c) {
+      c.onRegistrationAuthFailed(
+        emailErrorKey: EmailAuthFailureKey.emailAlreadyInUseWithGoogle,
+      );
+    },
+    verify: (EmailRegistrationCubit c) {
+      expect(c.state.currentStep, EmailRegistrationStep.account);
+      expect(c.state.status, EmailRegistrationStatus.editing);
+      expect(
+        c.state.fieldError('email'),
+        EmailAuthFailureKey.emailAlreadyInUseWithGoogle,
+      );
     },
   );
 }

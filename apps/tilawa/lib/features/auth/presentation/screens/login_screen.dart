@@ -358,6 +358,7 @@ class _LoginScreenBodyState extends State<_LoginScreenBody>
               LoginAuthBlocListener(
                 shouldSkipAutoSignIn: _shouldSkipAutoSignIn,
                 navigateAfterAuth: _navigateAfterAuth,
+                routeLocation: () => GoRouterState.of(context).uri.path,
                 child: TilawaThumbReachLayout(
                   useSafeArea: true,
                   contentFlex: 50,

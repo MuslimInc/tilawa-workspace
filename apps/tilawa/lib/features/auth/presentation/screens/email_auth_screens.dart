@@ -17,6 +17,7 @@ import '../services/auth_error_messages.dart';
 import '../services/email_auth_error_messages.dart';
 import '../services/auth_post_sign_in_navigation.dart';
 import '../services/login_navigate_to_home_scheduler.dart';
+import '../../domain/entities/email_auth_failure_key.dart';
 import '../../domain/entities/email_registration_step.dart';
 import '../../domain/entities/register_with_email_result.dart';
 import '../cubit/email_registration_cubit.dart';
@@ -177,6 +178,8 @@ class _RegisterBody extends StatefulWidget {
 }
 
 class _RegisterBodyState extends State<_RegisterBody> {
+  bool _registrationSubmitInFlight = false;
+
   @override
   Widget build(BuildContext context) {
     final ThemeData theme = Theme.of(context);
@@ -186,11 +189,15 @@ class _RegisterBodyState extends State<_RegisterBody> {
       listeners: <BlocListener<dynamic, dynamic>>[
         BlocListener<AuthBloc, AuthState>(
           listenWhen: (AuthState previous, AuthState current) {
+            if (!_registrationSubmitInFlight) {
+              return false;
+            }
             return previous != current &&
                 (current is AuthAuthenticated || current is AuthError);
           },
           listener: (BuildContext context, AuthState state) async {
             if (state is AuthAuthenticated) {
+              _registrationSubmitInFlight = false;
               final EmailRegistrationCubit cubit = context
                   .read<EmailRegistrationCubit>();
               if (cubit.state.status ==
@@ -237,6 +244,19 @@ class _RegisterBodyState extends State<_RegisterBody> {
               return;
             }
             if (state is AuthError) {
+              _registrationSubmitInFlight = false;
+              final EmailRegistrationCubit cubit = context
+                  .read<EmailRegistrationCubit>();
+              final bool isDuplicateEmail =
+                  state.message == EmailAuthFailureKey.emailAlreadyInUse ||
+                  state.message ==
+                      EmailAuthFailureKey.emailAlreadyInUseWithGoogle;
+              cubit.onRegistrationAuthFailed(
+                emailErrorKey: isDuplicateEmail ? state.message : null,
+              );
+              if (!context.mounted) {
+                return;
+              }
               TilawaFeedback.showToast(
                 context,
                 message: localizedAuthBlocErrorMessage(
@@ -261,10 +281,15 @@ class _RegisterBodyState extends State<_RegisterBody> {
           if (regState.marketDataErrorKey != null) {
             return Scaffold(
               appBar: AppBar(title: Text(context.l10n.createAccount)),
-              body: Center(
-                child: TilawaButton(
-                  text: context.l10n.retry,
-                  onPressed: () =>
+              body: SafeArea(
+                child: TilawaErrorState(
+                  icon: Icons.cloud_off_outlined,
+                  title: localizedAuthBlocErrorMessage(
+                    regState.marketDataErrorKey!,
+                    context.l10n,
+                  ),
+                  retryLabel: context.l10n.retry,
+                  onRetry: () =>
                       context.read<EmailRegistrationCubit>().initialize(),
                 ),
               ),
@@ -393,6 +418,7 @@ class _RegisterBodyState extends State<_RegisterBody> {
       if (!cubit.validateCurrentStep()) {
         return;
       }
+      _registrationSubmitInFlight = true;
       context.read<AuthBloc>().add(
         AuthEvent.registerWithEmail(draft: cubit.buildSubmissionDraft()),
       );

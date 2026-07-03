@@ -26,16 +26,24 @@ class LoginAuthBlocListener extends StatelessWidget {
     required this.child,
     required this.shouldSkipAutoSignIn,
     required this.navigateAfterAuth,
+    required this.routeLocation,
   });
 
   final Widget child;
   final bool Function() shouldSkipAutoSignIn;
   final void Function(String location) navigateAfterAuth;
+  final String Function() routeLocation;
 
   @override
   Widget build(BuildContext context) {
     return BlocListener<AuthBloc, AuthState>(
-      listenWhen: shouldLoginAuthBlocListen,
+      listenWhen: (AuthState previous, AuthState current) {
+        return shouldLoginAuthBlocListen(
+          previous,
+          current,
+          routeLocation: routeLocation(),
+        );
+      },
       listener: (BuildContext context, AuthState state) {
         handleLoginAuthBlocTransition(
           state: state,

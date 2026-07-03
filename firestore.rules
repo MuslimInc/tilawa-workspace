@@ -116,23 +116,23 @@ service cloud.firestore {
       allow write: if false;
     }
 
-    // Quran Sessions market config — read-only for authenticated clients;
-    // seed via admin tools (see FirestoreMarketConfigDataSource). Includes the
-    // per-country `cities` subcollection loaded by _loadCities().
+    // Quran Sessions market config — public read (country/city pickers run
+    // during email registration before Auth exists); seed via admin tools.
+    // Includes the per-country `cities` subcollection loaded by _loadCities().
     match /quran_session_market_configs/{countryCode} {
-      allow read: if isSignedIn();
+      allow read: if true;
       allow write: if false;
 
       match /cities/{cityId} {
-        allow read: if isSignedIn();
+        allow read: if true;
         allow write: if false;
       }
     }
 
-    // Quran Sessions platform policy — read-only for authenticated clients;
-    // seed via admin tools (see FirestoreSessionPolicyDataSource, global doc).
+    // Quran Sessions platform policy — public read (age thresholds for
+    // registration wizard); seed via admin tools (global doc).
     match /quran_session_platform_config/{configId} {
-      allow read: if isSignedIn();
+      allow read: if true;
       allow write: if false;
     }
 
