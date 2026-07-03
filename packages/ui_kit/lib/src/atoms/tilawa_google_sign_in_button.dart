@@ -102,13 +102,14 @@ class TilawaGoogleSignInButton extends StatelessWidget {
       GoogleSignInButtonAppearance.auto => GoogleSignInButtonBrand.lightLabel,
     };
 
-    final TextStyle labelStyle = tilawaResolveTextRole(
-      theme.textTheme,
-      TilawaTextRole.labelLarge,
-    ).copyWith(
-      fontWeight: FontWeight.w500,
-      color: labelColor,
-    );
+    final TextStyle labelStyle =
+        tilawaResolveTextRole(
+          theme.textTheme,
+          TilawaTextRole.labelLarge,
+        ).copyWith(
+          fontWeight: FontWeight.w500,
+          color: labelColor,
+        );
 
     final double height = tokens.minInteractiveDimension;
     final double logoSize = tokens.iconSizeMedium;

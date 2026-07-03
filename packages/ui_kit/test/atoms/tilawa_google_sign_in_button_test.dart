@@ -62,13 +62,14 @@ void main() {
     expect(expectedRadius, 24.0);
 
     final Text label = tester.widget(find.text('Sign in with Google'));
-    final TextStyle expectedLabelStyle = tilawaResolveTextRole(
-      theme.textTheme,
-      TilawaTextRole.labelLarge,
-    ).copyWith(
-      fontWeight: FontWeight.w500,
-      color: GoogleSignInButtonBrand.lightLabel,
-    );
+    final TextStyle expectedLabelStyle =
+        tilawaResolveTextRole(
+          theme.textTheme,
+          TilawaTextRole.labelLarge,
+        ).copyWith(
+          fontWeight: FontWeight.w500,
+          color: GoogleSignInButtonBrand.lightLabel,
+        );
     expect(label.style?.fontFamily, expectedLabelStyle.fontFamily);
     expect(label.style?.fontWeight, FontWeight.w500);
     expect(label.style?.fontSize, expectedLabelStyle.fontSize);
