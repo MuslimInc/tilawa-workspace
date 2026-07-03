@@ -16,7 +16,11 @@ class UserRepositoryImpl implements UserRepository {
   static const String _quranSessionsProfileField = 'quranSessionsProfile';
 
   @override
-  Future<void> saveUserData(UserEntity user) async {
+  Future<void> saveUserData(
+    UserEntity user, {
+    String? authProvider,
+    bool? profileCompleted,
+  }) async {
     final DocumentReference<Map<String, dynamic>> userRef = _firestore
         .collection('users')
         .doc(user.id);
@@ -27,6 +31,9 @@ class UserRepositoryImpl implements UserRepository {
       'photoUrl': user.photoUrl,
       'lastSignInTime': FieldValue.serverTimestamp(),
       'createdAt': user.createdAt.toIso8601String(),
+      'updatedAt': FieldValue.serverTimestamp(),
+      'authProvider': ?authProvider,
+      'profileCompleted': ?profileCompleted,
     }, SetOptions(merge: true));
   }
 
@@ -69,24 +76,15 @@ class UserRepositoryImpl implements UserRepository {
       'photoUrl': user.photoUrl,
       'lastSignInTime': FieldValue.serverTimestamp(),
       'createdAt': user.createdAt.toIso8601String(),
+      'updatedAt': now.toIso8601String(),
       'authProvider': 'emailPassword',
+      'profileCompleted': true,
       if (draft.preferredLanguageCode != null)
         'languageCode': draft.preferredLanguageCode,
       _quranSessionsProfileField: {
         'role': 'student',
         'accountStatus': 'active',
-        'profileCompleted': true,
-        'displayName': draft.displayName.trim(),
-        'gender': draft.gender,
-        'dateOfBirth': draft.dateOfBirth?.toIso8601String(),
-        'countryCode': draft.countryCode,
-        'countryName': draft.countryName,
-        'cityId': draft.cityId,
-        'cityName': draft.cityName,
-        'currencyCode': draft.currencyCode,
-        'timezone': draft.timezone,
-        if (draft.learningGoals.isNotEmpty)
-          'learningGoals': draft.learningGoals,
+        'profileCompleted': false,
         'createdAt': now.toIso8601String(),
         'updatedAt': now.toIso8601String(),
       },

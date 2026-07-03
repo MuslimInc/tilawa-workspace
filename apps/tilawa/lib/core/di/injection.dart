@@ -1,3 +1,4 @@
+import 'package:flutter/foundation.dart';
 import 'package:get_it/get_it.dart';
 import 'package:injectable/injectable.dart';
 import 'package:quran_sessions/quran_sessions.dart';
@@ -55,6 +56,13 @@ Future<void> configureDependencies({AppLaunchConfig? launchConfig}) async {
     getIt.unregister<AppLaunchConfig>();
   }
   getIt.registerSingleton<AppLaunchConfig>(config);
+  if (kDebugMode) {
+    debugPrint(
+      '[AppLaunchConfig] distribution=${const String.fromEnvironment('TILAWA_DISTRIBUTION', defaultValue: 'local')} '
+      'learnQuranStudent=${config.learnQuranStudentFeatureEnabled} '
+      'quranSessions=${config.quranSessionsEnabled}',
+    );
+  }
 
   if (!isCoreDependencyGraphReady) {
     await getIt.init();

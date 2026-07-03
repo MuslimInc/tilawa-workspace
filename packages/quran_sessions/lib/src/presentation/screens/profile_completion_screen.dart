@@ -28,11 +28,13 @@ class ProfileCompletionScreen extends StatefulWidget {
     super.key,
     required this.userId,
     this.mandatory = false,
+    this.learnQuranEntry = false,
     this.onMandatoryComplete,
   });
 
   final String userId;
   final bool mandatory;
+  final bool learnQuranEntry;
   final VoidCallback? onMandatoryComplete;
 
   @override
@@ -165,6 +167,9 @@ class _ProfileCompletionScreenState extends State<ProfileCompletionScreen> {
                 validationController: _validationController,
                 body: _ProfileCompletionFormBody(
                   l10n: l10n,
+                  subtitle: widget.learnQuranEntry
+                      ? l10n.profileCompletionLearnQuranSubtitle
+                      : l10n.profileCompletionSubtitle,
                   selectedGender: selectedGender,
                   selectedDateOfBirth: selectedDateOfBirth,
                   minimumStudentAgeYears: minimumStudentAgeYears,
@@ -270,6 +275,7 @@ class _LoadFailureView extends StatelessWidget {
 class _ProfileCompletionFormBody extends StatelessWidget {
   const _ProfileCompletionFormBody({
     required this.l10n,
+    required this.subtitle,
     required this.selectedGender,
     required this.selectedDateOfBirth,
     required this.minimumStudentAgeYears,
@@ -293,6 +299,7 @@ class _ProfileCompletionFormBody extends StatelessWidget {
   });
 
   final QuranSessionsLocalizations l10n;
+  final String subtitle;
   final UserGender? selectedGender;
   final DateTime? selectedDateOfBirth;
   final int minimumStudentAgeYears;
@@ -334,7 +341,7 @@ class _ProfileCompletionFormBody extends StatelessWidget {
         ),
         SizedBox(height: tokens.spaceSmall),
         Text(
-          l10n.profileCompletionSubtitle,
+          subtitle,
           style: theme.textTheme.bodyMedium?.copyWith(
             color: theme.colorScheme.onSurfaceVariant,
           ),

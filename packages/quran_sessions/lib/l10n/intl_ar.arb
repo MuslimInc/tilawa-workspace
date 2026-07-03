@@ -92,6 +92,7 @@
     "profileCompletionSaving": "جارٍ حفظ البيانات…",
     "profileCompletionHeadline": "أخبرنا عن نفسك",
     "profileCompletionSubtitle": "نحتاج إلى هذه المعلومات لمطابقتك مع المعلم المناسب وعرض الأسعار الصحيحة لمنطقتك.",
+    "profileCompletionLearnQuranSubtitle": "نحتاج بعض التفاصيل لإعداد حجز جلسة القرآن الخاصة بك.",
     "profileFieldGender": "الجنس",
     "profileFieldDateOfBirth": "تاريخ الميلاد",
     "profileFieldCountry": "الدولة",

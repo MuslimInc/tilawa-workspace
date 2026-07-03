@@ -3,13 +3,11 @@ import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:tilawa/core/app_legal_urls.dart';
 import 'package:tilawa/core/bootstrap/splash_launch_handoff.dart';
 import 'package:tilawa/core/widgets/deferred_after_first_frame.dart';
 import 'package:tilawa/core/di/injection.dart';
 import 'package:tilawa/core/extensions.dart';
 import 'package:tilawa/core/logging/app_logger.dart';
-import 'package:tilawa/core/utils/legal_url_launcher.dart';
 import 'package:tilawa_core/errors/failures.dart';
 import 'package:tilawa_core/services/app_system_chrome_style.dart';
 import 'package:tilawa_ui_kit/tilawa_ui_kit.dart';
@@ -359,22 +357,30 @@ class _LoginScreenBodyState extends State<_LoginScreenBody>
                 shouldSkipAutoSignIn: _shouldSkipAutoSignIn,
                 navigateAfterAuth: _navigateAfterAuth,
                 routeLocation: () => GoRouterState.of(context).uri.path,
-                child: TilawaThumbReachLayout(
-                  useSafeArea: true,
-                  contentFlex: 50,
-                  actionFlex: 50,
-                  actionTopInset: tokens.spaceMedium,
-                  content: RepaintBoundary(
-                    child: _LoginHeroContent(loginScheme: loginScheme),
-                  ),
-                  actions: DeferredAfterFirstFrame(
-                    perfEvent: 'login_actions',
-                    child: _LoginGoogleSignInActions(
-                      onPressed: _onGoogleSignInPressed,
-                      logButtonStateIfChanged: _logButtonStateIfChanged,
-                      logAuthStateIfChanged: _logAuthStateIfChanged,
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.stretch,
+                  children: <Widget>[
+                    Expanded(
+                      child: SafeArea(
+                        bottom: false,
+                        child: RepaintBoundary(
+                          child: _LoginHeroContent(loginScheme: loginScheme),
+                        ),
+                      ),
                     ),
-                  ),
+                    TilawaBottomActionInset(
+                      top: tokens.spaceLarge,
+                      maxWidthKind: TilawaContentKind.form,
+                      child: DeferredAfterFirstFrame(
+                        perfEvent: 'login_actions',
+                        child: _LoginGoogleSignInActions(
+                          onPressed: _onGoogleSignInPressed,
+                          logButtonStateIfChanged: _logButtonStateIfChanged,
+                          logAuthStateIfChanged: _logAuthStateIfChanged,
+                        ),
+                      ),
+                    ),
+                  ],
                 ),
               ),
               const _LoginLanguageSwitcherBar(),
@@ -415,11 +421,11 @@ class _LoginHeroContent extends StatelessWidget {
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           crossAxisAlignment: CrossAxisAlignment.stretch,
+          spacing: tokens.spaceMedium,
           children: <Widget>[
             Center(
               child: TilawaAppBrandBadge(accentColor: loginScheme.primary),
             ),
-            SizedBox(height: tokens.spaceLarge),
             Text(
               context.l10n.welcomeToApp,
               style: theme.textTheme.headlineLarge?.copyWith(
@@ -428,7 +434,6 @@ class _LoginHeroContent extends StatelessWidget {
               ),
               textAlign: TextAlign.center,
             ),
-            SizedBox(height: tokens.spaceMedium),
             Text(
               context.l10n.signInWithGoogleDescription,
               style: theme.textTheme.bodyMedium?.copyWith(
@@ -557,7 +562,6 @@ class _LoginGoogleSignInActionsState extends State<_LoginGoogleSignInActions>
           ),
         ),
         _LoginEmailAuthLinks(isGoogleLoading: _isGoogleSignInSessionInFlight()),
-        const _LoginLegalFooter(),
       ],
     );
   }
@@ -612,36 +616,6 @@ class _LoginEmailAuthLinks extends StatelessWidget {
           ],
         );
       },
-    );
-  }
-}
-
-class _LoginLegalFooter extends StatelessWidget {
-  const _LoginLegalFooter();
-
-  @override
-  Widget build(BuildContext context) {
-    final ThemeData theme = Theme.of(context);
-    final MeMuslimDesignTokens tokens = theme.tokens;
-
-    final ColorScheme colorScheme = theme.colorScheme;
-
-    return TextButton(
-      onPressed: () => openLegalUrl(AppLegalUrls.privacyPolicy),
-      style: TextButton.styleFrom(
-        foregroundColor: colorScheme.primary,
-      ),
-      child: Text(
-        context.l10n.privacyPolicy,
-        style: theme.textTheme.bodyMedium?.copyWith(
-          color: colorScheme.primary,
-          decoration: TextDecoration.underline,
-          decorationColor: colorScheme.primary.withValues(
-            alpha: tokens.opacityEmphasis,
-          ),
-        ),
-        textAlign: TextAlign.center,
-      ),
     );
   }
 }

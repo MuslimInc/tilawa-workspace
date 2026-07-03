@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
@@ -16,6 +18,7 @@ import 'package:tilawa/features/quran_sessions/presentation/quran_sessions_sched
 import 'package:tilawa/features/quran_sessions/presentation/quran_sessions_user.dart';
 import 'package:tilawa/features/quran_sessions/quran_sessions_feature_flags.dart';
 import 'package:tilawa/features/auth/presentation/services/auth_post_sign_in_navigation.dart';
+import 'package:tilawa/features/quran_sessions/quran_sessions_entry_gate.dart';
 import 'package:tilawa/router/app_router_config.dart';
 import 'package:tilawa/router/quran_sessions_session_guard.dart';
 import 'package:tilawa_ui_kit/tilawa_ui_kit.dart';
@@ -114,21 +117,24 @@ List<RouteBase> get quranSessionsRoutes => [
       }
       return null;
     },
-    builder: (context, state) => BlocProvider(
-      create: (_) =>
-          getIt<TeacherListBloc>()..add(const LoadTeachersRequested()),
-      child: _withQuranSessionsTheme(
-        _QuranSessionsHomeRoute(
-          onSeeAllTeachers: () => context.push(QuranSessionsRoutes.teacherList),
-          onTeacherTapped: (id) => context.push(
-            QuranSessionsRoutes.teacherProfile.replaceFirst(':teacherId', id),
+    builder: (context, state) => _QuranSessionsLearnQuranEntryGate(
+      child: BlocProvider(
+        create: (_) =>
+            getIt<TeacherListBloc>()..add(const LoadTeachersRequested()),
+        child: _withQuranSessionsTheme(
+          _QuranSessionsHomeRoute(
+            onSeeAllTeachers: () =>
+                context.push(QuranSessionsRoutes.teacherList),
+            onTeacherTapped: (id) => context.push(
+              QuranSessionsRoutes.teacherProfile.replaceFirst(':teacherId', id),
+            ),
+            onMySessions: () => context.push(QuranSessionsRoutes.mySessions),
+            onWallet: quranSessionsFeatureConfig().walletEnabled
+                ? () => context.push(QuranSessionsRoutes.wallet)
+                : null,
+            onBecomeTeacher: () => _openTeacherApply(context),
+            onChangeCity: () => _openProfileCompletion(context),
           ),
-          onMySessions: () => context.push(QuranSessionsRoutes.mySessions),
-          onWallet: quranSessionsFeatureConfig().walletEnabled
-              ? () => context.push(QuranSessionsRoutes.wallet)
-              : null,
-          onBecomeTeacher: () => _openTeacherApply(context),
-          onChangeCity: () => _openProfileCompletion(context),
         ),
       ),
     ),
@@ -435,12 +441,16 @@ List<RouteBase> get quranSessionsRoutes => [
     builder: (context, state) {
       final bool mandatory =
           state.uri.queryParameters[kMandatoryProfileCompletionQuery] == 'true';
+      final bool learnQuranEntry =
+          state.uri.queryParameters[kLearnQuranProfileCompletionQuery] ==
+          'true';
       return _QuranSessionsSignedInGate(
         builder: (userId) => BlocProvider(
           create: (_) => getIt<ProfileCompletionBloc>(),
           child: ProfileCompletionScreen(
             userId: userId,
             mandatory: mandatory,
+            learnQuranEntry: learnQuranEntry,
             onMandatoryComplete: mandatory
                 ? () => const HomeRoute().go(context)
                 : null,
@@ -856,5 +866,95 @@ class _TeacherDashboardGateState extends State<_TeacherDashboardGate> {
     }
 
     return widget.childBuilder(_teacherProfileId!);
+  }
+}
+
+/// Gates direct Learn Quran hub navigation until booking profile is complete.
+class _QuranSessionsLearnQuranEntryGate extends StatefulWidget {
+  const _QuranSessionsLearnQuranEntryGate({required this.child});
+
+  final Widget child;
+
+  @override
+  State<_QuranSessionsLearnQuranEntryGate> createState() =>
+      _QuranSessionsLearnQuranEntryGateState();
+}
+
+class _QuranSessionsLearnQuranEntryGateState
+    extends State<_QuranSessionsLearnQuranEntryGate> {
+  bool _checking = true;
+  bool _allowed = false;
+
+  @override
+  void initState() {
+    super.initState();
+    unawaited(_verifyProfile());
+  }
+
+  Future<void> _verifyProfile() async {
+    final String? userId = resolveQuranSessionsUserId(getIt);
+    if (userId == null) {
+      if (!mounted) {
+        return;
+      }
+      GoRouter.maybeOf(context)?.go(const LoginRoute().location);
+      return;
+    }
+
+    if (!getIt.isRegistered<GetUserProfileUseCase>()) {
+      if (!mounted) {
+        return;
+      }
+      setState(() {
+        _allowed = true;
+        _checking = false;
+      });
+      return;
+    }
+
+    final result = await getIt<GetUserProfileUseCase>()(userId);
+    if (!mounted) {
+      return;
+    }
+
+    final UserProfile? profile = result.fold((_) => null, (UserProfile p) => p);
+    if (profile != null && profile.isComplete) {
+      setState(() {
+        _allowed = true;
+        _checking = false;
+      });
+      return;
+    }
+
+    final bool ready = await ensureQuranSessionsProfileReady(
+      context,
+      userId: userId,
+    );
+    if (!mounted) {
+      return;
+    }
+    if (!ready) {
+      if (context.canPop()) {
+        context.pop();
+      } else {
+        const HomeRoute().go(context);
+      }
+      return;
+    }
+
+    setState(() {
+      _allowed = true;
+      _checking = false;
+    });
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    if (_checking || !_allowed) {
+      return const Scaffold(
+        body: Center(child: CircularProgressIndicator()),
+      );
+    }
+    return widget.child;
   }
 }

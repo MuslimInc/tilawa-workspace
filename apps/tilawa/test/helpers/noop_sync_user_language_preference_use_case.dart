@@ -8,7 +8,11 @@ class NoopUserRepository implements UserRepository {
   Future<void> deleteUserData(String userId) async {}
 
   @override
-  Future<void> saveUserData(UserEntity user) async {}
+  Future<void> saveUserData(
+    UserEntity user, {
+    String? authProvider,
+    bool? profileCompleted,
+  }) async {}
 
   @override
   Future<void> ensureQuranSessionsProfileShell(String userId) async {}

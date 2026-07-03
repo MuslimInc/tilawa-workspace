@@ -326,7 +326,6 @@ void main() {
 
       expect(find.text('Welcome to MeMuslim'), findsOneWidget);
       expect(find.text('Sign in with Google'), findsOneWidget);
-      expect(find.text('Privacy policy'), findsOneWidget);
       expect(find.byType(AppLanguageSwitcher), findsOneWidget);
       expect(find.text('English'), findsOneWidget);
       expect(find.text('العربية'), findsOneWidget);
@@ -686,7 +685,7 @@ void main() {
       expect(authBloc.state, isA<AuthError>());
     });
 
-    testWidgets('shows email auth entry points and privacy on small screens', (
+    testWidgets('shows email auth entry points on small screens', (
       WidgetTester tester,
     ) async {
       tester.view.physicalSize = const Size(360, 640);
@@ -699,8 +698,8 @@ void main() {
 
       expect(find.byType(TilawaGoogleSignInButton), findsOneWidget);
       expect(find.text('Sign in with email'), findsOneWidget);
-      expect(find.text('Privacy policy'), findsOneWidget);
       expect(find.text('No account yet? Create one'), findsOneWidget);
+      expect(find.byType(SingleChildScrollView), findsNothing);
       expect(tester.takeException(), isNull);
     });
 
@@ -730,7 +729,6 @@ void main() {
       await pumpLoginInitFrames(tester);
 
       expect(find.text('تسجيل الدخول بالبريد'), findsOneWidget);
-      expect(find.text('سياسة الخصوصية'), findsOneWidget);
     });
 
     testWidgets('marks splash handoff painted when still false on init', (

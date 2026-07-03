@@ -1,7 +1,5 @@
 import 'package:bloc_test/bloc_test.dart';
-import 'package:dartz_plus/dartz_plus.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:quran_sessions/quran_sessions.dart';
 import 'package:tilawa/features/auth/domain/entities/email_auth_failure_key.dart';
 import 'package:tilawa/features/auth/domain/entities/email_registration_step.dart';
 import 'package:tilawa/features/auth/presentation/cubit/email_registration_cubit.dart';
@@ -9,88 +7,13 @@ import 'package:tilawa/features/auth/presentation/cubit/email_registration_state
 
 import '../bloc/auth_bloc_test.mocks.dart';
 
-class _FakeGetMarketConfigUseCase implements GetMarketConfigUseCase {
-  @override
-  Future<Either<QuranSessionsFailure, List<MarketCountry>>>
-  supportedCountries() async {
-    return const Right(<MarketCountry>[
-      MarketCountry(
-        countryCode: 'EG',
-        countryName: 'Egypt',
-        currencyCode: 'EGP',
-        timezone: 'Africa/Cairo',
-        isEnabled: true,
-        sortOrder: 0,
-      ),
-    ]);
-  }
-
-  @override
-  Future<Either<QuranSessionsFailure, List<MarketCity>>> citiesByCountry(
-    String countryCode,
-  ) async {
-    return const Right(<MarketCity>[
-      MarketCity(
-        cityId: 'cairo',
-        cityName: 'Cairo',
-        countryCode: 'EG',
-        timezone: 'Africa/Cairo',
-        currencyCode: 'EGP',
-        isEnabled: true,
-        sortOrder: 0,
-      ),
-    ]);
-  }
-
-  @override
-  Future<Either<QuranSessionsFailure, MarketConfig>> call(
-    String countryCode,
-  ) => throw UnimplementedError();
-
-  @override
-  Future<Either<QuranSessionsFailure, List<MarketConfig>>> allMarkets() =>
-      throw UnimplementedError();
-
-  @override
-  Future<Either<QuranSessionsFailure, MarketConfig>> getMarketConfig(
-    String countryCode,
-  ) => throw UnimplementedError();
-
-  @override
-  Future<Either<QuranSessionsFailure, List<MarketConfig>>>
-  getSupportedMarkets() => throw UnimplementedError();
-
-  @override
-  Future<Either<QuranSessionsFailure, CityConfig>> getCityConfig(
-    String countryCode,
-    String cityId,
-  ) => throw UnimplementedError();
-}
-
-class _FakeGetSessionPolicyUseCase implements GetSessionPolicyUseCase {
-  @override
-  Future<Either<QuranSessionsFailure, QuranSessionSafetyPolicy>> call() async {
-    return const Right(
-      QuranSessionSafetyPolicy(
-        childAgeThreshold: 13,
-        minimumStudentAgeYears: 5,
-        requireGuardianApprovalForChildren: true,
-      ),
-    );
-  }
-}
-
 void main() {
   late EmailRegistrationCubit cubit;
   late MockRegisterWithEmailUseCase registerWithEmail;
 
   setUp(() {
     registerWithEmail = MockRegisterWithEmailUseCase();
-    cubit = EmailRegistrationCubit(
-      _FakeGetMarketConfigUseCase(),
-      _FakeGetSessionPolicyUseCase(),
-      registerWithEmail,
-    );
+    cubit = EmailRegistrationCubit(registerWithEmail);
   });
 
   tearDown(() async {
@@ -100,8 +23,7 @@ void main() {
   blocTest<EmailRegistrationCubit, EmailRegistrationState>(
     'advances from account to personal when account step is valid',
     build: () => cubit,
-    act: (EmailRegistrationCubit c) async {
-      await c.initialize();
+    act: (EmailRegistrationCubit c) {
       c
         ..emailChanged('user@example.com')
         ..passwordChanged('secret1')
@@ -114,10 +36,26 @@ void main() {
   );
 
   blocTest<EmailRegistrationCubit, EmailRegistrationState>(
+    'advances from personal to review when basic profile is valid',
+    build: () => cubit,
+    act: (EmailRegistrationCubit c) {
+      c
+        ..displayNameChanged('Saved Name')
+        ..preferredLanguageSelected('ar')
+        ..goNext();
+    },
+    seed: () => const EmailRegistrationState(
+      currentStep: EmailRegistrationStep.personal,
+    ),
+    verify: (EmailRegistrationCubit c) {
+      expect(c.state.currentStep, EmailRegistrationStep.review);
+    },
+  );
+
+  blocTest<EmailRegistrationCubit, EmailRegistrationState>(
     'back preserves draft data',
     build: () => cubit,
-    act: (EmailRegistrationCubit c) async {
-      await c.initialize();
+    act: (EmailRegistrationCubit c) {
       c
         ..emailChanged('user@example.com')
         ..passwordChanged('secret1')
@@ -136,8 +74,7 @@ void main() {
   blocTest<EmailRegistrationCubit, EmailRegistrationState>(
     'account step validation surfaces email error',
     build: () => cubit,
-    act: (EmailRegistrationCubit c) async {
-      await c.initialize();
+    act: (EmailRegistrationCubit c) {
       c.emailChanged('bad');
       c.goNext();
     },
@@ -150,9 +87,8 @@ void main() {
   blocTest<EmailRegistrationCubit, EmailRegistrationState>(
     'registration auth failure returns to account step with email error',
     build: () => cubit,
-    seed: () => EmailRegistrationState(
+    seed: () => const EmailRegistrationState(
       currentStep: EmailRegistrationStep.review,
-      isLoadingMarketData: false,
     ),
     act: (EmailRegistrationCubit c) {
       c.onRegistrationAuthFailed(

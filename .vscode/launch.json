@@ -6,7 +6,10 @@
             "request": "launch",
             "type": "dart",
             "program": "apps/tilawa/lib/main.dart",
-            "flutterMode": "debug"
+            "flutterMode": "debug",
+            "toolArgs": [
+                "--dart-define=TILAWA_LAUNCH_LEARN_QURAN_STUDENT_FEATURE_ENABLED=true"
+            ]
         },
         {
             "name": "Tilawa (Profile)",
@@ -44,6 +47,7 @@
                 "--dart-define=TILAWA_DISTRIBUTION=staging",
                 "--dart-define=TILAWA_LAUNCH_QURAN_SESSIONS_ENABLED=true",
                 "--dart-define=TILAWA_LAUNCH_QURAN_SESSIONS_BOOKING_ENABLED=true",
+                "--dart-define=TILAWA_LAUNCH_LEARN_QURAN_STUDENT_FEATURE_ENABLED=true",
                 "--dart-define=TILAWA_LAUNCH_ENABLED_CALL_PROVIDERS=external,mock,agora",
                 "--dart-define=TILAWA_LAUNCH_AGORA_APP_ID=aacd48a930944ecea29bec112f229eb9"
             ]
@@ -60,7 +64,21 @@
                 "--dart-define=TILAWA_DISTRIBUTION=staging",
                 "--dart-define=TILAWA_LAUNCH_QURAN_SESSIONS_ENABLED=true",
                 "--dart-define=TILAWA_LAUNCH_QURAN_SESSIONS_BOOKING_ENABLED=true",
+                "--dart-define=TILAWA_LAUNCH_LEARN_QURAN_STUDENT_FEATURE_ENABLED=true",
                 "--dart-define=TILAWA_LAUNCH_ENABLED_CALL_PROVIDERS=external,mock,livekit"
+            ]
+        },
+        {
+            "name": "Tilawa (Debug + Learn Quran)",
+            "request": "launch",
+            "type": "dart",
+            "program": "apps/tilawa/lib/main.dart",
+            "flutterMode": "debug",
+            "toolArgs": [
+                "--dart-define=TILAWA_DISTRIBUTION=staging",
+                "--dart-define=TILAWA_LAUNCH_QURAN_SESSIONS_ENABLED=true",
+                "--dart-define=TILAWA_LAUNCH_QURAN_SESSIONS_BOOKING_ENABLED=true",
+                "--dart-define=TILAWA_LAUNCH_LEARN_QURAN_STUDENT_FEATURE_ENABLED=true"
             ]
         }
     ]

@@ -288,6 +288,10 @@ class QuranSessionsLocalizationsAr extends QuranSessionsLocalizations {
       'نحتاج إلى هذه المعلومات لمطابقتك مع المعلم المناسب وعرض الأسعار الصحيحة لمنطقتك.';
 
   @override
+  String get profileCompletionLearnQuranSubtitle =>
+      'نحتاج بعض التفاصيل لإعداد حجز جلسة القرآن الخاصة بك.';
+
+  @override
   String get profileFieldGender => 'الجنس';
 
   @override

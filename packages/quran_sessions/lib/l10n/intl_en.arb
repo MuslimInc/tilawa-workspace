@@ -92,6 +92,7 @@
     "profileCompletionSaving": "Saving your details…",
     "profileCompletionHeadline": "Tell us about yourself",
     "profileCompletionSubtitle": "We need this information to match you with the right teacher and show correct pricing for your region.",
+    "profileCompletionLearnQuranSubtitle": "We need a few details to prepare your Quran session booking.",
     "profileFieldGender": "Gender",
     "profileFieldDateOfBirth": "Date of birth",
     "profileFieldCountry": "Country",

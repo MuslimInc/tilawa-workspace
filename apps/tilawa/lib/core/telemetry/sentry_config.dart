@@ -1,6 +1,7 @@
 import 'package:flutter/foundation.dart';
 import 'package:flutter/widgets.dart';
 import 'package:sentry_flutter/sentry_flutter.dart';
+import 'package:tilawa_ui_kit/tilawa_ui_kit.dart';
 
 import '../../router/app_router.dart';
 import 'crash_reporting_context.dart';
@@ -50,6 +51,9 @@ abstract final class SentryConfig {
     // Defaults are true; set explicitly so privacy posture stays obvious in code.
     options.privacy.maskAllText = true;
     options.privacy.maskAllImages = true;
+    // Shrink-wrap dropdown/input shells can show user-selected labels.
+    // ignore: experimental_member_use
+    options.privacy.mask<ShrinkWrapInputShell>();
   }
 
   /// Root [runApp] wrapper required for Session Replay widget capture.

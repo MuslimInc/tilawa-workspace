@@ -44,6 +44,10 @@ void main() {
       expect(options.replay.sessionSampleRate, kReleaseMode ? 0.1 : 1.0);
       expect(options.privacy.maskAllText, isTrue);
       expect(options.privacy.maskAllImages, isTrue);
+      expect(
+        options.privacy.toJson()['maskingRules'],
+        contains('ShrinkWrapInputShell: mask'),
+      );
     });
 
     test('wrapRootWidget wraps child in SentryWidget', () {

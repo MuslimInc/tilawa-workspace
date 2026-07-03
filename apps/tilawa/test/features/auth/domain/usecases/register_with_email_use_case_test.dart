@@ -39,21 +39,12 @@ class _FakeEmailPasswordAuthGateway implements EmailPasswordAuthGateway {
   }
 }
 
-EmailRegistrationDraft _draft() => EmailRegistrationDraft(
+EmailRegistrationDraft _draft() => const EmailRegistrationDraft(
   email: 'test@example.com',
   password: 'secret1',
   confirmPassword: 'secret1',
   displayName: 'Test User',
-  gender: 'male',
-  dateOfBirth: DateTime(1990, 1, 1),
-  countryCode: 'EG',
-  countryName: 'Egypt',
-  cityId: 'cairo',
-  cityName: 'Cairo',
-  currencyCode: 'EGP',
-  timezone: 'Africa/Cairo',
   preferredLanguageCode: 'ar',
-  learningGoals: <String>['recitation'],
 );
 
 void main() {

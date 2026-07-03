@@ -37,12 +37,192 @@ import 'package:flutter/foundation.dart';
 const String kDefaultTeacherApplicationFormUrl =
     'https://docs.google.com/forms/d/e/1FAIpQLScjFOySgVJqDxaY0IgR9GYDEnemxOkPSbW2QQea7KrORvRQQA/viewform';
 
-bool quranSessionsStagingFlagsDefaultEnabled() {
-  const distribution = String.fromEnvironment(
+bool quranSessionsStagingFlagsDefaultEnabled() =>
+    _LaunchEnvironment.stagingFlagsOn;
+
+/// Compile-time `--dart-define` values for [AppLaunchConfig.fromEnvironment].
+///
+/// [bool.fromEnvironment] only reads defines in a **constant** context; calling
+/// it inside a non-const factory body always returns [defaultValue].
+abstract final class _LaunchEnvironment {
+  const _LaunchEnvironment._();
+
+  static const String distribution = String.fromEnvironment(
     'TILAWA_DISTRIBUTION',
     defaultValue: 'local',
   );
-  return distribution != 'play_production';
+  static const bool stagingFlagsOn = distribution != 'play_production';
+
+  static const bool resetLaunchState = bool.fromEnvironment(
+    'TILAWA_LAUNCH_RESET_LAUNCH_STATE',
+    defaultValue: true,
+  );
+  static const bool frameWatcher = bool.fromEnvironment(
+    'TILAWA_LAUNCH_FRAME_WATCHER',
+    defaultValue: true,
+  );
+  static const bool perfInstrumentation = bool.fromEnvironment(
+    'TILAWA_LAUNCH_PERF_INSTRUMENTATION',
+    defaultValue: kProfileMode,
+  );
+  static const bool firebaseInit = bool.fromEnvironment(
+    'TILAWA_LAUNCH_FIREBASE_INIT',
+    defaultValue: true,
+  );
+  static const bool hydratedStorageInit = bool.fromEnvironment(
+    'TILAWA_LAUNCH_HYDRATED_STORAGE_INIT',
+    defaultValue: true,
+  );
+  static const bool foregroundMessaging = bool.fromEnvironment(
+    'TILAWA_LAUNCH_FOREGROUND_MESSAGING',
+    defaultValue: true,
+  );
+  static const bool blocObserver = bool.fromEnvironment(
+    'TILAWA_LAUNCH_BLOC_OBSERVER',
+    defaultValue: false,
+  );
+  static const bool notificationLaunchProbe = bool.fromEnvironment(
+    'TILAWA_LAUNCH_NOTIFICATION_LAUNCH_PROBE',
+    defaultValue: true,
+  );
+  static const bool systemChrome = bool.fromEnvironment(
+    'TILAWA_LAUNCH_SYSTEM_CHROME',
+    defaultValue: true,
+  );
+  static const bool nonCriticalServices = bool.fromEnvironment(
+    'TILAWA_LAUNCH_NON_CRITICAL_SERVICES',
+    defaultValue: true,
+  );
+  static const bool deferredNotificationChannel = bool.fromEnvironment(
+    'TILAWA_LAUNCH_DEFERRED_NOTIFICATION_CHANNEL',
+    defaultValue: true,
+  );
+  static const bool crashlyticsInit = bool.fromEnvironment(
+    'TILAWA_LAUNCH_CRASHLYTICS_INIT',
+    defaultValue: true,
+  );
+  static const bool hiveInit = bool.fromEnvironment(
+    'TILAWA_LAUNCH_HIVE_INIT',
+    defaultValue: true,
+  );
+  static const bool analyticsInit = bool.fromEnvironment(
+    'TILAWA_LAUNCH_ANALYTICS_INIT',
+    defaultValue: true,
+  );
+  static const bool notificationServiceInit = bool.fromEnvironment(
+    'TILAWA_LAUNCH_NOTIFICATION_SERVICE_INIT',
+    defaultValue: true,
+  );
+  static const bool notificationHandlersInit = bool.fromEnvironment(
+    'TILAWA_LAUNCH_NOTIFICATION_HANDLERS_INIT',
+    defaultValue: true,
+  );
+  static const bool athkarNotificationsInit = bool.fromEnvironment(
+    'TILAWA_LAUNCH_ATHKAR_NOTIFICATIONS_INIT',
+    defaultValue: true,
+  );
+  static const bool prayerNotificationsInit = bool.fromEnvironment(
+    'TILAWA_LAUNCH_PRAYER_NOTIFICATIONS_INIT',
+    defaultValue: true,
+  );
+  static const bool downloadsInit = bool.fromEnvironment(
+    'TILAWA_LAUNCH_DOWNLOADS_INIT',
+    defaultValue: true,
+  );
+  static const bool audioServiceInit = bool.fromEnvironment(
+    'TILAWA_LAUNCH_AUDIO_SERVICE_INIT',
+    defaultValue: true,
+  );
+  static const bool quranDataLoad = bool.fromEnvironment(
+    'TILAWA_LAUNCH_QURAN_DATA_LOAD',
+    defaultValue: true,
+  );
+  static const bool quranAssetsPrefetch = bool.fromEnvironment(
+    'TILAWA_LAUNCH_QURAN_ASSETS_PREFETCH',
+    defaultValue: true,
+  );
+  static const bool firebaseDataInit = bool.fromEnvironment(
+    'TILAWA_LAUNCH_FIREBASE_DATA_INIT',
+    defaultValue: true,
+  );
+  static const bool subscriptionServiceEnabled = bool.fromEnvironment(
+    'TILAWA_LAUNCH_SUBSCRIPTION_SERVICE_ENABLED',
+    defaultValue: false,
+  );
+  static const bool supportTilawaEnabled = bool.fromEnvironment(
+    'TILAWA_LAUNCH_SUPPORT_TILAWA_ENABLED',
+    defaultValue: true,
+  );
+  static const bool recitationPracticeEnabled = bool.fromEnvironment(
+    'TILAWA_LAUNCH_RECITATION_PRACTICE_ENABLED',
+    defaultValue: false,
+  );
+  static const bool smartKhatmaEnabled = bool.fromEnvironment(
+    'TILAWA_LAUNCH_SMART_KHATMA_ENABLED',
+    defaultValue: false,
+  );
+  static const bool todayPlanEnabled = bool.fromEnvironment(
+    'TILAWA_LAUNCH_TODAY_PLAN_ENABLED',
+    defaultValue: false,
+  );
+  static const bool notificationPermissionRequest = bool.fromEnvironment(
+    'TILAWA_LAUNCH_NOTIFICATION_PERMISSION_REQUEST',
+    defaultValue: true,
+  );
+  static const bool quranSessionsEnabled = bool.fromEnvironment(
+    'TILAWA_LAUNCH_QURAN_SESSIONS_ENABLED',
+    defaultValue: true,
+  );
+  static const bool learnQuranStudentFeatureEnabled = bool.fromEnvironment(
+    'TILAWA_LAUNCH_LEARN_QURAN_STUDENT_FEATURE_ENABLED',
+    defaultValue: false,
+  );
+  static const bool teacherApplicationEntryEnabled = bool.fromEnvironment(
+    'TILAWA_LAUNCH_TEACHER_APPLICATION_ENTRY_ENABLED',
+    defaultValue: false,
+  );
+  static const bool homeTeacherApplicationCardEnabled = bool.fromEnvironment(
+    'TILAWA_LAUNCH_HOME_TEACHER_APPLICATION_CARD_ENABLED',
+    defaultValue: false,
+  );
+  static const String teacherApplicationFormUrl = String.fromEnvironment(
+    'TILAWA_LAUNCH_TEACHER_APPLICATION_FORM_URL',
+    defaultValue: kDefaultTeacherApplicationFormUrl,
+  );
+  static const bool teacherApplicationEnabled = bool.fromEnvironment(
+    'TILAWA_LAUNCH_TEACHER_APPLICATION_ENABLED',
+    defaultValue: stagingFlagsOn,
+  );
+  static const String teacherApplicationDiscoverability =
+      String.fromEnvironment(
+        'TILAWA_LAUNCH_TEACHER_APPLICATION_DISCOVERABILITY',
+        defaultValue: 'profileAndEmptyState',
+      );
+  static const bool quranSessionsBookingEnabled = bool.fromEnvironment(
+    'TILAWA_LAUNCH_QURAN_SESSIONS_BOOKING_ENABLED',
+    defaultValue: stagingFlagsOn,
+  );
+  static const bool quranSessionsPaidBookingSandboxEnabled =
+      bool.fromEnvironment(
+        'TILAWA_LAUNCH_QURAN_SESSIONS_PAID_BOOKING_SANDBOX_ENABLED',
+        defaultValue: false,
+      );
+  static const String enabledCallProvidersCsv = String.fromEnvironment(
+    'TILAWA_LAUNCH_ENABLED_CALL_PROVIDERS',
+    defaultValue: stagingFlagsOn ? 'external,mock,livekit' : 'external,mock',
+  );
+  static const String agoraAppId = String.fromEnvironment(
+    'TILAWA_LAUNCH_AGORA_APP_ID',
+    defaultValue: '',
+  );
+  static const String livekitServerUrl = String.fromEnvironment(
+    'TILAWA_LAUNCH_LIVEKIT_URL',
+    defaultValue: '',
+  );
+  static const bool genUiAssistantEnabled = bool.fromEnvironment(
+    'TILAWA_LAUNCH_GENUI_ASSISTANT_ENABLED',
+    defaultValue: false,
+  );
 }
 
 @immutable
@@ -93,182 +273,57 @@ class AppLaunchConfig extends Equatable {
   });
 
   factory AppLaunchConfig.fromEnvironment() {
-    const distribution = String.fromEnvironment(
-      'TILAWA_DISTRIBUTION',
-      defaultValue: 'local',
-    );
-    const stagingFlagsOn = distribution != 'play_production';
     return AppLaunchConfig(
-      resetLaunchState: bool.fromEnvironment(
-        'TILAWA_LAUNCH_RESET_LAUNCH_STATE',
-        defaultValue: true,
-      ),
-      frameWatcher: bool.fromEnvironment(
-        'TILAWA_LAUNCH_FRAME_WATCHER',
-        defaultValue: true,
-      ),
-      perfInstrumentation: bool.fromEnvironment(
-        'TILAWA_LAUNCH_PERF_INSTRUMENTATION',
-        defaultValue: kProfileMode,
-      ),
-      firebaseInit: bool.fromEnvironment(
-        'TILAWA_LAUNCH_FIREBASE_INIT',
-        defaultValue: true,
-      ),
-      hydratedStorageInit: bool.fromEnvironment(
-        'TILAWA_LAUNCH_HYDRATED_STORAGE_INIT',
-        defaultValue: true,
-      ),
-      foregroundMessaging: bool.fromEnvironment(
-        'TILAWA_LAUNCH_FOREGROUND_MESSAGING',
-        defaultValue: true,
-      ),
-      blocObserver: bool.fromEnvironment(
-        'TILAWA_LAUNCH_BLOC_OBSERVER',
-        defaultValue: false,
-      ),
-      notificationLaunchProbe: bool.fromEnvironment(
-        'TILAWA_LAUNCH_NOTIFICATION_LAUNCH_PROBE',
-        defaultValue: true,
-      ),
-      systemChrome: bool.fromEnvironment(
-        'TILAWA_LAUNCH_SYSTEM_CHROME',
-        defaultValue: true,
-      ),
-      nonCriticalServices: bool.fromEnvironment(
-        'TILAWA_LAUNCH_NON_CRITICAL_SERVICES',
-        defaultValue: true,
-      ),
-      deferredNotificationChannel: bool.fromEnvironment(
-        'TILAWA_LAUNCH_DEFERRED_NOTIFICATION_CHANNEL',
-        defaultValue: true,
-      ),
-      crashlyticsInit: bool.fromEnvironment(
-        'TILAWA_LAUNCH_CRASHLYTICS_INIT',
-        defaultValue: true,
-      ),
-      hiveInit: bool.fromEnvironment(
-        'TILAWA_LAUNCH_HIVE_INIT',
-        defaultValue: true,
-      ),
-      analyticsInit: bool.fromEnvironment(
-        'TILAWA_LAUNCH_ANALYTICS_INIT',
-        defaultValue: true,
-      ),
-      notificationServiceInit: bool.fromEnvironment(
-        'TILAWA_LAUNCH_NOTIFICATION_SERVICE_INIT',
-        defaultValue: true,
-      ),
-      notificationHandlersInit: bool.fromEnvironment(
-        'TILAWA_LAUNCH_NOTIFICATION_HANDLERS_INIT',
-        defaultValue: true,
-      ),
-      athkarNotificationsInit: bool.fromEnvironment(
-        'TILAWA_LAUNCH_ATHKAR_NOTIFICATIONS_INIT',
-        defaultValue: true,
-      ),
-      prayerNotificationsInit: bool.fromEnvironment(
-        'TILAWA_LAUNCH_PRAYER_NOTIFICATIONS_INIT',
-        defaultValue: true,
-      ),
-      downloadsInit: bool.fromEnvironment(
-        'TILAWA_LAUNCH_DOWNLOADS_INIT',
-        defaultValue: true,
-      ),
-      audioServiceInit: bool.fromEnvironment(
-        'TILAWA_LAUNCH_AUDIO_SERVICE_INIT',
-        defaultValue: true,
-      ),
-      quranDataLoad: bool.fromEnvironment(
-        'TILAWA_LAUNCH_QURAN_DATA_LOAD',
-        defaultValue: true,
-      ),
-      quranAssetsPrefetch: bool.fromEnvironment(
-        'TILAWA_LAUNCH_QURAN_ASSETS_PREFETCH',
-        defaultValue: true,
-      ),
-      firebaseDataInit: bool.fromEnvironment(
-        'TILAWA_LAUNCH_FIREBASE_DATA_INIT',
-        defaultValue: true,
-      ),
-      subscriptionServiceEnabled: bool.fromEnvironment(
-        'TILAWA_LAUNCH_SUBSCRIPTION_SERVICE_ENABLED',
-        defaultValue: false,
-      ),
-      supportTilawaEnabled: bool.fromEnvironment(
-        'TILAWA_LAUNCH_SUPPORT_TILAWA_ENABLED',
-        defaultValue: true,
-      ),
-      recitationPracticeEnabled: bool.fromEnvironment(
-        'TILAWA_LAUNCH_RECITATION_PRACTICE_ENABLED',
-        defaultValue: false,
-      ),
-      smartKhatmaEnabled: bool.fromEnvironment(
-        'TILAWA_LAUNCH_SMART_KHATMA_ENABLED',
-        defaultValue: false,
-      ),
-      todayPlanEnabled: bool.fromEnvironment(
-        'TILAWA_LAUNCH_TODAY_PLAN_ENABLED',
-        defaultValue: false,
-      ),
-      notificationPermissionRequest: bool.fromEnvironment(
-        'TILAWA_LAUNCH_NOTIFICATION_PERMISSION_REQUEST',
-        defaultValue: true,
-      ),
-      quranSessionsEnabled: bool.fromEnvironment(
-        'TILAWA_LAUNCH_QURAN_SESSIONS_ENABLED',
-        defaultValue: true,
-      ),
-      learnQuranStudentFeatureEnabled: bool.fromEnvironment(
-        'TILAWA_LAUNCH_LEARN_QURAN_STUDENT_FEATURE_ENABLED',
-        defaultValue: false,
-      ),
-      teacherApplicationEntryEnabled: bool.fromEnvironment(
-        'TILAWA_LAUNCH_TEACHER_APPLICATION_ENTRY_ENABLED',
-        defaultValue: false,
-      ),
-      homeTeacherApplicationCardEnabled: bool.fromEnvironment(
-        'TILAWA_LAUNCH_HOME_TEACHER_APPLICATION_CARD_ENABLED',
-        defaultValue: false,
-      ),
-      teacherApplicationFormUrl: String.fromEnvironment(
-        'TILAWA_LAUNCH_TEACHER_APPLICATION_FORM_URL',
-        defaultValue: kDefaultTeacherApplicationFormUrl,
-      ),
-      teacherApplicationEnabled: bool.fromEnvironment(
-        'TILAWA_LAUNCH_TEACHER_APPLICATION_ENABLED',
-        defaultValue: stagingFlagsOn,
-      ),
-      teacherApplicationDiscoverability: String.fromEnvironment(
-        'TILAWA_LAUNCH_TEACHER_APPLICATION_DISCOVERABILITY',
-        defaultValue: 'profileAndEmptyState',
-      ),
-      quranSessionsBookingEnabled: bool.fromEnvironment(
-        'TILAWA_LAUNCH_QURAN_SESSIONS_BOOKING_ENABLED',
-        defaultValue: stagingFlagsOn,
-      ),
-      quranSessionsPaidBookingSandboxEnabled: bool.fromEnvironment(
-        'TILAWA_LAUNCH_QURAN_SESSIONS_PAID_BOOKING_SANDBOX_ENABLED',
-        defaultValue: false,
-      ),
-      enabledCallProvidersCsv: String.fromEnvironment(
-        'TILAWA_LAUNCH_ENABLED_CALL_PROVIDERS',
-        defaultValue: stagingFlagsOn
-            ? 'external,mock,livekit'
-            : 'external,mock',
-      ),
-      agoraAppId: String.fromEnvironment(
-        'TILAWA_LAUNCH_AGORA_APP_ID',
-        defaultValue: '',
-      ),
-      livekitServerUrl: String.fromEnvironment(
-        'TILAWA_LAUNCH_LIVEKIT_URL',
-        defaultValue: '',
-      ),
-      genUiAssistantEnabled: bool.fromEnvironment(
-        'TILAWA_LAUNCH_GENUI_ASSISTANT_ENABLED',
-        defaultValue: false,
-      ),
+      resetLaunchState: _LaunchEnvironment.resetLaunchState,
+      frameWatcher: _LaunchEnvironment.frameWatcher,
+      perfInstrumentation: _LaunchEnvironment.perfInstrumentation,
+      firebaseInit: _LaunchEnvironment.firebaseInit,
+      hydratedStorageInit: _LaunchEnvironment.hydratedStorageInit,
+      foregroundMessaging: _LaunchEnvironment.foregroundMessaging,
+      blocObserver: _LaunchEnvironment.blocObserver,
+      notificationLaunchProbe: _LaunchEnvironment.notificationLaunchProbe,
+      systemChrome: _LaunchEnvironment.systemChrome,
+      nonCriticalServices: _LaunchEnvironment.nonCriticalServices,
+      deferredNotificationChannel:
+          _LaunchEnvironment.deferredNotificationChannel,
+      crashlyticsInit: _LaunchEnvironment.crashlyticsInit,
+      hiveInit: _LaunchEnvironment.hiveInit,
+      analyticsInit: _LaunchEnvironment.analyticsInit,
+      notificationServiceInit: _LaunchEnvironment.notificationServiceInit,
+      notificationHandlersInit: _LaunchEnvironment.notificationHandlersInit,
+      athkarNotificationsInit: _LaunchEnvironment.athkarNotificationsInit,
+      prayerNotificationsInit: _LaunchEnvironment.prayerNotificationsInit,
+      downloadsInit: _LaunchEnvironment.downloadsInit,
+      audioServiceInit: _LaunchEnvironment.audioServiceInit,
+      quranDataLoad: _LaunchEnvironment.quranDataLoad,
+      quranAssetsPrefetch: _LaunchEnvironment.quranAssetsPrefetch,
+      firebaseDataInit: _LaunchEnvironment.firebaseDataInit,
+      subscriptionServiceEnabled: _LaunchEnvironment.subscriptionServiceEnabled,
+      supportTilawaEnabled: _LaunchEnvironment.supportTilawaEnabled,
+      recitationPracticeEnabled: _LaunchEnvironment.recitationPracticeEnabled,
+      smartKhatmaEnabled: _LaunchEnvironment.smartKhatmaEnabled,
+      todayPlanEnabled: _LaunchEnvironment.todayPlanEnabled,
+      notificationPermissionRequest:
+          _LaunchEnvironment.notificationPermissionRequest,
+      quranSessionsEnabled: _LaunchEnvironment.quranSessionsEnabled,
+      learnQuranStudentFeatureEnabled:
+          _LaunchEnvironment.learnQuranStudentFeatureEnabled,
+      teacherApplicationEntryEnabled:
+          _LaunchEnvironment.teacherApplicationEntryEnabled,
+      homeTeacherApplicationCardEnabled:
+          _LaunchEnvironment.homeTeacherApplicationCardEnabled,
+      teacherApplicationFormUrl: _LaunchEnvironment.teacherApplicationFormUrl,
+      teacherApplicationEnabled: _LaunchEnvironment.teacherApplicationEnabled,
+      teacherApplicationDiscoverability:
+          _LaunchEnvironment.teacherApplicationDiscoverability,
+      quranSessionsBookingEnabled:
+          _LaunchEnvironment.quranSessionsBookingEnabled,
+      quranSessionsPaidBookingSandboxEnabled:
+          _LaunchEnvironment.quranSessionsPaidBookingSandboxEnabled,
+      enabledCallProvidersCsv: _LaunchEnvironment.enabledCallProvidersCsv,
+      agoraAppId: _LaunchEnvironment.agoraAppId,
+      livekitServerUrl: _LaunchEnvironment.livekitServerUrl,
+      genUiAssistantEnabled: _LaunchEnvironment.genUiAssistantEnabled,
     );
   }
 

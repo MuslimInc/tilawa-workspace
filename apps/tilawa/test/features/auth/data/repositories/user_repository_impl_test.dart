@@ -74,20 +74,11 @@ void main() {
     });
 
     test(
-      'saveCompleteEmailRegistration writes profileCompleted true',
+      'saveCompleteEmailRegistration writes general profile and incomplete quran shell',
       () async {
         final EmailRegistrationDraft draft = EmailRegistrationDraft(
           displayName: 'Complete User',
-          gender: 'male',
-          dateOfBirth: DateTime(1990, 5, 1),
-          countryCode: 'EG',
-          countryName: 'Egypt',
-          cityId: 'cairo',
-          cityName: 'Cairo',
-          currencyCode: 'EGP',
-          timezone: 'Africa/Cairo',
           preferredLanguageCode: 'ar',
-          learningGoals: <String>['recitation'],
         );
 
         await userRepository.saveCompleteEmailRegistration(
@@ -97,14 +88,16 @@ void main() {
 
         final DocumentSnapshot<Map<String, dynamic>> docSnapshot =
             await fakeFirestore.collection('users').doc(tUser.id).get();
-        final Map<String, dynamic>? profile =
+        final Map<String, dynamic>? quranProfile =
             docSnapshot.data()?['quranSessionsProfile']
                 as Map<String, dynamic>?;
 
         expect(docSnapshot.data()?['authProvider'], 'emailPassword');
-        expect(profile?['profileCompleted'], true);
-        expect(profile?['gender'], 'male');
-        expect(profile?['cityId'], 'cairo');
+        expect(docSnapshot.data()?['profileCompleted'], true);
+        expect(docSnapshot.data()?['languageCode'], 'ar');
+        expect(quranProfile?['profileCompleted'], false);
+        expect(quranProfile?.containsKey('gender'), isFalse);
+        expect(quranProfile?.containsKey('cityId'), isFalse);
       },
     );
 

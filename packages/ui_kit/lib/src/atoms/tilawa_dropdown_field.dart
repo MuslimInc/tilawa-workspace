@@ -110,7 +110,7 @@ class TilawaDropdownField<T> extends StatelessWidget {
       return Semantics(
         label: semanticLabel ?? labelText ?? hintText,
         child: shrinkWrapWidth
-            ? _ShrinkWrapInputShell(
+            ? ShrinkWrapInputShell(
                 decoration: fieldDecoration,
                 tokens: tokens,
                 child: Text(
@@ -251,7 +251,7 @@ class TilawaDropdownField<T> extends StatelessWidget {
                       // Form fields use stable state-layer press (default).
                       borderRadius: BorderRadius.circular(radius),
                       child: shrinkWrapWidth
-                          ? _ShrinkWrapInputShell(
+                          ? ShrinkWrapInputShell(
                               decoration: fieldDecoration,
                               tokens: tokens,
                               child: _FieldContent(
@@ -303,8 +303,9 @@ class TilawaDropdownField<T> extends StatelessWidget {
 
 /// Closed-field shell that sizes to [child] instead of expanding like
 /// [InputDecorator].
-class _ShrinkWrapInputShell extends StatelessWidget {
-  const _ShrinkWrapInputShell({
+class ShrinkWrapInputShell extends StatelessWidget {
+  const ShrinkWrapInputShell({
+    super.key,
     required this.decoration,
     required this.tokens,
     required this.child,

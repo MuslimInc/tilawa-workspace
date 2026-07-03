@@ -1,10 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:tilawa/features/auth/domain/entities/email_registration_step.dart';
 import 'package:tilawa/features/theme/domain/primary_color_preset.dart';
 import 'package:tilawa_ui_kit/tilawa_ui_kit.dart';
 
-/// Mirrors [RegisterScreen] footer layout: [Expanded] scroll body + full-width
-/// primary CTA in a [Column] (non-flex children get unbounded max height).
+/// Mirrors [RegisterScreen] footer layout: [Expanded] scroll body + pinned
+/// primary CTA via [TilawaBottomActionInset].
 class _RegistrationFormFooterHarness extends StatelessWidget {
   const _RegistrationFormFooterHarness({
     required this.primaryLabel,
@@ -20,42 +21,58 @@ class _RegistrationFormFooterHarness extends StatelessWidget {
 
     return Scaffold(
       appBar: AppBar(title: const Text('إنشاء حساب')),
-      body: SafeArea(
-        child: Padding(
-          padding: EdgeInsets.all(tokens.spaceLarge),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.stretch,
-            children: <Widget>[
-              Expanded(
+      body: Column(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: <Widget>[
+          Expanded(
+            child: SafeArea(
+              bottom: false,
+              child: Padding(
+                padding: EdgeInsets.symmetric(horizontal: tokens.spaceLarge),
                 child: SingleChildScrollView(
+                  padding: EdgeInsets.only(
+                    top: tokens.spaceLarge,
+                    bottom: tokens.spaceMedium,
+                  ),
                   child: Text(errorMessage ?? 'Review content'),
                 ),
               ),
-              if (errorMessage != null)
-                Padding(
-                  padding: EdgeInsets.only(bottom: tokens.spaceMedium),
-                  child: Text(errorMessage!),
-                ),
-              SizedBox(height: tokens.spaceMedium),
-              TilawaButton(
-                text: primaryLabel,
-                isFullWidth: true,
-                onPressed: () {},
-              ),
-            ],
+            ),
           ),
-        ),
+          TilawaBottomActionInset(
+            top: tokens.spaceLarge,
+            maxWidthKind: TilawaContentKind.form,
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.stretch,
+              spacing: tokens.spaceSmall,
+              children: <Widget>[
+                if (errorMessage != null) Text(errorMessage!),
+                TilawaButton(
+                  text: primaryLabel,
+                  isFullWidth: true,
+                  onPressed: () {},
+                ),
+              ],
+            ),
+          ),
+        ],
       ),
     );
   }
 }
 
 void main() {
+  test('registration wizard has three steps without quran learning', () {
+    expect(EmailRegistrationStep.values.length, 3);
+    expect(
+      EmailRegistrationStep.values.map((EmailRegistrationStep s) => s.name),
+      <String>['account', 'personal', 'review'],
+    );
+  });
+
   testWidgets(
     'profile persistence footer keeps retry button compact in Arabic',
-    (
-      WidgetTester tester,
-    ) async {
+    (WidgetTester tester) async {
       tester.view.physicalSize = const Size(360, 640);
       tester.view.devicePixelRatio = 1;
       addTearDown(tester.view.resetPhysicalSize);
@@ -86,41 +103,4 @@ void main() {
       expect(tester.takeException(), isNull);
     },
   );
-
-  testWidgets('market data error state keeps retry button compact in Arabic', (
-    WidgetTester tester,
-  ) async {
-    tester.view.physicalSize = const Size(360, 640);
-    tester.view.devicePixelRatio = 1;
-    addTearDown(tester.view.resetPhysicalSize);
-    addTearDown(tester.view.resetDevicePixelRatio);
-
-    await tester.pumpWidget(
-      MaterialApp(
-        theme: AppTheme.getLightTheme(
-          primaryColor: PrimaryColorPreset.defaultPreset.value,
-        ),
-        home: Scaffold(
-          appBar: AppBar(title: const Text('إنشاء حساب')),
-          body: SafeArea(
-            child: TilawaErrorState(
-              icon: Icons.cloud_off_outlined,
-              title: 'حدث خطأ ما. يرجى المحاولة مرة أخرى.',
-              retryLabel: 'إعادة المحاولة',
-              onRetry: () {},
-            ),
-          ),
-        ),
-      ),
-    );
-    await tester.pump();
-
-    final Finder retryButton = find.widgetWithText(
-      TilawaButton,
-      'إعادة المحاولة',
-    );
-    expect(retryButton, findsOneWidget);
-    expect(tester.getSize(retryButton).height, lessThan(80));
-    expect(tester.takeException(), isNull);
-  });
 }

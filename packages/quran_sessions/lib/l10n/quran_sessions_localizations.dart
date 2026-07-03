@@ -569,6 +569,12 @@ abstract class QuranSessionsLocalizations {
   /// **'We need this information to match you with the right teacher and show correct pricing for your region.'**
   String get profileCompletionSubtitle;
 
+  /// No description provided for @profileCompletionLearnQuranSubtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'We need a few details to prepare your Quran session booking.'**
+  String get profileCompletionLearnQuranSubtitle;
+
   /// No description provided for @profileFieldGender.
   ///
   /// In en, this message translates to:

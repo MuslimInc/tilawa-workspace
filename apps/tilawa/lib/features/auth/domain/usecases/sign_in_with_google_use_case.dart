@@ -50,7 +50,12 @@ class SignInWithGoogleUseCase {
 
   Future<void> _persistUserProfile(UserEntity user) async {
     try {
-      await _userRepository.saveUserData(user);
+      final bool generalProfileComplete = user.displayName.trim().isNotEmpty;
+      await _userRepository.saveUserData(
+        user,
+        authProvider: 'google',
+        profileCompleted: generalProfileComplete,
+      );
     } catch (error, stackTrace) {
       logger.w(
         'Signed in but failed to persist user profile',

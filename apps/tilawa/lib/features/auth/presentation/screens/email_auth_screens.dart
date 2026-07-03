@@ -3,28 +3,27 @@ import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
-import 'package:quran_sessions/quran_sessions.dart';
 import 'package:tilawa/core/di/injection.dart';
 import 'package:tilawa/core/extensions.dart';
 import 'package:tilawa_ui_kit/tilawa_ui_kit.dart';
 
 import '../../../../router/app_router.dart';
 import '../../../../router/app_router_config.dart';
-import '../bloc/auth_bloc.dart';
-import '../cubit/email_auth_form_cubit.dart';
-import '../cubit/forgot_password_cubit.dart';
-import '../services/auth_error_messages.dart';
-import '../services/email_auth_error_messages.dart';
-import '../services/auth_post_sign_in_navigation.dart';
-import '../services/login_navigate_to_home_scheduler.dart';
 import '../../domain/entities/email_auth_failure_key.dart';
 import '../../domain/entities/email_registration_step.dart';
 import '../../domain/entities/register_with_email_result.dart';
+import '../bloc/auth_bloc.dart';
+import '../cubit/email_auth_form_cubit.dart';
 import '../cubit/email_registration_cubit.dart';
 import '../cubit/email_registration_state.dart';
+import '../cubit/forgot_password_cubit.dart';
+import '../services/auth_error_messages.dart';
+import '../services/auth_post_sign_in_navigation.dart';
+import '../services/email_auth_error_messages.dart';
+import '../services/login_navigate_to_home_scheduler.dart';
+import '../widgets/email_auth_fields.dart';
 import '../widgets/email_registration_step_indicator.dart';
 import '../widgets/email_registration_steps.dart';
-import '../widgets/email_auth_fields.dart';
 
 class EmailLoginScreen extends StatelessWidget {
   const EmailLoginScreen({super.key});
@@ -83,35 +82,60 @@ class _EmailLoginBody extends StatelessWidget {
       },
       child: Scaffold(
         appBar: AppBar(title: Text(context.l10n.signInWithEmail)),
-        body: SafeArea(
-          child: Padding(
-            padding: EdgeInsets.all(tokens.spaceLarge),
-            child: TilawaContentBounds(
-              kind: TilawaContentKind.form,
+        body: Column(
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          children: <Widget>[
+            Expanded(
+              child: SafeArea(
+                bottom: false,
+                child: Padding(
+                  padding: EdgeInsets.symmetric(horizontal: tokens.spaceLarge),
+                  child: TilawaContentBounds(
+                    kind: TilawaContentKind.form,
+                    child: SingleChildScrollView(
+                      keyboardDismissBehavior:
+                          ScrollViewKeyboardDismissBehavior.onDrag,
+                      padding: EdgeInsets.only(
+                        top: tokens.spaceLarge,
+                        bottom: tokens.spaceMedium,
+                      ),
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.stretch,
+                        spacing: tokens.spaceMedium,
+                        children: <Widget>[
+                          Text(
+                            context.l10n.signInWithEmailDescription,
+                            style: theme.textTheme.bodyLarge?.copyWith(
+                              color: theme.colorScheme.onSurfaceVariant,
+                            ),
+                          ),
+                          const EmailAuthFields(
+                            showConfirmPassword: false,
+                            enabled: true,
+                          ),
+                          Align(
+                            alignment: AlignmentDirectional.centerEnd,
+                            child: TextButton(
+                              onPressed: () => context.push(
+                                const ForgotPasswordRoute().location,
+                              ),
+                              child: Text(context.l10n.forgotPassword),
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                  ),
+                ),
+              ),
+            ),
+            TilawaBottomActionInset(
+              top: tokens.spaceLarge,
+              maxWidthKind: TilawaContentKind.form,
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.stretch,
+                spacing: tokens.spaceSmall,
                 children: <Widget>[
-                  Text(
-                    context.l10n.signInWithEmailDescription,
-                    style: theme.textTheme.bodyLarge?.copyWith(
-                      color: theme.colorScheme.onSurfaceVariant,
-                    ),
-                  ),
-                  SizedBox(height: tokens.spaceLarge),
-                  const EmailAuthFields(
-                    showConfirmPassword: false,
-                    enabled: true,
-                  ),
-                  Align(
-                    alignment: AlignmentDirectional.centerEnd,
-                    child: TextButton(
-                      onPressed: () => context.push(
-                        const ForgotPasswordRoute().location,
-                      ),
-                      child: Text(context.l10n.forgotPassword),
-                    ),
-                  ),
-                  SizedBox(height: tokens.spaceMedium),
                   BlocBuilder<AuthBloc, AuthState>(
                     builder: (BuildContext context, AuthState authState) {
                       final bool isLoading = authState is AuthLoading;
@@ -123,7 +147,6 @@ class _EmailLoginBody extends StatelessWidget {
                       );
                     },
                   ),
-                  SizedBox(height: tokens.spaceMedium),
                   TextButton(
                     onPressed: () => context.push(
                       const RegisterRoute().location,
@@ -133,7 +156,7 @@ class _EmailLoginBody extends StatelessWidget {
                 ],
               ),
             ),
-          ),
+          ],
         ),
       ),
     );
@@ -162,7 +185,7 @@ class RegisterScreen extends StatelessWidget {
     return MultiBlocProvider(
       providers: <BlocProvider<dynamic>>[
         BlocProvider<EmailRegistrationCubit>(
-          create: (_) => getIt<EmailRegistrationCubit>()..initialize(),
+          create: (_) => getIt<EmailRegistrationCubit>(),
         ),
       ],
       child: const _RegisterBody(),
@@ -203,25 +226,6 @@ class _RegisterBodyState extends State<_RegisterBody> {
               if (cubit.state.status ==
                   EmailRegistrationStatus.profilePersistenceFailed) {
                 return;
-              }
-              if (cubit.state.currentStep == EmailRegistrationStep.review &&
-                  getIt.isRegistered<GetUserProfileUseCase>()) {
-                final profileResult = await getIt<GetUserProfileUseCase>()(
-                  state.user.id,
-                );
-                final bool profileIncomplete = profileResult.fold(
-                  (_) => true,
-                  (UserProfile profile) => !profile.isComplete,
-                );
-                if (profileIncomplete && context.mounted) {
-                  cubit.markProfilePersistenceFailed(state.user);
-                  TilawaFeedback.showToast(
-                    context,
-                    message: context.l10n.registrationProfilePersistenceFailed,
-                    variant: TilawaFeedbackVariant.error,
-                  );
-                  return;
-                }
               }
               if (!context.mounted) {
                 return;
@@ -271,31 +275,6 @@ class _RegisterBodyState extends State<_RegisterBody> {
       ],
       child: BlocBuilder<EmailRegistrationCubit, EmailRegistrationState>(
         builder: (BuildContext context, EmailRegistrationState regState) {
-          if (regState.isLoadingMarketData) {
-            return Scaffold(
-              appBar: AppBar(title: Text(context.l10n.createAccount)),
-              body: const Center(child: CircularProgressIndicator()),
-            );
-          }
-
-          if (regState.marketDataErrorKey != null) {
-            return Scaffold(
-              appBar: AppBar(title: Text(context.l10n.createAccount)),
-              body: SafeArea(
-                child: TilawaErrorState(
-                  icon: Icons.cloud_off_outlined,
-                  title: localizedAuthBlocErrorMessage(
-                    regState.marketDataErrorKey!,
-                    context.l10n,
-                  ),
-                  retryLabel: context.l10n.retry,
-                  onRetry: () =>
-                      context.read<EmailRegistrationCubit>().initialize(),
-                ),
-              ),
-            );
-          }
-
           return Scaffold(
             appBar: AppBar(
               title: Text(context.l10n.createAccount),
@@ -308,43 +287,67 @@ class _RegisterBodyState extends State<_RegisterBody> {
                     )
                   : null,
             ),
-            body: SafeArea(
-              child: Padding(
-                padding: EdgeInsets.all(tokens.spaceLarge),
-                child: TilawaContentBounds(
-                  kind: TilawaContentKind.form,
+            body: Column(
+              crossAxisAlignment: CrossAxisAlignment.stretch,
+              children: <Widget>[
+                Expanded(
+                  child: SafeArea(
+                    bottom: false,
+                    child: Padding(
+                      padding: EdgeInsets.symmetric(
+                        horizontal: tokens.spaceLarge,
+                      ),
+                      child: TilawaContentBounds(
+                        kind: TilawaContentKind.form,
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.stretch,
+                          spacing: tokens.spaceLarge,
+                          children: <Widget>[
+                            EmailRegistrationStepIndicator(
+                              currentStep: regState.currentStepDisplayIndex,
+                              totalSteps: regState.visibleStepCount,
+                              stepLabel: context.l10n.registrationStepProgress(
+                                regState.currentStepDisplayIndex,
+                                regState.visibleStepCount,
+                                registrationStepLabel(
+                                  context,
+                                  regState.currentStep,
+                                ),
+                              ),
+                            ),
+                            Expanded(
+                              child: SingleChildScrollView(
+                                keyboardDismissBehavior:
+                                    ScrollViewKeyboardDismissBehavior.onDrag,
+                                padding: EdgeInsets.only(
+                                  bottom: tokens.spaceMedium,
+                                ),
+                                child: _RegistrationStepBody(
+                                  step: regState.currentStep,
+                                ),
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                    ),
+                  ),
+                ),
+                TilawaBottomActionInset(
+                  top: tokens.spaceLarge,
+                  maxWidthKind: TilawaContentKind.form,
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.stretch,
+                    spacing: tokens.spaceSmall,
                     children: <Widget>[
-                      EmailRegistrationStepIndicator(
-                        currentStep: regState.currentStepDisplayIndex,
-                        totalSteps: regState.visibleStepCount,
-                        stepLabel: context.l10n.registrationStepProgress(
-                          regState.currentStepDisplayIndex,
-                          regState.visibleStepCount,
-                          registrationStepLabel(context, regState.currentStep),
-                        ),
-                      ),
-                      SizedBox(height: tokens.spaceLarge),
-                      Expanded(
-                        child: SingleChildScrollView(
-                          child: _RegistrationStepBody(
-                            step: regState.currentStep,
-                          ),
-                        ),
-                      ),
                       if (regState.status ==
                           EmailRegistrationStatus.profilePersistenceFailed)
-                        Padding(
-                          padding: EdgeInsets.only(bottom: tokens.spaceMedium),
-                          child: Text(
-                            context.l10n.registrationProfilePersistenceFailed,
-                            style: theme.textTheme.bodyMedium?.copyWith(
-                              color: theme.colorScheme.error,
-                            ),
+                        Text(
+                          context.l10n.registrationProfilePersistenceFailed,
+                          style: theme.textTheme.bodyMedium?.copyWith(
+                            color: theme.colorScheme.error,
                           ),
                         ),
-                      SizedBox(height: tokens.spaceMedium),
                       BlocBuilder<AuthBloc, AuthState>(
                         builder: (BuildContext context, AuthState authState) {
                           final bool isLoading =
@@ -370,7 +373,6 @@ class _RegisterBodyState extends State<_RegisterBody> {
                           );
                         },
                       ),
-                      SizedBox(height: tokens.spaceMedium),
                       TextButton(
                         onPressed: () => context.push(
                           const EmailLoginRoute().location,
@@ -380,7 +382,7 @@ class _RegisterBodyState extends State<_RegisterBody> {
                     ],
                   ),
                 ),
-              ),
+              ],
             ),
           );
         },
@@ -439,9 +441,6 @@ class _RegistrationStepBody extends StatelessWidget {
     return switch (step) {
       EmailRegistrationStep.account => const EmailRegistrationAccountStep(),
       EmailRegistrationStep.personal => const EmailRegistrationPersonalStep(),
-      EmailRegistrationStep.quranLearning =>
-        const EmailRegistrationLearningStep(),
-      EmailRegistrationStep.guardian => const EmailRegistrationGuardianStep(),
       EmailRegistrationStep.review => const EmailRegistrationReviewStep(),
     };
   }
@@ -497,55 +496,80 @@ class _ForgotPasswordBody extends StatelessWidget {
       ],
       child: Scaffold(
         appBar: AppBar(title: Text(context.l10n.forgotPassword)),
-        body: SafeArea(
-          child: Padding(
-            padding: EdgeInsets.all(tokens.spaceLarge),
-            child: TilawaContentBounds(
-              kind: TilawaContentKind.form,
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.stretch,
-                children: <Widget>[
-                  Text(
-                    context.l10n.forgotPasswordDescription,
-                    style: theme.textTheme.bodyLarge?.copyWith(
-                      color: theme.colorScheme.onSurfaceVariant,
+        body: Column(
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          children: <Widget>[
+            Expanded(
+              child: SafeArea(
+                bottom: false,
+                child: Padding(
+                  padding: EdgeInsets.symmetric(horizontal: tokens.spaceLarge),
+                  child: TilawaContentBounds(
+                    kind: TilawaContentKind.form,
+                    child: SingleChildScrollView(
+                      keyboardDismissBehavior:
+                          ScrollViewKeyboardDismissBehavior.onDrag,
+                      padding: EdgeInsets.only(
+                        top: tokens.spaceLarge,
+                        bottom: tokens.spaceMedium,
+                      ),
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.stretch,
+                        spacing: tokens.spaceLarge,
+                        children: <Widget>[
+                          Text(
+                            context.l10n.forgotPasswordDescription,
+                            style: theme.textTheme.bodyLarge?.copyWith(
+                              color: theme.colorScheme.onSurfaceVariant,
+                            ),
+                          ),
+                          BlocBuilder<EmailAuthFormCubit, EmailAuthFormState>(
+                            builder:
+                                (
+                                  BuildContext context,
+                                  EmailAuthFormState state,
+                                ) {
+                                  return TilawaTextField(
+                                    label: context.l10n.emailAddress,
+                                    keyboardType: TextInputType.emailAddress,
+                                    enabled:
+                                        context
+                                                .watch<ForgotPasswordCubit>()
+                                                .state
+                                            is! ForgotPasswordSubmitting,
+                                    onChanged: context
+                                        .read<EmailAuthFormCubit>()
+                                        .emailChanged,
+                                    errorText: localizedEmailAuthFieldError(
+                                      state.emailErrorKey,
+                                      context.l10n,
+                                    ),
+                                  );
+                                },
+                          ),
+                        ],
+                      ),
                     ),
                   ),
-                  SizedBox(height: tokens.spaceLarge),
-                  BlocBuilder<EmailAuthFormCubit, EmailAuthFormState>(
-                    builder: (BuildContext context, EmailAuthFormState state) {
-                      return TilawaTextField(
-                        label: context.l10n.emailAddress,
-                        keyboardType: TextInputType.emailAddress,
-                        enabled:
-                            context.watch<ForgotPasswordCubit>().state
-                                is! ForgotPasswordSubmitting,
-                        onChanged: context
-                            .read<EmailAuthFormCubit>()
-                            .emailChanged,
-                        errorText: localizedEmailAuthFieldError(
-                          state.emailErrorKey,
-                          context.l10n,
-                        ),
-                      );
-                    },
-                  ),
-                  SizedBox(height: tokens.spaceLarge),
-                  BlocBuilder<ForgotPasswordCubit, ForgotPasswordState>(
-                    builder: (BuildContext context, ForgotPasswordState state) {
-                      final bool isLoading = state is ForgotPasswordSubmitting;
-                      return TilawaButton(
-                        text: context.l10n.sendResetLink,
-                        isLoading: isLoading,
-                        isFullWidth: true,
-                        onPressed: isLoading ? null : () => _submit(context),
-                      );
-                    },
-                  ),
-                ],
+                ),
               ),
             ),
-          ),
+            TilawaBottomActionInset(
+              top: tokens.spaceLarge,
+              maxWidthKind: TilawaContentKind.form,
+              child: BlocBuilder<ForgotPasswordCubit, ForgotPasswordState>(
+                builder: (BuildContext context, ForgotPasswordState state) {
+                  final bool isLoading = state is ForgotPasswordSubmitting;
+                  return TilawaButton(
+                    text: context.l10n.sendResetLink,
+                    isLoading: isLoading,
+                    isFullWidth: true,
+                    onPressed: isLoading ? null : () => _submit(context),
+                  );
+                },
+              ),
+            ),
+          ],
         ),
       ),
     );
