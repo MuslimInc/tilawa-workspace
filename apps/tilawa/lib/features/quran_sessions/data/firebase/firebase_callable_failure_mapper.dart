@@ -84,13 +84,6 @@ QuranSessionsFailure _mapLifecycleCode(
     'age_not_allowed' => AgeNotAllowedFailure(
       studentAgeGroup: details['studentAgeGroup'] as String? ?? 'child',
     ),
-    'guardian_approval_required' => GuardianApprovalRequiredFailure(
-      studentId: details['guardianId'] as String? ?? '',
-    ),
-    'guardian_approval_invalid' => const ValidationFailure(
-      field: 'guardianApproval',
-      code: 'invalid',
-    ),
     'meeting_link_required' => const MeetingLinkUnavailableFailure(),
     'group_booking_not_supported' => const GroupBookingNotSupportedFailure(),
     'unsupported_session_mode' => UnsupportedSessionModeFailure(

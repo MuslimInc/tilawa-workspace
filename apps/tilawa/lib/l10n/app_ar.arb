@@ -1195,22 +1195,6 @@
     "@registrationStepLearningDescription": {
         "description": "Registration step 3 subtitle"
     },
-    "registrationStepGuardianTitle": "وليّ الأمر",
-    "@registrationStepGuardianTitle": {
-        "description": "Registration step 4 title for minors"
-    },
-    "registrationStepGuardianDescription": "مطلوب موافقة وليّ الأمر قبل حجز الجلسات للطلاب دون عمر المنصة.",
-    "@registrationStepGuardianDescription": {
-        "description": "Registration step 4 subtitle"
-    },
-    "registrationGuardianStepTitle": "موافقة وليّ الأمر",
-    "@registrationGuardianStepTitle": {
-        "description": "Guardian step headline"
-    },
-    "registrationGuardianConsentLabel": "أؤكد أن وليّ الأمر سيوافق على الحجوزات",
-    "@registrationGuardianConsentLabel": {
-        "description": "Guardian consent checkbox label"
-    },
     "registrationStepReviewTitle": "المراجعة",
     "@registrationStepReviewTitle": {
         "description": "Registration step 5 title"
@@ -1222,10 +1206,6 @@
     "registrationPreferredLanguageLabel": "لغة التطبيق المفضّلة",
     "@registrationPreferredLanguageLabel": {
         "description": "Preferred language field on registration"
-    },
-    "registrationMinorNotice": "الطلاب دون عمر المنصة يحتاجون موافقة وليّ الأمر قبل الحجز.",
-    "@registrationMinorNotice": {
-        "description": "Info notice on learning step for minors"
     },
     "registrationDisplayNameRequired": "أدخل اسمك الكامل",
     "@registrationDisplayNameRequired": {
@@ -1254,10 +1234,6 @@
     "registrationLearningGoalsRequired": "اختر هدف تعلّم واحداً على الأقل",
     "@registrationLearningGoalsRequired": {
         "description": "Validation when learning goals missing"
-    },
-    "registrationGuardianConsentRequired": "أكّد موافقة وليّ الأمر للمتابعة",
-    "@registrationGuardianConsentRequired": {
-        "description": "Validation when guardian consent missing"
     },
     "registrationProfilePersistenceFailed": "تم إنشاء الحساب لكن حفظ الملف الشخصي فشل. أعد المحاولة أو أكمل ملفك بعد تسجيل الدخول.",
     "@registrationProfilePersistenceFailed": {

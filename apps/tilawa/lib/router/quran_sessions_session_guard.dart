@@ -34,8 +34,6 @@ bool isStudentFacingQuranSessionsPath(String path) {
     QuranSessionsRoutes.mySessions,
     QuranSessionsRoutes.wallet,
     QuranSessionsRoutes.profileCompletion,
-    QuranSessionsRoutes.guardianDashboard,
-    QuranSessionsRoutes.guardianApproval,
   };
   if (exactStudentPaths.contains(normalized)) {
     return true;
@@ -81,8 +79,6 @@ bool isAuthRequiredQuranSessionsPath(String path) {
     QuranSessionsRoutes.availability,
     QuranSessionsRoutes.profileCompletion,
     QuranSessionsRoutes.completeTeacherProfile,
-    QuranSessionsRoutes.guardianDashboard,
-    QuranSessionsRoutes.guardianApproval,
     QuranSessionsRoutes.teacherApply,
     QuranSessionsRoutes.teacherApplicationStatus,
   };

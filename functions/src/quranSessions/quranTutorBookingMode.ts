@@ -6,10 +6,7 @@ const VALID_MODES: ReadonlySet<string> = new Set([
 ]);
 
 export function distributionDefaultBookingMode(): QuranTutorBookingMode {
-  const distribution = process.env.TILAWA_DISTRIBUTION ?? "local";
-  return distribution === "play_production"
-    ? "requiresTutorApproval"
-    : "autoConfirm";
+  return "requiresTutorApproval";
 }
 
 export function resolveQuranTutorBookingMode(

@@ -10,7 +10,7 @@
 | Area | Files | Notes |
 |------|-------|-------|
 | Booking creation | `functions/src/quranSessions/createSessionBooking.ts` | Idempotency, slot lock, fee snapshot, market policy, allowed actions denorm |
-| Eligibility | `functions/src/quranSessions/bookingEligibilityService.ts` | Guardian gate, whitelist, gender toggle, min notice, max upcoming, **policy config validation** |
+| Eligibility | `functions/src/quranSessions/bookingEligibilityService.ts` | Child age + `canTeachChildren`, whitelist, gender toggle, min notice, max upcoming, **policy config validation** |
 | Market policy loader | `functions/src/quranSessions/sessionPolicyResolver.ts` | Versioned market docs + platform defaults + `assertBookingPolicyConfigured` |
 | Allowed actions | `sessionAllowedActionsService.ts`, `aggregateWriteService.ts` | Q-SR-02 denorm on **every** lifecycle write via `writeAggregateLifecycle` |
 | Idempotency | `functions/src/quranSessions/idempotencyService.ts` | 24h dedupe window (Q-BK-04) |
@@ -45,7 +45,8 @@ See `admin-config-seed.md` for seed commands and required fields.
 | `enabledCallProviders` | `string[]` | RTC provider rollout (Q-VC-02) |
 | `childAgeThreshold` | `number` | Child safety |
 | `genderMatchingEnabled` | `boolean` | Global gender ceiling |
-| `requireGuardianApprovalForChildren` | `boolean` | Child booking gate |
+
+**Deprecated (ignored):** `requireGuardianApprovalForChildren` — guardian approval removed 2026-07-04.
 
 ### Market — `quran_session_market_configs/{countryCode}`
 

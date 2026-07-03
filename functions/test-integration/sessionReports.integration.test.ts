@@ -82,27 +82,6 @@ test("integration: a non-participant cannot file a report on someone else's book
   );
 });
 
-test("integration: a child's guardian can file a report on the child's booking", async () => {
-  await clearFirestore();
-  await seedBooking();
-  await db()
-    .collection("users")
-    .doc("student1")
-    .set({ quranSessionsProfile: { guardianId: "guardian1" } });
-  await seedUserSession("guardian1");
-
-  const res = await report.run({
-    data: withSessionEpoch({
-      bookingId: "booking1",
-      category: "safety_concern",
-      description: "My child felt unsafe.",
-    }),
-    auth: { uid: "guardian1", token: {} },
-  });
-
-  const doc = await db().collection("quran_session_reports").doc(res.reportId).get();
-  assert.equal(doc.get("reporterRole"), "guardian");
-});
 
 test("integration: duplicate identical reports dedupe to a single record", async () => {
   await clearFirestore();

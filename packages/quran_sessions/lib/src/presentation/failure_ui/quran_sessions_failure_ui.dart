@@ -123,8 +123,6 @@ extension QuranSessionsFailureUi on QuranSessionsFailure {
             ? loc.accountBlockedWithReason(restrictionReasonLabel(loc, r))
             : loc.accountBlocked,
 
-      GuardianApprovalRequiredFailure() => loc.guardianApprovalRequired,
-
       PolicyViolationFailure(policyName: final p, detail: final d) =>
         loc.policyViolation(d, p),
 

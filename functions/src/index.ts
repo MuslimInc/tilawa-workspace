@@ -33,7 +33,6 @@ export { issueSessionRtcToken } from "./quranSessions/issueSessionRtcToken";
 export { issueDebugLiveKitToken } from "./quranSessions/issueDebugLiveKitToken";
 export { recordCallTelemetryEvent } from "./quranSessions/recordCallTelemetryEvent";
 export { sessionReminders } from "./quranSessions/sessionReminders";
-export { approveChildGuardianBooking } from "./quranSessions/approveChildGuardianBooking";
 export { requestUserDeletion } from "./userDeletion/requestUserDeletion";
 export { requestSelfAccountDeletion } from "./userDeletion/requestSelfAccountDeletion";
 export { cancelUserDeletion } from "./userDeletion/cancelUserDeletion";

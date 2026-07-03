@@ -643,7 +643,7 @@ class _SessionJoinStateBanner extends StatelessWidget {
           SizedBox(height: Theme.of(context).tokens.spaceSmall),
           TilawaFeedbackStrip(
             icon: Icons.hourglass_top_rounded,
-            message: l10n.sessionAwaitingReviewNextSteps,
+            message: l10n.sessionAwaitingTeacherApprovalHint,
             backgroundColor: scheme.primaryContainer,
             foregroundColor: scheme.onPrimaryContainer,
             variant: TilawaFeedbackVariant.info,

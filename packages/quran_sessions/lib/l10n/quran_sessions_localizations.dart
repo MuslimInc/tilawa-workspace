@@ -239,90 +239,6 @@ abstract class QuranSessionsLocalizations {
   /// **'Your account is suspended. Please contact support.'**
   String get accountBlocked;
 
-  /// No description provided for @guardianApprovalRequired.
-  ///
-  /// In en, this message translates to:
-  /// **'Booking for this student requires guardian approval first.'**
-  String get guardianApprovalRequired;
-
-  /// No description provided for @guardianApprovalTitle.
-  ///
-  /// In en, this message translates to:
-  /// **'Guardian approval'**
-  String get guardianApprovalTitle;
-
-  /// No description provided for @guardianApprovalBody.
-  ///
-  /// In en, this message translates to:
-  /// **'A parent or guardian must sign in on this device and confirm that they allow QuranTutor bookings for this student account.'**
-  String get guardianApprovalBody;
-
-  /// No description provided for @guardianApprovalStudentIdLabel.
-  ///
-  /// In en, this message translates to:
-  /// **'Student account ID'**
-  String get guardianApprovalStudentIdLabel;
-
-  /// No description provided for @guardianApprovalStudentIdHint.
-  ///
-  /// In en, this message translates to:
-  /// **'Child student user ID'**
-  String get guardianApprovalStudentIdHint;
-
-  /// No description provided for @guardianApprovalConfirm.
-  ///
-  /// In en, this message translates to:
-  /// **'Approve bookings'**
-  String get guardianApprovalConfirm;
-
-  /// No description provided for @guardianApprovalCaptured.
-  ///
-  /// In en, this message translates to:
-  /// **'Guardian approval recorded. You can return to booking.'**
-  String get guardianApprovalCaptured;
-
-  /// No description provided for @guardianApprovalSetupAction.
-  ///
-  /// In en, this message translates to:
-  /// **'Set up guardian approval'**
-  String get guardianApprovalSetupAction;
-
-  /// No description provided for @guardianDashboardTitle.
-  ///
-  /// In en, this message translates to:
-  /// **'Guardian hub'**
-  String get guardianDashboardTitle;
-
-  /// No description provided for @guardianDashboardIntroTitle.
-  ///
-  /// In en, this message translates to:
-  /// **'Child session bookings'**
-  String get guardianDashboardIntroTitle;
-
-  /// No description provided for @guardianDashboardIntroBody.
-  ///
-  /// In en, this message translates to:
-  /// **'Approve QuranTutor bookings for your child on this device. You will confirm consent once; the student can then complete booking.'**
-  String get guardianDashboardIntroBody;
-
-  /// No description provided for @guardianDashboardApproveAction.
-  ///
-  /// In en, this message translates to:
-  /// **'Approve child bookings'**
-  String get guardianDashboardApproveAction;
-
-  /// No description provided for @guardianDashboardOpenAction.
-  ///
-  /// In en, this message translates to:
-  /// **'Open guardian hub'**
-  String get guardianDashboardOpenAction;
-
-  /// No description provided for @guardianDashboardDeferredNote.
-  ///
-  /// In en, this message translates to:
-  /// **'Upcoming child sessions and pending approvals in one list require guardian account linking — coming after MVP auth roles.'**
-  String get guardianDashboardDeferredNote;
-
   /// No description provided for @sessionRevisionPracticeUpcomingTitle.
   ///
   /// In en, this message translates to:
@@ -3806,13 +3722,25 @@ abstract class QuranSessionsLocalizations {
   /// No description provided for @bookingRequestSentSubtitle.
   ///
   /// In en, this message translates to:
-  /// **'The booking is under review.'**
+  /// **'Awaiting teacher approval.'**
   String get bookingRequestSentSubtitle;
+
+  /// No description provided for @sessionAwaitingTeacherApproval.
+  ///
+  /// In en, this message translates to:
+  /// **'Awaiting teacher approval'**
+  String get sessionAwaitingTeacherApproval;
+
+  /// No description provided for @sessionAwaitingTeacherApprovalHint.
+  ///
+  /// In en, this message translates to:
+  /// **'The teacher will accept or decline your request. You\'ll be notified when they respond.'**
+  String get sessionAwaitingTeacherApprovalHint;
 
   /// No description provided for @sessionAwaitingReviewNextSteps.
   ///
   /// In en, this message translates to:
-  /// **'The booking is under review.\nPlease complete the payment using one of the available methods.\nThe session will be confirmed after payment review and teacher confirmation.'**
+  /// **'Awaiting teacher approval.\nThe teacher will accept or decline your booking request.\nYou\'ll be notified when they respond.'**
   String get sessionAwaitingReviewNextSteps;
 
   /// No description provided for @paidSessionNoticeTitle.
@@ -3896,19 +3824,19 @@ abstract class QuranSessionsLocalizations {
   /// No description provided for @bookingUnderReviewTitle.
   ///
   /// In en, this message translates to:
-  /// **'Booking under review'**
+  /// **'Awaiting teacher approval'**
   String get bookingUnderReviewTitle;
 
   /// No description provided for @bookingUnderReviewPaymentHint.
   ///
   /// In en, this message translates to:
-  /// **'Please complete the payment using one of the available methods.'**
+  /// **'The teacher will accept or decline your booking request.'**
   String get bookingUnderReviewPaymentHint;
 
   /// No description provided for @bookingUnderReviewConfirmHint.
   ///
   /// In en, this message translates to:
-  /// **'The booking will be confirmed after payment review and teacher confirmation.'**
+  /// **'You\'ll be notified when the teacher responds.'**
   String get bookingUnderReviewConfirmHint;
 
   /// No description provided for @bookingAcceptedTitle.
@@ -3944,7 +3872,7 @@ abstract class QuranSessionsLocalizations {
   /// No description provided for @sessionStatusBookingUnderReview.
   ///
   /// In en, this message translates to:
-  /// **'Under review'**
+  /// **'Awaiting teacher approval'**
   String get sessionStatusBookingUnderReview;
 
   /// No description provided for @sessionStatusRejectedByTutor.
@@ -4082,7 +4010,7 @@ abstract class QuranSessionsLocalizations {
   /// No description provided for @sessionLifecycleBookingUnderReview.
   ///
   /// In en, this message translates to:
-  /// **'Booking under review'**
+  /// **'Awaiting teacher approval'**
   String get sessionLifecycleBookingUnderReview;
 
   /// No description provided for @sessionLifecycleRejectedByTutor.

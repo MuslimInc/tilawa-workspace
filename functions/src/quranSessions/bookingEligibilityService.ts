@@ -13,8 +13,8 @@ import {
  *
  * The mobile client runs the same rules, but client checks are advisory only —
  * a modified client can skip them. These checks are authoritative: child-safety
- * (gender / age / guardian), teacher verification, and pricing are enforced
- * here before any booking document is written.
+ * (gender / age), teacher verification, and pricing are enforced here before
+ * any booking document is written.
  */
 
 export type Gender = "male" | "female";
@@ -27,8 +27,6 @@ export interface StudentEligibilityProfile {
   dateOfBirth: Date | null;
   countryCode: string | null;
   cityId: string | null;
-  guardianId: string | null;
-  guardianChildBookingApprovedAt: Date | null;
   restrictionReason: string | null;
 }
 
@@ -38,14 +36,12 @@ export interface TeacherEligibilityProfile {
   gender: Gender;
   allowedStudentGender: AllowedStudentGender;
   canTeachChildren: boolean;
-  requiresGuardianApprovalForChildren: boolean;
 }
 
 export interface GlobalSafetyPolicy {
   childAgeThreshold: number;
   globalAllowMaleTeacherFemaleStudent: boolean;
   globalAllowFemaleTeacherMaleStudent: boolean;
-  requireGuardianApprovalForChildren: boolean;
 }
 
 export interface ResolvedPricing {
@@ -85,26 +81,6 @@ export function isChild(
 ): boolean {
   if (dob == null) return false;
   return calendarAge(dob, now) < childAgeThreshold;
-}
-
-/** Guardian approvers must have a verified adult DOB (unlike generic isChild). */
-export function assertGuardianCanApproveChildBooking(
-  guardianDateOfBirth: Date | null,
-  childAgeThreshold: number,
-  now: Date,
-): void {
-  if (guardianDateOfBirth == null) {
-    throw lifecycleError(
-      "guardian_approval_invalid",
-      "Guardian profile must have a valid date of birth.",
-    );
-  }
-  if (isChild(guardianDateOfBirth, childAgeThreshold, now)) {
-    throw lifecycleError(
-      "guardian_approval_invalid",
-      "Guardian must be an adult account.",
-    );
-  }
 }
 
 /** Mirrors `QuranSessionSafetyPolicy.isGenderCombinationAllowed`. */
@@ -227,32 +203,10 @@ export function assertBookingEligible(
   }
 
   if (isChild(student.dateOfBirth, policy.childAgeThreshold, now)) {
-    const hasGuardian =
-      student.guardianId != null && student.guardianId.trim() !== "";
-    if (!hasGuardian) {
-      throw lifecycleError(
-        "guardian_approval_required",
-        "Guardian must be linked before booking.",
-        { guardianId: student.guardianId, reasonCode: "guardian_not_linked" },
-      );
-    }
     if (!teacher.canTeachChildren) {
       throw lifecycleError("age_not_allowed", "Teacher does not teach children.", {
         studentAgeGroup: "child",
       });
-    }
-    if (
-      teacher.requiresGuardianApprovalForChildren ||
-      policy.requireGuardianApprovalForChildren
-    ) {
-      const hasApproval = student.guardianChildBookingApprovedAt != null;
-      if (!hasApproval) {
-        throw lifecycleError(
-          "guardian_approval_required",
-          "Guardian approval is required for this child's booking.",
-          { guardianId: student.guardianId },
-        );
-      }
     }
   }
 
@@ -330,10 +284,6 @@ export async function loadBookingEligibilityContext(
     dateOfBirth: parseDate(studentProfile.dateOfBirth),
     countryCode: (studentProfile.countryCode as string) ?? null,
     cityId: (studentProfile.cityId as string) ?? null,
-    guardianId: (studentProfile.guardianId as string) ?? null,
-    guardianChildBookingApprovedAt: parseDate(
-      studentProfile.guardianChildBookingApprovedAt,
-    ),
     restrictionReason: (studentProfile.restrictionReason as string) ?? null,
   };
 
@@ -344,8 +294,6 @@ export async function loadBookingEligibilityContext(
     gender: parseGender(teacherData.gender) ?? "male",
     allowedStudentGender: parseAllowedStudentGender(teacherData.allowedStudentGender),
     canTeachChildren: (teacherData.canTeachChildren as boolean) ?? true,
-    requiresGuardianApprovalForChildren:
-      (teacherData.requiresGuardianApprovalForChildren as boolean) ?? false,
   };
 
   const policyData = platformConfig;
@@ -355,8 +303,6 @@ export async function loadBookingEligibilityContext(
       (policyData.globalAllowMaleTeacherFemaleStudent as boolean) ?? true,
     globalAllowFemaleTeacherMaleStudent:
       (policyData.globalAllowFemaleTeacherMaleStudent as boolean) ?? true,
-    requireGuardianApprovalForChildren:
-      (policyData.requireGuardianApprovalForChildren as boolean) ?? false,
   };
 
   let marketEnabled = true;
@@ -367,7 +313,7 @@ export async function loadBookingEligibilityContext(
     cityEnabled: true,
     sessionFeeAmount: 0,
     currencyCode: "USD",
-    bookingMode: "autoConfirm",
+    bookingMode: "requiresTutorApproval",
     genderMatchingEnabled: true,
     teacherWhitelist: null,
     tutorApprovalSlaMs: 24 * 60 * 60 * 1000,

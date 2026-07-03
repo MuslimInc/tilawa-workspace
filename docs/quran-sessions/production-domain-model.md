@@ -106,7 +106,7 @@ Order (from `ValidateBookingEligibilityUseCase`):
 5. Pricing allowed in market (when paid enabled)  
 6. Global safety + teacher eligibility policy  
 7. Gender policy (if enabled for market)  
-8. Age / guardian (if child)  
+8. Age (if child: teacher must accept children)  
 9. Concurrent upcoming cap  
 10. Slot available + min notice + max horizon  
 
@@ -121,6 +121,17 @@ All thresholds from admin config — **no hardcoded minutes/amounts in Flutter**
 | Paid | Student pays | `pendingPayment` | capture → `scheduled` |
 
 Server: `createSessionBooking` CF applies `QuranTutorBookingMode` + market `allowPaidBooking`.
+
+**Default booking mode:** `requiresTutorApproval` (student submits → teacher accepts/rejects).
+
+**Booking approval (decision 2026-07-04, updated):**
+
+| Role | Scope |
+|------|-------|
+| **Teacher/tutor** | Accept or reject each booking request (`respondToBookingRequest`) |
+| **System** | SLA expiry (`expirePendingReservations`) → `expired`, slot release |
+
+Guardian/parent approval was removed from the product — minors and adults follow the same booking path (teacher approval only). Stale Firestore fields (`guardianId`, `guardianChildBookingApprovedAt`, `requireGuardianApprovalForChildren`) may remain in old documents but are no longer read.
 
 ### 4.3 Cancellation (pending Q-CN-*)
 
@@ -302,7 +313,7 @@ Product owner sign-off: 2026-07-03. Full checklist: [questions.md](./questions.m
 | Q-BE-03 | **A** Separate bookings + sessions collections | Current schema |
 | Q-SR-01 | **A** App Check staging first | 2-week prod soak |
 | Q-SR-02 | **C** Server returns allowed actions list | `SessionAllowedActions` type |
-| Q-EC-01 | **A** Block bookings until guardian linked | Child student gate |
+| Q-EC-01 | **Removed** — no guardian gate; child age uses `canTeachChildren` only | Child student gate |
 | Q-EC-02 | **B** Suspended teacher: existing run; no new | Admin mass-cancel tool |
 | Q-EC-03 | **A** Slots UTC; display market TZ | Server authoritative |
 | Q-TD-01 | **A** Pending approvals top of dashboard | Time-sensitive UX |

@@ -7,6 +7,7 @@ import { createSessionBooking } from "../src/quranSessions/createSessionBooking"
 import { issueSessionRtcTokenForRequest } from "../src/quranSessions/issueSessionRtcTokenService";
 import {
   db,
+  patchAutoConfirmBooking,
   patchPlatformConfig,
   prepareIntegrationFirestore,
   seedUserSession,
@@ -137,6 +138,7 @@ test("integration: student cancel from pending releases slot and clears join", a
 
 test("integration: join token rejected before join window", async () => {
   await prepareIntegrationFirestore();
+  await patchAutoConfirmBooking();
   await patchPlatformConfig({
     enabledCallProviders: ["external", "mock", "agora"],
   });
@@ -163,6 +165,7 @@ test("integration: join token rejected before join window", async () => {
 
 test("integration: join token rejected after cancellation", async () => {
   await prepareIntegrationFirestore();
+  await patchAutoConfirmBooking();
   await patchPlatformConfig({
     enabledCallProviders: ["external", "mock", "agora"],
   });
@@ -273,22 +276,20 @@ test("integration: teacher not on whitelist is rejected", async () => {
   );
 });
 
-test("integration: child booking without guardian is rejected server-side", async () => {
+test("integration: child booking succeeds when teacher accepts children", async () => {
   await prepareIntegrationFirestore();
   await seedVerifiedTeacher("teacher1", { canTeachChildren: true });
   await seedCompleteStudent("child1", {
     dateOfBirth: Timestamp.fromDate(new Date("2018-01-01T00:00:00Z")),
-    guardianId: null,
   });
   await seedUserSession("child1");
 
-  await assert.rejects(
-    booking.run({
-      data: bookingData(),
-      auth: { uid: "child1", token: {} },
-    }),
-    (error: unknown) => codeOf(error) === "guardian_approval_required",
-  );
+  const res = await booking.run({
+    data: bookingData(),
+    auth: { uid: "child1", token: {} },
+  });
+
+  assert.ok(res.bookingId);
 });
 
 test("integration: canceled booking is not in student upcoming query set", async () => {

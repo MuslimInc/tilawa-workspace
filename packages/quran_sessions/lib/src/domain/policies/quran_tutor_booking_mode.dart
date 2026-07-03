@@ -22,7 +22,5 @@ QuranTutorBookingMode distributionDefaultQuranTutorBookingMode({
     defaultValue: 'local',
   ),
 }) {
-  return distribution == 'play_production'
-      ? QuranTutorBookingMode.requiresTutorApproval
-      : QuranTutorBookingMode.autoConfirm;
+  return QuranTutorBookingMode.requiresTutorApproval;
 }

@@ -2282,30 +2282,6 @@ abstract class AppLocalizations {
   /// **'What would you like to learn?'**
   String get registrationStepLearningDescription;
 
-  /// Registration step 4 title for minors
-  ///
-  /// In en, this message translates to:
-  /// **'Guardian'**
-  String get registrationStepGuardianTitle;
-
-  /// Registration step 4 subtitle
-  ///
-  /// In en, this message translates to:
-  /// **'Guardian approval is required before booking sessions for students under the platform age threshold.'**
-  String get registrationStepGuardianDescription;
-
-  /// Guardian step headline
-  ///
-  /// In en, this message translates to:
-  /// **'Guardian consent'**
-  String get registrationGuardianStepTitle;
-
-  /// Guardian consent checkbox label
-  ///
-  /// In en, this message translates to:
-  /// **'I confirm a parent or guardian will approve bookings'**
-  String get registrationGuardianConsentLabel;
-
   /// Registration step 5 title
   ///
   /// In en, this message translates to:
@@ -2323,12 +2299,6 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Preferred app language'**
   String get registrationPreferredLanguageLabel;
-
-  /// Info notice on learning step for minors
-  ///
-  /// In en, this message translates to:
-  /// **'Students under the platform age threshold need guardian approval before booking.'**
-  String get registrationMinorNotice;
 
   /// Validation when display name missing
   ///
@@ -2371,12 +2341,6 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Select at least one learning goal'**
   String get registrationLearningGoalsRequired;
-
-  /// Validation when guardian consent missing
-  ///
-  /// In en, this message translates to:
-  /// **'Confirm guardian consent to continue'**
-  String get registrationGuardianConsentRequired;
 
   /// Shown when Firebase auth succeeds but Firestore profile write fails
   ///

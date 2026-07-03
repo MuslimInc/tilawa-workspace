@@ -5,6 +5,7 @@ import { Timestamp } from "firebase-admin/firestore";
 import { createSessionBooking } from "../src/quranSessions/createSessionBooking";
 import {
   db,
+  patchAutoConfirmBooking,
   patchPlatformConfig,
   prepareIntegrationFirestore,
   seedUserSession,
@@ -81,7 +82,7 @@ function codeOf(error: unknown): string | undefined {
   return (error as { details?: { code?: string } })?.details?.code;
 }
 
-test("integration: free booking with a verified teacher is scheduled", async () => {
+test("integration: free booking defaults to pending tutor approval", async () => {
   await prepareIntegrationFirestore();
   await seedVerifiedTeacher("teacher1");
   await seedCompleteStudent("student1");
@@ -92,9 +93,9 @@ test("integration: free booking with a verified teacher is scheduled", async () 
     auth: { uid: "student1", token: {} },
   });
 
-  assert.equal(res.lifecycleStatus, "scheduled");
+  assert.equal(res.lifecycleStatus, "pending_tutor_approval");
   const bookingDoc = await db().collection("quran_bookings").doc(res.bookingId).get();
-  assert.equal(bookingDoc.get("lifecycleStatus"), "scheduled");
+  assert.equal(bookingDoc.get("lifecycleStatus"), "pending_tutor_approval");
   assert.equal(bookingDoc.get("pricingType"), "free");
   assert.equal(bookingDoc.get("studentId"), "student1");
   const sessionDoc = await db().collection("quran_sessions").doc(res.sessionId).get();
@@ -108,14 +109,51 @@ test("integration: free booking with a verified teacher is scheduled", async () 
   assert.equal(lock.exists, true);
 });
 
-test("integration: booking notification targets teacher auth uid not profile id", async () => {
+test("integration: autoConfirm policy schedules immediately", async () => {
+  await prepareIntegrationFirestore();
+  await patchAutoConfirmBooking();
+  await seedVerifiedTeacher("teacher1");
+  await seedCompleteStudent("student1");
+  await seedUserSession("student1");
+
+  const res = await booking.run({
+    data: bookingData({ slotId: "slot-auto-confirm" }),
+    auth: { uid: "student1", token: {} },
+  });
+
+  assert.equal(res.lifecycleStatus, "scheduled");
+});
+
+test("integration: tutor-approval booking notifies teacher auth uid only", async () => {
   await prepareIntegrationFirestore();
   await seedVerifiedTeacher("teacher1");
   await seedCompleteStudent("student1");
   await seedUserSession("student1");
 
   const res = await booking.run({
-    data: bookingData(),
+    data: bookingData({ slotId: "slot-notify-pending" }),
+    auth: { uid: "student1", token: {} },
+  });
+
+  const notifications = await db()
+    .collection("quran_session_notifications")
+    .where("aggregateId", "==", res.bookingId)
+    .get();
+  assert.equal(notifications.size, 1);
+  const recipients = notifications.docs[0].get("recipientUserIds") as string[];
+  assert.deepEqual(recipients, ["uid_teacher1"]);
+  assert.equal(notifications.docs[0].get("kind"), "bookingRequestReceived");
+});
+
+test("integration: autoConfirm booking notifies both parties", async () => {
+  await prepareIntegrationFirestore();
+  await patchAutoConfirmBooking();
+  await seedVerifiedTeacher("teacher1");
+  await seedCompleteStudent("student1");
+  await seedUserSession("student1");
+
+  const res = await booking.run({
+    data: bookingData({ slotId: "slot-notify-confirmed" }),
     auth: { uid: "student1", token: {} },
   });
 
@@ -396,6 +434,7 @@ test("integration: voice booking rejects malformed enabledCallProviders safely",
 
 test("integration: production-shaped teacher profile external booking", async () => {
   await prepareIntegrationFirestore();
+  await patchAutoConfirmBooking();
   const teacherId = "a1sYAAaBHg5aq1uwya0o";
   await db()
     .collection("quran_teacher_profiles")

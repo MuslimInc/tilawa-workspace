@@ -3,7 +3,6 @@ import assert from "node:assert/strict";
 
 import {
   assertBookingEligible,
-  assertGuardianCanApproveChildBooking,
   calendarAge,
   isChild,
   isGenderCombinationAllowed,
@@ -33,8 +32,6 @@ function baseContext(
       dateOfBirth: new Date("1990-01-01T00:00:00.000Z"),
       countryCode: "EG",
       cityId: "cairo",
-      guardianId: null,
-      guardianChildBookingApprovedAt: null,
       restrictionReason: null,
       ...overrides.student,
     },
@@ -44,14 +41,12 @@ function baseContext(
       gender: "male",
       allowedStudentGender: "both",
       canTeachChildren: true,
-      requiresGuardianApprovalForChildren: false,
       ...overrides.teacher,
     },
     policy: {
       childAgeThreshold: 14,
       globalAllowMaleTeacherFemaleStudent: true,
       globalAllowFemaleTeacherMaleStudent: true,
-      requireGuardianApprovalForChildren: false,
       ...overrides.policy,
     },
     market: {
@@ -192,10 +187,7 @@ test("assertBookingEligible rejects a child when teacher cannot teach children",
     () =>
       assertBookingEligible(
         baseContext({
-          student: {
-            dateOfBirth: new Date("2015-01-01Z"),
-            guardianId: "guardian_uid",
-          },
+          student: { dateOfBirth: new Date("2015-01-01Z") },
           teacher: { canTeachChildren: false },
         }),
         NOW,
@@ -204,84 +196,13 @@ test("assertBookingEligible rejects a child when teacher cannot teach children",
   );
 });
 
-test("assertBookingEligible blocks a child when guardian approval is required", () => {
-  expectCode(
-    () =>
-      assertBookingEligible(
-        baseContext({
-          student: { dateOfBirth: new Date("2015-01-01Z") },
-          policy: { requireGuardianApprovalForChildren: true },
-        }),
-        NOW,
-      ),
-    "guardian_approval_required",
-  );
-});
-
-test("assertBookingEligible allows a child when guardian approval is recorded", () => {
+test("assertBookingEligible allows a child when teacher accepts children", () => {
   const pricing = assertBookingEligible(
     baseContext({
-      student: {
-        dateOfBirth: new Date("2015-01-01Z"),
-        guardianId: "guardian_uid",
-        guardianChildBookingApprovedAt: new Date("2024-01-01Z"),
-      },
-      policy: { requireGuardianApprovalForChildren: true },
+      student: { dateOfBirth: new Date("2015-01-01Z") },
+      teacher: { canTeachChildren: true },
     }),
     NOW,
   );
   assert.equal(pricing.isPaid, false);
-});
-
-test("assertBookingEligible blocks child bookings until guardian is linked (Q-EC-01)", () => {
-  expectCode(
-    () =>
-      assertBookingEligible(
-        baseContext({ student: { dateOfBirth: new Date("2015-01-01Z") } }),
-        NOW,
-      ),
-    "guardian_approval_required",
-  );
-});
-
-test("assertBookingEligible allows child with linked guardian when approval not required", () => {
-  const pricing = assertBookingEligible(
-    baseContext({
-      student: {
-        dateOfBirth: new Date("2015-01-01Z"),
-        guardianId: "guardian_uid",
-      },
-    }),
-    NOW,
-  );
-  assert.equal(pricing.isPaid, false);
-});
-
-test("assertGuardianCanApproveChildBooking rejects missing guardian DOB", () => {
-  expectCode(
-    () => assertGuardianCanApproveChildBooking(null, 14, NOW),
-    "guardian_approval_invalid",
-  );
-});
-
-test("assertGuardianCanApproveChildBooking rejects child guardian DOB", () => {
-  expectCode(
-    () =>
-      assertGuardianCanApproveChildBooking(
-        new Date("2015-01-01Z"),
-        14,
-        NOW,
-      ),
-    "guardian_approval_invalid",
-  );
-});
-
-test("assertGuardianCanApproveChildBooking accepts adult guardian DOB", () => {
-  assert.doesNotThrow(() =>
-    assertGuardianCanApproveChildBooking(
-      new Date("1990-01-01Z"),
-      14,
-      NOW,
-    ),
-  );
 });

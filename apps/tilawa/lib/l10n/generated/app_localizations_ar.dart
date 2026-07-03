@@ -1258,20 +1258,6 @@ class AppLocalizationsAr extends AppLocalizations {
   String get registrationStepLearningDescription => 'ماذا تريد أن تتعلّم؟';
 
   @override
-  String get registrationStepGuardianTitle => 'وليّ الأمر';
-
-  @override
-  String get registrationStepGuardianDescription =>
-      'مطلوب موافقة وليّ الأمر قبل حجز الجلسات للطلاب دون عمر المنصة.';
-
-  @override
-  String get registrationGuardianStepTitle => 'موافقة وليّ الأمر';
-
-  @override
-  String get registrationGuardianConsentLabel =>
-      'أؤكد أن وليّ الأمر سيوافق على الحجوزات';
-
-  @override
   String get registrationStepReviewTitle => 'المراجعة';
 
   @override
@@ -1279,10 +1265,6 @@ class AppLocalizationsAr extends AppLocalizations {
 
   @override
   String get registrationPreferredLanguageLabel => 'لغة التطبيق المفضّلة';
-
-  @override
-  String get registrationMinorNotice =>
-      'الطلاب دون عمر المنصة يحتاجون موافقة وليّ الأمر قبل الحجز.';
 
   @override
   String get registrationDisplayNameRequired => 'أدخل اسمك الكامل';
@@ -1305,10 +1287,6 @@ class AppLocalizationsAr extends AppLocalizations {
   @override
   String get registrationLearningGoalsRequired =>
       'اختر هدف تعلّم واحداً على الأقل';
-
-  @override
-  String get registrationGuardianConsentRequired =>
-      'أكّد موافقة وليّ الأمر للمتابعة';
 
   @override
   String get registrationProfilePersistenceFailed =>

@@ -65,7 +65,7 @@
 | CF unit tests | ✅ | `cd functions && npm test` — **201/201 pass** (2026-07-03) |
 | CF integration tests (emulator) | ✅ | `npm run test:integration` — **70/70 pass** |
 | Free booking scheduled | ✅ | integration `free booking with a verified teacher is scheduled` |
-| Guardian gate | ✅ | integration `child booking without guardian is rejected` + unit Q-EC-01 tests |
+| Child age gate | ✅ | integration `child booking succeeds when teacher accepts children` + `canTeachChildren` unit tests |
 | Teacher whitelist | ✅ | integration `teacher not on whitelist is rejected` |
 | Fee snapshot | ✅ | integration `fee snapshot persists and ignores later market price changes` |
 | Video-only server reject non-video | ✅ | `createSessionBooking.ts` lines 206–211; platform seed `sessionMode: videoOnly` |
@@ -137,7 +137,6 @@ Do **not** ship or depend on these in the free/video-only gate:
 | `enabledCallProviders` | `["mock", "agora"]` |
 | `childAgeThreshold` | `14` |
 | `genderMatchingEnabled` | `true` |
-| `requireGuardianApprovalForChildren` | `true` |
 | `globalAllowMaleTeacherFemaleStudent` | `true` |
 | `globalAllowFemaleTeacherMaleStudent` | `true` |
 

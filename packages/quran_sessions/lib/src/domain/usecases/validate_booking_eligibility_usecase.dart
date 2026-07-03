@@ -153,21 +153,10 @@ class ValidateBookingEligibilityUseCase {
       );
     }
 
-    // ── 8. Age / guardian (Q-EC-01) ────────────────────────────────────────
+    // ── 8. Age (child students need a teacher who accepts children) ─────────
     if (ageGroup == UserAgeGroup.child) {
       if (!teacherPolicy.canTeachChildren) {
         return Left(AgeNotAllowedFailure(studentAgeGroup: ageGroup.name));
-      }
-      final hasGuardian =
-          student.guardianId != null && student.guardianId!.isNotEmpty;
-      if (!hasGuardian) {
-        return Left(GuardianApprovalRequiredFailure(studentId: studentId));
-      }
-      if (teacherPolicy.requiresGuardianApprovalForChildren ||
-          policy.requireGuardianApprovalForChildren) {
-        if (student.guardianChildBookingApprovedAt == null) {
-          return Left(GuardianApprovalRequiredFailure(studentId: studentId));
-        }
       }
     }
 

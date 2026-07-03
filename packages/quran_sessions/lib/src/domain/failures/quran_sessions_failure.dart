@@ -279,17 +279,6 @@ final class AccountBlockedFailure extends QuranSessionsFailure {
   List<Object?> get props => [accountId, reason];
 }
 
-/// A session involving a child student requires guardian approval before
-/// the booking can be confirmed.
-final class GuardianApprovalRequiredFailure extends QuranSessionsFailure {
-  const GuardianApprovalRequiredFailure({required this.studentId});
-
-  final String studentId;
-
-  @override
-  List<Object?> get props => [studentId];
-}
-
 /// No enabled countries or cities were returned from the market catalog.
 ///
 /// Usually means Firestore was not seeded or every market is disabled.

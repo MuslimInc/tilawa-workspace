@@ -27,7 +27,6 @@ class FirestoreSessionPolicyDataSource
           globalAllowFemaleTeacherMaleStudent: true,
           videoCallAllowedForChildren: false,
           recordingEnabled: false,
-          requireGuardianApprovalForChildren: false,
           quranTutorBookingMode: null,
         );
       }
@@ -43,8 +42,6 @@ class FirestoreSessionPolicyDataSource
         videoCallAllowedForChildren:
             data['videoCallAllowedForChildren'] as bool? ?? false,
         recordingEnabled: data['recordingEnabled'] as bool? ?? false,
-        requireGuardianApprovalForChildren:
-            data['requireGuardianApprovalForChildren'] as bool? ?? false,
         quranTutorBookingMode: data['quranTutorBookingMode'] as String?,
       );
     } on FirebaseException catch (e) {
@@ -65,15 +62,12 @@ class FirestoreSessionPolicyDataSource
         return const TeacherEligibilityPolicyDto(
           allowedStudentGender: 'both',
           canTeachChildren: true,
-          requiresGuardianApprovalForChildren: false,
         );
       }
       final data = doc.data() ?? const {};
       return TeacherEligibilityPolicyDto(
         allowedStudentGender: data['allowedStudentGender'] as String? ?? 'both',
         canTeachChildren: data['canTeachChildren'] as bool? ?? true,
-        requiresGuardianApprovalForChildren:
-            data['requiresGuardianApprovalForChildren'] as bool? ?? false,
       );
     } on FirebaseException catch (e) {
       throw mapFirebaseException(e);
@@ -93,8 +87,6 @@ class FirestoreSessionPolicyDataSource
             policy.globalAllowFemaleTeacherMaleStudent,
         'videoCallAllowedForChildren': policy.videoCallAllowedForChildren,
         'recordingEnabled': policy.recordingEnabled,
-        'requireGuardianApprovalForChildren':
-            policy.requireGuardianApprovalForChildren,
         'updatedAt': FieldValue.serverTimestamp(),
       }, SetOptions(merge: true));
     } on FirebaseException catch (e) {
@@ -114,8 +106,6 @@ class FirestoreSessionPolicyDataSource
           .set({
             'allowedStudentGender': policy.allowedStudentGender,
             'canTeachChildren': policy.canTeachChildren,
-            'requiresGuardianApprovalForChildren':
-                policy.requiresGuardianApprovalForChildren,
             'updatedAt': FieldValue.serverTimestamp(),
           }, SetOptions(merge: true));
     } on FirebaseException catch (e) {

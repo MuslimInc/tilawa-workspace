@@ -89,53 +89,6 @@ class QuranSessionsLocalizationsAr extends QuranSessionsLocalizations {
   String get accountBlocked => 'حسابك موقوف. يرجى التواصل مع الدعم.';
 
   @override
-  String get guardianApprovalRequired =>
-      'يتطلب الحجز لهذا الطالب موافقة وليّ الأمر أولاً.';
-
-  @override
-  String get guardianApprovalTitle => 'موافقة وليّ الأمر';
-
-  @override
-  String get guardianApprovalBody =>
-      'يجب على وليّ الأمر تسجيل الدخول على هذا الجهاز وتأكيد السماح بحجوزات تعلّم القرآن مع محفظك لهذا الحساب الطلابي.';
-
-  @override
-  String get guardianApprovalStudentIdLabel => 'معرّف حساب الطالب';
-
-  @override
-  String get guardianApprovalStudentIdHint => 'معرّف المستخدم للطالب';
-
-  @override
-  String get guardianApprovalConfirm => 'الموافقة على الحجز';
-
-  @override
-  String get guardianApprovalCaptured =>
-      'تم تسجيل موافقة وليّ الأمر. يمكنك العودة إلى الحجز.';
-
-  @override
-  String get guardianApprovalSetupAction => 'إعداد موافقة وليّ الأمر';
-
-  @override
-  String get guardianDashboardTitle => 'لوحة وليّ الأمر';
-
-  @override
-  String get guardianDashboardIntroTitle => 'حجوزات جلسات الطفل';
-
-  @override
-  String get guardianDashboardIntroBody =>
-      'وافق على حجوزات تعلّم القرآن مع محفظك لطفلك من هذا الجهاز. تُسجَّل الموافقة مرة واحدة ثم يكمل الطالب الحجز.';
-
-  @override
-  String get guardianDashboardApproveAction => 'الموافقة على حجوزات الطفل';
-
-  @override
-  String get guardianDashboardOpenAction => 'فتح لوحة وليّ الأمر';
-
-  @override
-  String get guardianDashboardDeferredNote =>
-      'عرض الجلسات القادمة للطفل والموافقات المعلّقة في قائمة واحدة يتطلب ربط حساب وليّ الأمر — بعد أدوار المصادقة في MVP.';
-
-  @override
   String get sessionRevisionPracticeUpcomingTitle => 'استعد لجلستك';
 
   @override
@@ -2085,11 +2038,18 @@ class QuranSessionsLocalizationsAr extends QuranSessionsLocalizations {
   String get bookingRequestSentTitle => 'تم إرسال طلب الحجز';
 
   @override
-  String get bookingRequestSentSubtitle => 'الحجز قيد المراجعة.';
+  String get bookingRequestSentSubtitle => 'بانتظار موافقة المعلم.';
+
+  @override
+  String get sessionAwaitingTeacherApproval => 'بانتظار موافقة المعلم';
+
+  @override
+  String get sessionAwaitingTeacherApprovalHint =>
+      'سيقبل المعلم طلبك أو يرفضه. سنُبلّغك عند الرد.';
 
   @override
   String get sessionAwaitingReviewNextSteps =>
-      'الحجز قيد المراجعة.\nيرجى إتمام الدفع عبر إحدى الطرق المتاحة.\nسيتم تأكيد الحصة بعد مراجعة الدفع وتأكيد المعلم.';
+      'بانتظار موافقة المعلم.\nسيقبل المعلم طلب الحجز أو يرفضه.\nسنُبلّغك عند الرد.';
 
   @override
   String get paidSessionNoticeTitle => 'هذه الحصة مدفوعة';
@@ -2138,15 +2098,14 @@ class QuranSessionsLocalizationsAr extends QuranSessionsLocalizations {
   String get paymentMethodBankTransfer => 'تحويل بنكي';
 
   @override
-  String get bookingUnderReviewTitle => 'الحجز قيد المراجعة';
+  String get bookingUnderReviewTitle => 'بانتظار موافقة المعلم';
 
   @override
   String get bookingUnderReviewPaymentHint =>
-      'يرجى إتمام الدفع عبر إحدى الطرق المتاحة.';
+      'سيقبل المعلم طلب الحجز أو يرفضه.';
 
   @override
-  String get bookingUnderReviewConfirmHint =>
-      'سيتم تأكيد الحجز بعد مراجعة الدفع وتأكيد المعلم.';
+  String get bookingUnderReviewConfirmHint => 'سنُبلّغك عند رد المعلم.';
 
   @override
   String get bookingAcceptedTitle => 'تم قبول الحصة';
@@ -2241,7 +2200,7 @@ class QuranSessionsLocalizationsAr extends QuranSessionsLocalizations {
   String get tutorCancelSessionFromCard => 'إلغاء';
 
   @override
-  String get sessionLifecycleBookingUnderReview => 'الحجز قيد المراجعة';
+  String get sessionLifecycleBookingUnderReview => 'بانتظار موافقة المعلم';
 
   @override
   String get sessionLifecycleRejectedByTutor => 'مرفوض من المحفظ';

@@ -73,12 +73,11 @@ export async function seedDefaultBookingPolicy(
     .collection("quran_session_platform_config")
     .doc("global")
     .set({
-      quranTutorBookingMode: "autoConfirm",
+      quranTutorBookingMode: "requiresTutorApproval",
       sessionMode: "freeBeta",
       enabledCallProviders: ["external", "mock"],
       childAgeThreshold: 14,
       genderMatchingEnabled: true,
-      requireGuardianApprovalForChildren: true,
     });
 
   await db()
@@ -110,6 +109,11 @@ export async function patchPlatformConfig(
     .collection("quran_session_platform_config")
     .doc("global")
     .set(patch, { merge: true });
+}
+
+/** Opt into legacy auto-confirm booking for tests that expect immediate scheduling. */
+export async function patchAutoConfirmBooking(): Promise<void> {
+  await patchPlatformConfig({ quranTutorBookingMode: "autoConfirm" });
 }
 
 /** Clears emulator and seeds default booking policy fixtures. */

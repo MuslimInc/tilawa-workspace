@@ -44,6 +44,18 @@ Classifier: `SessionListClassifier.isActionableUpcomingLifecycle`.
 
 ---
 
+## Booking approval (teacher-only)
+
+1. Student submits booking → `pendingTutorApproval`
+2. Teacher accepts → `scheduled` (upcoming)
+3. Teacher rejects → `rejectedByTutor` (cancelled tab), slot released
+4. SLA expiry → `expired`, slot released
+5. No guardian/parent approval — teacher-only booking approval (product decision 2026-07-04)
+
+Callable: `respondToBookingRequest` — **teacher actor only**.
+
+---
+
 ## Transition table
 
 | # | From state(s) | Action | Actor | To state | Side effects |

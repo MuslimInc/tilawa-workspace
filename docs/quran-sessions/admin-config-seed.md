@@ -28,7 +28,8 @@ Market seed data source: `docs/seed/quran_session_market_configs.json`
 | `sessionMode` | yes | `videoOnly` \| `freeBeta` |
 | `childAgeThreshold` | yes | positive number |
 | `enabledCallProviders` | recommended | RTC rollout |
-| `requireGuardianApprovalForChildren` | recommended | child safety |
+
+**Deprecated (ignored):** `requireGuardianApprovalForChildren`
 
 ### Market — `quran_session_market_configs/{countryCode}`
 

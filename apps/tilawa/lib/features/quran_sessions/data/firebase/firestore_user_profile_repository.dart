@@ -19,8 +19,6 @@ class FirestoreUserProfileDto {
     this.cityName,
     this.currencyCode,
     this.timezone,
-    this.guardianId,
-    this.guardianChildBookingApprovedAt,
     this.restrictionReason,
     this.profileCompleted = false,
     this.learningGoals = const [],
@@ -38,8 +36,6 @@ class FirestoreUserProfileDto {
   final String? cityName;
   final String? currencyCode;
   final String? timezone;
-  final String? guardianId;
-  final DateTime? guardianChildBookingApprovedAt;
   final String? restrictionReason;
   final bool profileCompleted;
   final List<String> learningGoals;
@@ -65,10 +61,6 @@ class FirestoreUserProfileDto {
       cityName: profile['cityName'] as String?,
       currencyCode: profile['currencyCode'] as String?,
       timezone: profile['timezone'] as String?,
-      guardianId: profile['guardianId'] as String?,
-      guardianChildBookingApprovedAt: readDateTime(
-        profile['guardianChildBookingApprovedAt'],
-      ),
       restrictionReason: profile['restrictionReason'] as String?,
       profileCompleted: profile['profileCompleted'] as bool? ?? false,
       learningGoals: List<String>.from(
@@ -90,11 +82,6 @@ class FirestoreUserProfileDto {
     if (cityName != null) 'cityName': cityName,
     if (currencyCode != null) 'currencyCode': currencyCode,
     if (timezone != null) 'timezone': timezone,
-    if (guardianId != null) 'guardianId': guardianId,
-    if (guardianChildBookingApprovedAt != null)
-      'guardianChildBookingApprovedAt': writeDateTime(
-        guardianChildBookingApprovedAt!,
-      ),
     if (restrictionReason != null) 'restrictionReason': restrictionReason,
     'profileCompleted': profileCompleted,
     if (learningGoals.isNotEmpty) 'learningGoals': learningGoals,
@@ -114,8 +101,6 @@ class FirestoreUserProfileDto {
     cityName: cityName,
     currencyCode: currencyCode,
     timezone: timezone,
-    guardianId: guardianId,
-    guardianChildBookingApprovedAt: guardianChildBookingApprovedAt,
     restrictionReason: restrictionReason,
     learningGoals: learningGoals,
   );
@@ -139,8 +124,6 @@ class FirestoreUserProfileDto {
       cityName: dto.cityName,
       currencyCode: dto.currencyCode,
       timezone: dto.timezone,
-      guardianId: dto.guardianId,
-      guardianChildBookingApprovedAt: dto.guardianChildBookingApprovedAt,
       restrictionReason: dto.restrictionReason,
       profileCompleted: complete,
       learningGoals: dto.learningGoals,

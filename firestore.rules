@@ -365,7 +365,6 @@ service cloud.firestore {
         && quranSessionsProfileEligibilityFieldUnchanged('dateOfBirth')
         && quranSessionsProfileEligibilityFieldUnchanged('countryCode')
         && quranSessionsProfileEligibilityFieldUnchanged('cityId')
-        && quranSessionsProfileEligibilityFieldUnchanged('guardianId')
         && quranSessionsProfileEligibilityFieldUnchanged('role')
         && quranSessionsProfileEligibilityFieldUnchanged('canApplyAsTeacher');
     }

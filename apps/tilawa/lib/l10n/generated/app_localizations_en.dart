@@ -1264,20 +1264,6 @@ class AppLocalizationsEn extends AppLocalizations {
       'What would you like to learn?';
 
   @override
-  String get registrationStepGuardianTitle => 'Guardian';
-
-  @override
-  String get registrationStepGuardianDescription =>
-      'Guardian approval is required before booking sessions for students under the platform age threshold.';
-
-  @override
-  String get registrationGuardianStepTitle => 'Guardian consent';
-
-  @override
-  String get registrationGuardianConsentLabel =>
-      'I confirm a parent or guardian will approve bookings';
-
-  @override
   String get registrationStepReviewTitle => 'Review';
 
   @override
@@ -1286,10 +1272,6 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get registrationPreferredLanguageLabel => 'Preferred app language';
-
-  @override
-  String get registrationMinorNotice =>
-      'Students under the platform age threshold need guardian approval before booking.';
 
   @override
   String get registrationDisplayNameRequired => 'Enter your full name';
@@ -1313,10 +1295,6 @@ class AppLocalizationsEn extends AppLocalizations {
   @override
   String get registrationLearningGoalsRequired =>
       'Select at least one learning goal';
-
-  @override
-  String get registrationGuardianConsentRequired =>
-      'Confirm guardian consent to continue';
 
   @override
   String get registrationProfilePersistenceFailed =>

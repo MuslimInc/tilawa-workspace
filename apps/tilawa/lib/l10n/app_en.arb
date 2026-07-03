@@ -1674,22 +1674,6 @@
     "@registrationStepLearningDescription": {
         "description": "Registration step 3 subtitle"
     },
-    "registrationStepGuardianTitle": "Guardian",
-    "@registrationStepGuardianTitle": {
-        "description": "Registration step 4 title for minors"
-    },
-    "registrationStepGuardianDescription": "Guardian approval is required before booking sessions for students under the platform age threshold.",
-    "@registrationStepGuardianDescription": {
-        "description": "Registration step 4 subtitle"
-    },
-    "registrationGuardianStepTitle": "Guardian consent",
-    "@registrationGuardianStepTitle": {
-        "description": "Guardian step headline"
-    },
-    "registrationGuardianConsentLabel": "I confirm a parent or guardian will approve bookings",
-    "@registrationGuardianConsentLabel": {
-        "description": "Guardian consent checkbox label"
-    },
     "registrationStepReviewTitle": "Review",
     "@registrationStepReviewTitle": {
         "description": "Registration step 5 title"
@@ -1701,10 +1685,6 @@
     "registrationPreferredLanguageLabel": "Preferred app language",
     "@registrationPreferredLanguageLabel": {
         "description": "Preferred language field on registration"
-    },
-    "registrationMinorNotice": "Students under the platform age threshold need guardian approval before booking.",
-    "@registrationMinorNotice": {
-        "description": "Info notice on learning step for minors"
     },
     "registrationDisplayNameRequired": "Enter your full name",
     "@registrationDisplayNameRequired": {
@@ -1733,10 +1713,6 @@
     "registrationLearningGoalsRequired": "Select at least one learning goal",
     "@registrationLearningGoalsRequired": {
         "description": "Validation when learning goals missing"
-    },
-    "registrationGuardianConsentRequired": "Confirm guardian consent to continue",
-    "@registrationGuardianConsentRequired": {
-        "description": "Validation when guardian consent missing"
     },
     "registrationProfilePersistenceFailed": "Account created but saving your profile failed. Tap retry or complete your profile after sign-in.",
     "@registrationProfilePersistenceFailed": {

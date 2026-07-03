@@ -19,7 +19,6 @@ const DEFAULT_PLATFORM_CONFIG: Record<string, unknown> = {
   enabledCallProviders: ["mock", "agora"],
   childAgeThreshold: 14,
   genderMatchingEnabled: true,
-  requireGuardianApprovalForChildren: true,
   globalAllowMaleTeacherFemaleStudent: true,
   globalAllowFemaleTeacherMaleStudent: true,
   updatedAt: FieldValue.serverTimestamp(),

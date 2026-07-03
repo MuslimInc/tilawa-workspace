@@ -42,8 +42,8 @@ function shortContentHash(category: string, description: string): string {
 
 /**
  * Files an abuse / safety report. Any authenticated user may file; when the
- * report targets a specific booking the caller must be a participant, the
- * student's guardian, or an admin. Reports are write-only for clients (rules)
+ * report targets a specific booking the caller must be a participant or an
+ * admin. Reports are write-only for clients (rules)
  * and surface to admins as a work queue.
  */
 export const reportSessionConcern = onCall(
@@ -93,22 +93,11 @@ export const reportSessionConcern = onCall(
       } else if (uid === teacherUserId) {
         reporterRole = "teacher";
       } else {
-        // Allow a child's guardian to report on their behalf.
-        const studentDoc = await db.collection("users").doc(studentId).get();
-        const guardianId = (
-          studentDoc.data()?.quranSessionsProfile as
-            | Record<string, unknown>
-            | undefined
-        )?.guardianId;
-        if (guardianId === uid) {
-          reporterRole = "guardian";
-        } else {
-          throw lifecycleError(
-            "not_participant",
-            "Caller is not a participant of this booking.",
-            { actorId: uid },
-          );
-        }
+        throw lifecycleError(
+          "not_participant",
+          "Caller is not a participant of this booking.",
+          { actorId: uid },
+        );
       }
 
       // Default the reported party to the counterparty when not specified.

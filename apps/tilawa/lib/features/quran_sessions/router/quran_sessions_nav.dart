@@ -255,16 +255,6 @@ List<RouteBase> get quranSessionsRoutes => [
               onCompleteProfile: () async {
                 await context.push(QuranSessionsRoutes.profileCompletion);
               },
-              onGuardianApprovalRequested: () async {
-                final approved = await context.push<bool>(
-                  QuranSessionsRoutes.guardianApproval,
-                  extra: studentId,
-                );
-                return approved ?? false;
-              },
-              onGuardianDashboardRequested: () {
-                context.push(QuranSessionsRoutes.guardianDashboard);
-              },
             ),
           ),
         ),
@@ -455,31 +445,6 @@ List<RouteBase> get quranSessionsRoutes => [
                 ? () => const HomeRoute().go(context)
                 : null,
           ),
-        ),
-      );
-    },
-  ),
-  GoRoute(
-    path: QuranSessionsRoutes.guardianDashboard,
-    redirect: quranSessionsAuthRequiredRedirect,
-    builder: (context, state) => _QuranSessionsSignedInGate(
-      builder: (userId) => GuardianDashboardScreen(
-        onApproveBookings: () => context.push(
-          QuranSessionsRoutes.guardianApproval,
-          extra: state.extra as String? ?? userId,
-        ),
-      ),
-    ),
-  ),
-  GoRoute(
-    path: QuranSessionsRoutes.guardianApproval,
-    redirect: quranSessionsAuthRequiredRedirect,
-    builder: (context, state) {
-      return _QuranSessionsSignedInGate(
-        builder: (userId) => GuardianApprovalCaptureScreen(
-          studentId: state.extra as String? ?? userId,
-          approveChildGuardianBooking:
-              getIt<ApproveChildGuardianBookingUseCase>(),
         ),
       );
     },

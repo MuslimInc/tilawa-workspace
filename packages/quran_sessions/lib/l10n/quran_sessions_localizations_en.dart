@@ -94,53 +94,6 @@ class QuranSessionsLocalizationsEn extends QuranSessionsLocalizations {
       'Your account is suspended. Please contact support.';
 
   @override
-  String get guardianApprovalRequired =>
-      'Booking for this student requires guardian approval first.';
-
-  @override
-  String get guardianApprovalTitle => 'Guardian approval';
-
-  @override
-  String get guardianApprovalBody =>
-      'A parent or guardian must sign in on this device and confirm that they allow QuranTutor bookings for this student account.';
-
-  @override
-  String get guardianApprovalStudentIdLabel => 'Student account ID';
-
-  @override
-  String get guardianApprovalStudentIdHint => 'Child student user ID';
-
-  @override
-  String get guardianApprovalConfirm => 'Approve bookings';
-
-  @override
-  String get guardianApprovalCaptured =>
-      'Guardian approval recorded. You can return to booking.';
-
-  @override
-  String get guardianApprovalSetupAction => 'Set up guardian approval';
-
-  @override
-  String get guardianDashboardTitle => 'Guardian hub';
-
-  @override
-  String get guardianDashboardIntroTitle => 'Child session bookings';
-
-  @override
-  String get guardianDashboardIntroBody =>
-      'Approve QuranTutor bookings for your child on this device. You will confirm consent once; the student can then complete booking.';
-
-  @override
-  String get guardianDashboardApproveAction => 'Approve child bookings';
-
-  @override
-  String get guardianDashboardOpenAction => 'Open guardian hub';
-
-  @override
-  String get guardianDashboardDeferredNote =>
-      'Upcoming child sessions and pending approvals in one list require guardian account linking — coming after MVP auth roles.';
-
-  @override
   String get sessionRevisionPracticeUpcomingTitle => 'Prepare for your session';
 
   @override
@@ -2111,11 +2064,18 @@ class QuranSessionsLocalizationsEn extends QuranSessionsLocalizations {
   String get bookingRequestSentTitle => 'Booking request sent';
 
   @override
-  String get bookingRequestSentSubtitle => 'The booking is under review.';
+  String get bookingRequestSentSubtitle => 'Awaiting teacher approval.';
+
+  @override
+  String get sessionAwaitingTeacherApproval => 'Awaiting teacher approval';
+
+  @override
+  String get sessionAwaitingTeacherApprovalHint =>
+      'The teacher will accept or decline your request. You\'ll be notified when they respond.';
 
   @override
   String get sessionAwaitingReviewNextSteps =>
-      'The booking is under review.\nPlease complete the payment using one of the available methods.\nThe session will be confirmed after payment review and teacher confirmation.';
+      'Awaiting teacher approval.\nThe teacher will accept or decline your booking request.\nYou\'ll be notified when they respond.';
 
   @override
   String get paidSessionNoticeTitle => 'This session is paid';
@@ -2164,15 +2124,15 @@ class QuranSessionsLocalizationsEn extends QuranSessionsLocalizations {
   String get paymentMethodBankTransfer => 'Bank transfer';
 
   @override
-  String get bookingUnderReviewTitle => 'Booking under review';
+  String get bookingUnderReviewTitle => 'Awaiting teacher approval';
 
   @override
   String get bookingUnderReviewPaymentHint =>
-      'Please complete the payment using one of the available methods.';
+      'The teacher will accept or decline your booking request.';
 
   @override
   String get bookingUnderReviewConfirmHint =>
-      'The booking will be confirmed after payment review and teacher confirmation.';
+      'You\'ll be notified when the teacher responds.';
 
   @override
   String get bookingAcceptedTitle => 'Session accepted';
@@ -2190,7 +2150,7 @@ class QuranSessionsLocalizationsEn extends QuranSessionsLocalizations {
   String get sendBookingRequest => 'Send booking request';
 
   @override
-  String get sessionStatusBookingUnderReview => 'Under review';
+  String get sessionStatusBookingUnderReview => 'Awaiting teacher approval';
 
   @override
   String get sessionStatusRejectedByTutor => 'Declined';
@@ -2266,7 +2226,7 @@ class QuranSessionsLocalizationsEn extends QuranSessionsLocalizations {
   String get tutorCancelSessionFromCard => 'Cancel';
 
   @override
-  String get sessionLifecycleBookingUnderReview => 'Booking under review';
+  String get sessionLifecycleBookingUnderReview => 'Awaiting teacher approval';
 
   @override
   String get sessionLifecycleRejectedByTutor => 'Rejected by tutor';

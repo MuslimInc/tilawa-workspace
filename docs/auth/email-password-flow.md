@@ -54,7 +54,7 @@ are **not** collected during registration.
   (`?learnQuran=true`).
 - **Before booking:** `ValidateBookingEligibilityUseCase` still blocks incomplete
   profiles (`ProfileIncompleteFailure`).
-- **Child accounts:** guardian gate only at booking / Learn Quran, not at account creation.
+- **Child accounts:** same booking path as adults; teacher `canTeachChildren` gate only at booking.
 
 ## Post-auth navigation
 

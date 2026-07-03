@@ -193,8 +193,6 @@ export 'src/domain/policies/market_session_price_policy.dart';
 export 'src/domain/policies/session_in_progress_transition_policy.dart';
 export 'src/domain/policies/booking_idempotency.dart';
 export 'src/domain/policies/session_join_window_policy.dart';
-export 'src/domain/repositories/guardian_approval_repository.dart';
-export 'src/domain/usecases/approve_child_guardian_booking_usecase.dart';
 export 'src/domain/usecases/get_market_config_usecase.dart';
 export 'src/domain/usecases/get_session_policy_usecase.dart';
 export 'src/domain/usecases/get_session_aggregate_usecase.dart';
@@ -323,8 +321,6 @@ export 'src/presentation/widgets/report_concern_sheet.dart';
 export 'src/presentation/widgets/session_review_sheet.dart';
 export 'src/presentation/utils/session_review_eligibility.dart';
 export 'src/presentation/widgets/external_meeting_join_sheet.dart';
-export 'src/presentation/screens/guardian_approval_capture_screen.dart';
-export 'src/presentation/screens/guardian_dashboard_screen.dart';
 export 'src/presentation/screens/profile_completion_screen.dart';
 export 'src/presentation/screens/quran_sessions_home_screen.dart';
 // ── Presentation: screens ─────────────────────────────────────────────────────

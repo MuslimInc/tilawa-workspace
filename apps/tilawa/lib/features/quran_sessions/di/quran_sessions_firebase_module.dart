@@ -30,7 +30,6 @@ import '../data/firebase/firestore_teacher_profile_repository.dart';
 import '../data/firebase/firestore_teacher_repository.dart';
 import '../data/manual_payment_link_launcher.dart';
 import '../data/firebase/firestore_user_profile_repository.dart';
-import '../data/firebase/firebase_guardian_approval_repository.dart';
 import '../data/firebase/firestore_wallet_data_source.dart';
 import '../data/shared_preferences_friday_review_reminder_store.dart';
 import '../data/firebase/firebase_call_telemetry_gateway.dart';
@@ -185,18 +184,6 @@ class QuranSessionsFirebaseModule {
 
     sl.registerLazySingletonIfAbsent<CallProvider>(
       () => CallProviderAdapter(sl<SessionCallProvider>()),
-    );
-
-    sl.registerLazySingletonIfAbsent<GuardianApprovalRepository>(
-      () => FirebaseGuardianApprovalRepository(
-        functions,
-        sl<CallableSessionPayloadBuilder>(),
-      ),
-    );
-    sl.registerLazySingletonIfAbsent<ApproveChildGuardianBookingUseCase>(
-      () => ApproveChildGuardianBookingUseCase(
-        sl<GuardianApprovalRepository>(),
-      ),
     );
 
     sl.registerLazySingletonIfAbsent<JoinSessionUseCase>(
