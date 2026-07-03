@@ -212,14 +212,14 @@ class _HistoryScreenState extends State<HistoryScreen> {
         if (state.searchQuery.isNotEmpty) {
           return SliverFillRemaining(
             child: TilawaEmptyState(
-              icon: Icons.search_off,
+              icon: Icons.search_off_rounded,
               title: context.l10n.noSearchResults,
             ),
           );
         }
         return SliverFillRemaining(
           child: TilawaEmptyState(
-            icon: Icons.history,
+            icon: Icons.history_rounded,
             title: context.l10n.noHistoryYet,
             subtitle: context.l10n.noHistoryDescription,
           ),

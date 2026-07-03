@@ -15,16 +15,22 @@ class OfflineIndicatorWidget extends StatelessWidget {
           return const SizedBox.shrink();
         }
 
-        return Container(
-          width: double.infinity,
+        return ColoredBox(
           color: Theme.of(context).colorScheme.error,
-          padding: const EdgeInsets.symmetric(vertical: 4),
-          child: Text(
-            context.l10n.noInternetConnection,
-            style: Theme.of(context).textTheme.labelSmall?.copyWith(
-              color: Theme.of(context).colorScheme.onError,
+          child: SafeArea(
+            bottom: false,
+            left: false,
+            right: false,
+            child: Padding(
+              padding: const EdgeInsets.symmetric(vertical: 4),
+              child: Text(
+                context.l10n.noInternetConnection,
+                style: Theme.of(context).textTheme.labelSmall?.copyWith(
+                  color: Theme.of(context).colorScheme.onError,
+                ),
+                textAlign: TextAlign.center,
+              ),
             ),
-            textAlign: TextAlign.center,
           ),
         );
       },

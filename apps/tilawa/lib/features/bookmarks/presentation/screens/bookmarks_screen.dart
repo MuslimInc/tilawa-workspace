@@ -1,4 +1,3 @@
-import 'package:fluentui_system_icons/fluentui_system_icons.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
@@ -230,7 +229,7 @@ class _BookmarksEmptyState extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return TilawaEmptyState(
-      icon: FluentIcons.bookmark_24_regular,
+      icon: Icons.bookmark_border_rounded,
       title: isSearching
           ? context.l10n.noBookmarksFound
           : context.l10n.noBookmarks,

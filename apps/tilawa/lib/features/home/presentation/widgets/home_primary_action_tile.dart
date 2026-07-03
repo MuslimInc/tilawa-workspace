@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:tilawa/features/home/presentation/widgets/home_dashboard_elevated_surface.dart';
+import 'package:tilawa/features/home/presentation/widgets/home_dashboard_icon_well.dart';
 import 'package:tilawa_ui_kit/tilawa_ui_kit.dart';
 
 /// Premium primary action tile for the Home dashboard.
@@ -70,9 +71,9 @@ class HomePrimaryActionTile extends StatelessWidget {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  _HomePrimaryActionIconWell(
-                    icon: icon,
-                    iconAccent: iconAccent,
+                  HomeDashboardIconWell(
+                    accent: iconAccent,
+                    child: icon,
                   ),
                   SizedBox(height: tokens.spaceMedium + tokens.spaceExtraSmall),
                   Text(
@@ -134,34 +135,6 @@ class _HomePrimaryActionAccentRail extends StatelessWidget {
             : BorderRadiusDirectional.horizontal(
                 end: Radius.circular(radius),
               ),
-      ),
-    );
-  }
-}
-
-class _HomePrimaryActionIconWell extends StatelessWidget {
-  const _HomePrimaryActionIconWell({
-    required this.icon,
-    required this.iconAccent,
-  });
-
-  final Widget icon;
-  final Color iconAccent;
-
-  @override
-  Widget build(BuildContext context) {
-    final tokens = context.tokens;
-    final double iconBoxSize = tokens.iconBoxSize;
-
-    return DecoratedBox(
-      decoration: BoxDecoration(
-        borderRadius: BorderRadius.circular(tokens.radiusLarge),
-        color: iconAccent.withValues(alpha: 0.10),
-      ),
-      child: SizedBox(
-        width: iconBoxSize,
-        height: iconBoxSize,
-        child: Center(child: icon),
       ),
     );
   }

@@ -12,7 +12,7 @@ import 'package:flutter/material.dart';
 /// from the base theme, then inherit this scaler at paint time.
 ///
 /// Quran reader mushaf rendering uses dedicated reader settings — not this scale.
-const double kTilawaGlobalTextScaleFactor = 1.20;
+const double kTilawaGlobalTextScaleFactor = 1.0;
 
 /// Scales a design-spec font size by [kTilawaGlobalTextScaleFactor].
 ///

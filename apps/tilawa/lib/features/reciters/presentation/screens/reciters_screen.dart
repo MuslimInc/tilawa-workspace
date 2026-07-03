@@ -1551,7 +1551,13 @@ class _RecitersTab extends StatelessWidget {
 
     return Tab(
       height: kTextTabBarHeight,
-      child: labelWidget,
+      child: DefaultTextStyle.merge(
+        style: const TextStyle(),
+        maxLines: 1,
+        overflow: TextOverflow.ellipsis,
+        softWrap: false,
+        child: labelWidget,
+      ),
     );
   }
 }
@@ -1626,14 +1632,11 @@ class _StatePanel extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final ThemeData theme = Theme.of(context);
-    final Color accent = isError
-        ? theme.colorScheme.error
-        : theme.colorScheme.primary;
-
     return TilawaIllustratedState(
       icon: icon,
-      iconColor: accent,
+      visualTone: isError
+          ? TilawaStateVisualTone.error
+          : TilawaStateVisualTone.primary,
       title: title,
       subtitle: subtitle,
       semanticLabel: title,

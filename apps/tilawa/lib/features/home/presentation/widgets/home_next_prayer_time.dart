@@ -38,9 +38,12 @@ abstract final class HomeNextPrayerTime {
     return TilawaHomeScreenTokens.contentSheetOverlap(context.tokens);
   }
 
-  /// Full hero layout extent (status bar + card body).
+  /// Scroll offset that clears the hero from the dashboard viewport.
+  ///
+  /// The shell reserves the status-bar inset above the scroll view, so this
+  /// extent covers only the hero sliver — not [MediaQuery.padding] top.
   static double expandedLayoutExtent(BuildContext context) {
-    return MediaQuery.paddingOf(context).top + _resolveHeroBodyHeight(context);
+    return _resolveHeroBodyHeight(context);
   }
 
   static double _resolveHeroBodyHeight(BuildContext context) {
@@ -84,7 +87,6 @@ class _HomeNextPrayerTimeSliver extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final MeMuslimDesignTokens tokens = context.tokens;
-    final double topInset = MediaQuery.paddingOf(context).top;
     final double horizontalInset =
         TilawaHomeScreenTokens.screenHorizontalPadding(tokens);
     final HomeDashboard? dashboard = ui.dashboard;
@@ -95,7 +97,7 @@ class _HomeNextPrayerTimeSliver extends StatelessWidget {
       child: Padding(
         padding: EdgeInsetsDirectional.fromSTEB(
           horizontalInset,
-          topInset + tokens.spaceSmall,
+          tokens.spaceSmall,
           horizontalInset,
           tokens.spaceMedium,
         ),

@@ -348,10 +348,13 @@ void main() {
       final tokens = TilawaEmptyStateTokens.defaults();
       expect(tokens.iconSize, 48.0);
       expect(tokens.iconOpacity, 0.56);
-      expect(tokens.titleSpacing, 24.0);
-      expect(tokens.subtitleSpacing, 8.0);
-      expect(tokens.actionSpacing, 24.0);
-      expect(tokens.padding, const EdgeInsets.all(24.0));
+      expect(tokens.titleSpacing, 28.0);
+      expect(tokens.subtitleSpacing, 10.0);
+      expect(tokens.actionSpacing, 28.0);
+      expect(
+        tokens.padding,
+        const EdgeInsets.symmetric(horizontal: 28.0, vertical: 32.0),
+      );
     });
 
     test('copyWith preserves unchanged values', () {

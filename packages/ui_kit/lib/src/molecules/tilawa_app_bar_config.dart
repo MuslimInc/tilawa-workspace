@@ -54,13 +54,38 @@ abstract final class TilawaAppBarConfig {
   }
 
   /// Insets for [TilawaCatalogAppBar] and catalog search slots.
-  static EdgeInsets catalogChromePadding(MeMuslimDesignTokens tokens) {
+  static EdgeInsets catalogChromePadding(
+    MeMuslimDesignTokens tokens, {
+    bool includeBottomInset = true,
+  }) {
     return EdgeInsets.fromLTRB(
       tokens.spaceMedium,
       tokens.spaceSmall,
       tokens.spaceMedium,
-      tokens.spaceSmall,
+      includeBottomInset ? tokens.spaceSmall : 0,
     );
+  }
+
+  /// Catalog chrome padding with status-bar inset folded into the top inset.
+  static EdgeInsets catalogChromePaddingWithStatusBar(
+    BuildContext context,
+    MeMuslimDesignTokens tokens, {
+    bool includeBottomInset = true,
+  }) {
+    return catalogChromePadding(
+      tokens,
+      includeBottomInset: includeBottomInset,
+    ).copyWith(
+      top: _catalogStatusBarTopInset(context) + tokens.spaceSmall,
+    );
+  }
+
+  static double _catalogStatusBarTopInset(BuildContext context) {
+    return MediaQuery.paddingOf(context).top;
+  }
+
+  static double _catalogChromeHeight(BuildContext context, double raw) {
+    return tilawaLayoutHeight(context, raw);
   }
 
   /// Bold [titleLarge] row height (matches catalog app bar title).
@@ -72,9 +97,13 @@ abstract final class TilawaAppBarConfig {
     int actionCount = 0,
     bool centerTitle = false,
     double? titleBlockHeight,
+    bool enforceMinTouchTarget = true,
   }) {
     if (titleBlockHeight != null) {
-      return math.max(titleBlockHeight, kMeMuslimMinInteractiveDimension);
+      return math.max(
+        titleBlockHeight,
+        enforceMinTouchTarget ? kMeMuslimMinInteractiveDimension : 0,
+      );
     }
 
     final ThemeData theme = Theme.of(context);
@@ -101,7 +130,11 @@ abstract final class TilawaAppBarConfig {
           )
         : tilawaMeasureTextHeight(context: context, style: titleStyle);
 
-    return math.max(titleHeight, kMeMuslimMinInteractiveDimension) +
+    final double minHeight = enforceMinTouchTarget
+        ? kMeMuslimMinInteractiveDimension
+        : 0;
+
+    return math.max(titleHeight, minHeight) +
         (MediaQuery.textScalerOf(context).scale(1.0) > 1.0
             ? 1.0 / MediaQuery.devicePixelRatioOf(context)
             : 0);
@@ -148,9 +181,15 @@ abstract final class TilawaAppBarConfig {
     double? titleBlockHeight,
   }) {
     final MeMuslimDesignTokens tokens = Theme.of(context).tokens;
-    final EdgeInsets padding = catalogChromePadding(tokens);
+    final EdgeInsets padding = catalogChromePadding(
+      tokens,
+      includeBottomInset: false,
+    );
+    final bool enforceMinTouchTarget =
+        hasLeading || actionCount > 0 || centerTitle;
     final double raw =
-        padding.vertical +
+        padding.top +
+        padding.bottom +
         catalogTitleRowHeight(
           context,
           title: title,
@@ -158,8 +197,9 @@ abstract final class TilawaAppBarConfig {
           actionCount: actionCount,
           centerTitle: centerTitle,
           titleBlockHeight: titleBlockHeight,
+          enforceMinTouchTarget: enforceMinTouchTarget,
         );
-    return tilawaLayoutHeight(context, raw);
+    return _catalogChromeHeight(context, raw);
   }
 
   /// Title + one catalog search field (Bookmarks, History, Playlists).
@@ -209,7 +249,7 @@ abstract final class TilawaAppBarConfig {
         ) +
         tokens.spaceSmall +
         contentHeight;
-    return tilawaLayoutHeight(context, raw);
+    return _catalogChromeHeight(context, raw);
   }
 
   /// Title + search + min-height filter row in catalog headers.
@@ -246,7 +286,7 @@ abstract final class TilawaAppBarConfig {
     final double rowHeight = math.max(searchHeight, trailingMinHeight);
     final EdgeInsets padding = catalogChromePadding(tokens);
     final double raw = padding.vertical + rowHeight;
-    return tilawaLayoutHeight(context, raw);
+    return _catalogChromeHeight(context, raw);
   }
 }
 

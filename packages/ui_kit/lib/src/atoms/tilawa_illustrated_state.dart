@@ -19,6 +19,7 @@ class TilawaIllustratedState extends StatelessWidget {
     this.visual,
     this.icon,
     this.iconColor,
+    this.visualTone = TilawaStateVisualTone.primary,
     this.primaryAction,
     this.secondaryAction,
     this.maxWidth,
@@ -41,8 +42,14 @@ class TilawaIllustratedState extends StatelessWidget {
   /// Fallback icon when no custom [visual] is provided.
   final IconData? icon;
 
-  /// Optional icon color. Defaults to the active theme primary color.
+  /// Optional accent override for the icon fallback visual.
   final Color? iconColor;
+
+  /// Semantic tone for the icon fallback visual. Defaults to [primary].
+  ///
+  /// Use [TilawaStateVisualTone.error] only for inline error panels; prefer
+  /// [TilawaErrorState] when a retry action is required.
+  final TilawaStateVisualTone visualTone;
 
   /// Primary action, usually a `TilawaButton`.
   final Widget? primaryAction;
@@ -69,8 +76,9 @@ class TilawaIllustratedState extends StatelessWidget {
     } else if (icon != null) {
       stateVisual = TilawaStateVisual(
         icon: icon!,
-        accentColor: iconColor ?? colorScheme.primary,
-        size: stateTokens.iconSize + designTokens.spaceExtraLarge * 2,
+        tone: visualTone,
+        accentColor: iconColor,
+        size: TilawaStateVisual.resolveDefaultSize(designTokens),
       );
     } else {
       stateVisual = const SizedBox.shrink();
@@ -111,9 +119,11 @@ class TilawaIllustratedState extends StatelessWidget {
             Text(
               title,
               textAlign: TextAlign.center,
-              style: theme.textTheme.titleMedium?.copyWith(
+              style: theme.textTheme.titleLarge?.copyWith(
                 color: colorScheme.onSurface,
                 fontWeight: FontWeight.w700,
+                height: 1.25,
+                letterSpacing: -0.2,
               ),
             ),
             if (subtitle != null) ...[
@@ -121,8 +131,10 @@ class TilawaIllustratedState extends StatelessWidget {
               Text(
                 subtitle!,
                 textAlign: TextAlign.center,
-                style: theme.textTheme.bodyMedium?.copyWith(
+                style: theme.textTheme.bodyLarge?.copyWith(
                   color: colorScheme.onSurfaceVariant,
+                  height: 1.5,
+                  fontWeight: FontWeight.w400,
                 ),
               ),
             ],

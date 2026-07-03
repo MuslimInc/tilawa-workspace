@@ -92,6 +92,8 @@ class _HomeScreenState extends State<HomeScreen> {
     final ThemeData theme = Theme.of(context);
     final Color canvasBottom =
         theme.componentTokens.homeScreen.backgroundGradientEnd;
+    final Color statusBarChromeColor =
+        theme.componentTokens.adaptiveShell.bottomNavBackgroundColor;
     final double topInset = MediaQuery.paddingOf(context).top;
 
     return _HomeTtfdScope(
@@ -135,73 +137,89 @@ class _HomeScreenState extends State<HomeScreen> {
               fit: StackFit.expand,
               children: [
                 const Positioned.fill(child: HomeScreenBackground()),
-                RefreshIndicator.adaptive(
-                  edgeOffset: topInset,
-                  displacement: context.tokens.spaceExtraLarge,
-                  onRefresh: _refreshHome,
-                  child: NotificationListener<ScrollNotification>(
-                    onNotification: (notification) =>
-                        _onScrollNotification(context, notification),
-                    // Debug-only review toggle (Settings → Developer → Force
-                    // Home skeleton). [HomeSkeletonDebug.isForced] is always
-                    // false in release, so this wrapper is inert in production.
-                    child: ValueListenableBuilder<bool>(
-                      valueListenable: HomeSkeletonDebug.forceSkeleton,
-                      builder: (context, _, _) =>
-                          BlocBuilder<HomeDashboardBloc, HomeDashboardState>(
-                            builder: (context, blocState) {
-                              final HomeDashboardState state =
-                                  HomeSkeletonDebug.isForced
-                                  ? const HomeDashboardLoading()
-                                  : blocState;
-                              final HomeDashboardUiState ui =
-                                  HomeDashboardUiState.from(state);
-                              final Widget? tutorHeaderSliver =
-                                  ui.showFullSkeleton
-                                  ? null
-                                  : homeFeaturedTutorCardSliver(context);
+                Positioned(
+                  top: topInset,
+                  left: 0,
+                  right: 0,
+                  bottom: 0,
+                  child: RefreshIndicator.adaptive(
+                    edgeOffset: 0,
+                    displacement: context.tokens.spaceExtraLarge,
+                    onRefresh: _refreshHome,
+                    child: NotificationListener<ScrollNotification>(
+                      onNotification: (notification) =>
+                          _onScrollNotification(context, notification),
+                      // Debug-only review toggle (Settings → Developer → Force
+                      // Home skeleton). [HomeSkeletonDebug.isForced] is always
+                      // false in release, so this wrapper is inert in production.
+                      child: ValueListenableBuilder<bool>(
+                        valueListenable: HomeSkeletonDebug.forceSkeleton,
+                        builder: (context, _, _) =>
+                            BlocBuilder<HomeDashboardBloc, HomeDashboardState>(
+                              builder: (context, blocState) {
+                                final HomeDashboardState state =
+                                    HomeSkeletonDebug.isForced
+                                    ? const HomeDashboardLoading()
+                                    : blocState;
+                                final HomeDashboardUiState ui =
+                                    HomeDashboardUiState.from(state);
+                                final Widget? tutorHeaderSliver =
+                                    ui.showFullSkeleton
+                                    ? null
+                                    : homeFeaturedTutorCardSliver(context);
 
-                              return CustomScrollView(
-                                controller: _scrollController,
-                                physics: const AlwaysScrollableScrollPhysics(
-                                  parent: BouncingScrollPhysics(),
-                                ),
-                                slivers: [
-                                  ...HomeNextPrayerTime.buildSlivers(
-                                    context: context,
-                                    state: state,
-                                    onOpenPrayer: widget.onOpenPrayer,
+                                return CustomScrollView(
+                                  controller: _scrollController,
+                                  physics: const AlwaysScrollableScrollPhysics(
+                                    parent: BouncingScrollPhysics(),
                                   ),
-                                  ?tutorHeaderSliver,
-                                  HomeDashboardContentSliver(
-                                    child: AnimatedSwitcher(
-                                      duration: context.tokens.durationMedium,
-                                      switchInCurve: Curves.easeOut,
-                                      switchOutCurve: Curves.easeIn,
-                                      layoutBuilder:
-                                          (currentChild, previousChildren) {
-                                            return Stack(
-                                              alignment:
-                                                  AlignmentDirectional.topStart,
-                                              children: <Widget>[
-                                                ...previousChildren,
-                                                ?currentChild,
-                                              ],
-                                            );
-                                          },
-                                      child: HomeDashboardBody(
-                                        key: ValueKey<bool>(
-                                          ui.showFullSkeleton,
+                                  slivers: [
+                                    ...HomeNextPrayerTime.buildSlivers(
+                                      context: context,
+                                      state: state,
+                                      onOpenPrayer: widget.onOpenPrayer,
+                                    ),
+                                    ?tutorHeaderSliver,
+                                    HomeDashboardContentSliver(
+                                      child: AnimatedSwitcher(
+                                        duration: context.tokens.durationMedium,
+                                        switchInCurve: Curves.easeOut,
+                                        switchOutCurve: Curves.easeIn,
+                                        layoutBuilder:
+                                            (currentChild, previousChildren) {
+                                              return Stack(
+                                                alignment: AlignmentDirectional
+                                                    .topStart,
+                                                children: <Widget>[
+                                                  ...previousChildren,
+                                                  ?currentChild,
+                                                ],
+                                              );
+                                            },
+                                        child: HomeDashboardBody(
+                                          key: ValueKey<bool>(
+                                            ui.showFullSkeleton,
+                                          ),
+                                          skeleton: ui.showFullSkeleton,
                                         ),
-                                        skeleton: ui.showFullSkeleton,
                                       ),
                                     ),
-                                  ),
-                                ],
-                              );
-                            },
-                          ),
+                                  ],
+                                );
+                              },
+                            ),
+                      ),
                     ),
+                  ),
+                ),
+                Positioned(
+                  top: 0,
+                  left: 0,
+                  right: 0,
+                  height: topInset,
+                  child: ColoredBox(
+                    key: const Key('home_status_bar_chrome'),
+                    color: statusBarChromeColor,
                   ),
                 ),
               ],

@@ -80,28 +80,9 @@ class _QiblaScreenState extends State<QiblaScreen> {
             );
           },
           child: Scaffold(
-            appBar: TilawaCatalogAppBar(
-              preferredHeight: TilawaCatalogAppBar.resolvePreferredHeight(
-                context,
-                title: context.l10n.qiblaFinderTitle,
-                titleBlockHeight: tilawaMeasureTextHeight(
-                  context: context,
-                  style: theme.textTheme.titleMedium?.copyWith(
-                    fontWeight: FontWeight.w700,
-                    letterSpacing: 1.2,
-                  ),
-                  text: context.l10n.qiblaFinderTitle,
-                ),
-              ),
-              centerTitle: false,
-              titleWidget: Text(
-                context.l10n.qiblaFinderTitle,
-                style: theme.textTheme.titleMedium?.copyWith(
-                  color: colorScheme.primary,
-                  fontWeight: FontWeight.w700,
-                  letterSpacing: 1.2,
-                ),
-              ),
+            appBar: TilawaCatalogAppBar.titleOnly(
+              context,
+              title: context.l10n.qiblaFinderTitle,
             ),
             body: SafeArea(
               child: LayoutBuilder(
@@ -159,7 +140,6 @@ class _PortraitContent extends StatelessWidget {
                     case QiblaStatus.serviceDisabled:
                       return _QiblaUnavailableState(
                         icon: Icons.location_off_rounded,
-                        tone: TilawaStateVisualTone.neutral,
                         title: context.l10n.locationServiceDisabled,
                         subtitle: context.l10n.enableLocationServiceMessage,
                         retryLabel: context.l10n.tryAgain,
@@ -170,7 +150,6 @@ class _PortraitContent extends StatelessWidget {
                     case QiblaStatus.permissionDenied:
                       return _QiblaUnavailableState(
                         icon: Icons.explore_off_rounded,
-                        tone: TilawaStateVisualTone.tertiary,
                         title: context.l10n.permissionDenied,
                         subtitle:
                             context.l10n.locationPermissionRequiredMessage,
@@ -182,7 +161,6 @@ class _PortraitContent extends StatelessWidget {
                     case QiblaStatus.error:
                       return _QiblaUnavailableState(
                         icon: Icons.error_outline_rounded,
-                        tone: TilawaStateVisualTone.error,
                         title: context.l10n.error,
                         subtitle:
                             state.errorMessage ?? context.l10n.anErrorOccurred,
@@ -258,7 +236,6 @@ class _CompassArea extends StatelessWidget {
           case QiblaStatus.serviceDisabled:
             return _QiblaUnavailableState(
               icon: Icons.location_off_rounded,
-              tone: TilawaStateVisualTone.neutral,
               title: context.l10n.locationServiceDisabled,
               subtitle: context.l10n.enableLocationServiceMessage,
               retryLabel: context.l10n.tryAgain,
@@ -268,7 +245,6 @@ class _CompassArea extends StatelessWidget {
           case QiblaStatus.permissionDenied:
             return _QiblaUnavailableState(
               icon: Icons.explore_off_rounded,
-              tone: TilawaStateVisualTone.tertiary,
               title: context.l10n.permissionDenied,
               subtitle: context.l10n.locationPermissionRequiredMessage,
               retryLabel: context.l10n.tryAgain,
@@ -279,7 +255,7 @@ class _CompassArea extends StatelessWidget {
           case QiblaStatus.error:
             return _QiblaUnavailableState(
               icon: Icons.error_outline_rounded,
-              tone: TilawaStateVisualTone.error,
+              visualTone: TilawaStateVisualTone.error,
               title: context.l10n.error,
               subtitle: state.errorMessage ?? context.l10n.anErrorOccurred,
               retryLabel: context.l10n.tryAgain,
@@ -310,7 +286,7 @@ class _QiblaUnavailableState extends StatelessWidget {
     required this.title,
     required this.retryLabel,
     required this.onRetry,
-    this.tone = TilawaStateVisualTone.primary,
+    this.visualTone = TilawaStateVisualTone.primary,
     this.subtitle,
   });
 
@@ -319,12 +295,13 @@ class _QiblaUnavailableState extends StatelessWidget {
   final String? subtitle;
   final String retryLabel;
   final VoidCallback onRetry;
-  final TilawaStateVisualTone tone;
+  final TilawaStateVisualTone visualTone;
 
   @override
   Widget build(BuildContext context) {
     return TilawaIllustratedState(
-      visual: TilawaStateVisual(icon: icon, tone: tone),
+      icon: icon,
+      visualTone: visualTone,
       title: title,
       subtitle: subtitle,
       semanticLabel: title,

@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 
 import 'tilawa_illustrated_state.dart';
+import 'tilawa_state_visual.dart';
 
 /// A generic, feature-agnostic empty-state widget.
 ///
@@ -17,6 +18,7 @@ class TilawaEmptyState extends StatelessWidget {
     this.subtitle,
     this.action,
     this.iconColor,
+    this.visualTone = TilawaStateVisualTone.primary,
   });
 
   /// The icon shown above the title.
@@ -31,14 +33,18 @@ class TilawaEmptyState extends StatelessWidget {
   /// Optional action widget (e.g. a button) below the subtitle.
   final Widget? action;
 
-  /// Accent override for the state visual. Defaults to the theme primary.
+  /// Optional accent override for the state visual.
   final Color? iconColor;
+
+  /// Halo and icon tone. Empty states default to [TilawaStateVisualTone.primary].
+  final TilawaStateVisualTone visualTone;
 
   @override
   Widget build(BuildContext context) {
     return TilawaIllustratedState(
       icon: icon,
       iconColor: iconColor,
+      visualTone: visualTone,
       title: title,
       subtitle: subtitle,
       primaryAction: action,

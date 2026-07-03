@@ -105,25 +105,16 @@ class _AthkarDetailsScreenState extends State<AthkarDetailsScreen> {
                       Positioned.fill(
                         child: switch (state) {
                           AthkarLoading() => const TilawaLoadingIndicator(),
-                          AthkarError(:final failure) => TilawaIllustratedState(
-                            visual: const TilawaStateVisual(
-                              icon: Icons.menu_book_rounded,
-                              tone: TilawaStateVisualTone.error,
-                            ),
+                          AthkarError(:final failure) => TilawaErrorState(
+                            icon: Icons.menu_book_rounded,
                             title:
                                 failure.message ?? context.l10n.unexpectedError,
-                            semanticLabel:
-                                failure.message ?? context.l10n.unexpectedError,
-                            primaryAction: TilawaButton(
-                              text: context.l10n.retry,
-                              variant: TilawaButtonVariant.secondary,
-                              leadingIcon: const Icon(Icons.refresh_rounded),
-                              onPressed: () {
-                                context.read<AthkarCubit>().loadAthkar(
-                                  widget.categoryId,
-                                );
-                              },
-                            ),
+                            retryLabel: context.l10n.retry,
+                            onRetry: () {
+                              context.read<AthkarCubit>().loadAthkar(
+                                widget.categoryId,
+                              );
+                            },
                           ),
                           AthkarItemsLoaded(
                             :final items,

@@ -199,23 +199,15 @@ class _PrayerTimesScreenState extends State<PrayerTimesScreen>
 
       case PrayerTimesStatus.error:
         return _nonScrollableBody(
-          TilawaIllustratedState(
-            visual: const TilawaStateVisual(
-              icon: Icons.event_busy_rounded,
-              tone: TilawaStateVisualTone.error,
-            ),
+          TilawaErrorState(
+            icon: Icons.event_busy_rounded,
             title: state.errorMessage,
-            semanticLabel: state.errorMessage,
-            primaryAction: TilawaButton(
-              text: context.l10n.retry,
-              variant: TilawaButtonVariant.secondary,
-              leadingIcon: const Icon(Icons.refresh_rounded),
-              onPressed: () {
-                context.read<PrayerTimesBloc>().add(
-                  const PrayerTimesEvent.loadPrayerTimes(),
-                );
-              },
-            ),
+            retryLabel: context.l10n.retry,
+            onRetry: () {
+              context.read<PrayerTimesBloc>().add(
+                const PrayerTimesEvent.loadPrayerTimes(),
+              );
+            },
           ),
         );
 
@@ -267,10 +259,7 @@ class _PrayerTimesScreenState extends State<PrayerTimesScreen>
     PrayerTimesState state,
   ) {
     return TilawaIllustratedState(
-      visual: const TilawaStateVisual(
-        icon: Icons.my_location_rounded,
-        tone: TilawaStateVisualTone.tertiary,
-      ),
+      icon: Icons.my_location_rounded,
       title: context.l10n.locationRequired,
       subtitle: context.l10n.locationRequiredDescription,
       semanticLabel: context.l10n.locationRequired,
@@ -363,10 +352,7 @@ class _PrayerTimesScreenState extends State<PrayerTimesScreen>
   Widget _buildMonthlyView(BuildContext context, PrayerTimesState state) {
     if (state.latitude == null || state.longitude == null) {
       return TilawaIllustratedState(
-        visual: const TilawaStateVisual(
-          icon: Icons.my_location_rounded,
-          tone: TilawaStateVisualTone.tertiary,
-        ),
+        icon: Icons.my_location_rounded,
         title: context.l10n.locationRequired,
         subtitle: context.l10n.locationRequiredDescription,
         semanticLabel: context.l10n.locationRequired,

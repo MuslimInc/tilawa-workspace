@@ -137,12 +137,12 @@ class _FavoritesMessageSliver extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final ThemeData theme = Theme.of(context);
-
     return _FavoritesViewportSliver(
       child: TilawaIllustratedState(
         icon: icon,
-        iconColor: isError ? theme.colorScheme.error : null,
+        visualTone: isError
+            ? TilawaStateVisualTone.error
+            : TilawaStateVisualTone.primary,
         title: title,
         semanticLabel: title,
         primaryAction: action,
@@ -163,10 +163,7 @@ class _FavoritesEmptySliver extends StatelessWidget {
 
     return _FavoritesViewportSliver(
       child: TilawaIllustratedState(
-        visual: const TilawaStateVisual(
-          icon: Icons.favorite_border_rounded,
-          tone: TilawaStateVisualTone.tertiary,
-        ),
+        icon: Icons.favorite_border_rounded,
         title: title,
         subtitle: context.l10n.tourRecitersFavoritesDescription,
         semanticLabel: title,

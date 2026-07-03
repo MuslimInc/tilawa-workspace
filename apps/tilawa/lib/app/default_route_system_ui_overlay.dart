@@ -156,6 +156,10 @@ class _DefaultRouteSystemUiOverlayState
 
   SystemUiOverlayStyle _overlayStyleForRoute(ThemeData theme) {
     final String path = _currentRoutePath;
+    final Color shellChromeColor =
+        theme.componentTokens.adaptiveShell.bottomNavBackgroundColor;
+    final bool matchesBottomNavChrome =
+        AppShellRoutePolicy.isPhoneBottomNavigationVisible(path);
     final Color? playerNavOverride = context
         .read<QuranPlayerChromeNotifier>()
         .systemNavigationBarColorOverride;
@@ -175,10 +179,10 @@ class _DefaultRouteSystemUiOverlayState
       ),
       _ => AppSystemChromeStyle.buildDefaultAppStyle(
         theme,
-        statusBarBackgroundColor: theme.scaffoldBackgroundColor,
-        navigationBarColor:
-            playerNavOverride ??
-            theme.componentTokens.adaptiveShell.bottomNavBackgroundColor,
+        statusBarBackgroundColor: matchesBottomNavChrome
+            ? shellChromeColor
+            : theme.scaffoldBackgroundColor,
+        navigationBarColor: playerNavOverride ?? shellChromeColor,
       ),
     };
   }

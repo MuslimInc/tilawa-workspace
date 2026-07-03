@@ -68,6 +68,23 @@ SystemUiOverlayStyle get _launchStyle =>
 ThemeData get _theme =>
     AppTheme.getLightTheme(primaryColor: AppColors.primaryCoral);
 
+Color get _shellChromeColor =>
+    _theme.componentTokens.adaptiveShell.bottomNavBackgroundColor;
+
+SystemUiOverlayStyle _homeShellOverlayStyle() =>
+    AppSystemChromeStyle.buildDefaultAppStyle(
+      _theme,
+      statusBarBackgroundColor: _shellChromeColor,
+      navigationBarColor: _shellChromeColor,
+    );
+
+SystemUiOverlayStyle _defaultShellOverlayStyle() =>
+    AppSystemChromeStyle.buildDefaultAppStyle(
+      _theme,
+      statusBarBackgroundColor: _theme.scaffoldBackgroundColor,
+      navigationBarColor: _shellChromeColor,
+    );
+
 void main() {
   final List<MethodCall> overlayStyleCalls = <MethodCall>[];
 
@@ -143,13 +160,7 @@ void main() {
 
       expect(harness.markCount, 1);
       expect(harness.splashPainted.value, isTrue);
-      final SystemUiOverlayStyle expected =
-          AppSystemChromeStyle.buildDefaultAppStyle(
-            _theme,
-            statusBarBackgroundColor: _theme.scaffoldBackgroundColor,
-            navigationBarColor:
-                _theme.componentTokens.adaptiveShell.bottomNavBackgroundColor,
-          );
+      final SystemUiOverlayStyle expected = _homeShellOverlayStyle();
       expect(_annotatedStyle(tester), expected);
       expect(AppSystemChromeStyle.defaultAppStyle, expected);
       expect(overlayStyleCalls, isNotEmpty);
@@ -261,15 +272,11 @@ void main() {
 
       harness.goTo('/');
       await tester.pumpAndSettle();
-      expect(
-        _annotatedStyle(tester),
-        AppSystemChromeStyle.buildDefaultAppStyle(
-          _theme,
-          statusBarBackgroundColor: _theme.scaffoldBackgroundColor,
-          navigationBarColor:
-              _theme.componentTokens.adaptiveShell.bottomNavBackgroundColor,
-        ),
-      );
+      expect(_annotatedStyle(tester), _homeShellOverlayStyle());
+
+      harness.goTo('/settings');
+      await tester.pumpAndSettle();
+      expect(_annotatedStyle(tester), _defaultShellOverlayStyle());
     });
 
     testWidgets('uses the player navigation bar override on default routes', (

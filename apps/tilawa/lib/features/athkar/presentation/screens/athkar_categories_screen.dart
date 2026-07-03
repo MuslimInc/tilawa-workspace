@@ -35,21 +35,13 @@ class AthkarCategoriesScreen extends StatelessWidget {
               } else if (state is AthkarError) {
                 final message =
                     state.failure.message ?? context.l10n.unexpectedError;
-                return TilawaIllustratedState(
-                  visual: const TilawaStateVisual(
-                    icon: Icons.menu_book_rounded,
-                    tone: TilawaStateVisualTone.error,
-                  ),
+                return TilawaErrorState(
+                  icon: Icons.menu_book_rounded,
                   title: message,
-                  semanticLabel: message,
-                  primaryAction: TilawaButton(
-                    text: context.l10n.retry,
-                    variant: TilawaButtonVariant.secondary,
-                    leadingIcon: const Icon(Icons.refresh_rounded),
-                    onPressed: () {
-                      context.read<AthkarCubit>().loadCategories();
-                    },
-                  ),
+                  retryLabel: context.l10n.retry,
+                  onRetry: () {
+                    context.read<AthkarCubit>().loadCategories();
+                  },
                 );
               } else if (state is AthkarCategoriesLoaded) {
                 return TilawaContentGrid(

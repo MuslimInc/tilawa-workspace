@@ -25,6 +25,7 @@ import 'package:tilawa/features/home/presentation/screens/home_screen.dart';
 import 'package:tilawa/features/home/presentation/widgets/home_next_prayer_time.dart';
 import 'package:tilawa/features/home/presentation/widgets/home_daily_inspiration_section.dart';
 import 'package:tilawa/features/home/presentation/widgets/home_dashboard_body_skeleton.dart';
+import 'package:tilawa/features/home/presentation/widgets/home_dashboard_card.dart';
 import 'package:tilawa/features/home/presentation/widgets/home_more_actions_group.dart';
 import 'package:tilawa/features/home/presentation/widgets/home_primary_actions_section.dart';
 import 'package:tilawa/features/home/presentation/widgets/home_quick_tools_section.dart';
@@ -292,6 +293,68 @@ void main() {
 
     final BuildContext homeContext = tester.element(find.byType(HomeScreen));
     expect(HomeNextPrayerTime.collapseScrollExtent(homeContext), 0);
+  });
+
+  testWidgets('paints status bar chrome with bottom-nav surface color', (
+    tester,
+  ) async {
+    const double topInset = 44;
+    final bloc = HomeDashboardBloc(
+      GetHomeDashboardUseCase(_FakeHomeDashboardRepository()),
+      NotifyPrayerLocationUpdatedUseCase(PrayerLocationUpdateNotifier()),
+    )..add(const HomeDashboardStarted(localeIdentifier: 'en'));
+    addTearDown(bloc.close);
+
+    await tester.pumpWidget(
+      MediaQuery(
+        data: const MediaQueryData(padding: EdgeInsets.only(top: topInset)),
+        child: _HomeScreenHarness(bloc: bloc, locale: 'en'),
+      ),
+    );
+    await tester.pump();
+    for (var frame = 0; frame < 20; frame++) {
+      await tester.pump(const Duration(milliseconds: 16));
+    }
+
+    final Finder chrome = find.byKey(const Key('home_status_bar_chrome'));
+    expect(chrome, findsOneWidget);
+
+    final ColoredBox box = tester.widget<ColoredBox>(chrome);
+    final ThemeData theme = AppTheme.getLightTheme(
+      primaryColor: AppColors.defaultPrimary,
+    );
+    expect(
+      box.color,
+      theme.componentTokens.adaptiveShell.bottomNavBackgroundColor,
+    );
+    expect(tester.getSize(chrome).height, topInset);
+  });
+
+  testWidgets('keeps dashboard content below status bar chrome', (
+    tester,
+  ) async {
+    const double topInset = 44;
+    final bloc = HomeDashboardBloc(
+      GetHomeDashboardUseCase(_FakeHomeDashboardRepository()),
+      NotifyPrayerLocationUpdatedUseCase(PrayerLocationUpdateNotifier()),
+    )..add(const HomeDashboardStarted(localeIdentifier: 'en'));
+    addTearDown(bloc.close);
+
+    await tester.pumpWidget(
+      MediaQuery(
+        data: const MediaQueryData(padding: EdgeInsets.only(top: topInset)),
+        child: _HomeScreenHarness(bloc: bloc, locale: 'ar'),
+      ),
+    );
+    await tester.pump();
+    for (var frame = 0; frame < 30; frame++) {
+      await tester.pump(const Duration(milliseconds: 16));
+    }
+
+    final Offset heroTop = tester.getTopLeft(
+      find.byType(HomeDashboardCard).first,
+    );
+    expect(heroTop.dy, greaterThanOrEqualTo(topInset));
   });
 
   testWidgets('Home avoids bottom-nav duplicate shortcuts', (tester) async {

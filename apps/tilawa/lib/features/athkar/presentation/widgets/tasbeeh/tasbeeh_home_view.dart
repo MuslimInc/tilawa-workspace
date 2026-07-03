@@ -60,10 +60,7 @@ class TasbeehHomeView extends StatelessWidget {
               Padding(
                 padding: EdgeInsets.symmetric(vertical: tokens.spaceLarge),
                 child: TilawaIllustratedState(
-                  visual: const TilawaStateVisual(
-                    icon: Icons.history,
-                    tone: TilawaStateVisualTone.tertiary,
-                  ),
+                  icon: Icons.history_rounded,
                   title: context.l10n.tasbeehHistoryEmpty,
                   semanticLabel: context.l10n.tasbeehHistoryEmpty,
                 ),

@@ -7,6 +7,7 @@ import 'package:tilawa/features/quran_sessions/quran_sessions_feature_flags.dart
 import 'package:tilawa_ui_kit/tilawa_ui_kit.dart';
 import 'package:visibility_detector/visibility_detector.dart';
 
+import 'home_dashboard_icon_well.dart';
 import 'home_learn_quran_analytics.dart';
 import 'open_home_quran_sessions.dart';
 import '../../../quran_sessions/presentation/teacher_application_entry.dart';
@@ -264,7 +265,13 @@ class _HomeTeacherApplicationCardContent extends StatelessWidget {
               Row(
                 spacing: tokens.spaceSmall,
                 children: [
-                  _FeaturedTutorIconWell(accent: accent),
+                  HomeDashboardIconWell(
+                    accent: accent,
+                    child: TilawaLearnQuranTutorIcon(
+                      size: tokens.iconSizeLarge,
+                      color: accent,
+                    ),
+                  ),
                   Expanded(
                     child: Text(
                       l10n.settingsTeacherApplicationEntryTitle,
@@ -356,7 +363,13 @@ class _HomeLearnQuranStudentCardContent extends StatelessWidget {
                   Row(
                     spacing: tokens.spaceSmall,
                     children: [
-                      _FeaturedTutorIconWell(accent: accent),
+                      HomeDashboardIconWell(
+                        accent: accent,
+                        child: TilawaLearnQuranTutorIcon(
+                          size: tokens.iconSizeLarge,
+                          color: accent,
+                        ),
+                      ),
                       Expanded(
                         child: Text(
                           context.l10n.homeFeaturedTutorTitle,
@@ -669,35 +682,6 @@ class _FeaturedTutorCtaPill extends StatelessWidget {
                 color: foreground,
               ),
             ],
-          ),
-        ),
-      ),
-    );
-  }
-}
-
-class _FeaturedTutorIconWell extends StatelessWidget {
-  const _FeaturedTutorIconWell({required this.accent});
-
-  final Color accent;
-
-  @override
-  Widget build(BuildContext context) {
-    final MeMuslimDesignTokens tokens = context.tokens;
-    final double iconBoxSize = tokens.iconBoxSize;
-
-    return DecoratedBox(
-      decoration: BoxDecoration(
-        borderRadius: BorderRadius.circular(tokens.radiusLarge),
-        color: accent.withValues(alpha: 0.10),
-      ),
-      child: SizedBox(
-        width: iconBoxSize,
-        height: iconBoxSize,
-        child: Center(
-          child: TilawaLearnQuranTutorIcon(
-            size: tokens.iconSizeLarge,
-            color: accent,
           ),
         ),
       ),

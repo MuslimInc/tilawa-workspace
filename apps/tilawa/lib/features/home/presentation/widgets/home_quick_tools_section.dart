@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:tilawa/core/extensions.dart';
 import 'package:tilawa/features/home/presentation/widgets/home_dashboard_elevated_surface.dart';
+import 'package:tilawa/features/home/presentation/widgets/home_dashboard_icon_well.dart';
 import 'package:tilawa/router/app_router_config.dart';
 import 'package:tilawa_ui_kit/tilawa_ui_kit.dart';
 
@@ -23,7 +24,7 @@ class HomeQuickToolsSection extends StatelessWidget {
     final double radius = tokens.resolveRadius(
       family: TilawaRadiusFamily.decorative,
     );
-    final double iconSize = tokens.iconSizeMedium;
+    final double iconSize = tokens.iconSizeLarge + tokens.spaceExtraSmall * 0.5;
 
     final items = _QuickToolsCatalog.items(context);
 
@@ -68,7 +69,6 @@ class _QuickToolTile extends StatelessWidget {
     final tokens = context.tokens;
     final theme = Theme.of(context);
     final colorScheme = theme.colorScheme;
-    final double iconBoxSize = tokens.minIconSize;
 
     final BorderRadius borderRadius = BorderRadius.circular(radius);
 
@@ -91,16 +91,9 @@ class _QuickToolTile extends StatelessWidget {
             mainAxisSize: MainAxisSize.min,
             spacing: tokens.spaceMedium,
             children: [
-              DecoratedBox(
-                decoration: BoxDecoration(
-                  color: iconAccent.withValues(alpha: 0.10),
-                  borderRadius: BorderRadius.circular(tokens.radiusMedium),
-                ),
-                child: SizedBox(
-                  width: iconBoxSize,
-                  height: iconBoxSize,
-                  child: Center(child: icon),
-                ),
+              HomeDashboardIconWell(
+                accent: iconAccent,
+                child: icon,
               ),
               Text(
                 label,

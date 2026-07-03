@@ -22,9 +22,9 @@ enum TilawaStateVisualTone {
 
 /// A quiet non-figurative visual for empty, permission, and error states.
 ///
-/// The visual intentionally avoids feature-specific imagery. It combines a
-/// soft geometric field with a centered icon so product screens can feel more
-/// intentional without adding random assets or childish illustration.
+/// Concentric halo rings carry the accent without a boxed icon tile, border,
+/// and shadow stack. Product screens stay calm while empty moments still feel
+/// intentional.
 class TilawaStateVisual extends StatelessWidget {
   /// Creates a reusable state visual.
   const TilawaStateVisual({
@@ -49,7 +49,7 @@ class TilawaStateVisual extends StatelessWidget {
   /// Optional icon override. Defaults to the resolved accent color.
   final Color? iconColor;
 
-  /// Overall square size. Defaults to a token-derived comfortable size.
+  /// Overall square size. Defaults to [resolveDefaultSize].
   final double? size;
 
   /// Optional semantic label when the visual itself carries meaning.
@@ -57,55 +57,59 @@ class TilawaStateVisual extends StatelessWidget {
   /// Leave null when the surrounding state already has a semantic label.
   final String? semanticLabel;
 
+  /// Token-backed diameter shared by [TilawaIllustratedState] and
+  /// [TilawaEmptyState] so every empty moment uses the same visual scale.
+  static double resolveDefaultSize(MeMuslimDesignTokens tokens) {
+    return tokens.iconSizeExtraLarge + tokens.spaceExtraLarge * 2.5;
+  }
+
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     final tokens = theme.tokens;
     final colorScheme = theme.colorScheme;
     final accent = accentColor ?? _resolveAccent(colorScheme);
-    final dimension =
-        size ?? tokens.iconSizeExtraLarge + tokens.spaceExtraLarge * 2;
-    final iconSize = tokens.iconSizeLarge;
+    final dimension = size ?? resolveDefaultSize(tokens);
+    final iconSize = tokens.iconSizeExtraLarge;
+    final midHalo = dimension - tokens.spaceLarge;
+    final innerHalo = dimension - tokens.spaceLarge * 2;
+    final haloStrength = _haloStrengthForTone(tone);
 
     final visual = SizedBox.square(
       dimension: dimension,
-      child: Center(
-        child: Container(
-          padding: EdgeInsets.all(tokens.spaceMedium),
-          decoration: BoxDecoration(
+      child: Stack(
+        alignment: Alignment.center,
+        children: [
+          _StateHalo(
+            diameter: dimension,
+            color: accent.withValues(
+              alpha: tokens.opacitySubtle * haloStrength.outer,
+            ),
+          ),
+          _StateHalo(
+            diameter: midHalo,
             color: Color.alphaBlend(
-              accent.withValues(alpha: tokens.opacitySubtle),
+              accent.withValues(
+                alpha: tokens.opacitySubtle * haloStrength.mid,
+              ),
               colorScheme.surface,
             ),
-            borderRadius: BorderRadius.circular(
-              tokens.resolveRadius(family: TilawaRadiusFamily.chrome),
-            ),
-            border: Border.all(
-              color: accent.withValues(alpha: tokens.opacityMedium),
-              width: 1.0,
-            ),
-            boxShadow: [
-              // Ambient layer — lifts the icon container off the background.
-              BoxShadow(
-                color: accent.withValues(alpha: tokens.opacitySubtle * 0.6),
-                blurRadius: 2,
-                offset: const Offset(0, 1),
-              ),
-              // Coloured glow — ties the shadow hue to the accent so the
-              // visual feels intentional rather than generic dark grey.
-              BoxShadow(
-                color: accent.withValues(alpha: tokens.opacitySubtle),
-                blurRadius: tokens.blurShadow,
-                offset: tokens.shadowOffsetSmall,
-              ),
-            ],
           ),
-          child: Icon(
+          _StateHalo(
+            diameter: innerHalo,
+            color: Color.alphaBlend(
+              accent.withValues(
+                alpha: tokens.opacitySubtle * haloStrength.inner,
+              ),
+              colorScheme.surface,
+            ),
+          ),
+          Icon(
             icon,
             size: iconSize,
             color: iconColor ?? accent,
           ),
-        ),
+        ],
       ),
     );
 
@@ -121,8 +125,40 @@ class TilawaStateVisual extends StatelessWidget {
       TilawaStateVisualTone.primary => colorScheme.primary,
       TilawaStateVisualTone.secondary => colorScheme.secondary,
       TilawaStateVisualTone.tertiary => colorScheme.tertiary,
-      TilawaStateVisualTone.neutral => colorScheme.outline,
+      TilawaStateVisualTone.neutral => colorScheme.onSurfaceVariant,
       TilawaStateVisualTone.error => colorScheme.error,
     };
+  }
+}
+
+({double outer, double mid, double inner}) _haloStrengthForTone(
+  TilawaStateVisualTone tone,
+) {
+  return switch (tone) {
+    TilawaStateVisualTone.error => (outer: 0.45, mid: 0.9, inner: 1.4),
+    TilawaStateVisualTone.neutral => (outer: 0.35, mid: 0.7, inner: 1.1),
+    _ => (outer: 0.55, mid: 1.0, inner: 1.75),
+  };
+}
+
+class _StateHalo extends StatelessWidget {
+  const _StateHalo({
+    required this.diameter,
+    required this.color,
+  });
+
+  final double diameter;
+  final Color color;
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      width: diameter,
+      height: diameter,
+      decoration: BoxDecoration(
+        shape: BoxShape.circle,
+        color: color,
+      ),
+    );
   }
 }

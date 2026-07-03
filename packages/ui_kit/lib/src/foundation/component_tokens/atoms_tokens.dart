@@ -421,10 +421,10 @@ class TilawaEmptyStateTokens {
     return const TilawaEmptyStateTokens(
       iconSize: kMeMuslimMinInteractiveDimension,
       iconOpacity: 0.56,
-      titleSpacing: 24.0,
-      subtitleSpacing: 8.0,
-      actionSpacing: 24.0,
-      padding: EdgeInsets.all(24.0),
+      titleSpacing: 28.0,
+      subtitleSpacing: 10.0,
+      actionSpacing: 28.0,
+      padding: EdgeInsets.symmetric(horizontal: 28.0, vertical: 32.0),
     );
   }
 

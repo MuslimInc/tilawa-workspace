@@ -140,26 +140,44 @@ class TilawaCatalogAppBar extends StatelessWidget
   Widget build(BuildContext context) {
     final ThemeData theme = Theme.of(context);
     final MeMuslimDesignTokens tokens = theme.tokens;
+    final ColorScheme colorScheme = theme.colorScheme;
     final TextStyle? titleStyle = theme.textTheme.titleLarge?.copyWith(
       fontWeight: FontWeight.w700,
     );
     final Widget titleChild = titleWidget ?? Text(title!, style: titleStyle);
+    final Color backgroundColor = TilawaAppBarChrome.backgroundColor(
+      colorScheme,
+      TilawaAppBarSurface.parchment,
+    );
 
-    return TilawaAppBar(
-      automaticallyImplyLeading: automaticallyImplyLeading,
+    return TilawaAppBarScope(
       surface: TilawaAppBarSurface.parchment,
-      centerTitle: centerTitle,
-      toolbarHeight: 0,
-      showBottomHairline: showBottomHairline,
-      showElevationShadow: showElevationShadow,
-      bottom: PreferredSize(
-        preferredSize: Size.fromHeight(preferredHeight),
+      showLeadingControlBackground:
+          TilawaAppBarConfig.showLeadingControlBackground,
+      showActionControlBackground:
+          TilawaAppBarConfig.showActionControlBackground,
+      child: Material(
+        color: backgroundColor,
+        elevation: TilawaAppBarChrome.elevation(enabled: showElevationShadow),
+        shadowColor: TilawaAppBarChrome.elevationShadowColor(
+          colorScheme,
+          tokens,
+          enabled: showElevationShadow,
+        ),
+        surfaceTintColor: Colors.transparent,
+        shape: showBottomHairline
+            ? TilawaAppBarChrome.bottomHairline(colorScheme, tokens)
+            : null,
         child: Semantics(
           header: true,
           label: title,
           explicitChildNodes: true,
           child: TilawaSearchFieldSlot(
-            padding: TilawaAppBarConfig.catalogChromePadding(tokens),
+            padding: TilawaAppBarConfig.catalogChromePaddingWithStatusBar(
+              context,
+              tokens,
+              includeBottomInset: bottomContent != null,
+            ),
             child: Column(
               mainAxisSize: MainAxisSize.min,
               crossAxisAlignment: CrossAxisAlignment.stretch,

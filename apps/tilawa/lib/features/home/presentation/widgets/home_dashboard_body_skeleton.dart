@@ -84,6 +84,9 @@ class _PrimaryActionTileSkeleton extends StatelessWidget {
     final double radius = tokens.resolveRadius(
       family: TilawaRadiusFamily.hero,
     );
+    final double decorativeRadius = tokens.resolveRadius(
+      family: TilawaRadiusFamily.decorative,
+    );
     final double iconBoxSize = tokens.iconBoxSize;
     final double accentRailWidth = tokens.spaceExtraSmall;
 
@@ -106,7 +109,7 @@ class _PrimaryActionTileSkeleton extends StatelessWidget {
             TilawaSkeletonBone(
               width: iconBoxSize,
               height: iconBoxSize,
-              borderRadius: tokens.radiusLarge,
+              borderRadius: decorativeRadius,
             ),
             SizedBox(height: tokens.spaceMedium + tokens.spaceExtraSmall),
             TilawaSkeletonLine(
@@ -159,7 +162,10 @@ class _QuickToolTileSkeleton extends StatelessWidget {
     final double radius = tokens.resolveRadius(
       family: TilawaRadiusFamily.decorative,
     );
-    final double iconBoxSize = tokens.minIconSize;
+    final double iconBoxSize = tokens.iconBoxSize;
+    final double decorativeRadius = tokens.resolveRadius(
+      family: TilawaRadiusFamily.decorative,
+    );
 
     return DecoratedBox(
       decoration: HomeDashboardElevatedSurface.decoration(
@@ -178,7 +184,7 @@ class _QuickToolTileSkeleton extends StatelessWidget {
             TilawaSkeletonBone(
               width: iconBoxSize,
               height: iconBoxSize,
-              borderRadius: tokens.radiusMedium,
+              borderRadius: decorativeRadius,
             ),
             TilawaSkeletonLine(
               width: 48,

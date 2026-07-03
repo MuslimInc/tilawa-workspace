@@ -55,21 +55,14 @@ class FavoritesScreen extends StatelessWidget {
                   if (state is FavoritesLoading) {
                     return const TilawaLoadingIndicator();
                   } else if (state is FavoritesError) {
-                    return TilawaIllustratedState(
+                    return TilawaErrorState(
                       icon: Icons.error_outline_rounded,
-                      iconColor: colorScheme.error,
                       title:
                           state.failure.localizedMessage(context) ??
                           context.l10n.unexpectedError,
-                      semanticLabel:
-                          state.failure.localizedMessage(context) ??
-                          context.l10n.unexpectedError,
-                      primaryAction: TilawaButton(
-                        text: context.l10n.retry,
-                        variant: TilawaButtonVariant.outline,
-                        onPressed: () =>
-                            context.read<FavoritesCubit>().loadFavorites(),
-                      ),
+                      retryLabel: context.l10n.retry,
+                      onRetry: () =>
+                          context.read<FavoritesCubit>().loadFavorites(),
                     );
                   } else if (state is FavoritesLoaded) {
                     if (state.favorites.isEmpty) {

@@ -283,7 +283,8 @@ class TilawaSearchFieldSlot extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final tokens = Theme.of(context).tokens;
-    return Center(
+    return Align(
+      alignment: AlignmentDirectional.topCenter,
       child: ConstrainedBox(
         constraints: BoxConstraints(maxWidth: tokens.contentMaxWidthMedia),
         child: Padding(

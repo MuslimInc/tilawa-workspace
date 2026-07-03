@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 
-import '../foundation/component_tokens.dart';
 import '../foundation/design_tokens.dart';
 import 'tilawa_button.dart';
 import 'tilawa_illustrated_state.dart';
@@ -48,14 +47,13 @@ class TilawaErrorState extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
-    final stateTokens = theme.componentTokens.emptyState;
 
     return TilawaIllustratedState(
       visual: TilawaStateVisual(
         icon: icon,
         tone: TilawaStateVisualTone.error,
         accentColor: iconColor,
-        size: stateTokens.iconSize + theme.tokens.spaceExtraLarge * 2,
+        size: TilawaStateVisual.resolveDefaultSize(theme.tokens),
       ),
       title: title,
       subtitle: subtitle,
