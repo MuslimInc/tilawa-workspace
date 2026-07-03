@@ -1,0 +1,19 @@
+<svg width="800" height="800" viewBox="0 0 800 800" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    <mask id="cut">
+      <g transform="translate(0,16)">
+        <path d="M386 570 C340 516 296 504 248 506 Q190 508 190 452 V240 Q190 186 244 182 C305 178 350 200 386 232 Z" fill="#fff"/>
+        <path d="M414 570 C460 516 504 504 552 506 Q610 508 610 452 V240 Q610 186 556 182 C495 178 450 200 414 232 Z" fill="#fff"/>
+        <g stroke="#000" stroke-width="30" stroke-linecap="round" fill="none">
+          <path d="M346 300 C312 285 278 278 246 277"/>
+          <path d="M346 356 C312 341 278 334 246 333"/>
+          <path d="M346 412 C318 399 290 391 266 389"/>
+          <path d="M454 300 C488 285 522 278 554 277"/>
+          <path d="M454 356 C488 341 522 334 554 333"/>
+          <path d="M454 412 C482 399 510 391 534 389"/>
+        </g>
+      </g>
+    </mask>
+  </defs>
+  <rect width="800" height="800" fill="#1DAB61" mask="url(#cut)"/>
+</svg>

@@ -19,6 +19,7 @@ enum SessionJoinUiState {
 SessionJoinUiState resolveSessionJoinUiState({
   required SessionLifecycleStatus lifecycleStatus,
   required DateTime startsAt,
+  required DateTime endsAt,
   required DateTime now,
   required bool joinInProgress,
   required QuranSessionsFailure? joinFailure,
@@ -37,6 +38,7 @@ SessionJoinUiState resolveSessionJoinUiState({
   if (_isJoinWindowEnded(
     lifecycleStatus,
     startsAt: startsAt,
+    endsAt: endsAt,
     now: now,
     joinWindowPolicy: joinWindowPolicy,
   )) {
@@ -55,7 +57,11 @@ SessionJoinUiState resolveSessionJoinUiState({
   if (!lifecycleStatus.canJoinSession) {
     return SessionJoinUiState.ended;
   }
-  if (joinWindowPolicy.isWithinJoinWindow(startsAt: startsAt, now: now)) {
+  if (joinWindowPolicy.isWithinJoinWindow(
+    startsAt: startsAt,
+    endsAt: endsAt,
+    now: now,
+  )) {
     return SessionJoinUiState.joinAvailable;
   }
   final windowStart = startsAt.subtract(joinWindowPolicy.prefetchLeadTime);
@@ -68,6 +74,7 @@ SessionJoinUiState resolveSessionJoinUiState({
 bool _isJoinWindowEnded(
   SessionLifecycleStatus status, {
   required DateTime startsAt,
+  required DateTime endsAt,
   required DateTime now,
   required SessionJoinWindowPolicy joinWindowPolicy,
 }) {
@@ -77,6 +84,5 @@ bool _isJoinWindowEnded(
   if (!status.canJoinSession) {
     return true;
   }
-  final windowEnd = startsAt.add(joinWindowPolicy.postStartGrace);
-  return !now.isBefore(windowEnd);
+  return now.isAfter(endsAt);
 }

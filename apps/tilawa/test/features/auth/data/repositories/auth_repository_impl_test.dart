@@ -1,6 +1,7 @@
 import 'package:flutter_test/flutter_test.dart';
 import 'package:mockito/annotations.dart';
 import 'package:mockito/mockito.dart';
+import 'package:tilawa/features/auth/domain/gateways/email_password_auth_gateway.dart';
 import 'package:tilawa/features/auth/data/datasources/google_sign_in_prepare_data_source.dart';
 import 'package:tilawa/features/auth/data/repositories/auth_repository_impl.dart';
 import 'package:tilawa/features/auth/domain/entities/auth_result.dart';
@@ -14,20 +15,27 @@ import 'auth_repository_impl_test.mocks.dart';
   AuthProviderInterface,
   UserRepository,
   GoogleSignInPrepareDataSource,
+  EmailPasswordAuthGateway,
 ])
 void main() {
   late AuthRepositoryImpl authRepository;
   late MockAuthProviderInterface mockAuthProvider;
   late MockGoogleSignInPrepareDataSource mockPrepare;
+  late MockEmailPasswordAuthGateway mockEmailAuth;
 
   setUp(() {
     mockAuthProvider = MockAuthProviderInterface();
     mockPrepare = MockGoogleSignInPrepareDataSource();
+    mockEmailAuth = MockEmailPasswordAuthGateway();
 
     when(mockPrepare.prepare()).thenAnswer((_) async {});
     when(mockPrepare.ensureInitialized()).thenAnswer((_) async {});
 
-    authRepository = AuthRepositoryImpl(mockAuthProvider, mockPrepare);
+    authRepository = AuthRepositoryImpl(
+      mockAuthProvider,
+      mockPrepare,
+      mockEmailAuth,
+    );
   });
 
   group('AuthRepositoryImpl', () {

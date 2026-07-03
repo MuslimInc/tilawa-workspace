@@ -4,6 +4,7 @@ import 'package:tilawa_core/errors/failures.dart';
 import 'package:tilawa_ui_kit/tilawa_ui_kit.dart';
 
 import '../../domain/entities/auth_error_key.dart';
+import '../../domain/entities/user_entity.dart';
 import '../bloc/auth_bloc.dart';
 import '../cubit/login_google_sign_in_cubit.dart';
 import 'login_auth_state_diagnostics.dart';
@@ -13,6 +14,7 @@ class LoginAuthBlocTransitionMessages {
   const LoginAuthBlocTransitionMessages({
     required this.authErrorFallback,
     required this.noGoogleAccounts,
+    required this.localizeAuthError,
     this.deviceRegistrationFailed = '',
     this.appCheckFailed = '',
     this.serverActionOffline = '',
@@ -23,6 +25,7 @@ class LoginAuthBlocTransitionMessages {
   final String appCheckFailed;
   final String serverActionOffline;
   final String noGoogleAccounts;
+  final String Function(String messageKey) localizeAuthError;
 }
 
 /// Applies login-screen side effects for a listened [AuthState] transition.
@@ -31,7 +34,7 @@ void handleLoginAuthBlocTransition({
   required LoginGoogleSignInCubit launchCubit,
   required bool shouldSkipAutoSignIn,
   required LoginAuthBlocTransitionMessages messages,
-  required void Function() onNavigateToHome,
+  required void Function(UserEntity user) onNavigateAfterAuth,
   required void Function(String message, TilawaFeedbackVariant variant)
   showToast,
   void Function(String message)? log,
@@ -44,9 +47,9 @@ void handleLoginAuthBlocTransition({
   state.when(
     initial: () {},
     loading: () {},
-    authenticated: (_) {
+    authenticated: (UserEntity user) {
       launchCubit.onAuthenticated();
-      onNavigateToHome();
+      onNavigateAfterAuth(user);
     },
     unauthenticated: () {
       launchCubit.clearLaunchPending();
@@ -97,6 +100,6 @@ String _visibleAuthErrorMessage(
       messages.serverActionOffline.isNotEmpty
           ? messages.serverActionOffline
           : messages.authErrorFallback,
-    _ => message,
+    _ => messages.localizeAuthError(message),
   };
 }

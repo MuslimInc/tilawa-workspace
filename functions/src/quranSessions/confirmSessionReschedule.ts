@@ -149,9 +149,21 @@ export const confirmSessionReschedule = onCall(
               startsAt: requestData.newStartsAt,
             },
             { startsAt: requestData.newStartsAt },
+            {
+              ...bookingData,
+              startsAt: requestData.newStartsAt ?? bookingData.startsAt,
+              endsAt: requestData.newEndsAt ?? bookingData.endsAt,
+            },
           );
         } else {
-          writeAggregateLifecycle(tx, { bookingRef, sessionRef }, "scheduled");
+          writeAggregateLifecycle(
+            tx,
+            { bookingRef, sessionRef },
+            "scheduled",
+            {},
+            {},
+            bookingData,
+          );
         }
 
         tx.set(

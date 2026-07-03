@@ -14,6 +14,7 @@ import 'package:tilawa_core/errors/failures.dart';
 import 'package:tilawa_core/services/app_system_chrome_style.dart';
 import 'package:tilawa_ui_kit/tilawa_ui_kit.dart';
 
+import 'package:go_router/go_router.dart';
 import '../../../../router/app_router.dart';
 import '../../../../router/app_router_config.dart';
 import '../../../localization/presentation/widgets/app_language_switcher.dart';
@@ -333,6 +334,7 @@ class _LoginScreenBodyState extends State<_LoginScreenBody>
   @override
   Widget build(BuildContext context) {
     final ThemeData theme = Theme.of(context);
+    final MeMuslimDesignTokens tokens = theme.tokens;
     final ColorScheme colorScheme = theme.colorScheme;
     final MeMuslimProductColors product = theme.productColors;
     final ColorScheme loginScheme = colorScheme.copyWith(
@@ -355,9 +357,12 @@ class _LoginScreenBodyState extends State<_LoginScreenBody>
             children: <Widget>[
               LoginAuthBlocListener(
                 shouldSkipAutoSignIn: _shouldSkipAutoSignIn,
-                onNavigateToHome: () => _navigateToHome(context),
+                navigateAfterAuth: _navigateAfterAuth,
                 child: TilawaThumbReachLayout(
                   useSafeArea: true,
+                  contentFlex: 50,
+                  actionFlex: 50,
+                  actionTopInset: tokens.spaceMedium,
                   content: RepaintBoundary(
                     child: _LoginHeroContent(loginScheme: loginScheme),
                   ),
@@ -379,12 +384,12 @@ class _LoginScreenBodyState extends State<_LoginScreenBody>
     );
   }
 
-  void _navigateToHome(BuildContext context) {
+  void _navigateAfterAuth(String location) {
     scheduleLoginNavigateToHome(
-      isMounted: () => context.mounted,
+      isMounted: () => mounted,
       navigate: () {
         AppRouter.disableStateRestoration = false;
-        AppRouter.router.go(const HomeRoute().location);
+        AppRouter.router.go(location);
       },
     );
   }
@@ -413,7 +418,7 @@ class _LoginHeroContent extends StatelessWidget {
             Center(
               child: TilawaAppBrandBadge(accentColor: loginScheme.primary),
             ),
-            SizedBox(height: tokens.spaceExtraLarge),
+            SizedBox(height: tokens.spaceLarge),
             Text(
               context.l10n.welcomeToApp,
               style: theme.textTheme.headlineLarge?.copyWith(
@@ -425,7 +430,7 @@ class _LoginHeroContent extends StatelessWidget {
             SizedBox(height: tokens.spaceMedium),
             Text(
               context.l10n.signInWithGoogleDescription,
-              style: theme.textTheme.bodyLarge?.copyWith(
+              style: theme.textTheme.bodyMedium?.copyWith(
                 color: colorScheme.onSurfaceVariant,
               ),
               textAlign: TextAlign.center,
@@ -507,7 +512,7 @@ class _LoginGoogleSignInActionsState extends State<_LoginGoogleSignInActions>
     return Column(
       mainAxisSize: MainAxisSize.min,
       crossAxisAlignment: CrossAxisAlignment.stretch,
-      spacing: tokens.spaceMedium,
+      spacing: tokens.spaceSmall,
       children: <Widget>[
         RepaintBoundary(
           child: BlocBuilder<AuthBloc, AuthState>(
@@ -550,8 +555,62 @@ class _LoginGoogleSignInActionsState extends State<_LoginGoogleSignInActions>
             },
           ),
         ),
+        _LoginEmailAuthLinks(isGoogleLoading: _isGoogleSignInSessionInFlight()),
         const _LoginLegalFooter(),
       ],
+    );
+  }
+}
+
+class _LoginEmailAuthLinks extends StatelessWidget {
+  const _LoginEmailAuthLinks({required this.isGoogleLoading});
+
+  final bool isGoogleLoading;
+
+  @override
+  Widget build(BuildContext context) {
+    final ThemeData theme = Theme.of(context);
+    final MeMuslimDesignTokens tokens = theme.tokens;
+
+    return BlocBuilder<AuthBloc, AuthState>(
+      builder: (BuildContext context, AuthState authState) {
+        final bool isLoading = authState is AuthLoading || isGoogleLoading;
+        return Column(
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          spacing: tokens.spaceSmall,
+          children: <Widget>[
+            Row(
+              children: <Widget>[
+                Expanded(child: Divider(color: theme.dividerColor)),
+                Padding(
+                  padding: EdgeInsets.symmetric(horizontal: tokens.spaceSmall),
+                  child: Text(
+                    context.l10n.orContinueWith,
+                    style: theme.textTheme.bodySmall?.copyWith(
+                      color: theme.colorScheme.onSurfaceVariant,
+                    ),
+                  ),
+                ),
+                Expanded(child: Divider(color: theme.dividerColor)),
+              ],
+            ),
+            TilawaButton(
+              text: context.l10n.signInWithEmail,
+              variant: TilawaButtonVariant.outline,
+              isFullWidth: true,
+              onPressed: isLoading
+                  ? null
+                  : () => context.push(const EmailLoginRoute().location),
+            ),
+            TextButton(
+              onPressed: isLoading
+                  ? null
+                  : () => context.push(const RegisterRoute().location),
+              child: Text(context.l10n.noAccountYet),
+            ),
+          ],
+        );
+      },
     );
   }
 }

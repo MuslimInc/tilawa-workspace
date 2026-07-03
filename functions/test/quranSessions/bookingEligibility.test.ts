@@ -17,6 +17,10 @@ function baseContext(
     student?: Partial<BookingEligibilityContext["student"]>;
     teacher?: Partial<BookingEligibilityContext["teacher"]>;
     policy?: Partial<BookingEligibilityContext["policy"]>;
+    market?: Partial<BookingEligibilityContext["market"]> & Pick<
+      BookingEligibilityContext["market"],
+      "countryCode" | "cityId"
+    >;
     marketEnabled?: boolean;
     pricing?: BookingEligibilityContext["pricing"];
   } = {},
@@ -49,6 +53,25 @@ function baseContext(
       globalAllowFemaleTeacherMaleStudent: true,
       requireGuardianApprovalForChildren: false,
       ...overrides.policy,
+    },
+    market: {
+      countryCode: "EG",
+      cityId: "cairo",
+      marketEnabled: true,
+      cityEnabled: true,
+      sessionFeeAmount: 0,
+      currencyCode: "USD",
+      bookingMode: "autoConfirm",
+      genderMatchingEnabled: true,
+      teacherWhitelist: null,
+      tutorApprovalSlaMs: 24 * 60 * 60 * 1000,
+      minBookingNoticeMs: 60 * 60 * 1000,
+      maxConcurrentUpcomingPerStudent: 3,
+      joinWindowLeadMs: 15 * 60 * 1000,
+      sessionMode: "videoOnly",
+      policyVersion: null,
+      effectiveFrom: null,
+      ...overrides.market,
     },
     marketEnabled: overrides.marketEnabled ?? true,
     pricing: overrides.pricing ?? { isPaid: false, amount: 0, currencyCode: "USD" },
@@ -169,7 +192,10 @@ test("assertBookingEligible rejects a child when teacher cannot teach children",
     () =>
       assertBookingEligible(
         baseContext({
-          student: { dateOfBirth: new Date("2015-01-01Z") },
+          student: {
+            dateOfBirth: new Date("2015-01-01Z"),
+            guardianId: "guardian_uid",
+          },
           teacher: { canTeachChildren: false },
         }),
         NOW,
@@ -207,9 +233,25 @@ test("assertBookingEligible allows a child when guardian approval is recorded", 
   assert.equal(pricing.isPaid, false);
 });
 
-test("assertBookingEligible allows an eligible child (teacher teaches children, no guardian gate)", () => {
+test("assertBookingEligible blocks child bookings until guardian is linked (Q-EC-01)", () => {
+  expectCode(
+    () =>
+      assertBookingEligible(
+        baseContext({ student: { dateOfBirth: new Date("2015-01-01Z") } }),
+        NOW,
+      ),
+    "guardian_approval_required",
+  );
+});
+
+test("assertBookingEligible allows child with linked guardian when approval not required", () => {
   const pricing = assertBookingEligible(
-    baseContext({ student: { dateOfBirth: new Date("2015-01-01Z") } }),
+    baseContext({
+      student: {
+        dateOfBirth: new Date("2015-01-01Z"),
+        guardianId: "guardian_uid",
+      },
+    }),
     NOW,
   );
   assert.equal(pricing.isPaid, false);

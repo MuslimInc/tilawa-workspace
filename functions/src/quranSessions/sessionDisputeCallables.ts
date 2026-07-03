@@ -93,7 +93,7 @@ export const openSessionDispute = onCall(
         const sessionRef = sessionRefForBooking(db, fresh);
         const disputeRef = db.collection("quran_session_disputes").doc();
 
-        writeAggregateLifecycle(tx, { bookingRef, sessionRef }, guard.to);
+        writeAggregateLifecycle(tx, { bookingRef, sessionRef }, guard.to, {}, {}, fresh);
 
         tx.set(
           disputeRef,

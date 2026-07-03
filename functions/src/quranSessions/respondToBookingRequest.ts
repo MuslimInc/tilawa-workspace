@@ -148,6 +148,8 @@ export const respondToBookingRequest = onCall(
           { bookingRef, sessionRef },
           guard.to,
           lifecyclePatch,
+          {},
+          fresh,
         );
 
         const slotId = fresh.slotId as string | undefined;

@@ -91,6 +91,18 @@ class _ThrowingAuthRepositoryForPrepare implements AuthRepository {
   Future<AuthResult> signInWithGoogle() async => const AuthResult.cancelled();
 
   @override
+  Future<AuthResult> signInWithEmailPassword({
+    required String email,
+    required String password,
+  }) async => const AuthResult.failure(message: 'not-implemented');
+
+  @override
+  Future<AuthResult> registerWithEmailPassword({
+    required String email,
+    required String password,
+  }) async => const AuthResult.failure(message: 'not-implemented');
+
+  @override
   Future<void> signOut() async {}
 
   @override
@@ -103,6 +115,8 @@ void main() {
   final GetIt getIt = GetIt.instance;
 
   late MockSignInWithGoogleUseCase mockSignInWithGoogleUseCase;
+  late MockSignInWithEmailUseCase mockSignInWithEmailUseCase;
+  late MockRegisterWithEmailUseCase mockRegisterWithEmailUseCase;
   late MockSignOut mockSignOut;
   late MockDeleteAccount mockDeleteAccount;
   late MockGetCurrentUserUseCase mockGetCurrentUserUseCase;
@@ -146,6 +160,8 @@ void main() {
     );
     await getIt.reset();
     mockSignInWithGoogleUseCase = MockSignInWithGoogleUseCase();
+    mockSignInWithEmailUseCase = MockSignInWithEmailUseCase();
+    mockRegisterWithEmailUseCase = MockRegisterWithEmailUseCase();
     mockSignOut = MockSignOut();
     mockDeleteAccount = MockDeleteAccount();
     mockGetCurrentUserUseCase = MockGetCurrentUserUseCase();
@@ -184,6 +200,8 @@ void main() {
 
     authBloc = AuthBloc(
       mockSignInWithGoogleUseCase,
+      mockSignInWithEmailUseCase,
+      mockRegisterWithEmailUseCase,
       mockSignOut,
       mockDeleteAccount,
       mockGetCurrentUserUseCase,
@@ -666,6 +684,53 @@ void main() {
       );
 
       expect(authBloc.state, isA<AuthError>());
+    });
+
+    testWidgets('shows email auth entry points and privacy on small screens', (
+      WidgetTester tester,
+    ) async {
+      tester.view.physicalSize = const Size(360, 640);
+      tester.view.devicePixelRatio = 1;
+      addTearDown(tester.view.resetPhysicalSize);
+      addTearDown(tester.view.resetDevicePixelRatio);
+
+      await pumpLoginScreen(tester);
+      await pumpLoginInitFrames(tester);
+
+      expect(find.byType(TilawaGoogleSignInButton), findsOneWidget);
+      expect(find.text('Sign in with email'), findsOneWidget);
+      expect(find.text('Privacy policy'), findsOneWidget);
+      expect(find.text('No account yet? Create one'), findsOneWidget);
+      expect(tester.takeException(), isNull);
+    });
+
+    testWidgets('renders Arabic auth labels when locale is ar', (
+      WidgetTester tester,
+    ) async {
+      await tester.pumpWidget(
+        MaterialApp(
+          theme: AppTheme.getLightTheme(
+            primaryColor: PrimaryColorPreset.defaultPreset.value,
+          ),
+          supportedLocales: AppLocalizations.supportedLocales,
+          localizationsDelegates: AppLocalizations.localizationsDelegates,
+          locale: const Locale('ar'),
+          builder: (BuildContext context, Widget? child) {
+            return TilawaFeedbackHost(child: child!);
+          },
+          home: MultiBlocProvider(
+            providers: <BlocProvider<dynamic>>[
+              BlocProvider<AuthBloc>.value(value: authBloc),
+              BlocProvider<LocalizationBloc>.value(value: localizationBloc),
+            ],
+            child: const LoginScreen(),
+          ),
+        ),
+      );
+      await pumpLoginInitFrames(tester);
+
+      expect(find.text('تسجيل الدخول بالبريد'), findsOneWidget);
+      expect(find.text('سياسة الخصوصية'), findsOneWidget);
     });
 
     testWidgets('marks splash handoff painted when still false on init', (

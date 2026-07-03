@@ -12,6 +12,8 @@ import 'package:tilawa/features/auth/domain/entities/auth_result.dart';
 import 'package:tilawa/features/auth/domain/entities/user_entity.dart';
 import 'package:tilawa/features/auth/domain/usecases/delete_account.dart';
 import 'package:tilawa/features/auth/domain/usecases/get_current_user_use_case.dart';
+import 'package:tilawa/features/auth/domain/usecases/register_with_email_use_case.dart';
+import 'package:tilawa/features/auth/domain/usecases/sign_in_with_email_use_case.dart';
 import 'package:tilawa/features/auth/domain/usecases/sign_in_with_google_use_case.dart';
 import 'package:tilawa/features/auth/domain/usecases/sign_out.dart';
 import 'package:tilawa/features/auth/domain/usecases/sync_device_token_use_case.dart';
@@ -30,6 +32,8 @@ import 'auth_bloc_test.mocks.dart';
 
 @GenerateMocks([
   SignInWithGoogleUseCase,
+  SignInWithEmailUseCase,
+  RegisterWithEmailUseCase,
   SignOut,
   DeleteAccount,
   GetCurrentUserUseCase,
@@ -40,6 +44,8 @@ import 'auth_bloc_test.mocks.dart';
 void main() {
   late AuthBloc authBloc;
   late MockSignInWithGoogleUseCase mockSignInWithGoogleUseCase;
+  late MockSignInWithEmailUseCase mockSignInWithEmailUseCase;
+  late MockRegisterWithEmailUseCase mockRegisterWithEmailUseCase;
   late MockSignOut mockSignOut;
   late MockDeleteAccount mockDeleteAccount;
   late MockGetCurrentUserUseCase mockGetCurrentUserUseCase;
@@ -76,6 +82,8 @@ void main() {
       () => defaultRevokePrefs.prefs,
     );
     mockSignInWithGoogleUseCase = MockSignInWithGoogleUseCase();
+    mockSignInWithEmailUseCase = MockSignInWithEmailUseCase();
+    mockRegisterWithEmailUseCase = MockRegisterWithEmailUseCase();
     mockSignOut = MockSignOut();
     mockDeleteAccount = MockDeleteAccount();
     mockGetCurrentUserUseCase = MockGetCurrentUserUseCase();
@@ -101,6 +109,8 @@ void main() {
 
     authBloc = AuthBloc(
       mockSignInWithGoogleUseCase,
+      mockSignInWithEmailUseCase,
+      mockRegisterWithEmailUseCase,
       mockSignOut,
       mockDeleteAccount,
       mockGetCurrentUserUseCase,

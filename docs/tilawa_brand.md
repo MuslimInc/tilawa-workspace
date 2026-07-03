@@ -16,13 +16,13 @@ this file wins on intent.
 MeMuslim is a **daily Muslim lifestyle companion** — prayer, Quran, Qibla, dhikr,
 and calm home rituals in one warm, approachable shell. The product name is
 **MeMuslim / أنا مسلم**; the visual language follows the Behance warm parchment +
-brown + gold system.
+**green accent** + gold featured-card system (implementation in `DESIGN.md`).
 
 | Word | What it means in pixels |
 |---|---|
-| **Warm** | Soft parchment canvas (`#F4F2EE`), brown ink (`#8B5E3C`), gold featured cards (`#FFD28E`→`#FF9E44`). No cool porcelain, no sage-green chrome. |
-| **Clear** | One primary accent per screen. Generous radius (20–24 dp cards). Readable metadata in warm grey-brown. |
-| **Faithful** | Arabic typography care (`textHeightLoose`), reverent reader surfaces, no stereotype chrome (mosques/crescents in app bars). |
+| **Warm** | Soft parchment canvas (`#F4F2EE`), warm ink (`#1A2E24`), **brand green** accent (`#1DAB61`), gold featured cards (`#FFD28E`→`#FF9E44`). No cool porcelain; brown/warm tones only as secondary micro-accents — never as production primary. |
+| **Clear** | One primary accent per screen (green). Generous radius (20–24 dp cards). Readable metadata in warm grey-green (`#6B7F74`). |
+| **Faithful** | Bundled **IBM Plex Sans Arabic**, `textHeightLoose` (2.0), reverent reader surfaces, no stereotype chrome (mosques/crescents in app bars). |
 
 ---
 
@@ -42,17 +42,20 @@ brown + gold system.
 
 | Brand role | Maps to | When to use |
 |---|---|---|
-| **Brown ink** | `colorScheme.primary` (`#8B5E3C`) | CTAs, active nav, selected pills/segments, link icons |
+| **Brand green** | `colorScheme.primary` (`#1DAB61`) | CTAs, active nav, selected pills/segments, switch ON, progress |
+| **On-primary ink** | `colorScheme.onPrimary` (`#003317`) | Labels/icons on green fills |
 | **Gold gilding** | `colorScheme.tertiary` / featured gradient stops | Hero cards, Last Read, surah header banners — not purchase buttons |
 | **Canvas** | `colorScheme.surfaceContainerLowest` (`#F4F2EE`) | Scaffold, canvas (~60% neutral) |
 | **Card white** | `colorScheme.surface` (`#FFFFFF`) | List rows, settings tiles (~30% secondary) |
-| **Warm beige** | `colorScheme.surfaceContainerHigh` | Idle chips, search rests |
-| **Hairline** | `colorScheme.outlineVariant` | Dividers at `borderWidthThin` |
+| **Warm chip rest** | `colorScheme.surfaceContainerHigh` (`#F0F7F2`) | Idle chips, search rests |
+| **Body ink** | `colorScheme.onSurface` (`#1A2E24`) | Headings, primary copy |
+| **Muted labels** | `colorScheme.onSurfaceVariant` (`#6B7F74`) | Metadata, captions |
+| **Hairline** | `colorScheme.outlineVariant` (`#EEEEEE`) | Dividers at `borderWidthThin` (0.5) |
 | **Featured text** | `AppColors.featuredGradientForeground` | Copy on gold gradient cards |
 
 **Anti-patterns:**
 - Don't flatten scaffold/canvas to pure white (`#FFFFFF`) — use warm parchment (`#F4F2EE`) so white cards lift.
-- Don't reintroduce sage green (`#219653`) as production primary.
+- Don't reintroduce legacy purple (`#7A5C89`), brown (`#8B5E3C`), sage (`#219653`), or teal (`#00897B`) as production primary.
 - Don't use cool grey porcelain (`#F4F5F7`) on lifestyle surfaces.
 - Don't use gold gradient on Support MeMuslim CTAs.
 
@@ -60,23 +63,30 @@ brown + gold system.
 
 ## 4. Typography
 
-- UI: bundled **IBM Plex Sans Arabic** via `AppTheme` (M3 roles).
+- UI: bundled **IBM Plex Sans Arabic** (`packages/tilawa_ui_kit/IBMPlexSansArabic`) via
+  `AppTheme` — not Alexandria, not runtime Google Fonts fetch in production.
 - Screen titles: `titleLarge` / `titleMedium`, `FontWeight.w700`; catalog screens
   may use centered uppercase for Quran/Qibla hubs when specified in feature UI.
-- Arabic content: `titleSmall` `w700`, `textHeightLoose`.
+- Arabic content: `titleSmall` `w700`, `textHeightLoose` (2.0).
 - Metadata: `bodySmall`, `onSurfaceVariant`.
+- **Text scale:** global clamp **1.0–1.0** via `tilawaProductTextScaler` on
+  `MaterialApp.builder`; Home prayer hero extent math may assume up to **1.3** for
+  layout slack (Quran reader uses dedicated reader settings).
 
 ---
 
 ## 5. Rhythm and elevation (Behance lifestyle)
 
-- **Cards:** white fill on the neutral canvas, **24 dp** radius (`radiusCard`), **warm
-  shadow** (`opacityShadow` / `opacityShadowStrong` on brown-tinted `shadow`).
+- **Cards:** white fill on the neutral canvas, **24 dp** radius (`radiusCard`), restrained
+  shadow (`opacityShadow` **0.04**, `opacityShadowStrong` **0.08** on `colorScheme.shadow`;
+  offsets `(0, 1)` / `(0, 2)`, blur **8** — not heavy 0.18/0.28 stacks).
 - **Featured cards:** gold linear gradient, no hairline border.
 - **Segmented controls / filter pills:** active = solid `primary` + `onPrimary`;
-  inactive = neutral track + brown or `onSurface` text.
-- **Floating chrome** (bottom nav, player): layered shadow tokens + optional glass.
+  inactive = neutral track + `onSurface` text.
+- **Floating chrome** (bottom nav, player): `opacityShadowStrong` + optional glass tokens.
 - **Reader page:** strongest shadow band reserved for Mushaf frame only.
+- **Touch targets:** minimum **48 dp** (`kMeMuslimMinInteractiveDimension`) on all
+  in-app interactive elements.
 
 | Family | Token | Use |
 |---|---|---|
@@ -127,5 +137,5 @@ not Premium. See §8 in prior revision — strings live in `*.arb`.
 
 Unchanged ethics — see [`specs/016-support-tilawa/spec.md`](../specs/016-support-tilawa/spec.md)
 and [`packages/ui_kit/docs/support_visual_system.md`](../packages/ui_kit/docs/support_visual_system.md).
-Calm parchment surfaces; brown Ink CTA; no gold pay heroes.
+Calm parchment surfaces; green Ink CTA; no gold pay heroes.
 

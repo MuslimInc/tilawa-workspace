@@ -24,9 +24,16 @@ import '../widgets/quran_sessions_scaffold.dart';
 /// On success, pops with [true] so the caller knows the profile is now
 /// complete and can retry eligibility.
 class ProfileCompletionScreen extends StatefulWidget {
-  const ProfileCompletionScreen({super.key, required this.userId});
+  const ProfileCompletionScreen({
+    super.key,
+    required this.userId,
+    this.mandatory = false,
+    this.onMandatoryComplete,
+  });
 
   final String userId;
+  final bool mandatory;
+  final VoidCallback? onMandatoryComplete;
 
   @override
   State<ProfileCompletionScreen> createState() =>
@@ -68,131 +75,140 @@ class _ProfileCompletionScreenState extends State<ProfileCompletionScreen> {
   Widget build(BuildContext context) {
     final l10n = context.quranSessionsL10n;
 
-    return QuranSessionsScaffold(
-      title: l10n.profileCompletionTitle,
-      resizeToAvoidBottomInset: true,
-      body: BlocConsumer<ProfileCompletionBloc, ProfileCompletionState>(
-        listenWhen: (ProfileCompletionState prev, ProfileCompletionState next) {
-          if (_shouldScrollToValidationError(prev, next)) {
-            return true;
-          }
-          return prev != next &&
-              (next is ProfileCompletionSaved ||
-                  next is ProfileCompletionFailure);
-        },
-        listener: (context, state) {
-          if (state is ProfileCompletionEditing &&
-              state.submitValidationAttempt > 0 &&
-              !state.canSubmit) {
-            final loc = context.quranSessionsL10n;
-            unawaited(
-              _validationController.handleValidationFailure(
+    return PopScope(
+      canPop: !widget.mandatory,
+      child: QuranSessionsScaffold(
+        title: l10n.profileCompletionTitle,
+        leading: widget.mandatory ? const SizedBox.shrink() : null,
+        resizeToAvoidBottomInset: true,
+        body: BlocConsumer<ProfileCompletionBloc, ProfileCompletionState>(
+          listenWhen:
+              (ProfileCompletionState prev, ProfileCompletionState next) {
+                if (_shouldScrollToValidationError(prev, next)) {
+                  return true;
+                }
+                return prev != next &&
+                    (next is ProfileCompletionSaved ||
+                        next is ProfileCompletionFailure);
+              },
+          listener: (context, state) {
+            if (state is ProfileCompletionEditing &&
+                state.submitValidationAttempt > 0 &&
+                !state.canSubmit) {
+              final loc = context.quranSessionsL10n;
+              unawaited(
+                _validationController.handleValidationFailure(
+                  context,
+                  TilawaFormValidationResult(
+                    issues: state.validationIssues(
+                      loc,
+                      (failure) => failure.toLocalizedMessage(context),
+                    ),
+                  ),
+                ),
+              );
+              return;
+            }
+            if (state is ProfileCompletionSaved) {
+              TilawaFeedback.showToast(
                 context,
-                TilawaFormValidationResult(
-                  issues: state.validationIssues(
-                    loc,
+                message: l10n.profileCompletionSavedSuccess,
+                variant: TilawaFeedbackVariant.success,
+              );
+              if (widget.mandatory) {
+                widget.onMandatoryComplete?.call();
+              } else {
+                Navigator.of(context).pop(true);
+              }
+            }
+            if (state is ProfileCompletionFailure) {
+              TilawaFeedback.showToast(
+                context,
+                message: state.failure.toLocalizedMessage(context),
+                variant: TilawaFeedbackVariant.error,
+              );
+            }
+          },
+          builder: (context, state) => switch (state) {
+            ProfileCompletionInitial() ||
+            ProfileCompletionLoading() => const Center(
+              child: CircularProgressIndicator(),
+            ),
+            ProfileCompletionSaving() => _SavingIndicator(
+              message: l10n.profileCompletionSaving,
+            ),
+            ProfileCompletionSaved() => const SizedBox.shrink(),
+            ProfileCompletionFailure(:final failure) => _LoadFailureView(
+              message: failure.toLocalizedMessage(context),
+              retryLabel: l10n.retry,
+              onRetry: () => context.read<ProfileCompletionBloc>().add(
+                ProfileLoadRequested(userId: widget.userId),
+              ),
+            ),
+            ProfileCompletionEditing(
+              :final userId,
+              :final availableCountries,
+              :final minimumStudentAgeYears,
+              :final selectedGender,
+              :final selectedDateOfBirth,
+              :final selectedCountry,
+              :final selectedCity,
+              :final availableCities,
+              :final isLoadingCities,
+              :final countryPickerLocked,
+              :final cityPickerLocked,
+              :final submitAttempted,
+              :final invalidFieldCount,
+              :final selectedLearningGoals,
+            ) =>
+              TilawaFormScreenScaffold(
+                validationController: _validationController,
+                body: _ProfileCompletionFormBody(
+                  l10n: l10n,
+                  selectedGender: selectedGender,
+                  selectedDateOfBirth: selectedDateOfBirth,
+                  minimumStudentAgeYears: minimumStudentAgeYears,
+                  dateOfBirthError: state.visibleDateOfBirthError(
+                    l10n,
                     (failure) => failure.toLocalizedMessage(context),
+                  ),
+                  genderError: state.genderErrorFor(l10n),
+                  countryError: state.countryErrorFor(l10n),
+                  cityError: state.cityErrorFor(l10n),
+                  availableCountries: availableCountries,
+                  selectedCountry: selectedCountry,
+                  countryPickerLocked: countryPickerLocked,
+                  availableCities: availableCities,
+                  selectedCity: selectedCity,
+                  isLoadingCities: isLoadingCities,
+                  cityPickerLocked: cityPickerLocked,
+                  selectedLearningGoals: selectedLearningGoals,
+                  onGenderSelected: (gender) => context
+                      .read<ProfileCompletionBloc>()
+                      .add(GenderSelected(gender)),
+                  onDateOfBirthSet: (date) => context
+                      .read<ProfileCompletionBloc>()
+                      .add(DateOfBirthSet(date)),
+                  onCountrySelected: (country) => context
+                      .read<ProfileCompletionBloc>()
+                      .add(CountrySelected(country)),
+                  onCitySelected: (city) => context
+                      .read<ProfileCompletionBloc>()
+                      .add(CitySelected(city)),
+                  onLearningGoalToggled: (goal) => context
+                      .read<ProfileCompletionBloc>()
+                      .add(LearningGoalToggled(goal)),
+                ),
+                footer: TilawaFormSubmitFooter(
+                  buttonText: l10n.profileCompletionSaveAndContinue,
+                  invalidFieldCount: submitAttempted ? invalidFieldCount : null,
+                  onPressed: () => context.read<ProfileCompletionBloc>().add(
+                    ProfileSubmitted(userId: userId),
                   ),
                 ),
               ),
-            );
-            return;
-          }
-          if (state is ProfileCompletionSaved) {
-            TilawaFeedback.showToast(
-              context,
-              message: l10n.profileCompletionSavedSuccess,
-              variant: TilawaFeedbackVariant.success,
-            );
-            Navigator.of(context).pop(true);
-          }
-          if (state is ProfileCompletionFailure) {
-            TilawaFeedback.showToast(
-              context,
-              message: state.failure.toLocalizedMessage(context),
-              variant: TilawaFeedbackVariant.error,
-            );
-          }
-        },
-        builder: (context, state) => switch (state) {
-          ProfileCompletionInitial() ||
-          ProfileCompletionLoading() => const Center(
-            child: CircularProgressIndicator(),
-          ),
-          ProfileCompletionSaving() => _SavingIndicator(
-            message: l10n.profileCompletionSaving,
-          ),
-          ProfileCompletionSaved() => const SizedBox.shrink(),
-          ProfileCompletionFailure(:final failure) => _LoadFailureView(
-            message: failure.toLocalizedMessage(context),
-            retryLabel: l10n.retry,
-            onRetry: () => context.read<ProfileCompletionBloc>().add(
-              ProfileLoadRequested(userId: widget.userId),
-            ),
-          ),
-          ProfileCompletionEditing(
-            :final userId,
-            :final availableCountries,
-            :final minimumStudentAgeYears,
-            :final selectedGender,
-            :final selectedDateOfBirth,
-            :final selectedCountry,
-            :final selectedCity,
-            :final availableCities,
-            :final isLoadingCities,
-            :final countryPickerLocked,
-            :final cityPickerLocked,
-            :final submitAttempted,
-            :final invalidFieldCount,
-            :final selectedLearningGoals,
-          ) =>
-            TilawaFormScreenScaffold(
-              validationController: _validationController,
-              body: _ProfileCompletionFormBody(
-                l10n: l10n,
-                selectedGender: selectedGender,
-                selectedDateOfBirth: selectedDateOfBirth,
-                minimumStudentAgeYears: minimumStudentAgeYears,
-                dateOfBirthError: state.visibleDateOfBirthError(
-                  l10n,
-                  (failure) => failure.toLocalizedMessage(context),
-                ),
-                genderError: state.genderErrorFor(l10n),
-                countryError: state.countryErrorFor(l10n),
-                cityError: state.cityErrorFor(l10n),
-                availableCountries: availableCountries,
-                selectedCountry: selectedCountry,
-                countryPickerLocked: countryPickerLocked,
-                availableCities: availableCities,
-                selectedCity: selectedCity,
-                isLoadingCities: isLoadingCities,
-                cityPickerLocked: cityPickerLocked,
-                selectedLearningGoals: selectedLearningGoals,
-                onGenderSelected: (gender) => context
-                    .read<ProfileCompletionBloc>()
-                    .add(GenderSelected(gender)),
-                onDateOfBirthSet: (date) => context
-                    .read<ProfileCompletionBloc>()
-                    .add(DateOfBirthSet(date)),
-                onCountrySelected: (country) => context
-                    .read<ProfileCompletionBloc>()
-                    .add(CountrySelected(country)),
-                onCitySelected: (city) => context
-                    .read<ProfileCompletionBloc>()
-                    .add(CitySelected(city)),
-                onLearningGoalToggled: (goal) => context
-                    .read<ProfileCompletionBloc>()
-                    .add(LearningGoalToggled(goal)),
-              ),
-              footer: TilawaFormSubmitFooter(
-                buttonText: l10n.profileCompletionSaveAndContinue,
-                invalidFieldCount: submitAttempted ? invalidFieldCount : null,
-                onPressed: () => context.read<ProfileCompletionBloc>().add(
-                  ProfileSubmitted(userId: userId),
-                ),
-              ),
-            ),
-        },
+          },
+        ),
       ),
     );
   }

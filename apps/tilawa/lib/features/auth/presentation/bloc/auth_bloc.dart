@@ -13,9 +13,13 @@ import '../../data/services/google_sign_in_session_tracker.dart';
 import '../../data/services/pending_session_revoke_store.dart';
 import '../../domain/entities/auth_error_key.dart';
 import '../../domain/entities/auth_result.dart';
+import '../../domain/entities/email_registration_draft.dart';
+import '../../domain/entities/register_with_email_result.dart';
 import '../../domain/entities/user_entity.dart';
 import '../../domain/usecases/delete_account.dart';
 import '../../domain/usecases/get_current_user_use_case.dart';
+import '../../domain/usecases/register_with_email_use_case.dart';
+import '../../domain/usecases/sign_in_with_email_use_case.dart';
 import '../../domain/usecases/sign_in_with_google_use_case.dart';
 import '../../domain/usecases/sign_out.dart';
 import '../../domain/usecases/sync_device_token_use_case.dart';
@@ -31,6 +35,8 @@ part 'auth_state.dart';
 class AuthBloc extends HydratedBloc<AuthEvent, AuthState> {
   AuthBloc(
     this._signInWithGoogle,
+    this._signInWithEmail,
+    this._registerWithEmail,
     this._signOut,
     this._deleteAccount,
     this._getCurrentUser,
@@ -41,6 +47,8 @@ class AuthBloc extends HydratedBloc<AuthEvent, AuthState> {
     this._signInSessionTracker,
   ) : super(const AuthState.initial()) {
     on<SignInWithGoogleEvent>(_onSignInWithGoogle);
+    on<SignInWithEmailEvent>(_onSignInWithEmail);
+    on<RegisterWithEmailEvent>(_onRegisterWithEmail);
     on<SignOutEvent>(_onSignOut);
     on<DeleteAccountEvent>(_onDeleteAccount);
     on<CheckAuthStatusEvent>(_onCheckAuthStatus);
@@ -51,6 +59,8 @@ class AuthBloc extends HydratedBloc<AuthEvent, AuthState> {
   int _interactiveSignInGeneration = 0;
 
   final SignInWithGoogleUseCase _signInWithGoogle;
+  final SignInWithEmailUseCase _signInWithEmail;
+  final RegisterWithEmailUseCase _registerWithEmail;
   final SignOut _signOut;
   final DeleteAccount _deleteAccount;
   final GetCurrentUserUseCase _getCurrentUser;
@@ -123,6 +133,109 @@ class AuthBloc extends HydratedBloc<AuthEvent, AuthState> {
       emit(const AuthState.error(message: 'Authentication failed'));
     } finally {
       _signInSessionTracker.markFinished();
+    }
+  }
+
+  Future<void> _onSignInWithEmail(
+    SignInWithEmailEvent event,
+    Emitter<AuthState> emit,
+  ) async {
+    final int generation = ++_interactiveSignInGeneration;
+    try {
+      await PendingSessionRevokeStore.clear();
+      emit(const AuthState.loading());
+
+      final AuthResult result = await _signInWithEmail(
+        email: event.email,
+        password: event.password,
+      );
+
+      if (generation != _interactiveSignInGeneration) {
+        return;
+      }
+
+      switch (result) {
+        case AuthSuccess(:final user):
+          await _handleSignInSuccess(
+            user: user,
+            generation: generation,
+            emit: emit,
+          );
+        case AuthFailure(:final message, :final code, :final details):
+          logger.w(
+            code == null
+                ? 'Email sign-in failed: $message'
+                : 'Email sign-in failed: $message (code: $code)',
+            stackTrace: details == null ? null : StackTrace.fromString(details),
+          );
+          emit(AuthState.error(message: message));
+        case AuthCancelled():
+          emit(const AuthState.unauthenticated());
+        case AuthResultNoGoogleAccounts():
+          emit(const AuthState.unauthenticated());
+      }
+    } catch (error, stackTrace) {
+      if (generation != _interactiveSignInGeneration) {
+        return;
+      }
+      logger.e('Email sign-in failed', error: error, stackTrace: stackTrace);
+      emit(const AuthState.error(message: 'Authentication failed'));
+    }
+  }
+
+  Future<void> _onRegisterWithEmail(
+    RegisterWithEmailEvent event,
+    Emitter<AuthState> emit,
+  ) async {
+    final int generation = ++_interactiveSignInGeneration;
+    try {
+      await PendingSessionRevokeStore.clear();
+      emit(const AuthState.loading());
+
+      final RegisterWithEmailResult result = await _registerWithEmail(
+        draft: event.draft,
+      );
+
+      if (generation != _interactiveSignInGeneration) {
+        return;
+      }
+
+      switch (result) {
+        case RegisterWithEmailCompleted(:final user):
+          await _handleSignInSuccess(
+            user: user,
+            generation: generation,
+            emit: emit,
+          );
+        case RegisterWithEmailProfilePersistenceFailed(:final user):
+          await _handleSignInSuccess(
+            user: user,
+            generation: generation,
+            emit: emit,
+          );
+        case RegisterWithEmailAuthFailed(
+          :final message,
+          :final code,
+          :final details,
+        ):
+          logger.w(
+            code == null
+                ? 'Email registration failed: $message'
+                : 'Email registration failed: $message (code: $code)',
+            stackTrace: details == null ? null : StackTrace.fromString(details),
+          );
+          emit(AuthState.error(message: message));
+      }
+    } catch (error, stackTrace) {
+      if (generation != _interactiveSignInGeneration) {
+        return;
+      }
+      logger.e(
+        'Email registration failed',
+        error: error,
+        stackTrace: stackTrace,
+      );
+      emit(const AuthState.error(message: 'Authentication failed'));
     }
   }
 

@@ -1216,6 +1216,189 @@ class AppLocalizationsEn extends AppLocalizations {
       'Something went wrong. Please try again.';
 
   @override
+  String get signInWithEmailDescription =>
+      'Sign in with your email and password';
+
+  @override
+  String get createAccountDescription =>
+      'Create an account with email and password';
+
+  @override
+  String get emailAddress => 'Email address';
+
+  @override
+  String get password => 'Password';
+
+  @override
+  String get confirmPassword => 'Confirm password';
+
+  @override
+  String get signInWithEmail => 'Sign in with email';
+
+  @override
+  String get createAccount => 'Create account';
+
+  @override
+  String registrationStepProgress(int current, int total, String title) {
+    return 'Step $current of $total: $title';
+  }
+
+  @override
+  String get registrationStepAccountTitle => 'Account';
+
+  @override
+  String get registrationStepAccountDescription =>
+      'Choose your email and password';
+
+  @override
+  String get registrationStepPersonalTitle => 'Personal details';
+
+  @override
+  String get registrationStepPersonalDescription => 'Tell us about yourself';
+
+  @override
+  String get registrationStepLearningTitle => 'Quran learning';
+
+  @override
+  String get registrationStepLearningDescription =>
+      'What would you like to learn?';
+
+  @override
+  String get registrationStepGuardianTitle => 'Guardian';
+
+  @override
+  String get registrationStepGuardianDescription =>
+      'Guardian approval is required before booking sessions for students under the platform age threshold.';
+
+  @override
+  String get registrationGuardianStepTitle => 'Guardian consent';
+
+  @override
+  String get registrationGuardianConsentLabel =>
+      'I confirm a parent or guardian will approve bookings';
+
+  @override
+  String get registrationStepReviewTitle => 'Review';
+
+  @override
+  String get registrationStepReviewDescription =>
+      'Review your details, then create your account';
+
+  @override
+  String get registrationPreferredLanguageLabel => 'Preferred app language';
+
+  @override
+  String get registrationMinorNotice =>
+      'Students under the platform age threshold need guardian approval before booking.';
+
+  @override
+  String get registrationDisplayNameRequired => 'Enter your full name';
+
+  @override
+  String get registrationGenderRequired => 'Select your gender';
+
+  @override
+  String get registrationDateOfBirthRequired => 'Select your date of birth';
+
+  @override
+  String get registrationCountryRequired => 'Select your country';
+
+  @override
+  String get registrationCityRequired => 'Select your city';
+
+  @override
+  String get registrationPreferredLanguageRequired =>
+      'Select your preferred language';
+
+  @override
+  String get registrationLearningGoalsRequired =>
+      'Select at least one learning goal';
+
+  @override
+  String get registrationGuardianConsentRequired =>
+      'Confirm guardian consent to continue';
+
+  @override
+  String get registrationProfilePersistenceFailed =>
+      'Account created but saving your profile failed. Tap retry or complete your profile after sign-in.';
+
+  @override
+  String get registrationRetryProfileSave => 'Retry saving profile';
+
+  @override
+  String get forgotPassword => 'Forgot password?';
+
+  @override
+  String get forgotPasswordDescription =>
+      'Enter your email and we will send a reset link';
+
+  @override
+  String get sendResetLink => 'Send reset link';
+
+  @override
+  String get orContinueWith => 'Or continue with';
+
+  @override
+  String get alreadyHaveAccount => 'Already have an account? Sign in';
+
+  @override
+  String get noAccountYet => 'No account yet? Create one';
+
+  @override
+  String get authInvalidEmail => 'Enter a valid email address';
+
+  @override
+  String get authWeakPassword => 'Password must be at least 6 characters';
+
+  @override
+  String get authPasswordsDoNotMatch => 'Passwords do not match';
+
+  @override
+  String get authUserNotFound => 'No account found for this email';
+
+  @override
+  String get authWrongPassword => 'Incorrect password';
+
+  @override
+  String get authEmailAlreadyInUse =>
+      'An account already exists with this email. Sign in instead.';
+
+  @override
+  String get authEmailAlreadyInUseWithGoogle =>
+      'This email is registered with Google. Sign in with Google instead.';
+
+  @override
+  String get authAccountExistsWithDifferentCredential =>
+      'This email uses a different sign-in method. Use the original method.';
+
+  @override
+  String get authAccountExistsUseEmailPassword =>
+      'This email is registered with a password. Sign in with email instead.';
+
+  @override
+  String get authTooManyRequests =>
+      'Too many attempts. Please wait and try again.';
+
+  @override
+  String get authOperationNotAllowed =>
+      'Email sign-in is not enabled. Contact support.';
+
+  @override
+  String get authUserDisabled =>
+      'This account has been disabled. Contact support.';
+
+  @override
+  String get authInvalidCredential => 'Invalid email or password';
+
+  @override
+  String get authResetEmailSent =>
+      'If an account exists, a reset link was sent to your email.';
+
+  @override
+  String get completeProfilePrompt =>
+      'Complete your profile to book Quran sessions';
+
+  @override
   String get downloadLowStorageWarning =>
       'Available storage may not be enough for this download. Free up space if downloads fail.';
 

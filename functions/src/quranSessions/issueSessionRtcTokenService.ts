@@ -8,6 +8,8 @@ import {
   readAgoraRtcCredentials,
 } from "./agoraTokenService";
 import { lifecycleError } from "./lifecycleErrors";
+import { isWithinJoinWindow } from "./sessionJoinWindowPolicy";
+import { JOIN_WINDOW_LEAD_MS } from "./platformSchedulingPolicy";
 import {
   buildLiveKitRtcToken,
   LiveKitRtcCredentials,
@@ -41,8 +43,9 @@ export interface IssueSessionRtcTokenDeps {
 
 const JOINABLE_STATUSES = new Set([
   "scheduled",
+  "confirmed",
   "in_progress",
-  "reschedule_pending",
+  "rescheduled",
 ]);
 
 export async function issueSessionRtcTokenForRequest(
@@ -93,6 +96,36 @@ export async function issueSessionRtcTokenForRequest(
     throw new HttpsError("not-found", "Booking not found.");
   }
   const booking = bookingSnap.data() ?? {};
+  const startsAtRaw = (session.startsAt ?? booking.startsAt) as
+    | FirebaseFirestore.Timestamp
+    | undefined;
+  const endsAtRaw = (session.endsAt ?? booking.endsAt) as
+    | FirebaseFirestore.Timestamp
+    | undefined;
+  if (startsAtRaw == null || endsAtRaw == null) {
+    throw lifecycleError(
+      "invalid_transition",
+      "Session schedule is incomplete.",
+      { reasonCode: "join_not_allowed" },
+    );
+  }
+  const joinLeadMs =
+    (booking.joinWindowLeadMs as number | undefined) ?? JOIN_WINDOW_LEAD_MS;
+  if (
+    !isWithinJoinWindow({
+      startsAt: startsAtRaw.toDate(),
+      endsAt: endsAtRaw.toDate(),
+      now: new Date(),
+      leadTimeMs: joinLeadMs,
+    })
+  ) {
+    throw lifecycleError(
+      "join_window_closed",
+      "Session join window is not open.",
+      { reasonCode: "join_window_closed" },
+    );
+  }
+
   const participants = {
     studentId: (booking.studentId as string) ?? "",
     teacherId: (booking.teacherId as string) ?? "",

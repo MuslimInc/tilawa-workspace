@@ -151,6 +151,8 @@ QuranTutorBookingMode resolveQuranTutorBookingModeHint({
 }
 
 /// Booking UI policy derived from [AppLaunchConfig] RTC flags.
+///
+/// Production exposes in-app video only (Q-VC-01).
 SessionModePolicy sessionModePolicyFromLaunchConfig(
   AppLaunchConfig config, {
   String distribution = const String.fromEnvironment(
@@ -165,6 +167,7 @@ SessionModePolicy sessionModePolicyFromLaunchConfig(
     debugMode: debugMode,
   );
   return SessionModePolicy(
+    enabledCallTypes: const {SessionCallType.videoCall},
     voiceVideoUseMockProvider: hint == SessionCallProviderKind.mock,
   );
 }

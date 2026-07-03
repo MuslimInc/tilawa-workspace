@@ -1,0 +1,13 @@
+<svg width="800" height="800" viewBox="0 0 800 800" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <g transform="translate(0,-28)">
+    <path d="M670 280 Q730 280 730 340 V630 Q730 690 670 690 H130 Q70 690 70 630 V340 Q70 280 130 280" stroke="#1A2E24" stroke-width="44" stroke-linecap="round" stroke-linejoin="round"/>
+    <path d="M400 585 C345 522 290 508 190 520 V190 C278 173 348 196 400 240 V585 Z" stroke="#1A2E24" stroke-width="44" stroke-linecap="round" stroke-linejoin="round"/>
+    <path d="M400 585 C455 522 510 508 610 520 V190 C522 173 452 196 400 240 V585 Z" stroke="#1A2E24" stroke-width="44" stroke-linecap="round" stroke-linejoin="round"/>
+    <path d="M352 306 C316 290 280 282 246 281" stroke="#1DAB61" stroke-width="30" stroke-linecap="round"/>
+    <path d="M352 362 C316 346 280 338 246 337" stroke="#1DAB61" stroke-width="30" stroke-linecap="round"/>
+    <path d="M352 418 C322 404 292 396 266 394" stroke="#1DAB61" stroke-width="30" stroke-linecap="round"/>
+    <path d="M448 306 C484 290 520 282 554 281" stroke="#1DAB61" stroke-width="30" stroke-linecap="round"/>
+    <path d="M448 362 C484 346 520 338 554 337" stroke="#1DAB61" stroke-width="30" stroke-linecap="round"/>
+    <path d="M448 418 C478 404 508 396 534 394" stroke="#1DAB61" stroke-width="30" stroke-linecap="round"/>
+  </g>
+</svg>

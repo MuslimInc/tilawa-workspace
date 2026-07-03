@@ -1,0 +1,14 @@
+<svg width="800" height="800" viewBox="0 0 800 800" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    <mask id="moon">
+      <rect width="800" height="800" fill="#fff"/>
+      <circle cx="452" cy="537" r="35" fill="#000"/>
+    </mask>
+  </defs>
+  <g fill="#1DAB61" mask="url(#moon)">
+    <ellipse cx="400" cy="247" rx="55" ry="54"/>
+    <path d="M290 377 C288 335 330 319 400 319 C470 319 512 335 510 377 C508 413 460 425 400 425 C340 425 292 413 290 377 Z" transform="rotate(-5 400 372)"/>
+    <path d="M248 475 Q400 517 552 475 C560 553 505 605 400 607 C295 605 240 553 248 475 Z"/>
+  </g>
+  <circle cx="465" cy="526" r="29" fill="#1DAB61"/>
+</svg>

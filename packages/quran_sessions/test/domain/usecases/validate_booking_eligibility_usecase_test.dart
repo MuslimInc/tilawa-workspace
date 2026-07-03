@@ -313,5 +313,34 @@ void main() {
 
       check(result.fold((f) => f, (_) => null)).isA<MarketNotEnabledFailure>();
     });
+    test(
+      'rejects child without linked guardian before approval check',
+      () async {
+        profileRepo = FakeUserProfileRepository(
+          profile: makeProfile(
+            userId: 'student_1',
+            gender: UserGender.male,
+            dateOfBirth: DateTime(2018, 6, 15),
+            countryCode: 'EG',
+            cityId: 'cairo',
+          ),
+        );
+        useCase = ValidateBookingEligibilityUseCase(
+          profileRepository: profileRepo,
+          policyRepository: policyRepo,
+          teacherRepository: teacherRepo,
+          marketConfigRepository: marketRepo,
+        );
+
+        final result = await useCase(
+          studentId: 'student_1',
+          teacherId: 'teacher_1',
+        );
+
+        check(
+          result.fold((f) => f, (_) => null),
+        ).isA<GuardianApprovalRequiredFailure>();
+      },
+    );
   });
 }

@@ -13,6 +13,21 @@ const TEST_CREDENTIALS = {
   appCertificate: "test-agora-app-cert",
 };
 
+function timestampFromDate(date: Date) {
+  return {
+    toDate: () => date,
+    toMillis: () => date.getTime(),
+  };
+}
+
+function joinWindowSchedule() {
+  const now = new Date();
+  return {
+    startsAt: timestampFromDate(new Date(now.getTime() + 5 * 60 * 1000)),
+    endsAt: timestampFromDate(new Date(now.getTime() + 65 * 60 * 1000)),
+  };
+}
+
 function createDb(docs: Record<string, Record<string, unknown>>) {
   return {
     collection(name: string) {
@@ -66,12 +81,14 @@ function agoraSessionDocs(
   const bookingId = overrides.bookingId ?? "booking_1";
   const studentId = overrides.studentId ?? "student_1";
   const teacherId = overrides.teacherId ?? "teacher_profile_1";
+  const schedule = joinWindowSchedule();
   const docs: Record<string, Record<string, unknown>> = {
     [`quran_sessions/${sessionId}`]: {
       callProvider: overrides.callProvider ?? "agora",
       lifecycleStatus: overrides.lifecycleStatus ?? "scheduled",
       bookingId,
       providerSessionId: overrides.providerSessionId,
+      ...schedule,
     },
     [`quran_teacher_profiles/${teacherId}`]: {
       userId: overrides.teacherUserId ?? "teacher_auth_1",
@@ -85,6 +102,7 @@ function agoraSessionDocs(
     docs[`quran_bookings/${bookingId}`] = {
       studentId,
       teacherId,
+      ...schedule,
     };
   }
   docs["users/stranger_1"] = { session: { epoch: 1 } };

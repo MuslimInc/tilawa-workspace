@@ -1211,6 +1211,183 @@ class AppLocalizationsAr extends AppLocalizations {
   String get authErrorGenericMessage => 'حدث خطأ ما. يرجى المحاولة مرة أخرى.';
 
   @override
+  String get signInWithEmailDescription =>
+      'سجّل الدخول ببريدك الإلكتروني وكلمة المرور';
+
+  @override
+  String get createAccountDescription =>
+      'أنشئ حساباً بالبريد الإلكتروني وكلمة المرور';
+
+  @override
+  String get emailAddress => 'البريد الإلكتروني';
+
+  @override
+  String get password => 'كلمة المرور';
+
+  @override
+  String get confirmPassword => 'تأكيد كلمة المرور';
+
+  @override
+  String get signInWithEmail => 'تسجيل الدخول بالبريد';
+
+  @override
+  String get createAccount => 'إنشاء حساب';
+
+  @override
+  String registrationStepProgress(int current, int total, String title) {
+    return 'الخطوة $current من $total: $title';
+  }
+
+  @override
+  String get registrationStepAccountTitle => 'الحساب';
+
+  @override
+  String get registrationStepAccountDescription =>
+      'اختر بريدك الإلكتروني وكلمة المرور';
+
+  @override
+  String get registrationStepPersonalTitle => 'البيانات الشخصية';
+
+  @override
+  String get registrationStepPersonalDescription => 'أخبرنا عن نفسك';
+
+  @override
+  String get registrationStepLearningTitle => 'تعلّم القرآن';
+
+  @override
+  String get registrationStepLearningDescription => 'ماذا تريد أن تتعلّم؟';
+
+  @override
+  String get registrationStepGuardianTitle => 'وليّ الأمر';
+
+  @override
+  String get registrationStepGuardianDescription =>
+      'مطلوب موافقة وليّ الأمر قبل حجز الجلسات للطلاب دون عمر المنصة.';
+
+  @override
+  String get registrationGuardianStepTitle => 'موافقة وليّ الأمر';
+
+  @override
+  String get registrationGuardianConsentLabel =>
+      'أؤكد أن وليّ الأمر سيوافق على الحجوزات';
+
+  @override
+  String get registrationStepReviewTitle => 'المراجعة';
+
+  @override
+  String get registrationStepReviewDescription => 'راجع بياناتك ثم أنشئ حسابك';
+
+  @override
+  String get registrationPreferredLanguageLabel => 'لغة التطبيق المفضّلة';
+
+  @override
+  String get registrationMinorNotice =>
+      'الطلاب دون عمر المنصة يحتاجون موافقة وليّ الأمر قبل الحجز.';
+
+  @override
+  String get registrationDisplayNameRequired => 'أدخل اسمك الكامل';
+
+  @override
+  String get registrationGenderRequired => 'اختر الجنس';
+
+  @override
+  String get registrationDateOfBirthRequired => 'اختر تاريخ الميلاد';
+
+  @override
+  String get registrationCountryRequired => 'اختر الدولة';
+
+  @override
+  String get registrationCityRequired => 'اختر المدينة';
+
+  @override
+  String get registrationPreferredLanguageRequired => 'اختر اللغة المفضّلة';
+
+  @override
+  String get registrationLearningGoalsRequired =>
+      'اختر هدف تعلّم واحداً على الأقل';
+
+  @override
+  String get registrationGuardianConsentRequired =>
+      'أكّد موافقة وليّ الأمر للمتابعة';
+
+  @override
+  String get registrationProfilePersistenceFailed =>
+      'تم إنشاء الحساب لكن حفظ الملف الشخصي فشل. أعد المحاولة أو أكمل ملفك بعد تسجيل الدخول.';
+
+  @override
+  String get registrationRetryProfileSave => 'إعادة حفظ الملف الشخصي';
+
+  @override
+  String get forgotPassword => 'نسيت كلمة المرور؟';
+
+  @override
+  String get forgotPasswordDescription =>
+      'أدخل بريدك الإلكتروني وسنرسل رابط إعادة التعيين';
+
+  @override
+  String get sendResetLink => 'إرسال رابط إعادة التعيين';
+
+  @override
+  String get orContinueWith => 'أو تابع باستخدام';
+
+  @override
+  String get alreadyHaveAccount => 'لديك حساب؟ سجّل الدخول';
+
+  @override
+  String get noAccountYet => 'لا تملك حساباً؟ أنشئ حساباً';
+
+  @override
+  String get authInvalidEmail => 'أدخل بريداً إلكترونياً صالحاً';
+
+  @override
+  String get authWeakPassword => 'يجب أن تكون كلمة المرور 6 أحرف على الأقل';
+
+  @override
+  String get authPasswordsDoNotMatch => 'كلمتا المرور غير متطابقتين';
+
+  @override
+  String get authUserNotFound => 'لا يوجد حساب بهذا البريد';
+
+  @override
+  String get authWrongPassword => 'كلمة المرور غير صحيحة';
+
+  @override
+  String get authEmailAlreadyInUse =>
+      'يوجد حساب بهذا البريد. سجّل الدخول بدلاً من ذلك.';
+
+  @override
+  String get authEmailAlreadyInUseWithGoogle =>
+      'هذا البريد مسجّل بحساب Google. سجّل الدخول بـ Google.';
+
+  @override
+  String get authAccountExistsWithDifferentCredential =>
+      'هذا البريد يستخدم طريقة تسجيل مختلفة. استخدم الطريقة الأصلية.';
+
+  @override
+  String get authAccountExistsUseEmailPassword =>
+      'هذا البريد مسجّل بكلمة مرور. سجّل الدخول بالبريد.';
+
+  @override
+  String get authTooManyRequests => 'محاولات كثيرة. انتظر ثم أعد المحاولة.';
+
+  @override
+  String get authOperationNotAllowed =>
+      'تسجيل الدخول بالبريد غير مفعّل. تواصل مع الدعم.';
+
+  @override
+  String get authUserDisabled => 'تم تعطيل هذا الحساب. تواصل مع الدعم.';
+
+  @override
+  String get authInvalidCredential => 'البريد أو كلمة المرور غير صحيحة';
+
+  @override
+  String get authResetEmailSent =>
+      'إذا وُجد حساب، أُرسل رابط إعادة التعيين إلى بريدك.';
+
+  @override
+  String get completeProfilePrompt => 'أكمل ملفك الشخصي لحجز جلسات القرآن';
+
+  @override
   String get downloadLowStorageWarning =>
       'قد لا تكون مساحة التخزين المتاحة كافية لهذا التحميل. حرّر مساحة إذا فشل التحميل.';
 

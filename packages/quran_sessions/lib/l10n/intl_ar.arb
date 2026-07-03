@@ -181,8 +181,10 @@
         }
     },
     "sessionsTabUpcoming": "القادمة",
+    "sessionsTabPending": "قيد الانتظار",
     "sessionsTabPast": "السابقة",
     "sessionsTabCancelled": "الملغاة",
+    "noPendingSessions": "لا توجد جلسات قيد الانتظار",
     "bookAgainAction": "احجز مرة أخرى",
     "sessionStatusStartingSoon": "تبدأ قريبًا",
     "sessionStartsInMinutes": "يبدأ بعد {minutes} د",

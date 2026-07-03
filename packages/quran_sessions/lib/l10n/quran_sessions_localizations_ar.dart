@@ -444,10 +444,16 @@ class QuranSessionsLocalizationsAr extends QuranSessionsLocalizations {
   String get sessionsTabUpcoming => 'القادمة';
 
   @override
+  String get sessionsTabPending => 'قيد الانتظار';
+
+  @override
   String get sessionsTabPast => 'السابقة';
 
   @override
   String get sessionsTabCancelled => 'الملغاة';
+
+  @override
+  String get noPendingSessions => 'لا توجد جلسات قيد الانتظار';
 
   @override
   String get bookAgainAction => 'احجز مرة أخرى';

@@ -177,7 +177,7 @@ class MeMuslimDesignTokens extends ThemeExtension<MeMuslimDesignTokens> {
   /// calibrated for visible depth on real-device DPIs.
   final double opacitySubtle;
 
-  /// 0.05 — default alpha for `BoxShadow.color` on raised cards and chips.
+  /// 0.04 — default alpha for `BoxShadow.color` on raised cards and chips.
   /// Calibrated for a soft Moneyloop-style lift (wide blur, low opacity).
   final double opacityShadow;
 
@@ -897,13 +897,13 @@ extension MeMuslimRadiusResolverX on MeMuslimDesignTokens {
     double width = 0,
   }) {
     return switch (family) {
-      TilawaRadiusFamily.card => radiusMedium,
+      TilawaRadiusFamily.card => radiusCard,
       TilawaRadiusFamily.pill =>
         height > 0
             ? radiusPill(height)
             : radiusPill(kMeMuslimMinInteractiveDimension),
       TilawaRadiusFamily.chrome => radiusMedium,
-      TilawaRadiusFamily.section => radiusMedium,
+      TilawaRadiusFamily.section => radiusSection,
       TilawaRadiusFamily.hero => radiusLarge,
       TilawaRadiusFamily.decorative => radiusMedium,
       TilawaRadiusFamily.icon => radiusIcon(

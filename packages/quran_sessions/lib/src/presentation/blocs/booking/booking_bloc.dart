@@ -2,17 +2,19 @@ import 'package:bloc_concurrency/bloc_concurrency.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
 import '../../../boundaries/payment/session_payment_confirmation.dart';
-import '../../../domain/entities/manual_payment_price.dart';
 import '../../../domain/entities/session_lifecycle_status.dart';
 import '../../../domain/entities/session_price.dart';
 import '../../../domain/entities/session_pricing_type.dart';
 import '../../../domain/entities/teacher_availability.dart';
 import '../../../domain/failures/quran_sessions_failure.dart';
 import '../../../domain/mappers/session_aggregate_mapper.dart';
+import '../../../domain/policies/market_session_price_policy.dart';
 import '../../../domain/policies/session_mode_policy.dart';
+import '../../../domain/usecases/get_market_config_usecase.dart';
 import '../../../domain/usecases/get_teacher_availability_usecase.dart';
 import '../../../domain/usecases/get_teacher_profile_by_id_usecase.dart';
 import '../../../domain/usecases/get_teacher_profile_usecase.dart';
+import '../../../domain/usecases/get_user_profile_usecase.dart';
 import '../../../domain/usecases/submit_session_booking_usecase.dart';
 import '../../../domain/usecases/validate_booking_eligibility_usecase.dart';
 import 'booking_event.dart';
@@ -25,7 +27,9 @@ class BookingBloc extends Bloc<BookingEvent, BookingState> {
     required this._validateEligibility,
     required this._getTeacherProfile,
     this._getTeacherListing,
-    this._sessionModePolicy = SessionModePolicy.freeBeta,
+    this._getUserProfile,
+    this._getMarketConfig,
+    this._sessionModePolicy = SessionModePolicy.videoOnly,
     this._onBookingLostDueToNoAvailability,
     this._resolveMarketCode,
     this._paymentConfirmation,
@@ -46,6 +50,8 @@ class BookingBloc extends Bloc<BookingEvent, BookingState> {
   final ValidateBookingEligibilityUseCase _validateEligibility;
   final GetTeacherProfileByIdUseCase _getTeacherProfile;
   final GetTeacherProfileUseCase? _getTeacherListing;
+  final GetUserProfileUseCase? _getUserProfile;
+  final GetMarketConfigUseCase? _getMarketConfig;
   final SessionModePolicy _sessionModePolicy;
   final SessionPaymentConfirmation? _paymentConfirmation;
 
@@ -107,14 +113,23 @@ class BookingBloc extends Bloc<BookingEvent, BookingState> {
 
     SessionPricingType? pricingType;
     SessionPrice? sessionPrice;
-    ManualPaymentPrice? manualPaymentPrice;
-    final listing = _getTeacherListing;
-    if (listing != null) {
-      final listingResult = await listing(teacherId);
-      listingResult.fold((_) {}, (teacher) {
-        pricingType = teacher.pricingType;
-        sessionPrice = teacher.price;
-        manualPaymentPrice = teacher.manualPaymentPrice;
+    final getUserProfile = _getUserProfile;
+    final getMarketConfig = _getMarketConfig;
+    if (getUserProfile != null && getMarketConfig != null) {
+      final studentResult = await getUserProfile(studentId);
+      await studentResult.fold((_) async {}, (student) async {
+        final country = student.countryCode;
+        final cityId = student.cityId;
+        if (country == null || cityId == null) return;
+        final marketResult = await getMarketConfig(country);
+        marketResult.fold((_) {}, (market) {
+          final preview = MarketSessionPricePolicy.resolvePreview(
+            market: market,
+            cityId: cityId,
+          );
+          pricingType = preview.pricingType;
+          sessionPrice = preview.price;
+        });
       });
     }
 
@@ -150,7 +165,7 @@ class BookingBloc extends Bloc<BookingEvent, BookingState> {
         teacherExternalMeetingUrl: externalMeetingUrl,
         pricingType: pricingType,
         sessionPrice: sessionPrice,
-        manualPaymentPrice: manualPaymentPrice,
+        manualPaymentPrice: null,
       ),
     );
   }

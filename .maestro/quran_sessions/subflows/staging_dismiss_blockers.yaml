@@ -1,0 +1,13 @@
+# Dismiss common post-launch blockers (release notes, onboarding).
+appId: com.tilawa.app
+---
+- tapOn:
+    text: ".*تم.*"
+    optional: true
+- tapOn:
+    text: "Next"
+    optional: true
+- tapOn:
+    text: "Get started"
+    optional: true
+- waitForAnimationToEnd

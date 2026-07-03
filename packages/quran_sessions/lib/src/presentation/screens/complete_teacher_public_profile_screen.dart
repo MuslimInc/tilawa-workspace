@@ -2,7 +2,9 @@ import 'package:flutter/material.dart';
 import 'package:quran_sessions/core/l10n_extensions.dart';
 import 'package:tilawa_ui_kit/tilawa_ui_kit.dart';
 
+import '../../domain/entities/session_call_type.dart';
 import '../../domain/entities/teacher_profile.dart';
+import '../../domain/policies/session_mode_policy.dart';
 import '../../domain/usecases/get_current_user_teacher_capability_usecase.dart';
 import '../../domain/usecases/save_teacher_public_profile_usecase.dart';
 import '../../domain/value_objects/teacher_public_name.dart';
@@ -17,12 +19,14 @@ class CompleteTeacherPublicProfileScreen extends StatefulWidget {
     required this.userId,
     required this.getCapability,
     required this.saveProfile,
+    this.sessionModePolicy = SessionModePolicy.freeBeta,
     this.onComplete,
   });
 
   final String userId;
   final GetCurrentUserTeacherCapabilityUseCase getCapability;
   final SaveTeacherPublicProfileUseCase saveProfile;
+  final SessionModePolicy sessionModePolicy;
   final VoidCallback? onComplete;
 
   @override
@@ -141,7 +145,7 @@ class _CompleteTeacherPublicProfileScreenState
       publicBio: _bioCtrl.text,
       teachingLanguages: _languages.toList(),
       specializations: _specializations.toList(),
-      externalMeetingUrl: _meetingUrlCtrl.text,
+      externalMeetingUrl: _showExternalMeetingUrl ? _meetingUrlCtrl.text : null,
     );
 
     if (!mounted) return;
@@ -174,6 +178,7 @@ class _CompleteTeacherPublicProfileScreenState
     final l10n = context.quranSessionsL10n;
     final tokens = Theme.of(context).tokens;
     final scheme = Theme.of(context).colorScheme;
+    final showExternalMeetingUrl = _showExternalMeetingUrl;
 
     return QuranSessionsScaffold(
       title: l10n.completeTeacherProfileTitle,
@@ -233,23 +238,25 @@ class _CompleteTeacherPublicProfileScreenState
                     textAlignVertical: TextAlignVertical.top,
                   ),
                   SizedBox(height: tokens.spaceLarge),
-                  _SectionTitle(l10n.teacherExternalMeetingUrlLabel),
-                  SizedBox(height: tokens.spaceExtraSmall),
-                  Text(
-                    l10n.teacherExternalMeetingUrlHelper,
-                    style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                      color: scheme.onSurfaceVariant,
+                  if (showExternalMeetingUrl) ...[
+                    _SectionTitle(l10n.teacherExternalMeetingUrlLabel),
+                    SizedBox(height: tokens.spaceExtraSmall),
+                    Text(
+                      l10n.teacherExternalMeetingUrlHelper,
+                      style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                        color: scheme.onSurfaceVariant,
+                      ),
                     ),
-                  ),
-                  SizedBox(height: tokens.spaceSmall),
-                  TilawaTextField(
-                    controller: _meetingUrlCtrl,
-                    hintText: l10n.teacherExternalMeetingUrlHint,
-                    keyboardType: TextInputType.url,
-                    textInputAction: TextInputAction.done,
-                    textAlignVertical: TextAlignVertical.top,
-                  ),
-                  SizedBox(height: tokens.spaceLarge),
+                    SizedBox(height: tokens.spaceSmall),
+                    TilawaTextField(
+                      controller: _meetingUrlCtrl,
+                      hintText: l10n.teacherExternalMeetingUrlHint,
+                      keyboardType: TextInputType.url,
+                      textInputAction: TextInputAction.done,
+                      textAlignVertical: TextAlignVertical.top,
+                    ),
+                    SizedBox(height: tokens.spaceLarge),
+                  ],
                   _SectionTitle(l10n.teachingLanguagesSelect),
                   SizedBox(height: tokens.spaceSmall),
                   Wrap(
@@ -310,6 +317,9 @@ class _CompleteTeacherPublicProfileScreenState
             ),
     );
   }
+
+  bool get _showExternalMeetingUrl =>
+      widget.sessionModePolicy.isEnabled(SessionCallType.externalMeeting);
 }
 
 class _SectionTitle extends StatelessWidget {

@@ -4,8 +4,9 @@ import { Timestamp } from "firebase-admin/firestore";
 
 import { createSessionBooking } from "../src/quranSessions/createSessionBooking";
 import {
-  clearFirestore,
   db,
+  patchPlatformConfig,
+  prepareIntegrationFirestore,
   seedUserSession,
   withSessionEpoch,
 } from "./support/emulator";
@@ -81,7 +82,7 @@ function codeOf(error: unknown): string | undefined {
 }
 
 test("integration: free booking with a verified teacher is scheduled", async () => {
-  await clearFirestore();
+  await prepareIntegrationFirestore();
   await seedVerifiedTeacher("teacher1");
   await seedCompleteStudent("student1");
   await seedUserSession("student1");
@@ -108,7 +109,7 @@ test("integration: free booking with a verified teacher is scheduled", async () 
 });
 
 test("integration: booking notification targets teacher auth uid not profile id", async () => {
-  await clearFirestore();
+  await prepareIntegrationFirestore();
   await seedVerifiedTeacher("teacher1");
   await seedCompleteStudent("student1");
   await seedUserSession("student1");
@@ -128,7 +129,7 @@ test("integration: booking notification targets teacher auth uid not profile id"
 });
 
 test("integration: an unverified teacher is rejected server-side", async () => {
-  await clearFirestore();
+  await prepareIntegrationFirestore();
   await seedVerifiedTeacher("teacher1", { verificationStatus: "pending" });
   await seedCompleteStudent("student1");
   await seedUserSession("student1");
@@ -140,7 +141,7 @@ test("integration: an unverified teacher is rejected server-side", async () => {
 });
 
 test("integration: a disallowed gender combination is rejected server-side", async () => {
-  await clearFirestore();
+  await prepareIntegrationFirestore();
   await seedVerifiedTeacher("teacher1", { allowedStudentGender: "maleOnly" });
   await seedCompleteStudent("student1", { gender: "female" });
   await seedUserSession("student1");
@@ -152,18 +153,22 @@ test("integration: a disallowed gender combination is rejected server-side", asy
 });
 
 test("integration: a paid teacher cannot be booked 'free' while payments are disabled", async () => {
-  await clearFirestore();
+  await prepareIntegrationFirestore();
   await seedVerifiedTeacher("teacher1");
   await seedCompleteStudent("student1");
   await seedUserSession("student1");
-  // A pricing doc for the student's market makes the teacher server-side "paid",
-  // regardless of the client-sent pricingType.
   await db()
-    .collection("quran_teacher_profiles")
-    .doc("teacher1")
-    .collection("pricing")
-    .doc("EG_cairo")
-    .set({ amount: 10, currencyCode: "USD" });
+    .collection("quran_session_market_configs")
+    .doc("EG")
+    .set(
+      {
+        isEnabled: true,
+        minSessionPrice: 10,
+        currencyCode: "USD",
+        cities: [{ cityId: "cairo", isEnabled: true, minSessionPrice: 10 }],
+      },
+      { merge: true },
+    );
 
   await assert.rejects(
     booking.run({
@@ -175,7 +180,7 @@ test("integration: a paid teacher cannot be booked 'free' while payments are dis
 });
 
 test("integration: double-booking the same slot is rejected", async () => {
-  await clearFirestore();
+  await prepareIntegrationFirestore();
   await seedVerifiedTeacher("teacher1");
   await seedCompleteStudent("student1");
   await seedCompleteStudent("student2");
@@ -191,7 +196,7 @@ test("integration: double-booking the same slot is rejected", async () => {
 });
 
 test("integration: replay with same idempotency key returns same booking", async () => {
-  await clearFirestore();
+  await prepareIntegrationFirestore();
   await seedVerifiedTeacher("teacher1");
   await seedCompleteStudent("student1");
   await seedUserSession("student1");
@@ -217,7 +222,7 @@ test("integration: replay with same idempotency key returns same booking", async
 });
 
 test("integration: voice booking stores mock call provider metadata", async () => {
-  await clearFirestore();
+  await prepareIntegrationFirestore();
   await seedVerifiedTeacher("teacher1");
   await seedCompleteStudent("student1");
   await seedUserSession("student1");
@@ -234,7 +239,7 @@ test("integration: voice booking stores mock call provider metadata", async () =
 });
 
 test("integration: group booking is rejected", async () => {
-  await clearFirestore();
+  await prepareIntegrationFirestore();
   await seedVerifiedTeacher("teacher1");
   await seedCompleteStudent("student1");
   await seedUserSession("student1");
@@ -249,7 +254,7 @@ test("integration: group booking is rejected", async () => {
 });
 
 test("integration: client agora provider hint is rejected when agora disabled", async () => {
-  await clearFirestore();
+  await prepareIntegrationFirestore();
   await seedVerifiedTeacher("teacher1");
   await seedCompleteStudent("student1");
   await seedUserSession("student1");
@@ -264,14 +269,11 @@ test("integration: client agora provider hint is rejected when agora disabled", 
 });
 
 test("integration: client agora provider hint is honored when platform enables agora", async () => {
-  await clearFirestore();
+  await prepareIntegrationFirestore();
   await seedVerifiedTeacher("teacher1");
   await seedCompleteStudent("student1");
   await seedUserSession("student1");
-  await db()
-    .collection("quran_session_platform_config")
-    .doc("global")
-    .set({ enabledCallProviders: ["external", "mock", "agora"] });
+  await patchPlatformConfig({ enabledCallProviders: ["external", "mock", "agora"] });
 
   const res = await booking.run({
     data: bookingData({ callType: "videoCall", callProvider: "agora" }),
@@ -283,7 +285,7 @@ test("integration: client agora provider hint is honored when platform enables a
 });
 
 test("integration: different idempotency key on same slot is blocked by lock", async () => {
-  await clearFirestore();
+  await prepareIntegrationFirestore();
   await seedVerifiedTeacher("teacher1");
   await seedCompleteStudent("student1");
   await seedCompleteStudent("student2");
@@ -305,7 +307,7 @@ test("integration: different idempotency key on same slot is blocked by lock", a
 });
 
 test("integration: stale session epoch rejects booking", async () => {
-  await clearFirestore();
+  await prepareIntegrationFirestore();
   await seedVerifiedTeacher("teacher1");
   await seedCompleteStudent("student1");
   await db().collection("users").doc("student1").set({
@@ -322,7 +324,7 @@ test("integration: stale session epoch rejects booking", async () => {
 });
 
 test("integration: external booking without meeting URL is rejected", async () => {
-  await clearFirestore();
+  await prepareIntegrationFirestore();
   await seedVerifiedTeacher("teacher1", { externalMeetingUrl: "" });
   await seedCompleteStudent("student1");
   await seedUserSession("student1");
@@ -334,16 +336,13 @@ test("integration: external booking without meeting URL is rejected", async () =
 });
 
 test("integration: external booking uses platform default meeting URL", async () => {
-  await clearFirestore();
+  await prepareIntegrationFirestore();
   await seedVerifiedTeacher("teacher1", { externalMeetingUrl: "" });
   await seedCompleteStudent("student1");
   await seedUserSession("student1");
-  await db()
-    .collection("quran_session_platform_config")
-    .doc("global")
-    .set({
-      defaultExternalMeetingUrl: "https://meet.example.com/platform-default",
-    });
+  await patchPlatformConfig({
+    defaultExternalMeetingUrl: "https://meet.example.com/platform-default",
+  });
 
   const res = await booking.run({
     data: bookingData(),
@@ -359,7 +358,7 @@ test("integration: external booking uses platform default meeting URL", async ()
 });
 
 test("integration: external booking reads legacy teacher meeting_link field", async () => {
-  await clearFirestore();
+  await prepareIntegrationFirestore();
   await seedVerifiedTeacher("teacher1", {
     externalMeetingUrl: "",
     meeting_link: "https://meet.example.com/legacy-teacher-room",
@@ -380,14 +379,11 @@ test("integration: external booking reads legacy teacher meeting_link field", as
 });
 
 test("integration: voice booking rejects malformed enabledCallProviders safely", async () => {
-  await clearFirestore();
+  await prepareIntegrationFirestore();
   await seedVerifiedTeacher("teacher1");
   await seedCompleteStudent("student1");
   await seedUserSession("student1");
-  await db()
-    .collection("quran_session_platform_config")
-    .doc("global")
-    .set({ enabledCallProviders: "external,mock" });
+  await patchPlatformConfig({ enabledCallProviders: "external,mock" });
 
   await assert.rejects(
     booking.run({
@@ -399,7 +395,7 @@ test("integration: voice booking rejects malformed enabledCallProviders safely",
 });
 
 test("integration: production-shaped teacher profile external booking", async () => {
-  await clearFirestore();
+  await prepareIntegrationFirestore();
   const teacherId = "a1sYAAaBHg5aq1uwya0o";
   await db()
     .collection("quran_teacher_profiles")
@@ -442,7 +438,7 @@ test("integration: production-shaped teacher profile external booking", async ()
 });
 
 test("integration: video booking stores mock call provider metadata", async () => {
-  await clearFirestore();
+  await prepareIntegrationFirestore();
   await seedVerifiedTeacher("teacher1");
   await seedCompleteStudent("student1");
   await seedUserSession("student1");
@@ -460,14 +456,11 @@ test("integration: video booking stores mock call provider metadata", async () =
 });
 
 test("integration: video booking stores agora when platform config enables it", async () => {
-  await clearFirestore();
+  await prepareIntegrationFirestore();
   await seedVerifiedTeacher("teacher1");
   await seedCompleteStudent("student1");
   await seedUserSession("student1");
-  await db()
-    .collection("quran_session_platform_config")
-    .doc("global")
-    .set({ enabledCallProviders: ["external", "mock", "agora"] });
+  await patchPlatformConfig({ enabledCallProviders: ["external", "mock", "agora"] });
 
   const res = await booking.run({
     data: bookingData({ callType: "videoCall" }),
@@ -481,7 +474,7 @@ test("integration: video booking stores agora when platform config enables it", 
 });
 
 test("integration: client webrtc provider hint is rejected when webrtc disabled", async () => {
-  await clearFirestore();
+  await prepareIntegrationFirestore();
   await seedVerifiedTeacher("teacher1");
   await seedCompleteStudent("student1");
   await seedUserSession("student1");
@@ -496,7 +489,7 @@ test("integration: client webrtc provider hint is rejected when webrtc disabled"
 });
 
 test("integration: unsupported call type is rejected", async () => {
-  await clearFirestore();
+  await prepareIntegrationFirestore();
   await seedVerifiedTeacher("teacher1");
   await seedCompleteStudent("student1");
   await seedUserSession("student1");
@@ -511,7 +504,7 @@ test("integration: unsupported call type is rejected", async () => {
 });
 
 test("integration: booking persists participants and audit event", async () => {
-  await clearFirestore();
+  await prepareIntegrationFirestore();
   await seedVerifiedTeacher("teacher1");
   await seedCompleteStudent("student1");
   await seedUserSession("student1");

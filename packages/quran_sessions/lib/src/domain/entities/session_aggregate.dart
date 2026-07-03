@@ -1,5 +1,6 @@
 import 'package:equatable/equatable.dart';
 
+import 'session_allowed_action.dart';
 import 'session_lifecycle_status.dart';
 import 'session_pricing_type.dart';
 
@@ -23,6 +24,8 @@ class SessionAggregate extends Equatable {
     this.sessionId,
     this.revisionSurahNumber,
     this.revisionAyahNumber,
+    this.allowedActionsForStudent,
+    this.allowedActionsForTeacher,
   });
 
   final String id;
@@ -48,6 +51,10 @@ class SessionAggregate extends Equatable {
 
   /// Optional starting ayah within [revisionSurahNumber].
   final int? revisionAyahNumber;
+
+  /// Server-authoritative actions (Q-SR-02), denormalized on booking doc.
+  final SessionAllowedActions? allowedActionsForStudent;
+  final SessionAllowedActions? allowedActionsForTeacher;
 
   bool get isPaid => pricingType == SessionPricingType.fixedPerSession;
 
@@ -107,5 +114,7 @@ class SessionAggregate extends Equatable {
     sessionId,
     revisionSurahNumber,
     revisionAyahNumber,
+    allowedActionsForStudent,
+    allowedActionsForTeacher,
   ];
 }

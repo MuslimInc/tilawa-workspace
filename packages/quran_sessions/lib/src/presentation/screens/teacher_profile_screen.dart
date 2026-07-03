@@ -5,6 +5,7 @@ import 'package:tilawa_ui_kit/tilawa_ui_kit.dart';
 
 import '../../domain/entities/quran_teacher.dart';
 import '../../domain/entities/session_call_type.dart';
+import '../../domain/policies/session_mode_policy.dart';
 import '../../domain/entities/session_review.dart';
 import '../../domain/entities/teacher_availability.dart';
 import '../../domain/value_objects/teacher_public_name.dart';
@@ -31,10 +32,12 @@ class TeacherProfileScreen extends StatefulWidget {
     this.analytics = const QuranSessionsAnalyticsCallbacks(),
     this.onBookTapped,
     this.bookingEnabled = true,
+    this.sessionModePolicy = SessionModePolicy.freeBeta,
   });
 
   final String teacherId;
   final QuranSessionsAnalyticsCallbacks analytics;
+  final SessionModePolicy sessionModePolicy;
 
   /// Called when the user initiates a booking. The host app navigates to
   /// [BookingScreen] with [teacherId] and the optional pre-selected [slotId].
@@ -164,6 +167,7 @@ class _TeacherProfileScreenState extends State<TeacherProfileScreen> {
                       reviews: reviews,
                       isLoadingAvailability: isLoadingAvailability,
                       bookingEnabled: widget.bookingEnabled,
+                      sessionModePolicy: widget.sessionModePolicy,
                       onBookTapped: widget.onBookTapped == null
                           ? null
                           : (slotId) => _onBookTapped(slotId),
@@ -229,6 +233,7 @@ class _TeacherProfileBody extends StatefulWidget {
     required this.reviews,
     required this.isLoadingAvailability,
     required this.bookingEnabled,
+    required this.sessionModePolicy,
     required this.teacherId,
     this.onBookTapped,
     this.onSlotSelected,
@@ -240,6 +245,7 @@ class _TeacherProfileBody extends StatefulWidget {
   final List<SessionReview> reviews;
   final bool isLoadingAvailability;
   final bool bookingEnabled;
+  final SessionModePolicy sessionModePolicy;
   final String teacherId;
   final void Function(String? slotId)? onBookTapped;
   final ValueChanged<String>? onSlotSelected;
@@ -314,9 +320,12 @@ class _TeacherProfileBodyState extends State<_TeacherProfileBody> {
                         label: l10n.specializationLabel(code),
                       ),
                     ],
-                    if (widget.teacher.supportedCallTypes.contains(
-                      SessionCallType.externalMeeting,
-                    )) ...[
+                    if (widget.sessionModePolicy.isEnabled(
+                          SessionCallType.externalMeeting,
+                        ) &&
+                        widget.teacher.supportedCallTypes.contains(
+                          SessionCallType.externalMeeting,
+                        )) ...[
                       SizedBox(width: tokens.spaceExtraSmall),
                       TilawaMetadataChip(
                         label: l10n.teacherOffersExternalSessions,

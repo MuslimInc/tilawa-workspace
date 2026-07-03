@@ -8,12 +8,27 @@ abstract final class SessionListClassifier {
     return isActionableUpcomingLifecycle(session.effectiveLifecycleStatus);
   }
 
-  /// Student "Upcoming" tab — same actionable lifecycle set as teacher dashboard.
+  /// Student "Upcoming" tab — actionable active lifecycle only (Q-ST-01).
   static bool isStudentUpcoming(QuranSession session) {
     return isActionableUpcomingLifecycle(session.effectiveLifecycleStatus);
   }
 
+  /// Student "Pending" tab — awaiting payment or tutor approval (Q-BK-02).
+  static bool isStudentPending(QuranSession session) {
+    return isPendingLifecycle(session.effectiveLifecycleStatus);
+  }
+
+  static bool isPendingLifecycle(SessionLifecycleStatus status) {
+    return switch (status) {
+      SessionLifecycleStatus.pendingTutorApproval ||
+      SessionLifecycleStatus.pendingPayment => true,
+      _ => false,
+    };
+  }
+
   /// True when lifecycle is active and the session may still be joined or managed.
+  ///
+  /// v1 treats `confirmed` as legacy alias of `scheduled` (Q-SL-02).
   static bool isActionableUpcomingLifecycle(SessionLifecycleStatus status) {
     return switch (status) {
       SessionLifecycleStatus.scheduled ||

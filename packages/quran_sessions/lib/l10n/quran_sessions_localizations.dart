@@ -851,6 +851,12 @@ abstract class QuranSessionsLocalizations {
   /// **'Upcoming'**
   String get sessionsTabUpcoming;
 
+  /// No description provided for @sessionsTabPending.
+  ///
+  /// In en, this message translates to:
+  /// **'Pending'**
+  String get sessionsTabPending;
+
   /// No description provided for @sessionsTabPast.
   ///
   /// In en, this message translates to:
@@ -862,6 +868,12 @@ abstract class QuranSessionsLocalizations {
   /// In en, this message translates to:
   /// **'Cancelled'**
   String get sessionsTabCancelled;
+
+  /// No description provided for @noPendingSessions.
+  ///
+  /// In en, this message translates to:
+  /// **'No pending sessions'**
+  String get noPendingSessions;
 
   /// No description provided for @bookAgainAction.
   ///

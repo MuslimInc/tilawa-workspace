@@ -1,6 +1,11 @@
 import { Firestore, Timestamp } from "firebase-admin/firestore";
 
 import { lifecycleError } from "./lifecycleErrors";
+import {
+  loadEffectiveMarketPolicy,
+  assertBookingPolicyConfigured,
+  type ResolvedMarketPolicy,
+} from "./sessionPolicyResolver";
 
 /**
  * Server-side parity with the domain `ValidateBookingEligibilityUseCase`
@@ -10,12 +15,6 @@ import { lifecycleError } from "./lifecycleErrors";
  * a modified client can skip them. These checks are authoritative: child-safety
  * (gender / age / guardian), teacher verification, and pricing are enforced
  * here before any booking document is written.
- *
- * NOTE: this intentionally does NOT re-validate that startsAt/endsAt/slotId is a
- * real offered availability slot (availability is generated from a weekly
- * schedule, not stored per-slot). Slot collisions are still prevented by the
- * `quran_slot_locks` hard lock in createSessionBooking. Full slot regeneration
- * is tracked as a follow-up.
  */
 
 export type Gender = "male" | "female";
@@ -60,6 +59,7 @@ export interface BookingEligibilityContext {
   student: StudentEligibilityProfile;
   teacher: TeacherEligibilityProfile;
   policy: GlobalSafetyPolicy;
+  market: ResolvedMarketPolicy;
   /** Only blocking when the market doc explicitly disables the country. */
   marketEnabled: boolean;
   pricing: ResolvedPricing;
@@ -153,8 +153,13 @@ export function isGenderCombinationAllowed(args: {
 export function assertBookingEligible(
   ctx: BookingEligibilityContext,
   now: Date,
+  options?: {
+    teacherId?: string;
+    startsAt?: Date;
+    upcomingCount?: number;
+  },
 ): ResolvedPricing {
-  const { student, teacher, policy } = ctx;
+  const { student, teacher, policy, market } = ctx;
 
   if (!student.exists) {
     throw lifecycleError("profile_incomplete", "Student profile not found.", {
@@ -178,8 +183,21 @@ export function assertBookingEligible(
     });
   }
 
-  if (!ctx.marketEnabled) {
+  if (!ctx.marketEnabled || !market.marketEnabled) {
     throw lifecycleError("market_not_enabled", "Market is not enabled.", {
+      countryCode: student.countryCode,
+      cityId: student.cityId,
+    });
+  }
+
+  const teacherId = options?.teacherId;
+  if (
+    teacherId != null &&
+    market.teacherWhitelist != null &&
+    !market.teacherWhitelist.includes(teacherId)
+  ) {
+    throw lifecycleError("teacher_not_whitelisted", "Teacher is not enabled in this market.", {
+      teacherId,
       countryCode: student.countryCode,
     });
   }
@@ -191,6 +209,7 @@ export function assertBookingEligible(
   }
 
   if (
+    market.genderMatchingEnabled &&
     !isGenderCombinationAllowed({
       teacherGender: teacher.gender,
       studentGender: student.gender as Gender,
@@ -208,6 +227,15 @@ export function assertBookingEligible(
   }
 
   if (isChild(student.dateOfBirth, policy.childAgeThreshold, now)) {
+    const hasGuardian =
+      student.guardianId != null && student.guardianId.trim() !== "";
+    if (!hasGuardian) {
+      throw lifecycleError(
+        "guardian_approval_required",
+        "Guardian must be linked before booking.",
+        { guardianId: student.guardianId, reasonCode: "guardian_not_linked" },
+      );
+    }
     if (!teacher.canTeachChildren) {
       throw lifecycleError("age_not_allowed", "Teacher does not teach children.", {
         studentAgeGroup: "child",
@@ -217,10 +245,8 @@ export function assertBookingEligible(
       teacher.requiresGuardianApprovalForChildren ||
       policy.requireGuardianApprovalForChildren
     ) {
-      const hasGuardian =
-        student.guardianId != null && student.guardianId.trim() !== "";
       const hasApproval = student.guardianChildBookingApprovedAt != null;
-      if (!hasGuardian || !hasApproval) {
+      if (!hasApproval) {
         throw lifecycleError(
           "guardian_approval_required",
           "Guardian approval is required for this child's booking.",
@@ -228,6 +254,28 @@ export function assertBookingEligible(
         );
       }
     }
+  }
+
+  if (options?.startsAt != null) {
+    const noticeMs = options.startsAt.getTime() - now.getTime();
+    if (noticeMs < market.minBookingNoticeMs) {
+      throw lifecycleError(
+        "min_notice_violation",
+        "Booking is too close to session start.",
+        { minNoticeMinutes: market.minBookingNoticeMs / (60 * 1000) },
+      );
+    }
+  }
+
+  if (
+    options?.upcomingCount != null &&
+    options.upcomingCount >= market.maxConcurrentUpcomingPerStudent
+  ) {
+    throw lifecycleError(
+      "max_upcoming_exceeded",
+      "Student has reached the maximum upcoming sessions.",
+      { maxUpcoming: market.maxConcurrentUpcomingPerStudent },
+    );
   }
 
   return ctx.pricing;
@@ -271,6 +319,8 @@ export async function loadBookingEligibilityContext(
     db.collection("quran_session_platform_config").doc("global").get(),
   ]);
 
+  const platformConfig = policySnap.data() ?? {};
+
   const studentProfile =
     (studentSnap.data()?.quranSessionsProfile as Record<string, unknown>) ?? {};
   const student: StudentEligibilityProfile = {
@@ -298,7 +348,7 @@ export async function loadBookingEligibilityContext(
       (teacherData.requiresGuardianApprovalForChildren as boolean) ?? false,
   };
 
-  const policyData = policySnap.data() ?? {};
+  const policyData = platformConfig;
   const policy: GlobalSafetyPolicy = {
     childAgeThreshold: (policyData.childAgeThreshold as number) ?? 14,
     globalAllowMaleTeacherFemaleStudent:
@@ -309,34 +359,74 @@ export async function loadBookingEligibilityContext(
       (policyData.requireGuardianApprovalForChildren as boolean) ?? false,
   };
 
-  // Market + pricing depend on the student's resolved market.
   let marketEnabled = true;
+  let market: ResolvedMarketPolicy = {
+    countryCode: student.countryCode ?? "",
+    cityId: student.cityId ?? "",
+    marketEnabled: true,
+    cityEnabled: true,
+    sessionFeeAmount: 0,
+    currencyCode: "USD",
+    bookingMode: "autoConfirm",
+    genderMatchingEnabled: true,
+    teacherWhitelist: null,
+    tutorApprovalSlaMs: 24 * 60 * 60 * 1000,
+    minBookingNoticeMs: 60 * 60 * 1000,
+    maxConcurrentUpcomingPerStudent: 3,
+    joinWindowLeadMs: 15 * 60 * 1000,
+    sessionMode: "videoOnly",
+    policyVersion: null,
+    effectiveFrom: null,
+  };
   let pricing: ResolvedPricing = { isPaid: false, amount: 0, currencyCode: "USD" };
+
   if (student.countryCode != null && student.cityId != null) {
-    const marketId = `${student.countryCode}_${student.cityId}`;
-    const [marketSnap, pricingSnap] = await Promise.all([
-      db.collection("quran_session_market_configs").doc(student.countryCode).get(),
-      db
-        .collection("quran_teacher_profiles")
-        .doc(teacherId)
-        .collection("pricing")
-        .doc(marketId)
-        .get(),
-    ]);
-    // Only block when the market doc explicitly disables the country; a missing
-    // doc is treated as enabled to avoid false rejections in partial seeds.
-    if (marketSnap.exists && marketSnap.data()?.isEnabled === false) {
-      marketEnabled = false;
-    }
-    if (pricingSnap.exists) {
-      const p = pricingSnap.data() ?? {};
-      pricing = {
-        isPaid: true,
-        amount: (p.amount as number) ?? 0,
-        currencyCode: (p.currencyCode as string) ?? "USD",
-      };
-    }
+    const marketSnap = await db
+      .collection("quran_session_market_configs")
+      .doc(student.countryCode)
+      .get();
+    assertBookingPolicyConfigured({
+      platformConfig,
+      marketData: marketSnap.data(),
+      countryCode: student.countryCode,
+      cityId: student.cityId,
+      marketDocExists: marketSnap.exists,
+    });
+
+    market = await loadEffectiveMarketPolicy(
+      db,
+      student.countryCode,
+      student.cityId,
+      platformConfig,
+    );
+    marketEnabled = market.marketEnabled;
+    pricing = {
+      isPaid: market.sessionFeeAmount > 0,
+      amount: market.sessionFeeAmount,
+      currencyCode: market.currencyCode,
+    };
   }
 
-  return { student, teacher, policy, marketEnabled, pricing };
+  return { student, teacher, policy, market, marketEnabled, pricing };
+}
+
+export async function countStudentUpcomingBookings(
+  db: Firestore,
+  studentId: string,
+): Promise<number> {
+  const upcomingStatuses = [
+    "scheduled",
+    "confirmed",
+    "in_progress",
+    "pending_tutor_approval",
+    "pending_payment",
+    "rescheduled",
+  ];
+  const snap = await db
+    .collection("quran_bookings")
+    .where("studentId", "==", studentId)
+    .where("lifecycleStatus", "in", upcomingStatuses)
+    .limit(20)
+    .get();
+  return snap.size;
 }

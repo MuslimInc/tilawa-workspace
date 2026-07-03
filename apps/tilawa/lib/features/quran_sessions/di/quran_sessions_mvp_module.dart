@@ -25,8 +25,11 @@ import '../data/session_backed_booked_slot_lock_repository.dart';
 import '../presentation/quran_sessions_scheduling_analytics.dart';
 import 'quran_sessions_lifecycle_module.dart';
 
-/// Wires fake MVP repositories, boundaries, use cases, and BLoC factories
-/// into [GetIt]. Call once after [configureDependencies].
+/// **NON-PRODUCTION ONLY** — wires in-memory fake repositories for local UI dev.
+///
+/// Never register this module in release builds. Production uses
+/// [QuranSessionsFirebaseModule] with Firestore + Cloud Functions.
+/// See `docs/quran-sessions/domain-audit-report.md`.
 class QuranSessionsMvpModule {
   QuranSessionsMvpModule._();
 
@@ -385,6 +388,8 @@ class QuranSessionsMvpModule {
           validateEligibility: sl<ValidateBookingEligibilityUseCase>(),
           getTeacherProfile: sl<GetTeacherProfileByIdUseCase>(),
           getTeacherListing: sl<GetTeacherProfileUseCase>(),
+          getUserProfile: sl<GetUserProfileUseCase>(),
+          getMarketConfig: sl<GetMarketConfigUseCase>(),
           sessionModePolicy: sessionModePolicyFromLaunchConfig(launchConfig),
           paymentConfirmation: sl.isRegistered<SessionPaymentConfirmation>()
               ? sl<SessionPaymentConfirmation>()

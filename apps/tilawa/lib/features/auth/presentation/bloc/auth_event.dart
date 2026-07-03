@@ -3,6 +3,13 @@ part of 'auth_bloc.dart';
 @freezed
 abstract class AuthEvent with _$AuthEvent {
   const factory AuthEvent.signInWithGoogle() = SignInWithGoogleEvent;
+  const factory AuthEvent.signInWithEmail({
+    required String email,
+    required String password,
+  }) = SignInWithEmailEvent;
+  const factory AuthEvent.registerWithEmail({
+    required EmailRegistrationDraft draft,
+  }) = RegisterWithEmailEvent;
   const factory AuthEvent.signOut() = SignOutEvent;
   const factory AuthEvent.deleteAccount() = DeleteAccountEvent;
   const factory AuthEvent.checkAuthStatus() = CheckAuthStatusEvent;

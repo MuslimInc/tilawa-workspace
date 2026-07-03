@@ -313,6 +313,7 @@ class _UpcomingActionsRow extends StatelessWidget {
     final joinUiState = resolveSessionJoinUiState(
       lifecycleStatus: session.effectiveLifecycleStatus,
       startsAt: session.startsAt,
+      endsAt: session.endsAt,
       now: now,
       joinInProgress: isJoinLoading,
       joinFailure: null,

@@ -9,7 +9,9 @@ import 'package:google_sign_in/google_sign_in.dart';
 import 'package:injectable/injectable.dart';
 import 'package:tilawa/core/logging/app_logger.dart';
 
+import '../mappers/firebase_auth_exception_mapper.dart';
 import '../../domain/entities/auth_result.dart';
+import '../../domain/entities/email_auth_failure_key.dart';
 import '../../domain/entities/user_entity.dart';
 import '../../domain/providers/auth_provider_interface.dart';
 import '../services/android_sign_in_platform_policy.dart';
@@ -170,7 +172,7 @@ class GoogleAuthProviderImpl implements AuthProviderInterface {
       return const AuthResult.noGoogleAccounts();
     } on FirebaseAuthException catch (e) {
       return AuthResult.failure(
-        message: e.message ?? 'Authentication failed',
+        message: _mapFirebaseAuthFailureMessage(e),
         code: e.code,
       );
     } catch (e) {
@@ -467,5 +469,12 @@ class GoogleAuthProviderImpl implements AuthProviderInterface {
       photoUrl: firebaseUser.photoURL,
       createdAt: firebaseUser.metadata.creationTime ?? DateTime.now(),
     );
+  }
+
+  String _mapFirebaseAuthFailureMessage(FirebaseAuthException error) {
+    if (error.code == 'account-exists-with-different-credential') {
+      return FirebaseAuthExceptionMapper.mapToFailureKey(error);
+    }
+    return error.message ?? EmailAuthFailureKey.generic;
   }
 }

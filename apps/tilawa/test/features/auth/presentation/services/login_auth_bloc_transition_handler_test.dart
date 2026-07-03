@@ -34,11 +34,25 @@ class _NoopAuthRepository implements AuthRepository {
   Future<AuthResult> signInWithGoogle() async => const AuthResult.cancelled();
 
   @override
+  Future<AuthResult> signInWithEmailPassword({
+    required String email,
+    required String password,
+  }) async => const AuthResult.failure(message: 'not-implemented');
+
+  @override
+  Future<AuthResult> registerWithEmailPassword({
+    required String email,
+    required String password,
+  }) async => const AuthResult.failure(message: 'not-implemented');
+
+  @override
   Future<void> signOut() async {}
 
   @override
   Future<bool> hasAdminClaim() async => false;
 }
+
+String _identityLocalizeAuthError(String key) => key;
 
 void main() {
   final UserEntity user = UserEntity(
@@ -55,11 +69,12 @@ void main() {
   final List<(String message, TilawaFeedbackVariant variant)> toasts =
       <(String, TilawaFeedbackVariant)>[];
 
-  const LoginAuthBlocTransitionMessages messages =
+  final LoginAuthBlocTransitionMessages messages =
       LoginAuthBlocTransitionMessages(
         authErrorFallback: 'fallback',
         noGoogleAccounts: 'no accounts',
         serverActionOffline: 'offline action blocked',
+        localizeAuthError: _identityLocalizeAuthError,
       );
 
   setUp(() {
@@ -90,7 +105,7 @@ void main() {
       launchCubit: cubit,
       shouldSkipAutoSignIn: shouldSkipAutoSignIn,
       messages: messages,
-      onNavigateToHome: () => navigateCount++,
+      onNavigateAfterAuth: (_) => navigateCount++,
       showToast: (String message, TilawaFeedbackVariant variant) {
         toasts.add((message, variant));
       },
@@ -166,6 +181,7 @@ void main() {
             authErrorFallback: 'fallback',
             noGoogleAccounts: 'no accounts',
             appCheckFailed: 'app check setup hint',
+            localizeAuthError: _identityLocalizeAuthError,
           );
 
       handleLoginAuthBlocTransition(
@@ -173,7 +189,7 @@ void main() {
         launchCubit: cubit,
         shouldSkipAutoSignIn: false,
         messages: appCheckMessages,
-        onNavigateToHome: () => navigateCount++,
+        onNavigateAfterAuth: (_) => navigateCount++,
         showToast: (String message, TilawaFeedbackVariant variant) {
           toasts.add((message, variant));
         },
@@ -197,6 +213,7 @@ void main() {
             noGoogleAccounts: 'no accounts',
             appCheckFailed: 'app check setup hint',
             deviceRegistrationFailed: 'registration failed',
+            localizeAuthError: _identityLocalizeAuthError,
           );
 
       handleLoginAuthBlocTransition(
@@ -206,7 +223,7 @@ void main() {
         launchCubit: cubit,
         shouldSkipAutoSignIn: false,
         messages: appCheckMessages,
-        onNavigateToHome: () => navigateCount++,
+        onNavigateAfterAuth: (_) => navigateCount++,
         showToast: (String message, TilawaFeedbackVariant variant) {
           toasts.add((message, variant));
         },
@@ -222,6 +239,7 @@ void main() {
             noGoogleAccounts: 'no accounts',
             deviceRegistrationFailed: 'registration failed',
             appCheckFailed: 'app check setup hint',
+            localizeAuthError: _identityLocalizeAuthError,
           );
 
       handleLoginAuthBlocTransition(
@@ -231,7 +249,7 @@ void main() {
         launchCubit: cubit,
         shouldSkipAutoSignIn: false,
         messages: registrationMessages,
-        onNavigateToHome: () => navigateCount++,
+        onNavigateAfterAuth: (_) => navigateCount++,
         showToast: (String message, TilawaFeedbackVariant variant) {
           toasts.add((message, variant));
         },

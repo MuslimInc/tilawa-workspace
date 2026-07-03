@@ -3,6 +3,7 @@ import 'package:tilawa_core/errors/failures.dart';
 
 import '../../../../core/network/network_error_message.dart';
 import '../../domain/entities/auth_error_key.dart';
+import '../../domain/entities/email_auth_failure_key.dart';
 
 /// Resolves [AuthState.error] message keys to localized user-visible copy.
 String localizedAuthBlocErrorMessage(
@@ -24,6 +25,24 @@ String localizedAuthBlocErrorMessage(
     DeleteAccountErrorKey.notSignedIn => l10n.deleteAccountNotSignedIn,
     DeleteAccountErrorKey.failed => l10n.deleteAccountFailed,
     AuthErrorKey.deviceRegistrationFailed => l10n.authDeviceRegistrationFailed,
+    EmailAuthFailureKey.invalidEmail => l10n.authInvalidEmail,
+    EmailAuthFailureKey.weakPassword => l10n.authWeakPassword,
+    EmailAuthFailureKey.passwordsDoNotMatch => l10n.authPasswordsDoNotMatch,
+    EmailAuthFailureKey.userNotFound => l10n.authUserNotFound,
+    EmailAuthFailureKey.wrongPassword => l10n.authWrongPassword,
+    EmailAuthFailureKey.emailAlreadyInUse => l10n.authEmailAlreadyInUse,
+    EmailAuthFailureKey.emailAlreadyInUseWithGoogle =>
+      l10n.authEmailAlreadyInUseWithGoogle,
+    EmailAuthFailureKey.accountExistsWithDifferentCredential =>
+      l10n.authAccountExistsWithDifferentCredential,
+    EmailAuthFailureKey.accountExistsUseEmailPassword =>
+      l10n.authAccountExistsUseEmailPassword,
+    EmailAuthFailureKey.tooManyRequests => l10n.authTooManyRequests,
+    EmailAuthFailureKey.networkError => l10n.serverActionOfflineMessage,
+    EmailAuthFailureKey.operationNotAllowed => l10n.authOperationNotAllowed,
+    EmailAuthFailureKey.userDisabled => l10n.authUserDisabled,
+    EmailAuthFailureKey.invalidCredential => l10n.authInvalidCredential,
+    EmailAuthFailureKey.generic => l10n.authErrorGenericMessage,
     '' => l10n.deleteAccountFailed,
     _ when isNetworkConnectivityErrorMessage(message) =>
       l10n.serverActionOfflineMessage,

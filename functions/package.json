@@ -9,6 +9,8 @@
     "deploy": "firebase deploy --only functions",
     "seed:market-configs": "ts-node --project tsconfig.scripts.json scripts/seedMarketConfigs.ts",
     "seed:market-configs:apply": "ts-node --project tsconfig.scripts.json scripts/seedMarketConfigs.ts --apply",
+    "seed:platform-config": "ts-node --project tsconfig.scripts.json scripts/seedPlatformConfig.ts",
+    "seed:platform-config:apply": "ts-node --project tsconfig.scripts.json scripts/seedPlatformConfig.ts --apply",
     "seed:staging-teachers": "ts-node --project tsconfig.scripts.json scripts/seedStagingTeachers.ts",
     "seed:staging-teachers:apply": "ts-node --project tsconfig.scripts.json scripts/seedStagingTeachers.ts --apply",
     "admin:list-pending-applications": "ts-node --project tsconfig.scripts.json scripts/listPendingTeacherApplications.ts",

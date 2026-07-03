@@ -1,0 +1,23 @@
+# Sign out from Settings (requires authenticated session).
+appId: com.tilawa.app
+---
+- launchApp:
+    clearState: false
+- extendedWaitUntil:
+    visible:
+      id: home_tab
+    timeout: 30000
+- tapOn:
+    id: settings_tab
+- waitForAnimationToEnd
+- scrollUntilVisible:
+    element:
+      text: ".*تسجيل خروج.*"
+    direction: DOWN
+    timeout: 20000
+- tapOn:
+    text: ".*تسجيل خروج.*"
+- extendedWaitUntil:
+    visible:
+      text: ".*Google.*"
+    timeout: 30000

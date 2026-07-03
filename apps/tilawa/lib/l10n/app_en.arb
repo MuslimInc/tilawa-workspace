@@ -1607,6 +1607,229 @@
     "@authErrorGenericMessage": {
         "description": "Fallback shown for unmapped auth errors so raw exception text never reaches users"
     },
+    "signInWithEmailDescription": "Sign in with your email and password",
+    "@signInWithEmailDescription": {
+        "description": "Subtitle on email login screen"
+    },
+    "createAccountDescription": "Create an account with email and password",
+    "@createAccountDescription": {
+        "description": "Subtitle on registration screen"
+    },
+    "emailAddress": "Email address",
+    "@emailAddress": {
+        "description": "Email field label"
+    },
+    "password": "Password",
+    "@password": {
+        "description": "Password field label"
+    },
+    "confirmPassword": "Confirm password",
+    "@confirmPassword": {
+        "description": "Confirm password field label"
+    },
+    "signInWithEmail": "Sign in with email",
+    "@signInWithEmail": {
+        "description": "Email sign-in button and navigation label"
+    },
+    "createAccount": "Create account",
+    "@createAccount": {
+        "description": "Registration button and navigation label"
+    },
+    "registrationStepProgress": "Step {current} of {total}: {title}",
+    "@registrationStepProgress": {
+        "description": "Registration wizard step progress label",
+        "placeholders": {
+            "current": {
+                "type": "int"
+            },
+            "total": {
+                "type": "int"
+            },
+            "title": {
+                "type": "String"
+            }
+        }
+    },
+    "registrationStepAccountTitle": "Account",
+    "@registrationStepAccountTitle": {
+        "description": "Registration step 1 title"
+    },
+    "registrationStepAccountDescription": "Choose your email and password",
+    "@registrationStepAccountDescription": {
+        "description": "Registration step 1 subtitle"
+    },
+    "registrationStepPersonalTitle": "Personal details",
+    "@registrationStepPersonalTitle": {
+        "description": "Registration step 2 title"
+    },
+    "registrationStepPersonalDescription": "Tell us about yourself",
+    "@registrationStepPersonalDescription": {
+        "description": "Registration step 2 subtitle"
+    },
+    "registrationStepLearningTitle": "Quran learning",
+    "@registrationStepLearningTitle": {
+        "description": "Registration step 3 title"
+    },
+    "registrationStepLearningDescription": "What would you like to learn?",
+    "@registrationStepLearningDescription": {
+        "description": "Registration step 3 subtitle"
+    },
+    "registrationStepGuardianTitle": "Guardian",
+    "@registrationStepGuardianTitle": {
+        "description": "Registration step 4 title for minors"
+    },
+    "registrationStepGuardianDescription": "Guardian approval is required before booking sessions for students under the platform age threshold.",
+    "@registrationStepGuardianDescription": {
+        "description": "Registration step 4 subtitle"
+    },
+    "registrationGuardianStepTitle": "Guardian consent",
+    "@registrationGuardianStepTitle": {
+        "description": "Guardian step headline"
+    },
+    "registrationGuardianConsentLabel": "I confirm a parent or guardian will approve bookings",
+    "@registrationGuardianConsentLabel": {
+        "description": "Guardian consent checkbox label"
+    },
+    "registrationStepReviewTitle": "Review",
+    "@registrationStepReviewTitle": {
+        "description": "Registration step 5 title"
+    },
+    "registrationStepReviewDescription": "Review your details, then create your account",
+    "@registrationStepReviewDescription": {
+        "description": "Registration step 5 subtitle"
+    },
+    "registrationPreferredLanguageLabel": "Preferred app language",
+    "@registrationPreferredLanguageLabel": {
+        "description": "Preferred language field on registration"
+    },
+    "registrationMinorNotice": "Students under the platform age threshold need guardian approval before booking.",
+    "@registrationMinorNotice": {
+        "description": "Info notice on learning step for minors"
+    },
+    "registrationDisplayNameRequired": "Enter your full name",
+    "@registrationDisplayNameRequired": {
+        "description": "Validation when display name missing"
+    },
+    "registrationGenderRequired": "Select your gender",
+    "@registrationGenderRequired": {
+        "description": "Validation when gender missing"
+    },
+    "registrationDateOfBirthRequired": "Select your date of birth",
+    "@registrationDateOfBirthRequired": {
+        "description": "Validation when DOB missing"
+    },
+    "registrationCountryRequired": "Select your country",
+    "@registrationCountryRequired": {
+        "description": "Validation when country missing"
+    },
+    "registrationCityRequired": "Select your city",
+    "@registrationCityRequired": {
+        "description": "Validation when city missing"
+    },
+    "registrationPreferredLanguageRequired": "Select your preferred language",
+    "@registrationPreferredLanguageRequired": {
+        "description": "Validation when language missing"
+    },
+    "registrationLearningGoalsRequired": "Select at least one learning goal",
+    "@registrationLearningGoalsRequired": {
+        "description": "Validation when learning goals missing"
+    },
+    "registrationGuardianConsentRequired": "Confirm guardian consent to continue",
+    "@registrationGuardianConsentRequired": {
+        "description": "Validation when guardian consent missing"
+    },
+    "registrationProfilePersistenceFailed": "Account created but saving your profile failed. Tap retry or complete your profile after sign-in.",
+    "@registrationProfilePersistenceFailed": {
+        "description": "Shown when Firebase auth succeeds but Firestore profile write fails"
+    },
+    "registrationRetryProfileSave": "Retry saving profile",
+    "@registrationRetryProfileSave": {
+        "description": "Retry button after profile persistence failure"
+    },
+    "forgotPassword": "Forgot password?",
+    "@forgotPassword": {
+        "description": "Forgot password link"
+    },
+    "forgotPasswordDescription": "Enter your email and we will send a reset link",
+    "@forgotPasswordDescription": {
+        "description": "Forgot password screen subtitle"
+    },
+    "sendResetLink": "Send reset link",
+    "@sendResetLink": {
+        "description": "Forgot password submit button"
+    },
+    "orContinueWith": "Or continue with",
+    "@orContinueWith": {
+        "description": "Divider label between auth methods on login screen"
+    },
+    "alreadyHaveAccount": "Already have an account? Sign in",
+    "@alreadyHaveAccount": {
+        "description": "Link from register to login"
+    },
+    "noAccountYet": "No account yet? Create one",
+    "@noAccountYet": {
+        "description": "Link from login to register"
+    },
+    "authInvalidEmail": "Enter a valid email address",
+    "@authInvalidEmail": {
+        "description": "Email validation error"
+    },
+    "authWeakPassword": "Password must be at least 6 characters",
+    "@authWeakPassword": {
+        "description": "Password length validation error"
+    },
+    "authPasswordsDoNotMatch": "Passwords do not match",
+    "@authPasswordsDoNotMatch": {
+        "description": "Confirm password mismatch error"
+    },
+    "authUserNotFound": "No account found for this email",
+    "@authUserNotFound": {
+        "description": "Login user-not-found error"
+    },
+    "authWrongPassword": "Incorrect password",
+    "@authWrongPassword": {
+        "description": "Login wrong-password error"
+    },
+    "authEmailAlreadyInUse": "An account already exists with this email. Sign in instead.",
+    "@authEmailAlreadyInUse": {
+        "description": "Registration email-already-in-use error"
+    },
+    "authEmailAlreadyInUseWithGoogle": "This email is registered with Google. Sign in with Google instead.",
+    "@authEmailAlreadyInUseWithGoogle": {
+        "description": "Registration when Google account exists for email"
+    },
+    "authAccountExistsWithDifferentCredential": "This email uses a different sign-in method. Use the original method.",
+    "@authAccountExistsWithDifferentCredential": {
+        "description": "Provider conflict generic message"
+    },
+    "authAccountExistsUseEmailPassword": "This email is registered with a password. Sign in with email instead.",
+    "@authAccountExistsUseEmailPassword": {
+        "description": "Google sign-in when email/password account exists"
+    },
+    "authTooManyRequests": "Too many attempts. Please wait and try again.",
+    "@authTooManyRequests": {
+        "description": "Firebase rate limit error"
+    },
+    "authOperationNotAllowed": "Email sign-in is not enabled. Contact support.",
+    "@authOperationNotAllowed": {
+        "description": "Email provider disabled in Firebase"
+    },
+    "authUserDisabled": "This account has been disabled. Contact support.",
+    "@authUserDisabled": {
+        "description": "Disabled Firebase user"
+    },
+    "authInvalidCredential": "Invalid email or password",
+    "@authInvalidCredential": {
+        "description": "Invalid credential on login"
+    },
+    "authResetEmailSent": "If an account exists, a reset link was sent to your email.",
+    "@authResetEmailSent": {
+        "description": "Password reset email success message"
+    },
+    "completeProfilePrompt": "Complete your profile to book Quran sessions",
+    "@completeProfilePrompt": {
+        "description": "Shown when redirecting new registrants to profile completion"
+    },
     "downloadLowStorageWarning": "Available storage may not be enough for this download. Free up space if downloads fail.",
     "@downloadLowStorageWarning": {
         "description": "Toast shown when device free storage is likely below the estimated download size"

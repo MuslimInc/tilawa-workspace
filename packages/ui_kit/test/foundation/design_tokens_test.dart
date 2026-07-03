@@ -866,7 +866,7 @@ void main() {
         final tokens = MeMuslimDesignTokens.light();
         expect(
           tokens.resolveRadius(family: TilawaRadiusFamily.card),
-          12.0,
+          24.0,
         );
         expect(
           tokens.resolveRadius(family: TilawaRadiusFamily.pill),
@@ -878,7 +878,7 @@ void main() {
         );
         expect(
           tokens.resolveRadius(family: TilawaRadiusFamily.section),
-          12.0,
+          24.0,
         );
         expect(
           tokens.resolveRadius(family: TilawaRadiusFamily.hero),

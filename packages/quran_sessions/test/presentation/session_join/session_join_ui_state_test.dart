@@ -6,6 +6,7 @@ import 'package:quran_sessions/src/presentation/session_join/session_join_ui_sta
 
 void main() {
   final startsAt = DateTime.utc(2026, 7, 1, 12);
+  final endsAt = DateTime.utc(2026, 7, 1, 13);
   const policy = SessionJoinWindowPolicy();
 
   test('not started before join window opens', () {
@@ -14,6 +15,7 @@ void main() {
       resolveSessionJoinUiState(
         lifecycleStatus: SessionLifecycleStatus.confirmed,
         startsAt: startsAt,
+        endsAt: endsAt,
         now: now,
         joinInProgress: false,
         joinFailure: null,
@@ -29,6 +31,7 @@ void main() {
       resolveSessionJoinUiState(
         lifecycleStatus: SessionLifecycleStatus.confirmed,
         startsAt: startsAt,
+        endsAt: endsAt,
         now: now,
         joinInProgress: false,
         joinFailure: null,
@@ -43,6 +46,7 @@ void main() {
       resolveSessionJoinUiState(
         lifecycleStatus: SessionLifecycleStatus.cancelledByStudent,
         startsAt: startsAt,
+        endsAt: endsAt,
         now: startsAt,
         joinInProgress: false,
         joinFailure: null,
@@ -56,6 +60,7 @@ void main() {
       resolveSessionJoinUiState(
         lifecycleStatus: SessionLifecycleStatus.cancelledByTeacher,
         startsAt: startsAt,
+        endsAt: endsAt,
         now: startsAt,
         joinInProgress: false,
         joinFailure: null,
@@ -70,6 +75,7 @@ void main() {
       resolveSessionJoinUiState(
         lifecycleStatus: SessionLifecycleStatus.confirmed,
         startsAt: startsAt,
+        endsAt: endsAt,
         now: now,
         joinInProgress: false,
         joinFailure: const CallProviderUnavailableFailure(),

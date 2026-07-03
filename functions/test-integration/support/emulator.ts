@@ -64,3 +64,58 @@ export async function clearFirestore(): Promise<void> {
     throw new Error(`Failed to clear emulator (${res.status}).`);
   }
 }
+
+/** Seeds platform + market policy docs required for production booking enforcement. */
+export async function seedDefaultBookingPolicy(
+  countryCode = "EG",
+): Promise<void> {
+  await db()
+    .collection("quran_session_platform_config")
+    .doc("global")
+    .set({
+      quranTutorBookingMode: "autoConfirm",
+      sessionMode: "freeBeta",
+      enabledCallProviders: ["external", "mock"],
+      childAgeThreshold: 14,
+      genderMatchingEnabled: true,
+      requireGuardianApprovalForChildren: true,
+    });
+
+  await db()
+    .collection("quran_session_market_configs")
+    .doc(countryCode)
+    .set({
+      isEnabled: true,
+      minSessionPrice: 0,
+      currencyCode: "EGP",
+      cities: [
+        {
+          cityId: "cairo",
+          isEnabled: true,
+          minSessionPrice: 0,
+        },
+      ],
+      genderMatchingEnabled: true,
+      minBookingNoticeMinutes: 60,
+      maxConcurrentUpcomingPerStudent: 3,
+      joinWindowLeadMinutes: 15,
+    });
+}
+
+/** Merges platform config without dropping required booking policy fields. */
+export async function patchPlatformConfig(
+  patch: Record<string, unknown>,
+): Promise<void> {
+  await db()
+    .collection("quran_session_platform_config")
+    .doc("global")
+    .set(patch, { merge: true });
+}
+
+/** Clears emulator and seeds default booking policy fixtures. */
+export async function prepareIntegrationFirestore(
+  countryCode = "EG",
+): Promise<void> {
+  await clearFirestore();
+  await seedDefaultBookingPolicy(countryCode);
+}

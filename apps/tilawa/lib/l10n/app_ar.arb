@@ -1128,6 +1128,229 @@
     "@authErrorGenericMessage": {
         "description": "Fallback shown for unmapped auth errors so raw exception text never reaches users"
     },
+    "signInWithEmailDescription": "سجّل الدخول ببريدك الإلكتروني وكلمة المرور",
+    "@signInWithEmailDescription": {
+        "description": "Subtitle on email login screen"
+    },
+    "createAccountDescription": "أنشئ حساباً بالبريد الإلكتروني وكلمة المرور",
+    "@createAccountDescription": {
+        "description": "Subtitle on registration screen"
+    },
+    "emailAddress": "البريد الإلكتروني",
+    "@emailAddress": {
+        "description": "Email field label"
+    },
+    "password": "كلمة المرور",
+    "@password": {
+        "description": "Password field label"
+    },
+    "confirmPassword": "تأكيد كلمة المرور",
+    "@confirmPassword": {
+        "description": "Confirm password field label"
+    },
+    "signInWithEmail": "تسجيل الدخول بالبريد",
+    "@signInWithEmail": {
+        "description": "Email sign-in button and navigation label"
+    },
+    "createAccount": "إنشاء حساب",
+    "@createAccount": {
+        "description": "Registration button and navigation label"
+    },
+    "registrationStepProgress": "الخطوة {current} من {total}: {title}",
+    "@registrationStepProgress": {
+        "description": "Registration wizard step progress label",
+        "placeholders": {
+            "current": {
+                "type": "int"
+            },
+            "total": {
+                "type": "int"
+            },
+            "title": {
+                "type": "String"
+            }
+        }
+    },
+    "registrationStepAccountTitle": "الحساب",
+    "@registrationStepAccountTitle": {
+        "description": "Registration step 1 title"
+    },
+    "registrationStepAccountDescription": "اختر بريدك الإلكتروني وكلمة المرور",
+    "@registrationStepAccountDescription": {
+        "description": "Registration step 1 subtitle"
+    },
+    "registrationStepPersonalTitle": "البيانات الشخصية",
+    "@registrationStepPersonalTitle": {
+        "description": "Registration step 2 title"
+    },
+    "registrationStepPersonalDescription": "أخبرنا عن نفسك",
+    "@registrationStepPersonalDescription": {
+        "description": "Registration step 2 subtitle"
+    },
+    "registrationStepLearningTitle": "تعلّم القرآن",
+    "@registrationStepLearningTitle": {
+        "description": "Registration step 3 title"
+    },
+    "registrationStepLearningDescription": "ماذا تريد أن تتعلّم؟",
+    "@registrationStepLearningDescription": {
+        "description": "Registration step 3 subtitle"
+    },
+    "registrationStepGuardianTitle": "وليّ الأمر",
+    "@registrationStepGuardianTitle": {
+        "description": "Registration step 4 title for minors"
+    },
+    "registrationStepGuardianDescription": "مطلوب موافقة وليّ الأمر قبل حجز الجلسات للطلاب دون عمر المنصة.",
+    "@registrationStepGuardianDescription": {
+        "description": "Registration step 4 subtitle"
+    },
+    "registrationGuardianStepTitle": "موافقة وليّ الأمر",
+    "@registrationGuardianStepTitle": {
+        "description": "Guardian step headline"
+    },
+    "registrationGuardianConsentLabel": "أؤكد أن وليّ الأمر سيوافق على الحجوزات",
+    "@registrationGuardianConsentLabel": {
+        "description": "Guardian consent checkbox label"
+    },
+    "registrationStepReviewTitle": "المراجعة",
+    "@registrationStepReviewTitle": {
+        "description": "Registration step 5 title"
+    },
+    "registrationStepReviewDescription": "راجع بياناتك ثم أنشئ حسابك",
+    "@registrationStepReviewDescription": {
+        "description": "Registration step 5 subtitle"
+    },
+    "registrationPreferredLanguageLabel": "لغة التطبيق المفضّلة",
+    "@registrationPreferredLanguageLabel": {
+        "description": "Preferred language field on registration"
+    },
+    "registrationMinorNotice": "الطلاب دون عمر المنصة يحتاجون موافقة وليّ الأمر قبل الحجز.",
+    "@registrationMinorNotice": {
+        "description": "Info notice on learning step for minors"
+    },
+    "registrationDisplayNameRequired": "أدخل اسمك الكامل",
+    "@registrationDisplayNameRequired": {
+        "description": "Validation when display name missing"
+    },
+    "registrationGenderRequired": "اختر الجنس",
+    "@registrationGenderRequired": {
+        "description": "Validation when gender missing"
+    },
+    "registrationDateOfBirthRequired": "اختر تاريخ الميلاد",
+    "@registrationDateOfBirthRequired": {
+        "description": "Validation when DOB missing"
+    },
+    "registrationCountryRequired": "اختر الدولة",
+    "@registrationCountryRequired": {
+        "description": "Validation when country missing"
+    },
+    "registrationCityRequired": "اختر المدينة",
+    "@registrationCityRequired": {
+        "description": "Validation when city missing"
+    },
+    "registrationPreferredLanguageRequired": "اختر اللغة المفضّلة",
+    "@registrationPreferredLanguageRequired": {
+        "description": "Validation when language missing"
+    },
+    "registrationLearningGoalsRequired": "اختر هدف تعلّم واحداً على الأقل",
+    "@registrationLearningGoalsRequired": {
+        "description": "Validation when learning goals missing"
+    },
+    "registrationGuardianConsentRequired": "أكّد موافقة وليّ الأمر للمتابعة",
+    "@registrationGuardianConsentRequired": {
+        "description": "Validation when guardian consent missing"
+    },
+    "registrationProfilePersistenceFailed": "تم إنشاء الحساب لكن حفظ الملف الشخصي فشل. أعد المحاولة أو أكمل ملفك بعد تسجيل الدخول.",
+    "@registrationProfilePersistenceFailed": {
+        "description": "Shown when Firebase auth succeeds but Firestore profile write fails"
+    },
+    "registrationRetryProfileSave": "إعادة حفظ الملف الشخصي",
+    "@registrationRetryProfileSave": {
+        "description": "Retry button after profile persistence failure"
+    },
+    "forgotPassword": "نسيت كلمة المرور؟",
+    "@forgotPassword": {
+        "description": "Forgot password link"
+    },
+    "forgotPasswordDescription": "أدخل بريدك الإلكتروني وسنرسل رابط إعادة التعيين",
+    "@forgotPasswordDescription": {
+        "description": "Forgot password screen subtitle"
+    },
+    "sendResetLink": "إرسال رابط إعادة التعيين",
+    "@sendResetLink": {
+        "description": "Forgot password submit button"
+    },
+    "orContinueWith": "أو تابع باستخدام",
+    "@orContinueWith": {
+        "description": "Divider label between auth methods on login screen"
+    },
+    "alreadyHaveAccount": "لديك حساب؟ سجّل الدخول",
+    "@alreadyHaveAccount": {
+        "description": "Link from register to login"
+    },
+    "noAccountYet": "لا تملك حساباً؟ أنشئ حساباً",
+    "@noAccountYet": {
+        "description": "Link from login to register"
+    },
+    "authInvalidEmail": "أدخل بريداً إلكترونياً صالحاً",
+    "@authInvalidEmail": {
+        "description": "Email validation error"
+    },
+    "authWeakPassword": "يجب أن تكون كلمة المرور 6 أحرف على الأقل",
+    "@authWeakPassword": {
+        "description": "Password length validation error"
+    },
+    "authPasswordsDoNotMatch": "كلمتا المرور غير متطابقتين",
+    "@authPasswordsDoNotMatch": {
+        "description": "Confirm password mismatch error"
+    },
+    "authUserNotFound": "لا يوجد حساب بهذا البريد",
+    "@authUserNotFound": {
+        "description": "Login user-not-found error"
+    },
+    "authWrongPassword": "كلمة المرور غير صحيحة",
+    "@authWrongPassword": {
+        "description": "Login wrong-password error"
+    },
+    "authEmailAlreadyInUse": "يوجد حساب بهذا البريد. سجّل الدخول بدلاً من ذلك.",
+    "@authEmailAlreadyInUse": {
+        "description": "Registration email-already-in-use error"
+    },
+    "authEmailAlreadyInUseWithGoogle": "هذا البريد مسجّل بحساب Google. سجّل الدخول بـ Google.",
+    "@authEmailAlreadyInUseWithGoogle": {
+        "description": "Registration when Google account exists for email"
+    },
+    "authAccountExistsWithDifferentCredential": "هذا البريد يستخدم طريقة تسجيل مختلفة. استخدم الطريقة الأصلية.",
+    "@authAccountExistsWithDifferentCredential": {
+        "description": "Provider conflict generic message"
+    },
+    "authAccountExistsUseEmailPassword": "هذا البريد مسجّل بكلمة مرور. سجّل الدخول بالبريد.",
+    "@authAccountExistsUseEmailPassword": {
+        "description": "Google sign-in when email/password account exists"
+    },
+    "authTooManyRequests": "محاولات كثيرة. انتظر ثم أعد المحاولة.",
+    "@authTooManyRequests": {
+        "description": "Firebase rate limit error"
+    },
+    "authOperationNotAllowed": "تسجيل الدخول بالبريد غير مفعّل. تواصل مع الدعم.",
+    "@authOperationNotAllowed": {
+        "description": "Email provider disabled in Firebase"
+    },
+    "authUserDisabled": "تم تعطيل هذا الحساب. تواصل مع الدعم.",
+    "@authUserDisabled": {
+        "description": "Disabled Firebase user"
+    },
+    "authInvalidCredential": "البريد أو كلمة المرور غير صحيحة",
+    "@authInvalidCredential": {
+        "description": "Invalid credential on login"
+    },
+    "authResetEmailSent": "إذا وُجد حساب، أُرسل رابط إعادة التعيين إلى بريدك.",
+    "@authResetEmailSent": {
+        "description": "Password reset email success message"
+    },
+    "completeProfilePrompt": "أكمل ملفك الشخصي لحجز جلسات القرآن",
+    "@completeProfilePrompt": {
+        "description": "Shown when redirecting new registrants to profile completion"
+    },
     "downloadLowStorageWarning": "قد لا تكون مساحة التخزين المتاحة كافية لهذا التحميل. حرّر مساحة إذا فشل التحميل.",
     "@downloadLowStorageWarning": {
         "description": "Toast shown when device free storage is likely below the estimated download size"

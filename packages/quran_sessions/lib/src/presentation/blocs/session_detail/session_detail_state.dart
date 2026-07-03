@@ -7,6 +7,8 @@ import '../../../domain/entities/pending_reschedule_request.dart';
 import '../../../domain/entities/session_call_type.dart';
 import '../../../domain/entities/session_lifecycle_status.dart';
 import '../../../domain/failures/quran_sessions_failure.dart';
+import '../../../domain/entities/session_allowed_action.dart';
+import '../../../domain/policies/platform_scheduling_policy.dart';
 import '../../../domain/policies/session_join_window_policy.dart';
 import '../../../domain/value_objects/actor_role.dart';
 import '../../../domain/policies/session_cancel_eligibility_policy.dart';
@@ -100,6 +102,11 @@ final class SessionDetailSuccess extends SessionDetailState {
   SessionJoinUiState get joinUiState => resolveSessionJoinUiState(
     lifecycleStatus: aggregate.lifecycleStatus,
     startsAt: aggregate.startsAt,
+    endsAt: aggregate.startsAt.add(
+      const Duration(
+        minutes: PlatformSchedulingPolicy.defaultSlotDurationMinutes,
+      ),
+    ),
     now: DateTime.now(),
     joinInProgress: joinInProgress,
     joinFailure: joinFailure,
@@ -109,17 +116,38 @@ final class SessionDetailSuccess extends SessionDetailState {
 
   bool get isTeacherViewer => viewerRole == ActorRole.teacher;
 
-  bool get canCancel => canViewerCancelSession(aggregate, viewerRole);
+  SessionAllowedActions? get _serverAllowedActions => isTeacherViewer
+      ? aggregate.allowedActionsForTeacher
+      : aggregate.allowedActionsForStudent;
 
-  bool get canJoin =>
-      aggregate.sessionId != null &&
-      joinUiState == SessionJoinUiState.joinAvailable;
+  bool get canCancel {
+    final server = _serverAllowedActions;
+    if (server != null) return server.can(SessionAllowedAction.cancel);
+    return canViewerCancelSession(aggregate, viewerRole);
+  }
 
-  bool get canOpenDispute =>
-      SessionActionPolicy.canOpenDispute(aggregate.lifecycleStatus);
+  bool get canJoin {
+    final server = _serverAllowedActions;
+    if (server != null) {
+      return aggregate.sessionId != null &&
+          server.can(SessionAllowedAction.join) &&
+          !joinInProgress;
+    }
+    return aggregate.sessionId != null &&
+        joinUiState == SessionJoinUiState.joinAvailable;
+  }
 
-  bool get canReportConcern =>
-      SessionActionPolicy.canReportConcern(aggregate.lifecycleStatus);
+  bool get canOpenDispute {
+    final server = _serverAllowedActions;
+    if (server != null) return server.can(SessionAllowedAction.openDispute);
+    return SessionActionPolicy.canOpenDispute(aggregate.lifecycleStatus);
+  }
+
+  bool get canReportConcern {
+    final server = _serverAllowedActions;
+    if (server != null) return server.can(SessionAllowedAction.reportConcern);
+    return SessionActionPolicy.canReportConcern(aggregate.lifecycleStatus);
+  }
 
   bool get showCancelledDisputeHelper =>
       SessionActionPolicy.showCancelledDisputeHelper(aggregate.lifecycleStatus);
@@ -127,10 +155,15 @@ final class SessionDetailSuccess extends SessionDetailState {
   bool get canOpenMeetingAgain =>
       externalMeetingJoinUrl != null && hasOpenedExternalMeeting;
 
-  bool get canReview =>
-      !isTeacherViewer &&
-      aggregate.lifecycleStatus == SessionLifecycleStatus.completed &&
-      !reviewCompleted;
+  bool get canReview {
+    if (isTeacherViewer) return false;
+    final server = _serverAllowedActions;
+    if (server != null) {
+      return server.can(SessionAllowedAction.submitReview) && !reviewCompleted;
+    }
+    return aggregate.lifecycleStatus == SessionLifecycleStatus.completed &&
+        !reviewCompleted;
+  }
 
   bool get isExternalMeeting => externalMeetingJoinUrl != null;
 

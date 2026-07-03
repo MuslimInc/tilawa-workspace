@@ -33,6 +33,7 @@ Future<void> _pumpProfile(
   double textScaleFactor = 1.0,
   QuranSessionsAnalyticsCallbacks analytics =
       const QuranSessionsAnalyticsCallbacks(),
+  SessionModePolicy sessionModePolicy = SessionModePolicy.freeBeta,
 }) async {
   tester.view.physicalSize = const Size(360, 800);
   tester.view.devicePixelRatio = 1;
@@ -64,6 +65,7 @@ Future<void> _pumpProfile(
               child: TeacherProfileScreen(
                 teacherId: seed.teacher.id,
                 analytics: analytics,
+                sessionModePolicy: sessionModePolicy,
                 onBookTapped: (_, _) {},
               ),
             ),
@@ -219,6 +221,26 @@ void main() {
 
     expect(find.text('Ijazah in Hafs'), findsOneWidget);
     expect(find.text('موثّقة من تلاوة'), findsOneWidget);
+  });
+
+  testWidgets('hides external sessions chip when session mode is videoOnly', (
+    tester,
+  ) async {
+    final l10n = await QuranSessionsLocalizations.delegate.load(
+      const Locale('ar'),
+    );
+
+    await _pumpProfile(
+      tester,
+      TeacherProfileSuccess(
+        teacher: makeTeacher(id: 't_ext', avatarUrl: ''),
+        availability: const [],
+        reviews: const [],
+      ),
+      sessionModePolicy: SessionModePolicy.videoOnly,
+    );
+
+    expect(find.text(l10n.teacherOffersExternalSessions), findsNothing);
   });
 }
 

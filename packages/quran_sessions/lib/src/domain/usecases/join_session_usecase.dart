@@ -9,6 +9,7 @@ import '../providers/auth_session_provider.dart';
 import '../repositories/session_repository.dart';
 import '../repositories/teacher_profile_repository.dart';
 import '../../boundaries/call/session_call_provider.dart';
+import '../policies/session_join_policy.dart';
 import '../services/quran_session_call_telemetry_coordinator.dart';
 
 /// Joins a session through the injected [SessionCallProvider] gateway.
@@ -22,6 +23,7 @@ class JoinSessionUseCase {
     required this.authSession,
     required this.teacherProfileRepository,
     this.callTelemetry,
+    this.joinPolicy = const SessionJoinPolicy(),
   });
 
   final SessionRepository sessionRepository;
@@ -29,6 +31,7 @@ class JoinSessionUseCase {
   final AuthSessionProvider authSession;
   final TeacherProfileRepository teacherProfileRepository;
   final QuranSessionCallTelemetryCoordinator? callTelemetry;
+  final SessionJoinPolicy joinPolicy;
 
   Future<Either<QuranSessionsFailure, void>> call({
     required String sessionId,
@@ -55,6 +58,20 @@ class JoinSessionUseCase {
           action: 'join_session',
           actorRole: 'participant',
           reasonCode: 'join_not_allowed',
+        ),
+      );
+    }
+
+    if (!joinPolicy.canJoin(
+      session: session,
+      userId: userId,
+      now: DateTime.now().toUtc(),
+    )) {
+      return const Left(
+        InvalidTransitionFailure(
+          action: 'join_session',
+          actorRole: 'participant',
+          reasonCode: 'join_window_closed',
         ),
       );
     }

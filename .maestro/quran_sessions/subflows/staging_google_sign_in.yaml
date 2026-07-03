@@ -1,0 +1,30 @@
+# Google Sign-In for staging Quran Sessions QA.
+# Tilawa uses Google OAuth only — passwords are not entered in-app.
+# Requires MAESTRO_TILAWA_ACCOUNT_EMAIL (student or teacher address).
+appId: com.tilawa.app
+---
+- launchApp:
+    clearState: true
+- tapOn:
+    text: "Next"
+    optional: true
+- tapOn:
+    text: "Get started"
+    optional: true
+- waitForAnimationToEnd
+- extendedWaitUntil:
+    visible:
+      text: ".*(Google|تسجيل الدخول).*"
+    timeout: 60000
+- tapOn:
+    text: ".*(Google|تسجيل الدخول).*"
+- extendedWaitUntil:
+    visible:
+      text: "${MAESTRO_TILAWA_ACCOUNT_EMAIL}"
+    timeout: 45000
+- tapOn:
+    text: "${MAESTRO_TILAWA_ACCOUNT_EMAIL}"
+- extendedWaitUntil:
+    visible:
+      id: home_tab
+    timeout: 90000

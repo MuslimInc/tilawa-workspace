@@ -22,6 +22,7 @@ class SessionJoinPolicy {
 
     return windowPolicy.isWithinJoinWindow(
       startsAt: session.startsAt,
+      endsAt: session.endsAt,
       now: now,
     );
   }

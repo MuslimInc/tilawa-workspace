@@ -43,6 +43,7 @@ class FirebaseSessionMutationGateway implements SessionMutationGateway {
     required SessionPricingType pricingType,
     String? paymentReference,
     String? studentNote,
+    String? idempotencyKey,
   }) async {
     return _perf.trace('functions_createSessionBooking', () async {
       try {
@@ -59,6 +60,7 @@ class FirebaseSessionMutationGateway implements SessionMutationGateway {
             'paymentReference': paymentReference,
             'studentNote': studentNote,
             'idempotencyKey':
+                idempotencyKey ??
                 '$studentId:$slotId:${startsAt.toUtc().toIso8601String()}',
           }),
         );

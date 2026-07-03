@@ -15,6 +15,18 @@ void main() {
       SessionCallProviderKind.livekit,
     );
     expect(
+      sessionModePolicyFromLaunchConfig(config).isEnabled(
+        SessionCallType.videoCall,
+      ),
+      isTrue,
+    );
+    expect(
+      sessionModePolicyFromLaunchConfig(config).isEnabled(
+        SessionCallType.voiceCall,
+      ),
+      isFalse,
+    );
+    expect(
       sessionModePolicyFromLaunchConfig(config).voiceVideoUseMockProvider,
       isFalse,
     );

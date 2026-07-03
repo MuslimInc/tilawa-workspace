@@ -105,6 +105,8 @@ export const cancelSessionBooking = onCall(
             cancelledByActorId: request.auth?.uid,
             cancelledByRole: actor,
           },
+          {},
+          fresh,
         );
 
         const slotId = fresh.slotId as string | undefined;

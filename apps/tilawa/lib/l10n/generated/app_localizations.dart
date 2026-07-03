@@ -2198,6 +2198,324 @@ abstract class AppLocalizations {
   /// **'Something went wrong. Please try again.'**
   String get authErrorGenericMessage;
 
+  /// Subtitle on email login screen
+  ///
+  /// In en, this message translates to:
+  /// **'Sign in with your email and password'**
+  String get signInWithEmailDescription;
+
+  /// Subtitle on registration screen
+  ///
+  /// In en, this message translates to:
+  /// **'Create an account with email and password'**
+  String get createAccountDescription;
+
+  /// Email field label
+  ///
+  /// In en, this message translates to:
+  /// **'Email address'**
+  String get emailAddress;
+
+  /// Password field label
+  ///
+  /// In en, this message translates to:
+  /// **'Password'**
+  String get password;
+
+  /// Confirm password field label
+  ///
+  /// In en, this message translates to:
+  /// **'Confirm password'**
+  String get confirmPassword;
+
+  /// Email sign-in button and navigation label
+  ///
+  /// In en, this message translates to:
+  /// **'Sign in with email'**
+  String get signInWithEmail;
+
+  /// Registration button and navigation label
+  ///
+  /// In en, this message translates to:
+  /// **'Create account'**
+  String get createAccount;
+
+  /// Registration wizard step progress label
+  ///
+  /// In en, this message translates to:
+  /// **'Step {current} of {total}: {title}'**
+  String registrationStepProgress(int current, int total, String title);
+
+  /// Registration step 1 title
+  ///
+  /// In en, this message translates to:
+  /// **'Account'**
+  String get registrationStepAccountTitle;
+
+  /// Registration step 1 subtitle
+  ///
+  /// In en, this message translates to:
+  /// **'Choose your email and password'**
+  String get registrationStepAccountDescription;
+
+  /// Registration step 2 title
+  ///
+  /// In en, this message translates to:
+  /// **'Personal details'**
+  String get registrationStepPersonalTitle;
+
+  /// Registration step 2 subtitle
+  ///
+  /// In en, this message translates to:
+  /// **'Tell us about yourself'**
+  String get registrationStepPersonalDescription;
+
+  /// Registration step 3 title
+  ///
+  /// In en, this message translates to:
+  /// **'Quran learning'**
+  String get registrationStepLearningTitle;
+
+  /// Registration step 3 subtitle
+  ///
+  /// In en, this message translates to:
+  /// **'What would you like to learn?'**
+  String get registrationStepLearningDescription;
+
+  /// Registration step 4 title for minors
+  ///
+  /// In en, this message translates to:
+  /// **'Guardian'**
+  String get registrationStepGuardianTitle;
+
+  /// Registration step 4 subtitle
+  ///
+  /// In en, this message translates to:
+  /// **'Guardian approval is required before booking sessions for students under the platform age threshold.'**
+  String get registrationStepGuardianDescription;
+
+  /// Guardian step headline
+  ///
+  /// In en, this message translates to:
+  /// **'Guardian consent'**
+  String get registrationGuardianStepTitle;
+
+  /// Guardian consent checkbox label
+  ///
+  /// In en, this message translates to:
+  /// **'I confirm a parent or guardian will approve bookings'**
+  String get registrationGuardianConsentLabel;
+
+  /// Registration step 5 title
+  ///
+  /// In en, this message translates to:
+  /// **'Review'**
+  String get registrationStepReviewTitle;
+
+  /// Registration step 5 subtitle
+  ///
+  /// In en, this message translates to:
+  /// **'Review your details, then create your account'**
+  String get registrationStepReviewDescription;
+
+  /// Preferred language field on registration
+  ///
+  /// In en, this message translates to:
+  /// **'Preferred app language'**
+  String get registrationPreferredLanguageLabel;
+
+  /// Info notice on learning step for minors
+  ///
+  /// In en, this message translates to:
+  /// **'Students under the platform age threshold need guardian approval before booking.'**
+  String get registrationMinorNotice;
+
+  /// Validation when display name missing
+  ///
+  /// In en, this message translates to:
+  /// **'Enter your full name'**
+  String get registrationDisplayNameRequired;
+
+  /// Validation when gender missing
+  ///
+  /// In en, this message translates to:
+  /// **'Select your gender'**
+  String get registrationGenderRequired;
+
+  /// Validation when DOB missing
+  ///
+  /// In en, this message translates to:
+  /// **'Select your date of birth'**
+  String get registrationDateOfBirthRequired;
+
+  /// Validation when country missing
+  ///
+  /// In en, this message translates to:
+  /// **'Select your country'**
+  String get registrationCountryRequired;
+
+  /// Validation when city missing
+  ///
+  /// In en, this message translates to:
+  /// **'Select your city'**
+  String get registrationCityRequired;
+
+  /// Validation when language missing
+  ///
+  /// In en, this message translates to:
+  /// **'Select your preferred language'**
+  String get registrationPreferredLanguageRequired;
+
+  /// Validation when learning goals missing
+  ///
+  /// In en, this message translates to:
+  /// **'Select at least one learning goal'**
+  String get registrationLearningGoalsRequired;
+
+  /// Validation when guardian consent missing
+  ///
+  /// In en, this message translates to:
+  /// **'Confirm guardian consent to continue'**
+  String get registrationGuardianConsentRequired;
+
+  /// Shown when Firebase auth succeeds but Firestore profile write fails
+  ///
+  /// In en, this message translates to:
+  /// **'Account created but saving your profile failed. Tap retry or complete your profile after sign-in.'**
+  String get registrationProfilePersistenceFailed;
+
+  /// Retry button after profile persistence failure
+  ///
+  /// In en, this message translates to:
+  /// **'Retry saving profile'**
+  String get registrationRetryProfileSave;
+
+  /// Forgot password link
+  ///
+  /// In en, this message translates to:
+  /// **'Forgot password?'**
+  String get forgotPassword;
+
+  /// Forgot password screen subtitle
+  ///
+  /// In en, this message translates to:
+  /// **'Enter your email and we will send a reset link'**
+  String get forgotPasswordDescription;
+
+  /// Forgot password submit button
+  ///
+  /// In en, this message translates to:
+  /// **'Send reset link'**
+  String get sendResetLink;
+
+  /// Divider label between auth methods on login screen
+  ///
+  /// In en, this message translates to:
+  /// **'Or continue with'**
+  String get orContinueWith;
+
+  /// Link from register to login
+  ///
+  /// In en, this message translates to:
+  /// **'Already have an account? Sign in'**
+  String get alreadyHaveAccount;
+
+  /// Link from login to register
+  ///
+  /// In en, this message translates to:
+  /// **'No account yet? Create one'**
+  String get noAccountYet;
+
+  /// Email validation error
+  ///
+  /// In en, this message translates to:
+  /// **'Enter a valid email address'**
+  String get authInvalidEmail;
+
+  /// Password length validation error
+  ///
+  /// In en, this message translates to:
+  /// **'Password must be at least 6 characters'**
+  String get authWeakPassword;
+
+  /// Confirm password mismatch error
+  ///
+  /// In en, this message translates to:
+  /// **'Passwords do not match'**
+  String get authPasswordsDoNotMatch;
+
+  /// Login user-not-found error
+  ///
+  /// In en, this message translates to:
+  /// **'No account found for this email'**
+  String get authUserNotFound;
+
+  /// Login wrong-password error
+  ///
+  /// In en, this message translates to:
+  /// **'Incorrect password'**
+  String get authWrongPassword;
+
+  /// Registration email-already-in-use error
+  ///
+  /// In en, this message translates to:
+  /// **'An account already exists with this email. Sign in instead.'**
+  String get authEmailAlreadyInUse;
+
+  /// Registration when Google account exists for email
+  ///
+  /// In en, this message translates to:
+  /// **'This email is registered with Google. Sign in with Google instead.'**
+  String get authEmailAlreadyInUseWithGoogle;
+
+  /// Provider conflict generic message
+  ///
+  /// In en, this message translates to:
+  /// **'This email uses a different sign-in method. Use the original method.'**
+  String get authAccountExistsWithDifferentCredential;
+
+  /// Google sign-in when email/password account exists
+  ///
+  /// In en, this message translates to:
+  /// **'This email is registered with a password. Sign in with email instead.'**
+  String get authAccountExistsUseEmailPassword;
+
+  /// Firebase rate limit error
+  ///
+  /// In en, this message translates to:
+  /// **'Too many attempts. Please wait and try again.'**
+  String get authTooManyRequests;
+
+  /// Email provider disabled in Firebase
+  ///
+  /// In en, this message translates to:
+  /// **'Email sign-in is not enabled. Contact support.'**
+  String get authOperationNotAllowed;
+
+  /// Disabled Firebase user
+  ///
+  /// In en, this message translates to:
+  /// **'This account has been disabled. Contact support.'**
+  String get authUserDisabled;
+
+  /// Invalid credential on login
+  ///
+  /// In en, this message translates to:
+  /// **'Invalid email or password'**
+  String get authInvalidCredential;
+
+  /// Password reset email success message
+  ///
+  /// In en, this message translates to:
+  /// **'If an account exists, a reset link was sent to your email.'**
+  String get authResetEmailSent;
+
+  /// Shown when redirecting new registrants to profile completion
+  ///
+  /// In en, this message translates to:
+  /// **'Complete your profile to book Quran sessions'**
+  String get completeProfilePrompt;
+
   /// Toast shown when device free storage is likely below the estimated download size
   ///
   /// In en, this message translates to:

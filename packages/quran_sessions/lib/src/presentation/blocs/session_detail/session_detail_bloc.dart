@@ -23,6 +23,7 @@ import '../../../domain/usecases/submit_review_usecase.dart';
 import '../../../application/usecases/get_session_detail_usecase.dart';
 import '../../../application/usecases/invalidate_quran_session_cache_usecase.dart';
 import '../../../domain/entities/session_lifecycle_status.dart';
+import '../../../domain/policies/platform_scheduling_policy.dart';
 import '../../../domain/policies/session_join_window_policy.dart';
 import '../../../boundaries/call/call_token_provider.dart';
 import '../../../domain/repositories/session_repository.dart';
@@ -214,6 +215,11 @@ class SessionDetailBloc extends Bloc<SessionDetailEvent, SessionDetailState> {
     }
     if (!_joinWindowPolicy.isWithinJoinWindow(
       startsAt: aggregate.startsAt,
+      endsAt: aggregate.startsAt.add(
+        const Duration(
+          minutes: PlatformSchedulingPolicy.defaultSlotDurationMinutes,
+        ),
+      ),
       now: DateTime.now(),
     )) {
       return;

@@ -3,13 +3,13 @@ import 'package:flutter/material.dart';
 /// Centralized app color constants.
 ///
 /// The Tilawa palette is intentionally **small and calm**:
-/// white canvas ([tripGlideCanvas] `#FFFFFF`), green global accent
-/// ([defaultPrimary] `#1DAB61`), neutral text ink ([tripGlideInk] `#212121`),
+/// warm scaffold canvas ([lightCanvas] `#F4F2EE`), green global accent
+/// ([defaultPrimary] `#1DAB61`), neutral text ink ([tripGlideInk] `#1A2E24`),
 /// and restrained category accent hues for hub tiles.
 ///
 /// Some `tripGlide*` names remain as compatibility aliases for the current
-/// travel-inspired Home layout. Their values now resolve to Tilawa's warm
-/// brand palette.
+/// travel-inspired Home layout (e.g. [tripGlideCanvas] `#FFFFFF` for elevated
+/// card surfaces — not the scaffold). Scaffold assembly uses [lightCanvas].
 ///
 /// All hex values used by `AppTheme` to assemble `ColorScheme` live here
 /// so there is exactly one source of truth. Product widgets should read

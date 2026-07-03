@@ -1,0 +1,15 @@
+<svg width="1600" height="800" viewBox="0 0 1600 800" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    <mask id="moon">
+      <rect width="1600" height="800" fill="#fff"/>
+      <circle cx="452" cy="532" r="35" fill="#000"/>
+    </mask>
+  </defs>
+  <g fill="#1DAB61" mask="url(#moon)">
+    <ellipse cx="400" cy="242" rx="55" ry="54"/>
+    <path d="M290 372 C288 330 330 314 400 314 C470 314 512 330 510 372 C508 408 460 420 400 420 C340 420 292 408 290 372 Z" transform="rotate(-5 400 367)"/>
+    <path d="M248 470 Q400 512 552 470 C560 548 505 600 400 602 C295 600 240 548 248 470 Z"/>
+  </g>
+  <circle cx="465" cy="521" r="29" fill="#1DAB61"/>
+  <text x="640" y="475" font-family="-apple-system, 'SF Pro Rounded', 'Segoe UI', sans-serif" font-size="190" font-weight="600" letter-spacing="-2" fill="#1A2E24">memuslim</text>
+</svg>

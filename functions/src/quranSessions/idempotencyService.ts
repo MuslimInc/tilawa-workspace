@@ -3,7 +3,10 @@ import {
   Transaction,
   DocumentReference,
   FieldValue,
+  Timestamp,
 } from "firebase-admin/firestore";
+
+import { BOOKING_IDEMPOTENCY_DEDUPE_MS } from "./platformSchedulingPolicy";
 
 const COLLECTION = "quran_session_operations";
 
@@ -12,6 +15,8 @@ export interface IdempotentOperationInput {
   operationKey: string;
   actorId: string;
   action: string;
+  /** When set, completed markers older than this window are ignored (Q-BK-04). */
+  dedupeWindowMs?: number;
 }
 
 export interface IdempotentOperationResult<T> {
@@ -43,12 +48,30 @@ export async function runIdempotentOperation<T>(
     // end keeps the whole transaction read-before-write correct.
     const existing = await tx.get(ref);
     if (existing.exists) {
-      // A committed marker only ever exists in the "completed" state because it
-      // is written atomically with the business writes below — there is no
-      // observable "pending" state. Treat any existing marker as a replay and
-      // return the stored result without repeating side effects.
       const data = existing.data() ?? {};
-      return { replayed: true, result: data.result as T };
+      const dedupeWindowMs =
+        input.dedupeWindowMs ?? BOOKING_IDEMPOTENCY_DEDUPE_MS;
+      const completedAtRaw = data.completedAt;
+      let completedAtMs: number | null = null;
+      if (completedAtRaw instanceof Timestamp) {
+        completedAtMs = completedAtRaw.toMillis();
+      } else if (
+        completedAtRaw &&
+        typeof (completedAtRaw as { toMillis?: unknown }).toMillis === "function"
+      ) {
+        completedAtMs = (completedAtRaw as { toMillis(): number }).toMillis();
+      } else if (completedAtRaw instanceof Date) {
+        completedAtMs = completedAtRaw.getTime();
+      }
+      if (completedAtMs != null) {
+        const ageMs = Date.now() - completedAtMs;
+        if (ageMs <= dedupeWindowMs) {
+          return { replayed: true, result: data.result as T };
+        }
+        // Outside dedupe window — allow a fresh operation with the same key.
+      } else if (existing.exists) {
+        return { replayed: true, result: data.result as T };
+      }
     }
 
     // WRITE PHASE. `execute` performs its own reads-before-writes, then the

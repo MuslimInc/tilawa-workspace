@@ -91,6 +91,7 @@ class TutorSessionCompactCard extends StatelessWidget {
     final joinUiState = resolveSessionJoinUiState(
       lifecycleStatus: session.effectiveLifecycleStatus,
       startsAt: session.startsAt,
+      endsAt: session.endsAt,
       now: now,
       joinInProgress: false,
       joinFailure: null,

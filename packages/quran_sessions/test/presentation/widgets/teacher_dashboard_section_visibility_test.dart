@@ -7,7 +7,6 @@ import 'package:quran_sessions/l10n/quran_sessions_localizations.dart';
 import 'package:quran_sessions/l10n/quran_sessions_localizations_ar.dart';
 import 'package:quran_sessions/l10n/quran_sessions_localizations_en.dart';
 import 'package:quran_sessions/quran_sessions.dart';
-import 'package:quran_sessions/src/domain/entities/session_lifecycle_status.dart';
 import 'package:quran_sessions/src/presentation/widgets/teacher_dashboard_summary_stats.dart';
 import 'package:quran_sessions/src/presentation/widgets/tutor_dashboard_section.dart';
 import 'package:quran_sessions/src/presentation/widgets/tutor_session_compact_card.dart';

@@ -1,0 +1,53 @@
+# Staging Device QA — teacher dashboard smoke (check #10 / #13).
+# Role: verified teacher ONLY. Sign out before running student flow.
+#
+# Env:
+#   MAESTRO_TILAWA_TEACHER_EMAIL — required for login subflow
+#   MAESTRO_TILAWA_TEACHER_PASSWORD — unused (Google OAuth); vault placeholder
+#   MAESTRO_SKIP_LOGIN=true — skip login when already signed in as teacher
+appId: com.tilawa.app
+tags:
+  - staging
+  - smoke
+  - teacher
+  - quran_sessions
+---
+- runFlow:
+    when:
+      true: ${MAESTRO_SKIP_LOGIN != 'true'}
+    commands:
+      - runFlow:
+          file: subflows/staging_google_sign_in.yaml
+          env:
+            MAESTRO_TILAWA_ACCOUNT_EMAIL: ${MAESTRO_TILAWA_TEACHER_EMAIL}
+- launchApp:
+    clearState: false
+- runFlow:
+    file: subflows/staging_dismiss_blockers.yaml
+- extendedWaitUntil:
+    visible:
+      id: home_tab
+    timeout: 30000
+- tapOn:
+    id: settings_tab
+- waitForAnimationToEnd
+- extendedWaitUntil:
+    visible:
+      text: ".*لوحة تحكم المحفظ.*"
+    timeout: 20000
+- tapOn:
+    text: ".*لوحة تحكم المحفظ.*"
+- waitForAnimationToEnd
+- extendedWaitUntil:
+    visible:
+      text: ".*لوحة المعلم.*"
+    timeout: 20000
+- assertVisible:
+    text: ".*طلبات معلقة.*"
+- assertVisible:
+    text: ".*حصص قادمة.*"
+# videoOnly — external meeting affordance must not appear
+- assertNotVisible:
+    text: ".*رابط الاجتماع الخارجي.*"
+- assertNotVisible:
+    text: ".*External meeting link.*"

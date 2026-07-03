@@ -125,13 +125,13 @@ void main() {
         final state = b.state as BookingSelecting;
         check(state.availableSlots).isNotEmpty();
         check(state.canSubmit).isFalse();
-        check(state.selectedCallType).equals(SessionCallType.voiceCall);
+        check(state.selectedCallType).equals(SessionCallType.videoCall);
         check(state.hasExternalMeetingUrl).isFalse();
       },
     );
 
     blocTest<BookingBloc, BookingState>(
-      'defaults to external when teacher has meeting URL',
+      'defaults to video when teacher has meeting URL under video-only policy',
       build: () {
         teacherProfileRepo = FakeTeacherProfileRepository(
           profile: _teacherProfile(
@@ -169,7 +169,7 @@ void main() {
       ],
       verify: (b) {
         final state = b.state as BookingSelecting;
-        check(state.selectedCallType).equals(SessionCallType.externalMeeting);
+        check(state.selectedCallType).equals(SessionCallType.videoCall);
         check(state.hasExternalMeetingUrl).isTrue();
       },
     );

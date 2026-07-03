@@ -96,6 +96,7 @@ export const completeSession = onCall(
           guard.to,
           { completedAt: FieldValue.serverTimestamp() },
           { completedAt: FieldValue.serverTimestamp() },
+          fresh,
         );
 
         appendAuditEvent(tx, db, {

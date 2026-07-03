@@ -4,6 +4,7 @@ import { getFirestore, Timestamp } from "firebase-admin/firestore";
 import { appendAuditEvent } from "./aggregateWriteService";
 import {
   assertBookingEligible,
+  countStudentUpcomingBookings,
   loadBookingEligibilityContext,
 } from "./bookingEligibilityService";
 import {
@@ -37,7 +38,11 @@ import {
   nowServer,
 } from "./sessionLifecycleService";
 import { sessionCallableHttpsOptions } from "./sessionCallableOptions";
-import { resolveQuranTutorBookingMode } from "./quranTutorBookingMode";
+import { buildAllowedActionsDenorm } from "./sessionAllowedActionsService";
+import {
+  BOOKING_IDEMPOTENCY_DEDUPE_MS,
+  PENDING_PAYMENT_SLOT_HOLD_MS,
+} from "./platformSchedulingPolicy";
 
 interface CreateSessionBookingRequest {
   teacherId: string;
@@ -186,12 +191,34 @@ async function handleCreateSessionBooking(
 
     const db = getFirestore();
 
+    const startsAtDate = new Date(data.startsAt);
+    const endsAtDate = new Date(data.endsAt);
+    if (Number.isNaN(startsAtDate.getTime()) || Number.isNaN(endsAtDate.getTime())) {
+      throw new HttpsError("invalid-argument", "Invalid session timestamps.");
+    }
+
     const eligibility = await loadBookingEligibilityContext(
       db,
       studentId,
       data.teacherId,
     );
-    const pricing = assertBookingEligible(eligibility, new Date());
+
+    if (eligibility.market.sessionMode === "videoOnly") {
+      if (data.callType !== "videoCall") {
+        throw lifecycleError(
+          "unsupported_session_mode",
+          "Only in-app video sessions are allowed in this market.",
+          { callType: data.callType },
+        );
+      }
+    }
+
+    const upcomingCount = await countStudentUpcomingBookings(db, studentId);
+    const pricing = assertBookingEligible(eligibility, new Date(), {
+      teacherId: data.teacherId,
+      startsAt: startsAtDate,
+      upcomingCount,
+    });
     const serverPricingType = pricing.isPaid ? "fixedPerSession" : "free";
 
     try {
@@ -240,6 +267,7 @@ async function handleCreateSessionBooking(
         operationKey,
         actorId: studentId,
         action: "create_booking",
+        dedupeWindowMs: BOOKING_IDEMPOTENCY_DEDUPE_MS,
       },
       async (tx) => {
         const startsAt = parseBookingTimestamp(data.startsAt, "startsAt");
@@ -250,7 +278,7 @@ async function handleCreateSessionBooking(
         const now = nowServer();
 
         const isFree = !pricing.isPaid;
-        const bookingMode = resolveQuranTutorBookingMode(platformConfig);
+        const bookingMode = eligibility.market.bookingMode;
         const bookingAction = isFree
           ? bookingMode === "requiresTutorApproval"
             ? "submit_booking_request"
@@ -272,7 +300,14 @@ async function handleCreateSessionBooking(
 
         const lockSnap = await tx.get(lockRef);
         if (lockSnap.exists) {
-          throw new HttpsError("already-exists", "Slot unavailable.");
+          const lockData = lockSnap.data() ?? {};
+          const lockExpiresAt = lockData.expiresAt as Timestamp | undefined;
+          if (
+            lockExpiresAt == null ||
+            lockExpiresAt.toMillis() > Date.now()
+          ) {
+            throw new HttpsError("already-exists", "Slot unavailable.");
+          }
         }
 
         const teacherSnap = await tx.get(
@@ -287,6 +322,7 @@ async function handleCreateSessionBooking(
             teacherProfile: teacherData,
             platformConfig,
             clientCallProvider: data.callProvider,
+            sessionMode: eligibility.market.sessionMode,
           });
         } catch (error) {
           mapCallProviderResolverError(error, data.callProvider);
@@ -303,15 +339,25 @@ async function handleCreateSessionBooking(
           );
         }
 
+        const paymentHoldMs = PENDING_PAYMENT_SLOT_HOLD_MS;
+        const approvalSlaMs = eligibility.market.tutorApprovalSlaMs;
+        const teacherUserId = teacherProfileUserIdFromData(
+          data.teacherId,
+          teacherData,
+        );
         const participants = buildIndividualParticipants(
           data.teacherId,
           studentId,
         );
         const meetingLink = resolvedCall.meetingLink;
-        const teacherUserId = teacherProfileUserIdFromData(
-          data.teacherId,
-          teacherData,
-        );
+        const allowedActionsDenorm = buildAllowedActionsDenorm({
+          studentId,
+          teacherUserId,
+          lifecycleStatus,
+          startsAt: startsAt.toDate(),
+          endsAt: endsAt.toDate(),
+          joinWindowLeadMs: eligibility.market.joinWindowLeadMs,
+        });
 
         tx.set(lockRef, {
           lockId: data.slotId,
@@ -328,9 +374,17 @@ async function handleCreateSessionBooking(
             lifecycleStatus === "scheduled"
               ? Timestamp.fromDate(new Date("2099-01-01T00:00:00.000Z"))
               : lifecycleStatus === "pending_tutor_approval"
-                ? startsAt
-                : Timestamp.fromMillis(Date.now() + 10 * 60 * 1000),
+                ? Timestamp.fromMillis(Date.now() + approvalSlaMs)
+                : Timestamp.fromMillis(Date.now() + paymentHoldMs),
         });
+
+        const feeSnapshot = {
+          amount: pricing.amount,
+          currencyCode: pricing.currencyCode,
+          pricingType: serverPricingType,
+          policyVersion: eligibility.market.policyVersion,
+          capturedAt: now,
+        };
 
         const bookingDoc: Record<string, unknown> = {
           bookingId: bookingRef.id,
@@ -348,6 +402,10 @@ async function handleCreateSessionBooking(
           pricingType: serverPricingType,
           priceAmount: pricing.amount,
           priceCurrency: pricing.currencyCode,
+          feeSnapshot,
+          countryCode: eligibility.student.countryCode,
+          cityId: eligibility.student.cityId,
+          joinWindowLeadMs: eligibility.market.joinWindowLeadMs,
           amountPaidUsd: null,
           paymentStatus,
           paymentProvider: isFree ? "none" : resolvePaymentProvider().kind,
@@ -357,10 +415,18 @@ async function handleCreateSessionBooking(
           status: legacyStatusForLifecycle(lifecycleStatus),
           createdAt: now,
           updatedAt: now,
+          ...allowedActionsDenorm,
         };
         if (lifecycleStatus === "pending_tutor_approval") {
           bookingDoc.approvalRequestedAt = now;
-          bookingDoc.approvalExpiresAt = startsAt;
+          bookingDoc.approvalExpiresAt = Timestamp.fromMillis(
+            Date.now() + approvalSlaMs,
+          );
+        }
+        if (lifecycleStatus === "pending_payment") {
+          bookingDoc.paymentExpiresAt = Timestamp.fromMillis(
+            Date.now() + paymentHoldMs,
+          );
         }
         if (isFree) {
           bookingDoc.bookingModeAtCreation = bookingMode;
@@ -388,6 +454,8 @@ async function handleCreateSessionBooking(
           paymentReference: null,
           createdAt: now,
           updatedAt: now,
+          feeSnapshot,
+          ...allowedActionsDenorm,
         });
 
         let paymentReference: string | undefined;
@@ -415,7 +483,7 @@ async function handleCreateSessionBooking(
             teacherAmount,
             tax,
             idempotencyKey,
-            expiresAt: new Date(Date.now() + 10 * 60 * 1000),
+            expiresAt: new Date(Date.now() + paymentHoldMs),
           });
           paymentReference = intent.paymentReference;
           clientConfirmToken = intent.clientConfirmToken;

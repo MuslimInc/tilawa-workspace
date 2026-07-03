@@ -82,3 +82,6 @@ apps/tilawa/android/app/java_pid35914.hprof
 
 sentry.properties
 sentry-wizard
+
+# Maestro local credentials (quran_sessions QA)
+.maestro/quran_sessions/.env

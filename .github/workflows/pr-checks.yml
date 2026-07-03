@@ -79,6 +79,21 @@ jobs:
           export PATH="$HOME/.pub-cache/bin:$PATH"
           melos run test
 
+  design-md-lint:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v6
+
+      - name: Set up Node 22
+        uses: actions/setup-node@v6
+        with:
+          node-version: "22"
+
+      - name: Lint DESIGN.md (@google/design.md)
+        run: npx --yes @google/design.md lint DESIGN.md
+
   quran-sessions-preflight:
     runs-on: ubuntu-latest
     timeout-minutes: 30

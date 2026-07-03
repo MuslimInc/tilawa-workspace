@@ -169,8 +169,10 @@
         }
     },
     "sessionsTabUpcoming": "Upcoming",
+    "sessionsTabPending": "Pending",
     "sessionsTabPast": "Past",
     "sessionsTabCancelled": "Cancelled",
+    "noPendingSessions": "No pending sessions",
     "bookAgainAction": "Book again",
     "sessionStatusStartingSoon": "Starting soon",
     "sessionStartsInMinutes": "Starts in {minutes} min",
