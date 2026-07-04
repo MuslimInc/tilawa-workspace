@@ -65,11 +65,11 @@ void navigateForTeacherCapability(
   bool showBlockedMessage = false,
   bool replace = false,
 }) {
-  void navigate(String route) {
+  void navigate(String route, {Object? extra}) {
     if (replace) {
-      context.pushReplacement(route);
+      context.pushReplacement(route, extra: extra);
     } else {
-      context.push(route);
+      context.push(route, extra: extra);
     }
   }
 
@@ -97,7 +97,7 @@ void navigateForTeacherCapability(
       navigate(QuranSessionsRoutes.completeTeacherProfile);
     case TeacherCapabilityNavigationTarget.teacherDashboard:
       analytics.onTeacherDashboardOpened?.call();
-      navigate(QuranSessionsRoutes.teacherDashboard);
+      navigate(QuranSessionsRoutes.teacherDashboard, extra: capability);
   }
 }
 
@@ -727,16 +727,41 @@ class _TeacherDashboardGate extends StatefulWidget {
 class _TeacherDashboardGateState extends State<_TeacherDashboardGate> {
   bool _allowed = false;
   bool _checking = true;
+  bool _verifyStarted = false;
   String? _teacherProfileId;
   String? _viewerAuthUserId;
 
   @override
-  void initState() {
-    super.initState();
-    _verifyAccess();
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    if (_verifyStarted) {
+      return;
+    }
+    _verifyStarted = true;
+
+    final prefetched = GoRouterState.of(context).extra;
+    if (prefetched is TeacherCapability) {
+      _tryApplyPrefetchedCapability(prefetched);
+    }
+    unawaited(_verifyAccess(skipAnalyticsOnSuccess: prefetched != null));
   }
 
-  Future<void> _verifyAccess() async {
+  void _tryApplyPrefetchedCapability(TeacherCapability capability) {
+    if (!capability.canAccessTeacherDashboard) {
+      return;
+    }
+    final teacherProfileId = capability.teacherProfileId;
+    final userId = resolveQuranSessionsUserId(getIt);
+    if (teacherProfileId == null || userId == null) {
+      return;
+    }
+    _allowed = true;
+    _checking = false;
+    _teacherProfileId = teacherProfileId;
+    _viewerAuthUserId = userId;
+  }
+
+  Future<void> _verifyAccess({bool skipAnalyticsOnSuccess = false}) async {
     final userId = resolveQuranSessionsUserId(getIt);
     if (userId == null) {
       if (!mounted) return;
@@ -756,7 +781,10 @@ class _TeacherDashboardGateState extends State<_TeacherDashboardGate> {
     if (capability.canAccessTeacherDashboard) {
       final teacherProfileId = capability.teacherProfileId;
       if (teacherProfileId == null) {
-        setState(() => _checking = false);
+        setState(() {
+          _allowed = false;
+          _checking = false;
+        });
         navigateForTeacherCapability(
           context,
           capability,
@@ -766,17 +794,34 @@ class _TeacherDashboardGateState extends State<_TeacherDashboardGate> {
         );
         return;
       }
-      quranSessionsAnalyticsCallbacks().onTeacherDashboardOpened?.call();
-      setState(() {
-        _allowed = true;
-        _checking = false;
-        _teacherProfileId = teacherProfileId;
-        _viewerAuthUserId = userId;
-      });
+      if (!_allowed) {
+        if (!skipAnalyticsOnSuccess) {
+          quranSessionsAnalyticsCallbacks().onTeacherDashboardOpened?.call();
+        }
+        setState(() {
+          _allowed = true;
+          _checking = false;
+          _teacherProfileId = teacherProfileId;
+          _viewerAuthUserId = userId;
+        });
+        return;
+      }
+      if (_teacherProfileId != teacherProfileId ||
+          _viewerAuthUserId != userId) {
+        setState(() {
+          _teacherProfileId = teacherProfileId;
+          _viewerAuthUserId = userId;
+        });
+      } else if (_checking) {
+        setState(() => _checking = false);
+      }
       return;
     }
 
-    setState(() => _checking = false);
+    setState(() {
+      _allowed = false;
+      _checking = false;
+    });
     navigateForTeacherCapability(
       context,
       capability,
@@ -792,8 +837,9 @@ class _TeacherDashboardGateState extends State<_TeacherDashboardGate> {
         !_allowed ||
         _teacherProfileId == null ||
         _viewerAuthUserId == null) {
-      return const Scaffold(
-        body: Center(child: CircularProgressIndicator()),
+      return QuranSessionsScaffold(
+        title: context.quranSessionsL10n.teacherDashboardTitle,
+        body: const Center(child: CircularProgressIndicator()),
       );
     }
 

@@ -36,7 +36,7 @@ class _AgoraCallSurfaceState extends State<AgoraCallSurface> {
   int? _remoteUid;
   String? _channelId;
   bool _remoteVideoReady = false;
-  bool _localVideoReady = false;
+  bool? _localVideoReady;
   RtcEngineEventHandler? _eventHandler;
 
   @override
@@ -53,7 +53,7 @@ class _AgoraCallSurfaceState extends State<AgoraCallSurface> {
       _remoteUid = null;
       _channelId = null;
       _remoteVideoReady = false;
-      _localVideoReady = false;
+      _localVideoReady = null;
       _phase = _AgoraCallConnectionPhase.connecting;
       _bindEngineEvents();
       _reportConnectionPhase();
@@ -294,7 +294,7 @@ class _VideoLayout extends StatefulWidget {
   final String? channelId;
   final _AgoraCallConnectionPhase phase;
   final bool remoteVideoReady;
-  final bool localVideoReady;
+  final bool? localVideoReady;
 
   @override
   State<_VideoLayout> createState() => _VideoLayoutState();
@@ -316,6 +316,10 @@ class _VideoLayoutState extends State<_VideoLayout> {
     if (oldWidget.remoteUid != widget.remoteUid ||
         oldWidget.channelId != widget.channelId) {
       _remoteController = null;
+    }
+    // Drop the local texture when capture stops so the last frame cannot linger.
+    if (oldWidget.localVideoReady != false && widget.localVideoReady == false) {
+      _localController = null;
     }
     // Invalidate local controller only when the engine changes.
     if (oldWidget.engine != widget.engine) {
@@ -363,10 +367,17 @@ class _VideoLayoutState extends State<_VideoLayout> {
         widget.channelId!.isNotEmpty;
     final hasChannel = widget.channelId != null && widget.channelId!.isNotEmpty;
     final showRemoteVideo = hasRemoteParticipant && widget.remoteVideoReady;
+    // Solo waiting: render local preview optimistically until SDK reports stopped.
+    // PiP: require SDK-confirmed capture so remote-placeholder states stay clean.
     final showLocalFullscreen =
-        !showRemoteVideo && hasChannel && !hasRemoteParticipant;
+        widget.localVideoReady != false &&
+        !showRemoteVideo &&
+        hasChannel &&
+        !hasRemoteParticipant;
     final showLocalPiP =
-        widget.localVideoReady && hasRemoteParticipant && !showLocalFullscreen;
+        widget.localVideoReady == true &&
+        hasRemoteParticipant &&
+        !showLocalFullscreen;
     final pipWidth = tokens.spaceXXL * 3.5;
     final pipHeight = tokens.spaceXXL * 4.625;
 
@@ -375,6 +386,12 @@ class _VideoLayoutState extends State<_VideoLayout> {
         widget.phase == _AgoraCallConnectionPhase.reconnecting;
     final showRemoteMutedPlaceholder =
         hasRemoteParticipant && !showRemoteVideo && !showConnectingPlaceholder;
+    final showLocalMutedPlaceholder =
+        widget.localVideoReady == false &&
+        !showRemoteVideo &&
+        hasChannel &&
+        !hasRemoteParticipant &&
+        !showConnectingPlaceholder;
 
     return Stack(
       fit: StackFit.expand,
@@ -386,6 +403,8 @@ class _VideoLayoutState extends State<_VideoLayout> {
         else if (showConnectingPlaceholder)
           const AgoraCallVideoPlaceholder(showSpinner: true)
         else if (showRemoteMutedPlaceholder)
+          const AgoraCallVideoPlaceholder(icon: Icons.person_outline)
+        else if (showLocalMutedPlaceholder)
           const AgoraCallVideoPlaceholder(icon: Icons.person_outline),
         if (showLocalPiP)
           PositionedDirectional(

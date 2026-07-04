@@ -331,6 +331,7 @@ void main() {
   testWidgets('approved active card tap opens teacher dashboard route', (
     tester,
   ) async {
+    TeacherCapability? capturedRouteExtra;
     final router = GoRouter(
       initialLocation: '/',
       routes: [
@@ -345,16 +346,29 @@ void main() {
         ),
         GoRoute(
           path: QuranSessionsRoutes.teacherDashboard,
-          builder: (context, state) =>
-              const Scaffold(key: Key('teacher_dashboard_screen')),
+          builder: (context, state) {
+            capturedRouteExtra = state.extra as TeacherCapability?;
+            return const Scaffold(key: Key('teacher_dashboard_screen'));
+          },
         ),
       ],
+    );
+
+    final capability = TeacherCapability(
+      state: TeacherCapabilityState.approvedActive,
+      application: TeacherApplication(
+        id: 'teacher_profile_1',
+        userId: 'user_1',
+        status: TeacherApplicationStatus.approved,
+        createdAt: DateTime(2024),
+        updatedAt: DateTime(2024),
+      ),
     );
 
     await _pumpSettingsTeachingSection(
       tester,
       _mockAuthBloc,
-      const TeacherCapability(state: TeacherCapabilityState.approvedActive),
+      capability,
       router: router,
     );
 
@@ -364,6 +378,8 @@ void main() {
     check(
       find.byKey(const Key('teacher_dashboard_screen')).evaluate().length,
     ).equals(1);
+    check(capturedRouteExtra).isNotNull();
+    check(capturedRouteExtra!.teacherProfileId).equals('teacher_profile_1');
   });
 
   testWidgets(

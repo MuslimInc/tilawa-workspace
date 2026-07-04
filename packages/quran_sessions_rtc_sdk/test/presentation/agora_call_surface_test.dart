@@ -248,6 +248,36 @@ void main() {
       expect(find.byType(AgoraVideoView), findsNWidgets(2));
     });
 
+    testWidgets(
+      'local camera disabled while waiting shows placeholder not frozen preview',
+      (tester) async {
+        final engine = FakeRtcEngine();
+        final handle = FakeAgoraRtcSessionHandle(engine);
+        final pool = AgoraRtcEnginePool()..remember('session_1', handle);
+
+        await pumpSurface(
+          tester,
+          sessionId: 'session_1',
+          callType: SessionCallType.videoCall,
+          enginePool: pool,
+        );
+
+        engine.simulateJoinSuccess();
+        engine.simulateLocalVideoState(
+          LocalVideoStreamState.localVideoStreamStateCapturing,
+        );
+        await tester.pump();
+
+        expect(find.byType(AgoraVideoView), findsOneWidget);
+
+        await handle.setCameraEnabled(false);
+        await tester.pump();
+
+        expect(find.byType(AgoraVideoView), findsNothing);
+        expect(find.byIcon(Icons.person_outline), findsOneWidget);
+      },
+    );
+
     testWidgets('video call hides local PiP when camera is disabled', (
       tester,
     ) async {
