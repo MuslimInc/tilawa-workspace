@@ -450,6 +450,9 @@ class AppTheme {
             (theme.bottomNavigationBarTheme.elevation ?? 3.0) *
             kElevationMultiplier,
       ),
+      progressIndicatorTheme: theme.progressIndicatorTheme.copyWith(
+        refreshBackgroundColor: colorScheme.surface,
+      ),
       inputDecorationTheme: const InputDecorationTheme(
         border: InputBorder.none,
         enabledBorder: InputBorder.none,
@@ -472,10 +475,12 @@ class AppTheme {
                   return baseElevation * kElevationMultiplier;
                 }
                 if (states.contains(WidgetState.disabled)) return 0.0;
-                if (states.contains(WidgetState.hovered))
+                if (states.contains(WidgetState.hovered)) {
                   return 3.0 * kElevationMultiplier;
-                if (states.contains(WidgetState.pressed))
+                }
+                if (states.contains(WidgetState.pressed)) {
                   return 1.0 * kElevationMultiplier;
+                }
                 return 1.0 * kElevationMultiplier;
               }),
             ),

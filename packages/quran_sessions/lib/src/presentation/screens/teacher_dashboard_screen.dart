@@ -3,7 +3,6 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:intl/intl.dart';
 import 'package:quran_sessions/l10n/quran_sessions_localizations.dart';
 import 'package:quran_sessions/quran_sessions.dart';
-
 import 'package:tilawa_ui_kit/tilawa_ui_kit.dart';
 
 import '../failure_ui/quran_sessions_failure_body.dart';
@@ -298,7 +297,7 @@ class _TeacherDashboardScreenState extends State<TeacherDashboardScreen> {
                 failure: failure,
                 onRetry: _reload,
               ),
-            TeacherDashboardSuccess success => RefreshIndicator(
+            TeacherDashboardSuccess success => TilawaRefreshIndicator(
               backgroundColor: Theme.of(context).colorScheme.surface,
               color: Theme.of(context).colorScheme.primary,
               onRefresh: () async => _reload(),
@@ -1086,7 +1085,7 @@ class _TeacherDashboardCategoryScreenState
       _maybeLogFridayBanner(success);
     }
 
-    return RefreshIndicator(
+    return TilawaRefreshIndicator(
       backgroundColor: Theme.of(context).colorScheme.surface,
       color: Theme.of(context).colorScheme.primary,
       onRefresh: widget.onReload,

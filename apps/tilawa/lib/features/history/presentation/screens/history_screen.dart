@@ -137,7 +137,7 @@ class _HistoryScreenState extends State<HistoryScreen> {
               BlocBuilder<HistoryBloc, HistoryState>(
                 builder: (context, state) {
                   final tokens = Theme.of(context).tokens;
-                  return RefreshIndicator(
+                  return TilawaRefreshIndicator(
                     onRefresh: () async {
                       context.read<HistoryBloc>().add(
                         const HistoryEvent.refreshHistory(),

@@ -5,9 +5,9 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:quran_sessions/quran_sessions.dart';
 import 'package:tilawa_ui_kit/tilawa_ui_kit.dart';
 
-import '../session_join/session_join_ui_state.dart';
 import '../l10n/session_join_l10n.dart';
 import '../l10n/session_lifecycle_l10n.dart';
+import '../session_join/session_join_ui_state.dart';
 import '../utils/session_revision_practice.dart';
 import '../widgets/pending_reschedule_banner.dart';
 import '../widgets/session_revision_practice_card.dart';
@@ -335,7 +335,7 @@ class _SessionDetailScreenState extends State<SessionDetailScreen>
                 :final isAwaitingRescheduleCounterparty,
                 :final rescheduleRespondInProgress,
               ) =>
-                RefreshIndicator(
+                TilawaRefreshIndicator(
                   onRefresh: _reloadDetail,
                   child: ListView(
                     physics: const AlwaysScrollableScrollPhysics(),

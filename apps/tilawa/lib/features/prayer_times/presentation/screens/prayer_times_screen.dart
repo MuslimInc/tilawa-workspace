@@ -288,7 +288,7 @@ class _PrayerTimesScreenState extends State<PrayerTimesScreen>
 
     final tokens = Theme.of(context).tokens;
 
-    return RefreshIndicator(
+    return TilawaRefreshIndicator(
       onRefresh: () async {
         context.read<PrayerTimesBloc>().add(
           const PrayerTimesEvent.loadPrayerTimes(),

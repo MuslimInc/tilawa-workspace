@@ -30,7 +30,7 @@ import 'package:flutter/material.dart';
 /// Use this to tune the overall depth of the UI kit from a single place.
 /// Values > 1.0 increase elevation (deeper shadow, wider blur),
 /// while values < 1.0 flatten the UI. All surface elevations scale proportionally.
-const double kElevationMultiplier = 2.30;
+const double kElevationMultiplier = 3.0;
 
 const double kMeMuslimMinInteractiveDimension = 48.0;
 

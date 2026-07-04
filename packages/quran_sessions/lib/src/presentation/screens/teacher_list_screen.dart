@@ -4,17 +4,17 @@ import 'package:quran_sessions/core/l10n_extensions.dart';
 import 'package:quran_sessions/l10n/quran_sessions_localizations.dart';
 import 'package:tilawa_ui_kit/tilawa_ui_kit.dart';
 
-import '../failure_ui/quran_sessions_failure_body.dart';
 import '../../domain/entities/quran_teacher.dart';
 import '../blocs/teacher_list/teacher_list_bloc.dart';
 import '../blocs/teacher_list/teacher_list_event.dart';
 import '../blocs/teacher_list/teacher_list_state.dart';
 import '../config/quran_sessions_analytics_callbacks.dart';
 import '../config/quran_sessions_feature_config.dart';
+import '../failure_ui/quran_sessions_failure_body.dart';
 import '../models/teacher_availability_summary.dart';
-import '../widgets/quran_sessions_student_empty_state.dart';
 import '../widgets/quran_sessions_page_header.dart';
 import '../widgets/quran_sessions_scaffold.dart';
+import '../widgets/quran_sessions_student_empty_state.dart';
 import '../widgets/teacher_card.dart';
 import '../widgets/teacher_card_compact_skeleton.dart';
 import '../widgets/teacher_list_filter_bar.dart';
@@ -192,7 +192,7 @@ class _TeacherListScreenState extends State<TeacherListScreen> {
         (_selectedFilter.isClientSideOnly && filtered.isEmpty) ||
         (_searchQuery.trim().isNotEmpty && visible.isEmpty);
 
-    return RefreshIndicator(
+    return TilawaRefreshIndicator(
       onRefresh: () async => _retry(),
       child: ListView.builder(
         controller: _scrollController,

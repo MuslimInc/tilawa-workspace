@@ -366,7 +366,7 @@ class _SuccessBody extends StatelessWidget {
       _MySessionsTab.cancelled => success.cancelled,
     };
 
-    return RefreshIndicator(
+    return TilawaRefreshIndicator(
       onRefresh: () async => onReload(),
       child: CustomScrollView(
         slivers: [
