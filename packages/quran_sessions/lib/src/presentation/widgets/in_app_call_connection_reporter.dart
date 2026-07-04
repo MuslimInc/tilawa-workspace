@@ -12,15 +12,26 @@ class InAppCallConnectionReporter extends InheritedWidget {
   const InAppCallConnectionReporter({
     super.key,
     required this.onPhaseChanged,
+    this.remoteParticipantDisplayName,
     required super.child,
   });
 
   final ValueChanged<InAppCallConnectionPhase> onPhaseChanged;
 
+  /// Remote party name for camera-off placeholders in media surfaces.
+  final String? remoteParticipantDisplayName;
+
   static InAppCallConnectionReporter? maybeOf(BuildContext context) {
     return context.getInheritedWidgetOfExactType<InAppCallConnectionReporter>();
   }
 
+  static String? remoteParticipantDisplayNameOf(BuildContext context) {
+    return maybeOf(context)?.remoteParticipantDisplayName;
+  }
+
   @override
-  bool updateShouldNotify(InAppCallConnectionReporter oldWidget) => false;
+  bool updateShouldNotify(InAppCallConnectionReporter oldWidget) {
+    return remoteParticipantDisplayName !=
+        oldWidget.remoteParticipantDisplayName;
+  }
 }

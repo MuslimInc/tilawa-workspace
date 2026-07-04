@@ -171,6 +171,14 @@ class _AgoraCallSurfaceState extends State<AgoraCallSurface> {
               _remoteVideoReady = _isRemoteVideoRenderable(state);
             });
           },
+      onUserMuteVideo: (connection, remoteUid, muted) {
+        if (!mounted || _remoteUid != remoteUid) return;
+        if (muted) {
+          setState(() {
+            _remoteVideoReady = false;
+          });
+        }
+      },
       onLocalVideoStateChanged: (source, state, reason) {
         if (!mounted) return;
         setState(() {
@@ -366,10 +374,13 @@ class _VideoLayoutState extends State<_VideoLayout> {
         widget.channelId != null &&
         widget.channelId!.isNotEmpty;
     final showRemoteVideo = hasRemoteParticipant && widget.remoteVideoReady;
-    final showLocalFullscreen = widget.localVideoReady && !showRemoteVideo;
-    final showLocalPiP = widget.localVideoReady && showRemoteVideo;
+    final showLocalFullscreen = widget.localVideoReady && !hasRemoteParticipant;
+    final showLocalPiP = widget.localVideoReady && hasRemoteParticipant;
     final pipWidth = tokens.spaceXXL * 3.5;
     final pipHeight = tokens.spaceXXL * 4.625;
+
+    final remoteParticipantName =
+        InAppCallConnectionReporter.remoteParticipantDisplayNameOf(context);
 
     final (placeholderIcon, placeholderMessage) = switch (widget.phase) {
       _AgoraCallConnectionPhase.connecting => (
@@ -384,10 +395,12 @@ class _VideoLayoutState extends State<_VideoLayout> {
         Icons.hourglass_top_outlined,
         widget.labels.waitingForParticipant,
       ),
-      _AgoraCallConnectionPhase.participantJoined when !showRemoteVideo => (
-        Icons.videocam_outlined,
-        widget.labels.connected,
-      ),
+      _AgoraCallConnectionPhase.participantJoined
+          when hasRemoteParticipant && !showRemoteVideo =>
+        (
+          Icons.person_outline,
+          remoteParticipantName ?? widget.labels.connected,
+        ),
       _ => (Icons.person_outline, widget.labels.connected),
     };
 

@@ -105,13 +105,18 @@ void main() {
       ),
     );
 
-    final toggleTokens = theme.componentTokens.iconToggle;
-    final activeColor = toggleTokens.activeBackgroundColor;
-    final inactiveColor = toggleTokens.inactiveBackgroundColor;
+    final activeColor = theme.colorScheme.primary;
+    final inactiveColor =
+        theme.componentTokens.iconToggle.inactiveBackgroundColor;
+    final activeIconColor = theme.colorScheme.onPrimary;
 
     expect(
       _callControlMaterialColor(tester, const Key('call_shell_mute')),
       activeColor,
+    );
+    expect(
+      _callControlIconColor(tester, const Key('call_shell_mute')),
+      activeIconColor,
     );
     expect(
       tester
@@ -147,6 +152,10 @@ void main() {
     expect(
       _callControlMaterialColor(tester, const Key('call_shell_speaker')),
       activeColor,
+    );
+    expect(
+      _callControlIconColor(tester, const Key('call_shell_speaker')),
+      activeIconColor,
     );
     expect(
       tester
@@ -242,6 +251,96 @@ void main() {
     expect(find.textContaining('Beta preview'), findsOneWidget);
   });
 
+  testWidgets('Video toggle swaps active background and slash icon', (
+    tester,
+  ) async {
+    final gateway = _RecordingCallControlGateway();
+    late ThemeData theme;
+
+    await tester.pumpWidget(
+      _shellApp(
+        Builder(
+          builder: (context) {
+            theme = Theme.of(context);
+            return InAppCallShellScreen(
+              sessionId: 'session_1',
+              callType: SessionCallType.videoCall,
+              callProviderKind: SessionCallProviderKind.agora,
+              callControlGateway: gateway,
+            );
+          },
+        ),
+      ),
+    );
+
+    final activeColor = theme.colorScheme.primary;
+    final inactiveColor =
+        theme.componentTokens.iconToggle.inactiveBackgroundColor;
+    final activeIconColor = theme.colorScheme.onPrimary;
+
+    expect(
+      _callControlMaterialColor(tester, const Key('call_shell_video')),
+      activeColor,
+    );
+    expect(
+      _callControlIconColor(tester, const Key('call_shell_video')),
+      activeIconColor,
+    );
+    expect(find.byIcon(Icons.videocam_rounded), findsOneWidget);
+    expect(find.byIcon(Icons.videocam_off_rounded), findsNothing);
+
+    await tester.tap(find.byKey(const Key('call_shell_video')));
+    await tester.pumpAndSettle();
+
+    check(gateway.cameraEnabledCalls).deepEquals([false]);
+    expect(
+      _callControlMaterialColor(tester, const Key('call_shell_video')),
+      inactiveColor,
+    );
+    expect(find.byIcon(Icons.videocam_off_rounded), findsOneWidget);
+    expect(find.byIcon(Icons.videocam_rounded), findsNothing);
+    expect(
+      tester
+          .getSemantics(find.byKey(const Key('call_shell_video')))
+          .flagsCollection
+          .isToggled,
+      Tristate.isFalse,
+    );
+  });
+
+  testWidgets('Flip camera stays neutral when video is on', (tester) async {
+    final gateway = _RecordingCallControlGateway();
+    late ThemeData theme;
+
+    await tester.pumpWidget(
+      _shellApp(
+        Builder(
+          builder: (context) {
+            theme = Theme.of(context);
+            return InAppCallShellScreen(
+              sessionId: 'session_1',
+              callType: SessionCallType.videoCall,
+              callProviderKind: SessionCallProviderKind.agora,
+              callControlGateway: gateway,
+            );
+          },
+        ),
+      ),
+    );
+
+    final inactiveColor =
+        theme.componentTokens.iconToggle.inactiveBackgroundColor;
+
+    expect(
+      _callControlMaterialColor(tester, const Key('call_shell_video')),
+      theme.colorScheme.primary,
+    );
+    expect(
+      _callControlMaterialColor(tester, const Key('call_shell_flip')),
+      inactiveColor,
+    );
+  });
+
   testWidgets('Participant name appears in glass info bar', (tester) async {
     await tester.pumpWidget(
       _shellApp(
@@ -277,6 +376,14 @@ Color _callControlMaterialColor(WidgetTester tester, Key key) {
     matching: find.byType(Material),
   );
   return tester.widget<Material>(materialFinder).color!;
+}
+
+Color _callControlIconColor(WidgetTester tester, Key key) {
+  final iconFinder = find.descendant(
+    of: find.byKey(key),
+    matching: find.byType(Icon),
+  );
+  return tester.widget<Icon>(iconFinder).color!;
 }
 
 class _RecordingCallControlGateway implements SessionCallControlGateway {

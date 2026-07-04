@@ -249,7 +249,6 @@ class _InAppCallShellView extends StatelessWidget {
 
     final statusSubtitle = _resolveStatusSubtitle(l10n);
     final displayName = participantName ?? l10n.inAppCallShellTitle;
-    final cubit = _readCallControlCubit(context);
     final overlayStyle = _callShellSystemUiOverlayStyle(
       Theme.of(context),
       hasCallSurface: hasCallSurface,
@@ -274,6 +273,7 @@ class _InAppCallShellView extends StatelessWidget {
               if (hasCallSurface)
                 InAppCallConnectionReporter(
                   onPhaseChanged: onConnectionPhaseChanged,
+                  remoteParticipantDisplayName: displayName,
                   child: callSurface!,
                 )
               else
@@ -293,13 +293,18 @@ class _InAppCallShellView extends StatelessWidget {
                       ),
                       child: Align(
                         alignment: AlignmentDirectional.centerStart,
-                        child: _CallChromeIconButton(
-                          key: const Key('call_shell_back'),
-                          iconWidget: const BackButtonIcon(),
-                          label: l10n.inAppCallShellEndCall,
-                          onPressed: cubit?.state.canEndCall ?? true
-                              ? () => unawaited(onEndCall())
-                              : null,
+                        child: _CallEndGuard(
+                          onEndCall: onEndCall,
+                          builder: (context, canEndCall) {
+                            return _CallChromeIconButton(
+                              key: const Key('call_shell_back'),
+                              iconWidget: const BackButtonIcon(),
+                              label: l10n.inAppCallShellEndCall,
+                              onPressed: canEndCall
+                                  ? () => unawaited(onEndCall())
+                                  : null,
+                            );
+                          },
                         ),
                       ),
                     ),
@@ -314,22 +319,35 @@ class _InAppCallShellView extends StatelessWidget {
                       ),
                     ),
                     SizedBox(height: tokens.spaceMedium),
-                    if (cubit != null)
-                      _CallControlsRow(
-                        state: cubit.state,
-                        muteLabel: cubit.state.isMuted
-                            ? l10n.inAppCallShellUnmute
-                            : l10n.inAppCallShellMute,
-                        endCallLabel: l10n.inAppCallShellEndCall,
-                        speakerLabel: l10n.inAppCallShellSpeaker,
-                        flipCameraLabel: l10n.inAppCallShellFlipCamera,
-                        turnVideoOnLabel: l10n.inAppCallShellTurnVideoOn,
-                        turnVideoOffLabel: l10n.inAppCallShellTurnVideoOff,
-                        onToggleMute: () => unawaited(cubit.toggleMicrophone()),
-                        onToggleVideo: () => unawaited(cubit.toggleCamera()),
-                        onToggleSpeaker: () => unawaited(cubit.toggleSpeaker()),
-                        onSwitchCamera: () => unawaited(cubit.switchCamera()),
-                        onEndCall: () => unawaited(onEndCall()),
+                    if (_readCallControlCubit(context) != null)
+                      BlocBuilder<
+                        QuranSessionCallControlCubit,
+                        QuranSessionCallControlState
+                      >(
+                        builder: (context, state) {
+                          final cubit = context
+                              .read<QuranSessionCallControlCubit>();
+                          return _CallControlsRow(
+                            state: state,
+                            muteLabel: state.isMuted
+                                ? l10n.inAppCallShellUnmute
+                                : l10n.inAppCallShellMute,
+                            endCallLabel: l10n.inAppCallShellEndCall,
+                            speakerLabel: l10n.inAppCallShellSpeaker,
+                            flipCameraLabel: l10n.inAppCallShellFlipCamera,
+                            turnVideoOnLabel: l10n.inAppCallShellTurnVideoOn,
+                            turnVideoOffLabel: l10n.inAppCallShellTurnVideoOff,
+                            onToggleMute: () =>
+                                unawaited(cubit.toggleMicrophone()),
+                            onToggleVideo: () =>
+                                unawaited(cubit.toggleCamera()),
+                            onToggleSpeaker: () =>
+                                unawaited(cubit.toggleSpeaker()),
+                            onSwitchCamera: () =>
+                                unawaited(cubit.switchCamera()),
+                            onEndCall: () => unawaited(onEndCall()),
+                          );
+                        },
                       )
                     else
                       _CallControlsRow(
@@ -696,7 +714,8 @@ class _CallChromeIconButton extends StatelessWidget {
     required this.onPressed,
     this.isLoading = false,
     this.isActive = false,
-  }) : assert(icon != null || iconWidget != null);
+  }) : highlightWhenActive = true,
+       assert(icon != null || iconWidget != null);
 
   final IconData? icon;
   final Widget? iconWidget;
@@ -704,6 +723,10 @@ class _CallChromeIconButton extends StatelessWidget {
   final VoidCallback? onPressed;
   final bool isLoading;
   final bool isActive;
+
+  /// When false, [isActive] only drives semantics — surface stays neutral
+  /// (e.g. flip camera is a secondary action, not an on/off toggle).
+  final bool highlightWhenActive;
 
   @override
   Widget build(BuildContext context) {
@@ -713,11 +736,12 @@ class _CallChromeIconButton extends StatelessWidget {
     final composerTokens = theme.componentTokens.immersiveComposer;
     final toggleTokens = theme.componentTokens.iconToggle;
     final size = composerTokens.headerButtonSize;
-    final fillColor = isActive
-        ? toggleTokens.activeBackgroundColor
+    final showActiveHighlight = isActive && highlightWhenActive;
+    final fillColor = showActiveHighlight
+        ? colorScheme.primary
         : toggleTokens.inactiveBackgroundColor;
-    final iconColor = isActive
-        ? colorScheme.onPrimaryContainer
+    final iconColor = showActiveHighlight
+        ? colorScheme.onPrimary
         : colorScheme.onSurfaceVariant;
 
     return Semantics(
@@ -830,8 +854,33 @@ class _CallEndButton extends StatelessWidget {
 
 QuranSessionCallControlCubit? _readCallControlCubit(BuildContext context) {
   try {
-    return context.watch<QuranSessionCallControlCubit>();
+    return context.read<QuranSessionCallControlCubit>();
   } on ProviderNotFoundException {
     return null;
+  }
+}
+
+class _CallEndGuard extends StatelessWidget {
+  const _CallEndGuard({
+    required this.onEndCall,
+    required this.builder,
+  });
+
+  final Future<void> Function() onEndCall;
+  final Widget Function(BuildContext context, bool canEndCall) builder;
+
+  @override
+  Widget build(BuildContext context) {
+    final cubit = _readCallControlCubit(context);
+    if (cubit == null) {
+      return builder(context, true);
+    }
+
+    return BlocBuilder<
+      QuranSessionCallControlCubit,
+      QuranSessionCallControlState
+    >(
+      builder: (context, state) => builder(context, state.canEndCall),
+    );
   }
 }

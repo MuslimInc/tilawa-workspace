@@ -158,7 +158,12 @@ class _LiveKitCallSurfaceState extends State<LiveKitCallSurface> {
       return;
     }
     _syncRemoteParticipant(room);
-    _localVideoReady = _hasRenderableLocalVideo(room);
+    final localReady = _hasRenderableLocalVideo(room);
+    if (localReady != _localVideoReady) {
+      setState(() {
+        _localVideoReady = localReady;
+      });
+    }
   }
 
   void _syncRemoteParticipant(Room room) {
@@ -306,6 +311,7 @@ class _LiveKitCallSurfaceState extends State<LiveKitCallSurface> {
           SessionCallType.videoCall => _LiveKitVideoLayout(
             room: room,
             phase: _phase,
+            hasRemoteParticipant: _remoteParticipantId != null,
             remoteVideoReady: _remoteVideoReady,
             localVideoReady: _localVideoReady,
             remoteVideoTrack: _remoteVideoTrack(room),
@@ -324,6 +330,7 @@ class _LiveKitVideoLayout extends StatelessWidget {
   const _LiveKitVideoLayout({
     required this.room,
     required this.phase,
+    required this.hasRemoteParticipant,
     required this.remoteVideoReady,
     required this.localVideoReady,
     required this.remoteVideoTrack,
@@ -333,6 +340,7 @@ class _LiveKitVideoLayout extends StatelessWidget {
 
   final Room room;
   final _LiveKitCallConnectionPhase phase;
+  final bool hasRemoteParticipant;
   final bool remoteVideoReady;
   final bool localVideoReady;
   final VideoTrack? remoteVideoTrack;
@@ -343,11 +351,16 @@ class _LiveKitVideoLayout extends StatelessWidget {
   Widget build(BuildContext context) {
     final tokens = Theme.of(context).tokens;
     final colorScheme = Theme.of(context).colorScheme;
-    final showRemoteVideo = remoteVideoReady && remoteVideoTrack != null;
-    final showLocalFullscreen = localVideoReady && !showRemoteVideo;
-    final showLocalPiP = localVideoReady && showRemoteVideo;
+    final showRemoteVideo =
+        hasRemoteParticipant && remoteVideoReady && remoteVideoTrack != null;
+    final showLocalFullscreen =
+        localVideoReady && !hasRemoteParticipant && localVideoTrack != null;
+    final showLocalPiP = localVideoReady && hasRemoteParticipant;
     final pipWidth = tokens.spaceXXL * 3.5;
     final pipHeight = tokens.spaceXXL * 4.625;
+
+    final remoteParticipantName =
+        InAppCallConnectionReporter.remoteParticipantDisplayNameOf(context);
 
     final (placeholderIcon, placeholderMessage) = switch (phase) {
       _LiveKitCallConnectionPhase.connecting => (Icons.sync, labels.connecting),
@@ -359,10 +372,9 @@ class _LiveKitVideoLayout extends StatelessWidget {
         Icons.hourglass_top_outlined,
         labels.waitingForParticipant,
       ),
-      _LiveKitCallConnectionPhase.participantJoined when !showRemoteVideo => (
-        Icons.videocam_outlined,
-        labels.connected,
-      ),
+      _LiveKitCallConnectionPhase.participantJoined
+          when hasRemoteParticipant && !showRemoteVideo =>
+        (Icons.person_outline, remoteParticipantName ?? labels.connected),
       _ => (Icons.person_outline, labels.connected),
     };
 

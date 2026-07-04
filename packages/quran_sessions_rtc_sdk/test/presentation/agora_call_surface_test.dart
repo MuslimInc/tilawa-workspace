@@ -202,7 +202,7 @@ void main() {
       await tester.pump();
 
       expect(find.byType(AgoraVideoView), findsNothing);
-      expect(find.byIcon(Icons.videocam_outlined), findsOneWidget);
+      expect(find.byIcon(Icons.person_outline), findsOneWidget);
 
       engine.simulateRemoteVideoState(
         remoteUid: 42,
@@ -265,7 +265,93 @@ void main() {
       expect(find.byType(AgoraVideoView), findsNWidgets(2));
     });
 
-    testWidgets('video call shows local PiP when camera is ready', (
+    testWidgets('video call hides local PiP when camera is disabled', (
+      tester,
+    ) async {
+      final engine = FakeRtcEngine();
+      final handle = FakeAgoraRtcSessionHandle(engine);
+      final pool = AgoraRtcEnginePool()..remember('session_1', handle);
+
+      await pumpSurface(
+        tester,
+        sessionId: 'session_1',
+        callType: SessionCallType.videoCall,
+        enginePool: pool,
+      );
+
+      engine.simulateJoinSuccess();
+      engine.simulateUserJoined(remoteUid: 42);
+      engine.simulateLocalVideoState(
+        LocalVideoStreamState.localVideoStreamStateCapturing,
+      );
+      engine.simulateRemoteVideoState(
+        remoteUid: 42,
+        state: RemoteVideoState.remoteVideoStateDecoding,
+      );
+      await tester.pump();
+
+      expect(find.byType(AgoraVideoView), findsNWidgets(2));
+
+      await handle.setCameraEnabled(false);
+      await tester.pump();
+
+      expect(find.byType(AgoraVideoView), findsOneWidget);
+    });
+
+    testWidgets(
+      'remote camera muted shows participant placeholder not video view',
+      (tester) async {
+        final engine = FakeRtcEngine();
+        final pool = AgoraRtcEnginePool()
+          ..remember('session_1', FakeAgoraRtcSessionHandle(engine));
+
+        await tester.pumpWidget(
+          MaterialApp(
+            theme: AppTheme.getLightTheme(
+              primaryColor: AppColors.defaultPrimary,
+            ),
+            home: Scaffold(
+              body: InAppCallConnectionReporter(
+                onPhaseChanged: (_) {},
+                remoteParticipantDisplayName: 'Ustadh Ahmad',
+                child: AgoraCallSurface(
+                  sessionId: 'session_1',
+                  callType: SessionCallType.videoCall,
+                  enginePool: pool,
+                  labels: testAgoraCallSurfaceLabels,
+                ),
+              ),
+            ),
+          ),
+        );
+        await tester.pump();
+
+        engine.simulateJoinSuccess();
+        engine.simulateUserJoined(remoteUid: 42);
+        engine.simulateLocalVideoState(
+          LocalVideoStreamState.localVideoStreamStateCapturing,
+        );
+        engine.simulateRemoteVideoState(
+          remoteUid: 42,
+          state: RemoteVideoState.remoteVideoStateDecoding,
+        );
+        await tester.pump();
+
+        expect(find.byType(AgoraVideoView), findsNWidgets(2));
+
+        engine.simulateRemoteVideoState(
+          remoteUid: 42,
+          state: RemoteVideoState.remoteVideoStateStopped,
+        );
+        await tester.pump();
+
+        expect(find.byType(AgoraVideoView), findsOneWidget);
+        expect(find.text('Ustadh Ahmad'), findsOneWidget);
+        expect(find.byIcon(Icons.person_outline), findsOneWidget);
+      },
+    );
+
+    testWidgets('onUserMuteVideo hides remote video view immediately', (
       tester,
     ) async {
       final engine = FakeRtcEngine();
@@ -281,12 +367,19 @@ void main() {
 
       engine.simulateJoinSuccess();
       engine.simulateUserJoined(remoteUid: 42);
-      engine.simulateLocalVideoState(
-        LocalVideoStreamState.localVideoStreamStateCapturing,
+      engine.simulateRemoteVideoState(
+        remoteUid: 42,
+        state: RemoteVideoState.remoteVideoStateDecoding,
       );
       await tester.pump();
 
       expect(find.byType(AgoraVideoView), findsOneWidget);
+
+      engine.simulateUserMuteVideo(remoteUid: 42, muted: true);
+      await tester.pump();
+
+      expect(find.byType(AgoraVideoView), findsNothing);
+      expect(find.byIcon(Icons.person_outline), findsOneWidget);
     });
 
     testWidgets('external meeting uses voice layout', (tester) async {
