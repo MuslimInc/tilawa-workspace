@@ -6,6 +6,7 @@ import 'package:get_it/get_it.dart';
 import 'package:mocktail/mocktail.dart';
 import 'package:tilawa/features/localization/presentation/bloc/localization_bloc.dart';
 import 'package:tilawa/features/auth/data/services/google_sign_in_session_tracker.dart';
+import 'package:tilawa/features/auth/domain/entities/user_entity.dart';
 import 'package:tilawa/features/auth/domain/repositories/auth_repository.dart';
 import 'package:tilawa/features/auth/domain/services/session_revoked_notifier.dart';
 import 'package:tilawa/features/auth/domain/usecases/check_session_validity_use_case.dart';
@@ -223,4 +224,43 @@ void main() {
 
     expect(find.text('Signed out on another device'), findsNothing);
   });
+
+  testWidgets(
+    'does not show signed-in-elsewhere after first login when AuthBloc authenticated',
+    (tester) async {
+      final mockAuthBloc = MockAuthBloc();
+      final UserEntity user = UserEntity(
+        id: 'user_1',
+        email: 'user@example.com',
+        displayName: 'User',
+        createdAt: DateTime.utc(2024),
+      );
+      whenListen(
+        mockAuthBloc,
+        Stream<AuthState>.empty(),
+        initialState: AuthState.authenticated(user: user),
+      );
+
+      await tester.pumpWidget(
+        MultiBlocProvider(
+          providers: <BlocProvider<dynamic>>[
+            BlocProvider<SessionValidityCubit>.value(value: cubit),
+            BlocProvider<AuthBloc>.value(value: mockAuthBloc),
+          ],
+          child: SessionRevokedNavigationListener(
+            child: _materialAppWithL10n(
+              child: const Scaffold(body: Text('child')),
+            ),
+          ),
+        ),
+      );
+
+      // Session cubit should not emit revoked on first login; verify listener
+      // stays silent when only authenticated (no revoked transition).
+      cubit.emit(const SessionValidityState(isChecking: false));
+      await tester.pumpAndSettle();
+
+      expect(find.text('Signed out on another device'), findsNothing);
+    },
+  );
 }

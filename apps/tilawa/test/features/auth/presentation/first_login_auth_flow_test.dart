@@ -131,5 +131,47 @@ void main() {
         );
       },
     );
+
+    blocTest<SessionValidityCubit, SessionValidityState>(
+      'does not revoke when server session matches after first device registration',
+      build: buildSessionValidityCubit,
+      act: (cubit) async {
+        await tokenSyncCache.saveActiveDeviceId('device_1');
+        await tokenSyncCache.saveSessionEpoch(1);
+        await firestore.collection('users').doc(testUser.id).set({
+          'session': {'epoch': 1, 'activeDeviceId': 'device_1'},
+        });
+        await cubit.checkOnResume();
+      },
+      expect: () => [
+        const SessionValidityState(isChecking: true),
+        const SessionValidityState(isChecking: false),
+      ],
+      verify: (_) {
+        verifyNever(
+          () => mockSignOut(skipServerTokenClear: true),
+        );
+      },
+    );
+
+    blocTest<SessionValidityCubit, SessionValidityState>(
+      'defers revoke check while Google sign-in is in flight on first login',
+      build: () {
+        signInSessionTracker.markStarted();
+        return buildSessionValidityCubit();
+      },
+      act: (cubit) async {
+        await firestore.collection('users').doc(testUser.id).set({
+          'session': {'epoch': 99, 'activeDeviceId': 'other_device'},
+        });
+        await cubit.checkOnResume();
+      },
+      expect: () => <SessionValidityState>[],
+      verify: (_) {
+        verifyNever(
+          () => mockSignOut(skipServerTokenClear: true),
+        );
+      },
+    );
   });
 }

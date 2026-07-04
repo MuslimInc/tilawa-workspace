@@ -100,5 +100,36 @@ void main() {
         ),
       ).isFalse();
     });
+
+    test('ignores CheckAuthStatus flicker initial to unauthenticated', () {
+      check(
+        shouldLoginAuthBlocListen(
+          const AuthState.initial(),
+          const AuthState.unauthenticated(),
+          routeLocation: '/login',
+        ),
+      ).isFalse();
+    });
+
+    test('ignores transient unauthenticated after successful auth', () {
+      final AuthState authenticated = AuthState.authenticated(user: user);
+      check(
+        shouldLoginAuthBlocListen(
+          authenticated,
+          const AuthState.unauthenticated(),
+          routeLocation: '/login',
+        ),
+      ).isFalse();
+    });
+
+    test('listens only once when loading settles to authenticated', () {
+      check(
+        shouldLoginAuthBlocListen(
+          const AuthState.loading(),
+          AuthState.authenticated(user: user),
+          routeLocation: '/login',
+        ),
+      ).isTrue();
+    });
   });
 }

@@ -2,6 +2,7 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:mockito/mockito.dart';
 import 'package:tilawa/core/domain/server_action_guard.dart';
 import 'package:tilawa/features/auth/domain/entities/auth_result.dart';
+import 'package:tilawa/features/auth/domain/entities/email_auth_failure_key.dart';
 import 'package:tilawa/features/auth/domain/entities/email_registration_draft.dart';
 import 'package:tilawa/features/auth/domain/entities/register_with_email_result.dart';
 import 'package:tilawa/features/auth/domain/entities/user_entity.dart';
@@ -106,6 +107,84 @@ void main() {
     ).called(1);
     expect(emailGateway.verificationSent, isTrue);
   });
+
+  test('returns authFailed when offline before Firebase call', () async {
+    networkInfo.connected = false;
+
+    final RegisterWithEmailResult result = await useCase(draft: _draft());
+
+    expect(
+      result,
+      isA<RegisterWithEmailAuthFailed>().having(
+        (RegisterWithEmailAuthFailed r) => r.message,
+        'message',
+        ServerActionFailureKey.offline,
+      ),
+    );
+    verifyNever(
+      mockAuthRepository.registerWithEmailPassword(
+        email: anyNamed('email'),
+        password: anyNamed('password'),
+      ),
+    );
+  });
+
+  test('returns authFailed when email already registered', () async {
+    when(
+      mockAuthRepository.registerWithEmailPassword(
+        email: anyNamed('email'),
+        password: anyNamed('password'),
+      ),
+    ).thenAnswer(
+      (_) async => const AuthResult.failure(
+        message: EmailAuthFailureKey.emailAlreadyInUse,
+        code: 'email-already-in-use',
+      ),
+    );
+
+    final RegisterWithEmailResult result = await useCase(draft: _draft());
+
+    expect(
+      result,
+      const RegisterWithEmailResult.authFailed(
+        message: EmailAuthFailureKey.emailAlreadyInUse,
+        code: 'email-already-in-use',
+      ),
+    );
+    verifyNever(
+      mockUserRepository.saveCompleteEmailRegistration(
+        user: anyNamed('user'),
+        draft: anyNamed('draft'),
+      ),
+    );
+  });
+
+  test(
+    'returns authFailed when email exists under Google provider',
+    () async {
+      when(
+        mockAuthRepository.registerWithEmailPassword(
+          email: anyNamed('email'),
+          password: anyNamed('password'),
+        ),
+      ).thenAnswer(
+        (_) async => const AuthResult.failure(
+          message: EmailAuthFailureKey.emailAlreadyInUseWithGoogle,
+          code: 'email-already-in-use',
+        ),
+      );
+
+      final RegisterWithEmailResult result = await useCase(draft: _draft());
+
+      expect(
+        result,
+        const RegisterWithEmailResult.authFailed(
+          message: EmailAuthFailureKey.emailAlreadyInUseWithGoogle,
+          code: 'email-already-in-use',
+        ),
+      );
+    },
+  );
 
   test(
     'returns profile persistence failure when firestore write fails',
