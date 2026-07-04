@@ -880,6 +880,15 @@
     },
     "teacherPendingBookingRequestsSectionTitle": "طلبات الحجز",
     "upcomingSessionsSectionTitle": "الحصص القادمة",
+    "teacherDashboardShowAllSessions": "عرض الكل ({count})",
+    "@teacherDashboardShowAllSessions": {
+        "placeholders": {
+            "count": {
+                "type": "int"
+            }
+        }
+    },
+    "teacherDashboardShowLessSessions": "عرض أقل",
     "teacherPendingBookingRequestsEmptyTitle": "لا توجد طلبات حجز حاليًا",
     "teacherPendingBookingRequestsEmptySubtitle": "ستظهر طلبات الطلاب هنا عند إرسالها",
     "teacherDashboardStatPendingRequests": "طلبات معلقة",

@@ -8,7 +8,9 @@ import 'package:tilawa_ui_kit/tilawa_ui_kit.dart';
 import '../failure_ui/quran_sessions_failure_body.dart';
 import '../widgets/date_grouped_slots_layout.dart';
 import '../widgets/friday_review_reminder_banner.dart';
+import '../widgets/teacher_dashboard_collapsible_session_list.dart';
 import '../widgets/teacher_dashboard_inline_empty_state.dart';
+import '../widgets/teacher_dashboard_lazy_slot_day_list.dart';
 import '../widgets/teacher_dashboard_schedule_section.dart';
 import '../widgets/teacher_dashboard_summary_stats.dart';
 import '../widgets/tutor_dashboard_section.dart';
@@ -70,6 +72,8 @@ class _TeacherDashboardScreenState extends State<TeacherDashboardScreen> {
   final Set<String> _enterAnimatedSlotIds = {};
   bool _loggedWeekView = false;
   bool _loggedFridayBanner = false;
+  bool _pendingSessionsExpanded = false;
+  bool _upcomingSessionsExpanded = false;
 
   static const _undoSnackDuration = Duration(seconds: 4);
   static const _slotUndoDedupeKey = 'teacher-dashboard-slot-undo';
@@ -291,6 +295,7 @@ class _TeacherDashboardScreenState extends State<TeacherDashboardScreen> {
               onRefresh: () async => _reload(),
               child: CustomScrollView(
                 slivers: [
+                  // Session lists are capped so bookable slots stay reachable.
                   SliverToBoxAdapter(
                     child: TeacherDashboardSummaryStats(
                       pendingRequestsCount:
@@ -314,8 +319,14 @@ class _TeacherDashboardScreenState extends State<TeacherDashboardScreen> {
                         title: l10n.teacherPendingBookingRequestsSectionTitle,
                       ),
                     ),
-                    SliverList.builder(
+                    TeacherDashboardCollapsibleSessionList(
+                      sectionKey: 'pending',
                       itemCount: success.pendingBookingRequests.length,
+                      expanded: _pendingSessionsExpanded,
+                      onToggleExpanded: () => setState(
+                        () => _pendingSessionsExpanded =
+                            !_pendingSessionsExpanded,
+                      ),
                       itemBuilder: (_, i) {
                         final session = success.pendingBookingRequests[i];
                         final inProgress =
@@ -351,8 +362,14 @@ class _TeacherDashboardScreenState extends State<TeacherDashboardScreen> {
                         title: l10n.upcomingSessionsSectionTitle,
                       ),
                     ),
-                    SliverList.builder(
+                    TeacherDashboardCollapsibleSessionList(
+                      sectionKey: 'upcoming',
                       itemCount: success.upcomingSessions.length,
+                      expanded: _upcomingSessionsExpanded,
+                      onToggleExpanded: () => setState(
+                        () => _upcomingSessionsExpanded =
+                            !_upcomingSessionsExpanded,
+                      ),
                       itemBuilder: (_, i) {
                         final session = success.upcomingSessions[i];
                         final canJoin =
@@ -425,6 +442,7 @@ class _TeacherDashboardScreenState extends State<TeacherDashboardScreen> {
                     ),
                   if (success.weekScopedDashboard)
                     _BookableTimesWeekScopedSection(
+                      showTopDivider: _hasSessionSections(success),
                       thisWeekSlots: success.thisWeekAvailability,
                       nextWeekSlots: success.nextWeekAvailability,
                       isUpdatingAvailability: success.isUpdatingAvailability,
@@ -454,6 +472,7 @@ class _TeacherDashboardScreenState extends State<TeacherDashboardScreen> {
                     )
                   else
                     _BookableTimesWeekSection(
+                      showTopDivider: _hasSessionSections(success),
                       title: l10n.bookableTimesSectionTitle,
                       slots: success.availability,
                       isUpdatingAvailability: success.isUpdatingAvailability,
@@ -469,12 +488,6 @@ class _TeacherDashboardScreenState extends State<TeacherDashboardScreen> {
                         showDivider: showDivider,
                       ),
                     ),
-                  SliverPadding(
-                    padding: EdgeInsets.only(
-                      bottom: TilawaComfortableReachPadding.resolve(context),
-                    ),
-                    sliver: const SliverToBoxAdapter(child: SizedBox.shrink()),
-                  ),
                 ],
               ),
             ),
@@ -761,6 +774,11 @@ class _TeacherDashboardScreenState extends State<TeacherDashboardScreen> {
     return slots.where((slot) => !slot.isBooked).length;
   }
 
+  bool _hasSessionSections(TeacherDashboardSuccess state) {
+    return state.pendingBookingRequests.isNotEmpty ||
+        state.upcomingSessions.isNotEmpty;
+  }
+
   Future<void> _reload() async {
     final bloc = context.read<TeacherDashboardBloc>();
     final wasSuccess = bloc.state is TeacherDashboardSuccess;
@@ -984,8 +1002,10 @@ class _BookableTimesWeekScopedSection extends StatefulWidget {
     this.onWeekScopeChanged,
     this.scheduleActionLabel,
     this.onManageSchedule,
+    this.showTopDivider = false,
   });
 
+  final bool showTopDivider;
   final List<TeacherAvailability> thisWeekSlots;
   final List<TeacherAvailability> nextWeekSlots;
   final bool isUpdatingAvailability;
@@ -1066,6 +1086,7 @@ class _BookableTimesWeekScopedSectionState
           child: TutorDashboardSection(
             title: l10n.bookableTimesWeekScopedTitle,
             variant: TutorDashboardSectionVariant.secondary,
+            showTopDivider: widget.showTopDivider,
             trailing: _BookableSectionTrailing(
               isUpdatingAvailability: widget.isUpdatingAvailability,
               scheduleActionLabel: widget.scheduleActionLabel,
@@ -1107,15 +1128,13 @@ class _BookableTimesWeekScopedSectionState
               ),
               slotsForDayBuilder: (context, daySlots) => Padding(
                 padding: EdgeInsets.only(bottom: tokens.spaceExtraLarge),
-                child: Column(
-                  children: [
-                    for (var i = 0; i < daySlots.length; i++)
-                      widget.buildSlot(
-                        context,
-                        daySlots[i],
-                        i < daySlots.length - 1,
-                      ),
-                  ],
+                child: TeacherDashboardLazySlotDayList(
+                  itemCount: daySlots.length,
+                  itemBuilder: (context, i) => widget.buildSlot(
+                    context,
+                    daySlots[i],
+                    i < daySlots.length - 1,
+                  ),
                 ),
               ),
             ),
@@ -1212,8 +1231,10 @@ class _BookableTimesWeekSection extends StatelessWidget {
     required this.buildSlot,
     this.scheduleActionLabel,
     this.onManageSchedule,
+    this.showTopDivider = false,
   });
 
+  final bool showTopDivider;
   final String title;
   final List<TeacherAvailability> slots;
   final bool isUpdatingAvailability;
@@ -1234,6 +1255,7 @@ class _BookableTimesWeekSection extends StatelessWidget {
           child: TutorDashboardSection(
             title: title,
             variant: TutorDashboardSectionVariant.secondary,
+            showTopDivider: showTopDivider,
             trailing: _BookableSectionTrailing(
               isUpdatingAvailability: isUpdatingAvailability,
               scheduleActionLabel: scheduleActionLabel,
@@ -1265,15 +1287,13 @@ class _BookableTimesWeekSection extends StatelessWidget {
                   ),
                   slotsForDayBuilder: (context, daySlots) => Padding(
                     padding: EdgeInsets.only(bottom: tokens.spaceExtraLarge),
-                    child: Column(
-                      children: [
-                        for (var i = 0; i < daySlots.length; i++)
-                          buildSlot(
-                            context,
-                            daySlots[i],
-                            i < daySlots.length - 1,
-                          ),
-                      ],
+                    child: TeacherDashboardLazySlotDayList(
+                      itemCount: daySlots.length,
+                      itemBuilder: (context, i) => buildSlot(
+                        context,
+                        daySlots[i],
+                        i < daySlots.length - 1,
+                      ),
                     ),
                   ),
                 );

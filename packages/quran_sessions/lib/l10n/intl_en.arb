@@ -875,6 +875,15 @@
     },
     "teacherPendingBookingRequestsSectionTitle": "Booking requests",
     "upcomingSessionsSectionTitle": "Upcoming sessions",
+    "teacherDashboardShowAllSessions": "Show all ({count})",
+    "@teacherDashboardShowAllSessions": {
+        "placeholders": {
+            "count": {
+                "type": "int"
+            }
+        }
+    },
+    "teacherDashboardShowLessSessions": "Show less",
     "teacherPendingBookingRequestsEmptyTitle": "No booking requests right now",
     "teacherPendingBookingRequestsEmptySubtitle": "Student requests will appear here",
     "teacherDashboardStatPendingRequests": "Pending requests",

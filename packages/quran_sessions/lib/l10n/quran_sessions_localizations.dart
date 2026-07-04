@@ -3899,6 +3899,18 @@ abstract class QuranSessionsLocalizations {
   /// **'Upcoming sessions'**
   String get upcomingSessionsSectionTitle;
 
+  /// No description provided for @teacherDashboardShowAllSessions.
+  ///
+  /// In en, this message translates to:
+  /// **'Show all ({count})'**
+  String teacherDashboardShowAllSessions(int count);
+
+  /// No description provided for @teacherDashboardShowLessSessions.
+  ///
+  /// In en, this message translates to:
+  /// **'Show less'**
+  String get teacherDashboardShowLessSessions;
+
   /// No description provided for @teacherPendingBookingRequestsEmptyTitle.
   ///
   /// In en, this message translates to:

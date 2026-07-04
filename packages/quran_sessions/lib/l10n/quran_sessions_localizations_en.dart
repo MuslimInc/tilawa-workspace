@@ -2167,6 +2167,14 @@ class QuranSessionsLocalizationsEn extends QuranSessionsLocalizations {
   String get upcomingSessionsSectionTitle => 'Upcoming sessions';
 
   @override
+  String teacherDashboardShowAllSessions(int count) {
+    return 'Show all ($count)';
+  }
+
+  @override
+  String get teacherDashboardShowLessSessions => 'Show less';
+
+  @override
   String get teacherPendingBookingRequestsEmptyTitle =>
       'No booking requests right now';
 

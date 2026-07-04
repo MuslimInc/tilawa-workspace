@@ -2140,6 +2140,14 @@ class QuranSessionsLocalizationsAr extends QuranSessionsLocalizations {
   String get upcomingSessionsSectionTitle => 'الحصص القادمة';
 
   @override
+  String teacherDashboardShowAllSessions(int count) {
+    return 'عرض الكل ($count)';
+  }
+
+  @override
+  String get teacherDashboardShowLessSessions => 'عرض أقل';
+
+  @override
   String get teacherPendingBookingRequestsEmptyTitle =>
       'لا توجد طلبات حجز حاليًا';
 
