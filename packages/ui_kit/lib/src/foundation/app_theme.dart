@@ -409,6 +409,7 @@ class AppTheme {
       cardTheme: theme.cardTheme.copyWith(
         color: colorScheme.surface,
         surfaceTintColor: componentSurfaceTint,
+        elevation: (theme.cardTheme.elevation ?? 1.0) * kElevationMultiplier,
         shape: RoundedRectangleBorder(
           borderRadius: BorderRadius.circular(cardRadius),
         ),
@@ -416,6 +417,7 @@ class AppTheme {
       dialogTheme: theme.dialogTheme.copyWith(
         backgroundColor: colorScheme.surface,
         surfaceTintColor: componentSurfaceTint,
+        elevation: (theme.dialogTheme.elevation ?? 6.0) * kElevationMultiplier,
         shape: RoundedRectangleBorder(
           borderRadius: BorderRadius.circular(cardRadius),
         ),
@@ -424,11 +426,29 @@ class AppTheme {
         backgroundColor: colorScheme.surface,
         modalBackgroundColor: colorScheme.surface,
         surfaceTintColor: componentSurfaceTint,
+        elevation:
+            (theme.bottomSheetTheme.elevation ?? 1.0) * kElevationMultiplier,
+        modalElevation:
+            (theme.bottomSheetTheme.modalElevation ?? 1.0) *
+            kElevationMultiplier,
         shape: RoundedRectangleBorder(
           borderRadius: BorderRadius.vertical(
             top: Radius.circular(cardRadius),
           ),
         ),
+      ),
+      popupMenuTheme: theme.popupMenuTheme.copyWith(
+        elevation:
+            (theme.popupMenuTheme.elevation ?? 3.0) * kElevationMultiplier,
+      ),
+      navigationBarTheme: theme.navigationBarTheme.copyWith(
+        elevation:
+            (theme.navigationBarTheme.elevation ?? 3.0) * kElevationMultiplier,
+      ),
+      bottomNavigationBarTheme: theme.bottomNavigationBarTheme.copyWith(
+        elevation:
+            (theme.bottomNavigationBarTheme.elevation ?? 3.0) *
+            kElevationMultiplier,
       ),
       inputDecorationTheme: const InputDecorationTheme(
         border: InputBorder.none,
@@ -440,10 +460,25 @@ class AppTheme {
         filled: false,
       ),
       elevatedButtonTheme: ElevatedButtonThemeData(
-        style: _buttonStyleWithKitShape(
-          theme.elevatedButtonTheme.style,
-          designTokens,
-        ),
+        style:
+            _buttonStyleWithKitShape(
+              theme.elevatedButtonTheme.style,
+              designTokens,
+            )?.copyWith(
+              elevation: WidgetStateProperty.resolveWith((states) {
+                final baseElevation = theme.elevatedButtonTheme.style?.elevation
+                    ?.resolve(states);
+                if (baseElevation != null) {
+                  return baseElevation * kElevationMultiplier;
+                }
+                if (states.contains(WidgetState.disabled)) return 0.0;
+                if (states.contains(WidgetState.hovered))
+                  return 3.0 * kElevationMultiplier;
+                if (states.contains(WidgetState.pressed))
+                  return 1.0 * kElevationMultiplier;
+                return 1.0 * kElevationMultiplier;
+              }),
+            ),
       ),
       filledButtonTheme: FilledButtonThemeData(
         style:

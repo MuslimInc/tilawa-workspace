@@ -83,15 +83,15 @@ void main() {
         expect(light.radiusExtraLarge, 24.0);
         expect(light.radiusHero, 28.0);
         expect(light.opacitySubtle, 0.1);
-        expect(light.opacityShadow, 0.04);
-        expect(light.opacityShadowStrong, 0.08);
+        expect(light.opacityShadow, 0.04 * kElevationMultiplier);
+        expect(light.opacityShadowStrong, 0.08 * kElevationMultiplier);
         expect(light.opacityMedium, 0.3);
         expect(light.opacityEmphasis, 0.7);
         expect(light.opacityGlass, 0.8);
         expect(light.blurGlass, 12.0);
-        expect(light.blurShadow, 8.0);
-        expect(light.shadowOffsetSmall, const Offset(0, 1));
-        expect(light.shadowOffsetMedium, const Offset(0, 2));
+        expect(light.blurShadow, 12.0 * kElevationMultiplier);
+        expect(light.shadowOffsetSmall, Offset(0, 1.5 * kElevationMultiplier));
+        expect(light.shadowOffsetMedium, Offset(0, 3.0 * kElevationMultiplier));
         expect(light.borderWidthThin, 0.5);
         expect(light.progressHeight, 3.0);
         expect(light.iconSizeExtraSmall, 12.0);
@@ -632,7 +632,10 @@ void main() {
         );
 
         final lerped = first.lerp(second, 0.5);
-        expect(lerped.shadowOffsetSmall.dy, closeTo(3.5, 0.01));
+        expect(
+          lerped.shadowOffsetSmall.dy,
+          closeTo((1.5 * kElevationMultiplier + 6.0) / 2, 0.01),
+        );
       });
 
       test(
