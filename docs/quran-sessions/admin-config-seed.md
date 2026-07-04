@@ -53,6 +53,10 @@ Error code: `policy_not_configured`.
 
 ## Closed-testing gate — required platform config
 
+> Part of the official
+> [closed-testing rollout runbook](closed-testing-rollout-runbook.md) — see it
+> for the full sequence and promotion policy.
+
 `quran_session_platform_config/global` in `quran-playera-app` **must hold these
 exact values before inviting Learn Quran closed testers** (Play builds exclude
 the native Agora/LiveKit SDKs, so the config must not expose RTC providers the

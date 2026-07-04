@@ -63,6 +63,10 @@ Consequences:
 
 ### Closed testing (Learn Quran) — reference configuration
 
+The official end-to-end sequence (Agora QA → config flip → internal build →
+device QA → widen) lives in the
+[closed-testing rollout runbook](quran-sessions/closed-testing-rollout-runbook.md).
+
 Workflow inputs for a closed-testing build:
 
 | Input | Value |
