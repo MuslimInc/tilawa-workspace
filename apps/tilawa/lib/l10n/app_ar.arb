@@ -1116,6 +1116,22 @@
     "@googleSignInUpdatePlayServices": {
         "description": "Opens Play Store to update Google Play Services"
     },
+    "googleSignInTimeout": "انتهت مهلة تسجيل الدخول. يرجى المحاولة مرة أخرى.",
+    "@googleSignInTimeout": {
+        "description": "Shown when Google sign-in exceeds the time limit"
+    },
+    "googleSignInTimeoutUiHidden": "انتهت مهلة تسجيل الدخول. إذا لم تظهر نافذة اختيار الحساب، ارجع وحاول مرة أخرى، أو استخدم الخيارات أدناه.",
+    "@googleSignInTimeoutUiHidden": {
+        "description": "Shown when Google sign-in times out without showing UI on problematic devices"
+    },
+    "googleSignInUserMismatch": "حساب Google هذا لا يطابق الحساب المسجّل. يرجى المحاولة مرة أخرى.",
+    "@googleSignInUserMismatch": {
+        "description": "Shown when Google sign-in returns a different account than expected"
+    },
+    "googleSignInCancelled": "تم إلغاء تسجيل الدخول.",
+    "@googleSignInCancelled": {
+        "description": "Shown when the user dismisses the Google account picker during sign-in"
+    },
     "networkError": "يرجى التحقق من اتصالك بالإنترنت",
     "@networkError": {
         "description": "Network error message"

@@ -164,6 +164,14 @@ Future<void> _pumpTeacherDashboard(
   await tester.pumpAndSettle();
 }
 
+Future<void> _openUpcomingCategory(WidgetTester tester) async {
+  final l10n = QuranSessionsLocalizations.of(
+    tester.element(find.byType(TeacherDashboardScreen)),
+  );
+  await tester.tap(find.text(l10n.upcomingSessionsSectionTitle).last);
+  await tester.pumpAndSettle();
+}
+
 void main() {
   setUpAll(() async {
     tz_data.initializeTimeZones();
@@ -193,6 +201,7 @@ void main() {
       },
     );
 
+    await _openUpcomingCategory(tester);
     await tester.tap(find.text('Join'));
     await tester.pumpAndSettle();
 
@@ -226,6 +235,7 @@ void main() {
       ),
     );
 
+    await _openUpcomingCategory(tester);
     await tester.tap(find.text('Join'));
     await tester.pumpAndSettle();
 

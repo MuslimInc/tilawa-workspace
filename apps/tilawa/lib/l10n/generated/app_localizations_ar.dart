@@ -1201,6 +1201,21 @@ class AppLocalizationsAr extends AppLocalizations {
   String get googleSignInUpdatePlayServices => 'تحديث خدمات Google Play';
 
   @override
+  String get googleSignInTimeout =>
+      'انتهت مهلة تسجيل الدخول. يرجى المحاولة مرة أخرى.';
+
+  @override
+  String get googleSignInTimeoutUiHidden =>
+      'انتهت مهلة تسجيل الدخول. إذا لم تظهر نافذة اختيار الحساب، ارجع وحاول مرة أخرى، أو استخدم الخيارات أدناه.';
+
+  @override
+  String get googleSignInUserMismatch =>
+      'حساب Google هذا لا يطابق الحساب المسجّل. يرجى المحاولة مرة أخرى.';
+
+  @override
+  String get googleSignInCancelled => 'تم إلغاء تسجيل الدخول.';
+
+  @override
   String get networkError => 'يرجى التحقق من اتصالك بالإنترنت';
 
   @override

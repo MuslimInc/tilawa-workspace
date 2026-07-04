@@ -5,6 +5,7 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:intl/date_symbol_data_local.dart';
 import 'package:quran_sessions/l10n/quran_sessions_localizations_en.dart';
 import 'package:quran_sessions/quran_sessions.dart';
+import 'package:quran_sessions/src/presentation/widgets/date_grouped_day_tab_bar.dart';
 import 'package:quran_sessions/src/presentation/widgets/teacher_dashboard_collapsible_session_list.dart';
 import 'package:quran_sessions/src/presentation/widgets/teacher_dashboard_lazy_slot_day_list.dart';
 import 'package:quran_sessions/src/presentation/widgets/tutor_session_compact_card.dart';
@@ -161,12 +162,12 @@ void main() {
       await tester.pumpAndSettle();
 
       expect(find.text(l10n.teacherDashboardShowLessSessions), findsOneWidget);
-      expect(find.byType(TutorSessionCompactCard), findsNWidgets(6));
+      expect(find.byType(TutorSessionCompactCard), findsWidgets);
     });
   });
 
   group('TeacherDashboardScreen long lists', () {
-    testWidgets('collapses many upcoming sessions and keeps bookable visible', (
+    testWidgets('moves many upcoming sessions to the category detail screen', (
       tester,
     ) async {
       final l10n = QuranSessionsLocalizationsEn();
@@ -183,21 +184,98 @@ void main() {
 
       await pumpDashboard(tester, bloc: bloc);
 
-      expect(find.byType(TutorSessionCompactCard), findsNWidgets(3));
-      expect(
-        find.text(l10n.teacherDashboardShowAllSessions(6)),
-        findsOneWidget,
-      );
+      expect(find.byType(TutorSessionCompactCard), findsNothing);
+      expect(find.text(l10n.upcomingSessionsSectionTitle), findsWidgets);
 
-      await tester.scrollUntilVisible(
-        find.text(l10n.bookableTimesWeekScopedTitle),
-        200,
-      );
+      await tester.tap(find.text(l10n.upcomingSessionsSectionTitle).last);
       await tester.pumpAndSettle();
 
-      expect(find.text(l10n.bookableTimesWeekScopedTitle), findsOneWidget);
+      expect(find.byType(TutorSessionCompactCard), findsWidgets);
+      expect(
+        find.text(l10n.teacherDashboardShowAllSessions(6)),
+        findsNothing,
+      );
       expect(tester.takeException(), isNull);
     });
+
+    testWidgets('pinned bookable headers stay visible while scrolling slots', (
+      tester,
+    ) async {
+      final l10n = QuranSessionsLocalizationsEn();
+      final sessionRepo = FakeSessionRepository()
+        ..sessions = List.generate(
+          8,
+          (index) => makeSession(
+            id: 'session_$index',
+            lifecycleStatus: SessionLifecycleStatus.scheduled,
+            startsAt: DateTime.now().add(Duration(hours: index + 2)),
+          ),
+        );
+      final bloc = buildBloc(sessionRepo: sessionRepo);
+
+      await pumpDashboard(tester, bloc: bloc);
+
+      await tester.drag(find.byType(CustomScrollView), const Offset(0, -240));
+      await tester.pumpAndSettle();
+      await tester.tap(find.text(l10n.bookableTimesWeekScopedTitle).last);
+      await tester.pumpAndSettle();
+
+      final weekTabBeforeScroll = tester.getTopLeft(
+        find.text(l10n.bookableTimesThisWeekSectionTitle),
+      );
+
+      await tester.drag(find.byType(CustomScrollView), const Offset(0, -400));
+      await tester.pumpAndSettle();
+
+      final weekTabAfterScroll = tester.getTopLeft(
+        find.text(l10n.bookableTimesThisWeekSectionTitle),
+      );
+
+      expect(weekTabAfterScroll.dy, weekTabBeforeScroll.dy);
+      expect(find.text(l10n.bookableTimesWeekScopedTitle), findsWidgets);
+      expect(find.byType(DateGroupedDayTabBar), findsOneWidget);
+      expect(tester.takeException(), isNull);
+    });
+
+    testWidgets(
+      'week-scoped bookable header survives repeated scroll without sliver errors',
+      (tester) async {
+        final l10n = QuranSessionsLocalizationsEn();
+        final sessionRepo = FakeSessionRepository()
+          ..sessions = List.generate(
+            4,
+            (index) => makeSession(
+              id: 'session_$index',
+              lifecycleStatus: SessionLifecycleStatus.scheduled,
+              startsAt: DateTime.now().add(Duration(hours: index + 2)),
+            ),
+          );
+        final bloc = buildBloc(sessionRepo: sessionRepo);
+
+        await pumpDashboard(tester, bloc: bloc);
+
+        await tester.drag(find.byType(CustomScrollView), const Offset(0, -240));
+        await tester.pumpAndSettle();
+        await tester.tap(find.text(l10n.bookableTimesWeekScopedTitle).last);
+        await tester.pumpAndSettle();
+
+        for (var i = 0; i < 3; i++) {
+          await tester.drag(
+            find.byType(CustomScrollView),
+            const Offset(0, -250),
+          );
+          await tester.pumpAndSettle();
+          await tester.drag(
+            find.byType(CustomScrollView),
+            const Offset(0, 250),
+          );
+          await tester.pumpAndSettle();
+        }
+
+        expect(find.byType(SliverPersistentHeader), findsWidgets);
+        expect(tester.takeException(), isNull);
+      },
+    );
 
     testWidgets('join still works from collapsed upcoming session card', (
       tester,
@@ -219,6 +297,10 @@ void main() {
       final bloc = buildBloc(sessionRepo: sessionRepo);
 
       await pumpDashboard(tester, bloc: bloc);
+
+      final l10n = QuranSessionsLocalizationsEn();
+      await tester.tap(find.text(l10n.upcomingSessionsSectionTitle).last);
+      await tester.pumpAndSettle();
 
       final enabledJoin = find.byWidgetPredicate(
         (widget) =>

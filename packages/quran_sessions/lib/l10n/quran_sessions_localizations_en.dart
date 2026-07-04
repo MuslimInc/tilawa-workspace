@@ -2196,6 +2196,40 @@ class QuranSessionsLocalizationsEn extends QuranSessionsLocalizations {
   String get teacherDashboardStatBookableSlotsHorizon => 'Open slots (14 days)';
 
   @override
+  String get teacherDashboardCategoriesTitle => 'Dashboard categories';
+
+  @override
+  String get teacherDashboardCategoriesSubtitle =>
+      'Open a category for the full list and actions.';
+
+  @override
+  String get teacherDashboardViewAsGrid => 'Grid';
+
+  @override
+  String get teacherDashboardViewAsList => 'List';
+
+  @override
+  String get teacherDashboardShowAsGrid => 'Show as grid';
+
+  @override
+  String get teacherDashboardShowAsList => 'Show as list';
+
+  @override
+  String get teacherDashboardOpenCategory => 'Open';
+
+  @override
+  String get teacherDashboardBookingRequestsCategorySubtitle =>
+      'Review student requests before they expire.';
+
+  @override
+  String get teacherDashboardUpcomingSessionsCategorySubtitle =>
+      'Join sessions, open details, or manage changes.';
+
+  @override
+  String get teacherDashboardBookableTimesCategorySubtitle =>
+      'Review open slots generated from your weekly schedule.';
+
+  @override
   String get teacherDashboardWeeklyScheduleSectionTitle => 'Weekly schedule';
 
   @override

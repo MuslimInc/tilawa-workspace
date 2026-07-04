@@ -64,7 +64,6 @@ void main() {
 
   late LoginGoogleSignInCubit cubit;
   late FakeNetworkInfo networkInfo;
-  final List<String> logs = <String>[];
   int navigateCount = 0;
   final List<(String message, TilawaFeedbackVariant variant)> toasts =
       <(String, TilawaFeedbackVariant)>[];
@@ -73,6 +72,7 @@ void main() {
       LoginAuthBlocTransitionMessages(
         authErrorFallback: 'fallback',
         noGoogleAccounts: 'no accounts',
+        googleSignInCancelled: 'sign-in cancelled',
         serverActionOffline: 'offline action blocked',
         localizeAuthError: _identityLocalizeAuthError,
       );
@@ -89,7 +89,6 @@ void main() {
       ResolveGoogleSignInLaunchUseCase(store),
       ServerActionGuard(networkInfo),
     );
-    logs.clear();
     navigateCount = 0;
     toasts.clear();
   });
@@ -109,9 +108,40 @@ void main() {
       showToast: (String message, TilawaFeedbackVariant variant) {
         toasts.add((message, variant));
       },
-      log: logs.add,
     );
   }
+
+  group('handleExistingAuthenticatedLoginSession', () {
+    test('navigates on login root when already authenticated', () {
+      handleExistingAuthenticatedLoginSession(
+        state: AuthState.authenticated(user: user),
+        routeLocation: '/login',
+        onNavigateAfterAuth: (_) => navigateCount++,
+      );
+
+      check(navigateCount).equals(1);
+    });
+
+    test('ignores authenticated state on register child route', () {
+      handleExistingAuthenticatedLoginSession(
+        state: AuthState.authenticated(user: user),
+        routeLocation: '/login/register',
+        onNavigateAfterAuth: (_) => navigateCount++,
+      );
+
+      check(navigateCount).equals(0);
+    });
+
+    test('ignores unauthenticated state', () {
+      handleExistingAuthenticatedLoginSession(
+        state: const AuthState.unauthenticated(),
+        routeLocation: '/login',
+        onNavigateAfterAuth: (_) => navigateCount++,
+      );
+
+      check(navigateCount).equals(0);
+    });
+  });
 
   group('handleLoginAuthBlocTransition', () {
     test('authenticated clears launch state and navigates home', () {
@@ -121,7 +151,6 @@ void main() {
 
       check(cubit.state.isLaunchPending).isFalse();
       check(navigateCount).equals(1);
-      check(logs.single).contains('authenticated');
     });
 
     test('unauthenticated clears pending launch', () {
@@ -131,6 +160,30 @@ void main() {
 
       check(cubit.state.isLaunchPending).isFalse();
       check(navigateCount).equals(0);
+    });
+
+    test('unauthenticated with manual cancel shows info toast', () {
+      cubit.emit(
+        const LoginGoogleSignInState(
+          isLaunchPending: true,
+          awaitingManualResult: true,
+        ),
+      );
+
+      handle(const AuthState.unauthenticated());
+
+      check(cubit.state.awaitingManualResult).isFalse();
+      check(toasts.single.$1).equals('sign-in cancelled');
+      check(toasts.single.$2).equals(TilawaFeedbackVariant.info);
+    });
+
+    test('unauthenticated without manual cancel shows no toast', () {
+      cubit.emit(const LoginGoogleSignInState(isLaunchPending: true));
+
+      handle(const AuthState.unauthenticated());
+
+      check(cubit.state.isLaunchPending).isFalse();
+      check(toasts).isEmpty();
     });
 
     test('unauthenticated with skip policy notifies manual cancel', () {
@@ -144,6 +197,7 @@ void main() {
       handle(const AuthState.unauthenticated(), shouldSkipAutoSignIn: true);
 
       check(cubit.state.awaitingManualResult).isFalse();
+      check(toasts.single.$1).equals('sign-in cancelled');
     });
 
     test('error shows message toast and clears launch pending', () {
@@ -180,6 +234,7 @@ void main() {
           LoginAuthBlocTransitionMessages(
             authErrorFallback: 'fallback',
             noGoogleAccounts: 'no accounts',
+            googleSignInCancelled: 'sign-in cancelled',
             appCheckFailed: 'app check setup hint',
             localizeAuthError: _identityLocalizeAuthError,
           );
@@ -211,6 +266,7 @@ void main() {
           LoginAuthBlocTransitionMessages(
             authErrorFallback: 'fallback',
             noGoogleAccounts: 'no accounts',
+            googleSignInCancelled: 'sign-in cancelled',
             appCheckFailed: 'app check setup hint',
             deviceRegistrationFailed: 'registration failed',
             localizeAuthError: _identityLocalizeAuthError,
@@ -237,6 +293,7 @@ void main() {
           LoginAuthBlocTransitionMessages(
             authErrorFallback: 'fallback',
             noGoogleAccounts: 'no accounts',
+            googleSignInCancelled: 'sign-in cancelled',
             deviceRegistrationFailed: 'registration failed',
             appCheckFailed: 'app check setup hint',
             localizeAuthError: _identityLocalizeAuthError,

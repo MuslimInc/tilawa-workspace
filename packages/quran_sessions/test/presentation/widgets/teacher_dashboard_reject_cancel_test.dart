@@ -52,6 +52,22 @@ void main() {
     await tester.pumpAndSettle();
   }
 
+  Future<void> openPendingRequests(WidgetTester tester) async {
+    final l10n = QuranSessionsLocalizations.of(
+      tester.element(find.byType(TeacherDashboardScreen)),
+    );
+    await tester.tap(find.text(l10n.teacherPendingBookingRequestsSectionTitle));
+    await tester.pumpAndSettle();
+  }
+
+  Future<void> openUpcomingSessions(WidgetTester tester) async {
+    final l10n = QuranSessionsLocalizations.of(
+      tester.element(find.byType(TeacherDashboardScreen)),
+    );
+    await tester.tap(find.text(l10n.upcomingSessionsSectionTitle).last);
+    await tester.pumpAndSettle();
+  }
+
   testWidgets('decline opens confirmation sheet and rejects without reason', (
     tester,
   ) async {
@@ -79,6 +95,7 @@ void main() {
     );
 
     await pumpDashboard(tester, bloc: bloc);
+    await openPendingRequests(tester);
 
     await tester.tap(find.text('Decline'));
     await tester.pumpAndSettle();
@@ -118,6 +135,7 @@ void main() {
     );
 
     await pumpDashboard(tester, bloc: bloc);
+    await openPendingRequests(tester);
 
     await tester.tap(find.text('Decline'));
     await tester.pumpAndSettle();
@@ -151,6 +169,7 @@ void main() {
     );
 
     await pumpDashboard(tester, bloc: bloc);
+    await openUpcomingSessions(tester);
 
     expect(find.byIcon(Icons.more_vert), findsOneWidget);
     expect(find.text('Cancel'), findsNothing);
@@ -179,6 +198,7 @@ void main() {
     );
 
     await pumpDashboard(tester, bloc: bloc);
+    await openPendingRequests(tester);
 
     expect(find.byIcon(Icons.more_vert), findsNothing);
   });
@@ -218,6 +238,7 @@ void main() {
     );
 
     await pumpDashboard(tester, bloc: bloc);
+    await openUpcomingSessions(tester);
 
     await tester.tap(find.byIcon(Icons.more_vert));
     await tester.pumpAndSettle();

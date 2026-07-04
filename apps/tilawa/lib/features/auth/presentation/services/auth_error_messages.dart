@@ -4,6 +4,8 @@ import 'package:tilawa_core/errors/failures.dart';
 import '../../../../core/network/network_error_message.dart';
 import '../../domain/entities/auth_error_key.dart';
 import '../../domain/entities/email_auth_failure_key.dart';
+import '../../domain/entities/google_sign_in_failure_key.dart';
+import 'google_auth_error_messages.dart';
 
 /// Resolves [AuthState.error] message keys to localized user-visible copy.
 String localizedAuthBlocErrorMessage(
@@ -43,6 +45,16 @@ String localizedAuthBlocErrorMessage(
     EmailAuthFailureKey.userDisabled => l10n.authUserDisabled,
     EmailAuthFailureKey.invalidCredential => l10n.authInvalidCredential,
     EmailAuthFailureKey.generic => l10n.authErrorGenericMessage,
+    GoogleSignInFailureKey.uiUnavailable ||
+    GoogleSignInFailureKey.notConfigured ||
+    GoogleSignInFailureKey.timeout ||
+    GoogleSignInFailureKey.timeoutUiHidden ||
+    GoogleSignInFailureKey.userMismatch ||
+    GoogleSignInFailureKey.offline ||
+    GoogleSignInFailureKey.generic => localizedGoogleSignInFailureMessage(
+      message,
+      l10n,
+    ),
     '' => l10n.deleteAccountFailed,
     _ when isNetworkConnectivityErrorMessage(message) =>
       l10n.serverActionOfflineMessage,

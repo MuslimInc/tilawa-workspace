@@ -10,6 +10,7 @@ import 'package:injectable/injectable.dart';
 import 'package:tilawa/core/logging/app_logger.dart';
 
 import '../mappers/firebase_auth_exception_mapper.dart';
+import '../mappers/google_sign_in_failure_mapper.dart';
 import '../../domain/entities/auth_result.dart';
 import '../../domain/entities/email_auth_failure_key.dart';
 import '../../domain/entities/user_entity.dart';
@@ -134,7 +135,9 @@ class GoogleAuthProviderImpl implements AuthProviderInterface {
         );
       }
       return AuthResult.failure(
-        message: _signInTimeoutMessage(),
+        message: GoogleSignInFailureMapper.messageKeyForTimeout(
+          uiHiddenProbeFailed: _platformPolicy.skipAutomaticSignIn,
+        ),
         code: 'sign-in-timeout',
       );
     } on PlatformException catch (e) {
@@ -143,9 +146,9 @@ class GoogleAuthProviderImpl implements AuthProviderInterface {
         error: e,
       );
       return AuthResult.failure(
-        message: e.message ?? 'Google sign-in platform error',
+        message: GoogleSignInFailureMapper.messageKeyForPlatformException(e),
         code: e.code,
-        details: e.details?.toString(),
+        details: _platformExceptionDiagnostics(e),
       );
     } on GoogleSignInException catch (e) {
       switch (e.code) {
@@ -153,19 +156,14 @@ class GoogleAuthProviderImpl implements AuthProviderInterface {
         case GoogleSignInExceptionCode.interrupted:
           return const AuthResult.cancelled();
         case GoogleSignInExceptionCode.uiUnavailable:
-          return AuthResult.failure(
-            message: e.description ?? 'Google sign-in UI is not available',
-            code: 'ui-unavailable',
-            details: e.details?.toString(),
-          );
         case GoogleSignInExceptionCode.unknownError:
         case GoogleSignInExceptionCode.clientConfigurationError:
         case GoogleSignInExceptionCode.providerConfigurationError:
         case GoogleSignInExceptionCode.userMismatch:
           return AuthResult.failure(
-            message: e.description ?? 'Authentication failed',
+            message: GoogleSignInFailureMapper.messageKeyForException(e),
             code: e.code.name,
-            details: e.details?.toString(),
+            details: _googleSignInExceptionDiagnostics(e),
           );
       }
     } on _NoGoogleAccountsException {
@@ -176,7 +174,9 @@ class GoogleAuthProviderImpl implements AuthProviderInterface {
         code: e.code,
       );
     } catch (e) {
-      return AuthResult.failure(message: e.toString());
+      return AuthResult.failure(
+        message: GoogleSignInFailureMapper.messageKeyForUnknownError(),
+      );
     }
   }
 
@@ -358,14 +358,6 @@ class GoogleAuthProviderImpl implements AuthProviderInterface {
     }
   }
 
-  String _signInTimeoutMessage() {
-    if (_platformPolicy.skipAutomaticSignIn) {
-      return 'Sign-in timed out. If the account picker did not appear, press '
-          'back and try again, or use the options below.';
-    }
-    return 'Sign-in timed out';
-  }
-
   Future<GoogleSignInAccount> _authenticateWithButtonFlow() async {
     if (!_googleSignIn.supportsAuthenticate()) {
       throw const GoogleSignInException(
@@ -469,6 +461,26 @@ class GoogleAuthProviderImpl implements AuthProviderInterface {
       photoUrl: firebaseUser.photoURL,
       createdAt: firebaseUser.metadata.creationTime ?? DateTime.now(),
     );
+  }
+
+  String? _googleSignInExceptionDiagnostics(GoogleSignInException error) {
+    final StringBuffer buffer = StringBuffer(
+      error.description ?? error.code.name,
+    );
+    final Object? details = error.details;
+    if (details != null) {
+      buffer.write('\n$details');
+    }
+    return buffer.toString();
+  }
+
+  String? _platformExceptionDiagnostics(PlatformException error) {
+    final StringBuffer buffer = StringBuffer(error.message ?? error.code);
+    final Object? details = error.details;
+    if (details != null) {
+      buffer.write('\n$details');
+    }
+    return buffer.toString();
   }
 
   String _mapFirebaseAuthFailureMessage(FirebaseAuthException error) {

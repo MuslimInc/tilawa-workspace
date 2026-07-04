@@ -7,13 +7,14 @@ import '../../domain/entities/auth_error_key.dart';
 import '../../domain/entities/user_entity.dart';
 import '../bloc/auth_bloc.dart';
 import '../cubit/login_google_sign_in_cubit.dart';
-import 'login_auth_state_diagnostics.dart';
+import 'email_auth_route_guard.dart';
 
 /// User-visible copy for login auth listener side effects.
 class LoginAuthBlocTransitionMessages {
   const LoginAuthBlocTransitionMessages({
     required this.authErrorFallback,
     required this.noGoogleAccounts,
+    required this.googleSignInCancelled,
     required this.localizeAuthError,
     this.deviceRegistrationFailed = '',
     this.appCheckFailed = '',
@@ -25,7 +26,25 @@ class LoginAuthBlocTransitionMessages {
   final String appCheckFailed;
   final String serverActionOffline;
   final String noGoogleAccounts;
+  final String googleSignInCancelled;
   final String Function(String messageKey) localizeAuthError;
+}
+
+/// Navigates away when [state] is already authenticated on login root.
+///
+/// [LoginAuthBlocListener] only reacts to transitions into authenticated;
+/// Firebase may settle auth before the first listener callback runs.
+void handleExistingAuthenticatedLoginSession({
+  required AuthState state,
+  required String routeLocation,
+  required void Function(UserEntity user) onNavigateAfterAuth,
+}) {
+  if (!isLoginSurfaceHandlingAuthTransitions(routeLocation)) {
+    return;
+  }
+  state.whenOrNull(
+    authenticated: (UserEntity user) => onNavigateAfterAuth(user),
+  );
 }
 
 /// Applies login-screen side effects for a listened [AuthState] transition.
@@ -37,13 +56,7 @@ void handleLoginAuthBlocTransition({
   required void Function(UserEntity user) onNavigateAfterAuth,
   required void Function(String message, TilawaFeedbackVariant variant)
   showToast,
-  void Function(String message)? log,
 }) {
-  final void Function(String message) writeLog = log ?? (_) {};
-
-  writeLog(
-    'listener transition authState=${loginAuthStateLabel(state)}',
-  );
   state.when(
     initial: () {},
     loading: () {},
@@ -52,8 +65,15 @@ void handleLoginAuthBlocTransition({
       onNavigateAfterAuth(user);
     },
     unauthenticated: () {
+      final bool manualCancel = launchCubit.state.awaitingManualResult;
       launchCubit.clearLaunchPending();
-      if (shouldSkipAutoSignIn) {
+      if (manualCancel) {
+        launchCubit.onManualSignInCancelled();
+        showToast(
+          messages.googleSignInCancelled,
+          TilawaFeedbackVariant.info,
+        );
+      } else if (shouldSkipAutoSignIn) {
         launchCubit.onManualSignInCancelled();
       }
     },

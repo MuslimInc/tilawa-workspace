@@ -1,20 +1,33 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:intl/intl.dart';
+import 'package:quran_sessions/l10n/quran_sessions_localizations.dart';
 import 'package:quran_sessions/quran_sessions.dart';
 
 import 'package:tilawa_ui_kit/tilawa_ui_kit.dart';
 
 import '../failure_ui/quran_sessions_failure_body.dart';
-import '../widgets/date_grouped_slots_layout.dart';
+import '../utils/teacher_availability_by_date.dart';
+import '../widgets/date_grouped_day_tab_bar.dart';
 import '../widgets/friday_review_reminder_banner.dart';
-import '../widgets/teacher_dashboard_collapsible_session_list.dart';
 import '../widgets/teacher_dashboard_inline_empty_state.dart';
-import '../widgets/teacher_dashboard_lazy_slot_day_list.dart';
 import '../widgets/teacher_dashboard_schedule_section.dart';
 import '../widgets/teacher_dashboard_summary_stats.dart';
 import '../widgets/tutor_dashboard_section.dart';
 import '../widgets/tutor_session_compact_card.dart';
+
+enum _BookableWeekScope { thisWeek, nextWeek }
+
+_BookableWeekScope _bookableWeekScopeFromTabIndex(int index) =>
+    index == 0 ? _BookableWeekScope.thisWeek : _BookableWeekScope.nextWeek;
+
+enum _TeacherDashboardCategory {
+  bookingRequests,
+  upcomingSessions,
+  bookableTimes,
+}
+
+enum _TeacherDashboardCategoryViewMode { grid, list }
 
 class TeacherDashboardScreen extends StatefulWidget {
   const TeacherDashboardScreen({
@@ -70,10 +83,8 @@ class _TeacherDashboardScreenState extends State<TeacherDashboardScreen> {
   String? _lastUndoSnackSlotId;
   int? _lastAnnouncedDiscardedCount;
   final Set<String> _enterAnimatedSlotIds = {};
-  bool _loggedWeekView = false;
-  bool _loggedFridayBanner = false;
-  bool _pendingSessionsExpanded = false;
-  bool _upcomingSessionsExpanded = false;
+  _TeacherDashboardCategoryViewMode _categoryViewMode =
+      _TeacherDashboardCategoryViewMode.grid;
 
   static const _undoSnackDuration = Duration(seconds: 4);
   static const _slotUndoDedupeKey = 'teacher-dashboard-slot-undo';
@@ -173,13 +184,8 @@ class _TeacherDashboardScreenState extends State<TeacherDashboardScreen> {
           listener: (context, state) {
             if (state is! TeacherDashboardSuccess) {
               _lastUndoSnackSlotId = null;
-              _loggedWeekView = false;
-              _loggedFridayBanner = false;
               return;
             }
-
-            _maybeLogWeekView(state);
-            _maybeLogFridayBanner(state);
 
             if (state.bookingRequestFailure != null) {
               TilawaFeedback.showToast(
@@ -312,186 +318,92 @@ class _TeacherDashboardScreenState extends State<TeacherDashboardScreen> {
                     ),
                   ),
 
-                  // ── Pending booking requests (actionable lists only) ───
-                  if (success.pendingBookingRequests.isNotEmpty) ...[
-                    SliverToBoxAdapter(
-                      child: TutorDashboardSection(
-                        title: l10n.teacherPendingBookingRequestsSectionTitle,
-                      ),
-                    ),
-                    TeacherDashboardCollapsibleSessionList(
-                      sectionKey: 'pending',
-                      itemCount: success.pendingBookingRequests.length,
-                      expanded: _pendingSessionsExpanded,
-                      onToggleExpanded: () => setState(
-                        () => _pendingSessionsExpanded =
-                            !_pendingSessionsExpanded,
-                      ),
-                      itemBuilder: (_, i) {
-                        final session = success.pendingBookingRequests[i];
-                        final inProgress =
-                            success.bookingRequestActionInProgress ==
-                            session.bookingId;
-                        return TutorSessionCompactCard(
-                          session: session,
-                          studentDisplayName: _studentDisplayName(
-                            context,
-                            session.studentId,
-                          ),
-                          now: DateTime.now(),
-                          isLoading: inProgress,
-                          viewerUserId: widget.viewerAuthUserId,
-                          onAccept: () =>
-                              context.read<TeacherDashboardBloc>().add(
-                                TeacherBookingRequestAccepted(
-                                  bookingId: session.bookingId,
-                                ),
-                              ),
-                          onReject: () => _confirmRejectBookingRequest(
-                            session.bookingId,
-                          ),
-                        );
+                  SliverToBoxAdapter(
+                    child: _TeacherDashboardCategoriesSection(
+                      viewMode: _categoryViewMode,
+                      categories: _categoryItems(context, success),
+                      onViewModeChanged: (viewMode) {
+                        setState(() => _categoryViewMode = viewMode);
                       },
+                      onCategorySelected: _openDashboardCategory,
                     ),
-                  ],
-
-                  // ── Upcoming sessions (actionable lists only) ──────────
-                  if (success.upcomingSessions.isNotEmpty) ...[
-                    SliverToBoxAdapter(
-                      child: TutorDashboardSection(
-                        title: l10n.upcomingSessionsSectionTitle,
-                      ),
+                  ),
+                  SliverToBoxAdapter(
+                    child: SizedBox(
+                      height: Theme.of(context).tokens.spaceExtraLarge,
                     ),
-                    TeacherDashboardCollapsibleSessionList(
-                      sectionKey: 'upcoming',
-                      itemCount: success.upcomingSessions.length,
-                      expanded: _upcomingSessionsExpanded,
-                      onToggleExpanded: () => setState(
-                        () => _upcomingSessionsExpanded =
-                            !_upcomingSessionsExpanded,
-                      ),
-                      itemBuilder: (_, i) {
-                        final session = success.upcomingSessions[i];
-                        final canJoin =
-                            session.effectiveLifecycleStatus.canJoinSession;
-                        final cancelInProgress =
-                            success.sessionCancelInProgress ==
-                            session.bookingId;
-                        final acceptInProgress =
-                            success.bookingRequestActionInProgress ==
-                            session.bookingId;
-                        final joinInProgress =
-                            success.joinInProgress == session.id;
-                        return TutorSessionCompactCard(
-                          session: session,
-                          studentDisplayName: _studentDisplayName(
-                            context,
-                            session.studentId,
-                          ),
-                          now: DateTime.now(),
-                          isLoading: cancelInProgress,
-                          isJoinLoading: joinInProgress,
-                          viewerUserId: widget.viewerAuthUserId,
-                          onTap: widget.onSessionDetailRequested == null
-                              ? null
-                              : () => _openSessionDetail(session.bookingId),
-                          onJoin: canJoin ? () => _requestJoin(session) : null,
-                          showCancelInOverflowMenu: true,
-                          onCancel:
-                              canTeacherCancelQuranSession(session) &&
-                                  !cancelInProgress &&
-                                  !acceptInProgress
-                              ? () => _confirmTutorCancelSession(session)
-                              : null,
-                        );
-                      },
-                    ),
-                  ],
-
-                  // ── Bookable times ─────────────────────────────────────
-                  if (success.showFridayReviewBanner)
-                    SliverToBoxAdapter(
-                      child: FridayReviewReminderBanner(
-                        onReview: () {
-                          widget.schedulingAnalytics?.onFridayReviewBannerTapped
-                              ?.call(
-                                _schedulingAnalyticsBase(
-                                  success,
-                                  extra: const {'action': 'review'},
-                                ),
-                              );
-                          _openManageSchedule(source: 'friday_banner');
-                        },
-                        onDismiss: () {
-                          widget
-                              .schedulingAnalytics
-                              ?.onFridayReviewBannerDismissed
-                              ?.call(
-                                _schedulingAnalyticsBase(
-                                  success,
-                                  extra: const {'action': 'dismiss'},
-                                ),
-                              );
-                          context.read<TeacherDashboardBloc>().add(
-                            FridayReviewBannerDismissed(
-                              teacherId: widget.teacherId,
-                            ),
-                          );
-                        },
-                      ),
-                    ),
-                  if (success.weekScopedDashboard)
-                    _BookableTimesWeekScopedSection(
-                      showTopDivider: _hasSessionSections(success),
-                      thisWeekSlots: success.thisWeekAvailability,
-                      nextWeekSlots: success.nextWeekAvailability,
-                      isUpdatingAvailability: success.isUpdatingAvailability,
-                      scheduleActionLabel: widget.onManageSchedule != null
-                          ? l10n.editWeeklyTemplate
-                          : null,
-                      onManageSchedule: widget.onManageSchedule != null
-                          ? () => _openManageSchedule(source: 'bookable_header')
-                          : null,
-                      buildSlot: (context, slot, showDivider) => _buildSlotTile(
-                        context,
-                        slot,
-                        showDivider: showDivider,
-                      ),
-                      onWeekScopeChanged: (section, slotCount) {
-                        widget.schedulingAnalytics?.onWeekViewOpened?.call(
-                          _schedulingAnalyticsBase(
-                            success,
-                            extra: {
-                              'section': section,
-                              'slot_count': slotCount,
-                              'interaction': 'scope_selected',
-                            },
-                          ),
-                        );
-                      },
-                    )
-                  else
-                    _BookableTimesWeekSection(
-                      showTopDivider: _hasSessionSections(success),
-                      title: l10n.bookableTimesSectionTitle,
-                      slots: success.availability,
-                      isUpdatingAvailability: success.isUpdatingAvailability,
-                      scheduleActionLabel: widget.onManageSchedule != null
-                          ? l10n.editWeeklyTemplate
-                          : null,
-                      onManageSchedule: widget.onManageSchedule != null
-                          ? () => _openManageSchedule(source: 'bookable_header')
-                          : null,
-                      buildSlot: (context, slot, showDivider) => _buildSlotTile(
-                        context,
-                        slot,
-                        showDivider: showDivider,
-                      ),
-                    ),
+                  ),
                 ],
               ),
             ),
           },
+        ),
+      ),
+    );
+  }
+
+  List<_TeacherDashboardCategoryItem> _categoryItems(
+    BuildContext context,
+    TeacherDashboardSuccess success,
+  ) {
+    final l10n = context.quranSessionsL10n;
+    return [
+      _TeacherDashboardCategoryItem(
+        category: _TeacherDashboardCategory.bookingRequests,
+        title: l10n.teacherPendingBookingRequestsSectionTitle,
+        subtitle: l10n.teacherDashboardBookingRequestsCategorySubtitle,
+        count: success.pendingBookingRequests.length,
+        countLabel: l10n.teacherDashboardStatPendingRequests,
+        icon: Icons.inbox_outlined,
+        semanticTint: TilawaSemanticTint.ink,
+      ),
+      _TeacherDashboardCategoryItem(
+        category: _TeacherDashboardCategory.upcomingSessions,
+        title: l10n.upcomingSessionsSectionTitle,
+        subtitle: l10n.teacherDashboardUpcomingSessionsCategorySubtitle,
+        count: success.upcomingSessions.length,
+        countLabel: l10n.teacherDashboardStatUpcomingSessions,
+        icon: Icons.event_outlined,
+        semanticTint: TilawaSemanticTint.scholar,
+      ),
+      _TeacherDashboardCategoryItem(
+        category: _TeacherDashboardCategory.bookableTimes,
+        title: l10n.bookableTimesWeekScopedTitle,
+        subtitle: l10n.teacherDashboardBookableTimesCategorySubtitle,
+        count: _bookableOpenSlotsCount(success),
+        countLabel: success.weekScopedDashboard
+            ? l10n.teacherDashboardStatBookableSlotsThisWeek
+            : l10n.teacherDashboardStatBookableSlotsHorizon,
+        icon: Icons.schedule_outlined,
+        semanticTint: TilawaSemanticTint.neutral,
+      ),
+    ];
+  }
+
+  Future<void> _openDashboardCategory(
+    _TeacherDashboardCategory category,
+  ) async {
+    final bloc = context.read<TeacherDashboardBloc>();
+    await Navigator.of(context).push<void>(
+      MaterialPageRoute(
+        settings: RouteSettings(name: 'teacher-dashboard-${category.name}'),
+        builder: (_) => BlocProvider<TeacherDashboardBloc>.value(
+          value: bloc,
+          child: _TeacherDashboardCategoryScreen(
+            category: category,
+            teacherId: widget.teacherId,
+            canManageSchedule: widget.onManageSchedule != null,
+            onManageSchedule: _openManageSchedule,
+            onReload: _reload,
+            onRejectBookingRequest: _confirmRejectBookingRequest,
+            onSessionDetailRequested: _openSessionDetail,
+            onRequestJoin: _requestJoin,
+            onCancelSession: _confirmTutorCancelSession,
+            studentDisplayName: _studentDisplayName,
+            buildSlotTile: _buildSlotTile,
+            viewerAuthUserId: widget.viewerAuthUserId,
+            schedulingAnalytics: widget.schedulingAnalytics,
+          ),
         ),
       ),
     );
@@ -711,6 +623,826 @@ class _TeacherDashboardScreenState extends State<TeacherDashboardScreen> {
     );
   }
 
+  Map<String, Object> _schedulingAnalyticsBase(
+    TeacherDashboardSuccess state, {
+    Map<String, Object>? extra,
+  }) {
+    return {
+      'scheduling_mode': state.schedulingConfig.schedulingMode.storageKey,
+      'policy_version': state.schedulingConfig.policyVersion,
+      if (state.marketCountryCode != null)
+        'market_code': state.marketCountryCode!,
+      ...?extra,
+    };
+  }
+
+  int _bookableOpenSlotsCount(TeacherDashboardSuccess state) {
+    final slots = state.weekScopedDashboard
+        ? state.thisWeekAvailability
+        : state.availability;
+    return slots.where((slot) => !slot.isBooked).length;
+  }
+
+  Future<void> _reload() async {
+    final bloc = context.read<TeacherDashboardBloc>();
+    final wasSuccess = bloc.state is TeacherDashboardSuccess;
+
+    // Subscribe before dispatch so we never complete on the pre-reload state.
+    final Future<void> reloadDone = bloc.stream
+        .firstWhere(
+          (s) {
+            if (wasSuccess) {
+              return (s is TeacherDashboardSuccess && !s.isRefreshing) ||
+                  s is TeacherDashboardEmpty ||
+                  s is TeacherDashboardFailure;
+            }
+            return s is TeacherDashboardSuccess ||
+                s is TeacherDashboardEmpty ||
+                s is TeacherDashboardFailure;
+          },
+          orElse: () => bloc.state,
+        )
+        .then((_) {});
+
+    bloc.add(TeacherDashboardLoadRequested(teacherId: widget.teacherId));
+    await reloadDone;
+  }
+}
+
+class _TeacherDashboardCategoryItem {
+  const _TeacherDashboardCategoryItem({
+    required this.category,
+    required this.title,
+    required this.subtitle,
+    required this.count,
+    required this.countLabel,
+    required this.icon,
+    required this.semanticTint,
+  });
+
+  final _TeacherDashboardCategory category;
+  final String title;
+  final String subtitle;
+  final int count;
+  final String countLabel;
+  final IconData icon;
+  final TilawaSemanticTint semanticTint;
+}
+
+class _TeacherDashboardCategoriesSection extends StatelessWidget {
+  const _TeacherDashboardCategoriesSection({
+    required this.viewMode,
+    required this.categories,
+    required this.onViewModeChanged,
+    required this.onCategorySelected,
+  });
+
+  final _TeacherDashboardCategoryViewMode viewMode;
+  final List<_TeacherDashboardCategoryItem> categories;
+  final ValueChanged<_TeacherDashboardCategoryViewMode> onViewModeChanged;
+  final ValueChanged<_TeacherDashboardCategory> onCategorySelected;
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final tokens = theme.tokens;
+    final l10n = context.quranSessionsL10n;
+
+    return Padding(
+      padding: EdgeInsetsDirectional.fromSTEB(
+        tokens.spaceLarge,
+        tokens.spaceMedium,
+        tokens.spaceLarge,
+        0,
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          TilawaSectionHeader(
+            title: l10n.teacherDashboardCategoriesTitle,
+            subtitle: l10n.teacherDashboardCategoriesSubtitle,
+            padding: EdgeInsets.zero,
+            trailing: _CategoryViewModeToggle(
+              viewMode: viewMode,
+              onViewModeChanged: onViewModeChanged,
+            ),
+          ),
+          SizedBox(height: tokens.spaceMedium),
+          if (viewMode == _TeacherDashboardCategoryViewMode.grid)
+            TilawaContentGrid(
+              targetItemExtent: 220,
+              childAspectRatio: 0.95,
+              mainAxisSpacing: tokens.spaceSmall,
+              crossAxisSpacing: tokens.spaceSmall,
+              shrinkWrap: true,
+              physics: const NeverScrollableScrollPhysics(),
+              itemCount: categories.length,
+              itemBuilder: (context, index) {
+                final item = categories[index];
+                return _TeacherDashboardCategoryCard(
+                  item: item,
+                  compact: true,
+                  onTap: () => onCategorySelected(item.category),
+                );
+              },
+            )
+          else
+            Column(
+              spacing: tokens.spaceSmall,
+              children: [
+                for (final item in categories)
+                  _TeacherDashboardCategoryCard(
+                    item: item,
+                    compact: false,
+                    onTap: () => onCategorySelected(item.category),
+                  ),
+              ],
+            ),
+        ],
+      ),
+    );
+  }
+}
+
+class _CategoryViewModeToggle extends StatelessWidget {
+  const _CategoryViewModeToggle({
+    required this.viewMode,
+    required this.onViewModeChanged,
+  });
+
+  final _TeacherDashboardCategoryViewMode viewMode;
+  final ValueChanged<_TeacherDashboardCategoryViewMode> onViewModeChanged;
+
+  @override
+  Widget build(BuildContext context) {
+    final l10n = context.quranSessionsL10n;
+    final isGrid = viewMode == _TeacherDashboardCategoryViewMode.grid;
+    final label = isGrid
+        ? l10n.teacherDashboardShowAsList
+        : l10n.teacherDashboardShowAsGrid;
+
+    return TilawaIconActionButton(
+      icon: isGrid ? Icons.view_list_rounded : Icons.grid_view_rounded,
+      tooltip: label,
+      semanticLabel: label,
+      onTap: () {
+        onViewModeChanged(
+          isGrid
+              ? _TeacherDashboardCategoryViewMode.list
+              : _TeacherDashboardCategoryViewMode.grid,
+        );
+      },
+    );
+  }
+}
+
+class _TeacherDashboardCategoryCard extends StatelessWidget {
+  const _TeacherDashboardCategoryCard({
+    required this.item,
+    required this.compact,
+    required this.onTap,
+  });
+
+  final _TeacherDashboardCategoryItem item;
+  final bool compact;
+  final VoidCallback onTap;
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final tokens = theme.tokens;
+    final scheme = theme.colorScheme;
+    final l10n = context.quranSessionsL10n;
+
+    final count = Text(
+      '${item.count}',
+      style: theme.textTheme.titleLarge?.copyWith(
+        color: scheme.onSurface,
+        fontWeight: FontWeight.w800,
+        height: 1.1,
+      ),
+    );
+
+    final countLabel = Text(
+      item.countLabel,
+      maxLines: compact ? 2 : 1,
+      overflow: TextOverflow.ellipsis,
+      style: theme.textTheme.bodySmall?.copyWith(
+        color: scheme.onSurfaceVariant,
+        height: 1.25,
+      ),
+      textAlign: TextAlign.start,
+    );
+
+    final title = Text(
+      item.title,
+      maxLines: 2,
+      overflow: TextOverflow.ellipsis,
+      style: theme.textTheme.titleSmall?.copyWith(
+        color: scheme.onSurface,
+        fontWeight: FontWeight.w700,
+        height: 1.25,
+      ),
+      textAlign: TextAlign.start,
+    );
+
+    final subtitle = Text(
+      item.subtitle,
+      maxLines: compact ? 2 : 3,
+      overflow: TextOverflow.ellipsis,
+      style: theme.textTheme.bodySmall?.copyWith(
+        color: scheme.onSurfaceVariant,
+        height: 1.35,
+      ),
+      textAlign: TextAlign.start,
+    );
+
+    if (!compact) {
+      return TilawaCard(
+        onTap: onTap,
+        padding: EdgeInsets.all(tokens.spaceMedium),
+        child: Row(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          spacing: tokens.spaceMedium,
+          children: [
+            TilawaIconBox(
+              icon: item.icon,
+              variant: TilawaIconBoxVariant.tinted,
+              semanticTint: item.semanticTint,
+              size: tokens.iconSizeMedium,
+            ),
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                spacing: tokens.spaceExtraSmall,
+                children: [
+                  title,
+                  subtitle,
+                  Row(
+                    spacing: tokens.spaceExtraSmall,
+                    children: [
+                      count,
+                      Flexible(child: countLabel),
+                    ],
+                  ),
+                ],
+              ),
+            ),
+            Icon(
+              Icons.arrow_forward_rounded,
+              size: tokens.iconSizeSmall,
+              color: scheme.onSurfaceVariant,
+            ),
+          ],
+        ),
+      );
+    }
+
+    return TilawaCard(
+      onTap: onTap,
+      expandHeight: true,
+      padding: EdgeInsets.all(tokens.spaceMedium),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            children: [
+              TilawaIconBox(
+                icon: item.icon,
+                variant: TilawaIconBoxVariant.tinted,
+                semanticTint: item.semanticTint,
+                size: tokens.iconSizeMedium,
+              ),
+              const Spacer(),
+              count,
+            ],
+          ),
+          SizedBox(height: tokens.spaceSmall),
+          title,
+          SizedBox(height: tokens.spaceExtraSmall),
+          subtitle,
+          const Spacer(),
+          Row(
+            mainAxisSize: MainAxisSize.min,
+            spacing: tokens.spaceExtraSmall,
+            children: [
+              Text(
+                l10n.teacherDashboardOpenCategory,
+                style: theme.textTheme.labelMedium?.copyWith(
+                  color: scheme.primary,
+                  fontWeight: FontWeight.w700,
+                ),
+              ),
+              Icon(
+                Icons.arrow_forward_rounded,
+                size: tokens.iconSizeSmall,
+                color: scheme.primary,
+              ),
+            ],
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+class _TeacherDashboardCategoryScreen extends StatefulWidget {
+  const _TeacherDashboardCategoryScreen({
+    required this.category,
+    required this.teacherId,
+    required this.canManageSchedule,
+    required this.onManageSchedule,
+    required this.onReload,
+    required this.onRejectBookingRequest,
+    required this.onSessionDetailRequested,
+    required this.onRequestJoin,
+    required this.onCancelSession,
+    required this.studentDisplayName,
+    required this.buildSlotTile,
+    required this.viewerAuthUserId,
+    required this.schedulingAnalytics,
+  });
+
+  final _TeacherDashboardCategory category;
+  final String teacherId;
+  final bool canManageSchedule;
+  final Future<void> Function({String source}) onManageSchedule;
+  final Future<void> Function() onReload;
+  final Future<void> Function(String bookingId) onRejectBookingRequest;
+  final Future<void> Function(String bookingId) onSessionDetailRequested;
+  final Future<void> Function(QuranSession session) onRequestJoin;
+  final Future<void> Function(QuranSession session) onCancelSession;
+  final String Function(BuildContext context, String studentId)
+  studentDisplayName;
+  final Widget Function(
+    BuildContext context,
+    TeacherAvailability slot, {
+    required bool showDivider,
+  })
+  buildSlotTile;
+  final String? viewerAuthUserId;
+  final QuranSessionsSchedulingAnalyticsCallbacks? schedulingAnalytics;
+
+  @override
+  State<_TeacherDashboardCategoryScreen> createState() =>
+      _TeacherDashboardCategoryScreenState();
+}
+
+class _TeacherDashboardCategoryScreenState
+    extends State<_TeacherDashboardCategoryScreen>
+    with SingleTickerProviderStateMixin {
+  TabController? _bookableWeekTabController;
+  _BookableWeekScope _bookableWeekScope = _BookableWeekScope.thisWeek;
+  DateTime _bookableSelectedDay = localDayKey(DateTime.now());
+  bool _loggedWeekView = false;
+  bool _loggedFridayBanner = false;
+
+  @override
+  void dispose() {
+    _bookableWeekTabController?.removeListener(_onBookableWeekTabChanged);
+    _bookableWeekTabController?.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final l10n = context.quranSessionsL10n;
+
+    return QuranSessionsScaffold(
+      title: _categoryTitle(l10n),
+      actions: [
+        if (widget.category == _TeacherDashboardCategory.bookableTimes &&
+            widget.canManageSchedule)
+          IconButton(
+            icon: const Icon(Icons.edit_calendar_outlined),
+            tooltip: l10n.editWeeklyTemplate,
+            onPressed: () {
+              widget.onManageSchedule(source: 'category_app_bar');
+            },
+          ),
+      ],
+      body: BlocBuilder<TeacherDashboardBloc, TeacherDashboardState>(
+        builder: (context, state) => switch (state) {
+          TeacherDashboardInitial() || TeacherDashboardLoading() =>
+            const Center(child: CircularProgressIndicator()),
+          TeacherDashboardEmpty() => _DashboardSetupEmptyState(
+            canManageSchedule: widget.canManageSchedule,
+            onManageSchedule: widget.onManageSchedule,
+          ),
+          TeacherDashboardFailure(:final failure) =>
+            buildQuranSessionsFailureBody(
+              context,
+              failure: failure,
+              onRetry: widget.onReload,
+            ),
+          TeacherDashboardSuccess success => _buildSuccess(context, success),
+        },
+      ),
+    );
+  }
+
+  String _categoryTitle(QuranSessionsLocalizations l10n) {
+    return switch (widget.category) {
+      _TeacherDashboardCategory.bookingRequests =>
+        l10n.teacherPendingBookingRequestsSectionTitle,
+      _TeacherDashboardCategory.upcomingSessions =>
+        l10n.upcomingSessionsSectionTitle,
+      _TeacherDashboardCategory.bookableTimes =>
+        l10n.bookableTimesWeekScopedTitle,
+    };
+  }
+
+  Widget _buildSuccess(
+    BuildContext context,
+    TeacherDashboardSuccess success,
+  ) {
+    if (widget.category == _TeacherDashboardCategory.bookableTimes) {
+      _maybeLogWeekView(success);
+      _maybeLogFridayBanner(success);
+    }
+
+    return RefreshIndicator(
+      onRefresh: widget.onReload,
+      child: CustomScrollView(
+        slivers: switch (widget.category) {
+          _TeacherDashboardCategory.bookingRequests =>
+            _buildPendingRequestSlivers(context, success),
+          _TeacherDashboardCategory.upcomingSessions =>
+            _buildUpcomingSessionSlivers(context, success),
+          _TeacherDashboardCategory.bookableTimes => _buildBookableTimeSlivers(
+            context,
+            success,
+          ),
+        },
+      ),
+    );
+  }
+
+  List<Widget> _buildPendingRequestSlivers(
+    BuildContext context,
+    TeacherDashboardSuccess success,
+  ) {
+    final l10n = context.quranSessionsL10n;
+    final sessions = success.pendingBookingRequests;
+
+    if (sessions.isEmpty) {
+      return [
+        _CategoryEmptySliver(
+          icon: Icons.inbox_outlined,
+          title: l10n.teacherPendingBookingRequestsEmptyTitle,
+          subtitle: l10n.teacherPendingBookingRequestsEmptySubtitle,
+        ),
+      ];
+    }
+
+    return [
+      _CategoryTopGapSliver(),
+      SliverList.builder(
+        itemCount: sessions.length,
+        itemBuilder: (context, index) {
+          final session = sessions[index];
+          final inProgress =
+              success.bookingRequestActionInProgress == session.bookingId;
+          return TutorSessionCompactCard(
+            session: session,
+            studentDisplayName: widget.studentDisplayName(
+              context,
+              session.studentId,
+            ),
+            now: DateTime.now(),
+            isLoading: inProgress,
+            viewerUserId: widget.viewerAuthUserId,
+            onAccept: () => context.read<TeacherDashboardBloc>().add(
+              TeacherBookingRequestAccepted(bookingId: session.bookingId),
+            ),
+            onReject: () => widget.onRejectBookingRequest(session.bookingId),
+          );
+        },
+      ),
+      _CategoryBottomGapSliver(),
+    ];
+  }
+
+  List<Widget> _buildUpcomingSessionSlivers(
+    BuildContext context,
+    TeacherDashboardSuccess success,
+  ) {
+    final l10n = context.quranSessionsL10n;
+    final sessions = success.upcomingSessions;
+
+    if (sessions.isEmpty) {
+      return [
+        _CategoryEmptySliver(
+          icon: Icons.event_outlined,
+          title: l10n.upcomingSessionsEmptyTitle,
+          subtitle: l10n.upcomingSessionsEmptySubtitle,
+        ),
+      ];
+    }
+
+    return [
+      _CategoryTopGapSliver(),
+      SliverList.builder(
+        itemCount: sessions.length,
+        itemBuilder: (context, index) {
+          final session = sessions[index];
+          final canJoin = session.effectiveLifecycleStatus.canJoinSession;
+          final cancelInProgress =
+              success.sessionCancelInProgress == session.bookingId;
+          final acceptInProgress =
+              success.bookingRequestActionInProgress == session.bookingId;
+          final joinInProgress = success.joinInProgress == session.id;
+          return TutorSessionCompactCard(
+            session: session,
+            studentDisplayName: widget.studentDisplayName(
+              context,
+              session.studentId,
+            ),
+            now: DateTime.now(),
+            isLoading: cancelInProgress,
+            isJoinLoading: joinInProgress,
+            viewerUserId: widget.viewerAuthUserId,
+            onTap: () => widget.onSessionDetailRequested(session.bookingId),
+            onJoin: canJoin ? () => widget.onRequestJoin(session) : null,
+            showCancelInOverflowMenu: true,
+            onCancel:
+                canTeacherCancelQuranSession(session) &&
+                    !cancelInProgress &&
+                    !acceptInProgress
+                ? () => widget.onCancelSession(session)
+                : null,
+          );
+        },
+      ),
+      _CategoryBottomGapSliver(),
+    ];
+  }
+
+  List<Widget> _buildBookableTimeSlivers(
+    BuildContext context,
+    TeacherDashboardSuccess success,
+  ) {
+    final slivers = <Widget>[
+      if (success.showFridayReviewBanner)
+        SliverToBoxAdapter(
+          child: FridayReviewReminderBanner(
+            onReview: () {
+              widget.schedulingAnalytics?.onFridayReviewBannerTapped?.call(
+                _schedulingAnalyticsBase(
+                  success,
+                  extra: const {'action': 'review'},
+                ),
+              );
+              widget.onManageSchedule(source: 'friday_banner');
+            },
+            onDismiss: () {
+              widget.schedulingAnalytics?.onFridayReviewBannerDismissed?.call(
+                _schedulingAnalyticsBase(
+                  success,
+                  extra: const {'action': 'dismiss'},
+                ),
+              );
+              context.read<TeacherDashboardBloc>().add(
+                FridayReviewBannerDismissed(teacherId: widget.teacherId),
+              );
+            },
+          ),
+        ),
+      if (widget.canManageSchedule)
+        SliverToBoxAdapter(
+          child: Padding(
+            padding: EdgeInsetsDirectional.fromSTEB(
+              Theme.of(context).tokens.spaceLarge,
+              Theme.of(context).tokens.spaceMedium,
+              Theme.of(context).tokens.spaceLarge,
+              0,
+            ),
+            child: Align(
+              alignment: AlignmentDirectional.centerStart,
+              child: TeacherDashboardScheduleSection(
+                actionLabel: context.quranSessionsL10n.editWeeklyTemplate,
+                onManageSchedule: () {
+                  widget.onManageSchedule(source: 'category_inline');
+                },
+              ),
+            ),
+          ),
+        ),
+    ];
+
+    slivers.addAll(
+      success.weekScopedDashboard
+          ? _buildWeekScopedBookableSlivers(context, success)
+          : _buildHorizonBookableSlivers(context, success),
+    );
+    return slivers;
+  }
+
+  void _ensureBookableWeekTabController() {
+    if (_bookableWeekTabController != null) return;
+    _bookableWeekTabController = TabController(length: 2, vsync: this);
+    _bookableWeekTabController!.addListener(_onBookableWeekTabChanged);
+  }
+
+  void _onBookableWeekTabChanged() {
+    final controller = _bookableWeekTabController;
+    if (controller == null || controller.indexIsChanging) return;
+    _applyBookableWeekScope(
+      _bookableWeekScopeFromTabIndex(controller.index),
+    );
+  }
+
+  void _applyBookableWeekScope(_BookableWeekScope next) {
+    if (next == _bookableWeekScope) return;
+    final blocState = context.read<TeacherDashboardBloc>().state;
+    if (blocState is! TeacherDashboardSuccess) return;
+
+    final slotCount = switch (next) {
+      _BookableWeekScope.thisWeek => blocState.thisWeekAvailability.length,
+      _BookableWeekScope.nextWeek => blocState.nextWeekAvailability.length,
+    };
+    final section = switch (next) {
+      _BookableWeekScope.thisWeek => 'this_week',
+      _BookableWeekScope.nextWeek => 'next_week',
+    };
+
+    setState(() {
+      _bookableWeekScope = next;
+      final grouped = groupTeacherAvailabilityByLocalDay(
+        _activeBookableSlots(blocState),
+      );
+      if (grouped.days.isNotEmpty &&
+          !grouped.days.contains(_bookableSelectedDay)) {
+        _bookableSelectedDay = grouped.days.first;
+      }
+    });
+
+    widget.schedulingAnalytics?.onWeekViewOpened?.call(
+      _schedulingAnalyticsBase(
+        blocState,
+        extra: {
+          'section': section,
+          'slot_count': slotCount,
+          'interaction': 'scope_selected',
+        },
+      ),
+    );
+  }
+
+  List<TeacherAvailability> _activeBookableSlots(
+    TeacherDashboardSuccess state,
+  ) => switch (_bookableWeekScope) {
+    _BookableWeekScope.thisWeek => state.thisWeekAvailability,
+    _BookableWeekScope.nextWeek => state.nextWeekAvailability,
+  };
+
+  ({
+    List<DateTime> days,
+    Map<DateTime, List<TeacherAvailability>> byDay,
+    DateTime selectedDay,
+    List<TeacherAvailability> selectedDaySlots,
+  })
+  _bookableDayView(List<TeacherAvailability> slots) {
+    final grouped = groupTeacherAvailabilityByLocalDay(slots);
+    final selectedDay = grouped.days.contains(_bookableSelectedDay)
+        ? _bookableSelectedDay
+        : grouped.days.isEmpty
+        ? localDayKey(DateTime.now())
+        : grouped.days.first;
+
+    return (
+      days: grouped.days,
+      byDay: grouped.byDay,
+      selectedDay: selectedDay,
+      selectedDaySlots: grouped.byDay[selectedDay] ?? const [],
+    );
+  }
+
+  List<Widget> _buildWeekScopedBookableSlivers(
+    BuildContext context,
+    TeacherDashboardSuccess success,
+  ) {
+    final l10n = context.quranSessionsL10n;
+    final locale = Localizations.localeOf(context).languageCode;
+    final dayLabelFmt = DateFormat('EEEE, d MMMM', locale);
+    final tokens = Theme.of(context).tokens;
+    _ensureBookableWeekTabController();
+
+    final activeSlots = _activeBookableSlots(success);
+    final dayView = _bookableDayView(activeSlots);
+
+    final empty = switch (_bookableWeekScope) {
+      _BookableWeekScope.thisWeek => (
+        title: l10n.bookableTimesEmptyThisWeekTitle,
+        subtitle: l10n.bookableTimesEmptyThisWeekSubtitle,
+      ),
+      _BookableWeekScope.nextWeek => (
+        title: l10n.bookableTimesEmptyNextWeekTitle,
+        subtitle: l10n.bookableTimesEmptyNextWeekSubtitle,
+      ),
+    };
+
+    return [
+      SliverPersistentHeader(
+        pinned: true,
+        delegate: _PinnedBookableSlotsControlsDelegate(
+          showTopDivider: false,
+          title: l10n.bookableTimesWeekScopedTitle,
+          isUpdatingAvailability: success.isUpdatingAvailability,
+          weekTabController: _bookableWeekTabController,
+          thisWeekLabel: l10n.bookableTimesThisWeekSectionTitle,
+          nextWeekLabel: l10n.bookableTimesNextWeekSectionTitle,
+          days: activeSlots.isEmpty ? null : dayView.days,
+          selectedDay: dayView.selectedDay,
+          onDaySelected: (day) => setState(() => _bookableSelectedDay = day),
+          selectedDayCaption: activeSlots.isEmpty
+              ? null
+              : l10n.bookableTimesSelectedDayCaption(
+                  dayLabelFmt.format(dayView.selectedDay),
+                ),
+        ),
+      ),
+      if (activeSlots.isEmpty)
+        SliverToBoxAdapter(
+          child: TeacherDashboardInlineEmptyState(
+            icon: Icons.schedule_outlined,
+            title: empty.title,
+            subtitle: empty.subtitle,
+          ),
+        )
+      else
+        SliverPadding(
+          padding: EdgeInsetsDirectional.only(
+            start: tokens.spaceLarge,
+            end: tokens.spaceLarge,
+            bottom: tokens.spaceExtraLarge,
+          ),
+          sliver: SliverList.builder(
+            itemCount: dayView.selectedDaySlots.length,
+            itemBuilder: (context, index) {
+              final slot = dayView.selectedDaySlots[index];
+              return widget.buildSlotTile(
+                context,
+                slot,
+                showDivider: index < dayView.selectedDaySlots.length - 1,
+              );
+            },
+          ),
+        ),
+    ];
+  }
+
+  List<Widget> _buildHorizonBookableSlivers(
+    BuildContext context,
+    TeacherDashboardSuccess success,
+  ) {
+    final l10n = context.quranSessionsL10n;
+    final tokens = Theme.of(context).tokens;
+    final dayView = _bookableDayView(success.availability);
+
+    return [
+      SliverPersistentHeader(
+        pinned: true,
+        delegate: _PinnedBookableSlotsControlsDelegate(
+          showTopDivider: false,
+          title: l10n.bookableTimesSectionTitle,
+          isUpdatingAvailability: success.isUpdatingAvailability,
+          days: success.availability.isEmpty ? null : dayView.days,
+          selectedDay: dayView.selectedDay,
+          onDaySelected: (day) => setState(() => _bookableSelectedDay = day),
+        ),
+      ),
+      if (success.availability.isEmpty)
+        SliverToBoxAdapter(
+          child: TeacherDashboardInlineEmptyState(
+            icon: Icons.schedule_outlined,
+            title: l10n.bookableTimesEmptyHorizonTitle,
+            subtitle: l10n.bookableTimesEmptyHorizonSubtitle,
+          ),
+        )
+      else
+        SliverPadding(
+          padding: EdgeInsetsDirectional.only(
+            start: tokens.spaceLarge,
+            end: tokens.spaceLarge,
+            bottom: tokens.spaceExtraLarge,
+          ),
+          sliver: SliverList.builder(
+            itemCount: dayView.selectedDaySlots.length,
+            itemBuilder: (context, index) {
+              final slot = dayView.selectedDaySlots[index];
+              return widget.buildSlotTile(
+                context,
+                slot,
+                showDivider: index < dayView.selectedDaySlots.length - 1,
+              );
+            },
+          ),
+        ),
+    ];
+  }
+
   void _maybeLogWeekView(TeacherDashboardSuccess state) {
     if (_loggedWeekView) return;
     _loggedWeekView = true;
@@ -723,7 +1455,7 @@ class _TeacherDashboardScreenState extends State<TeacherDashboardScreen> {
           extra: {
             'section': 'this_week',
             'slot_count': state.thisWeekAvailability.length,
-            'interaction': 'dashboard_load',
+            'interaction': 'category_open',
           },
         ),
       );
@@ -734,6 +1466,7 @@ class _TeacherDashboardScreenState extends State<TeacherDashboardScreen> {
           extra: {
             'section': 'horizon',
             'slot_count': state.availability.length,
+            'interaction': 'category_open',
           },
         ),
       );
@@ -766,42 +1499,92 @@ class _TeacherDashboardScreenState extends State<TeacherDashboardScreen> {
       ...?extra,
     };
   }
+}
 
-  int _bookableOpenSlotsCount(TeacherDashboardSuccess state) {
-    final slots = state.weekScopedDashboard
-        ? state.thisWeekAvailability
-        : state.availability;
-    return slots.where((slot) => !slot.isBooked).length;
+class _DashboardSetupEmptyState extends StatelessWidget {
+  const _DashboardSetupEmptyState({
+    required this.canManageSchedule,
+    required this.onManageSchedule,
+  });
+
+  final bool canManageSchedule;
+  final Future<void> Function({String source}) onManageSchedule;
+
+  @override
+  Widget build(BuildContext context) {
+    final l10n = context.quranSessionsL10n;
+    final tokens = Theme.of(context).tokens;
+
+    return Center(
+      child: Padding(
+        padding: EdgeInsets.all(tokens.spaceLarge),
+        child: TilawaEmptyState(
+          icon: Icons.event_available_outlined,
+          title: l10n.availabilitySetupHeadline,
+          subtitle:
+              '${l10n.availabilitySetupBenefitRecurring}  ·  '
+              '${l10n.availabilitySetupBenefitTimezone}  ·  '
+              '${l10n.availabilitySetupBenefitSelfBooking}',
+          action: canManageSchedule
+              ? TilawaButton(
+                  text: l10n.availabilitySetupCta,
+                  leadingIcon: const Icon(Icons.calendar_month_outlined),
+                  onPressed: () {
+                    onManageSchedule(source: 'empty_state');
+                  },
+                )
+              : null,
+        ),
+      ),
+    );
   }
+}
 
-  bool _hasSessionSections(TeacherDashboardSuccess state) {
-    return state.pendingBookingRequests.isNotEmpty ||
-        state.upcomingSessions.isNotEmpty;
+class _CategoryEmptySliver extends StatelessWidget {
+  const _CategoryEmptySliver({
+    required this.icon,
+    required this.title,
+    required this.subtitle,
+  });
+
+  final IconData icon;
+  final String title;
+  final String subtitle;
+
+  @override
+  Widget build(BuildContext context) {
+    final tokens = Theme.of(context).tokens;
+
+    return SliverFillRemaining(
+      child: Center(
+        child: Padding(
+          padding: EdgeInsets.all(tokens.spaceLarge),
+          child: TilawaEmptyState(
+            icon: icon,
+            title: title,
+            subtitle: subtitle,
+          ),
+        ),
+      ),
+    );
   }
+}
 
-  Future<void> _reload() async {
-    final bloc = context.read<TeacherDashboardBloc>();
-    final wasSuccess = bloc.state is TeacherDashboardSuccess;
+class _CategoryTopGapSliver extends StatelessWidget {
+  @override
+  Widget build(BuildContext context) {
+    return SliverToBoxAdapter(
+      child: SizedBox(height: Theme.of(context).tokens.spaceSmall),
+    );
+  }
+}
 
-    // Subscribe before dispatch so we never complete on the pre-reload state.
-    final Future<void> reloadDone = bloc.stream
-        .firstWhere(
-          (s) {
-            if (wasSuccess) {
-              return (s is TeacherDashboardSuccess && !s.isRefreshing) ||
-                  s is TeacherDashboardEmpty ||
-                  s is TeacherDashboardFailure;
-            }
-            return s is TeacherDashboardSuccess ||
-                s is TeacherDashboardEmpty ||
-                s is TeacherDashboardFailure;
-          },
-          orElse: () => bloc.state,
-        )
-        .then((_) {});
-
-    bloc.add(TeacherDashboardLoadRequested(teacherId: widget.teacherId));
-    await reloadDone;
+class _CategoryBottomGapSliver extends StatelessWidget {
+  @override
+  Widget build(BuildContext context) {
+    return SliverToBoxAdapter(
+      child: SizedBox(height: Theme.of(context).tokens.spaceExtraLarge),
+    );
   }
 }
 
@@ -937,235 +1720,114 @@ class _BlockSlotTrailing extends StatelessWidget {
   }
 }
 
-// ── Bookable section header trailing (schedule edit + sync spinner) ─────────
+// ── Bookable section sync indicator (header trailing) ───────────────────────
 
-class _BookableSectionTrailing extends StatelessWidget {
-  const _BookableSectionTrailing({
-    required this.isUpdatingAvailability,
-    this.scheduleActionLabel,
-    this.onManageSchedule,
-  });
+class _AvailabilitySyncTrailing extends StatelessWidget {
+  const _AvailabilitySyncTrailing({required this.isUpdatingAvailability});
 
   final bool isUpdatingAvailability;
-  final String? scheduleActionLabel;
-  final VoidCallback? onManageSchedule;
 
   @override
   Widget build(BuildContext context) {
+    if (!isUpdatingAvailability) return const SizedBox.shrink();
+
     final tokens = Theme.of(context).tokens;
-    final children = <Widget>[];
-
-    if (isUpdatingAvailability) {
-      children.add(
-        SizedBox(
-          width: tokens.iconSizeSmall,
-          height: tokens.iconSizeSmall,
-          child: const CircularProgressIndicator(strokeWidth: 2),
-        ),
-      );
-    }
-
-    final label = scheduleActionLabel;
-    final onSchedule = onManageSchedule;
-    if (label != null && onSchedule != null) {
-      children.add(
-        TeacherDashboardScheduleSection(
-          actionLabel: label,
-          onManageSchedule: onSchedule,
-        ),
-      );
-    }
-
-    if (children.isEmpty) return const SizedBox.shrink();
-
-    return Row(
-      mainAxisSize: MainAxisSize.min,
-      spacing: tokens.spaceExtraSmall,
-      children: children,
+    return SizedBox(
+      width: tokens.iconSizeSmall,
+      height: tokens.iconSizeSmall,
+      child: const CircularProgressIndicator(strokeWidth: 2),
     );
   }
 }
 
-// ── Bookable times (week-scoped, single scope at a time) ────────────────────
-
-enum _BookableWeekScope { thisWeek, nextWeek }
-
-_BookableWeekScope _bookableWeekScopeFromTabIndex(int index) =>
-    index == 0 ? _BookableWeekScope.thisWeek : _BookableWeekScope.nextWeek;
-
-class _BookableTimesWeekScopedSection extends StatefulWidget {
-  const _BookableTimesWeekScopedSection({
-    required this.thisWeekSlots,
-    required this.nextWeekSlots,
+class _PinnedBookableSlotsControlsDelegate
+    extends SliverPersistentHeaderDelegate {
+  _PinnedBookableSlotsControlsDelegate({
+    required this.showTopDivider,
+    required this.title,
     required this.isUpdatingAvailability,
-    required this.buildSlot,
-    this.onWeekScopeChanged,
-    this.scheduleActionLabel,
-    this.onManageSchedule,
-    this.showTopDivider = false,
+    this.weekTabController,
+    this.thisWeekLabel,
+    this.nextWeekLabel,
+    this.days,
+    this.selectedDay,
+    this.onDaySelected,
+    this.selectedDayCaption,
   });
 
   final bool showTopDivider;
-  final List<TeacherAvailability> thisWeekSlots;
-  final List<TeacherAvailability> nextWeekSlots;
+  final String title;
   final bool isUpdatingAvailability;
-  final Widget Function(
-    BuildContext context,
-    TeacherAvailability slot,
-    bool showDivider,
-  )
-  buildSlot;
-  final void Function(String section, int slotCount)? onWeekScopeChanged;
-  final String? scheduleActionLabel;
-  final VoidCallback? onManageSchedule;
+  final TabController? weekTabController;
+  final String? thisWeekLabel;
+  final String? nextWeekLabel;
+  final List<DateTime>? days;
+  final DateTime? selectedDay;
+  final ValueChanged<DateTime>? onDaySelected;
+  final String? selectedDayCaption;
+
+  bool get _showsWeekTabs =>
+      weekTabController != null &&
+      thisWeekLabel != null &&
+      nextWeekLabel != null;
+
+  bool get _showsDayChips =>
+      days != null &&
+      days!.isNotEmpty &&
+      selectedDay != null &&
+      onDaySelected != null;
 
   @override
-  State<_BookableTimesWeekScopedSection> createState() =>
-      _BookableTimesWeekScopedSectionState();
-}
-
-class _BookableTimesWeekScopedSectionState
-    extends State<_BookableTimesWeekScopedSection>
-    with SingleTickerProviderStateMixin {
-  late final TabController _weekTabController;
-  _BookableWeekScope _scope = _BookableWeekScope.thisWeek;
+  double get minExtent => _layoutExtent;
 
   @override
-  void initState() {
-    super.initState();
-    _weekTabController = TabController(length: 2, vsync: this);
-    _weekTabController.addListener(_onWeekTabChanged);
+  double get maxExtent => _layoutExtent;
+
+  /// Pixel-aligned extent shared by [minExtent], [maxExtent], and [build].
+  ///
+  /// Uses design-token defaults (not [BuildContext]) so declared geometry
+  /// always matches the [SizedBox] height we paint.
+  double get _layoutExtent => _rawExtent.ceilToDouble();
+
+  static const _titleLineHeight = 24.0;
+  static const _captionLineHeight = 16.0;
+  static const _extentSlack = 32.0;
+
+  double _titleExtent() {
+    const spaceLarge = 16.0;
+    const spaceMedium = 12.0;
+    const spaceExtraSmall = 4.0;
+
+    var height = spaceMedium + _titleLineHeight + spaceExtraSmall;
+    if (showTopDivider) {
+      height += spaceLarge + 1 + spaceMedium;
+    }
+    return height;
   }
 
-  @override
-  void dispose() {
-    _weekTabController.removeListener(_onWeekTabChanged);
-    _weekTabController.dispose();
-    super.dispose();
+  double _weekTabsExtent() => 16 + kTextTabBarHeight;
+
+  double _dayChipsExtent() {
+    const spaceMedium = 12.0;
+    const spaceSmall = 8.0;
+    const chipHeight = 76.0; // spaceXXL * 2 + spaceMedium
+
+    var height = spaceMedium + chipHeight;
+    if (selectedDayCaption != null && selectedDayCaption!.isNotEmpty) {
+      height += spaceSmall + _captionLineHeight + spaceSmall;
+    }
+    return height;
   }
 
-  void _onWeekTabChanged() {
-    if (_weekTabController.indexIsChanging) return;
-    _applyScope(_bookableWeekScopeFromTabIndex(_weekTabController.index));
-  }
-
-  void _applyScope(_BookableWeekScope next) {
-    if (next == _scope) return;
-    final slotCount = switch (next) {
-      _BookableWeekScope.thisWeek => widget.thisWeekSlots.length,
-      _BookableWeekScope.nextWeek => widget.nextWeekSlots.length,
-    };
-    final section = switch (next) {
-      _BookableWeekScope.thisWeek => 'this_week',
-      _BookableWeekScope.nextWeek => 'next_week',
-    };
-    setState(() => _scope = next);
-    widget.onWeekScopeChanged?.call(section, slotCount);
-  }
-
-  List<TeacherAvailability> get _activeSlots => switch (_scope) {
-    _BookableWeekScope.thisWeek => widget.thisWeekSlots,
-    _BookableWeekScope.nextWeek => widget.nextWeekSlots,
-  };
-
-  @override
-  Widget build(BuildContext context) {
-    final l10n = context.quranSessionsL10n;
-    final locale = Localizations.localeOf(context).languageCode;
-    final dayLabelFmt = DateFormat('EEEE, d MMMM', locale);
-    final tokens = Theme.of(context).tokens;
-    final scheme = Theme.of(context).colorScheme;
-    final emptyMessage = switch (_scope) {
-      _BookableWeekScope.thisWeek => l10n.bookableTimesEmptyThisWeek,
-      _BookableWeekScope.nextWeek => l10n.bookableTimesEmptyNextWeek,
-    };
-
-    return SliverMainAxisGroup(
-      slivers: [
-        SliverToBoxAdapter(
-          child: TutorDashboardSection(
-            title: l10n.bookableTimesWeekScopedTitle,
-            variant: TutorDashboardSectionVariant.secondary,
-            showTopDivider: widget.showTopDivider,
-            trailing: _BookableSectionTrailing(
-              isUpdatingAvailability: widget.isUpdatingAvailability,
-              scheduleActionLabel: widget.scheduleActionLabel,
-              onManageSchedule: widget.onManageSchedule,
-            ),
-          ),
-        ),
-        SliverPersistentHeader(
-          pinned: true,
-          delegate: _PinnedWeekScopeTabBarDelegate(
-            tabController: _weekTabController,
-            thisWeekLabel: l10n.bookableTimesThisWeekSectionTitle,
-            nextWeekLabel: l10n.bookableTimesNextWeekSectionTitle,
-          ),
-        ),
-        if (_activeSlots.isEmpty)
-          SliverToBoxAdapter(
-            child: TeacherDashboardInlineEmptyState(
-              title: emptyMessage,
-            ),
-          )
-        else
-          SliverToBoxAdapter(
-            child: DateGroupedSlotsLayout(
-              key: ValueKey(_scope),
-              slots: _activeSlots,
-              padding: EdgeInsetsDirectional.only(
-                start: tokens.spaceLarge,
-                end: tokens.spaceLarge,
-                top: tokens.spaceMedium,
-              ),
-              belowTabsBuilder: (context, selectedDay) => Text(
-                l10n.bookableTimesSelectedDayCaption(
-                  dayLabelFmt.format(selectedDay),
-                ),
-                style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                  color: scheme.onSurfaceVariant,
-                ),
-              ),
-              slotsForDayBuilder: (context, daySlots) => Padding(
-                padding: EdgeInsets.only(bottom: tokens.spaceExtraLarge),
-                child: TeacherDashboardLazySlotDayList(
-                  itemCount: daySlots.length,
-                  itemBuilder: (context, i) => widget.buildSlot(
-                    context,
-                    daySlots[i],
-                    i < daySlots.length - 1,
-                  ),
-                ),
-              ),
-            ),
-          ),
-      ],
-    );
-  }
-}
-
-class _PinnedWeekScopeTabBarDelegate extends SliverPersistentHeaderDelegate {
-  _PinnedWeekScopeTabBarDelegate({
-    required this.tabController,
-    required this.thisWeekLabel,
-    required this.nextWeekLabel,
-  });
-
-  final TabController tabController;
-  final String thisWeekLabel;
-  final String nextWeekLabel;
-
-  @override
-  double get minExtent => _extentFor(null);
-
-  @override
-  double get maxExtent => _extentFor(null);
-
-  double _extentFor(BuildContext? context) {
-    final double vertical = context != null
-        ? Theme.of(context).tokens.spaceSmall * 2
-        : 16;
-    return vertical + kTextTabBarHeight;
+  double get _rawExtent {
+    var height = _titleExtent();
+    if (_showsWeekTabs) {
+      height += _weekTabsExtent();
+    }
+    if (_showsDayChips) {
+      height += _dayChipsExtent();
+    }
+    return height + _extentSlack;
   }
 
   @override
@@ -1178,129 +1840,107 @@ class _PinnedWeekScopeTabBarDelegate extends SliverPersistentHeaderDelegate {
     final scheme = theme.colorScheme;
     final tokens = theme.tokens;
     final isStuck = shrinkOffset > 0;
+    final caption = selectedDayCaption;
 
-    return Material(
-      color: isStuck ? scheme.surface : theme.scaffoldBackgroundColor,
-      elevation: isStuck ? 1 : 0,
-      shadowColor: scheme.shadow.withValues(alpha: 0.1),
-      child: DecoratedBox(
-        decoration: isStuck
-            ? BoxDecoration(
-                border: Border(
-                  bottom: BorderSide(
-                    color: scheme.outlineVariant.withValues(alpha: 0.85),
+    return SizedBox(
+      height: _layoutExtent,
+      child: Material(
+        color: isStuck ? scheme.surface : theme.scaffoldBackgroundColor,
+        elevation: isStuck ? 1 : 0,
+        shadowColor: scheme.shadow.withValues(alpha: 0.1),
+        child: Stack(
+          fit: StackFit.expand,
+          children: [
+            Column(
+              crossAxisAlignment: CrossAxisAlignment.stretch,
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                TutorDashboardSection(
+                  title: title,
+                  variant: TutorDashboardSectionVariant.secondary,
+                  showTopDivider: showTopDivider,
+                  trailing: _AvailabilitySyncTrailing(
+                    isUpdatingAvailability: isUpdatingAvailability,
                   ),
                 ),
-              )
-            : const BoxDecoration(),
-        child: Padding(
-          padding: EdgeInsets.fromLTRB(
-            tokens.spaceLarge,
-            tokens.spaceSmall,
-            tokens.spaceLarge,
-            tokens.spaceSmall,
-          ),
-          child: TilawaTabBar(
-            controller: tabController,
-            tabs: [
-              Tab(text: thisWeekLabel),
-              Tab(text: nextWeekLabel),
-            ],
-          ),
+                if (_showsWeekTabs)
+                  Padding(
+                    padding: EdgeInsets.fromLTRB(
+                      tokens.spaceLarge,
+                      tokens.spaceSmall,
+                      tokens.spaceLarge,
+                      tokens.spaceSmall,
+                    ),
+                    child: TilawaTabBar(
+                      controller: weekTabController!,
+                      tabs: [
+                        Tab(text: thisWeekLabel!),
+                        Tab(text: nextWeekLabel!),
+                      ],
+                    ),
+                  ),
+                if (_showsDayChips) ...[
+                  Padding(
+                    padding: EdgeInsetsDirectional.fromSTEB(
+                      tokens.spaceLarge,
+                      tokens.spaceMedium,
+                      tokens.spaceLarge,
+                      0,
+                    ),
+                    child: DateGroupedDayTabBar(
+                      days: days!,
+                      selected: selectedDay!,
+                      onDaySelected: onDaySelected!,
+                    ),
+                  ),
+                  if (caption != null && caption.isNotEmpty) ...[
+                    SizedBox(height: tokens.spaceSmall),
+                    Padding(
+                      padding: EdgeInsetsDirectional.fromSTEB(
+                        tokens.spaceLarge,
+                        0,
+                        tokens.spaceLarge,
+                        tokens.spaceSmall,
+                      ),
+                      child: Text(
+                        caption,
+                        style: theme.textTheme.bodySmall?.copyWith(
+                          color: scheme.onSurfaceVariant,
+                        ),
+                      ),
+                    ),
+                  ],
+                ],
+              ],
+            ),
+            if (isStuck)
+              Positioned(
+                left: 0,
+                right: 0,
+                bottom: 0,
+                child: Divider(
+                  height: 1,
+                  thickness: 1,
+                  color: scheme.outlineVariant.withValues(alpha: 0.85),
+                ),
+              ),
+          ],
         ),
       ),
     );
   }
 
   @override
-  bool shouldRebuild(covariant _PinnedWeekScopeTabBarDelegate old) {
-    return old.tabController != tabController ||
+  bool shouldRebuild(covariant _PinnedBookableSlotsControlsDelegate old) {
+    return old.showTopDivider != showTopDivider ||
+        old.title != title ||
+        old.isUpdatingAvailability != isUpdatingAvailability ||
+        old.weekTabController != weekTabController ||
         old.thisWeekLabel != thisWeekLabel ||
         old.nextWeekLabel != nextWeekLabel ||
-        old.tabController.index != tabController.index;
-  }
-}
-
-// ── Bookable times week section (legacy 14-day horizon) ─────────────────────
-
-class _BookableTimesWeekSection extends StatelessWidget {
-  const _BookableTimesWeekSection({
-    required this.title,
-    required this.slots,
-    required this.isUpdatingAvailability,
-    required this.buildSlot,
-    this.scheduleActionLabel,
-    this.onManageSchedule,
-    this.showTopDivider = false,
-  });
-
-  final bool showTopDivider;
-  final String title;
-  final List<TeacherAvailability> slots;
-  final bool isUpdatingAvailability;
-  final Widget Function(
-    BuildContext context,
-    TeacherAvailability slot,
-    bool showDivider,
-  )
-  buildSlot;
-  final String? scheduleActionLabel;
-  final VoidCallback? onManageSchedule;
-
-  @override
-  Widget build(BuildContext context) {
-    return SliverMainAxisGroup(
-      slivers: [
-        SliverToBoxAdapter(
-          child: TutorDashboardSection(
-            title: title,
-            variant: TutorDashboardSectionVariant.secondary,
-            showTopDivider: showTopDivider,
-            trailing: _BookableSectionTrailing(
-              isUpdatingAvailability: isUpdatingAvailability,
-              scheduleActionLabel: scheduleActionLabel,
-              onManageSchedule: onManageSchedule,
-            ),
-          ),
-        ),
-        if (slots.isEmpty)
-          SliverToBoxAdapter(
-            child: Builder(
-              builder: (context) {
-                final l10n = context.quranSessionsL10n;
-                return TeacherDashboardInlineEmptyState(
-                  title: l10n.bookableTimesEmptyHorizonTitle,
-                );
-              },
-            ),
-          )
-        else
-          SliverToBoxAdapter(
-            child: Builder(
-              builder: (context) {
-                final tokens = Theme.of(context).tokens;
-                return DateGroupedSlotsLayout(
-                  slots: slots,
-                  padding: EdgeInsetsDirectional.only(
-                    start: tokens.spaceLarge,
-                    end: tokens.spaceLarge,
-                  ),
-                  slotsForDayBuilder: (context, daySlots) => Padding(
-                    padding: EdgeInsets.only(bottom: tokens.spaceExtraLarge),
-                    child: TeacherDashboardLazySlotDayList(
-                      itemCount: daySlots.length,
-                      itemBuilder: (context, i) => buildSlot(
-                        context,
-                        daySlots[i],
-                        i < daySlots.length - 1,
-                      ),
-                    ),
-                  ),
-                );
-              },
-            ),
-          ),
-      ],
-    );
+        old.weekTabController?.index != weekTabController?.index ||
+        old.days != days ||
+        old.selectedDay != selectedDay ||
+        old.selectedDayCaption != selectedDayCaption;
   }
 }

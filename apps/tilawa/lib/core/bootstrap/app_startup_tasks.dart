@@ -91,6 +91,11 @@ class AppStartupTasks {
   static const String legacyAudioPlayerBlocHydrationCleanupKey =
       'audio_player_bloc_hydration_removed_v1';
 
+  /// SharedPreferences key marking legacy [AuthBloc] hydration cleanup.
+  @visibleForTesting
+  static const String legacyAuthBlocHydrationCleanupKey =
+      'auth_bloc_hydration_removed_v1';
+
   @visibleForTesting
   SharedPreferencesAsync? sharedPreferencesAsyncOverride;
 
@@ -530,6 +535,7 @@ class AppStartupTasks {
       );
 
       await cleanupLegacyAudioPlayerBlocHydration();
+      await cleanupLegacyAuthBlocHydration();
 
       logger.d(
         '[AppLaunch] source=AppStartupTasks.initializeHydratedStorage: HydratedStorage initialized successfully at (${DateTime.now()})',
@@ -561,6 +567,29 @@ class AppStartupTasks {
     } catch (e) {
       logger.d(
         '[AppLaunch] source=AppStartupTasks.cleanupLegacyAudioPlayerBlocHydration: '
+        'Warning: cleanup failed at (${DateTime.now()}): $e',
+      );
+    }
+  }
+
+  /// Deletes persisted [AuthBloc] hydration once per install upgrade.
+  Future<void> cleanupLegacyAuthBlocHydration() async {
+    try {
+      final SharedPreferencesAsync prefs =
+          sharedPreferencesAsyncOverride ??
+          SharedPreferencesAsync(options: tilawaSharedPreferencesOptions);
+      if (await prefs.getBool(legacyAuthBlocHydrationCleanupKey) ?? false) {
+        return;
+      }
+      await HydratedBloc.storage.delete('AuthBloc');
+      await prefs.setBool(legacyAuthBlocHydrationCleanupKey, true);
+      logger.d(
+        '[AppLaunch] source=AppStartupTasks.cleanupLegacyAuthBlocHydration: '
+        'Removed legacy AuthBloc hydration at (${DateTime.now()})',
+      );
+    } catch (e) {
+      logger.d(
+        '[AppLaunch] source=AppStartupTasks.cleanupLegacyAuthBlocHydration: '
         'Warning: cleanup failed at (${DateTime.now()}): $e',
       );
     }

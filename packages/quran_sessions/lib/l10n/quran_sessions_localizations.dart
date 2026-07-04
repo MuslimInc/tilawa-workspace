@@ -3947,6 +3947,66 @@ abstract class QuranSessionsLocalizations {
   /// **'Open slots (14 days)'**
   String get teacherDashboardStatBookableSlotsHorizon;
 
+  /// No description provided for @teacherDashboardCategoriesTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Dashboard categories'**
+  String get teacherDashboardCategoriesTitle;
+
+  /// No description provided for @teacherDashboardCategoriesSubtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Open a category for the full list and actions.'**
+  String get teacherDashboardCategoriesSubtitle;
+
+  /// No description provided for @teacherDashboardViewAsGrid.
+  ///
+  /// In en, this message translates to:
+  /// **'Grid'**
+  String get teacherDashboardViewAsGrid;
+
+  /// No description provided for @teacherDashboardViewAsList.
+  ///
+  /// In en, this message translates to:
+  /// **'List'**
+  String get teacherDashboardViewAsList;
+
+  /// No description provided for @teacherDashboardShowAsGrid.
+  ///
+  /// In en, this message translates to:
+  /// **'Show as grid'**
+  String get teacherDashboardShowAsGrid;
+
+  /// No description provided for @teacherDashboardShowAsList.
+  ///
+  /// In en, this message translates to:
+  /// **'Show as list'**
+  String get teacherDashboardShowAsList;
+
+  /// No description provided for @teacherDashboardOpenCategory.
+  ///
+  /// In en, this message translates to:
+  /// **'Open'**
+  String get teacherDashboardOpenCategory;
+
+  /// No description provided for @teacherDashboardBookingRequestsCategorySubtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Review student requests before they expire.'**
+  String get teacherDashboardBookingRequestsCategorySubtitle;
+
+  /// No description provided for @teacherDashboardUpcomingSessionsCategorySubtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Join sessions, open details, or manage changes.'**
+  String get teacherDashboardUpcomingSessionsCategorySubtitle;
+
+  /// No description provided for @teacherDashboardBookableTimesCategorySubtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Review open slots generated from your weekly schedule.'**
+  String get teacherDashboardBookableTimesCategorySubtitle;
+
   /// No description provided for @teacherDashboardWeeklyScheduleSectionTitle.
   ///
   /// In en, this message translates to:

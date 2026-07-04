@@ -30,7 +30,6 @@ import 'package:tilawa_core/errors/failures.dart';
 
 import '../../../../support/map_backed_shared_preferences_async.dart';
 
-import '../../../../helpers/hydrated_bloc_test_helper.dart';
 import 'auth_bloc_test.mocks.dart';
 
 @GenerateMocks([
@@ -59,17 +58,12 @@ void main() {
   late GoogleSignInSessionTracker signInSessionTracker;
   late MapBackedSharedPreferencesAsync defaultRevokePrefs;
 
-  setUpAll(() async {
+  setUpAll(() {
     TestWidgetsFlutterBinding.ensureInitialized();
     provideDummy<Either<Failure, void>>(const Right(null));
     provideDummy<Either<Failure, String>>(
       Right(LanguageConfig.defaultLanguageCode),
     );
-    await initializeHydratedStorageForTest();
-  });
-
-  tearDownAll(() async {
-    await clearHydratedStorageForTest();
   });
 
   final tUser = UserEntity(
@@ -224,7 +218,7 @@ void main() {
       );
 
       blocTest<AuthBloc, AuthState>(
-        'keeps hydrated authenticated user when live Firebase user is missing',
+        'keeps in-memory authenticated user when live Firebase user is missing',
         build: () {
           when(mockGetCurrentUserUseCase()).thenReturn(null);
           return authBloc;
@@ -483,7 +477,7 @@ void main() {
         act: (bloc) => bloc.add(const SignInWithGoogleEvent()),
         expect: () => [
           const AuthState.loading(),
-          const AuthState.error(message: 'Authentication failed'),
+          const AuthState.error(message: EmailAuthFailureKey.generic),
         ],
         verify: (_) {
           expect(signInSessionTracker.inFlight, isFalse);
@@ -502,6 +496,26 @@ void main() {
         expect: () => [
           const AuthState.loading(),
           const AuthState.unauthenticated(),
+        ],
+        verify: (_) {
+          verify(mockSignInWithGoogleUseCase()).called(1);
+          verifyNever(mockSyncDeviceTokenUseCase(any));
+        },
+      );
+
+      blocTest<AuthBloc, AuthState>(
+        'returns to authenticated when sign in is cancelled mid-session',
+        seed: () => AuthState.authenticated(user: tUser),
+        build: () {
+          when(
+            mockSignInWithGoogleUseCase(),
+          ).thenAnswer((_) async => const AuthResult.cancelled());
+          return authBloc;
+        },
+        act: (bloc) => bloc.add(const SignInWithGoogleEvent()),
+        expect: () => [
+          const AuthState.loading(),
+          AuthState.authenticated(user: tUser),
         ],
         verify: (_) {
           verify(mockSignInWithGoogleUseCase()).called(1);
@@ -675,7 +689,7 @@ void main() {
 
       blocTest<AuthBloc, AuthState>(
         'emits [error, authenticated] when delete fails with not signed in '
-        'but hydrated auth state still has a user',
+        'but in-memory auth state still has a user',
         build: () {
           when(mockGetCurrentUserUseCase()).thenReturn(null);
           when(
@@ -823,41 +837,6 @@ void main() {
           verifyNever(mockSyncDeviceTokenUseCase.registerExplicitSignIn(any));
         },
       );
-    });
-
-    group('hydration', () {
-      test('toJson / fromJson work correctly for authenticated state', () {
-        final state = AuthState.authenticated(user: tUser);
-        final Map<String, dynamic>? json = authBloc.toJson(state);
-        expect(json, isNotNull);
-        final Map<String, dynamic> jsonData = json!;
-        expect(jsonData['state'], 'authenticated');
-        final userMap = jsonData['user'] as Map<String, dynamic>;
-        expect(userMap['id'], tUser.id);
-
-        final AuthState? restoredState = authBloc.fromJson(json);
-        expect(restoredState, state);
-      });
-
-      test('toJson returns null for unauthenticated state', () {
-        const state = AuthState.unauthenticated();
-        final Map<String, dynamic>? json = authBloc.toJson(state);
-        expect(json, isNull);
-      });
-
-      test('fromJson returns initial for empty/invalid json', () {
-        expect(authBloc.fromJson({}), const AuthState.initial());
-        expect(
-          authBloc.fromJson({'state': 'invalid'}),
-          const AuthState.initial(),
-        );
-      });
-
-      test('fromJson returns initial on exception', () {
-        final json = {'state': 'authenticated', 'user': 'invalid'};
-        final AuthState? restoredState = authBloc.fromJson(json);
-        expect(restoredState, const AuthState.initial());
-      });
     });
   });
 }

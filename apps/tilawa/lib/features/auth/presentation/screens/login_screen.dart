@@ -16,18 +16,18 @@ import 'package:go_router/go_router.dart';
 import '../../../../router/app_router.dart';
 import '../../../../router/app_router_config.dart';
 import '../../../localization/presentation/widgets/app_language_switcher.dart';
-import '../../application/account_deletion_flow_tracker.dart';
 import '../../data/services/android_sign_in_platform_policy.dart';
 import '../../data/services/google_sign_in_session_tracker.dart';
 import '../../domain/entities/google_sign_in_launch_readiness.dart';
+import '../../domain/entities/user_entity.dart';
 import '../../domain/gateways/google_sign_in_launch_gateway.dart';
 import '../../domain/usecases/resolve_google_sign_in_launch_use_case.dart';
 import '../bloc/auth_bloc.dart';
 import '../cubit/login_google_sign_in_cubit.dart';
+import '../services/auth_post_sign_in_navigation.dart';
+import '../services/login_auth_bloc_transition_handler.dart';
 import '../services/login_auth_state_diagnostics.dart';
-import '../services/login_auto_sign_in_scheduler.dart';
 import '../services/login_navigate_to_home_scheduler.dart';
-import '../services/login_sign_in_policy_warm_up.dart';
 import '../widgets/login_auth_bloc_listener.dart';
 
 /// Reference teal login canvas aligned with the brand-locked primary.
@@ -65,8 +65,6 @@ class _LoginScreenBody extends StatefulWidget {
 
 class _LoginScreenBodyState extends State<_LoginScreenBody>
     with WidgetsBindingObserver {
-  final LoginAutoSignInScheduler _autoSignInScheduler =
-      LoginAutoSignInScheduler();
   String? _lastLoggedAuthStateLabel;
   bool? _lastLoggedButtonEnabled;
 
@@ -80,8 +78,8 @@ class _LoginScreenBodyState extends State<_LoginScreenBody>
         return;
       }
       unawaited(_recoverLoginSurface(reason: 'initState'));
+      _maybeNavigateIfAlreadyAuthenticated();
     });
-    _scheduleAutoSignInWhenReady();
   }
 
   @override
@@ -97,7 +95,6 @@ class _LoginScreenBodyState extends State<_LoginScreenBody>
     if (state == AppLifecycleState.resumed) {
       unawaited(_recoverLoginSurface(reason: 'lifecycleResumed'));
       _recoverStalledSignIn();
-      _scheduleAutoSignInWhenReady();
     }
   }
 
@@ -127,6 +124,23 @@ class _LoginScreenBodyState extends State<_LoginScreenBody>
     authBloc.add(const CheckAuthStatusEvent());
   }
 
+  void _maybeNavigateIfAlreadyAuthenticated() {
+    final GoRouter? router = GoRouter.maybeOf(context);
+    handleExistingAuthenticatedLoginSession(
+      state: context.read<AuthBloc>().state,
+      routeLocation: router?.state.uri.path ?? const LoginRoute().location,
+      onNavigateAfterAuth: (UserEntity user) {
+        unawaited(
+          schedulePostAuthNavigation(
+            isMounted: () => mounted,
+            userId: user.id,
+            navigate: _navigateAfterAuth,
+          ),
+        );
+      },
+    );
+  }
+
   Future<void> _recoverLoginSurface({required String reason}) async {
     final bool splashPainted = SplashLaunchHandoff.splashRouteHasPainted.value;
     _logGoogleSignInButton(
@@ -143,38 +157,6 @@ class _LoginScreenBodyState extends State<_LoginScreenBody>
     }
   }
 
-  void _scheduleAutoSignInWhenReady() {
-    if (_shouldSuppressLoginAutoSignInForAccountDeletion()) {
-      _logGoogleSignInButton(
-        'scheduleAutoSignIn skipped: account deletion flow',
-      );
-      return;
-    }
-    _autoSignInScheduler.scheduleWhenReady(
-      warmUpPolicy: _warmUpSignInPolicy,
-      shouldSkipAutoSignIn: _shouldSkipAutoSignIn,
-      isMounted: () => mounted,
-      isRouteCurrent: () => ModalRoute.of(context)?.isCurrent ?? false,
-      lifecycleState: () => WidgetsBinding.instance.lifecycleState,
-      onAutoSignIn: _maybeAutoSignIn,
-      log: _logGoogleSignInButton,
-    );
-  }
-
-  Future<void> _warmUpSignInPolicy() {
-    return warmUpLoginSignInPolicy(
-      isPolicyRegistered: getIt.isRegistered<AndroidSignInPlatformPolicy>(),
-      warmUp: () => getIt<AndroidSignInPlatformPolicy>().warmUp(),
-    );
-  }
-
-  bool _shouldSuppressLoginAutoSignInForAccountDeletion() {
-    if (!getIt.isRegistered<AccountDeletionFlowTracker>()) {
-      return false;
-    }
-    return getIt<AccountDeletionFlowTracker>().suppressLoginAutoSignIn;
-  }
-
   bool _shouldSkipAutoSignIn() {
     if (!getIt.isRegistered<AndroidSignInPlatformPolicy>()) {
       return false;
@@ -187,31 +169,6 @@ class _LoginScreenBodyState extends State<_LoginScreenBody>
       return false;
     }
     return getIt<GoogleSignInSessionTracker>().inFlight;
-  }
-
-  void _maybeAutoSignIn() {
-    final bool suppressForAccountDeletion =
-        _shouldSuppressLoginAutoSignInForAccountDeletion();
-    final AuthState authState = context.read<AuthBloc>().state;
-    final bool willDispatch = loginShouldAttemptAutoSignIn(
-      suppressForAccountDeletion: suppressForAccountDeletion,
-      authState: authState,
-    );
-    if (!willDispatch) {
-      if (suppressForAccountDeletion) {
-        _logGoogleSignInButton(
-          'maybeAutoSignIn skipped: account deletion flow',
-        );
-      }
-      return;
-    }
-    _logGoogleSignInButton(
-      'maybeAutoSignIn authState=${loginAuthStateLabel(authState)} '
-      'willDispatch=$willDispatch',
-    );
-    unawaited(
-      _launchInteractiveSignIn(trigger: GoogleSignInLaunchTrigger.auto),
-    );
   }
 
   Future<void> _onGoogleSignInPressed() async {
@@ -287,13 +244,14 @@ class _LoginScreenBodyState extends State<_LoginScreenBody>
           message: context.l10n.googleSignInFallbackBody,
           variant: TilawaFeedbackVariant.error,
         );
-      case GoogleSignInLaunchPlatformError(:final message):
+      case GoogleSignInLaunchPlatformError(:final code, :final message):
         _logGoogleSignInButton(
-          'launchInteractiveSignIn platformError reason=$trigger',
+          'launchInteractiveSignIn platformError reason=$trigger '
+          'code=$code detail=$message',
         );
         TilawaFeedback.showToast(
           context,
-          message: message ?? context.l10n.unableToSignInWithThirdPartyAccount,
+          message: context.l10n.authErrorGenericMessage,
           variant: TilawaFeedbackVariant.error,
         );
     }
@@ -356,7 +314,10 @@ class _LoginScreenBodyState extends State<_LoginScreenBody>
               LoginAuthBlocListener(
                 shouldSkipAutoSignIn: _shouldSkipAutoSignIn,
                 navigateAfterAuth: _navigateAfterAuth,
-                routeLocation: () => GoRouterState.of(context).uri.path,
+                routeLocation: () {
+                  final GoRouter? router = GoRouter.maybeOf(context);
+                  return router?.state.uri.path ?? const LoginRoute().location;
+                },
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.stretch,
                   children: <Widget>[

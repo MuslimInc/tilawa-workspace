@@ -24,6 +24,14 @@ void main() {
     await initializeDateFormatting('en');
   });
 
+  Future<void> openUpcomingCategory(WidgetTester tester) async {
+    final l10n = QuranSessionsLocalizations.of(
+      tester.element(find.byType(TeacherDashboardScreen)),
+    );
+    await tester.tap(find.text(l10n.upcomingSessionsSectionTitle).last);
+    await tester.pumpAndSettle();
+  }
+
   testWidgets('teacher dashboard upcoming session opens detail', (
     tester,
   ) async {
@@ -74,6 +82,7 @@ void main() {
     );
     await tester.pumpAndSettle();
 
+    await openUpcomingCategory(tester);
     await tester.tap(find.byType(TutorSessionCompactCard));
     await tester.pumpAndSettle();
 
@@ -130,6 +139,7 @@ void main() {
       await tester.pumpAndSettle();
 
       check(sessionRepo.getTeacherUpcomingSessionsCallCount).equals(1);
+      await openUpcomingCategory(tester);
       expect(find.byType(TutorSessionCompactCard), findsOneWidget);
 
       await tester.tap(find.byType(TutorSessionCompactCard));

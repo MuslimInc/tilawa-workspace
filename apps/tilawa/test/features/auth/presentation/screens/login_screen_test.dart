@@ -391,7 +391,10 @@ void main() {
 
       verifyNever(mockSignInWithGoogleUseCase());
       expect(isGoogleButtonLoading(tester), isFalse);
-      expect(find.text('blocked'), findsOneWidget);
+      expect(
+        find.text('Something went wrong. Please try again.'),
+        findsOneWidget,
+      );
     });
 
     testWidgets('manual tap while offline shows message without sign-in flow', (
@@ -475,7 +478,7 @@ void main() {
       await tester.pump();
 
       expect(
-        find.text('Unable to sign in with third-party account'),
+        find.text('Something went wrong. Please try again.'),
         findsOneWidget,
       );
     });
@@ -575,11 +578,10 @@ void main() {
       },
     );
 
-    testWidgets('skips auto sign-in during account deletion flow', (
+    testWidgets('does not auto sign-in on screen load', (
       WidgetTester tester,
     ) async {
       registerAutoSignInPolicy();
-      accountDeletionFlowTracker.markDeletionStarted();
 
       await pumpLoginScreen(tester);
       await pumpLoginInitFrames(tester);
@@ -587,42 +589,51 @@ void main() {
       verifyNever(mockSignInWithGoogleUseCase());
     });
 
-    testWidgets('shows no toast when manual sign-in is cancelled', (
-      WidgetTester tester,
-    ) async {
-      final Completer<AuthResult> signInCompleter = Completer<AuthResult>();
-      when(
-        mockSignInWithGoogleUseCase(),
-      ).thenAnswer((_) => signInCompleter.future);
+    testWidgets(
+      'shows localized cancel toast when manual sign-in is cancelled',
+      (
+        WidgetTester tester,
+      ) async {
+        final Completer<AuthResult> signInCompleter = Completer<AuthResult>();
+        when(
+          mockSignInWithGoogleUseCase(),
+        ).thenAnswer((_) => signInCompleter.future);
 
-      await pumpLoginScreen(tester);
-      await pumpLoginInitFrames(tester);
+        await pumpLoginScreen(tester);
+        await pumpLoginInitFrames(tester);
 
-      await tester.tap(googleButtonFinder());
-      await tester.pump();
-      await tester.runAsync(() async {
-        await authBloc.stream.firstWhere(
-          (AuthState state) => state is AuthLoading,
+        await tester.tap(googleButtonFinder());
+        await tester.pump();
+        await tester.runAsync(() async {
+          await authBloc.stream.firstWhere(
+            (AuthState state) => state is AuthLoading,
+          );
+        });
+        await tester.pump();
+
+        expect(authBloc.state, isA<AuthLoading>());
+
+        await tester.runAsync(() async {
+          signInCompleter.complete(const AuthResult.cancelled());
+          await authBloc.stream.firstWhere(
+            (AuthState state) => state is AuthUnauthenticated,
+          );
+        });
+        await tester.pump();
+        await tester.pump(const Duration(milliseconds: 400));
+
+        expect(authBloc.state, isA<AuthUnauthenticated>());
+        expect(
+          find.textContaining('No Google account found on this device'),
+          findsNothing,
         );
-      });
-      await tester.pump();
-
-      expect(authBloc.state, isA<AuthLoading>());
-
-      signInCompleter.complete(const AuthResult.cancelled());
-      await tester.pump();
-      await tester.pump();
-
-      expect(authBloc.state, isA<AuthUnauthenticated>());
-      expect(
-        find.textContaining('No Google account found on this device'),
-        findsNothing,
-      );
-      expect(
-        find.text('Unable to sign in with third-party account'),
-        findsNothing,
-      );
-    });
+        expect(
+          find.text('Unable to sign in with third-party account'),
+          findsNothing,
+        );
+        expect(find.text('Sign-in cancelled.'), findsOneWidget);
+      },
+    );
 
     testWidgets(
       'surfaces noGoogleAccounts when CM is unavailable and chooser dismissed',

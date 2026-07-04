@@ -2170,6 +2170,40 @@ class QuranSessionsLocalizationsAr extends QuranSessionsLocalizations {
       'مواعيد مفتوحة (14 يومًا)';
 
   @override
+  String get teacherDashboardCategoriesTitle => 'أقسام لوحة المعلم';
+
+  @override
+  String get teacherDashboardCategoriesSubtitle =>
+      'افتح قسمًا لعرض القائمة الكاملة والإجراءات.';
+
+  @override
+  String get teacherDashboardViewAsGrid => 'شبكة';
+
+  @override
+  String get teacherDashboardViewAsList => 'قائمة';
+
+  @override
+  String get teacherDashboardShowAsGrid => 'عرض كشبكة';
+
+  @override
+  String get teacherDashboardShowAsList => 'عرض كقائمة';
+
+  @override
+  String get teacherDashboardOpenCategory => 'فتح';
+
+  @override
+  String get teacherDashboardBookingRequestsCategorySubtitle =>
+      'راجع طلبات الطلاب قبل انتهاء وقت الرد.';
+
+  @override
+  String get teacherDashboardUpcomingSessionsCategorySubtitle =>
+      'انضم للحصص أو افتح التفاصيل أو أدِر التغييرات.';
+
+  @override
+  String get teacherDashboardBookableTimesCategorySubtitle =>
+      'راجع المواعيد المفتوحة الناتجة من جدولك الأسبوعي.';
+
+  @override
   String get teacherDashboardWeeklyScheduleSectionTitle => 'الجدول الأسبوعي';
 
   @override

@@ -47,6 +47,21 @@ Future<void> _pumpDashboard(
   await tester.pump();
 }
 
+Future<void> _openBookableTimesCategory(WidgetTester tester) async {
+  final l10n = QuranSessionsLocalizations.of(
+    tester.element(find.byType(TeacherDashboardScreen)),
+  );
+  final categoryTitle = find.text(l10n.bookableTimesWeekScopedTitle);
+
+  if (categoryTitle.evaluate().isEmpty) {
+    await tester.drag(find.byType(CustomScrollView), const Offset(0, -240));
+    await tester.pumpAndSettle();
+  }
+
+  await tester.tap(categoryTitle.last);
+  await tester.pumpAndSettle();
+}
+
 void main() {
   late FakeSessionRepository sessionRepo;
   late FakeScheduleRepository scheduleRepo;
@@ -221,13 +236,10 @@ void main() {
 
         check(editorOpened).isTrue();
         expect(find.text(l10n.availabilitySetupHeadline), findsNothing);
-        await tester.scrollUntilVisible(
-          find.text(l10n.bookableTimesThisWeekSectionTitle),
-          100,
-        );
+        await _openBookableTimesCategory(tester);
         expect(
           find.text(l10n.bookableTimesWeekScopedTitle),
-          findsOneWidget,
+          findsWidgets,
         );
         expect(
           find.text(l10n.bookableTimesThisWeekSectionTitle),
@@ -282,14 +294,11 @@ void main() {
 
       final state = bloc.state as TeacherDashboardSuccess;
       check(state.availability.length).isGreaterThan(initialCount);
-      await tester.scrollUntilVisible(
-        find.text(l10n.bookableTimesWeekScopedTitle),
-        100,
-      );
-      expect(find.text(l10n.bookableTimesWeekScopedTitle), findsOneWidget);
+      await _openBookableTimesCategory(tester);
+      expect(find.text(l10n.bookableTimesWeekScopedTitle), findsWidgets);
     });
 
-    testWidgets('edit weekly template lives in bookable section header', (
+    testWidgets('edit weekly template stays in app bar on overview', (
       tester,
     ) async {
       scheduleRepo.schedule = makeWeeklySchedule();
@@ -314,12 +323,7 @@ void main() {
         ),
         findsOneWidget,
       );
-      await tester.scrollUntilVisible(
-        find.text(l10n.editWeeklyTemplate),
-        200,
-        scrollable: find.byType(Scrollable).first,
-      );
-      expect(find.text(l10n.editWeeklyTemplate), findsOneWidget);
+      expect(find.text(l10n.editWeeklyTemplate), findsNothing);
     });
 
     testWidgets('edit weekly template stays in app bar when slots are empty', (
@@ -350,6 +354,86 @@ void main() {
         ),
         findsOneWidget,
       );
+    });
+  });
+
+  group('TeacherDashboardScreen — week-scoped bookable slots init', () {
+    testWidgets(
+      'renders this-week bookable slots without LateInitializationError',
+      (tester) async {
+        final mondayNow = DateTime.utc(2026, 1, 5, 10);
+        spyGetAvailability = SpyGetTeacherAvailabilityUseCase(
+          scheduleRepository: scheduleRepo,
+          bookedSlotLocks: FakeBookedSlotLockRepository(),
+          now: () => mondayNow,
+        );
+        scheduleRepo.schedule = makeWeeklySchedule(
+          rules: {
+            Weekday.monday: const [
+              TimeRange(start: LocalTime(8, 0), end: LocalTime(18, 0)),
+            ],
+            Weekday.friday: const [
+              TimeRange(start: LocalTime(8, 0), end: LocalTime(18, 0)),
+            ],
+          },
+        );
+        final bloc = buildTestTeacherDashboardBloc(
+          sessionRepo: sessionRepo,
+          getAvailability: spyGetAvailability,
+          blockGeneratedSlot: blockGeneratedSlot,
+          availabilityProvider: availabilityProvider,
+          cancelSession: buildCancelSessionViaServerUseCase(),
+          completeSession: buildCompleteSessionViaServerUseCase(),
+          scheduleRepo: scheduleRepo,
+          commitTimerFactory: fakeTimers.createFactory(),
+          commitDelay: const Duration(days: 365),
+          now: () => mondayNow,
+        );
+
+        await _pumpDashboard(
+          tester,
+          bloc: bloc,
+          onManageSchedule: () async {},
+        );
+        await tester.pumpAndSettle();
+
+        final l10n = QuranSessionsLocalizations.of(
+          tester.element(find.byType(TeacherDashboardScreen)),
+        );
+        final state = bloc.state as TeacherDashboardSuccess;
+        check(state.thisWeekAvailability).isNotEmpty();
+
+        await _openBookableTimesCategory(tester);
+        expect(
+          find.text(l10n.bookableTimesThisWeekSectionTitle),
+          findsOneWidget,
+        );
+        expect(find.text(l10n.bookableTimesEmptyThisWeek), findsNothing);
+      },
+    );
+
+    testWidgets('next-week tab switch keeps day selection in sync', (
+      tester,
+    ) async {
+      scheduleRepo.schedule = makeWeeklySchedule();
+      final bloc = buildBloc();
+
+      await _pumpDashboard(
+        tester,
+        bloc: bloc,
+        onManageSchedule: () async {},
+      );
+      await tester.pumpAndSettle();
+
+      final l10n = QuranSessionsLocalizations.of(
+        tester.element(find.byType(TeacherDashboardScreen)),
+      );
+
+      await _openBookableTimesCategory(tester);
+      await tester.tap(find.text(l10n.bookableTimesNextWeekSectionTitle));
+      await tester.pumpAndSettle();
+
+      expect(find.text(l10n.bookableTimesNextWeekSectionTitle), findsOneWidget);
     });
   });
 }

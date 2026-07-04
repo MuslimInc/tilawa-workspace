@@ -2,8 +2,8 @@ import 'dart:async';
 import 'dart:developer' as developer;
 
 import 'package:dartz_plus/dartz_plus.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:freezed_annotation/freezed_annotation.dart';
-import 'package:hydrated_bloc/hydrated_bloc.dart';
 import 'package:injectable/injectable.dart';
 import 'package:tilawa/core/logging/app_logger.dart';
 import 'package:tilawa_core/errors/failures.dart';
@@ -13,6 +13,7 @@ import '../../data/services/google_sign_in_session_tracker.dart';
 import '../../data/services/pending_session_revoke_store.dart';
 import '../../domain/entities/auth_error_key.dart';
 import '../../domain/entities/auth_result.dart';
+import '../../domain/entities/email_auth_failure_key.dart';
 import '../../domain/entities/email_registration_draft.dart';
 import '../../domain/entities/register_with_email_result.dart';
 import '../../domain/entities/user_entity.dart';
@@ -25,14 +26,13 @@ import '../../domain/usecases/sign_out.dart';
 import '../../domain/usecases/sync_device_token_use_case.dart';
 import '../../domain/usecases/sync_user_language_preference_use_case.dart';
 import '../../../localization/domain/usecases/get_current_language_use_case.dart';
-import '../../debug/tilawa_gsignin_debug_log.dart';
 
 part 'auth_bloc.freezed.dart';
 part 'auth_event.dart';
 part 'auth_state.dart';
 
 @injectable
-class AuthBloc extends HydratedBloc<AuthEvent, AuthState> {
+class AuthBloc extends Bloc<AuthEvent, AuthState> {
   AuthBloc(
     this._signInWithGoogle,
     this._signInWithEmail,
@@ -75,6 +75,10 @@ class AuthBloc extends HydratedBloc<AuthEvent, AuthState> {
     Emitter<AuthState> emit,
   ) async {
     final int generation = ++_interactiveSignInGeneration;
+    final AuthState? authenticatedBeforeSignIn = switch (state) {
+      AuthAuthenticated() => state,
+      _ => null,
+    };
 
     try {
       _signInSessionTracker.markStarted();
@@ -84,13 +88,6 @@ class AuthBloc extends HydratedBloc<AuthEvent, AuthState> {
       final AuthResult result = await _signInWithGoogle();
 
       if (generation != _interactiveSignInGeneration) {
-        // #region agent log
-        tilawaGSignInDebug(
-          'signIn result ignored (aborted)',
-          hypothesisId: 'H3',
-          data: <String, Object?>{'generation': generation},
-        );
-        // #endregion
         return;
       }
 
@@ -116,7 +113,11 @@ class AuthBloc extends HydratedBloc<AuthEvent, AuthState> {
           emit(AuthState.error(message: message));
         case AuthCancelled():
           logger.d('[GoogleSignIn] cancelled by user');
-          emit(const AuthState.unauthenticated());
+          if (authenticatedBeforeSignIn != null) {
+            emit(authenticatedBeforeSignIn);
+          } else {
+            emit(const AuthState.unauthenticated());
+          }
         case AuthResultNoGoogleAccounts():
           logger.d('[GoogleSignIn] no Google accounts on device');
           emit(const AuthState.noGoogleAccounts());
@@ -130,7 +131,9 @@ class AuthBloc extends HydratedBloc<AuthEvent, AuthState> {
         error: error,
         stackTrace: stackTrace,
       );
-      emit(const AuthState.error(message: 'Authentication failed'));
+      emit(
+        const AuthState.error(message: EmailAuthFailureKey.generic),
+      );
     } finally {
       _signInSessionTracker.markFinished();
     }
@@ -180,7 +183,9 @@ class AuthBloc extends HydratedBloc<AuthEvent, AuthState> {
         return;
       }
       logger.e('Email sign-in failed', error: error, stackTrace: stackTrace);
-      emit(const AuthState.error(message: 'Authentication failed'));
+      emit(
+        const AuthState.error(message: EmailAuthFailureKey.generic),
+      );
     } finally {
       _signInSessionTracker.markFinished();
     }
@@ -308,7 +313,7 @@ class AuthBloc extends HydratedBloc<AuthEvent, AuthState> {
     }
   }
 
-  UserEntity? _liveOrCachedUser() {
+  UserEntity? _liveOrInMemoryUser() {
     final UserEntity? liveUser = _getCurrentUser();
     if (liveUser != null) {
       return liveUser;
@@ -323,7 +328,7 @@ class AuthBloc extends HydratedBloc<AuthEvent, AuthState> {
     DeleteAccountEvent event,
     Emitter<AuthState> emit,
   ) async {
-    final UserEntity? userBeforeDelete = _liveOrCachedUser();
+    final UserEntity? userBeforeDelete = _liveOrInMemoryUser();
     logger.d(
       '[DeleteFirebaseUser] Bloc: delete requested '
       'signedIn=${userBeforeDelete != null}',
@@ -372,9 +377,6 @@ class AuthBloc extends HydratedBloc<AuthEvent, AuthState> {
   ) {
     _interactiveSignInGeneration++;
     if (state is AuthLoading) {
-      // #region agent log
-      tilawaGSignInDebug('abortInteractiveSignIn emitted', hypothesisId: 'H2');
-      // #endregion
       emit(const AuthState.unauthenticated());
     }
   }
@@ -395,7 +397,7 @@ class AuthBloc extends HydratedBloc<AuthEvent, AuthState> {
       return;
     }
 
-    final UserEntity? user = _liveOrCachedUser();
+    final UserEntity? user = _liveOrInMemoryUser();
     if (user != null) {
       final Either<Failure, void> registration = await _syncDeviceToken(
         user.id,
@@ -429,7 +431,7 @@ class AuthBloc extends HydratedBloc<AuthEvent, AuthState> {
     required UserEntity? userBeforeDelete,
   }) {
     final UserEntity? currentUser =
-        _getCurrentUser() ?? userBeforeDelete ?? _liveOrCachedUser();
+        _getCurrentUser() ?? userBeforeDelete ?? _liveOrInMemoryUser();
     if (currentUser != null) {
       emit(AuthState.authenticated(user: currentUser));
     } else {
@@ -455,45 +457,5 @@ class AuthBloc extends HydratedBloc<AuthEvent, AuthState> {
         }
       },
     );
-  }
-
-  @override
-  AuthState? fromJson(Map<String, dynamic> json) {
-    try {
-      final stateType = json['state'] as String?;
-      if (stateType == 'authenticated' && json['user'] != null) {
-        final userJson = json['user'] as Map<String, dynamic>;
-        final user = UserEntity(
-          id: userJson['id'] as String,
-          email: userJson['email'] as String,
-          displayName: userJson['displayName'] as String,
-          photoUrl: userJson['photoUrl'] as String?,
-          createdAt: DateTime.parse(userJson['createdAt'] as String),
-        );
-        return AuthState.authenticated(user: user);
-      }
-      return const AuthState.initial();
-    } catch (e) {
-      return const AuthState.initial();
-    }
-  }
-
-  @override
-  Map<String, dynamic>? toJson(AuthState state) {
-    // Only persist if authenticated to maintain session
-    if (state is AuthAuthenticated) {
-      return {
-        'state': 'authenticated',
-        'user': {
-          'id': state.user.id,
-          'email': state.user.email,
-          'displayName': state.user.displayName,
-          'photoUrl': state.user.photoUrl,
-          'createdAt': state.user.createdAt.toIso8601String(),
-        },
-      };
-    }
-    // Don't persist other states - will check auth status on startup
-    return null;
   }
 }

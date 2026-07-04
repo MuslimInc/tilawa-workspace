@@ -2180,6 +2180,30 @@ abstract class AppLocalizations {
   /// **'Update Google Play Services'**
   String get googleSignInUpdatePlayServices;
 
+  /// Shown when Google sign-in exceeds the time limit
+  ///
+  /// In en, this message translates to:
+  /// **'Sign-in timed out. Please try again.'**
+  String get googleSignInTimeout;
+
+  /// Shown when Google sign-in times out without showing UI on problematic devices
+  ///
+  /// In en, this message translates to:
+  /// **'Sign-in timed out. If the account picker did not appear, go back and try again, or use the options below.'**
+  String get googleSignInTimeoutUiHidden;
+
+  /// Shown when Google sign-in returns a different account than expected
+  ///
+  /// In en, this message translates to:
+  /// **'This Google account does not match the signed-in account. Please try again.'**
+  String get googleSignInUserMismatch;
+
+  /// Shown when the user dismisses the Google account picker during sign-in
+  ///
+  /// In en, this message translates to:
+  /// **'Sign-in cancelled.'**
+  String get googleSignInCancelled;
+
   /// Network error message
   ///
   /// In en, this message translates to:

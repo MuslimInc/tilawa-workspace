@@ -1205,6 +1205,20 @@ class AppLocalizationsEn extends AppLocalizations {
   String get googleSignInUpdatePlayServices => 'Update Google Play Services';
 
   @override
+  String get googleSignInTimeout => 'Sign-in timed out. Please try again.';
+
+  @override
+  String get googleSignInTimeoutUiHidden =>
+      'Sign-in timed out. If the account picker did not appear, go back and try again, or use the options below.';
+
+  @override
+  String get googleSignInUserMismatch =>
+      'This Google account does not match the signed-in account. Please try again.';
+
+  @override
+  String get googleSignInCancelled => 'Sign-in cancelled.';
+
+  @override
   String get networkError => 'Please check your internet connection';
 
   @override

@@ -1595,6 +1595,22 @@
     "@googleSignInUpdatePlayServices": {
         "description": "Opens Play Store to update Google Play Services"
     },
+    "googleSignInTimeout": "Sign-in timed out. Please try again.",
+    "@googleSignInTimeout": {
+        "description": "Shown when Google sign-in exceeds the time limit"
+    },
+    "googleSignInTimeoutUiHidden": "Sign-in timed out. If the account picker did not appear, go back and try again, or use the options below.",
+    "@googleSignInTimeoutUiHidden": {
+        "description": "Shown when Google sign-in times out without showing UI on problematic devices"
+    },
+    "googleSignInUserMismatch": "This Google account does not match the signed-in account. Please try again.",
+    "@googleSignInUserMismatch": {
+        "description": "Shown when Google sign-in returns a different account than expected"
+    },
+    "googleSignInCancelled": "Sign-in cancelled.",
+    "@googleSignInCancelled": {
+        "description": "Shown when the user dismisses the Google account picker during sign-in"
+    },
     "networkError": "Please check your internet connection",
     "@networkError": {
         "description": "Network error message"
