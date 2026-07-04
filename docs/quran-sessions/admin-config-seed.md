@@ -11,8 +11,13 @@ Run from `functions/` with `GOOGLE_APPLICATION_CREDENTIALS` or `gcloud auth appl
 
 | Doc | Script | Dry run | Apply |
 |-----|--------|---------|-------|
-| `quran_session_platform_config/global` | `scripts/seedPlatformConfig.ts` | `npm run seed:platform-config` | `npm run seed:platform-config:apply` |
+| `quran_session_platform_config/global` | `scripts/seedPlatformConfig.ts` | `npm run seed:platform-config -- --mode <mode>` | `npm run seed:platform-config:apply -- --mode <mode>` |
 | `quran_session_market_configs/{country}` | `scripts/seedMarketConfigs.ts` | `npm run seed:market-configs` | `npm run seed:market-configs:apply` |
+
+`seedPlatformConfig.ts` **requires** `--mode closed-testing | video-qa` and
+refuses to run without it, so a QA configuration can never be re-seeded by
+mistake. See [§ Closed-testing gate](#closed-testing-gate--required-platform-config)
+for which mode applies when.
 
 Market seed data source: `docs/seed/quran_session_market_configs.json`
 
@@ -43,6 +48,46 @@ Market seed data source: `docs/seed/quran_session_market_configs.json`
 Validation: `functions/src/quranSessions/sessionPolicyResolver.ts`  
 Enforced at booking: `loadBookingEligibilityContext` → `assertBookingPolicyConfigured`.  
 Error code: `policy_not_configured`.
+
+---
+
+## Closed-testing gate — required platform config
+
+`quran_session_platform_config/global` in `quran-playera-app` **must hold these
+exact values before inviting Learn Quran closed testers** (Play builds exclude
+the native Agora/LiveKit SDKs, so the config must not expose RTC providers the
+client cannot join; `videoOnly` would also reject external-meeting bookings
+server-side):
+
+| Field | Required value for closed testing |
+|-------|-----------------------------------|
+| `enabledCallProviders` | `["external", "mock"]` |
+| `sessionMode` | `"freeBeta"` |
+| `quranTutorBookingMode` | `"requiresTutorApproval"` |
+
+Apply with:
+
+```sh
+cd functions
+npm run seed:platform-config -- --mode closed-testing          # dry run
+npm run seed:platform-config:apply -- --mode closed-testing    # write
+```
+
+⚠️ **Sequencing:** the doc currently holds the MeMuslim staging **video-qa**
+values (`["mock","agora"]` + `videoOnly`, verified 2026-07-04) because staging
+shares this Firebase project. Flip to `closed-testing` only **after the Agora
+staging QA round is finished** — the flip breaks in-app Agora video joins for
+staging QA builds. To restore the QA setup later, re-seed with
+`--mode video-qa`.
+
+Verify after applying (read-only):
+
+```sh
+cd functions && NODE_PATH=./node_modules node -e '
+const a=require("firebase-admin");a.initializeApp({projectId:"quran-playera-app"});
+a.firestore().doc("quran_session_platform_config/global").get()
+ .then(s=>console.log(JSON.stringify(s.data(),null,2)));'
+```
 
 ---
 

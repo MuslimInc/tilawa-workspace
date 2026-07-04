@@ -86,10 +86,13 @@ flutter build appbundle --release \
 ```
 
 Note: in-app video (Agora/LiveKit) native SDKs are excluded from **all** Play
-tracks; closed testers join sessions through the external meeting link. The
-server-side provider config lives in Firestore
-`quran_session_platform_config/global.enabledCallProviders` and must not list
-providers the client cannot join.
+tracks; closed testers join sessions through the external meeting link. Before
+inviting testers, Firestore `quran_session_platform_config/global` must hold
+`enabledCallProviders: ["external", "mock"]` and `sessionMode: "freeBeta"` —
+apply with `npm run seed:platform-config:apply -- --mode closed-testing` and
+see the "Closed-testing gate" section of
+[docs/quran-sessions/admin-config-seed.md](quran-sessions/admin-config-seed.md)
+for sequencing against the Agora staging QA.
 
 The version name/code are passed straight to the build, so you don't need to
 edit `pubspec.yaml` to bump the release.
