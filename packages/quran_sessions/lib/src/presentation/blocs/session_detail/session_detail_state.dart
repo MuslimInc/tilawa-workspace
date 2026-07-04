@@ -13,6 +13,7 @@ import '../../../domain/policies/session_join_window_policy.dart';
 import '../../../domain/value_objects/actor_role.dart';
 import '../../../domain/policies/session_cancel_eligibility_policy.dart';
 import '../../../domain/policies/session_action_policy.dart';
+import '../../launch_scope.dart';
 import '../../session_join/session_join_ui_state.dart';
 
 sealed class SessionDetailState extends Equatable {
@@ -130,7 +131,8 @@ final class SessionDetailSuccess extends SessionDetailState {
   }
 
   bool get canJoin {
-    if (aggregate.sessionId == null || joinInProgress) return false;
+    if (aggregate.sessionId == null) return false;
+    if (joinInProgress) return true;
     if (joinUiState == SessionJoinUiState.joinAvailable) return true;
     final server = _serverAllowedActions;
     if (server != null) return server.can(SessionAllowedAction.join);
@@ -138,19 +140,25 @@ final class SessionDetailSuccess extends SessionDetailState {
   }
 
   bool get canOpenDispute {
+    if (!QuranSessionsLaunchScope.reportDisputeUiEnabled) return false;
     final server = _serverAllowedActions;
     if (server != null) return server.can(SessionAllowedAction.openDispute);
     return SessionActionPolicy.canOpenDispute(aggregate.lifecycleStatus);
   }
 
   bool get canReportConcern {
+    if (!QuranSessionsLaunchScope.reportDisputeUiEnabled) return false;
     final server = _serverAllowedActions;
     if (server != null) return server.can(SessionAllowedAction.reportConcern);
     return SessionActionPolicy.canReportConcern(aggregate.lifecycleStatus);
   }
 
-  bool get showCancelledDisputeHelper =>
-      SessionActionPolicy.showCancelledDisputeHelper(aggregate.lifecycleStatus);
+  bool get showCancelledDisputeHelper {
+    if (!QuranSessionsLaunchScope.reportDisputeUiEnabled) return false;
+    return SessionActionPolicy.showCancelledDisputeHelper(
+      aggregate.lifecycleStatus,
+    );
+  }
 
   bool get canOpenMeetingAgain =>
       externalMeetingJoinUrl != null && hasOpenedExternalMeeting;

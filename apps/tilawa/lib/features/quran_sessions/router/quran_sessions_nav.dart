@@ -381,6 +381,9 @@ List<RouteBase> get quranSessionsRoutes => [
           child: TeacherDashboardScreen(
             teacherId: teacherId,
             viewerAuthUserId: viewerAuthUserId,
+            analytics: quranSessionsAnalyticsCallbacks(),
+            createCallControlGateway: createQuranSessionsCallControlGateway,
+            createCallTelemetry: createQuranSessionsCallTelemetry,
             onManageSchedule: () =>
                 context.push(QuranSessionsRoutes.availability),
             onSessionDetailRequested: (bookingId) => context.push<bool>(

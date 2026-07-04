@@ -1,31 +1,18 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:intl/intl.dart';
-import 'package:quran_sessions/core/l10n_extensions.dart';
+import 'package:quran_sessions/quran_sessions.dart';
 
 import 'package:tilawa_ui_kit/tilawa_ui_kit.dart';
 
-import '../../domain/entities/scheduling_mode.dart';
-import '../../domain/entities/quran_session.dart';
-import '../../domain/entities/session_lifecycle_status.dart';
-import '../../domain/entities/teacher_availability.dart';
 import '../failure_ui/quran_sessions_failure_body.dart';
-import '../failure_ui/quran_sessions_failure_ui.dart';
-import '../blocs/teacher_dashboard/teacher_dashboard_bloc.dart';
-import '../blocs/teacher_dashboard/teacher_dashboard_event.dart';
-import '../blocs/teacher_dashboard/teacher_dashboard_state.dart';
 import '../widgets/date_grouped_slots_layout.dart';
 import '../widgets/friday_review_reminder_banner.dart';
 import '../widgets/teacher_dashboard_inline_empty_state.dart';
 import '../widgets/teacher_dashboard_schedule_section.dart';
 import '../widgets/teacher_dashboard_summary_stats.dart';
-import '../widgets/tutor_cancel_session_dialog.dart';
 import '../widgets/tutor_dashboard_section.dart';
 import '../widgets/tutor_session_compact_card.dart';
-import '../widgets/tutor_reject_booking_sheet.dart';
-import '../../domain/policies/session_cancel_eligibility_policy.dart';
-import '../config/quran_sessions_scheduling_analytics_callbacks.dart';
-import '../widgets/quran_sessions_scaffold.dart';
 
 class TeacherDashboardScreen extends StatefulWidget {
   const TeacherDashboardScreen({
@@ -37,6 +24,9 @@ class TeacherDashboardScreen extends StatefulWidget {
     this.schedulingAnalytics,
     this.meetingUrlSettingsBuilder,
     this.viewerAuthUserId,
+    this.analytics = const QuranSessionsAnalyticsCallbacks(),
+    this.createCallControlGateway,
+    this.createCallTelemetry,
   });
 
   final String teacherId;
@@ -64,6 +54,11 @@ class TeacherDashboardScreen extends StatefulWidget {
 
   /// Signed-in teacher auth uid — staging QA join-window bypass in UI.
   final String? viewerAuthUserId;
+
+  final QuranSessionsAnalyticsCallbacks analytics;
+
+  final SessionCallControlGatewayFactory? createCallControlGateway;
+  final CallTelemetryCoordinatorFactory? createCallTelemetry;
 
   @override
   State<TeacherDashboardScreen> createState() => _TeacherDashboardScreenState();
@@ -109,322 +104,382 @@ class _TeacherDashboardScreenState extends State<TeacherDashboardScreen> {
             onPressed: () => _openManageSchedule(source: 'app_bar'),
           ),
       ],
-      body: BlocConsumer<TeacherDashboardBloc, TeacherDashboardState>(
-        listenWhen: (previous, current) {
-          if (current is! TeacherDashboardSuccess) {
-            return previous is TeacherDashboardSuccess;
-          }
-          if (previous is! TeacherDashboardSuccess) return true;
-          return previous.bookingRequestFailure !=
-                  current.bookingRequestFailure ||
-              previous.sessionCancelFailure != current.sessionCancelFailure ||
-              previous.sessionCancelSucceeded !=
-                  current.sessionCancelSucceeded ||
-              previous.slotFailure != current.slotFailure ||
-              previous.refreshDiscardedPendingCount !=
-                  current.refreshDiscardedPendingCount ||
-              previous.undoableSlotId != current.undoableSlotId;
-        },
-        listener: (context, state) {
-          if (state is! TeacherDashboardSuccess) {
-            _lastUndoSnackSlotId = null;
-            _loggedWeekView = false;
-            _loggedFridayBanner = false;
-            return;
-          }
+      body: MultiBlocListener(
+        listeners: [
+          BlocListener<TeacherDashboardBloc, TeacherDashboardState>(
+            listenWhen: (previous, current) =>
+                current is TeacherDashboardSuccess &&
+                current.joinCompletedSessionId != null &&
+                (previous is! TeacherDashboardSuccess ||
+                    previous.joinCompletedSessionId !=
+                        current.joinCompletedSessionId),
+            listener: (context, state) async {
+              if (state is! TeacherDashboardSuccess) return;
 
-          _maybeLogWeekView(state);
-          _maybeLogFridayBanner(state);
+              final sessionId = state.joinCompletedSessionId;
+              if (sessionId == null) return;
 
-          if (state.bookingRequestFailure != null) {
-            TilawaFeedback.showToast(
-              context,
-              message: state.bookingRequestFailure!.toLocalizedMessage(context),
-              variant: TilawaFeedbackVariant.error,
-            );
-          }
+              final session = _findSession(state, sessionId);
+              widget.analytics.onSessionJoined?.call(
+                bookingId: session?.bookingId,
+                sessionId: sessionId,
+              );
+              context.read<TeacherDashboardBloc>().add(
+                const TeacherDashboardJoinCompletedAcknowledged(),
+              );
 
-          if (state.sessionCancelFailure != null) {
-            TilawaFeedback.showToast(
-              context,
-              message: l10n.tutorCancelSessionError,
-              variant: TilawaFeedbackVariant.error,
-              dedupeKey: 'teacher-dashboard-session-cancel-error',
-            );
-          }
+              if (session == null || _isExternalMeeting(session)) {
+                return;
+              }
 
-          if (state.sessionCancelSucceeded) {
-            TilawaFeedback.showToast(
-              context,
-              message: l10n.tutorCancelSessionSuccess,
-              variant: TilawaFeedbackVariant.success,
-              dedupeKey: 'teacher-dashboard-session-cancel-success',
-            );
-          }
-
-          if (state.slotFailure != null) {
-            TilawaFeedback.showToast(
-              context,
-              message: state.slotFailure!.toLocalizedMessage(context),
-              variant: TilawaFeedbackVariant.error,
-            );
-          }
-
-          final discarded = state.refreshDiscardedPendingCount;
-          if (discarded != null &&
-              discarded > 0 &&
-              discarded != _lastAnnouncedDiscardedCount) {
-            _dismissSlotUndoToast(context);
-            _lastUndoSnackSlotId = null;
-            _lastAnnouncedDiscardedCount = discarded;
-            TilawaFeedback.showToast(
-              context,
-              message: context.quranSessionsL10n.deleteSlotRefreshDiscarded(
-                discarded,
-              ),
-              variant: TilawaFeedbackVariant.info,
-              dedupeKey: 'teacher-dashboard-slot-refresh-discarded',
-            );
-          }
-
-          final undoId = state.undoableSlotId;
-          if (undoId == null) {
-            if (_lastUndoSnackSlotId != null) {
-              _dismissSlotUndoToast(context);
-            }
-            _lastUndoSnackSlotId = null;
-            return;
-          }
-          if (undoId == _lastUndoSnackSlotId) {
-            return;
-          }
-
-          final pending = state.pendingDeletes[undoId];
-          if (pending == null) return;
-
-          _lastUndoSnackSlotId = undoId;
-          _showDeleteUndoToast(
-            context,
-            pending.snapshot,
-            pendingDeleteCount: state.pendingDeletes.length,
-          );
-        },
-        builder: (context, state) => switch (state) {
-          TeacherDashboardInitial() || TeacherDashboardLoading() =>
-            const Center(child: CircularProgressIndicator()),
-          TeacherDashboardEmpty() => Center(
-            child: Padding(
-              padding: EdgeInsets.all(Theme.of(context).tokens.spaceLarge),
-              child: TilawaEmptyState(
-                icon: Icons.event_available_outlined,
-                title: l10n.availabilitySetupHeadline,
-                subtitle:
-                    '${l10n.availabilitySetupBenefitRecurring}  ·  '
-                    '${l10n.availabilitySetupBenefitTimezone}  ·  '
-                    '${l10n.availabilitySetupBenefitSelfBooking}',
-                action: TilawaButton(
-                  text: l10n.availabilitySetupCta,
-                  leadingIcon: const Icon(Icons.calendar_month_outlined),
-                  onPressed: _openManageSchedule,
+              if (!context.mounted) return;
+              await pushInAppCallShell(
+                context,
+                sessionId: sessionId,
+                callType: session.callType,
+                callProviderKind: session.callProviderKind,
+                participantName: _studentDisplayName(
+                  context,
+                  session.studentId,
                 ),
-              ),
-            ),
+                participantSubtitle: l10n.callTypeLabel(session.callType),
+                createCallControlGateway: widget.createCallControlGateway,
+                createCallTelemetry: widget.createCallTelemetry,
+              );
+            },
           ),
-          TeacherDashboardFailure(:final failure) =>
-            buildQuranSessionsFailureBody(
+        ],
+        child: BlocConsumer<TeacherDashboardBloc, TeacherDashboardState>(
+          listenWhen: (previous, current) {
+            if (current is! TeacherDashboardSuccess) {
+              return previous is TeacherDashboardSuccess;
+            }
+            if (previous is! TeacherDashboardSuccess) return true;
+            return previous.bookingRequestFailure !=
+                    current.bookingRequestFailure ||
+                previous.sessionCancelFailure != current.sessionCancelFailure ||
+                previous.sessionCancelSucceeded !=
+                    current.sessionCancelSucceeded ||
+                previous.slotFailure != current.slotFailure ||
+                previous.refreshDiscardedPendingCount !=
+                    current.refreshDiscardedPendingCount ||
+                previous.undoableSlotId != current.undoableSlotId ||
+                previous.joinFailure != current.joinFailure;
+          },
+          listener: (context, state) {
+            if (state is! TeacherDashboardSuccess) {
+              _lastUndoSnackSlotId = null;
+              _loggedWeekView = false;
+              _loggedFridayBanner = false;
+              return;
+            }
+
+            _maybeLogWeekView(state);
+            _maybeLogFridayBanner(state);
+
+            if (state.bookingRequestFailure != null) {
+              TilawaFeedback.showToast(
+                context,
+                message: state.bookingRequestFailure!.toLocalizedMessage(
+                  context,
+                ),
+                variant: TilawaFeedbackVariant.error,
+              );
+            }
+
+            if (state.sessionCancelFailure != null) {
+              TilawaFeedback.showToast(
+                context,
+                message: l10n.tutorCancelSessionError,
+                variant: TilawaFeedbackVariant.error,
+                dedupeKey: 'teacher-dashboard-session-cancel-error',
+              );
+            }
+
+            if (state.sessionCancelSucceeded) {
+              TilawaFeedback.showToast(
+                context,
+                message: l10n.tutorCancelSessionSuccess,
+                variant: TilawaFeedbackVariant.success,
+                dedupeKey: 'teacher-dashboard-session-cancel-success',
+              );
+            }
+
+            if (state.joinFailure != null) {
+              TilawaFeedback.showToast(
+                context,
+                message: state.joinFailure!.toLocalizedMessage(context),
+                variant: TilawaFeedbackVariant.error,
+              );
+            }
+
+            if (state.slotFailure != null) {
+              TilawaFeedback.showToast(
+                context,
+                message: state.slotFailure!.toLocalizedMessage(context),
+                variant: TilawaFeedbackVariant.error,
+              );
+            }
+
+            final discarded = state.refreshDiscardedPendingCount;
+            if (discarded != null &&
+                discarded > 0 &&
+                discarded != _lastAnnouncedDiscardedCount) {
+              _dismissSlotUndoToast(context);
+              _lastUndoSnackSlotId = null;
+              _lastAnnouncedDiscardedCount = discarded;
+              TilawaFeedback.showToast(
+                context,
+                message: context.quranSessionsL10n.deleteSlotRefreshDiscarded(
+                  discarded,
+                ),
+                variant: TilawaFeedbackVariant.info,
+                dedupeKey: 'teacher-dashboard-slot-refresh-discarded',
+              );
+            }
+
+            final undoId = state.undoableSlotId;
+            if (undoId == null) {
+              if (_lastUndoSnackSlotId != null) {
+                _dismissSlotUndoToast(context);
+              }
+              _lastUndoSnackSlotId = null;
+              return;
+            }
+            if (undoId == _lastUndoSnackSlotId) {
+              return;
+            }
+
+            final pending = state.pendingDeletes[undoId];
+            if (pending == null) return;
+
+            _lastUndoSnackSlotId = undoId;
+            _showDeleteUndoToast(
               context,
-              failure: failure,
-              onRetry: _reload,
-            ),
-          TeacherDashboardSuccess success => RefreshIndicator(
-            onRefresh: () async => _reload(),
-            child: CustomScrollView(
-              slivers: [
-                SliverToBoxAdapter(
-                  child: TeacherDashboardSummaryStats(
-                    pendingRequestsCount: success.pendingBookingRequests.length,
-                    upcomingSessionsCount: success.upcomingSessions.length,
-                    bookableSlotsCount: _bookableOpenSlotsCount(success),
-                    pendingRequestsLabel:
-                        l10n.teacherDashboardStatPendingRequests,
-                    upcomingSessionsLabel:
-                        l10n.teacherDashboardStatUpcomingSessions,
-                    bookableSlotsLabel: success.weekScopedDashboard
-                        ? l10n.teacherDashboardStatBookableSlotsThisWeek
-                        : l10n.teacherDashboardStatBookableSlotsHorizon,
+              pending.snapshot,
+              pendingDeleteCount: state.pendingDeletes.length,
+            );
+          },
+          builder: (context, state) => switch (state) {
+            TeacherDashboardInitial() || TeacherDashboardLoading() =>
+              const Center(child: CircularProgressIndicator()),
+            TeacherDashboardEmpty() => Center(
+              child: Padding(
+                padding: EdgeInsets.all(Theme.of(context).tokens.spaceLarge),
+                child: TilawaEmptyState(
+                  icon: Icons.event_available_outlined,
+                  title: l10n.availabilitySetupHeadline,
+                  subtitle:
+                      '${l10n.availabilitySetupBenefitRecurring}  ·  '
+                      '${l10n.availabilitySetupBenefitTimezone}  ·  '
+                      '${l10n.availabilitySetupBenefitSelfBooking}',
+                  action: TilawaButton(
+                    text: l10n.availabilitySetupCta,
+                    leadingIcon: const Icon(Icons.calendar_month_outlined),
+                    onPressed: _openManageSchedule,
                   ),
                 ),
-
-                // ── Pending booking requests (actionable lists only) ───
-                if (success.pendingBookingRequests.isNotEmpty) ...[
+              ),
+            ),
+            TeacherDashboardFailure(:final failure) =>
+              buildQuranSessionsFailureBody(
+                context,
+                failure: failure,
+                onRetry: _reload,
+              ),
+            TeacherDashboardSuccess success => RefreshIndicator(
+              onRefresh: () async => _reload(),
+              child: CustomScrollView(
+                slivers: [
                   SliverToBoxAdapter(
-                    child: TutorDashboardSection(
-                      title: l10n.teacherPendingBookingRequestsSectionTitle,
+                    child: TeacherDashboardSummaryStats(
+                      pendingRequestsCount:
+                          success.pendingBookingRequests.length,
+                      upcomingSessionsCount: success.upcomingSessions.length,
+                      bookableSlotsCount: _bookableOpenSlotsCount(success),
+                      pendingRequestsLabel:
+                          l10n.teacherDashboardStatPendingRequests,
+                      upcomingSessionsLabel:
+                          l10n.teacherDashboardStatUpcomingSessions,
+                      bookableSlotsLabel: success.weekScopedDashboard
+                          ? l10n.teacherDashboardStatBookableSlotsThisWeek
+                          : l10n.teacherDashboardStatBookableSlotsHorizon,
                     ),
                   ),
-                  SliverList.builder(
-                    itemCount: success.pendingBookingRequests.length,
-                    itemBuilder: (_, i) {
-                      final session = success.pendingBookingRequests[i];
-                      final inProgress =
-                          success.bookingRequestActionInProgress ==
-                          session.bookingId;
-                      return TutorSessionCompactCard(
-                        session: session,
-                        studentDisplayName: _studentDisplayName(
-                          context,
-                          session.studentId,
-                        ),
-                        now: DateTime.now(),
-                        isLoading: inProgress,
-                        viewerUserId: widget.viewerAuthUserId,
-                        onAccept: () =>
-                            context.read<TeacherDashboardBloc>().add(
-                              TeacherBookingRequestAccepted(
-                                bookingId: session.bookingId,
-                              ),
-                            ),
-                        onReject: () => _confirmRejectBookingRequest(
-                          session.bookingId,
-                        ),
-                      );
-                    },
-                  ),
-                ],
 
-                // ── Upcoming sessions (actionable lists only) ──────────
-                if (success.upcomingSessions.isNotEmpty) ...[
-                  SliverToBoxAdapter(
-                    child: TutorDashboardSection(
-                      title: l10n.upcomingSessionsSectionTitle,
+                  // ── Pending booking requests (actionable lists only) ───
+                  if (success.pendingBookingRequests.isNotEmpty) ...[
+                    SliverToBoxAdapter(
+                      child: TutorDashboardSection(
+                        title: l10n.teacherPendingBookingRequestsSectionTitle,
+                      ),
                     ),
-                  ),
-                  SliverList.builder(
-                    itemCount: success.upcomingSessions.length,
-                    itemBuilder: (_, i) {
-                      final session = success.upcomingSessions[i];
-                      final canJoin =
-                          session.effectiveLifecycleStatus.canJoinSession;
-                      final cancelInProgress =
-                          success.sessionCancelInProgress == session.bookingId;
-                      final acceptInProgress =
-                          success.bookingRequestActionInProgress ==
-                          session.bookingId;
-                      return TutorSessionCompactCard(
-                        session: session,
-                        studentDisplayName: _studentDisplayName(
-                          context,
-                          session.studentId,
-                        ),
-                        now: DateTime.now(),
-                        isLoading: cancelInProgress,
-                        viewerUserId: widget.viewerAuthUserId,
-                        onTap: widget.onSessionDetailRequested == null
-                            ? null
-                            : () => _openSessionDetail(session.bookingId),
-                        onJoin: canJoin
-                            ? () => _openSessionDetail(session.bookingId)
-                            : null,
-                        showCancelInOverflowMenu: true,
-                        onCancel:
-                            canTeacherCancelQuranSession(session) &&
-                                !cancelInProgress &&
-                                !acceptInProgress
-                            ? () => _confirmTutorCancelSession(session)
-                            : null,
-                      );
-                    },
-                  ),
-                ],
-
-                // ── Bookable times ─────────────────────────────────────
-                if (success.showFridayReviewBanner)
-                  SliverToBoxAdapter(
-                    child: FridayReviewReminderBanner(
-                      onReview: () {
-                        widget.schedulingAnalytics?.onFridayReviewBannerTapped
-                            ?.call(
-                              _schedulingAnalyticsBase(
-                                success,
-                                extra: const {'action': 'review'},
+                    SliverList.builder(
+                      itemCount: success.pendingBookingRequests.length,
+                      itemBuilder: (_, i) {
+                        final session = success.pendingBookingRequests[i];
+                        final inProgress =
+                            success.bookingRequestActionInProgress ==
+                            session.bookingId;
+                        return TutorSessionCompactCard(
+                          session: session,
+                          studentDisplayName: _studentDisplayName(
+                            context,
+                            session.studentId,
+                          ),
+                          now: DateTime.now(),
+                          isLoading: inProgress,
+                          viewerUserId: widget.viewerAuthUserId,
+                          onAccept: () =>
+                              context.read<TeacherDashboardBloc>().add(
+                                TeacherBookingRequestAccepted(
+                                  bookingId: session.bookingId,
+                                ),
                               ),
-                            );
-                        _openManageSchedule(source: 'friday_banner');
-                      },
-                      onDismiss: () {
-                        widget
-                            .schedulingAnalytics
-                            ?.onFridayReviewBannerDismissed
-                            ?.call(
-                              _schedulingAnalyticsBase(
-                                success,
-                                extra: const {'action': 'dismiss'},
-                              ),
-                            );
-                        context.read<TeacherDashboardBloc>().add(
-                          FridayReviewBannerDismissed(
-                            teacherId: widget.teacherId,
+                          onReject: () => _confirmRejectBookingRequest(
+                            session.bookingId,
                           ),
                         );
                       },
                     ),
-                  ),
-                if (success.weekScopedDashboard)
-                  _BookableTimesWeekScopedSection(
-                    thisWeekSlots: success.thisWeekAvailability,
-                    nextWeekSlots: success.nextWeekAvailability,
-                    isUpdatingAvailability: success.isUpdatingAvailability,
-                    scheduleActionLabel: widget.onManageSchedule != null
-                        ? l10n.editWeeklyTemplate
-                        : null,
-                    onManageSchedule: widget.onManageSchedule != null
-                        ? () => _openManageSchedule(source: 'bookable_header')
-                        : null,
-                    buildSlot: (context, slot, showDivider) => _buildSlotTile(
-                      context,
-                      slot,
-                      showDivider: showDivider,
+                  ],
+
+                  // ── Upcoming sessions (actionable lists only) ──────────
+                  if (success.upcomingSessions.isNotEmpty) ...[
+                    SliverToBoxAdapter(
+                      child: TutorDashboardSection(
+                        title: l10n.upcomingSessionsSectionTitle,
+                      ),
                     ),
-                    onWeekScopeChanged: (section, slotCount) {
-                      widget.schedulingAnalytics?.onWeekViewOpened?.call(
-                        _schedulingAnalyticsBase(
-                          success,
-                          extra: {
-                            'section': section,
-                            'slot_count': slotCount,
-                            'interaction': 'scope_selected',
-                          },
-                        ),
-                      );
-                    },
-                  )
-                else
-                  _BookableTimesWeekSection(
-                    title: l10n.bookableTimesSectionTitle,
-                    slots: success.availability,
-                    isUpdatingAvailability: success.isUpdatingAvailability,
-                    scheduleActionLabel: widget.onManageSchedule != null
-                        ? l10n.editWeeklyTemplate
-                        : null,
-                    onManageSchedule: widget.onManageSchedule != null
-                        ? () => _openManageSchedule(source: 'bookable_header')
-                        : null,
-                    buildSlot: (context, slot, showDivider) => _buildSlotTile(
-                      context,
-                      slot,
-                      showDivider: showDivider,
+                    SliverList.builder(
+                      itemCount: success.upcomingSessions.length,
+                      itemBuilder: (_, i) {
+                        final session = success.upcomingSessions[i];
+                        final canJoin =
+                            session.effectiveLifecycleStatus.canJoinSession;
+                        final cancelInProgress =
+                            success.sessionCancelInProgress ==
+                            session.bookingId;
+                        final acceptInProgress =
+                            success.bookingRequestActionInProgress ==
+                            session.bookingId;
+                        final joinInProgress =
+                            success.joinInProgress == session.id;
+                        return TutorSessionCompactCard(
+                          session: session,
+                          studentDisplayName: _studentDisplayName(
+                            context,
+                            session.studentId,
+                          ),
+                          now: DateTime.now(),
+                          isLoading: cancelInProgress,
+                          isJoinLoading: joinInProgress,
+                          viewerUserId: widget.viewerAuthUserId,
+                          onTap: widget.onSessionDetailRequested == null
+                              ? null
+                              : () => _openSessionDetail(session.bookingId),
+                          onJoin: canJoin ? () => _requestJoin(session) : null,
+                          showCancelInOverflowMenu: true,
+                          onCancel:
+                              canTeacherCancelQuranSession(session) &&
+                                  !cancelInProgress &&
+                                  !acceptInProgress
+                              ? () => _confirmTutorCancelSession(session)
+                              : null,
+                        );
+                      },
                     ),
+                  ],
+
+                  // ── Bookable times ─────────────────────────────────────
+                  if (success.showFridayReviewBanner)
+                    SliverToBoxAdapter(
+                      child: FridayReviewReminderBanner(
+                        onReview: () {
+                          widget.schedulingAnalytics?.onFridayReviewBannerTapped
+                              ?.call(
+                                _schedulingAnalyticsBase(
+                                  success,
+                                  extra: const {'action': 'review'},
+                                ),
+                              );
+                          _openManageSchedule(source: 'friday_banner');
+                        },
+                        onDismiss: () {
+                          widget
+                              .schedulingAnalytics
+                              ?.onFridayReviewBannerDismissed
+                              ?.call(
+                                _schedulingAnalyticsBase(
+                                  success,
+                                  extra: const {'action': 'dismiss'},
+                                ),
+                              );
+                          context.read<TeacherDashboardBloc>().add(
+                            FridayReviewBannerDismissed(
+                              teacherId: widget.teacherId,
+                            ),
+                          );
+                        },
+                      ),
+                    ),
+                  if (success.weekScopedDashboard)
+                    _BookableTimesWeekScopedSection(
+                      thisWeekSlots: success.thisWeekAvailability,
+                      nextWeekSlots: success.nextWeekAvailability,
+                      isUpdatingAvailability: success.isUpdatingAvailability,
+                      scheduleActionLabel: widget.onManageSchedule != null
+                          ? l10n.editWeeklyTemplate
+                          : null,
+                      onManageSchedule: widget.onManageSchedule != null
+                          ? () => _openManageSchedule(source: 'bookable_header')
+                          : null,
+                      buildSlot: (context, slot, showDivider) => _buildSlotTile(
+                        context,
+                        slot,
+                        showDivider: showDivider,
+                      ),
+                      onWeekScopeChanged: (section, slotCount) {
+                        widget.schedulingAnalytics?.onWeekViewOpened?.call(
+                          _schedulingAnalyticsBase(
+                            success,
+                            extra: {
+                              'section': section,
+                              'slot_count': slotCount,
+                              'interaction': 'scope_selected',
+                            },
+                          ),
+                        );
+                      },
+                    )
+                  else
+                    _BookableTimesWeekSection(
+                      title: l10n.bookableTimesSectionTitle,
+                      slots: success.availability,
+                      isUpdatingAvailability: success.isUpdatingAvailability,
+                      scheduleActionLabel: widget.onManageSchedule != null
+                          ? l10n.editWeeklyTemplate
+                          : null,
+                      onManageSchedule: widget.onManageSchedule != null
+                          ? () => _openManageSchedule(source: 'bookable_header')
+                          : null,
+                      buildSlot: (context, slot, showDivider) => _buildSlotTile(
+                        context,
+                        slot,
+                        showDivider: showDivider,
+                      ),
+                    ),
+                  SliverPadding(
+                    padding: EdgeInsets.only(
+                      bottom: TilawaComfortableReachPadding.resolve(context),
+                    ),
+                    sliver: const SliverToBoxAdapter(child: SizedBox.shrink()),
                   ),
-                SliverPadding(
-                  padding: EdgeInsets.only(
-                    bottom: TilawaComfortableReachPadding.resolve(context),
-                  ),
-                  sliver: const SliverToBoxAdapter(child: SizedBox.shrink()),
-                ),
-              ],
+                ],
+              ),
             ),
-          ),
-        },
+          },
+        ),
       ),
     );
   }
@@ -578,6 +633,39 @@ class _TeacherDashboardScreenState extends State<TeacherDashboardScreen> {
   String _studentDisplayName(BuildContext context, String studentId) {
     return widget.resolveStudentName?.call(studentId) ??
         context.quranSessionsL10n.tutorDashboardStudentFallback;
+  }
+
+  QuranSession? _findSession(
+    TeacherDashboardSuccess state,
+    String sessionId,
+  ) {
+    for (final session in state.upcomingSessions) {
+      if (session.id == sessionId) {
+        return session;
+      }
+    }
+    return null;
+  }
+
+  bool _isExternalMeeting(QuranSession session) {
+    if (session.callProviderKind != SessionCallProviderKind.external) {
+      return false;
+    }
+    final url = session.joinUrl?.trim();
+    return url?.isNotEmpty ?? false;
+  }
+
+  Future<void> _requestJoin(QuranSession session) async {
+    if (_isExternalMeeting(session)) {
+      final confirmed = await showExternalMeetingJoinSheet(
+        context,
+        meetingUrl: session.joinUrl!,
+      );
+      if (!confirmed || !mounted) return;
+    }
+    context.read<TeacherDashboardBloc>().add(
+      TeacherDashboardSessionJoinRequested(sessionId: session.id),
+    );
   }
 
   Future<void> _openSessionDetail(String bookingId) async {

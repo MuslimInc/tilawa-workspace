@@ -176,7 +176,7 @@ void main() {
     expect(selectedSlotId, isNull);
   });
 
-  testWidgets('shows report tutor action in app bar for visible profile', (
+  testWidgets('hides report tutor action for launch rollout', (
     tester,
   ) async {
     await _pumpProfile(
@@ -188,8 +188,8 @@ void main() {
       ),
     );
 
-    expect(find.byIcon(Icons.flag_outlined), findsOneWidget);
-    expect(find.byTooltip('الإبلاغ عن المحفظ'), findsOneWidget);
+    expect(find.byIcon(Icons.flag_outlined), findsNothing);
+    expect(find.byTooltip('الإبلاغ عن المحفظ'), findsNothing);
   });
 
   testWidgets('expands credentials section when teacher has credentials', (

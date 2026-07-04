@@ -17,6 +17,7 @@ import '../../../domain/services/week_calendar.dart';
 import '../../../domain/usecases/block_generated_slot_usecase.dart';
 import '../../../domain/usecases/cancel_session_via_server_usecase.dart';
 import '../../../domain/usecases/complete_session_via_server_usecase.dart';
+import '../../../domain/usecases/join_session_usecase.dart';
 import '../../../application/usecases/get_teacher_dashboard_usecase.dart';
 import '../../../application/usecases/invalidate_quran_session_cache_usecase.dart';
 import '../../../domain/usecases/get_teacher_availability_usecase.dart';
@@ -47,6 +48,7 @@ class TeacherDashboardBloc
     required CancelSessionViaServerUseCase cancelSessionUseCase,
     required RespondToBookingRequestUseCase respondToBookingRequestUseCase,
     required CompleteSessionViaServerUseCase completeSessionUseCase,
+    required JoinSessionUseCase joinSessionUseCase,
     required FridayReviewReminderStore fridayReminderStore,
     required String teacherUserId,
     SchedulingPolicyResolver? schedulingPolicyResolver,
@@ -64,6 +66,7 @@ class TeacherDashboardBloc
        _cancelSession = cancelSessionUseCase,
        _respondToBookingRequest = respondToBookingRequestUseCase,
        _completeSession = completeSessionUseCase,
+       _joinSession = joinSessionUseCase,
        _fridayReviewReminderStore = fridayReminderStore,
        _teacherId = teacherUserId,
        _schedulingPolicyResolver =
@@ -108,6 +111,14 @@ class TeacherDashboardBloc
       transformer: sequential(),
     );
     on<TeacherSessionCompleted>(_onSessionCompleted, transformer: sequential());
+    on<TeacherDashboardSessionJoinRequested>(
+      _onJoinRequested,
+      transformer: sequential(),
+    );
+    on<TeacherDashboardJoinCompletedAcknowledged>(
+      _onJoinCompletedAcknowledged,
+      transformer: sequential(),
+    );
   }
 
   final GetTeacherDashboardUseCase _getTeacherDashboard;
@@ -119,6 +130,7 @@ class TeacherDashboardBloc
   final CancelSessionViaServerUseCase _cancelSession;
   final RespondToBookingRequestUseCase _respondToBookingRequest;
   final CompleteSessionViaServerUseCase _completeSession;
+  final JoinSessionUseCase _joinSession;
   final FridayReviewReminderStore _fridayReviewReminderStore;
   final SchedulingPolicyResolver _schedulingPolicyResolver;
   final WeekCalendar _weekCalendar;
@@ -953,5 +965,50 @@ class TeacherDashboardBloc
         );
       },
     );
+  }
+
+  Future<void> _onJoinRequested(
+    TeacherDashboardSessionJoinRequested event,
+    Emitter<TeacherDashboardState> emit,
+  ) async {
+    final current = state;
+    if (current is! TeacherDashboardSuccess) return;
+
+    emit(
+      current.copyWith(
+        clearJoinFailure: true,
+        joinInProgress: event.sessionId,
+      ),
+    );
+
+    final result = await _joinSession(sessionId: event.sessionId);
+
+    final after = state;
+    if (after is! TeacherDashboardSuccess) return;
+
+    result.fold(
+      (failure) => emit(
+        after.copyWith(
+          joinFailure: failure,
+          clearJoinInProgress: true,
+        ),
+      ),
+      (_) => emit(
+        after.copyWith(
+          clearJoinInProgress: true,
+          joinCompletedSessionId: event.sessionId,
+        ),
+      ),
+    );
+  }
+
+  Future<void> _onJoinCompletedAcknowledged(
+    TeacherDashboardJoinCompletedAcknowledged event,
+    Emitter<TeacherDashboardState> emit,
+  ) async {
+    final current = state;
+    if (current is! TeacherDashboardSuccess) return;
+
+    emit(current.copyWith(clearJoinCompletedSessionId: true));
   }
 }

@@ -423,6 +423,7 @@ class QuranSessionsMvpModule {
         cancelSessionUseCase: sl<CancelSessionViaServerUseCase>(),
         respondToBookingRequestUseCase: sl<RespondToBookingRequestUseCase>(),
         completeSessionUseCase: sl<CompleteSessionViaServerUseCase>(),
+        joinSessionUseCase: sl<JoinSessionUseCase>(),
         fridayReminderStore: sl<FridayReviewReminderStore>(),
         teacherUserId: sl<AuthSessionProvider>().currentUserId ?? 'teacher_mvp',
         isConnected: sl.isRegistered<NetworkInfo>()

@@ -11,6 +11,7 @@ import '../../domain/entities/teacher_availability.dart';
 import '../../domain/value_objects/teacher_public_name.dart';
 import '../config/quran_sessions_analytics_callbacks.dart';
 import '../failure_ui/quran_sessions_failure_ui.dart';
+import '../launch_scope.dart';
 import '../blocs/teacher_profile/teacher_profile_bloc.dart';
 import '../blocs/teacher_profile/teacher_profile_event.dart';
 import '../blocs/teacher_profile/teacher_profile_state.dart';
@@ -74,21 +75,22 @@ class _TeacherProfileScreenState extends State<TeacherProfileScreen> {
     return QuranSessionsScaffold(
       title: l10n.teacherProfileTitle,
       actions: [
-        BlocBuilder<TeacherProfileBloc, TeacherProfileState>(
-          builder: (context, state) {
-            if (state is! TeacherProfileSuccess ||
-                !_isTeacherMarketplaceVisible(state.teacher)) {
-              return const SizedBox.shrink();
-            }
-            return IconButton(
-              tooltip: l10n.reportTutorAction,
-              onPressed: state.reportInProgress
-                  ? null
-                  : () => _submitReport(context),
-              icon: const Icon(Icons.flag_outlined),
-            );
-          },
-        ),
+        if (QuranSessionsLaunchScope.reportDisputeUiEnabled)
+          BlocBuilder<TeacherProfileBloc, TeacherProfileState>(
+            builder: (context, state) {
+              if (state is! TeacherProfileSuccess ||
+                  !_isTeacherMarketplaceVisible(state.teacher)) {
+                return const SizedBox.shrink();
+              }
+              return IconButton(
+                tooltip: l10n.reportTutorAction,
+                onPressed: state.reportInProgress
+                    ? null
+                    : () => _submitReport(context),
+                icon: const Icon(Icons.flag_outlined),
+              );
+            },
+          ),
       ],
       bottomNavigationBar: widget.bookingEnabled && widget.onBookTapped != null
           ? BlocBuilder<TeacherProfileBloc, TeacherProfileState>(

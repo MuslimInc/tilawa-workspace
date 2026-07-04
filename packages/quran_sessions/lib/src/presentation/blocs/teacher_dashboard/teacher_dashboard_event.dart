@@ -148,3 +148,19 @@ final class TeacherBookingRequestRejected extends TeacherDashboardEvent {
   @override
   List<Object?> get props => [bookingId, reason];
 }
+
+/// Teacher joins an upcoming session from the dashboard list.
+final class TeacherDashboardSessionJoinRequested extends TeacherDashboardEvent {
+  const TeacherDashboardSessionJoinRequested({required this.sessionId});
+
+  final String sessionId;
+
+  @override
+  List<Object?> get props => [sessionId];
+}
+
+/// Clears [TeacherDashboardSuccess.joinCompletedSessionId] after navigation.
+final class TeacherDashboardJoinCompletedAcknowledged
+    extends TeacherDashboardEvent {
+  const TeacherDashboardJoinCompletedAcknowledged();
+}

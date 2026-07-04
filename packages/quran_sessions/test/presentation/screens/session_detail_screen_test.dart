@@ -214,6 +214,51 @@ void main() {
     expect(find.text('Join'), findsOneWidget);
   });
 
+  testWidgets('join button stays visible with loading while preparing', (
+    tester,
+  ) async {
+    final bloc = JoinLoadingHoldBloc(seed: _inAppJoinSeed());
+
+    await _pumpSessionDetailScreen(tester, bloc: bloc);
+
+    await tester.tap(find.text('Join'));
+    await tester.pump();
+
+    final joinButton = tester.widget<TilawaButton>(
+      find.byWidgetPredicate(
+        (widget) => widget is TilawaButton && widget.text == 'Join',
+      ),
+    );
+    check(joinButton.isLoading).isTrue();
+    check(joinButton.onPressed).isNull();
+    expect(find.bySemanticsLabel('Join, Loading'), findsOneWidget);
+  });
+
+  testWidgets(
+    'teacher join button stays visible with loading while preparing',
+    (
+      tester,
+    ) async {
+      final bloc = JoinLoadingHoldBloc(
+        seed: _inAppJoinSeed().copyWith(viewerRole: ActorRole.teacher),
+      );
+
+      await _pumpSessionDetailScreen(tester, bloc: bloc);
+
+      await tester.tap(find.text('Join'));
+      await tester.pump();
+
+      final joinButton = tester.widget<TilawaButton>(
+        find.byWidgetPredicate(
+          (widget) => widget is TilawaButton && widget.text == 'Join',
+        ),
+      );
+      check(joinButton.isLoading).isTrue();
+      check(joinButton.onPressed).isNull();
+      expect(find.bySemanticsLabel('Join, Loading'), findsOneWidget);
+    },
+  );
+
   testWidgets('open meeting again shows after external join opened', (
     tester,
   ) async {
@@ -925,7 +970,7 @@ void main() {
       },
     );
 
-    testWidgets('cancelled session keeps report and dispute with helper', (
+    testWidgets('hides report and dispute actions for launch rollout', (
       tester,
     ) async {
       final bloc = RecordingSessionDetailBloc(
@@ -940,11 +985,11 @@ void main() {
 
       await _pumpSessionDetailScreen(tester, bloc: bloc);
 
-      expect(find.text('Report a concern'), findsOneWidget);
-      expect(find.text('Open a dispute'), findsOneWidget);
+      expect(find.text('Report a concern'), findsNothing);
+      expect(find.text('Open a dispute'), findsNothing);
       expect(
         find.textContaining('review this cancellation'),
-        findsOneWidget,
+        findsNothing,
       );
     });
 
