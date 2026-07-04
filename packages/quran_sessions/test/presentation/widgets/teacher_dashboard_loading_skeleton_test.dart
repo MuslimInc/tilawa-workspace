@@ -35,8 +35,11 @@ void main() {
       );
       expect(find.byType(TilawaContentGrid), findsOneWidget);
 
-      check(find.byType(TilawaCard).evaluate().length >= 7).isTrue();
-      check(find.byType(TilawaSkeletonLine).evaluate().length >= 18).isTrue();
+      // Summary stats render as a TilawaMetricTileStrip (not cards) since the
+      // metric-tile redesign; card surfaces remain for the category grid.
+      expect(find.byType(TilawaMetricTileStrip), findsOneWidget);
+      check(find.byType(TilawaCard).evaluate().length >= 4).isTrue();
+      check(find.byType(TilawaSkeletonLine).evaluate().length >= 15).isTrue();
     },
   );
 

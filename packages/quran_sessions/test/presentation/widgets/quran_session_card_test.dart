@@ -91,8 +91,10 @@ void main() {
         surfaceSize: const Size(360, 800),
       );
 
-      expect(find.textContaining('under review'), findsOneWidget);
-      expect(find.textContaining('payment'), findsOneWidget);
+      expect(
+        find.textContaining('The teacher will accept or decline'),
+        findsOneWidget,
+      );
       expect(find.text('Join now'), findsNothing);
     });
 
