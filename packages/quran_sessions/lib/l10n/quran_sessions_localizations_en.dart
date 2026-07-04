@@ -576,7 +576,7 @@ class QuranSessionsLocalizationsEn extends QuranSessionsLocalizations {
   String get inAppCallShellSpeaker => 'Speaker';
 
   @override
-  String get inAppCallShellFlipCamera => 'Flip camera';
+  String get inAppCallShellFlipCamera => 'Switch camera';
 
   @override
   String get inAppCallShellTurnVideoOn => 'Turn camera on';

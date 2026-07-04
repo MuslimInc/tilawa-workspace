@@ -4,8 +4,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
 import 'package:quran_sessions/quran_sessions.dart';
-import 'package:tilawa/features/quran_sessions/rtc/quran_sessions_rtc_impl.dart';
-import 'package:quran_sessions_rtc/quran_sessions_rtc.dart';
 import 'package:tilawa/core/bootstrap/app_launch_config.dart';
 import 'package:tilawa/core/di/injection.dart';
 import 'package:tilawa/core/layout/list_scroll_bottom_padding.dart';
@@ -281,7 +279,6 @@ List<RouteBase> get quranSessionsRoutes => [
               resolveTeacherName: _resolveTeacherName,
               createCallControlGateway: createQuranSessionsCallControlGateway,
               createCallTelemetry: createQuranSessionsCallTelemetry,
-              buildCallSurface: buildQuranSessionsInAppCallSurface(),
               onSessionDetailRequested: (bookingId) => context.push(
                 QuranSessionsRoutes.sessionDetail.replaceFirst(
                   ':bookingId',
@@ -335,7 +332,6 @@ List<RouteBase> get quranSessionsRoutes => [
           analytics: quranSessionsAnalyticsCallbacks(),
           createCallControlGateway: createQuranSessionsCallControlGateway,
           createCallTelemetry: createQuranSessionsCallTelemetry,
-          buildCallSurface: buildQuranSessionsInAppCallSurface(),
           onPracticeRevisionRequested:
               ({
                 required surahNumber,
@@ -568,10 +564,6 @@ Widget _withQuranSessionsTheme(Widget child) {
   );
 }
 
-InAppCallSurfaceBuilder? buildQuranSessionsInAppCallSurface() {
-  return _buildQuranSessionsCallSurface();
-}
-
 SessionCallControlGateway createQuranSessionsCallControlGateway(
   String sessionId,
 ) {
@@ -580,37 +572,6 @@ SessionCallControlGateway createQuranSessionsCallControlGateway(
 
 QuranSessionCallTelemetryCoordinator? createQuranSessionsCallTelemetry() {
   return _createCallTelemetry();
-}
-
-InAppCallSurfaceBuilder? _buildQuranSessionsCallSurface() {
-  return (
-    context, {
-    required sessionId,
-    required callType,
-    required callProviderKind,
-  }) {
-    final labels = AgoraCallSurfaceLabels(
-      connecting: context.quranSessionsL10n.inAppCallShellConnecting,
-      connected: context.quranSessionsL10n.inAppCallShellConnected,
-      waitingForParticipant:
-          context.quranSessionsL10n.inAppCallShellWaitingForParticipant,
-      voiceCallTitle: context.quranSessionsL10n.inAppCallShellTitle,
-    );
-    final eventHub = getIt.isRegistered<SessionCallProviderEventHub>()
-        ? getIt<SessionCallProviderEventHub>()
-        : null;
-    final builder = QuranSessionsRtcWiring.buildInAppCallSurface(
-      sl: getIt,
-      labels: labels,
-      eventHub: eventHub,
-    );
-    return builder?.call(
-      context,
-      sessionId: sessionId,
-      callType: callType,
-      callProviderKind: callProviderKind,
-    );
-  };
 }
 
 SessionCallControlGateway _createQuranSessionCallControlGateway(

@@ -235,7 +235,7 @@
     "inAppCallShellWaitingForParticipant": "Waiting for the other participant",
     "inAppCallShellMockBetaBody": "Beta preview — no live audio or video. Book a new session with Agora enabled to try a real call.",
     "inAppCallShellSpeaker": "Speaker",
-    "inAppCallShellFlipCamera": "Flip camera",
+    "inAppCallShellFlipCamera": "Switch camera",
     "inAppCallShellTurnVideoOn": "Turn camera on",
     "inAppCallShellTurnVideoOff": "Turn camera off",
     "inAppCallShellMicrophoneMuted": "Microphone muted",

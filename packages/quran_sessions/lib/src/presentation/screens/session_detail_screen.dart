@@ -19,7 +19,6 @@ class SessionDetailScreen extends StatefulWidget {
     this.analytics = const QuranSessionsAnalyticsCallbacks(),
     this.createCallControlGateway,
     this.createCallTelemetry,
-    this.buildCallSurface,
     this.onPracticeRevisionRequested,
   });
 
@@ -27,7 +26,6 @@ class SessionDetailScreen extends StatefulWidget {
   final QuranSessionsAnalyticsCallbacks analytics;
   final SessionCallControlGatewayFactory? createCallControlGateway;
   final CallTelemetryCoordinatorFactory? createCallTelemetry;
-  final InAppCallSurfaceBuilder? buildCallSurface;
 
   /// Host opens Tilawa Quran reader for [surahNumber] (optional [ayahNumber]).
   final void Function({required int surahNumber, int? ayahNumber})?
@@ -147,7 +145,6 @@ class _SessionDetailScreenState extends State<SessionDetailScreen>
                     callType: callType,
                     callProviderKind: callProviderKind,
                     participantSubtitle: l10n.callTypeLabel(callType),
-                    buildCallSurface: widget.buildCallSurface,
                     createCallControlGateway: widget.createCallControlGateway,
                     createCallTelemetry: widget.createCallTelemetry,
                   );

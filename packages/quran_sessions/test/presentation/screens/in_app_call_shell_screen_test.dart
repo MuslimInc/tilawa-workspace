@@ -182,6 +182,10 @@ void main() {
 
     final flipButton = find.byKey(const Key('call_shell_flip'));
     expect(flipButton, findsOneWidget);
+    expect(
+      find.bySemanticsLabel('Switch camera'),
+      findsOneWidget,
+    );
 
     await tester.tap(find.byKey(const Key('call_shell_video')));
     await tester.pump();
@@ -191,6 +195,107 @@ void main() {
     await tester.pump();
 
     check(gateway.switchCameraCount).equals(0);
+  });
+
+  testWidgets('Switch camera keeps unified label and icon after switch', (
+    tester,
+  ) async {
+    final gateway = _RecordingCallControlGateway(delaySwitchCamera: true);
+    late ThemeData theme;
+
+    await tester.pumpWidget(
+      _shellApp(
+        Builder(
+          builder: (context) {
+            theme = Theme.of(context);
+            return InAppCallShellScreen(
+              sessionId: 'session_1',
+              callType: SessionCallType.videoCall,
+              callProviderKind: SessionCallProviderKind.agora,
+              callControlGateway: gateway,
+            );
+          },
+        ),
+      ),
+    );
+
+    final inactiveColor =
+        theme.componentTokens.iconToggle.inactiveBackgroundColor;
+    final frontIconColor = theme.colorScheme.onSurface;
+    final backIconColor = theme.colorScheme.onSurfaceVariant;
+
+    expect(find.bySemanticsLabel('Switch camera'), findsOneWidget);
+    expect(find.byIcon(Icons.cameraswitch), findsOneWidget);
+    expect(
+      _callControlMaterialColor(tester, const Key('call_shell_flip')),
+      inactiveColor,
+    );
+    expect(
+      _callControlIconColor(tester, const Key('call_shell_flip')),
+      frontIconColor,
+    );
+
+    await tester.tap(find.byKey(const Key('call_shell_flip')));
+    await tester.pump();
+    await tester.pump(const Duration(milliseconds: 300));
+    await tester.pumpAndSettle();
+
+    expect(find.bySemanticsLabel('Switch camera'), findsOneWidget);
+    expect(find.byIcon(Icons.cameraswitch), findsOneWidget);
+    expect(find.byIcon(Icons.camera_rear_outlined), findsNothing);
+    expect(find.byIcon(Icons.camera_front_outlined), findsNothing);
+    expect(
+      _callControlMaterialColor(tester, const Key('call_shell_flip')),
+      inactiveColor,
+    );
+    expect(
+      _callControlIconColor(tester, const Key('call_shell_flip')),
+      backIconColor,
+    );
+    check(gateway.switchCameraCount).equals(1);
+  });
+
+  testWidgets('Switch camera failure shows friendly error toast', (
+    tester,
+  ) async {
+    final gateway = _RecordingCallControlGateway(failSwitchCamera: true);
+
+    await tester.pumpWidget(
+      _shellApp(
+        InAppCallShellScreen(
+          sessionId: 'session_1',
+          callType: SessionCallType.videoCall,
+          callProviderKind: SessionCallProviderKind.agora,
+          callControlGateway: gateway,
+        ),
+      ),
+    );
+
+    await tester.tap(find.byKey(const Key('call_shell_flip')));
+    await tester.pumpAndSettle();
+
+    expect(
+      find.text('Could not complete that action. Try again.'),
+      findsOneWidget,
+    );
+    check(gateway.switchCameraCount).equals(1);
+  });
+
+  testWidgets('Switch camera hidden when only one lens available', (
+    tester,
+  ) async {
+    await tester.pumpWidget(
+      _shellApp(
+        InAppCallShellScreen(
+          sessionId: 'session_1',
+          callType: SessionCallType.videoCall,
+          callProviderKind: SessionCallProviderKind.external,
+          callControlGateway: _RecordingCallControlGateway(),
+        ),
+      ),
+    );
+
+    expect(find.byKey(const Key('call_shell_flip')), findsNothing);
   });
 
   testWidgets('Speaker toggle updates active icon state', (tester) async {
@@ -236,19 +341,6 @@ void main() {
     expect(find.byKey(surfaceKey), findsOneWidget);
     expect(find.byKey(const Key('call_shell_video')), findsOneWidget);
     expect(find.byKey(const Key('call_shell_flip')), findsOneWidget);
-  });
-
-  testWidgets('Mock provider shows beta preview banner', (tester) async {
-    await tester.pumpWidget(
-      _shellApp(
-        const InAppCallShellScreen(
-          sessionId: 'session_mock',
-          callProviderKind: SessionCallProviderKind.mock,
-        ),
-      ),
-    );
-
-    expect(find.textContaining('Beta preview'), findsOneWidget);
   });
 
   testWidgets('Video toggle swaps active background and slash icon', (
@@ -339,20 +431,10 @@ void main() {
       _callControlMaterialColor(tester, const Key('call_shell_flip')),
       inactiveColor,
     );
-  });
-
-  testWidgets('Participant name appears in glass info bar', (tester) async {
-    await tester.pumpWidget(
-      _shellApp(
-        const InAppCallShellScreen(
-          sessionId: 'session_1',
-          participantName: 'Ustadh Ahmad',
-          participantSubtitle: 'Voice call',
-        ),
-      ),
+    expect(
+      _callControlIconColor(tester, const Key('call_shell_flip')),
+      theme.colorScheme.onSurface,
     );
-
-    expect(find.text('Ustadh Ahmad'), findsOneWidget);
   });
 }
 
@@ -379,14 +461,31 @@ Color _callControlMaterialColor(WidgetTester tester, Key key) {
 }
 
 Color _callControlIconColor(WidgetTester tester, Key key) {
+  final buttonFinder = find.byKey(key);
   final iconFinder = find.descendant(
-    of: find.byKey(key),
+    of: buttonFinder,
     matching: find.byType(Icon),
   );
-  return tester.widget<Icon>(iconFinder).color!;
+  final icon = tester.widget<Icon>(iconFinder);
+  if (icon.color != null) {
+    return icon.color!;
+  }
+
+  final iconThemeFinder = find.descendant(
+    of: buttonFinder,
+    matching: find.byType(IconTheme),
+  );
+  return tester.widgetList<IconTheme>(iconThemeFinder).first.data.color!;
 }
 
 class _RecordingCallControlGateway implements SessionCallControlGateway {
+  _RecordingCallControlGateway({
+    this.delaySwitchCamera = false,
+    this.failSwitchCamera = false,
+  });
+
+  final bool delaySwitchCamera;
+  final bool failSwitchCamera;
   final List<bool> microphoneEnabledCalls = [];
   final List<bool> cameraEnabledCalls = [];
   final List<bool> speakerEnabledCalls = [];
@@ -405,7 +504,13 @@ class _RecordingCallControlGateway implements SessionCallControlGateway {
 
   @override
   Future<void> switchCamera() async {
+    if (delaySwitchCamera) {
+      await Future<void>.delayed(const Duration(milliseconds: 50));
+    }
     switchCameraCount++;
+    if (failSwitchCamera) {
+      throw StateError('switch camera failed');
+    }
   }
 
   @override

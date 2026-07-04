@@ -1,5 +1,4 @@
 import 'package:agora_rtc_engine/agora_rtc_engine.dart';
-import 'package:quran_sessions_rtc/quran_sessions_rtc.dart';
 import 'package:quran_sessions_rtc_sdk/quran_sessions_rtc_sdk.dart';
 
 /// Minimal [RtcEngine] fake for widget and boundary tests.
@@ -196,10 +195,3 @@ class FakeAgoraRtcSessionHandle implements AgoraRtcSessionHandle {
     await _engine.setEnableSpeakerphone(enabled);
   }
 }
-
-const testAgoraCallSurfaceLabels = AgoraCallSurfaceLabels(
-  connecting: 'Connecting',
-  connected: 'Connected',
-  waitingForParticipant: 'Waiting for participant',
-  voiceCallTitle: 'Voice call',
-);

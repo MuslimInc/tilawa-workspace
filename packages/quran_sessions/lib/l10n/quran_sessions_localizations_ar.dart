@@ -564,7 +564,7 @@ class QuranSessionsLocalizationsAr extends QuranSessionsLocalizations {
   String get inAppCallShellSpeaker => 'مكبر الصوت';
 
   @override
-  String get inAppCallShellFlipCamera => 'قلب الكاميرا';
+  String get inAppCallShellFlipCamera => 'تبديل الكاميرا';
 
   @override
   String get inAppCallShellTurnVideoOn => 'تشغيل الكاميرا';

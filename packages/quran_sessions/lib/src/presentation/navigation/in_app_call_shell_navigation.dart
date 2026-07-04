@@ -12,6 +12,13 @@ typedef SessionCallControlGatewayFactory =
 typedef CallTelemetryCoordinatorFactory =
     QuranSessionCallTelemetryCoordinator? Function();
 
+InAppCallSurfaceBuilder? _configuredInAppCallSurfaceBuilder;
+
+/// Host app registers the Agora/LiveKit surface builder once at startup.
+void configureInAppCallShellCallSurface(InAppCallSurfaceBuilder? builder) {
+  _configuredInAppCallSurfaceBuilder = builder;
+}
+
 /// Pushes [InAppCallShellScreen] after a successful in-app join.
 Future<void> pushInAppCallShell(
   BuildContext context, {
@@ -20,10 +27,10 @@ Future<void> pushInAppCallShell(
   required SessionCallProviderKind callProviderKind,
   String? participantName,
   String? participantSubtitle,
-  InAppCallSurfaceBuilder? buildCallSurface,
   SessionCallControlGatewayFactory? createCallControlGateway,
   CallTelemetryCoordinatorFactory? createCallTelemetry,
 }) {
+  final buildCallSurface = _configuredInAppCallSurfaceBuilder;
   return Navigator.of(context).push(
     MaterialPageRoute<void>(
       settings: const RouteSettings(name: 'in_app_call_shell'),

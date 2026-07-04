@@ -1,7 +1,6 @@
 import 'package:flutter_test/flutter_test.dart';
 import 'package:get_it/get_it.dart';
 import 'package:quran_sessions/quran_sessions.dart';
-import 'package:quran_sessions_rtc/quran_sessions_rtc.dart';
 import 'package:quran_sessions_rtc_stub/quran_sessions_rtc_stub.dart';
 import 'package:tilawa/core/bootstrap/app_launch_config.dart';
 import 'package:tilawa/features/quran_sessions/quran_sessions_launch_policy.dart';
@@ -54,18 +53,9 @@ void main() {
 
   test('stub wiring returns null in-app call surface builder', () {
     final sl = GetIt.asNewInstance();
-    const labels = AgoraCallSurfaceLabels(
-      connecting: 'Connecting',
-      connected: 'Connected',
-      waitingForParticipant: 'Waiting',
-      voiceCallTitle: 'Call',
-    );
 
     expect(
-      QuranSessionsRtcWiring.buildInAppCallSurface(
-        sl: sl,
-        labels: labels,
-      ),
+      QuranSessionsRtcWiring.buildInAppCallSurface(sl: sl),
       isNull,
     );
   });

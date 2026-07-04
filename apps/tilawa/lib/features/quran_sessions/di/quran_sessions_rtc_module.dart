@@ -13,6 +13,34 @@ import 'package:tilawa/features/quran_sessions/rtc/quran_sessions_rtc_impl.dart'
 class QuranSessionsRtcModule {
   QuranSessionsRtcModule._();
 
+  static InAppCallSurfaceBuilder? buildInAppCallSurfaceBuilder(GetIt sl) {
+    if (!QuranSessionsRtcWiring.hasNativeSdks) {
+      return null;
+    }
+
+    final eventHub = sl.isRegistered<SessionCallProviderEventHub>()
+        ? sl<SessionCallProviderEventHub>()
+        : null;
+
+    return (
+      context, {
+      required sessionId,
+      required callType,
+      required callProviderKind,
+    }) {
+      final builder = QuranSessionsRtcWiring.buildInAppCallSurface(
+        sl: sl,
+        eventHub: eventHub,
+      );
+      return builder?.call(
+        context,
+        sessionId: sessionId,
+        callType: callType,
+        callProviderKind: callProviderKind,
+      );
+    };
+  }
+
   static SessionCallProvider buildRoutingProvider(
     GetIt sl,
     AppLaunchConfig config,

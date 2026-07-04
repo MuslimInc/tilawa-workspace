@@ -49,7 +49,6 @@ Future<void> joinDebugLiveKitVideoCall(BuildContext context) async {
     callProviderKind: SessionCallProviderKind.livekit,
     participantName: 'Debug LiveKit',
     participantSubtitle: 'QA smoke test',
-    buildCallSurface: buildQuranSessionsInAppCallSurface(),
     createCallControlGateway: createQuranSessionsCallControlGateway,
     createCallTelemetry: createQuranSessionsCallTelemetry,
   );

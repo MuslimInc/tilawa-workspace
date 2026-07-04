@@ -8,12 +8,16 @@ class SessionCallControlCapabilities {
     required this.camera,
     required this.speaker,
     required this.switchCamera,
+    this.hasMultipleCameras = true,
   });
 
   final bool microphone;
   final bool camera;
   final bool speaker;
   final bool switchCamera;
+
+  /// When false, the switch-camera control stays disabled (single-lens devices).
+  final bool hasMultipleCameras;
 
   factory SessionCallControlCapabilities.forSession({
     required SessionCallProviderKind providerKind,
@@ -28,25 +32,20 @@ class SessionCallControlCapabilities {
         camera: isVideoCall,
         speaker: true,
         switchCamera: isVideoCall,
+        hasMultipleCameras: isVideoCall,
       ),
       SessionCallProviderKind.external => const SessionCallControlCapabilities(
         microphone: false,
         camera: false,
         speaker: false,
         switchCamera: false,
+        hasMultipleCameras: false,
       ),
     };
   }
 }
 
-/// One-shot user feedback after a control action.
+/// One-shot user feedback when a control action fails.
 enum CallControlFeedback {
-  microphoneMuted,
-  microphoneUnmuted,
-  cameraOff,
-  cameraOn,
-  switchCameraBlocked,
-  speakerOn,
-  speakerOff,
   actionFailed,
 }

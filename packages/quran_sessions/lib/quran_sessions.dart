@@ -297,6 +297,7 @@ export 'src/presentation/teacher_capability/teacher_capability_presentation.dart
 export 'src/presentation/router/quran_sessions_routes.dart';
 export 'src/presentation/blocs/call_control/quran_session_call_control_cubit.dart';
 export 'src/presentation/blocs/call_control/quran_session_call_control_state.dart';
+export 'src/presentation/blocs/call_control/session_call_camera_facing.dart';
 export 'src/presentation/blocs/call_control/session_call_control_capabilities.dart';
 export 'src/presentation/navigation/in_app_call_shell_navigation.dart';
 export 'src/presentation/screens/in_app_call_shell_screen.dart';

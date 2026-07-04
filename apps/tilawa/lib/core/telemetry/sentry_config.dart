@@ -83,6 +83,15 @@ abstract final class SentryConfig {
       description:
           'Mask private Quran Sessions video layout shells in replays.',
     );
+    // Flip-facing control is call chrome, not a camera feed; unmask silences
+    // debug replay warnings for the library-private [_SwitchCameraButton].
+    // ignore: experimental_member_use
+    privacy.maskCallback<Widget>(
+      _replayCallShellControlUnmaskDecision,
+      name: 'SessionCallShellControls',
+      description:
+          'Unmask call-shell controls falsely matched by the camera regex.',
+    );
   }
 
   // ignore: experimental_member_use
@@ -100,6 +109,25 @@ abstract final class SentryConfig {
       '_LiveKitVideoLayout' ||
       // ignore: experimental_member_use
       'VideoTrackRenderer' => SentryMaskingDecision.mask,
+      // ignore: experimental_member_use
+      _ => SentryMaskingDecision.continueProcessing,
+    };
+  }
+
+  // ignore: experimental_member_use
+  static SentryMaskingDecision _replayCallShellControlUnmaskDecision(
+    Element element,
+    Widget widget,
+  ) {
+    if (widget is InheritedWidget) {
+      // ignore: experimental_member_use
+      return SentryMaskingDecision.continueProcessing;
+    }
+    // ignore: experimental_member_use
+    return switch (widget.runtimeType.toString()) {
+      '_SwitchCameraButton' =>
+        // ignore: experimental_member_use
+        SentryMaskingDecision.unmask,
       // ignore: experimental_member_use
       _ => SentryMaskingDecision.continueProcessing,
     };

@@ -161,6 +161,9 @@ class QuranSessionsFirebaseModule {
     }
 
     QuranSessionsRtcModule.register(sl, config);
+    configureInAppCallShellCallSurface(
+      QuranSessionsRtcModule.buildInAppCallSurfaceBuilder(sl),
+    );
 
     sl.registerLazySingletonIfAbsent<SessionCallProviderEventHub>(
       () => SessionCallProviderEventHub(),

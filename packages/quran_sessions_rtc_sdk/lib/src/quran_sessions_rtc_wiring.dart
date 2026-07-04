@@ -1,6 +1,5 @@
 import 'package:get_it/get_it.dart';
 import 'package:quran_sessions/quran_sessions.dart';
-import 'package:quran_sessions_rtc/quran_sessions_rtc.dart';
 
 import 'boundaries/call/agora_call_provider.dart';
 import 'boundaries/call/agora_rtc_engine_pool.dart';
@@ -69,7 +68,6 @@ class QuranSessionsRtcWiring {
 
   static InAppCallSurfaceBuilder? buildInAppCallSurface({
     required GetIt sl,
-    required AgoraCallSurfaceLabels labels,
     SessionCallProviderEventHub? eventHub,
   }) {
     return (
@@ -84,7 +82,6 @@ class QuranSessionsRtcWiring {
           callType: callType,
           providerKind: callProviderKind,
           roomPool: sl<LiveKitRoomPool>(),
-          labels: labels,
           eventHub: eventHub,
         );
         if (livekitSurface != null) {
@@ -101,7 +98,6 @@ class QuranSessionsRtcWiring {
         providerKind: callProviderKind,
         enginePool: sl<AgoraRtcEnginePool>(),
         eventHub: eventHub,
-        labels: labels,
       );
     };
   }

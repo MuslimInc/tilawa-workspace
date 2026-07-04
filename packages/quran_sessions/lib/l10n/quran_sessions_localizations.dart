@@ -1052,7 +1052,7 @@ abstract class QuranSessionsLocalizations {
   /// No description provided for @inAppCallShellFlipCamera.
   ///
   /// In en, this message translates to:
-  /// **'Flip camera'**
+  /// **'Switch camera'**
   String get inAppCallShellFlipCamera;
 
   /// No description provided for @inAppCallShellTurnVideoOn.

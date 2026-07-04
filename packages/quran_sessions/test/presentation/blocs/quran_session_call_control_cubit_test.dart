@@ -39,25 +39,21 @@ void main() {
           'loading',
           isTrue,
         ),
-        isA<QuranSessionCallControlState>()
-            .having((s) => s.isMuted, 'muted', isTrue)
-            .having(
-              (s) => s.feedback,
-              'feedback',
-              CallControlFeedback.microphoneMuted,
-            ),
+        isA<QuranSessionCallControlState>().having(
+          (s) => s.isMuted,
+          'muted',
+          isTrue,
+        ),
         isA<QuranSessionCallControlState>().having(
           (s) => s.isMicrophoneLoading,
           'loading',
           isTrue,
         ),
-        isA<QuranSessionCallControlState>()
-            .having((s) => s.isMicrophoneEnabled, 'enabled', isTrue)
-            .having(
-              (s) => s.feedback,
-              'feedback',
-              CallControlFeedback.microphoneUnmuted,
-            ),
+        isA<QuranSessionCallControlState>().having(
+          (s) => s.isMicrophoneEnabled,
+          'enabled',
+          isTrue,
+        ),
       ],
       verify: (_) {
         check(gateway.microphoneEnabledCalls).deepEquals([false, true]);
@@ -86,7 +82,7 @@ void main() {
     );
 
     blocTest<QuranSessionCallControlCubit, QuranSessionCallControlState>(
-      'switchCamera blocked when camera disabled',
+      'switchCamera no-ops when camera disabled',
       build: buildCubit,
       seed: () => QuranSessionCallControlState(
         isVideoCall: true,
@@ -94,13 +90,7 @@ void main() {
         isCameraEnabled: false,
       ),
       act: (cubit) async => cubit.switchCamera(),
-      expect: () => [
-        isA<QuranSessionCallControlState>().having(
-          (s) => s.feedback,
-          'feedback',
-          CallControlFeedback.switchCameraBlocked,
-        ),
-      ],
+      expect: () => <QuranSessionCallControlState>[],
       verify: (_) {
         check(gateway.switchCameraCount).equals(0);
       },
@@ -110,8 +100,43 @@ void main() {
       'switchCamera forwards to gateway when camera on',
       build: buildCubit,
       act: (cubit) async => cubit.switchCamera(),
+      expect: () => [
+        isA<QuranSessionCallControlState>().having(
+          (s) => s.isSwitchCameraLoading,
+          'loading',
+          isTrue,
+        ),
+        isA<QuranSessionCallControlState>()
+            .having(
+              (s) => s.cameraFacing,
+              'facing',
+              SessionCallCameraFacing.back,
+            )
+            .having((s) => s.isSwitchCameraLoading, 'loading', isFalse),
+      ],
       verify: (_) {
         check(gateway.switchCameraCount).equals(1);
+      },
+    );
+
+    blocTest<QuranSessionCallControlCubit, QuranSessionCallControlState>(
+      'switchCamera blocked when device has one camera',
+      build: () {
+        return QuranSessionCallControlCubit(
+          gateway: gateway,
+          isVideoCall: true,
+          capabilities: const SessionCallControlCapabilities(
+            microphone: true,
+            camera: true,
+            speaker: true,
+            switchCamera: true,
+            hasMultipleCameras: false,
+          ),
+        );
+      },
+      act: (cubit) async => cubit.switchCamera(),
+      verify: (_) {
+        check(gateway.switchCameraCount).equals(0);
       },
     );
 
@@ -152,6 +177,36 @@ void main() {
     );
 
     blocTest<QuranSessionCallControlCubit, QuranSessionCallControlState>(
+      'switchCamera failure surfaces actionFailed feedback',
+      build: () {
+        gateway.shouldFailSwitchCamera = true;
+        return buildCubit(isVideoCall: true);
+      },
+      act: (cubit) async => cubit.switchCamera(),
+      expect: () => [
+        isA<QuranSessionCallControlState>().having(
+          (s) => s.isSwitchCameraLoading,
+          'loading',
+          isTrue,
+        ),
+        isA<QuranSessionCallControlState>()
+            .having(
+              (s) => s.cameraFacing,
+              'facing',
+              SessionCallCameraFacing.front,
+            )
+            .having(
+              (s) => s.feedback,
+              'feedback',
+              CallControlFeedback.actionFailed,
+            ),
+      ],
+      verify: (_) {
+        check(gateway.switchCameraCount).equals(1);
+      },
+    );
+
+    blocTest<QuranSessionCallControlCubit, QuranSessionCallControlState>(
       'endCall failure clears hasEndedCall guard',
       build: () {
         gateway.shouldFailOnLeave = true;
@@ -182,6 +237,7 @@ class _FakeCallControlGateway implements SessionCallControlGateway {
   int leaveCount = 0;
   bool shouldFail = false;
   bool shouldFailOnLeave = false;
+  bool shouldFailSwitchCamera = false;
 
   @override
   Future<void> setMicrophoneEnabled({required bool enabled}) async {
@@ -199,6 +255,9 @@ class _FakeCallControlGateway implements SessionCallControlGateway {
   @override
   Future<void> switchCamera() async {
     switchCameraCount++;
+    if (shouldFailSwitchCamera) {
+      throw StateError('switch camera failed');
+    }
   }
 
   @override

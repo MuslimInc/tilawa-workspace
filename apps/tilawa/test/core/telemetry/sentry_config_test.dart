@@ -66,6 +66,13 @@ void main() {
           'Mask private Quran Sessions video layout shells in replays.',
         ),
       );
+      expect(
+        maskingRules,
+        contains(
+          'SessionCallShellControls: '
+          'Unmask call-shell controls falsely matched by the camera regex.',
+        ),
+      );
     });
 
     test('wrapRootWidget wraps child in SentryWidget', () {

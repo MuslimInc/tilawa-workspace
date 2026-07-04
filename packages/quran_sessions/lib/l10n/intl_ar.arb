@@ -249,7 +249,7 @@
     "inAppCallShellWaitingForParticipant": "في انتظار الطرف الآخر",
     "inAppCallShellMockBetaBody": "معاينة تجريبية — لا يوجد صوت أو فيديو مباشر. احجز جلسة جديدة مع تفعيل Agora لتجربة مكالمة حقيقية.",
     "inAppCallShellSpeaker": "مكبر الصوت",
-    "inAppCallShellFlipCamera": "قلب الكاميرا",
+    "inAppCallShellFlipCamera": "تبديل الكاميرا",
     "inAppCallShellTurnVideoOn": "تشغيل الكاميرا",
     "inAppCallShellTurnVideoOff": "إيقاف الكاميرا",
     "inAppCallShellMicrophoneMuted": "تم كتم الميكروفون",
