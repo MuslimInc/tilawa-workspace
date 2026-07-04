@@ -15,6 +15,7 @@ import 'package:tilawa_ui_kit/tilawa_ui_kit.dart';
 class TeacherDashboardSummaryStats extends StatelessWidget {
   const TeacherDashboardSummaryStats({
     super.key,
+    required this.sectionTitle,
     required this.pendingRequestsCount,
     required this.upcomingSessionsCount,
     required this.bookableSlotsCount,
@@ -23,6 +24,7 @@ class TeacherDashboardSummaryStats extends StatelessWidget {
     required this.bookableSlotsLabel,
   });
 
+  final String sectionTitle;
   final int pendingRequestsCount;
   final int upcomingSessionsCount;
   final int bookableSlotsCount;
@@ -32,25 +34,54 @@ class TeacherDashboardSummaryStats extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return TilawaMetricTileStrip(
-      metrics: [
-        TilawaMetricData(
-          value: '$pendingRequestsCount',
-          label: pendingRequestsLabel,
-          icon: Icons.inbox_outlined,
-          tint: TilawaSemanticTint.ink,
+    final theme = Theme.of(context);
+    final textTheme = theme.textTheme;
+    final tokens = theme.tokens;
+
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      mainAxisSize: MainAxisSize.min,
+      children: [
+        Padding(
+          padding: EdgeInsetsDirectional.fromSTEB(
+            tokens.spaceLarge,
+            tokens.spaceLarge,
+            tokens.spaceLarge,
+            0,
+          ),
+          child: Text(
+            sectionTitle,
+            style: textTheme.titleMedium?.copyWith(
+              fontWeight: FontWeight.w800,
+              color: theme.colorScheme.onSurface,
+              height: 1.15,
+              letterSpacing: -0.2,
+            ),
+          ),
         ),
-        TilawaMetricData(
-          value: '$upcomingSessionsCount',
-          label: upcomingSessionsLabel,
-          icon: Icons.event_outlined,
-          tint: TilawaSemanticTint.scholar,
-        ),
-        TilawaMetricData(
-          value: '$bookableSlotsCount',
-          label: bookableSlotsLabel,
-          icon: Icons.schedule_outlined,
-          tint: TilawaSemanticTint.neutral,
+        SizedBox(height: tokens.spaceMedium),
+        TilawaMetricTileStrip(
+          padding: EdgeInsets.symmetric(horizontal: tokens.spaceLarge),
+          metrics: [
+            TilawaMetricData(
+              value: '$pendingRequestsCount',
+              label: pendingRequestsLabel,
+              icon: Icons.inbox_outlined,
+              tint: TilawaSemanticTint.ink,
+            ),
+            TilawaMetricData(
+              value: '$upcomingSessionsCount',
+              label: upcomingSessionsLabel,
+              icon: Icons.event_outlined,
+              tint: TilawaSemanticTint.scholar,
+            ),
+            TilawaMetricData(
+              value: '$bookableSlotsCount',
+              label: bookableSlotsLabel,
+              icon: Icons.schedule_outlined,
+              tint: TilawaSemanticTint.neutral,
+            ),
+          ],
         ),
       ],
     );

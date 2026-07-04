@@ -1104,8 +1104,8 @@ class TilawaSettingsGroupTokens {
       groupShadowOpacity: 0,
       groupShadowBlur: 0,
       groupShadowOffset: Offset.zero,
-      groupTitleTextRole: TilawaTextRole.titleSmall,
-      groupTitleLetterSpacing: 0,
+      groupTitleTextRole: TilawaTextRole.titleMedium,
+      groupTitleLetterSpacing: -0.2,
       tileContentPadding: const EdgeInsets.symmetric(
         horizontal: 16,
         vertical: 14,

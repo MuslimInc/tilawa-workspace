@@ -2186,7 +2186,10 @@ class QuranSessionsLocalizationsEn extends QuranSessionsLocalizations {
   String get teacherDashboardLoadingLabel => 'Loading your dashboard';
 
   @override
-  String get teacherDashboardRefreshingLabel => 'Updating';
+  String get teacherDashboardRefreshingLabel => 'Refreshing';
+
+  @override
+  String get teacherDashboardSummaryTitle => 'Quick glance';
 
   @override
   String get teacherDashboardStatPendingRequests => 'Pending requests';

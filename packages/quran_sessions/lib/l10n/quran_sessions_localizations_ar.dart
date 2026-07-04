@@ -2162,6 +2162,9 @@ class QuranSessionsLocalizationsAr extends QuranSessionsLocalizations {
   String get teacherDashboardRefreshingLabel => 'جارٍ التحديث';
 
   @override
+  String get teacherDashboardSummaryTitle => 'نظرة سريعة';
+
+  @override
   String get teacherDashboardStatPendingRequests => 'طلبات معلقة';
 
   @override

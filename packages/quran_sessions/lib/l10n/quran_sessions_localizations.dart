@@ -3932,8 +3932,14 @@ abstract class QuranSessionsLocalizations {
   /// No description provided for @teacherDashboardRefreshingLabel.
   ///
   /// In en, this message translates to:
-  /// **'Updating'**
+  /// **'Refreshing'**
   String get teacherDashboardRefreshingLabel;
+
+  /// No description provided for @teacherDashboardSummaryTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Quick glance'**
+  String get teacherDashboardSummaryTitle;
 
   /// No description provided for @teacherDashboardStatPendingRequests.
   ///

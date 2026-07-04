@@ -94,13 +94,13 @@ class TilawaMetricTile extends StatelessWidget {
     final designTokens = theme.tokens;
     final scheme = theme.colorScheme;
 
-    final radius = designTokens.resolveRadius(
-      family: TilawaRadiusFamily.chrome,
-    );
-    final border = Border.all(
-      color: tokens.borderColor.withValues(alpha: tokens.borderOpacity),
-      width: designTokens.borderWidthThin,
-    );
+    final radius = designTokens.spaceSmall; // smaller radius for metric chips
+    final border = tokens.borderOpacity > 0
+        ? Border.all(
+            color: tokens.borderColor.withValues(alpha: tokens.borderOpacity),
+            width: designTokens.borderWidthThin,
+          )
+        : null;
 
     final body = Padding(
       padding: tokens.padding,
@@ -119,19 +119,6 @@ class TilawaMetricTile extends StatelessWidget {
             SizedBox(height: tokens.valueToIconSpacing),
           ],
           Text(
-            data.value,
-            style: tokens.valueTextRole
-                .resolve(theme.textTheme)
-                ?.copyWith(
-                  fontWeight: tokens.valueFontWeight,
-                  color: scheme.onSurface,
-                  height: tokens.valueLineHeight,
-                ),
-            maxLines: 1,
-            overflow: TextOverflow.ellipsis,
-          ),
-          SizedBox(height: tokens.valueToLabelSpacing),
-          Text(
             data.label,
             style: tokens.labelTextRole
                 .resolve(theme.textTheme)
@@ -141,6 +128,19 @@ class TilawaMetricTile extends StatelessWidget {
                   height: 1.25,
                 ),
             maxLines: 2,
+            overflow: TextOverflow.ellipsis,
+          ),
+          SizedBox(height: tokens.valueToLabelSpacing),
+          Text(
+            data.value,
+            style: tokens.valueTextRole
+                .resolve(theme.textTheme)
+                ?.copyWith(
+                  fontWeight: tokens.valueFontWeight,
+                  height: tokens.valueLineHeight,
+                  color: scheme.onSurface,
+                ),
+            maxLines: 1,
             overflow: TextOverflow.ellipsis,
           ),
           if (data.helperText != null) ...[
@@ -294,13 +294,13 @@ class TilawaMetricTileSkeleton extends StatelessWidget {
     final theme = Theme.of(context);
     final tokens = theme.componentTokens.metricTile;
     final designTokens = theme.tokens;
-    final radius = designTokens.resolveRadius(
-      family: TilawaRadiusFamily.chrome,
-    );
-    final border = Border.all(
-      color: tokens.borderColor.withValues(alpha: tokens.borderOpacity),
-      width: designTokens.borderWidthThin,
-    );
+    final radius = designTokens.spaceSmall;
+    final border = tokens.borderOpacity > 0
+        ? Border.all(
+            color: tokens.borderColor.withValues(alpha: tokens.borderOpacity),
+            width: designTokens.borderWidthThin,
+          )
+        : null;
 
     return DecoratedBox(
       decoration: BoxDecoration(
@@ -321,12 +321,12 @@ class TilawaMetricTileSkeleton extends StatelessWidget {
             ),
             SizedBox(height: tokens.valueToIconSpacing),
             TilawaSkeletonLine(
-              width: 40,
-              style: tokens.valueTextRole.resolve(theme.textTheme),
+              style: tokens.labelTextRole.resolve(theme.textTheme),
             ),
             SizedBox(height: tokens.valueToLabelSpacing),
             TilawaSkeletonLine(
-              style: tokens.labelTextRole.resolve(theme.textTheme),
+              width: 80,
+              style: tokens.valueTextRole.resolve(theme.textTheme),
             ),
           ],
         ),
@@ -355,10 +355,12 @@ class _MetricTileSkeleton extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final designTokens = theme.tokens;
-    final border = Border.all(
-      color: tokens.borderColor.withValues(alpha: tokens.borderOpacity),
-      width: designTokens.borderWidthThin,
-    );
+    final border = tokens.borderOpacity > 0
+        ? Border.all(
+            color: tokens.borderColor.withValues(alpha: tokens.borderOpacity),
+            width: designTokens.borderWidthThin,
+          )
+        : null;
     return DecoratedBox(
       decoration: BoxDecoration(
         color: tokens.fillColor,
@@ -380,12 +382,12 @@ class _MetricTileSkeleton extends StatelessWidget {
               SizedBox(height: tokens.valueToIconSpacing),
             ],
             TilawaSkeletonLine(
-              width: 40,
-              style: tokens.valueTextRole.resolve(theme.textTheme),
+              style: tokens.labelTextRole.resolve(theme.textTheme),
             ),
             SizedBox(height: tokens.valueToLabelSpacing),
             TilawaSkeletonLine(
-              style: tokens.labelTextRole.resolve(theme.textTheme),
+              width: 80,
+              style: tokens.valueTextRole.resolve(theme.textTheme),
             ),
             if (hasHelper) ...[
               SizedBox(height: tokens.labelToHelperSpacing),

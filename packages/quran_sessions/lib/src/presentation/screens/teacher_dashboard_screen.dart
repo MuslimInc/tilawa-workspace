@@ -299,6 +299,8 @@ class _TeacherDashboardScreenState extends State<TeacherDashboardScreen> {
                 onRetry: _reload,
               ),
             TeacherDashboardSuccess success => RefreshIndicator(
+              backgroundColor: Theme.of(context).colorScheme.surface,
+              color: Theme.of(context).colorScheme.primary,
               onRefresh: () async => _reload(),
               child: Stack(
                 children: [
@@ -308,6 +310,7 @@ class _TeacherDashboardScreenState extends State<TeacherDashboardScreen> {
                       // reachable.
                       SliverToBoxAdapter(
                         child: TeacherDashboardSummaryStats(
+                          sectionTitle: l10n.teacherDashboardSummaryTitle,
                           pendingRequestsCount:
                               success.pendingBookingRequests.length,
                           upcomingSessionsCount:
@@ -732,7 +735,7 @@ class _TeacherDashboardCategoriesSection extends StatelessWidget {
     return Padding(
       padding: EdgeInsetsDirectional.fromSTEB(
         tokens.spaceLarge,
-        tokens.spaceMedium,
+        tokens.spaceLarge,
         tokens.spaceLarge,
         0,
       ),
@@ -1084,6 +1087,8 @@ class _TeacherDashboardCategoryScreenState
     }
 
     return RefreshIndicator(
+      backgroundColor: Theme.of(context).colorScheme.surface,
+      color: Theme.of(context).colorScheme.primary,
       onRefresh: widget.onReload,
       child: CustomScrollView(
         slivers: switch (widget.category) {

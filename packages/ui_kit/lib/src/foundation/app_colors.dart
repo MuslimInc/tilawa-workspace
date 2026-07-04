@@ -445,7 +445,8 @@ abstract final class AppColors {
   static const Color lightSurfaceContainer = lightCanvas;
 
   /// Light top container tier — quiet neutral hairline (`#E5E5E2`).
-  static const Color lightSurfaceContainerHighestBase = tripGlideCanvasDusk;
+  static const Color lightSurfaceContainerHighestBase =
+      lightSurfaceContainerHighBase;
 
   /// Hairline dividers — warm neutral.
   static const Color lightHairline = tripGlideCanvasDusk;
@@ -464,9 +465,9 @@ abstract final class AppColors {
   /// Dark upper container tier (neutral; no primary harmonization in [AppTheme]).
   static const Color darkSurfaceContainerHighBase = catalogFilterUnselectedDark;
 
-  /// Dark top container tier **base** before optional primary harmonization
-  /// in [AppTheme].
-  static const Color darkSurfaceContainerHighestBase = Color(0xFF2E3F3B);
+  /// Dark top container tier (`#2E3F3B`).
+  static const Color darkSurfaceContainerHighestBase =
+      darkSurfaceContainerHighBase;
 
   /// Dark [ColorScheme] error tone for Material dark scheme.
   static const Color darkSchemeError = Color(0xFFFFB4AB);

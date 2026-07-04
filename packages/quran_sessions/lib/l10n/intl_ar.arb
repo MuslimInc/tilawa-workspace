@@ -893,6 +893,7 @@
     "teacherPendingBookingRequestsEmptySubtitle": "ستظهر طلبات الطلاب هنا عند إرسالها",
     "teacherDashboardLoadingLabel": "جارٍ تحميل لوحتك",
     "teacherDashboardRefreshingLabel": "جارٍ التحديث",
+    "teacherDashboardSummaryTitle": "نظرة سريعة",
     "teacherDashboardStatPendingRequests": "طلبات معلقة",
     "teacherDashboardStatUpcomingSessions": "حصص قادمة",
     "teacherDashboardStatBookableSlotsThisWeek": "مواعيد مفتوحة هذا الأسبوع",

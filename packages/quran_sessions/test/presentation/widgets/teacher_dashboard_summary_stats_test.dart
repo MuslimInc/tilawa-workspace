@@ -11,6 +11,7 @@ void main() {
       await pumpInApp(
         tester,
         const TeacherDashboardSummaryStats(
+          sectionTitle: 'نظرة سريعة',
           pendingRequestsCount: 2,
           upcomingSessionsCount: 5,
           bookableSlotsCount: 12,
@@ -36,6 +37,7 @@ void main() {
       await pumpInApp(
         tester,
         const TeacherDashboardSummaryStats(
+          sectionTitle: 'نظرة سريعة',
           pendingRequestsCount: 1,
           upcomingSessionsCount: 3,
           bookableSlotsCount: 8,

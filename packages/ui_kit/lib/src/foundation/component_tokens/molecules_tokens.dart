@@ -2743,21 +2743,21 @@ class TilawaMetricTileTokens {
         : MeMuslimDesignTokens.light();
     return TilawaMetricTileTokens(
       padding: EdgeInsets.symmetric(
-        horizontal: tokens.spaceSmall,
-        vertical: tokens.spaceSmall,
+        horizontal: tokens.spaceMedium,
+        vertical: tokens.spaceMedium,
       ),
-      iconSize: tokens.iconSizeSmall,
-      valueToIconSpacing: tokens.spaceSmall,
+      iconSize: 16,
+      valueToIconSpacing: tokens.spaceExtraSmall,
       valueToLabelSpacing: tokens.spaceExtraSmall,
-      labelToHelperSpacing: tokens.spaceExtraSmall,
-      borderOpacity: 0.4,
-      fillColor: colorScheme.surfaceContainerLow,
-      borderColor: colorScheme.outlineVariant,
+      labelToHelperSpacing: 2,
+      borderOpacity: 0.0,
+      fillColor: colorScheme.surface,
+      borderColor: Colors.transparent,
       helperColorOpacity: 0.72,
-      valueTextRole: TilawaTextRole.titleLarge,
-      labelTextRole: TilawaTextRole.labelSmall,
+      valueTextRole: TilawaTextRole.headlineSmall,
+      labelTextRole: TilawaTextRole.labelMedium,
       helperTextRole: TilawaTextRole.labelSmall,
-      valueFontWeight: FontWeight.w800,
+      valueFontWeight: FontWeight.w700,
       valueLineHeight: 1.05,
     );
   }
