@@ -4,6 +4,7 @@ import '../app_colors.dart';
 import 'atoms_tokens.dart';
 import 'molecules_tokens.dart';
 import 'organisms_tokens.dart';
+import '../design_tokens.dart';
 
 @immutable
 class MeMuslimComponentTokens extends ThemeExtension<MeMuslimComponentTokens> {
@@ -101,6 +102,10 @@ class MeMuslimComponentTokens extends ThemeExtension<MeMuslimComponentTokens> {
           seedColor: AppColors.defaultPrimary,
           brightness: brightness,
         );
+    final designTokens = brightness == Brightness.dark
+        ? MeMuslimDesignTokens.dark()
+        : MeMuslimDesignTokens.light();
+
     return MeMuslimComponentTokens(
       sectionTitle: TilawaSectionTitleTokens.defaults(),
       sheetHandle: TilawaSheetHandleTokens.defaults(),
@@ -132,9 +137,11 @@ class MeMuslimComponentTokens extends ThemeExtension<MeMuslimComponentTokens> {
       ),
       adaptiveShell: TilawaAdaptiveShellTokens.fromColorScheme(
         effectiveColorScheme,
+        designTokens,
       ),
       settingsGroup: TilawaSettingsGroupTokens.fromColorScheme(
         effectiveColorScheme,
+        designTokens,
       ),
       immersiveComposer: TilawaImmersiveComposerTokens.fromColorScheme(
         effectiveColorScheme,

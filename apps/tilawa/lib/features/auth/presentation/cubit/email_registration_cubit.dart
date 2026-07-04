@@ -68,6 +68,7 @@ class EmailRegistrationCubit extends Cubit<EmailRegistrationState> {
     );
   }
 
+  // ignore: avoid_public_methods_on_bloc_instances
   bool validateCurrentStep() {
     final Map<String, String?> errors =
         EmailRegistrationFormPolicy.validateStep(
@@ -95,6 +96,7 @@ class EmailRegistrationCubit extends Cubit<EmailRegistrationState> {
     );
   }
 
+  // ignore: avoid_public_methods_on_bloc_instances
   bool goNext() {
     if (!validateCurrentStep()) {
       return false;
@@ -112,6 +114,7 @@ class EmailRegistrationCubit extends Cubit<EmailRegistrationState> {
     return true;
   }
 
+  // ignore: avoid_public_methods_on_bloc_instances
   EmailRegistrationDraft buildSubmissionDraft() => state.draft;
 
   void onRegistrationAuthFailed({String? emailErrorKey}) {
@@ -148,6 +151,7 @@ class EmailRegistrationCubit extends Cubit<EmailRegistrationState> {
     );
   }
 
+  // ignore: avoid_public_methods_on_bloc_instances
   Future<RegisterWithEmailResult?> retryProfilePersistence() async {
     final UserEntity? user = state.authenticatedUser;
     if (user == null) {

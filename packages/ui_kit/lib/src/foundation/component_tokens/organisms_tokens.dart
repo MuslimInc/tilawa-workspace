@@ -3,7 +3,8 @@ import 'dart:math' as math;
 import 'package:flutter/material.dart';
 
 import '../app_colors.dart';
-import '../design_tokens.dart' show kMeMuslimMinInteractiveDimension;
+import '../design_tokens.dart'
+    show MeMuslimDesignTokens, kMeMuslimMinInteractiveDimension;
 import '../tilawa_text_roles.dart';
 import 'token_lerp.dart';
 
@@ -551,14 +552,19 @@ class TilawaAdaptiveShellTokens {
     );
   }
 
-  factory TilawaAdaptiveShellTokens.defaults() {
+  factory TilawaAdaptiveShellTokens.defaults(
+    MeMuslimDesignTokens designTokens,
+  ) {
     final colorScheme = ColorScheme.fromSeed(
       seedColor: AppColors.defaultPrimary,
     );
-    return TilawaAdaptiveShellTokens.fromColorScheme(colorScheme);
+    return TilawaAdaptiveShellTokens.fromColorScheme(colorScheme, designTokens);
   }
 
-  factory TilawaAdaptiveShellTokens.fromColorScheme(ColorScheme colorScheme) {
+  factory TilawaAdaptiveShellTokens.fromColorScheme(
+    ColorScheme colorScheme,
+    MeMuslimDesignTokens designTokens,
+  ) {
     // Color is derived here so every phone bottom nav follows the
     // active theme without per-screen overrides.
     final bottomNavBackgroundColor = _bottomNavBackgroundColor(colorScheme);
@@ -601,9 +607,9 @@ class TilawaAdaptiveShellTokens {
       bottomNavBorderWidth: lightChrome ? 0.5 : 1,
       bottomNavItemGap: 8,
       bottomNavBackgroundColor: bottomNavBackgroundColor,
-      bottomNavShadowOpacity: 0,
-      bottomNavShadowBlur: 0,
-      bottomNavShadowOffset: Offset.zero,
+      bottomNavShadowOpacity: designTokens.opacityShadowStrong,
+      bottomNavShadowBlur: designTokens.blurShadow,
+      bottomNavShadowOffset: Offset(0, -designTokens.shadowOffsetSmall.dy),
       bottomNavOutlineColor: _bottomNavOutlineColor(colorScheme),
       sideRailIndicatorColor: _sideRailIndicatorColor(colorScheme),
       sideRailBackgroundColor: _sideRailBackgroundColor(colorScheme),
@@ -1070,13 +1076,19 @@ class TilawaSettingsGroupTokens {
   /// [switchTileContentPadding]; vertical is zero so row height is driven by
   /// [ListTile.minTileHeight] (48 dp, [kMeMuslimMinInteractiveDimension]) in the
   /// settings tile widgets.
-  factory TilawaSettingsGroupTokens.defaults() {
+  factory TilawaSettingsGroupTokens.defaults(
+    MeMuslimDesignTokens designTokens,
+  ) {
     return TilawaSettingsGroupTokens.fromColorScheme(
       ColorScheme.fromSeed(seedColor: AppColors.defaultPrimary),
+      designTokens,
     );
   }
 
-  factory TilawaSettingsGroupTokens.fromColorScheme(ColorScheme colorScheme) {
+  factory TilawaSettingsGroupTokens.fromColorScheme(
+    ColorScheme colorScheme,
+    MeMuslimDesignTokens designTokens,
+  ) {
     const tileIconContainerOpacity = 0.1;
     const selectionTileSelectedBackgroundColor = Colors.transparent;
     // Full outlineVariant — calm hairlines visible on white settings cards
@@ -1101,9 +1113,9 @@ class TilawaSettingsGroupTokens {
         0,
         8,
       ),
-      groupShadowOpacity: 0,
-      groupShadowBlur: 0,
-      groupShadowOffset: Offset.zero,
+      groupShadowOpacity: designTokens.opacityShadow,
+      groupShadowBlur: designTokens.blurShadow,
+      groupShadowOffset: designTokens.shadowOffsetSmall,
       groupTitleTextRole: TilawaTextRole.titleMedium,
       groupTitleLetterSpacing: -0.2,
       tileContentPadding: const EdgeInsets.symmetric(

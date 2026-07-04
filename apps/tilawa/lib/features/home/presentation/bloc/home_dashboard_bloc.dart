@@ -32,6 +32,7 @@ final class HomeDashboardBloc
   ///
   /// When a refresh is already pending, returns its future without queueing
   /// a duplicate refresh event.
+  // ignore: avoid_public_methods_on_bloc_instances
   Future<void> refreshAndWait({String? localeIdentifier}) {
     _localeIdentifier = localeIdentifier ?? _localeIdentifier;
     final Completer<void>? pending = _refreshCompleter;
