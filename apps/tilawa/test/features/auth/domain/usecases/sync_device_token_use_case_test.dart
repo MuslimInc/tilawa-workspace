@@ -86,7 +86,7 @@ void main() {
     await subscription.cancel();
   });
 
-  test('explicit stale failure notifies session revoked', () async {
+  test('explicit stale failure does not notify session revoked', () async {
     var revoked = false;
     final subscription = sessionRevokedNotifier.onSessionRevoked.listen((_) {
       revoked = true;
@@ -103,7 +103,7 @@ void main() {
     await Future<void>.delayed(Duration.zero);
 
     expect(result.isLeft(), isTrue);
-    expect(revoked, isTrue);
+    expect(revoked, isFalse);
     await subscription.cancel();
   });
 

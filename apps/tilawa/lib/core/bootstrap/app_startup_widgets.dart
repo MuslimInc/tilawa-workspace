@@ -141,8 +141,6 @@ class _BootGateState extends State<_BootGate> {
   bool _loggedBootGateSplash = false;
 
   static final Color _launchBackground = AppColors.launchSplashBackground;
-  static const String _appLogoAsset = 'assets/images/app_logo.png';
-  static const double _wordmarkBoxSize = AppColors.launchSplashLogoSize;
   static final SystemUiOverlayStyle _launchOverlayStyle =
       AppSystemChromeStyle.buildColoredScreenStyle(
         backgroundColor: _launchBackground,
@@ -336,8 +334,6 @@ class _BootGateState extends State<_BootGate> {
             ready: _ready,
             backgroundColor: _launchBackground,
             overlayStyle: _launchOverlayStyle,
-            wordmarkAsset: _appLogoAsset,
-            wordmarkBoxSize: _wordmarkBoxSize,
           ),
         ],
       ),
@@ -352,15 +348,11 @@ class _LaunchSplashOverlay extends StatefulWidget {
     required this.ready,
     required this.backgroundColor,
     required this.overlayStyle,
-    required this.wordmarkAsset,
-    required this.wordmarkBoxSize,
   });
 
   final bool ready;
   final Color backgroundColor;
   final SystemUiOverlayStyle overlayStyle;
-  final String wordmarkAsset;
-  final double wordmarkBoxSize;
 
   @override
   State<_LaunchSplashOverlay> createState() => _LaunchSplashOverlayState();
@@ -401,8 +393,6 @@ class _LaunchSplashOverlayState extends State<_LaunchSplashOverlay> {
         return _LaunchSplash(
           backgroundColor: widget.backgroundColor,
           overlayStyle: widget.overlayStyle,
-          wordmarkAsset: widget.wordmarkAsset,
-          wordmarkBoxSize: widget.wordmarkBoxSize,
         );
       },
     );
@@ -413,16 +403,12 @@ class _LaunchSplash extends StatelessWidget {
   const _LaunchSplash({
     required this.backgroundColor,
     required this.overlayStyle,
-    required this.wordmarkAsset,
-    required this.wordmarkBoxSize,
   });
 
   static int _paintLogCount = 0;
 
   final Color backgroundColor;
   final SystemUiOverlayStyle overlayStyle;
-  final String wordmarkAsset;
-  final double wordmarkBoxSize;
 
   @override
   Widget build(BuildContext context) {
@@ -434,23 +420,13 @@ class _LaunchSplash extends StatelessWidget {
         ? 'first paint'
         : 'repaint #$_paintLogCount (often allowFirstFrame; same 288dp box)';
     firstFrameLog(
-      '_LaunchSplash $paintLabel logoBox=${wordmarkBoxSize}dp '
-      'asset=$wordmarkAsset',
+      '_LaunchSplash $paintLabel logoBox=${LaunchSplashContent.logoBoxSize}dp '
+      'asset=${LaunchSplashContent.logoAsset}',
     );
     return LaunchSplashCanvas(
       backgroundColor: backgroundColor,
       overlayStyle: overlayStyle,
-      child: LogoHeightProbe(
-        source: 'BootGate_LaunchSplash',
-        boxSize: wordmarkBoxSize,
-        asset: wordmarkAsset,
-        child: Image.asset(
-          wordmarkAsset,
-          filterQuality: FilterQuality.high,
-          fit: BoxFit.contain,
-          gaplessPlayback: true,
-        ),
-      ),
+      child: const LaunchSplashContent(source: 'BootGate_LaunchSplash'),
     );
   }
 }

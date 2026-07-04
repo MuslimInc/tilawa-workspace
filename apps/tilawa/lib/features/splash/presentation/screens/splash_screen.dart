@@ -6,7 +6,7 @@ import 'package:flutter/scheduler.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:tilawa/core/bootstrap/first_frame_log.dart';
 import 'package:tilawa/core/bootstrap/launch_splash_canvas.dart';
-import 'package:tilawa/core/bootstrap/logo_height_log.dart';
+import 'package:tilawa/core/bootstrap/launch_splash_content.dart';
 import 'package:tilawa/core/bootstrap/splash_launch_handoff.dart';
 import 'package:tilawa/core/di/injection.dart';
 import 'package:tilawa/core/telemetry/tilawa_sentry_route_display.dart';
@@ -30,9 +30,6 @@ class SplashScreen extends StatefulWidget {
 
 class _SplashScreenState extends State<SplashScreen> {
   static final Color _launchBackground = AppColors.launchSplashBackground;
-  static const Color _logoForeground = AppColors.launchSplashForeground;
-  static const String _appLogoAsset = 'assets/images/app_logo.png';
-  static const double _wordmarkBoxSize = AppColors.launchSplashLogoSize;
   static final SystemUiOverlayStyle _launchOverlayStyle =
       AppSystemChromeStyle.buildColoredScreenStyle(
         backgroundColor: _launchBackground,
@@ -139,25 +136,10 @@ class _SplashScreenState extends State<SplashScreen> {
             child: LaunchSplashCanvas(
               backgroundColor: _launchBackground,
               overlayStyle: _launchOverlayStyle,
-              child: Column(
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  LogoHeightProbe(
-                    source: 'SplashScreen',
-                    boxSize: _wordmarkBoxSize,
-                    asset: _appLogoAsset,
-                    child: Image.asset(
-                      _appLogoAsset,
-                      filterQuality: FilterQuality.high,
-                      fit: BoxFit.contain,
-                      gaplessPlayback: true,
-                    ),
-                  ),
-                  const SizedBox(height: 40),
-                  const CircularProgressIndicator(
-                    color: _logoForeground,
-                  ),
-                ],
+              child: LaunchSplashContent(
+                source: 'SplashScreen',
+                wordmark: context.l10n.appTitle,
+                showProgress: true,
               ),
             ),
           ),

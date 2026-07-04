@@ -22,6 +22,9 @@ class CheckSessionValidityUseCase {
     try {
       final localEpoch = await _tokenSyncCache.getSessionEpoch() ?? 0;
       final localActiveDeviceId = await _tokenSyncCache.getActiveDeviceId();
+      if (localActiveDeviceId == null || localActiveDeviceId.isEmpty) {
+        return const Right(SessionValidityResult.verificationUnknown);
+      }
       final snap = await _firestore.collection('users').doc(userId).get();
       final rawEpoch = snap.data()?['session']?['epoch'];
       final serverEpoch = rawEpoch is num ? rawEpoch.toInt() : 0;
@@ -31,11 +34,14 @@ class CheckSessionValidityUseCase {
           : '';
       final isValid =
           localEpoch == serverEpoch &&
-          localActiveDeviceId != null &&
           localActiveDeviceId == serverActiveDeviceId;
-      return Right(
-        isValid ? SessionValidityResult.valid : SessionValidityResult.stale,
-      );
+      if (isValid) {
+        return const Right(SessionValidityResult.valid);
+      }
+      if (localEpoch > 0 && serverEpoch == 0 && serverActiveDeviceId.isEmpty) {
+        return const Right(SessionValidityResult.verificationUnknown);
+      }
+      return const Right(SessionValidityResult.stale);
     } on FirebaseException catch (error, stackTrace) {
       if (_isNetworkIssue(error)) {
         logger.d(

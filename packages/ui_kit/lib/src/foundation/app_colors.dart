@@ -373,9 +373,15 @@ abstract final class AppColors {
   /// Wordmark and progress on launch surfaces (`#FFFFFF`).
   static const Color launchSplashForeground = Color(0xFFFFFFFF);
 
-  /// Logo box on Flutter launch surfaces — must match Android
-  /// `@dimen/splash_logo_size` (288dp) and `splash_icon` drawable.
-  static const double launchSplashLogoSize = 288;
+  /// Full-frame launch logo box used by Flutter. Android 12 keeps its native
+  /// splash icon transparent because the OS scales/masks animated icons; Flutter
+  /// renders the padded asset after the first launch frame is ready.
+  static const double launchSplashLogoFrameSize = 288;
+
+  /// Android 12+ masked visible circle diameter (2/3 of the icon frame,
+  /// `@dimen/splash_logo_display_size`). The mark's bounding-box diagonal
+  /// must stay inside this circle or the mask clips it.
+  static const double launchSplashLogoSize = 192;
 
   // ---------------------------------------------------------------------------
   // Light neutral ramp — warm near-white canvas + white cards

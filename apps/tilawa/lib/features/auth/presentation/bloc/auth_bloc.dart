@@ -142,6 +142,7 @@ class AuthBloc extends HydratedBloc<AuthEvent, AuthState> {
   ) async {
     final int generation = ++_interactiveSignInGeneration;
     try {
+      _signInSessionTracker.markStarted();
       await PendingSessionRevokeStore.clear();
       emit(const AuthState.loading());
 
@@ -180,6 +181,8 @@ class AuthBloc extends HydratedBloc<AuthEvent, AuthState> {
       }
       logger.e('Email sign-in failed', error: error, stackTrace: stackTrace);
       emit(const AuthState.error(message: 'Authentication failed'));
+    } finally {
+      _signInSessionTracker.markFinished();
     }
   }
 
@@ -189,6 +192,7 @@ class AuthBloc extends HydratedBloc<AuthEvent, AuthState> {
   ) async {
     final int generation = ++_interactiveSignInGeneration;
     try {
+      _signInSessionTracker.markStarted();
       await PendingSessionRevokeStore.clear();
       emit(const AuthState.loading());
 
@@ -236,6 +240,8 @@ class AuthBloc extends HydratedBloc<AuthEvent, AuthState> {
         stackTrace: stackTrace,
       );
       emit(const AuthState.error(message: 'Authentication failed'));
+    } finally {
+      _signInSessionTracker.markFinished();
     }
   }
 

@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <!-- Invisible splash icon: Android 12+ only allows a flat window color here.
-     The wordmark is drawn by Flutter at @dimen/splash_logo_size so it is not
-     masked or scaled differently from the launcher adaptive icon animation. -->
+     The wordmark is drawn by Flutter from the padded app_logo.png frame so it
+     is not masked or scaled differently from the launcher adaptive icon. -->
 <shape xmlns:android="http://schemas.android.com/apk/res/android"
     android:shape="rectangle">
     <solid android:color="@android:color/transparent" />

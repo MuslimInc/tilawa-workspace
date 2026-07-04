@@ -753,6 +753,44 @@ void main() {
       );
     });
 
+    group('SignInWithEmailEvent', () {
+      test(
+        'keeps CheckAuthStatus deferred until email device registration finishes',
+        () async {
+          final registrationCompleter = Completer<Either<Failure, void>>();
+          when(
+            mockSignInWithEmailUseCase(
+              email: anyNamed('email'),
+              password: anyNamed('password'),
+            ),
+          ).thenAnswer((_) async => AuthResult.success(user: tUser));
+          when(
+            mockSyncDeviceTokenUseCase.registerExplicitSignIn(tUser.id),
+          ).thenAnswer((_) => registrationCompleter.future);
+
+          authBloc.add(
+            const SignInWithEmailEvent(
+              email: 'test@example.com',
+              password: 'Password1!',
+            ),
+          );
+          await Future<void>.delayed(Duration.zero);
+
+          expect(authBloc.state, AuthState.authenticated(user: tUser));
+          expect(signInSessionTracker.inFlight, isTrue);
+
+          authBloc.add(const CheckAuthStatusEvent());
+          await Future<void>.delayed(Duration.zero);
+          verifyNever(mockGetCurrentUserUseCase());
+
+          registrationCompleter.complete(const Right(null));
+          await Future<void>.delayed(Duration.zero);
+
+          expect(signInSessionTracker.inFlight, isFalse);
+        },
+      );
+    });
+
     group('RegisterWithEmailEvent', () {
       const EmailRegistrationDraft draft = EmailRegistrationDraft(
         email: 'mm@gmail.com',
