@@ -29,13 +29,67 @@ repository secret**:
 2. Open the **GitHub app → repo → Actions → "Android Release (Google Play)" →
    Run workflow**.
 3. Fill the form:
-   - **track**: `internal` first (recommended), then promote.
+   - **track**: `internal` first (recommended). **Do not promote testing
+     artifacts to production in the Play Console** — re-run the workflow with
+     `track=production` instead (see
+     [Promotion policy](#promotion-policy--closed-testing-flags)).
    - **build_name**: e.g. `2.0.8`.
    - **build_number**: e.g. `52` — must be **higher** than the last uploaded
      version code (current live is `2.0.8+52` in repo; confirm Play Console).
    - **rollout**: only matters for `production` (e.g. `0.05` for 5%, `1.0` for
      full).
+   - **learn_quran_student**: enable the Learn Quran student hub for closed
+     testing (`internal`/`alpha`/`beta` only). The workflow **fails** if this
+     is combined with `track=production`.
 4. Run it and watch the logs. On success the build is on the chosen Play track.
+
+## Promotion policy — closed-testing flags
+
+Feature gating is **compiled into the AAB** via dart-defines. Every build gets
+`TILAWA_DISTRIBUTION=play_<track>`, and any distribution other than
+`play_production` compiles closed-testing defaults **ON** (Quran Sessions
+booking, teacher application, dashboard summary read). With
+`learn_quran_student=true` the student hub is visible too.
+
+Consequences:
+
+- **Never promote an internal/alpha/beta AAB to the production track in the
+  Play Console.** The testing flags travel with the artifact — promotion would
+  ship them to all users.
+- **Production is always a fresh workflow run with `track=production`**, which
+  compiles `play_production` defaults (all testing flags off). The workflow
+  rejects `learn_quran_student=true` on the production track and prints a
+  "do not promote" warning on every testing-track run as a reminder.
+
+### Closed testing (Learn Quran) — reference configuration
+
+Workflow inputs for a closed-testing build:
+
+| Input | Value |
+| --- | --- |
+| `track` | `internal` (first device QA), then `alpha` for closed testing |
+| `build_name` / `build_number` | next version as usual |
+| `learn_quran_student` | `true` |
+
+This is equivalent to the local command:
+
+```sh
+cd apps/tilawa
+dart run tool/configure_rtc_deps.dart --stub   # CI does this on all Play tracks
+flutter build appbundle --release \
+  --flavor production \
+  --dart-define-from-file=env/production.json \
+  --target-platform android-arm64 \
+  --obfuscate --split-debug-info=build/symbols \
+  --dart-define=TILAWA_DISTRIBUTION=play_internal \
+  --dart-define=TILAWA_LAUNCH_LEARN_QURAN_STUDENT_FEATURE_ENABLED=true
+```
+
+Note: in-app video (Agora/LiveKit) native SDKs are excluded from **all** Play
+tracks; closed testers join sessions through the external meeting link. The
+server-side provider config lives in Firestore
+`quran_session_platform_config/global.enabledCallProviders` and must not list
+providers the client cannot join.
 
 The version name/code are passed straight to the build, so you don't need to
 edit `pubspec.yaml` to bump the release.
