@@ -2,6 +2,7 @@ import 'package:dartz_plus/dartz_plus.dart';
 
 import '../entities/generated_slot.dart';
 import '../entities/teacher_availability.dart';
+import '../entities/weekly_schedule.dart';
 import '../failures/quran_sessions_failure.dart';
 import '../repositories/booked_slot_lock_repository.dart';
 import '../repositories/schedule_repository.dart';
@@ -23,16 +24,22 @@ class GetTeacherAvailabilityUseCase {
   final SlotGenerator _slotGenerator;
   final DateTime Function() _now;
 
+  /// [preloadedSchedule] skips the schedule fetch when the caller already
+  /// holds the teacher's weekly schedule (e.g. the dashboard use case).
   Future<Either<QuranSessionsFailure, List<TeacherAvailability>>> call(
     String teacherId, {
     required DateTime from,
     required DateTime to,
+    WeeklySchedule? preloadedSchedule,
   }) async {
-    final scheduleResult = await _scheduleRepository.getSchedule(teacherId);
-    if (scheduleResult.isLeft()) {
-      return scheduleResult.map((_) => throw StateError('unreachable'));
+    WeeklySchedule? schedule = preloadedSchedule;
+    if (schedule == null) {
+      final scheduleResult = await _scheduleRepository.getSchedule(teacherId);
+      if (scheduleResult.isLeft()) {
+        return scheduleResult.map((_) => throw StateError('unreachable'));
+      }
+      schedule = scheduleResult.fold((_) => null, (value) => value);
     }
-    final schedule = scheduleResult.fold((_) => null, (value) => value);
     if (schedule == null || schedule.isEmpty) {
       return const Right([]);
     }
@@ -42,11 +49,19 @@ class GetTeacherAvailabilityUseCase {
     final overrideQueryTo = DateTime(to.year, to.month, to.day).add(
       const Duration(days: 1),
     );
-    final overridesResult = await _scheduleRepository.getOverrides(
+    // Overrides and booked starts are independent — fetch them concurrently.
+    final overridesFuture = _scheduleRepository.getOverrides(
       teacherId,
       from: from,
       to: overrideQueryTo,
     );
+    final bookedStartsFuture = _bookedSlotLocks.getActiveBookedStarts(
+      teacherId,
+      windowStart: from,
+      windowEnd: to,
+      now: _now(),
+    );
+    final overridesResult = await overridesFuture;
     if (overridesResult.isLeft()) {
       return overridesResult.map((_) => throw StateError('unreachable'));
     }
@@ -55,12 +70,7 @@ class GetTeacherAvailabilityUseCase {
       (value) => value,
     );
 
-    final bookedStartsResult = await _bookedSlotLocks.getActiveBookedStarts(
-      teacherId,
-      windowStart: from,
-      windowEnd: to,
-      now: _now(),
-    );
+    final bookedStartsResult = await bookedStartsFuture;
     if (bookedStartsResult.isLeft()) {
       return bookedStartsResult.map((_) => throw StateError('unreachable'));
     }

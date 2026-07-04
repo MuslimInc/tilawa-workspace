@@ -4,6 +4,7 @@ import 'package:dartz_plus/dartz_plus.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 import 'package:quran_sessions/src/domain/entities/teacher_availability.dart';
+import 'package:quran_sessions/src/domain/entities/weekly_schedule.dart';
 import 'package:quran_sessions/src/domain/failures/quran_sessions_failure.dart';
 import 'package:quran_sessions/src/domain/usecases/get_teacher_availability_usecase.dart';
 import 'package:quran_sessions/src/domain/usecases/get_teachers_usecase.dart';
@@ -30,6 +31,7 @@ class _StaticAvailabilityUseCase extends GetTeacherAvailabilityUseCase {
     String teacherId, {
     required DateTime from,
     required DateTime to,
+    WeeklySchedule? preloadedSchedule,
   }) async {
     return Right(slots[teacherId] ?? const []);
   }

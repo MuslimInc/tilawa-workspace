@@ -25,6 +25,7 @@ class _StaticAvailabilityUseCase extends GetTeacherAvailabilityUseCase {
     String teacherId, {
     required DateTime from,
     required DateTime to,
+    WeeklySchedule? preloadedSchedule,
   }) async {
     return Right(slots[teacherId] ?? const []);
   }

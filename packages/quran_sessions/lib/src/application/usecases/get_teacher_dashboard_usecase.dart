@@ -88,19 +88,11 @@ class GetTeacherDashboardUseCase {
           ? teacherProfile.userId
           : teacherProfileId;
 
-      final userProfile = await cacheStore.getOrFetch<UserProfile>(
-        key: SessionCacheKey.teacherProfileByUserId(ownerUserId),
-        ttl: CacheFreshnessPolicy.teacherProfileTtl,
-        fetcher: () async {
-          final res = await userProfileRepository.getProfile(ownerUserId);
-          return res.fold((f) => throw f, (p) => p);
-        },
-      );
+      // The profile→config chain, schedule, and upcoming sessions are
+      // independent — run them concurrently instead of serial round trips.
+      final profileAndConfigFuture = _loadProfileAndConfig(ownerUserId);
 
-      final countryCode = userProfile.countryCode;
-      final schedulingConfig = await _resolveSchedulingConfig(countryCode);
-
-      final schedule = await cacheStore.getOrFetch<WeeklySchedule?>(
+      final scheduleFuture = cacheStore.getOrFetch<WeeklySchedule?>(
         key: SessionCacheKey.teacherSchedule(teacherProfileId),
         ttl: CacheFreshnessPolicy.weeklyScheduleTtl,
         fetcher: () async {
@@ -109,7 +101,7 @@ class GetTeacherDashboardUseCase {
         },
       );
 
-      final allUpcoming = await cacheStore.getOrFetch<List<QuranSession>>(
+      final upcomingFuture = cacheStore.getOrFetch<List<QuranSession>>(
         key: SessionCacheKey.teacherDashboardSessions(teacherProfileId),
         ttl: CacheFreshnessPolicy.dashboardSessionsTtl,
         fetcher: () async {
@@ -119,6 +111,18 @@ class GetTeacherDashboardUseCase {
           return res.fold((f) => throw f, (s) => s);
         },
       );
+
+      // Future.wait surfaces the first failure and absorbs the rest, so the
+      // concurrent fetches cannot leak unhandled async errors.
+      await Future.wait<Object?>([
+        profileAndConfigFuture,
+        scheduleFuture,
+        upcomingFuture,
+      ]);
+
+      final (userProfile, schedulingConfig) = await profileAndConfigFuture;
+      final schedule = await scheduleFuture;
+      final allUpcoming = await upcomingFuture;
 
       final pendingBookingRequests = <QuranSession>[];
       final upcomingSessions = <QuranSession>[];
@@ -145,6 +149,7 @@ class GetTeacherDashboardUseCase {
                 teacherProfileId,
                 from: now,
                 to: now.add(horizon),
+                preloadedSchedule: schedule,
               );
               return result.fold((f) => throw f, (slots) => slots);
             },
@@ -165,6 +170,26 @@ class GetTeacherDashboardUseCase {
     } catch (e) {
       return const Left(UnknownFailure());
     }
+  }
+
+  /// Loads the owner's user profile, then the scheduling config derived from
+  /// its country code — a dependent chain that runs as one unit so it can be
+  /// awaited concurrently with the schedule and sessions fetches.
+  Future<(UserProfile, MarketSchedulingConfig)> _loadProfileAndConfig(
+    String ownerUserId,
+  ) async {
+    final userProfile = await cacheStore.getOrFetch<UserProfile>(
+      key: SessionCacheKey.teacherProfileByUserId(ownerUserId),
+      ttl: CacheFreshnessPolicy.teacherProfileTtl,
+      fetcher: () async {
+        final res = await userProfileRepository.getProfile(ownerUserId);
+        return res.fold((f) => throw f, (p) => p);
+      },
+    );
+    final schedulingConfig = await _resolveSchedulingConfig(
+      userProfile.countryCode,
+    );
+    return (userProfile, schedulingConfig);
   }
 
   /// Resolves the effective scheduling config for [countryCode].

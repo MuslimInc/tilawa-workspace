@@ -268,9 +268,15 @@ class SpyGetTeacherAvailabilityUseCase extends GetTeacherAvailabilityUseCase {
     String teacherId, {
     required DateTime from,
     required DateTime to,
+    WeeklySchedule? preloadedSchedule,
   }) async {
     callCount++;
-    return super.call(teacherId, from: from, to: to);
+    return super.call(
+      teacherId,
+      from: from,
+      to: to,
+      preloadedSchedule: preloadedSchedule,
+    );
   }
 }
 
