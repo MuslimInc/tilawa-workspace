@@ -2,28 +2,36 @@ import 'dart:math' as math;
 
 import 'package:fluentui_system_icons/fluentui_system_icons.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:quran_sessions/quran_sessions.dart';
 import 'package:tilawa/core/extensions.dart';
-import 'package:tilawa/features/quran_sessions/quran_sessions_feature_flags.dart';
+import 'package:tilawa/features/settings/presentation/cubit/teacher_capability_cubit.dart';
 import 'package:tilawa_ui_kit/tilawa_ui_kit.dart';
 import 'package:visibility_detector/visibility_detector.dart';
 
 import 'home_dashboard_icon_well.dart';
 import 'home_learn_quran_analytics.dart';
+import 'learn_quran_student_visibility.dart';
 import 'open_home_quran_sessions.dart';
-import '../../../quran_sessions/presentation/teacher_application_entry.dart';
 
 /// Minimum visible fraction that counts as an impression.
 const double _kImpressionVisibleFraction = 0.5;
 
-bool _isHomeTeacherApplicationCardVisible() =>
-    quranSessionsFeatureConfig().showHomeTeacherApplicationCard;
+bool _isHomeLearnQuranStudentCardVisible({
+  TeacherCapability? capability,
+  bool capabilityLoaded = true,
+}) => LearnQuranStudentVisibility.shouldShowHomeCard(
+  capabilityLoaded: capabilityLoaded,
+  capability: capability,
+);
 
-bool _isHomeLearnQuranStudentCardVisible() =>
-    quranSessionsFeatureConfig().showLearnQuranStudentExperience;
-
-bool _isHomeFeaturedCardVisible() =>
-    _isHomeTeacherApplicationCardVisible() ||
-    _isHomeLearnQuranStudentCardVisible();
+bool _isHomeFeaturedCardVisible({
+  TeacherCapability? capability,
+  bool capabilityLoaded = true,
+}) => _isHomeLearnQuranStudentCardVisible(
+  capability: capability,
+  capabilityLoaded: capabilityLoaded,
+);
 
 /// Layout metrics for the home featured tutor sliver.
 abstract final class HomeFeaturedTutorCardLayout {
@@ -117,9 +125,46 @@ abstract final class HomeFeaturedTutorCardLayout {
   }
 }
 
+/// Loads [TeacherCapability] and builds the home Learn Quran sliver when allowed.
+class HomeFeaturedTutorCardScope extends StatelessWidget {
+  const HomeFeaturedTutorCardScope({super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    return BlocProvider(
+      create: (_) => TeacherCapabilityCubit()..load(),
+      child: const _HomeFeaturedTutorCardSliverHost(),
+    );
+  }
+}
+
+class _HomeFeaturedTutorCardSliverHost extends StatelessWidget {
+  const _HomeFeaturedTutorCardSliverHost();
+
+  @override
+  Widget build(BuildContext context) {
+    final SettingsTeacherCapabilityLoadState state = context
+        .watch<TeacherCapabilityCubit>()
+        .state;
+    final Widget? sliver = homeFeaturedTutorCardSliver(
+      context,
+      capability: state.capability,
+      capabilityLoaded: state.hasLoaded,
+    );
+    return sliver ?? const SliverToBoxAdapter(child: SizedBox.shrink());
+  }
+}
+
 /// Builds the featured tutor sliver when a home card flag is enabled.
-Widget? homeFeaturedTutorCardSliver(BuildContext context) {
-  if (!_isHomeFeaturedCardVisible()) {
+Widget? homeFeaturedTutorCardSliver(
+  BuildContext context, {
+  TeacherCapability? capability,
+  bool capabilityLoaded = true,
+}) {
+  if (!_isHomeFeaturedCardVisible(
+    capability: capability,
+    capabilityLoaded: capabilityLoaded,
+  )) {
     return null;
   }
 
@@ -136,8 +181,10 @@ Widget? homeFeaturedTutorCardSliver(BuildContext context) {
         horizontalInset,
         tokens.spaceMedium,
       ),
-      child: const _HomeFeaturedTutorCardImpressionScope(
-        child: _HomeFeaturedTutorCardContent(),
+      child: _HomeFeaturedTutorCardImpressionScope(
+        capability: capability,
+        capabilityLoaded: capabilityLoaded,
+        child: const _HomeLearnQuranStudentCardContent(),
       ),
     ),
   );
@@ -148,24 +195,42 @@ Widget? homeFeaturedTutorCardSliver(BuildContext context) {
 /// Standalone wrapper for tests; on Home it is rendered via
 /// [homeFeaturedTutorCardSliver].
 class HomeFeaturedTutorCard extends StatelessWidget {
-  const HomeFeaturedTutorCard({super.key});
+  const HomeFeaturedTutorCard({
+    super.key,
+    this.capability,
+    this.capabilityLoaded = true,
+  });
+
+  final TeacherCapability? capability;
+  final bool capabilityLoaded;
 
   @override
   Widget build(BuildContext context) {
-    if (!_isHomeFeaturedCardVisible()) {
+    if (!_isHomeFeaturedCardVisible(
+      capability: capability,
+      capabilityLoaded: capabilityLoaded,
+    )) {
       return const SizedBox.shrink();
     }
 
-    return const _HomeFeaturedTutorCardImpressionScope(
-      child: _HomeFeaturedTutorCardContent(),
+    return _HomeFeaturedTutorCardImpressionScope(
+      capability: capability,
+      capabilityLoaded: capabilityLoaded,
+      child: const _HomeLearnQuranStudentCardContent(),
     );
   }
 }
 
 class _HomeFeaturedTutorCardImpressionScope extends StatefulWidget {
-  const _HomeFeaturedTutorCardImpressionScope({required this.child});
+  const _HomeFeaturedTutorCardImpressionScope({
+    required this.child,
+    this.capability,
+    this.capabilityLoaded = true,
+  });
 
   final Widget child;
+  final TeacherCapability? capability;
+  final bool capabilityLoaded;
 
   @override
   State<_HomeFeaturedTutorCardImpressionScope> createState() =>
@@ -183,11 +248,17 @@ class _HomeFeaturedTutorCardImpressionScopeState
     if (info.visibleFraction < _kImpressionVisibleFraction) {
       return;
     }
-    if (!_isHomeFeaturedCardVisible()) {
+    if (!_isHomeFeaturedCardVisible(
+      capability: widget.capability,
+      capabilityLoaded: widget.capabilityLoaded,
+    )) {
       return;
     }
     _loggedImpression = true;
-    if (_isHomeLearnQuranStudentCardVisible()) {
+    if (_isHomeLearnQuranStudentCardVisible(
+      capability: widget.capability,
+      capabilityLoaded: widget.capabilityLoaded,
+    )) {
       logHomeLearnQuranCardViewed();
     }
   }
@@ -198,117 +269,6 @@ class _HomeFeaturedTutorCardImpressionScopeState
       key: const Key('home_learn_quran_card_impression'),
       onVisibilityChanged: _onVisibilityChanged,
       child: widget.child,
-    );
-  }
-}
-
-class _HomeFeaturedTutorCardContent extends StatelessWidget {
-  const _HomeFeaturedTutorCardContent();
-
-  @override
-  Widget build(BuildContext context) {
-    if (_isHomeTeacherApplicationCardVisible()) {
-      return _HomeTeacherApplicationCardContent(
-        showExperimentalBadge: !_isHomeLearnQuranStudentCardVisible(),
-      );
-    }
-
-    return const _HomeLearnQuranStudentCardContent();
-  }
-}
-
-class _HomeTeacherApplicationCardContent extends StatelessWidget {
-  const _HomeTeacherApplicationCardContent({
-    required this.showExperimentalBadge,
-  });
-
-  final bool showExperimentalBadge;
-
-  @override
-  Widget build(BuildContext context) {
-    final MeMuslimDesignTokens tokens = context.tokens;
-    final ThemeData theme = Theme.of(context);
-    final TilawaHomeScreenTokens screenTokens =
-        theme.componentTokens.homeScreen;
-    final Color accent = screenTokens.homeFeaturedTutorAccent;
-    final Color cardBorder = Color.alphaBlend(
-      screenTokens.homePrayerHeroBorder.withValues(alpha: 0.72),
-      theme.colorScheme.outlineVariant.withValues(alpha: 0.28),
-    );
-    final double radius = tokens.resolveRadius(
-      family: TilawaRadiusFamily.decorative,
-    );
-    final BorderRadius borderRadius = BorderRadius.circular(radius);
-    final l10n = context.l10n;
-
-    return TilawaInteractiveSurface(
-      onTap: () => showTeacherApplicationEntrySheet(context),
-      borderRadius: borderRadius,
-      stateLayerColor: accent,
-      semanticLabel: l10n.settingsTeacherApplicationEntryTitle,
-      semanticHint: l10n.teacherApplicationOpenFormCta,
-      child: DecoratedBox(
-        decoration: BoxDecoration(
-          borderRadius: borderRadius,
-          color: screenTokens.homeContentSheetSurface,
-          border: Border.all(
-            color: cardBorder,
-            width: tokens.borderWidthThin,
-          ),
-        ),
-        child: Padding(
-          padding: EdgeInsetsDirectional.all(tokens.spaceMedium),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              Row(
-                spacing: tokens.spaceSmall,
-                children: [
-                  HomeDashboardIconWell(
-                    accent: accent,
-                    child: TilawaLearnQuranTutorIcon(
-                      size: tokens.iconSizeLarge,
-                      color: accent,
-                    ),
-                  ),
-                  Expanded(
-                    child: Text(
-                      l10n.settingsTeacherApplicationEntryTitle,
-                      maxLines: 2,
-                      overflow: TextOverflow.ellipsis,
-                      style: theme.textTheme.titleMedium?.copyWith(
-                        color: theme.colorScheme.onSurface,
-                        fontWeight: FontWeight.w700,
-                        height: 1.15,
-                      ),
-                    ),
-                  ),
-                ],
-              ),
-              SizedBox(height: tokens.spaceExtraSmall),
-              Text(
-                l10n.settingsTeacherApplicationEntrySubtitle,
-                maxLines: 3,
-                overflow: TextOverflow.ellipsis,
-                style: theme.textTheme.bodySmall?.copyWith(
-                  color: theme.colorScheme.onSurfaceVariant,
-                  height: 1.3,
-                ),
-              ),
-              SizedBox(height: tokens.spaceMedium),
-              _FeaturedTutorFooter(
-                ctaLabel: l10n.teacherApplicationOpenFormCta,
-                badgeLabel: showExperimentalBadge
-                    ? l10n.experimentalBadgeLabel
-                    : null,
-                accent: accent,
-                ctaForeground: screenTokens.homeFeaturedTutorCtaForeground,
-              ),
-            ],
-          ),
-        ),
-      ),
     );
   }
 }

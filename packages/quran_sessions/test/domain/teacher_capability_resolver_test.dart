@@ -167,5 +167,25 @@ void main() {
         ).state,
       ).equals(TeacherCapabilityState.revoked);
     });
+
+    test('hasTeacherMarketplaceRole excludes student-only states', () {
+      check(
+        const TeacherCapability(
+          state: TeacherCapabilityState.none,
+        ).hasTeacherMarketplaceRole,
+      ).isFalse();
+      check(
+        TeacherCapabilityResolver.resolve(
+          application: _application(TeacherApplicationStatus.pending),
+        ).hasTeacherMarketplaceRole,
+      ).isFalse();
+
+      check(
+        TeacherCapabilityResolver.resolve(
+          application: _application(TeacherApplicationStatus.approved),
+          profile: _profile(),
+        ).hasTeacherMarketplaceRole,
+      ).isTrue();
+    });
   });
 }

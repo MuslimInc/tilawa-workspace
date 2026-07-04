@@ -112,6 +112,59 @@ test("integration: teacher accept moves booking to scheduled", async () => {
   assert.equal(teacherActions.includes("respondToBookingRequest"), false);
 });
 
+test("integration: teacher with admin claim can accept assigned booking", async () => {
+  await prepareIntegrationFirestore();
+  await seedVerifiedTeacher("teacher1");
+  await seedCompleteStudent("student1");
+  await seedUserSession("student1");
+  await seedUserSession("uid_teacher1");
+
+  const created = await booking.run({
+    data: bookingData({ slotId: "slot-admin-teacher-accept" }),
+    auth: { uid: "student1", token: {} },
+  });
+
+  const accepted = await respond.run({
+    data: withSessionEpoch({
+      bookingId: created.bookingId,
+      response: "accept",
+    }),
+    auth: { uid: "uid_teacher1", token: { admin: true } },
+  });
+  assert.equal(accepted.lifecycleStatus, "scheduled");
+});
+
+test("integration: teacher accept works when legacy teacherUserId equals profile id", async () => {
+  await prepareIntegrationFirestore();
+  await seedVerifiedTeacher("teacher1");
+  await seedCompleteStudent("student1");
+  await seedUserSession("student1");
+  await seedUserSession("uid_teacher1");
+
+  const created = await booking.run({
+    data: bookingData({ slotId: "slot-legacy-teacher-user-id" }),
+    auth: { uid: "student1", token: {} },
+  });
+
+  await db().collection("quran_bookings").doc(created.bookingId).set(
+    { teacherUserId: "teacher1" },
+    { merge: true },
+  );
+  await db().collection("quran_sessions").doc(created.sessionId).set(
+    { teacherUserId: "teacher1" },
+    { merge: true },
+  );
+
+  const accepted = await respond.run({
+    data: withSessionEpoch({
+      bookingId: created.bookingId,
+      response: "accept",
+    }),
+    auth: { uid: "uid_teacher1", token: {} },
+  });
+  assert.equal(accepted.lifecycleStatus, "scheduled");
+});
+
 test("integration: teacher reject releases slot", async () => {
   await prepareIntegrationFirestore();
   await seedVerifiedTeacher("teacher1");

@@ -5,48 +5,41 @@ import 'package:tilawa/features/settings/presentation/cubit/teacher_application_
 
 void main() {
   group('SettingsTeachingVisibility', () {
-    test('shows section for approved teacher without waiting for access', () {
+    test('shows section for approved active teacher', () {
       const capability = TeacherCapability(
         state: TeacherCapabilityState.approvedActive,
       );
       final show = SettingsTeachingVisibility.shouldShowSection(
         capabilityLoaded: true,
         capability: capability,
-        accessResolved: false,
-        canApplyAsTeacher: false,
       );
       check(show).isTrue();
     });
 
-    test('hides section for none capability when access denies', () {
+    test('hides section for student with none capability', () {
       const capability = TeacherCapability(state: TeacherCapabilityState.none);
       final show = SettingsTeachingVisibility.shouldShowSection(
         capabilityLoaded: true,
         capability: capability,
-        accessResolved: true,
-        canApplyAsTeacher: false,
       );
       check(show).isFalse();
     });
 
-    test('shows apply entry when access allows and capability is none', () {
-      const capability = TeacherCapability(state: TeacherCapabilityState.none);
+    test('hides apply entry for pending application', () {
+      const capability = TeacherCapability(
+        state: TeacherCapabilityState.pending,
+      );
       final show = SettingsTeachingVisibility.shouldShowSection(
         capabilityLoaded: true,
         capability: capability,
-        accessResolved: true,
-        canApplyAsTeacher: true,
       );
-      check(show).isTrue();
+      check(show).isFalse();
     });
 
-    test('fails closed while access unresolved for none capability', () {
-      const capability = TeacherCapability(state: TeacherCapabilityState.none);
+    test('fails closed while capability unresolved', () {
       final show = SettingsTeachingVisibility.shouldShowSection(
-        capabilityLoaded: true,
-        capability: capability,
-        accessResolved: false,
-        canApplyAsTeacher: false,
+        capabilityLoaded: false,
+        capability: null,
       );
       check(show).isFalse();
     });

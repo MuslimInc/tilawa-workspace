@@ -163,10 +163,12 @@ class _HomeScreenState extends State<HomeScreen> {
                                     : blocState;
                                 final HomeDashboardUiState ui =
                                     HomeDashboardUiState.from(state);
-                                final Widget? tutorHeaderSliver =
+                                final Widget tutorHeaderSliver =
                                     ui.showFullSkeleton
-                                    ? null
-                                    : homeFeaturedTutorCardSliver(context);
+                                    ? const SliverToBoxAdapter(
+                                        child: SizedBox.shrink(),
+                                      )
+                                    : const HomeFeaturedTutorCardScope();
 
                                 return CustomScrollView(
                                   controller: _scrollController,
@@ -179,7 +181,7 @@ class _HomeScreenState extends State<HomeScreen> {
                                       state: state,
                                       onOpenPrayer: widget.onOpenPrayer,
                                     ),
-                                    ?tutorHeaderSliver,
+                                    tutorHeaderSliver,
                                     HomeDashboardContentSliver(
                                       child: AnimatedSwitcher(
                                         duration: context.tokens.durationMedium,

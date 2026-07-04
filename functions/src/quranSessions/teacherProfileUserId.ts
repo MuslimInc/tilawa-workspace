@@ -39,3 +39,34 @@ export function teacherUserIdFromDenormalizedSessionData(
   }
   return undefined;
 }
+
+/**
+ * Resolves teacher auth uid for session authorization.
+ *
+ * Legacy rows may denormalize `teacherUserId` to the profile doc id when the
+ * profile lacked `userId` at booking time — those values are ignored so the
+ * live profile remains authoritative.
+ */
+export function teacherUserIdForSessionAuth(
+  data: FirebaseFirestore.DocumentData,
+  profileResolvedUserId: string,
+): string {
+  const teacherProfileId = (data.teacherId as string) ?? "";
+  const denormalized = teacherUserIdFromDenormalizedSessionData(data);
+  if (denormalized != null && denormalized !== teacherProfileId) {
+    return denormalized;
+  }
+  return profileResolvedUserId;
+}
+
+export async function resolveTeacherUserIdForSessionAuth(
+  db: Firestore,
+  data: FirebaseFirestore.DocumentData,
+): Promise<string> {
+  const teacherProfileId = (data.teacherId as string) ?? "";
+  const profileResolvedUserId = await resolveTeacherProfileUserId(
+    db,
+    teacherProfileId,
+  );
+  return teacherUserIdForSessionAuth(data, profileResolvedUserId);
+}

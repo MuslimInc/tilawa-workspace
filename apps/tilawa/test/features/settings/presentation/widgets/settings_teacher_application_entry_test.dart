@@ -45,7 +45,7 @@ void main() {
     expect(find.text('التقديم كمعلّم قرآن'), findsNothing);
   });
 
-  testWidgets('settings teacher application tile visible when flag on', (
+  testWidgets('settings teacher application tile hidden when flag on', (
     tester,
   ) async {
     await _pumpSettingsTile(
@@ -56,21 +56,6 @@ void main() {
       ),
     );
 
-    expect(find.text('التقديم كمعلّم قرآن'), findsOneWidget);
-  });
-
-  testWidgets('settings tile tap opens bottom sheet', (tester) async {
-    await _pumpSettingsTile(
-      tester,
-      config: const AppLaunchConfig(
-        quranSessionsEnabled: true,
-        teacherApplicationEntryEnabled: true,
-      ),
-    );
-
-    await tester.tap(find.text('التقديم كمعلّم قرآن'));
-    await tester.pumpAndSettle();
-
-    expect(find.text('هل أنت محفّظ أو معلّم قرآن؟'), findsOneWidget);
+    expect(find.text('التقديم كمعلّم قرآن'), findsNothing);
   });
 }

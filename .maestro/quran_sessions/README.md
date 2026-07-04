@@ -4,6 +4,23 @@ Device QA accelerators for **staging** (`quran-playera-app`). Smoke only — no 
 
 Canonical setup: [`docs/quran-sessions/maestro-device-qa-setup.md`](../../docs/quran-sessions/maestro-device-qa-setup.md).
 
+## Account setup (existing Google uids)
+
+Staging accounts are real Google-auth users. To enable **Email/Password on the same uid** (for vault/CI without creating duplicates):
+
+```sh
+cd functions
+export GOOGLE_APPLICATION_CREDENTIALS=/path/to/service-account.json
+npm run verify:quran-staging-existing-auth-accounts
+
+export MAESTRO_QURAN_TEACHER_PASSWORD='***'   # local vault only
+export MAESTRO_QURAN_STUDENT_PASSWORD='***'
+npm run seed:quran-staging-existing-maestro-accounts          # dry run
+npm run seed:quran-staging-existing-maestro-accounts:apply    # merge writes
+```
+
+Passwords are never printed or stored in the repo. Seed uses `auth.updateUser({ password })` on the existing uid only.
+
 ## Flows
 
 | Flow | Role | Scope |
@@ -21,11 +38,19 @@ Copy `.env.example` → `.env` (gitignored). Or pass via CLI:
 ```sh
 maestro test .maestro/quran_sessions/staging_student_smoke.yaml \
   --device emulator-5554 \
-  -e MAESTRO_TILAWA_STUDENT_EMAIL='mohammad.kamel@othaimmarkets.com' \
-  -e MAESTRO_TILAWA_STUDENT_PASSWORD='***'
+  -e MAESTRO_QURAN_STUDENT_EMAIL='mohammad.kamel@othaimmarkets.com' \
+  -e MAESTRO_QURAN_STUDENT_PASSWORD='***'
 ```
 
-Password vars are **not used by the app** (Google Sign-In only); keep them out of git.
+| Variable | Purpose |
+|----------|---------|
+| `MAESTRO_QURAN_STUDENT_EMAIL` | Student account (Google / email) |
+| `MAESTRO_QURAN_STUDENT_PASSWORD` | Local vault — used after seed links password to same uid |
+| `MAESTRO_QURAN_TEACHER_EMAIL` | Teacher account |
+| `MAESTRO_QURAN_TEACHER_PASSWORD` | Local vault — used after seed links password to same uid |
+| `MAESTRO_TILAWA_*` | Legacy aliases for existing YAML subflows |
+
+Never commit real passwords.
 
 ## Subflows
 

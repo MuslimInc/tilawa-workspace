@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:go_router/go_router.dart';
-import 'package:quran_sessions/quran_sessions.dart' show AuthSessionProvider;
+import 'package:quran_sessions/quran_sessions.dart';
 import 'package:tilawa/core/bootstrap/app_launch_config.dart';
 import 'package:tilawa/core/di/injection.dart';
 import 'package:tilawa/features/home/presentation/widgets/home_featured_tutor_card.dart';
@@ -108,6 +108,36 @@ void main() {
     if (getIt.isRegistered<AppLaunchConfig>()) {
       await getIt.unregister<AppLaunchConfig>();
     }
+  });
+
+  testWidgets('hides Learn Quran card for approved teacher', (tester) async {
+    await resetScopeGetIt();
+    getIt.registerSingleton<AppLaunchConfig>(
+      const AppLaunchConfig(
+        quranSessionsEnabled: true,
+        learnQuranStudentFeatureEnabled: true,
+      ),
+    );
+
+    await tester.pumpWidget(
+      MaterialApp(
+        theme: AppTheme.getLightTheme(primaryColor: AppColors.defaultPrimary),
+        locale: const Locale('en'),
+        localizationsDelegates: AppLocalizations.localizationsDelegates,
+        supportedLocales: AppLocalizations.supportedLocales,
+        home: const Scaffold(
+          body: HomeFeaturedTutorCard(
+            capability: TeacherCapability(
+              state: TeacherCapabilityState.approvedActive,
+            ),
+          ),
+        ),
+      ),
+    );
+    await tester.pumpAndSettle();
+
+    expect(find.text('Learn Quran'), findsNothing);
+    expect(find.byType(TilawaInteractiveSurface), findsNothing);
   });
 
   testWidgets('English home featured card shows Learn Quran not QuranTutor', (

@@ -7,35 +7,18 @@ import 'package:tilawa/features/quran_sessions/quran_sessions_feature_flags.dart
 
 /// Whether Settings / profile should show the teaching section.
 abstract final class SettingsTeachingVisibility {
+  /// Approved or former teachers only — no in-app apply entry.
   static bool shouldShowSection({
     required bool capabilityLoaded,
     required TeacherCapability? capability,
-    required bool accessResolved,
-    required bool canApplyAsTeacher,
   }) {
-    if (capabilityLoaded &&
-        capability != null &&
-        capability.state != TeacherCapabilityState.none) {
-      return true;
-    }
-    if (!accessResolved) {
+    if (!capabilityLoaded || capability == null) {
       return false;
     }
-    return canApplyAsTeacher;
+    return capability.hasTeacherMarketplaceRole;
   }
 
-  static bool isLoading({
-    required bool capabilityLoaded,
-    required TeacherCapability? capability,
-    required bool accessResolved,
-  }) {
-    final needsAccess =
-        !capabilityLoaded ||
-        capability == null ||
-        capability.state == TeacherCapabilityState.none;
-    if (needsAccess && !accessResolved) {
-      return true;
-    }
+  static bool isLoading({required bool capabilityLoaded}) {
     return !capabilityLoaded;
   }
 }

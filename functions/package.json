@@ -30,7 +30,10 @@
     "test:rules": "firebase emulators:exec --only firestore --project demo-tilawa-rules \"$(command -v node) -r ts-node/register --test --test-concurrency=1 test-rules/*.test.ts\"",
     "test:emulator": "npm run test:integration && npm run test:rules",
     "admin:backfill-teacher-profiles": "ts-node --project tsconfig.scripts.json scripts/backfillTeacherProfiles.ts",
-    "admin:audit-duplicate-users": "ts-node --project tsconfig.scripts.json scripts/auditDuplicateUsers.ts"
+    "admin:audit-duplicate-users": "ts-node --project tsconfig.scripts.json scripts/auditDuplicateUsers.ts",
+    "verify:quran-staging-existing-auth-accounts": "ts-node --project tsconfig.scripts.json scripts/verifyQuranStagingExistingAuthAccounts.ts",
+    "seed:quran-staging-existing-maestro-accounts": "ts-node --project tsconfig.scripts.json scripts/seedQuranStagingExistingMaestroAccounts.ts",
+    "seed:quran-staging-existing-maestro-accounts:apply": "ts-node --project tsconfig.scripts.json scripts/seedQuranStagingExistingMaestroAccounts.ts --apply"
   },
   "engines": {
     "node": "22"
