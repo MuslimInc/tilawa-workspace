@@ -159,14 +159,14 @@ jobs:
           serviceCredentialsFileContent: ${{ secrets.FIREBASE_SERVICE_ACCOUNT_JSON }}
           groups: ${{ inputs.groups }}
           releaseNotes: ${{ inputs.release_notes }}
-          file: apps/tilawa/build/app/outputs/flutter-apk/app-release.apk
+          file: apps/tilawa/build/app/outputs/flutter-apk/app-production-release.apk
 
       - name: Upload APK as build artifact
         if: always()
         uses: actions/upload-artifact@v7
         with:
           name: app-release-apk
-          path: apps/tilawa/build/app/outputs/flutter-apk/app-release.apk
+          path: apps/tilawa/build/app/outputs/flutter-apk/app-production-release.apk
           if-no-files-found: ignore
 
       - name: Upload debug symbols

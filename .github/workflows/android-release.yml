@@ -182,7 +182,7 @@ jobs:
         with:
           serviceAccountJsonPlainText: ${{ secrets.PLAY_SERVICE_ACCOUNT_JSON }}
           packageName: com.tilawa.app
-          releaseFiles: apps/tilawa/build/app/outputs/bundle/release/app-release.aab
+          releaseFiles: apps/tilawa/build/app/outputs/bundle/productionRelease/app-production-release.aab
           tracks: ${{ inputs.track }}
           # Staged rollout only applies to production with a fraction < 1.0.
           status: ${{ (inputs.track == 'production' && inputs.rollout != '1.0') && 'inProgress' || 'completed' }}
@@ -207,5 +207,5 @@ jobs:
         uses: actions/upload-artifact@v7
         with:
           name: app-release-aab
-          path: apps/tilawa/build/app/outputs/bundle/release/app-release.aab
+          path: apps/tilawa/build/app/outputs/bundle/productionRelease/app-production-release.aab
           if-no-files-found: ignore
