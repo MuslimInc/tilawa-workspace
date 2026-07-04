@@ -24,6 +24,7 @@ class SessionJoinPolicy {
       startsAt: session.startsAt,
       endsAt: session.endsAt,
       now: now,
+      qaBypassUserId: userId,
     );
   }
 }

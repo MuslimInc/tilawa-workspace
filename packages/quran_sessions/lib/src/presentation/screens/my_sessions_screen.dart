@@ -440,6 +440,7 @@ class _SuccessBody extends StatelessWidget {
                   now: now,
                   highlighted: isUpcomingTab && index == 0,
                   teacherName: resolveTeacherName?.call(session.teacherId),
+                  viewerUserId: studentId,
                   variant: isUpcomingTab
                       ? QuranSessionCardVariant.upcoming
                       : QuranSessionCardVariant.past,

@@ -23,6 +23,7 @@ class TutorSessionCompactCard extends StatelessWidget {
     this.onCancel,
     this.isLoading = false,
     this.showCancelInOverflowMenu = false,
+    this.viewerUserId,
   });
 
   final QuranSession session;
@@ -35,6 +36,9 @@ class TutorSessionCompactCard extends StatelessWidget {
   final VoidCallback? onCancel;
   final bool isLoading;
   final bool showCancelInOverflowMenu;
+
+  /// Signed-in viewer auth uid — enables staging QA join-window bypass in UI.
+  final String? viewerUserId;
 
   bool get _isPendingRequest => onAccept != null || onReject != null;
 
@@ -96,6 +100,7 @@ class TutorSessionCompactCard extends StatelessWidget {
       joinInProgress: false,
       joinFailure: null,
       hasOpenedMeeting: false,
+      qaBypassUserId: viewerUserId,
     );
 
     final showJoin =

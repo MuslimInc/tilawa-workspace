@@ -169,6 +169,7 @@ class SessionDetailBloc extends Bloc<SessionDetailEvent, SessionDetailState> {
     );
 
     final viewerRole = await _resolveActorRole?.forAggregate(aggregate);
+    final viewerUserId = _authSession?.currentUserId;
 
     emit(
       SessionDetailSuccess(
@@ -183,6 +184,7 @@ class SessionDetailBloc extends Bloc<SessionDetailEvent, SessionDetailState> {
         canRespondToReschedule: rescheduleContext.canRespond,
         isAwaitingRescheduleCounterparty: rescheduleContext.isAwaiting,
         viewerRole: viewerRole,
+        viewerUserId: viewerUserId,
       ),
     );
 
@@ -221,6 +223,7 @@ class SessionDetailBloc extends Bloc<SessionDetailEvent, SessionDetailState> {
         ),
       ),
       now: DateTime.now(),
+      qaBypassUserId: userId,
     )) {
       return;
     }

@@ -475,7 +475,9 @@ void main() {
     );
     await tester.pumpAndSettle();
 
-    check(find.text(en.teachingOnMemuslimViewStatus).evaluate().isEmpty).isTrue();
+    check(
+      find.text(en.teachingOnMemuslimViewStatus).evaluate().isEmpty,
+    ).isTrue();
     check(useCase.callCount).equals(1);
 
     SettingsTeacherCapabilityScope.refreshOf(

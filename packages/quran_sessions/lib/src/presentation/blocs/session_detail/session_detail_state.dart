@@ -63,6 +63,7 @@ final class SessionDetailSuccess extends SessionDetailState {
     this.reviewCompleted = false,
     this.joinWindowPolicy = const SessionJoinWindowPolicy(),
     this.viewerRole,
+    this.viewerUserId,
   });
 
   final SessionAggregate aggregate;
@@ -98,6 +99,7 @@ final class SessionDetailSuccess extends SessionDetailState {
   final bool reviewCompleted;
   final SessionJoinWindowPolicy joinWindowPolicy;
   final ActorRole? viewerRole;
+  final String? viewerUserId;
 
   SessionJoinUiState get joinUiState => resolveSessionJoinUiState(
     lifecycleStatus: aggregate.lifecycleStatus,
@@ -112,6 +114,7 @@ final class SessionDetailSuccess extends SessionDetailState {
     joinFailure: joinFailure,
     hasOpenedMeeting: hasOpenedExternalMeeting,
     joinWindowPolicy: joinWindowPolicy,
+    qaBypassUserId: viewerUserId,
   );
 
   bool get isTeacherViewer => viewerRole == ActorRole.teacher;
@@ -127,14 +130,11 @@ final class SessionDetailSuccess extends SessionDetailState {
   }
 
   bool get canJoin {
+    if (aggregate.sessionId == null || joinInProgress) return false;
+    if (joinUiState == SessionJoinUiState.joinAvailable) return true;
     final server = _serverAllowedActions;
-    if (server != null) {
-      return aggregate.sessionId != null &&
-          server.can(SessionAllowedAction.join) &&
-          !joinInProgress;
-    }
-    return aggregate.sessionId != null &&
-        joinUiState == SessionJoinUiState.joinAvailable;
+    if (server != null) return server.can(SessionAllowedAction.join);
+    return false;
   }
 
   bool get canOpenDispute {
@@ -231,6 +231,8 @@ final class SessionDetailSuccess extends SessionDetailState {
     bool? reviewCompleted,
     ActorRole? viewerRole,
     bool clearViewerRole = false,
+    String? viewerUserId,
+    bool clearViewerUserId = false,
   }) {
     return SessionDetailSuccess(
       aggregate: aggregate ?? this.aggregate,
@@ -309,6 +311,9 @@ final class SessionDetailSuccess extends SessionDetailState {
           : reviewSubmitted ?? this.reviewSubmitted,
       reviewCompleted: reviewCompleted ?? this.reviewCompleted,
       viewerRole: clearViewerRole ? null : viewerRole ?? this.viewerRole,
+      viewerUserId: clearViewerUserId
+          ? null
+          : viewerUserId ?? this.viewerUserId,
     );
   }
 
@@ -345,6 +350,7 @@ final class SessionDetailSuccess extends SessionDetailState {
     reviewCompleted,
     joinWindowPolicy,
     viewerRole,
+    viewerUserId,
   ];
 }
 

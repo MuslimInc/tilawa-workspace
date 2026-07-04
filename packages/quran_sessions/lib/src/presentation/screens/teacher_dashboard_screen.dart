@@ -36,6 +36,7 @@ class TeacherDashboardScreen extends StatefulWidget {
     this.resolveStudentName,
     this.schedulingAnalytics,
     this.meetingUrlSettingsBuilder,
+    this.viewerAuthUserId,
   });
 
   final String teacherId;
@@ -60,6 +61,9 @@ class TeacherDashboardScreen extends StatefulWidget {
   /// Builds the external meeting URL editor shown from the app bar settings
   /// sheet. When null, the settings entry point is hidden.
   final WidgetBuilder? meetingUrlSettingsBuilder;
+
+  /// Signed-in teacher auth uid — staging QA join-window bypass in UI.
+  final String? viewerAuthUserId;
 
   @override
   State<TeacherDashboardScreen> createState() => _TeacherDashboardScreenState();
@@ -273,6 +277,7 @@ class _TeacherDashboardScreenState extends State<TeacherDashboardScreen> {
                         ),
                         now: DateTime.now(),
                         isLoading: inProgress,
+                        viewerUserId: widget.viewerAuthUserId,
                         onAccept: () =>
                             context.read<TeacherDashboardBloc>().add(
                               TeacherBookingRequestAccepted(
@@ -313,6 +318,7 @@ class _TeacherDashboardScreenState extends State<TeacherDashboardScreen> {
                         ),
                         now: DateTime.now(),
                         isLoading: cancelInProgress,
+                        viewerUserId: widget.viewerAuthUserId,
                         onTap: widget.onSessionDetailRequested == null
                             ? null
                             : () => _openSessionDetail(session.bookingId),

@@ -27,6 +27,7 @@ class QuranSessionCard extends StatelessWidget {
     this.onReview,
     this.isJoinLoading = false,
     this.variant = QuranSessionCardVariant.upcoming,
+    this.viewerUserId,
   });
 
   final QuranSession session;
@@ -42,6 +43,9 @@ class QuranSessionCard extends StatelessWidget {
   final VoidCallback? onReview;
   final bool isJoinLoading;
   final QuranSessionCardVariant variant;
+
+  /// Signed-in viewer auth uid — enables staging QA join-window bypass in UI.
+  final String? viewerUserId;
 
   @override
   Widget build(BuildContext context) {
@@ -82,6 +86,7 @@ class QuranSessionCard extends StatelessWidget {
                 onViewDetails: onViewDetails,
                 onReschedule: onReschedule,
                 onCancel: onCancel,
+                viewerUserId: viewerUserId,
               )
             else
               _PastActionsRow(
@@ -293,6 +298,7 @@ class _UpcomingActionsRow extends StatelessWidget {
     required this.onViewDetails,
     required this.onReschedule,
     required this.onCancel,
+    this.viewerUserId,
   });
 
   final QuranSession session;
@@ -302,6 +308,7 @@ class _UpcomingActionsRow extends StatelessWidget {
   final VoidCallback? onViewDetails;
   final VoidCallback? onReschedule;
   final VoidCallback? onCancel;
+  final String? viewerUserId;
 
   @override
   Widget build(BuildContext context) {
@@ -318,6 +325,7 @@ class _UpcomingActionsRow extends StatelessWidget {
       joinInProgress: isJoinLoading,
       joinFailure: null,
       hasOpenedMeeting: false,
+      qaBypassUserId: viewerUserId,
     );
 
     if (joinUiState == SessionJoinUiState.awaitingTutorApproval) {

@@ -40,5 +40,82 @@ void main() {
         policy.isWithinJoinWindow(startsAt: startsAt, endsAt: endsAt, now: now),
       ).isFalse();
     });
+
+    test('QA staging uid bypasses window before lead time', () {
+      const stagingPolicy = SessionJoinWindowPolicy(distribution: 'staging');
+      final now = startsAt.subtract(const Duration(hours: 2));
+      check(
+        stagingPolicy.isWithinJoinWindow(
+          startsAt: startsAt,
+          endsAt: endsAt,
+          now: now,
+          qaBypassUserId: stagingQaStudentUid,
+        ),
+      ).isTrue();
+    });
+
+    test('non-QA uid still blocked before lead time on staging', () {
+      const stagingPolicy = SessionJoinWindowPolicy(distribution: 'staging');
+      final now = startsAt.subtract(const Duration(hours: 2));
+      check(
+        stagingPolicy.isWithinJoinWindow(
+          startsAt: startsAt,
+          endsAt: endsAt,
+          now: now,
+          qaBypassUserId: 'student_random',
+        ),
+      ).isFalse();
+    });
+  });
+
+  group('SessionJoinPolicy QA bypass', () {
+    const stagingPolicy = SessionJoinWindowPolicy(distribution: 'staging');
+    const joinPolicy = SessionJoinPolicy(windowPolicy: stagingPolicy);
+
+    test('allows QA student outside join window when lifecycle joinable', () {
+      final startsAt = DateTime.utc(2099, 6, 1, 12);
+      final session = QuranSession(
+        id: 'session_qa',
+        bookingId: 'booking_qa',
+        teacherId: 'teacher_profile',
+        studentId: stagingQaStudentUid,
+        startsAt: startsAt,
+        endsAt: startsAt.add(const Duration(hours: 1)),
+        callType: SessionCallType.videoCall,
+        status: QuranSessionStatus.scheduled,
+        lifecycleStatus: SessionLifecycleStatus.confirmed,
+      );
+
+      check(
+        joinPolicy.canJoin(
+          session: session,
+          userId: stagingQaStudentUid,
+          now: startsAt.subtract(const Duration(hours: 3)),
+        ),
+      ).isTrue();
+    });
+
+    test('blocks completed session even for QA uid', () {
+      final startsAt = DateTime.utc(2099, 6, 1, 12);
+      final session = QuranSession(
+        id: 'session_done',
+        bookingId: 'booking_done',
+        teacherId: 'teacher_profile',
+        studentId: stagingQaStudentUid,
+        startsAt: startsAt,
+        endsAt: startsAt.add(const Duration(hours: 1)),
+        callType: SessionCallType.videoCall,
+        status: QuranSessionStatus.completed,
+        lifecycleStatus: SessionLifecycleStatus.completed,
+      );
+
+      check(
+        joinPolicy.canJoin(
+          session: session,
+          userId: stagingQaStudentUid,
+          now: startsAt,
+        ),
+      ).isFalse();
+    });
   });
 }

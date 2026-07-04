@@ -21,6 +21,17 @@ npm run seed:quran-staging-existing-maestro-accounts:apply    # merge writes
 
 Passwords are never printed or stored in the repo. Seed uses `auth.updateUser({ password })` on the existing uid only.
 
+## Staging QA join-window bypass
+
+Two Maestro accounts may **join outside the normal 15-minute window** on staging only (`TILAWA_DISTRIBUTION=staging`, project `quran-playera-app`). Production / `play_production` never apply the override. Lifecycle checks (cancelled, completed, wrong participant, etc.) still apply.
+
+| Account | Email | UID |
+|---------|-------|-----|
+| Teacher | `mu7ammadkamel@hotmail.com` | `WV0m6tenTJPDLZE4EdWXBzjADF12` |
+| Student | `mohammad.kamel@othaimmarkets.com` | `U33e4w08bYWFOuS7NTxoHmvDFxM2` |
+
+Server logs: `[QA] join-window bypass applied for uid=…` when the override is used.
+
 ## Flows
 
 | Flow | Role | Scope |

@@ -8,7 +8,7 @@ import {
   readAgoraRtcCredentials,
 } from "./agoraTokenService";
 import { lifecycleError } from "./lifecycleErrors";
-import { isWithinJoinWindow } from "./sessionJoinWindowPolicy";
+import { isWithinJoinWindowOrQaBypass } from "./sessionJoinWindowPolicy";
 import { JOIN_WINDOW_LEAD_MS } from "./platformSchedulingPolicy";
 import {
   buildLiveKitRtcToken,
@@ -112,11 +112,12 @@ export async function issueSessionRtcTokenForRequest(
   const joinLeadMs =
     (booking.joinWindowLeadMs as number | undefined) ?? JOIN_WINDOW_LEAD_MS;
   if (
-    !isWithinJoinWindow({
+    !isWithinJoinWindowOrQaBypass({
       startsAt: startsAtRaw.toDate(),
       endsAt: endsAtRaw.toDate(),
       now: new Date(),
       leadTimeMs: joinLeadMs,
+      uid,
     })
   ) {
     throw lifecycleError(

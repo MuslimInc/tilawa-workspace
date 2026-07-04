@@ -193,6 +193,7 @@ export 'src/domain/policies/market_session_price_policy.dart';
 export 'src/domain/policies/session_in_progress_transition_policy.dart';
 export 'src/domain/policies/booking_idempotency.dart';
 export 'src/domain/policies/session_join_window_policy.dart';
+export 'src/domain/policies/staging_qa_join_window_bypass.dart';
 export 'src/domain/usecases/get_market_config_usecase.dart';
 export 'src/domain/usecases/get_session_policy_usecase.dart';
 export 'src/domain/usecases/get_session_aggregate_usecase.dart';

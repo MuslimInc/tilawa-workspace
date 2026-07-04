@@ -380,10 +380,11 @@ List<RouteBase> get quranSessionsRoutes => [
       );
 
       return _TeacherDashboardGate(
-        childBuilder: (teacherId) => BlocProvider(
+        childBuilder: (teacherId, viewerAuthUserId) => BlocProvider(
           create: (_) => getIt<TeacherDashboardBloc>(),
           child: TeacherDashboardScreen(
             teacherId: teacherId,
+            viewerAuthUserId: viewerAuthUserId,
             onManageSchedule: () =>
                 context.push(QuranSessionsRoutes.availability),
             onSessionDetailRequested: (bookingId) => context.push<bool>(
@@ -414,7 +415,7 @@ List<RouteBase> get quranSessionsRoutes => [
     path: QuranSessionsRoutes.availability,
     redirect: quranSessionsAuthRequiredRedirect,
     builder: (context, state) => _TeacherDashboardGate(
-      childBuilder: (teacherId) => BlocProvider(
+      childBuilder: (teacherId, _) => BlocProvider(
         create: (_) => getIt<AvailabilityCubit>()..load(teacherId),
         child: WeeklyAvailabilityScreen(
           teacherId: teacherId,
@@ -756,7 +757,7 @@ class _QuranSessionsHomeRouteState extends State<_QuranSessionsHomeRoute> {
 class _TeacherDashboardGate extends StatefulWidget {
   const _TeacherDashboardGate({required this.childBuilder});
 
-  final Widget Function(String teacherId) childBuilder;
+  final Widget Function(String teacherId, String viewerAuthUserId) childBuilder;
 
   @override
   State<_TeacherDashboardGate> createState() => _TeacherDashboardGateState();
@@ -766,6 +767,7 @@ class _TeacherDashboardGateState extends State<_TeacherDashboardGate> {
   bool _allowed = false;
   bool _checking = true;
   String? _teacherProfileId;
+  String? _viewerAuthUserId;
 
   @override
   void initState() {
@@ -808,6 +810,7 @@ class _TeacherDashboardGateState extends State<_TeacherDashboardGate> {
         _allowed = true;
         _checking = false;
         _teacherProfileId = teacherProfileId;
+        _viewerAuthUserId = userId;
       });
       return;
     }
@@ -824,13 +827,16 @@ class _TeacherDashboardGateState extends State<_TeacherDashboardGate> {
 
   @override
   Widget build(BuildContext context) {
-    if (_checking || !_allowed || _teacherProfileId == null) {
+    if (_checking ||
+        !_allowed ||
+        _teacherProfileId == null ||
+        _viewerAuthUserId == null) {
       return const Scaffold(
         body: Center(child: CircularProgressIndicator()),
       );
     }
 
-    return widget.childBuilder(_teacherProfileId!);
+    return widget.childBuilder(_teacherProfileId!, _viewerAuthUserId!);
   }
 }
 

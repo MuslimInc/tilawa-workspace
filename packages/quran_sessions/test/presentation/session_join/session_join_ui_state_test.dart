@@ -84,4 +84,55 @@ void main() {
       ),
     ).equals(SessionJoinUiState.failed);
   });
+
+  test('QA staging uid shows join available before window opens', () {
+    final now = startsAt.subtract(const Duration(hours: 2));
+    const stagingPolicy = SessionJoinWindowPolicy(distribution: 'staging');
+    check(
+      resolveSessionJoinUiState(
+        lifecycleStatus: SessionLifecycleStatus.confirmed,
+        startsAt: startsAt,
+        endsAt: endsAt,
+        now: now,
+        joinInProgress: false,
+        joinFailure: null,
+        hasOpenedMeeting: false,
+        joinWindowPolicy: stagingPolicy,
+        qaBypassUserId: stagingQaStudentUid,
+      ),
+    ).equals(SessionJoinUiState.joinAvailable);
+  });
+
+  test('non-QA uid stays not started before window on staging', () {
+    final now = startsAt.subtract(const Duration(hours: 2));
+    const stagingPolicy = SessionJoinWindowPolicy(distribution: 'staging');
+    check(
+      resolveSessionJoinUiState(
+        lifecycleStatus: SessionLifecycleStatus.confirmed,
+        startsAt: startsAt,
+        endsAt: endsAt,
+        now: now,
+        joinInProgress: false,
+        joinFailure: null,
+        hasOpenedMeeting: false,
+        joinWindowPolicy: stagingPolicy,
+        qaBypassUserId: 'student_random',
+      ),
+    ).equals(SessionJoinUiState.notStarted);
+  });
+
+  test('completed session stays ended for QA uid', () {
+    check(
+      resolveSessionJoinUiState(
+        lifecycleStatus: SessionLifecycleStatus.completed,
+        startsAt: startsAt,
+        endsAt: endsAt,
+        now: startsAt,
+        joinInProgress: false,
+        joinFailure: null,
+        hasOpenedMeeting: false,
+        qaBypassUserId: stagingQaStudentUid,
+      ),
+    ).equals(SessionJoinUiState.ended);
+  });
 }

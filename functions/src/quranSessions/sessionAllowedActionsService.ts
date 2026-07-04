@@ -1,6 +1,6 @@
 import type { ActorRole } from "./sessionLifecycleGuard";
 import type { LifecycleStatus } from "./sessionLifecycleService";
-import { isWithinJoinWindow } from "./sessionJoinWindowPolicy";
+import { isWithinJoinWindowOrQaBypass } from "./sessionJoinWindowPolicy";
 
 /** Q-SR-02 — mirrors Dart `SessionAllowedAction`. */
 export type SessionAllowedAction =
@@ -20,6 +20,8 @@ export interface AllowedActionsInput {
   now?: Date;
   joinWindowLeadMs?: number;
   hasPendingReschedule?: boolean;
+  /** When set, staging QA uids may bypass join-window timing for `join`. */
+  viewerUserId?: string;
 }
 
 const JOINABLE_STATUSES = new Set<string>([
@@ -61,11 +63,12 @@ export function resolveSessionAllowedActions(
 
   if (
     JOINABLE_STATUSES.has(status) &&
-    isWithinJoinWindow({
+    isWithinJoinWindowOrQaBypass({
       startsAt: input.startsAt,
       endsAt: input.endsAt,
       now,
       leadTimeMs: input.joinWindowLeadMs,
+      uid: input.viewerUserId,
     })
   ) {
     actions.push("join");
@@ -116,7 +119,11 @@ export function allowedActionsForParticipant(
   } else if (input.viewerUserId !== input.studentId) {
     return [];
   }
-  return resolveSessionAllowedActions({ ...input, actorRole });
+  return resolveSessionAllowedActions({
+    ...input,
+    actorRole,
+    viewerUserId: input.viewerUserId,
+  });
 }
 
 export function buildAllowedActionsDenorm(params: {

@@ -21,6 +21,10 @@ export const MAESTRO_BLOCKED_PRODUCTION_PROJECT_IDS = [
 export const MAESTRO_TEACHER_EMAIL = "mu7ammadkamel@hotmail.com";
 export const MAESTRO_STUDENT_EMAIL = "mohammad.kamel@othaimmarkets.com";
 
+/** Auth uids for staging Maestro QA accounts (Google sign-in). */
+export const MAESTRO_TEACHER_UID = "WV0m6tenTJPDLZE4EdWXBzjADF12";
+export const MAESTRO_STUDENT_UID = "U33e4w08bYWFOuS7NTxoHmvDFxM2";
+
 export const MAESTRO_TEACHER_PASSWORD_ENV = "MAESTRO_QURAN_TEACHER_PASSWORD";
 export const MAESTRO_STUDENT_PASSWORD_ENV = "MAESTRO_QURAN_STUDENT_PASSWORD";
 
