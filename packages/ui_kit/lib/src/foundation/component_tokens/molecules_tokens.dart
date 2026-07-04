@@ -2670,3 +2670,176 @@ class TilawaCupertinoWheelPickerTokens {
     );
   }
 }
+
+/// Component tokens for [TilawaMetricTile].
+///
+/// Read-only metric tiles read as a *quiet* summary strip, not as a grid of
+/// tappable cards. They keep a flat tonal fill, a hairline outline, and no
+/// shadow — distinct from the raised, tap-affording [TilawaCard] used for
+/// dashboard action/category cards below them.
+@immutable
+class TilawaMetricTileTokens {
+  const TilawaMetricTileTokens({
+    required this.padding,
+    required this.iconSize,
+    required this.valueToIconSpacing,
+    required this.valueToLabelSpacing,
+    required this.labelToHelperSpacing,
+    required this.borderOpacity,
+    required this.fillColor,
+    required this.borderColor,
+    required this.helperColorOpacity,
+    required this.valueTextRole,
+    required this.labelTextRole,
+    required this.helperTextRole,
+    required this.valueFontWeight,
+    required this.valueLineHeight,
+  });
+
+  /// Tile inner padding.
+  final EdgeInsetsGeometry padding;
+
+  /// Leading icon glyph size (plain variant — no fill box).
+  final double iconSize;
+
+  /// Gap between the leading icon column and the value/label column.
+  final double valueToIconSpacing;
+
+  /// Gap between the value and the label.
+  final double valueToLabelSpacing;
+
+  /// Gap between the label and the optional helper/trend line.
+  final double labelToHelperSpacing;
+
+  /// Outline alpha on [ColorScheme.outlineVariant].
+  final double borderOpacity;
+
+  /// Quiet tonal fill. Default is [ColorScheme.surfaceContainerLow] so the
+  /// strip recedes behind the raised category cards below it.
+  final Color fillColor;
+
+  /// Outline colour (before [borderOpacity] is applied).
+  final Color borderColor;
+
+  /// Alpha applied to [ColorScheme.onSurfaceVariant] for the helper line.
+  final double helperColorOpacity;
+
+  final TilawaTextRole valueTextRole;
+  final TilawaTextRole labelTextRole;
+  final TilawaTextRole helperTextRole;
+
+  final FontWeight valueFontWeight;
+  final double valueLineHeight;
+
+  factory TilawaMetricTileTokens.defaults() {
+    return TilawaMetricTileTokens.fromColorScheme(
+      ColorScheme.fromSeed(seedColor: AppColors.defaultPrimary),
+    );
+  }
+
+  factory TilawaMetricTileTokens.fromColorScheme(ColorScheme colorScheme) {
+    final tokens = colorScheme.brightness == Brightness.dark
+        ? MeMuslimDesignTokens.dark()
+        : MeMuslimDesignTokens.light();
+    return TilawaMetricTileTokens(
+      padding: EdgeInsets.symmetric(
+        horizontal: tokens.spaceSmall,
+        vertical: tokens.spaceSmall,
+      ),
+      iconSize: tokens.iconSizeSmall,
+      valueToIconSpacing: tokens.spaceSmall,
+      valueToLabelSpacing: tokens.spaceExtraSmall,
+      labelToHelperSpacing: tokens.spaceExtraSmall,
+      borderOpacity: 0.4,
+      fillColor: colorScheme.surfaceContainerLow,
+      borderColor: colorScheme.outlineVariant,
+      helperColorOpacity: 0.72,
+      valueTextRole: TilawaTextRole.titleLarge,
+      labelTextRole: TilawaTextRole.labelSmall,
+      helperTextRole: TilawaTextRole.labelSmall,
+      valueFontWeight: FontWeight.w800,
+      valueLineHeight: 1.05,
+    );
+  }
+
+  TilawaMetricTileTokens copyWith({
+    EdgeInsetsGeometry? padding,
+    double? iconSize,
+    double? valueToIconSpacing,
+    double? valueToLabelSpacing,
+    double? labelToHelperSpacing,
+    double? borderOpacity,
+    Color? fillColor,
+    Color? borderColor,
+    double? helperColorOpacity,
+    TilawaTextRole? valueTextRole,
+    TilawaTextRole? labelTextRole,
+    TilawaTextRole? helperTextRole,
+    FontWeight? valueFontWeight,
+    double? valueLineHeight,
+  }) {
+    return TilawaMetricTileTokens(
+      padding: padding ?? this.padding,
+      iconSize: iconSize ?? this.iconSize,
+      valueToIconSpacing: valueToIconSpacing ?? this.valueToIconSpacing,
+      valueToLabelSpacing: valueToLabelSpacing ?? this.valueToLabelSpacing,
+      labelToHelperSpacing: labelToHelperSpacing ?? this.labelToHelperSpacing,
+      borderOpacity: borderOpacity ?? this.borderOpacity,
+      fillColor: fillColor ?? this.fillColor,
+      borderColor: borderColor ?? this.borderColor,
+      helperColorOpacity: helperColorOpacity ?? this.helperColorOpacity,
+      valueTextRole: valueTextRole ?? this.valueTextRole,
+      labelTextRole: labelTextRole ?? this.labelTextRole,
+      helperTextRole: helperTextRole ?? this.helperTextRole,
+      valueFontWeight: valueFontWeight ?? this.valueFontWeight,
+      valueLineHeight: valueLineHeight ?? this.valueLineHeight,
+    );
+  }
+
+  static TilawaMetricTileTokens lerp(
+    TilawaMetricTileTokens a,
+    TilawaMetricTileTokens b,
+    double t,
+  ) {
+    return TilawaMetricTileTokens(
+      padding: EdgeInsetsGeometry.lerp(a.padding, b.padding, t)!,
+      iconSize: lerpTokenDouble(a.iconSize, b.iconSize, t),
+      valueToIconSpacing: lerpTokenDouble(
+        a.valueToIconSpacing,
+        b.valueToIconSpacing,
+        t,
+      ),
+      valueToLabelSpacing: lerpTokenDouble(
+        a.valueToLabelSpacing,
+        b.valueToLabelSpacing,
+        t,
+      ),
+      labelToHelperSpacing: lerpTokenDouble(
+        a.labelToHelperSpacing,
+        b.labelToHelperSpacing,
+        t,
+      ),
+      borderOpacity: lerpTokenDouble(a.borderOpacity, b.borderOpacity, t),
+      fillColor: Color.lerp(a.fillColor, b.fillColor, t)!,
+      borderColor: Color.lerp(a.borderColor, b.borderColor, t)!,
+      helperColorOpacity: lerpTokenDouble(
+        a.helperColorOpacity,
+        b.helperColorOpacity,
+        t,
+      ),
+      valueTextRole: lerpTilawaTextRole(a.valueTextRole, b.valueTextRole, t),
+      labelTextRole: lerpTilawaTextRole(a.labelTextRole, b.labelTextRole, t),
+      helperTextRole: lerpTilawaTextRole(
+        a.helperTextRole,
+        b.helperTextRole,
+        t,
+      ),
+      valueFontWeight: FontWeight.lerp(
+        a.valueFontWeight,
+        b.valueFontWeight,
+        t,
+      )!,
+      valueLineHeight: lerpTokenDouble(a.valueLineHeight, b.valueLineHeight, t),
+    );
+  }
+}

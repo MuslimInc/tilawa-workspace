@@ -1,6 +1,7 @@
 import 'package:alchemist/alchemist.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:tilawa_ui_kit/src/foundation/semantic_tints.dart';
 import 'package:tilawa_ui_kit/src/molecules/molecules.dart';
 
 import '../../lib/src/previews/preview_wrapper.dart';
@@ -867,6 +868,175 @@ void main() {
                     TilawaVerifiedTeacherBadge(label: 'Verified Teacher'),
                   ],
                 ),
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
+
+    goldenTest(
+      'TilawaMetricTile',
+      fileName: 'molecules/tilawa_metric_tile',
+      builder: () => GoldenTestGroup(
+        scenarioConstraints: const BoxConstraints(
+          minWidth: 200,
+          maxWidth: 200,
+          minHeight: 48,
+          maxHeight: 220,
+        ),
+        children: [
+          GoldenTestScenario(
+            name: 'Value + label',
+            child: const TilawaPreviewWrapper(
+              padding: EdgeInsets.zero,
+              child: SizedBox(
+                width: 200,
+                child: TilawaMetricTile(
+                  data: TilawaMetricData(
+                    value: '12',
+                    label: 'Pending requests',
+                    icon: Icons.inbox_outlined,
+                    tint: TilawaSemanticTint.ink,
+                  ),
+                ),
+              ),
+            ),
+          ),
+          GoldenTestScenario(
+            name: 'With helper text',
+            child: const TilawaPreviewWrapper(
+              padding: EdgeInsets.zero,
+              child: SizedBox(
+                width: 200,
+                child: TilawaMetricTile(
+                  data: TilawaMetricData(
+                    value: '48',
+                    label: 'Bookable slots',
+                    icon: Icons.schedule_outlined,
+                    tint: TilawaSemanticTint.neutral,
+                    helperText: '+3 this week',
+                  ),
+                ),
+              ),
+            ),
+          ),
+          GoldenTestScenario(
+            name: 'RTL Arabic',
+            child: const TilawaPreviewWrapper(
+              isRTL: true,
+              padding: EdgeInsets.zero,
+              child: SizedBox(
+                width: 200,
+                child: TilawaMetricTile(
+                  data: TilawaMetricData(
+                    value: '2',
+                    label: 'طلبات معلقة',
+                    icon: Icons.inbox_outlined,
+                    tint: TilawaSemanticTint.ink,
+                  ),
+                ),
+              ),
+            ),
+          ),
+          GoldenTestScenario(
+            name: 'Dark',
+            child: const TilawaPreviewWrapper(
+              isDark: true,
+              padding: EdgeInsets.zero,
+              child: SizedBox(
+                width: 200,
+                child: TilawaMetricTile(
+                  data: TilawaMetricData(
+                    value: '5',
+                    label: 'Upcoming sessions',
+                    icon: Icons.event_outlined,
+                    tint: TilawaSemanticTint.scholar,
+                  ),
+                ),
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
+
+    goldenTest(
+      'TilawaMetricTileStrip',
+      fileName: 'molecules/tilawa_metric_tile_strip',
+      builder: () => GoldenTestGroup(
+        scenarioConstraints: const BoxConstraints(
+          minWidth: 360,
+          maxWidth: 360,
+          minHeight: 48,
+          maxHeight: 220,
+        ),
+        children: [
+          GoldenTestScenario(
+            name: 'Three metrics',
+            child: const TilawaPreviewWrapper(
+              padding: EdgeInsets.zero,
+              child: TilawaMetricTileStrip(
+                metrics: [
+                  TilawaMetricData(
+                    value: '2',
+                    label: 'Pending',
+                    icon: Icons.inbox_outlined,
+                    tint: TilawaSemanticTint.ink,
+                  ),
+                  TilawaMetricData(
+                    value: '5',
+                    label: 'Upcoming',
+                    icon: Icons.event_outlined,
+                    tint: TilawaSemanticTint.scholar,
+                  ),
+                  TilawaMetricData(
+                    value: '12',
+                    label: 'Bookable slots',
+                    icon: Icons.schedule_outlined,
+                    tint: TilawaSemanticTint.neutral,
+                  ),
+                ],
+              ),
+            ),
+          ),
+          GoldenTestScenario(
+            name: 'Loading',
+            child: const TilawaPreviewWrapper(
+              padding: EdgeInsets.zero,
+              child: TilawaMetricTileStrip(
+                metrics: [],
+                loading: true,
+                loadingCount: 3,
+              ),
+            ),
+          ),
+          GoldenTestScenario(
+            name: 'RTL Arabic',
+            child: const TilawaPreviewWrapper(
+              isRTL: true,
+              padding: EdgeInsets.zero,
+              child: TilawaMetricTileStrip(
+                metrics: [
+                  TilawaMetricData(
+                    value: '2',
+                    label: 'طلبات معلقة',
+                    icon: Icons.inbox_outlined,
+                    tint: TilawaSemanticTint.ink,
+                  ),
+                  TilawaMetricData(
+                    value: '5',
+                    label: 'حصص قادمة',
+                    icon: Icons.event_outlined,
+                    tint: TilawaSemanticTint.scholar,
+                  ),
+                  TilawaMetricData(
+                    value: '12',
+                    label: 'مواعيد مفتوحة',
+                    icon: Icons.schedule_outlined,
+                    tint: TilawaSemanticTint.neutral,
+                  ),
+                ],
               ),
             ),
           ),

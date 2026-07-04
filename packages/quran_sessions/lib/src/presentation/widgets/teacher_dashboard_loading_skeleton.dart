@@ -34,70 +34,10 @@ class _SummaryStatsSkeleton extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final tokens = Theme.of(context).tokens;
-
-    return Padding(
-      padding: EdgeInsetsDirectional.fromSTEB(
-        tokens.spaceLarge,
-        tokens.spaceMedium,
-        tokens.spaceLarge,
-        tokens.spaceSmall,
-      ),
-      child: IntrinsicHeight(
-        child: Row(
-          crossAxisAlignment: CrossAxisAlignment.stretch,
-          spacing: tokens.spaceSmall,
-          children: const [
-            Expanded(child: _SummaryStatTileSkeleton()),
-            Expanded(child: _SummaryStatTileSkeleton()),
-            Expanded(child: _SummaryStatTileSkeleton()),
-          ],
-        ),
-      ),
-    );
-  }
-}
-
-class _SummaryStatTileSkeleton extends StatelessWidget {
-  const _SummaryStatTileSkeleton();
-
-  @override
-  Widget build(BuildContext context) {
-    final theme = Theme.of(context);
-    final tokens = theme.tokens;
-    final double iconRestSize = _iconRestSize(
-      context,
-      tokens.iconSizeSmall,
-    );
-    final double decorativeRadius = tokens.resolveRadius(
-      family: TilawaRadiusFamily.decorative,
-    );
-
-    return TilawaCard(
-      padding: EdgeInsets.all(tokens.spaceSmall + tokens.spaceExtraSmall),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          TilawaSkeletonBone(
-            width: iconRestSize,
-            height: iconRestSize,
-            borderRadius: decorativeRadius,
-          ),
-          SizedBox(height: tokens.spaceSmall),
-          TilawaSkeletonLine(
-            width: 40,
-            style: theme.textTheme.headlineSmall,
-          ),
-          SizedBox(height: tokens.spaceTiny),
-          TilawaSkeletonLine(style: theme.textTheme.labelSmall),
-          SizedBox(height: tokens.spaceExtraSmall),
-          TilawaSkeletonLine(
-            width: 64,
-            style: theme.textTheme.labelSmall,
-          ),
-        ],
-      ),
+    return const TilawaMetricTileStrip(
+      metrics: [],
+      loading: true,
+      loadingCount: 3,
     );
   }
 }

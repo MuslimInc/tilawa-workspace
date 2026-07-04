@@ -670,5 +670,42 @@ Widget previewTilawaStatusChipDark() {
   );
 }
 
+@Preview(
+  name: 'TilawaMetricTile',
+  group: 'Molecules',
+  theme: moleculesPreviewTheme,
+)
+Widget previewTilawaMetricTile() {
+  return Scaffold(
+    body: Center(
+      child: SizedBox(
+        width: 360,
+        child: TilawaMetricTileStrip(
+          metrics: [
+            TilawaMetricData(
+              value: '2',
+              label: 'Pending',
+              icon: Icons.inbox_outlined,
+              tint: TilawaSemanticTint.ink,
+            ),
+            TilawaMetricData(
+              value: '5',
+              label: 'Upcoming',
+              icon: Icons.event_outlined,
+              tint: TilawaSemanticTint.scholar,
+            ),
+            TilawaMetricData(
+              value: '48',
+              label: 'Bookable slots',
+              icon: Icons.schedule_outlined,
+              tint: TilawaSemanticTint.neutral,
+            ),
+          ],
+        ),
+      ),
+    ),
+  );
+}
+
 void _noop() {}
 void _noopBool(bool _) {}

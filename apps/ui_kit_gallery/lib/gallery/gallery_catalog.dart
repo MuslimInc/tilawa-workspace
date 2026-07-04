@@ -181,6 +181,15 @@ const List<GalleryEntry> galleryCatalog = [
     builder: MoleculesDemos.metadataChip,
   ),
   GalleryEntry(
+    id: 'tilawa_metric_tile',
+    name: 'TilawaMetricTile',
+    category: GalleryCategory.molecules,
+    description:
+        'Read-only dashboard summary metric tile + strip. Flat, non-clickable, '
+        'distinct from raise-action cards.',
+    builder: MoleculesDemos.metricTile,
+  ),
+  GalleryEntry(
     id: 'tilawa_navigation_row',
     name: 'TilawaNavigationRow',
     category: GalleryCategory.molecules,

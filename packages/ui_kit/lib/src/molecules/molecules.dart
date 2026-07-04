@@ -31,3 +31,4 @@ export 'tilawa_settings_tile.dart';
 export 'tilawa_status_chip.dart';
 export 'tilawa_experimental_badge.dart';
 export 'tilawa_verified_teacher_badge.dart';
+export 'tilawa_metric_tile.dart';
