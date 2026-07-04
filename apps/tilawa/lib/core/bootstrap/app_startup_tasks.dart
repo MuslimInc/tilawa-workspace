@@ -671,16 +671,38 @@ class AppStartupTasks {
       try {
         final NotificationPermissionService notificationPermissionService =
             getIt<NotificationPermissionService>();
-        await notificationPermissionService
-            .requestPermissionIfNecessary()
-            .timeout(
-              notificationPermissionSoftTimeout,
-              onTimeout: () {
-                logger.d(
-                  'Notification permission request still pending (deferred)',
-                );
-              },
+        final Future<void> permissionRequest = notificationPermissionService
+            .requestPermissionIfNecessary();
+        bool completedWithinSoftTimeout = true;
+        await permissionRequest.timeout(
+          notificationPermissionSoftTimeout,
+          onTimeout: () {
+            completedWithinSoftTimeout = false;
+            logger.d(
+              'Notification permission request still pending (deferred)',
             );
+          },
+        );
+        if (completedWithinSoftTimeout) {
+          await _refreshPrayerNotificationsWhenPermissionGranted(
+            notificationPermissionService,
+          );
+        } else {
+          unawaited(
+            permissionRequest
+                .then(
+                  (_) => _refreshPrayerNotificationsWhenPermissionGranted(
+                    notificationPermissionService,
+                  ),
+                )
+                .catchError((Object e) {
+                  logger.d(
+                    '[AppLaunch] source=AppStartupTasks.requestNotificationPermission: '
+                    'Deferred permission completion failed at (${DateTime.now()}): $e',
+                  );
+                }),
+          );
+        }
         logger.d(
           '[AppLaunch] source=AppStartupTasks.requestNotificationPermission: Notification permission request completed at (${DateTime.now()})',
         );
@@ -690,6 +712,27 @@ class AppStartupTasks {
         );
       }
     }();
+  }
+
+  Future<void> _refreshPrayerNotificationsWhenPermissionGranted(
+    NotificationPermissionService notificationPermissionService,
+  ) async {
+    if (!launchConfig.prayerNotificationsInit) {
+      return;
+    }
+    try {
+      final bool isGranted = await notificationPermissionService
+          .isPermissionGranted();
+      if (!isGranted) {
+        return;
+      }
+      await initializePrayerNotifications();
+    } catch (e) {
+      logger.d(
+        '[AppLaunch] source=AppStartupTasks._refreshPrayerNotificationsWhenPermissionGranted: '
+        'Warning: Could not refresh prayer notifications at (${DateTime.now()}): $e',
+      );
+    }
   }
 
   Future<void> initializeFirebaseDataAsync() async {

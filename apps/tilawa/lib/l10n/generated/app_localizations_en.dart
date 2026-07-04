@@ -3454,6 +3454,24 @@ class AppLocalizationsEn extends AppLocalizations {
   String get tourDebugResetDone => 'Product tours reset';
 
   @override
+  String get adhanDebugTestTitle => 'Test Adhan in 10 seconds';
+
+  @override
+  String get adhanDebugTestSubtitle =>
+      'Requests notification permission, then schedules the native Adhan alarm.';
+
+  @override
+  String get adhanDebugScheduled =>
+      'Adhan test scheduled for 10 seconds from now';
+
+  @override
+  String get adhanDebugPermissionMissing =>
+      'Notification permission is required before scheduling the Adhan test';
+
+  @override
+  String get adhanDebugFailed => 'Could not schedule Adhan test';
+
+  @override
   String get notificationDebugLabTitle => 'Notification Debug Lab';
 
   @override

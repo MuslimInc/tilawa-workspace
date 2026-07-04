@@ -317,6 +317,11 @@ class QuranSessionsMvpModule {
     );
     sl.registerLazySingletonIfAbsent(
       () => GetTeacherDashboardUseCase(
+        // Present only when the launch flag registered it (firebase module);
+        // null keeps the legacy multi-fetch path.
+        summarySource: sl.isRegistered<TeacherDashboardSummarySource>()
+            ? sl<TeacherDashboardSummarySource>()
+            : null,
         userProfileRepository: sl<UserProfileRepository>(),
         marketSchedulingConfigRepository:
             sl<MarketSchedulingConfigRepository>(),

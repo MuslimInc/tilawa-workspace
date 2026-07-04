@@ -15,6 +15,7 @@ export 'src/boundaries/call/call_provider.dart';
 export 'src/boundaries/call/call_room.dart';
 export 'src/boundaries/call/call_token_provider.dart';
 export 'src/boundaries/call/external_meeting_call_provider.dart';
+export 'src/boundaries/dashboard/teacher_dashboard_summary_source.dart';
 export 'src/boundaries/manual_payment_link_launcher.dart';
 export 'src/boundaries/call/mock_session_call_provider.dart';
 export 'src/boundaries/call/routing_session_call_provider.dart';
@@ -73,6 +74,9 @@ export 'src/data/dtos/slot_lock_dto.dart';
 export 'src/data/dtos/teacher_application_dto.dart';
 export 'src/data/dtos/teacher_application_access_dto.dart';
 export 'src/data/dtos/teacher_availability_dto.dart';
+export 'src/data/datasources/teacher_dashboard_summary_remote_data_source.dart';
+export 'src/data/dtos/teacher_dashboard_summary_dto.dart';
+export 'src/data/repositories/teacher_dashboard_summary_source_impl.dart';
 export 'src/data/dtos/weekly_schedule_dto.dart';
 export 'src/data/dtos/availability_override_dto.dart';
 export 'src/data/dtos/teacher_profile_dto.dart';
@@ -353,6 +357,7 @@ export 'src/utils/price_formatter.dart';
 export 'src/utils/specialization_labels.dart';
 
 // ── Application Layer ──────────────────────────────────────────────────────────
+export 'src/application/dashboard/teacher_dashboard_summary.dart';
 export 'src/application/usecases/get_teacher_dashboard_usecase.dart';
 export 'src/application/usecases/refresh_teacher_dashboard_usecase.dart';
 export 'src/application/usecases/get_session_detail_usecase.dart';

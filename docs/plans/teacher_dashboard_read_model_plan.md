@@ -1,6 +1,41 @@
 # Teacher Dashboard Read Model (O(1) reads) — Implementation Plan
 
-Status: **planned** (no code yet)
+Status: **phases 1 + 3–4 implemented.** Backend projector + triggers + rules +
+indexes (write-only) landed first; the mobile summary-first path is now in
+place behind `AppLaunchConfig.teacherDashboardSummaryReadEnabled`
+(`TILAWA_LAUNCH_TEACHER_DASHBOARD_SUMMARY_READ_ENABLED`, staging default ON,
+production OFF), with the legacy multi-fetch path as permanent fallback
+(missing/truncated/stale doc, any fetch failure). Remaining: staging parity QA
+(rollout step 4) and defaulting the flag on (step 5).
+
+Mobile shape (differs slightly from §4 as planned): package boundary
+`TeacherDashboardSummarySource` + `TeacherDashboardSummaryDto`/
+`TeacherDashboardSummarySourceImpl` (domain mapping via the same mappers as
+legacy reads); app-side `FirestoreTeacherDashboardSummaryDataSource` decodes
+raw docs through shared decoders (`firestore_quran_sessions_decoders.dart`)
+extracted from the session/schedule data sources so both paths cannot drift.
+Freshness gate: `CacheFreshnessPolicy.teacherDashboardSummaryTtl` (26h,
+aligned with the daily prune). UX: initial load now renders a
+structure-mirroring `TeacherDashboardLoadingSkeleton` (spinner removed) and
+silent post-mutation refreshes show a thin progress bar.
+
+Phase 1 deviations from the original design, chosen during implementation:
+
+- The summary stores **one raw `sessions` array** (same bounded query the app
+  runs today, raw camelCase fields/Timestamps, `joinToken` excluded) instead
+  of pre-split `pendingBookingRequests`/`upcomingSessions`. Lifecycle
+  classification is subtle (`resolveLifecycleStatusRawFromFirestore`,
+  `SessionListClassifier`) and stays in Dart — zero drift risk, same O(1)
+  read.
+- **5 triggers, not 6**: no slot-lock trigger. Booked starts are derived from
+  sessions on-device (`SessionBackedBookedSlotLockRepository`), so the
+  sessions section already carries them.
+- Truncation cap: `MAX_DASHBOARD_SESSION_ENTRIES = 200`
+  (dashboardSummaryService.ts); projector logs a warning and sets
+  `sessionsTruncated: true`.
+- Prune needs the new `dashboard` COLLECTION_GROUP index
+  (firestore.indexes.json) — deploy indexes with the functions:
+  `firebase deploy --only functions,firestore:rules,firestore:indexes`.
 Goal: entering `/sessions/dashboard` costs **one Firestore document read** on
 mobile, and every backend mutation keeps that document fresh with **O(1)
 incremental work** (bounded recompute + one write). No per-entry fan-out

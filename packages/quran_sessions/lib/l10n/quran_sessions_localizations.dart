@@ -3923,6 +3923,18 @@ abstract class QuranSessionsLocalizations {
   /// **'Student requests will appear here'**
   String get teacherPendingBookingRequestsEmptySubtitle;
 
+  /// No description provided for @teacherDashboardLoadingLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Loading your dashboard'**
+  String get teacherDashboardLoadingLabel;
+
+  /// No description provided for @teacherDashboardRefreshingLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Updating'**
+  String get teacherDashboardRefreshingLabel;
+
   /// No description provided for @teacherDashboardStatPendingRequests.
   ///
   /// In en, this message translates to:

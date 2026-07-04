@@ -5,6 +5,7 @@ import 'package:tilawa_core/services/performance_monitoring_service.dart';
 import 'firestore_exception_mapper.dart';
 import 'firestore_paths.dart';
 import 'firestore_performance_wrapper.dart';
+import 'firestore_quran_sessions_decoders.dart';
 
 /// Firestore-backed [ScheduleRemoteDataSource].
 ///
@@ -42,21 +43,7 @@ class FirestoreScheduleDataSource implements ScheduleRemoteDataSource {
       try {
         final doc = await _scheduleDoc(teacherId).get();
         if (!doc.exists) return null;
-        final data = doc.data() ?? const {};
-        return WeeklyScheduleDto(
-          teacherId: teacherId,
-          timezone: data['timezone'] as String? ?? 'Africa/Cairo',
-          slotDurationMinutes: data['slotDurationMinutes'] as int? ?? 30,
-          minNoticeMinutes: data['minNoticeMinutes'] as int? ?? 120,
-          maxHorizonDays: data['maxHorizonDays'] as int? ?? 30,
-          bufferBeforeMinutes: data['bufferBeforeMinutes'] as int? ?? 0,
-          bufferAfterMinutes: data['bufferAfterMinutes'] as int? ?? 0,
-          weeklyRules: _readRules(data['weeklyRules']),
-          version: data['version'] as int? ?? 1,
-          updatedAt: readDateTime(
-            data['updatedAt'],
-          )?.toUtc().toIso8601String(),
-        );
+        return weeklyScheduleDtoFromDocData(teacherId, doc.data() ?? const {});
       } on FirebaseException catch (e) {
         throw mapFirebaseException(e);
       }
@@ -103,15 +90,11 @@ class FirestoreScheduleDataSource implements ScheduleRemoteDataSource {
           query = query.where('date', isLessThan: _dateKey(to));
         }
         final snapshot = await query.get();
-        return snapshot.docs.map((doc) {
-          final data = doc.data();
-          return AvailabilityOverrideDto(
-            date: data['date'] as String? ?? doc.id,
-            type: data['type'] as String? ?? 'unavailable',
-            intervals: _readIntervals(data['intervals']),
-            reason: data['reason'] as String?,
-          );
-        }).toList();
+        return snapshot.docs
+            .map(
+              (doc) => availabilityOverrideDtoFromDocData(doc.id, doc.data()),
+            )
+            .toList();
       } on FirebaseException catch (e) {
         throw mapFirebaseException(e);
       }
@@ -127,12 +110,9 @@ class FirestoreScheduleDataSource implements ScheduleRemoteDataSource {
       try {
         final doc = await _overrides(teacherId).doc(dateKey).get();
         if (!doc.exists) return null;
-        final data = doc.data() ?? const {};
-        return AvailabilityOverrideDto(
-          date: data['date'] as String? ?? doc.id,
-          type: data['type'] as String? ?? 'unavailable',
-          intervals: _readIntervals(data['intervals']),
-          reason: data['reason'] as String?,
+        return availabilityOverrideDtoFromDocData(
+          doc.id,
+          doc.data() ?? const {},
         );
       } on FirebaseException catch (e) {
         throw mapFirebaseException(e);
@@ -172,28 +152,6 @@ class FirestoreScheduleDataSource implements ScheduleRemoteDataSource {
   }
 
   // ── Helpers ────────────────────────────────────────────────────────────────
-
-  Map<String, List<Map<String, String>>> _readRules(Object? raw) {
-    if (raw is! Map) return const {};
-    final result = <String, List<Map<String, String>>>{};
-    raw.forEach((key, value) {
-      result['$key'] = _readIntervals(value);
-    });
-    return result;
-  }
-
-  List<Map<String, String>> _readIntervals(Object? raw) {
-    if (raw is! List) return const [];
-    return raw
-        .whereType<Map>()
-        .map(
-          (m) => {
-            'start': m['start'] as String? ?? '00:00',
-            'end': m['end'] as String? ?? '00:00',
-          },
-        )
-        .toList();
-  }
 
   String _dateKey(DateTime date) =>
       '${date.year.toString().padLeft(4, '0')}-'

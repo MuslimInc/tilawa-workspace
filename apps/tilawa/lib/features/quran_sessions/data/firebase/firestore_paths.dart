@@ -9,6 +9,8 @@ abstract final class FirestoreQuranSessionsPaths {
   static const availabilityConfig = 'availability_config';
   static const scheduleDoc = 'schedule';
   static const availabilityOverrides = 'availability_overrides';
+  static const dashboard = 'dashboard';
+  static const dashboardSummaryDoc = 'summary';
   static const bookings = 'quran_bookings';
   static const sessions = 'quran_sessions';
   static const slotLocks = 'quran_slot_locks';

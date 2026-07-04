@@ -25,6 +25,7 @@ import '../data/firebase/firestore_schedule_repository.dart';
 import '../data/firebase/firestore_session_policy_repository.dart';
 import '../data/firebase/firestore_session_repository.dart';
 import '../data/firebase/firestore_teacher_application_access_data_source.dart';
+import '../data/firebase/firestore_teacher_dashboard_summary_data_source.dart';
 import '../data/firebase/firestore_teacher_application_repository.dart';
 import '../data/firebase/firestore_teacher_profile_repository.dart';
 import '../data/firebase/firestore_teacher_repository.dart';
@@ -198,6 +199,20 @@ class QuranSessionsFirebaseModule {
         callTelemetry: sl<QuranSessionCallTelemetryCoordinator>(),
       ),
     );
+
+    // One-read dashboard summary source. Registered only when the launch
+    // flag is on; GetTeacherDashboardUseCase treats an absent registration as
+    // "summary path disabled" and uses the legacy multi-fetch path.
+    if (config.teacherDashboardSummaryReadEnabled) {
+      sl.registerLazySingletonIfAbsent<TeacherDashboardSummarySource>(
+        () => TeacherDashboardSummarySourceImpl(
+          FirestoreTeacherDashboardSummaryDataSource(
+            firestore,
+            sl<PerformanceMonitoringService>(),
+          ),
+        ),
+      );
+    }
 
     // Application-layer caching use cases (GetTeacherDashboardUseCase,
     // InvalidateQuranSessionCacheUseCase, QuranSessionCacheStore, …) are only

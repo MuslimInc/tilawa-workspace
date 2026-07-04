@@ -4556,6 +4556,26 @@
     "@tourDebugResetDone": {
         "description": "Confirmation shown after the debug reset clears tour progress"
     },
+    "adhanDebugTestTitle": "Test Adhan in 10 seconds",
+    "@adhanDebugTestTitle": {
+        "description": "Debug-only settings tile that schedules a manual Adhan test"
+    },
+    "adhanDebugTestSubtitle": "Requests notification permission, then schedules the native Adhan alarm.",
+    "@adhanDebugTestSubtitle": {
+        "description": "Supporting text for the debug-only Adhan test settings tile"
+    },
+    "adhanDebugScheduled": "Adhan test scheduled for 10 seconds from now",
+    "@adhanDebugScheduled": {
+        "description": "Confirmation shown after scheduling the debug Adhan test"
+    },
+    "adhanDebugPermissionMissing": "Notification permission is required before scheduling the Adhan test",
+    "@adhanDebugPermissionMissing": {
+        "description": "Error shown when notification permission is missing for the debug Adhan test"
+    },
+    "adhanDebugFailed": "Could not schedule Adhan test",
+    "@adhanDebugFailed": {
+        "description": "Error shown when the debug Adhan test cannot be scheduled"
+    },
     "notificationDebugLabTitle": "Notification Debug Lab",
     "@notificationDebugLabTitle": {
         "description": "Developer settings entry and screen title for notification routing tests"

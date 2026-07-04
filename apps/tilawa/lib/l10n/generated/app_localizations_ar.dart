@@ -3425,6 +3425,23 @@ class AppLocalizationsAr extends AppLocalizations {
   String get tourDebugResetDone => 'تمت إعادة تعيين الجولات التعريفية';
 
   @override
+  String get adhanDebugTestTitle => 'اختبار الأذان بعد 10 ثوانٍ';
+
+  @override
+  String get adhanDebugTestSubtitle =>
+      'يطلب إذن الإشعارات ثم يجدول منبه الأذان الأصلي.';
+
+  @override
+  String get adhanDebugScheduled => 'تمت جدولة اختبار الأذان بعد 10 ثوانٍ';
+
+  @override
+  String get adhanDebugPermissionMissing =>
+      'يلزم إذن الإشعارات قبل جدولة اختبار الأذان';
+
+  @override
+  String get adhanDebugFailed => 'تعذّرت جدولة اختبار الأذان';
+
+  @override
   String get notificationDebugLabTitle => 'اختبار الإشعارات';
 
   @override

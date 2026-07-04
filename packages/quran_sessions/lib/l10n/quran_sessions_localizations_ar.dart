@@ -2156,6 +2156,12 @@ class QuranSessionsLocalizationsAr extends QuranSessionsLocalizations {
       'ستظهر طلبات الطلاب هنا عند إرسالها';
 
   @override
+  String get teacherDashboardLoadingLabel => 'جارٍ تحميل لوحتك';
+
+  @override
+  String get teacherDashboardRefreshingLabel => 'جارٍ التحديث';
+
+  @override
   String get teacherDashboardStatPendingRequests => 'طلبات معلقة';
 
   @override

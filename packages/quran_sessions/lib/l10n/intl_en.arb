@@ -886,6 +886,8 @@
     "teacherDashboardShowLessSessions": "Show less",
     "teacherPendingBookingRequestsEmptyTitle": "No booking requests right now",
     "teacherPendingBookingRequestsEmptySubtitle": "Student requests will appear here",
+    "teacherDashboardLoadingLabel": "Loading your dashboard",
+    "teacherDashboardRefreshingLabel": "Updating",
     "teacherDashboardStatPendingRequests": "Pending requests",
     "teacherDashboardStatUpcomingSessions": "Upcoming sessions",
     "teacherDashboardStatBookableSlotsThisWeek": "Open slots this week",

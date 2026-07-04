@@ -179,6 +179,10 @@ abstract final class _LaunchEnvironment {
     'TILAWA_LAUNCH_LEARN_QURAN_STUDENT_FEATURE_ENABLED',
     defaultValue: false,
   );
+  static const bool teacherDashboardSummaryReadEnabled = bool.fromEnvironment(
+    'TILAWA_LAUNCH_TEACHER_DASHBOARD_SUMMARY_READ_ENABLED',
+    defaultValue: stagingFlagsOn,
+  );
   static const bool teacherApplicationEntryEnabled = bool.fromEnvironment(
     'TILAWA_LAUNCH_TEACHER_APPLICATION_ENTRY_ENABLED',
     defaultValue: false,
@@ -261,6 +265,7 @@ class AppLaunchConfig extends Equatable {
     this.notificationPermissionRequest = true,
     this.quranSessionsEnabled = true,
     this.learnQuranStudentFeatureEnabled = false,
+    this.teacherDashboardSummaryReadEnabled = false,
     this.teacherApplicationEntryEnabled = false,
     this.homeTeacherApplicationCardEnabled = false,
     this.teacherApplicationFormUrl = kDefaultTeacherApplicationFormUrl,
@@ -310,6 +315,8 @@ class AppLaunchConfig extends Equatable {
       quranSessionsEnabled: _LaunchEnvironment.quranSessionsEnabled,
       learnQuranStudentFeatureEnabled:
           _LaunchEnvironment.learnQuranStudentFeatureEnabled,
+      teacherDashboardSummaryReadEnabled:
+          _LaunchEnvironment.teacherDashboardSummaryReadEnabled,
       teacherApplicationEntryEnabled:
           _LaunchEnvironment.teacherApplicationEntryEnabled,
       homeTeacherApplicationCardEnabled:
@@ -363,6 +370,11 @@ class AppLaunchConfig extends Equatable {
   /// Student marketplace: hub, teachers list, booking, my sessions.
   /// Default **false** in production — enable via dart-define for staging.
   final bool learnQuranStudentFeatureEnabled;
+
+  /// One-read teacher dashboard: serve `/sessions/dashboard` from the
+  /// server-maintained summary doc, falling back to per-collection reads.
+  /// Default off in production, on for staging/local builds.
+  final bool teacherDashboardSummaryReadEnabled;
 
   /// Settings/Profile Google Form teacher application entry.
   final bool teacherApplicationEntryEnabled;
@@ -437,6 +449,7 @@ class AppLaunchConfig extends Equatable {
     notificationPermissionRequest,
     quranSessionsEnabled,
     learnQuranStudentFeatureEnabled,
+    teacherDashboardSummaryReadEnabled,
     teacherApplicationEntryEnabled,
     homeTeacherApplicationCardEnabled,
     teacherApplicationFormUrl,

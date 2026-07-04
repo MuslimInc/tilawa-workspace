@@ -1,5 +1,6 @@
 import 'package:dartz_plus/dartz_plus.dart';
 
+import '../../boundaries/dashboard/teacher_dashboard_summary_source.dart';
 import '../../domain/entities/quran_session.dart';
 import '../../domain/entities/teacher_availability.dart';
 import '../../domain/entities/teacher_profile.dart';
@@ -9,6 +10,7 @@ import '../../domain/entities/market_scheduling_config.dart';
 import '../../domain/entities/session_lifecycle_status.dart';
 import '../../domain/failures/quran_sessions_failure.dart';
 import '../../domain/policies/session_list_classifier.dart';
+import '../../domain/services/booked_slot_starts.dart';
 import '../cache/cache_freshness_policy.dart';
 import '../cache/quran_session_cache_store.dart';
 import '../cache/session_cache_key.dart';
@@ -18,6 +20,7 @@ import '../../domain/repositories/session_repository.dart';
 import '../../domain/repositories/teacher_profile_repository.dart';
 import '../../domain/repositories/user_profile_repository.dart';
 import '../../domain/usecases/get_teacher_availability_usecase.dart';
+import '../dashboard/teacher_dashboard_summary.dart';
 
 class TeacherDashboardResult {
   const TeacherDashboardResult({
@@ -46,6 +49,8 @@ class GetTeacherDashboardUseCase {
     required this.teacherProfileRepository,
     required this.getTeacherAvailability,
     required this.cacheStore,
+    this.summarySource,
+    this.summaryFreshness = CacheFreshnessPolicy.teacherDashboardSummaryTtl,
     this.currentTime,
   });
 
@@ -56,6 +61,11 @@ class GetTeacherDashboardUseCase {
   final TeacherProfileRepository teacherProfileRepository;
   final GetTeacherAvailabilityUseCase getTeacherAvailability;
   final QuranSessionCacheStore cacheStore;
+
+  /// Server-maintained read model; `null` disables the summary-first path
+  /// (feature flag off, fake wiring, tests of the legacy path).
+  final TeacherDashboardSummarySource? summarySource;
+  final Duration summaryFreshness;
   final DateTime Function()? currentTime;
 
   Future<Either<QuranSessionsFailure, TeacherDashboardResult>> call({
@@ -63,6 +73,11 @@ class GetTeacherDashboardUseCase {
     required DateTime now,
     bool forceRefresh = false,
   }) async {
+    final fromSummary = await _tryLoadFromSummary(teacherProfileId, now);
+    if (fromSummary != null) {
+      return Right(fromSummary);
+    }
+
     if (forceRefresh) {
       cacheStore.remove(
         SessionCacheKey.teacherDashboardSessions(teacherProfileId),
@@ -124,21 +139,11 @@ class GetTeacherDashboardUseCase {
       final schedule = await scheduleFuture;
       final allUpcoming = await upcomingFuture;
 
-      final pendingBookingRequests = <QuranSession>[];
-      final upcomingSessions = <QuranSession>[];
-      for (final session in allUpcoming) {
-        if (session.effectiveLifecycleStatus ==
-            SessionLifecycleStatus.pendingTutorApproval) {
-          pendingBookingRequests.add(session);
-        } else if (SessionListClassifier.isTeacherDashboardUpcoming(session)) {
-          upcomingSessions.add(session);
-        }
-      }
+      final classified = _classifySessions(allUpcoming);
+      final pendingBookingRequests = classified.pending;
+      final upcomingSessions = classified.upcoming;
 
-      final horizonDays = schedulingConfig.bookingHorizonDays < 14
-          ? schedulingConfig.bookingHorizonDays
-          : 14;
-      final horizon = Duration(days: horizonDays);
+      final horizon = Duration(days: _horizonDays(schedulingConfig));
 
       final availability = await cacheStore
           .getOrFetch<List<TeacherAvailability>>(
@@ -171,6 +176,101 @@ class GetTeacherDashboardUseCase {
       return const Left(UnknownFailure());
     }
   }
+
+  /// Attempts the one-read summary path. Returns `null` whenever the legacy
+  /// multi-fetch path must run instead: source disabled, doc missing, doc
+  /// truncated, doc stale, or any fetch failure. Falling back on failure (not
+  /// propagating it) keeps the projection strictly an optimization — a broken
+  /// projector can never take the dashboard down.
+  Future<TeacherDashboardResult?> _tryLoadFromSummary(
+    String teacherProfileId,
+    DateTime now,
+  ) async {
+    final source = summarySource;
+    if (source == null) return null;
+
+    final Either<QuranSessionsFailure, TeacherDashboardSummary?> result;
+    try {
+      result = await source.fetch(teacherProfileId);
+    } on Object {
+      return null;
+    }
+    final summary = result.fold((_) => null, (s) => s);
+    if (summary == null || summary.sessionsTruncated) return null;
+
+    final age = now.difference(summary.updatedAt);
+    if (age > summaryFreshness) return null;
+
+    return _resultFromSummary(summary, now);
+  }
+
+  TeacherDashboardResult _resultFromSummary(
+    TeacherDashboardSummary summary,
+    DateTime now,
+  ) {
+    final classified = _classifySessions(summary.sessions);
+    final schedule = summary.weeklySchedule;
+
+    List<TeacherAvailability> availability = const [];
+    if (schedule != null && !schedule.isEmpty) {
+      final horizonEnd = now.add(
+        Duration(days: _horizonDays(summary.schedulingConfig)),
+      );
+      availability = GetTeacherAvailabilityUseCase.generateTeacherAvailability(
+        schedule: schedule,
+        overrides: summary.overrides,
+        bookedStartsUtc: collectBookedSlotStarts(
+          summary.sessions,
+          windowStart: now,
+          windowEnd: horizonEnd,
+        ),
+        windowStart: now,
+        windowEnd: horizonEnd,
+        now: now,
+      );
+    }
+
+    return TeacherDashboardResult(
+      // Projection of the owner profile — carries exactly the fields the
+      // dashboard consumes (countryCode, displayName). Role/status use the
+      // profile mapper's defaults.
+      profile: UserProfile(
+        userId: summary.ownerUserId,
+        role: UserRole.student,
+        accountStatus: AccountStatus.active,
+        displayName: summary.displayName,
+        countryCode: summary.countryCode,
+      ),
+      schedulingConfig: summary.schedulingConfig,
+      schedule: schedule,
+      pendingBookingRequests: classified.pending,
+      upcomingSessions: classified.upcoming,
+      availability: availability,
+    );
+  }
+
+  /// Splits the raw upcoming window into pending requests vs actionable
+  /// upcoming sessions — the single classification used by both the summary
+  /// and legacy paths.
+  ({List<QuranSession> pending, List<QuranSession> upcoming}) _classifySessions(
+    List<QuranSession> allUpcoming,
+  ) {
+    final pending = <QuranSession>[];
+    final upcoming = <QuranSession>[];
+    for (final session in allUpcoming) {
+      if (session.effectiveLifecycleStatus ==
+          SessionLifecycleStatus.pendingTutorApproval) {
+        pending.add(session);
+      } else if (SessionListClassifier.isTeacherDashboardUpcoming(session)) {
+        upcoming.add(session);
+      }
+    }
+    return (pending: pending, upcoming: upcoming);
+  }
+
+  /// Dashboard availability horizon: min(config horizon, 14 days).
+  int _horizonDays(MarketSchedulingConfig config) =>
+      config.bookingHorizonDays < 14 ? config.bookingHorizonDays : 14;
 
   /// Loads the owner's user profile, then the scheduling config derived from
   /// its country code — a dependent chain that runs as one unit so it can be

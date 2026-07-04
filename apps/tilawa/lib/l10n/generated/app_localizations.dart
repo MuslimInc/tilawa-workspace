@@ -6086,6 +6086,36 @@ abstract class AppLocalizations {
   /// **'Product tours reset'**
   String get tourDebugResetDone;
 
+  /// Debug-only settings tile that schedules a manual Adhan test
+  ///
+  /// In en, this message translates to:
+  /// **'Test Adhan in 10 seconds'**
+  String get adhanDebugTestTitle;
+
+  /// Supporting text for the debug-only Adhan test settings tile
+  ///
+  /// In en, this message translates to:
+  /// **'Requests notification permission, then schedules the native Adhan alarm.'**
+  String get adhanDebugTestSubtitle;
+
+  /// Confirmation shown after scheduling the debug Adhan test
+  ///
+  /// In en, this message translates to:
+  /// **'Adhan test scheduled for 10 seconds from now'**
+  String get adhanDebugScheduled;
+
+  /// Error shown when notification permission is missing for the debug Adhan test
+  ///
+  /// In en, this message translates to:
+  /// **'Notification permission is required before scheduling the Adhan test'**
+  String get adhanDebugPermissionMissing;
+
+  /// Error shown when the debug Adhan test cannot be scheduled
+  ///
+  /// In en, this message translates to:
+  /// **'Could not schedule Adhan test'**
+  String get adhanDebugFailed;
+
   /// Developer settings entry and screen title for notification routing tests
   ///
   /// In en, this message translates to:

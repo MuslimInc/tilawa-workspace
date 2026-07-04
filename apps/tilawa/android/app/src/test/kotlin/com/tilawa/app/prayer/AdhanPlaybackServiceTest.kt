@@ -21,6 +21,7 @@ import org.robolectric.RobolectricTestRunner
 import org.robolectric.Shadows
 import org.robolectric.annotation.Config
 import org.robolectric.shadows.ShadowService
+import java.io.File
 
 @RunWith(RobolectricTestRunner::class)
 @Config(sdk = [Build.VERSION_CODES.S])
@@ -352,6 +353,25 @@ class AdhanPlaybackServiceTest {
         assertEquals(
             NATIVE_FG_CHANNEL_ID,
             shadowService.lastForegroundNotification?.channelId,
+        )
+    }
+
+    @Test
+    fun `default adhan raw resource is packaged and protected from shrinking`() {
+        assertEquals(
+            R.raw.adhan,
+            context.resources.getIdentifier("adhan", "raw", context.packageName),
+        )
+
+        val keepFile = listOf(
+            File("src/main/res/raw/keep.xml"),
+            File("app/src/main/res/raw/keep.xml"),
+        ).firstOrNull { it.isFile }
+
+        assertNotNull("raw keep.xml must exist", keepFile)
+        assertTrue(
+            "raw keep.xml must keep the dynamically-loaded adhan sound",
+            keepFile!!.readText().contains("@raw/adhan"),
         )
     }
 

@@ -1,5 +1,6 @@
 import 'package:dartz_plus/dartz_plus.dart';
 
+import '../entities/availability_override.dart';
 import '../entities/generated_slot.dart';
 import '../entities/teacher_availability.dart';
 import '../entities/weekly_schedule.dart';
@@ -79,23 +80,44 @@ class GetTeacherAvailabilityUseCase {
       (value) => value,
     );
 
-    final generated = _slotGenerator.generate(
-      schedule: schedule,
-      overrides: overrides,
-      bookedStartsUtc: bookedStartsUtc,
-      windowStart: from,
-      windowEnd: to,
-      now: _now(),
-    );
-
     return Right(
-      sortTeacherAvailabilityByStart(
-        generated.map(_toTeacherAvailability).toList(),
+      generateTeacherAvailability(
+        schedule: schedule,
+        overrides: overrides,
+        bookedStartsUtc: bookedStartsUtc,
+        windowStart: from,
+        windowEnd: to,
+        now: _now(),
+        slotGenerator: _slotGenerator,
       ),
     );
   }
 
-  TeacherAvailability _toTeacherAvailability(GeneratedSlot slot) =>
+  /// Pure slot generation shared with the dashboard summary path, so both
+  /// produce identical availability from the same sources.
+  static List<TeacherAvailability> generateTeacherAvailability({
+    required WeeklySchedule schedule,
+    required List<AvailabilityOverride> overrides,
+    required Set<DateTime> bookedStartsUtc,
+    required DateTime windowStart,
+    required DateTime windowEnd,
+    required DateTime now,
+    SlotGenerator slotGenerator = const SlotGenerator(),
+  }) {
+    final generated = slotGenerator.generate(
+      schedule: schedule,
+      overrides: overrides,
+      bookedStartsUtc: bookedStartsUtc,
+      windowStart: windowStart,
+      windowEnd: windowEnd,
+      now: now,
+    );
+    return sortTeacherAvailabilityByStart(
+      generated.map(_toTeacherAvailability).toList(),
+    );
+  }
+
+  static TeacherAvailability _toTeacherAvailability(GeneratedSlot slot) =>
       TeacherAvailability(
         slotId: slot.slotId,
         teacherId: slot.teacherId,

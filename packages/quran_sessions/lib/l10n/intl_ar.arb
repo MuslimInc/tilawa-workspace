@@ -891,6 +891,8 @@
     "teacherDashboardShowLessSessions": "عرض أقل",
     "teacherPendingBookingRequestsEmptyTitle": "لا توجد طلبات حجز حاليًا",
     "teacherPendingBookingRequestsEmptySubtitle": "ستظهر طلبات الطلاب هنا عند إرسالها",
+    "teacherDashboardLoadingLabel": "جارٍ تحميل لوحتك",
+    "teacherDashboardRefreshingLabel": "جارٍ التحديث",
     "teacherDashboardStatPendingRequests": "طلبات معلقة",
     "teacherDashboardStatUpcomingSessions": "حصص قادمة",
     "teacherDashboardStatBookableSlotsThisWeek": "مواعيد مفتوحة هذا الأسبوع",

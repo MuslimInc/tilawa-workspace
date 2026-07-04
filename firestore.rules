@@ -202,6 +202,15 @@ service cloud.firestore {
         allow write: if canEditTeacherAvailability(teacherId);
       }
 
+      // Teacher dashboard read model (one-read dashboard). Contains the
+      // owner's booking/student data, so reads are owner/admin only — unlike
+      // the sibling availability collections. Written exclusively by the
+      // dashboard projection Cloud Functions (admin SDK bypasses rules).
+      match /dashboard/{docId} {
+        allow read: if isAdmin() || ownsTeacherProfile(teacherId);
+        allow write: if false;
+      }
+
       // Legacy published slots — teacher-scoped direct delete (no collectionGroup).
       match /availability/{slotId} {
         allow read: if isSignedIn();

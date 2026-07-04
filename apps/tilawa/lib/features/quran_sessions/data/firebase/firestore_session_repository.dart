@@ -5,6 +5,7 @@ import 'package:tilawa_core/services/performance_monitoring_service.dart';
 import 'firestore_exception_mapper.dart';
 import 'firestore_paths.dart';
 import 'firestore_performance_wrapper.dart';
+import 'firestore_quran_sessions_decoders.dart';
 
 class FirestoreSessionDataSource implements SessionRemoteDataSource {
   FirestoreSessionDataSource(this._firestore, [this._perf]);
@@ -15,33 +16,8 @@ class FirestoreSessionDataSource implements SessionRemoteDataSource {
   CollectionReference<Map<String, dynamic>> get _sessions =>
       _firestore.collection(FirestoreQuranSessionsPaths.sessions);
 
-  QuranSessionDto _mapDoc(DocumentSnapshot<Map<String, dynamic>> doc) {
-    final data = doc.data() ?? const {};
-    final lifecycleRaw = resolveLifecycleStatusRawFromFirestore(data);
-    final bookingId = resolveBookingIdFromFirestore(doc.id, data);
-    final statusRaw = lifecycleRaw ?? data['status'] as String? ?? 'scheduled';
-    return QuranSessionDto(
-      id: doc.id,
-      bookingId: bookingId,
-      teacherId: data['teacherId'] as String? ?? '',
-      studentId: data['studentId'] as String? ?? '',
-      startsAt: readRequiredDateTime(
-        data['startsAt'],
-      ).toUtc().toIso8601String(),
-      endsAt: readRequiredDateTime(data['endsAt']).toUtc().toIso8601String(),
-      callType: _mapCallType(data['callType'] as String?),
-      status: _mapSessionStatus(statusRaw),
-      lifecycleStatus: lifecycleRaw ?? data['lifecycleStatus'] as String?,
-      meetingLink: (data['meetingLink'] ?? data['meeting_link']) as String?,
-      callRoomId: (data['providerSessionId'] ?? data['callRoomId']) as String?,
-      bookingType: data['bookingType'] as String?,
-      callProvider: data['callProvider'] as String?,
-      providerSessionId: data['providerSessionId'] as String?,
-      joinToken: data['joinToken'] as String?,
-      participants: data['participants'],
-      notes: data['notes'] as String?,
-    );
-  }
+  QuranSessionDto _mapDoc(DocumentSnapshot<Map<String, dynamic>> doc) =>
+      quranSessionDtoFromDocData(doc.id, doc.data() ?? const {});
 
   @override
   Future<QuranSessionDto> getSessionById(String sessionId) async {
@@ -163,18 +139,4 @@ class FirestoreSessionDataSource implements SessionRemoteDataSource {
       throw mapFirebaseException(e);
     }
   }
-
-  String _mapCallType(String? raw) => switch (raw) {
-    'voiceCall' => 'voice_call',
-    'videoCall' => 'video_call',
-    _ => 'external_meeting',
-  };
-
-  String _mapSessionStatus(String? raw) => switch (raw) {
-    'inProgress' => 'in_progress',
-    'cancelledByStudent' => 'cancelled_by_student',
-    'cancelledByTeacher' => 'cancelled_by_teacher',
-    'noShow' => 'no_show',
-    _ => raw ?? 'scheduled',
-  };
 }

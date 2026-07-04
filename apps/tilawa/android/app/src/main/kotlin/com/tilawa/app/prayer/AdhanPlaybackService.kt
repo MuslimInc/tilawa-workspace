@@ -234,17 +234,7 @@ internal class AdhanPlaybackService : Service() {
         
         logDebug("startPlayback: initializing MediaPlayer for sound: $sound")
         try {
-            var adhanResId = resources.getIdentifier(sound, "raw", packageName)
-            if (adhanResId == 0) {
-                Log.w(TAG, "Sound resource '$sound' not found, falling back to 'adhan'")
-                adhanResId = resources.getIdentifier("adhan", "raw", packageName)
-            }
-            
-            if (adhanResId == 0) {
-                Log.e(TAG, "Adhan resource not found")
-                stopSelf()
-                return
-            }
+            val adhanResId = resolveAdhanRawResource(sound)
 
             mediaPlayer = MediaPlayer().apply {
                 setDataSource(this@AdhanPlaybackService, Uri.parse("android.resource://$packageName/$adhanResId"))
@@ -351,6 +341,17 @@ internal class AdhanPlaybackService : Service() {
             analytics.logEvent(PrayerEvents.PLAYBACK_FAILED, mapOf("reason" to "initialization_error"))
             stopSelf()
         }
+    }
+
+    private fun resolveAdhanRawResource(sound: String): Int {
+        val requestedResId = resources.getIdentifier(sound, "raw", packageName)
+        if (requestedResId != 0) {
+            return requestedResId
+        }
+        if (sound != "adhan") {
+            Log.w(TAG, "Sound resource '$sound' not found, falling back to 'adhan'")
+        }
+        return R.raw.adhan
     }
 
     private fun stopPlayback() {
@@ -551,4 +552,3 @@ internal class AdhanPlaybackService : Service() {
         }
     }
 }
-

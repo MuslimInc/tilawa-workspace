@@ -11,6 +11,7 @@ import '../utils/teacher_availability_by_date.dart';
 import '../widgets/date_grouped_day_tab_bar.dart';
 import '../widgets/friday_review_reminder_banner.dart';
 import '../widgets/teacher_dashboard_inline_empty_state.dart';
+import '../widgets/teacher_dashboard_loading_skeleton.dart';
 import '../widgets/teacher_dashboard_schedule_section.dart';
 import '../widgets/teacher_dashboard_summary_stats.dart';
 import '../widgets/tutor_dashboard_section.dart';
@@ -272,7 +273,7 @@ class _TeacherDashboardScreenState extends State<TeacherDashboardScreen> {
           },
           builder: (context, state) => switch (state) {
             TeacherDashboardInitial() || TeacherDashboardLoading() =>
-              const Center(child: CircularProgressIndicator()),
+              const TeacherDashboardLoadingSkeleton(),
             TeacherDashboardEmpty() => Center(
               child: Padding(
                 padding: EdgeInsets.all(Theme.of(context).tokens.spaceLarge),
@@ -299,40 +300,60 @@ class _TeacherDashboardScreenState extends State<TeacherDashboardScreen> {
               ),
             TeacherDashboardSuccess success => RefreshIndicator(
               onRefresh: () async => _reload(),
-              child: CustomScrollView(
-                slivers: [
-                  // Session lists are capped so bookable slots stay reachable.
-                  SliverToBoxAdapter(
-                    child: TeacherDashboardSummaryStats(
-                      pendingRequestsCount:
-                          success.pendingBookingRequests.length,
-                      upcomingSessionsCount: success.upcomingSessions.length,
-                      bookableSlotsCount: _bookableOpenSlotsCount(success),
-                      pendingRequestsLabel:
-                          l10n.teacherDashboardStatPendingRequests,
-                      upcomingSessionsLabel:
-                          l10n.teacherDashboardStatUpcomingSessions,
-                      bookableSlotsLabel: success.weekScopedDashboard
-                          ? l10n.teacherDashboardStatBookableSlotsThisWeek
-                          : l10n.teacherDashboardStatBookableSlotsHorizon,
-                    ),
-                  ),
+              child: Stack(
+                children: [
+                  CustomScrollView(
+                    slivers: [
+                      // Session lists are capped so bookable slots stay
+                      // reachable.
+                      SliverToBoxAdapter(
+                        child: TeacherDashboardSummaryStats(
+                          pendingRequestsCount:
+                              success.pendingBookingRequests.length,
+                          upcomingSessionsCount:
+                              success.upcomingSessions.length,
+                          bookableSlotsCount: _bookableOpenSlotsCount(success),
+                          pendingRequestsLabel:
+                              l10n.teacherDashboardStatPendingRequests,
+                          upcomingSessionsLabel:
+                              l10n.teacherDashboardStatUpcomingSessions,
+                          bookableSlotsLabel: success.weekScopedDashboard
+                              ? l10n.teacherDashboardStatBookableSlotsThisWeek
+                              : l10n.teacherDashboardStatBookableSlotsHorizon,
+                        ),
+                      ),
 
-                  SliverToBoxAdapter(
-                    child: _TeacherDashboardCategoriesSection(
-                      viewMode: _categoryViewMode,
-                      categories: _categoryItems(context, success),
-                      onViewModeChanged: (viewMode) {
-                        setState(() => _categoryViewMode = viewMode);
-                      },
-                      onCategorySelected: _openDashboardCategory,
-                    ),
+                      SliverToBoxAdapter(
+                        child: _TeacherDashboardCategoriesSection(
+                          viewMode: _categoryViewMode,
+                          categories: _categoryItems(context, success),
+                          onViewModeChanged: (viewMode) {
+                            setState(() => _categoryViewMode = viewMode);
+                          },
+                          onCategorySelected: _openDashboardCategory,
+                        ),
+                      ),
+                      SliverToBoxAdapter(
+                        child: SizedBox(
+                          height: Theme.of(context).tokens.spaceExtraLarge,
+                        ),
+                      ),
+                    ],
                   ),
-                  SliverToBoxAdapter(
-                    child: SizedBox(
-                      height: Theme.of(context).tokens.spaceExtraLarge,
+                  // Post-mutation reloads keep the dashboard interactive;
+                  // this thin bar is the only signal a refresh is running
+                  // (pull-to-refresh has its own indicator).
+                  if (success.isRefreshing)
+                    PositionedDirectional(
+                      top: 0,
+                      start: 0,
+                      end: 0,
+                      child: Semantics(
+                        label: l10n.teacherDashboardRefreshingLabel,
+                        liveRegion: true,
+                        child: const LinearProgressIndicator(minHeight: 2),
+                      ),
                     ),
-                  ),
                 ],
               ),
             ),
