@@ -1,6 +1,8 @@
 import 'package:equatable/equatable.dart';
 import 'package:flutter/foundation.dart';
 
+import 'app_environment.dart' as app_env;
+
 /// Launch-time feature toggles for startup orchestration.
 ///
 /// Most toggles default to enabled and can be overridden via `--dart-define`.
@@ -38,7 +40,7 @@ const String kDefaultTeacherApplicationFormUrl =
     'https://docs.google.com/forms/d/e/1FAIpQLScjFOySgVJqDxaY0IgR9GYDEnemxOkPSbW2QQea7KrORvRQQA/viewform';
 
 bool quranSessionsStagingFlagsDefaultEnabled() =>
-    _LaunchEnvironment.stagingFlagsOn;
+    app_env.quranSessionsStagingFlagsDefaultEnabledFromEnvironment();
 
 /// Compile-time `--dart-define` values for [AppLaunchConfig.fromEnvironment].
 ///

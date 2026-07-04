@@ -2,83 +2,55 @@
     "version": "0.2.0",
     "configurations": [
         {
-            "name": "Tilawa (Debug)",
+            "name": "MeMuslim Dev",
             "request": "launch",
             "type": "dart",
-            "program": "apps/tilawa/lib/main.dart",
+            "cwd": "${workspaceFolder}/apps/tilawa",
+            "program": "lib/main.dart",
             "flutterMode": "debug",
             "toolArgs": [
-                "--dart-define=TILAWA_LAUNCH_LEARN_QURAN_STUDENT_FEATURE_ENABLED=true"
+                "--flavor",
+                "development",
+                "--dart-define-from-file=env/development.json"
             ]
         },
         {
-            "name": "Tilawa (Profile)",
+            "name": "MeMuslim Staging",
             "request": "launch",
             "type": "dart",
-            "program": "apps/tilawa/lib/main.dart",
-            "flutterMode": "profile"
+            "program": "lib/main.dart",
+            "cwd": "${workspaceFolder}/apps/tilawa",
+            "flutterMode": "debug",
+            "toolArgs": [
+                "--flavor",
+                "staging",
+                "--dart-define-from-file=env/staging.json"
+            ]
         },
         {
-            "name": "Tilawa (Release)",
+            "name": "MeMuslim Production",
             "request": "launch",
             "type": "dart",
-            "program": "apps/tilawa/lib/main.dart",
-            "flutterMode": "release"
-        },
-        {
-            // Run `dart run tool/configure_rtc_deps.dart --stub` from apps/tilawa
-            // first, then `flutter pub get` at repo root. Restores with --sdk.
-            "name": "Tilawa (Production no RTC)",
-            "request": "launch",
-            "type": "dart",
-            "program": "apps/tilawa/lib/main.dart",
+            "cwd": "${workspaceFolder}/apps/tilawa",
+            "program": "lib/main.dart",
             "flutterMode": "release",
             "toolArgs": [
-                "--dart-define=TILAWA_DISTRIBUTION=play_production"
+                "--flavor",
+                "production",
+                "--dart-define-from-file=env/production.json"
             ]
         },
         {
-            "name": "Tilawa (Staging Agora)",
+            "name": "MeMuslim Production Profile",
             "request": "launch",
             "type": "dart",
-            "program": "apps/tilawa/lib/main.dart",
-            "flutterMode": "release",
+            "cwd": "${workspaceFolder}/apps/tilawa",
+            "program": "lib/main.dart",
+            "flutterMode": "profile",
             "toolArgs": [
-                "--dart-define=TILAWA_DISTRIBUTION=staging",
-                "--dart-define=TILAWA_LAUNCH_QURAN_SESSIONS_ENABLED=true",
-                "--dart-define=TILAWA_LAUNCH_QURAN_SESSIONS_BOOKING_ENABLED=true",
-                "--dart-define=TILAWA_LAUNCH_LEARN_QURAN_STUDENT_FEATURE_ENABLED=true",
-                "--dart-define=TILAWA_LAUNCH_ENABLED_CALL_PROVIDERS=external,mock,agora",
-                "--dart-define=TILAWA_LAUNCH_AGORA_APP_ID=aacd48a930944ecea29bec112f229eb9"
-            ]
-        },
-        {
-            // Staging + LiveKit QA: Settings → QA Tools → "Test LiveKit video call"
-            // LiveKit URL auto-fills (kStagingLiveKitUrl) in debug/staging — no URL define needed.
-            "name": "Tilawa (staging + LiveKit QA)",
-            "request": "launch",
-            "type": "dart",
-            "program": "apps/tilawa/lib/main.dart",
-            "flutterMode": "debug",
-            "toolArgs": [
-                "--dart-define=TILAWA_DISTRIBUTION=staging",
-                "--dart-define=TILAWA_LAUNCH_QURAN_SESSIONS_ENABLED=true",
-                "--dart-define=TILAWA_LAUNCH_QURAN_SESSIONS_BOOKING_ENABLED=true",
-                "--dart-define=TILAWA_LAUNCH_LEARN_QURAN_STUDENT_FEATURE_ENABLED=true",
-                "--dart-define=TILAWA_LAUNCH_ENABLED_CALL_PROVIDERS=external,mock,livekit"
-            ]
-        },
-        {
-            "name": "Tilawa (Debug + Learn Quran)",
-            "request": "launch",
-            "type": "dart",
-            "program": "apps/tilawa/lib/main.dart",
-            "flutterMode": "debug",
-            "toolArgs": [
-                "--dart-define=TILAWA_DISTRIBUTION=staging",
-                "--dart-define=TILAWA_LAUNCH_QURAN_SESSIONS_ENABLED=true",
-                "--dart-define=TILAWA_LAUNCH_QURAN_SESSIONS_BOOKING_ENABLED=true",
-                "--dart-define=TILAWA_LAUNCH_LEARN_QURAN_STUDENT_FEATURE_ENABLED=true"
+                "--flavor",
+                "production",
+                "--dart-define-from-file=env/production.json"
             ]
         }
     ]

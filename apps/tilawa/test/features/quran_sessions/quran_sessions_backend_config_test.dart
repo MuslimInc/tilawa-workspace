@@ -1,4 +1,5 @@
 import 'package:flutter_test/flutter_test.dart';
+import 'package:tilawa/core/bootstrap/app_environment.dart';
 import 'package:tilawa/features/quran_sessions/di/quran_sessions_backend_config.dart';
 
 void main() {
@@ -6,6 +7,7 @@ void main() {
     expect(
       quranSessionsBackendModeFromEnvironment(
         firebaseInitEnabled: true,
+        environment: AppEnvironment.staging,
         distribution: 'staging',
       ),
       QuranSessionsBackendMode.firebase,
@@ -16,9 +18,24 @@ void main() {
     expect(
       quranSessionsBackendModeFromEnvironment(
         firebaseInitEnabled: true,
+        environment: AppEnvironment.production,
         distribution: 'play_production',
       ),
       QuranSessionsBackendMode.firebase,
     );
   });
+
+  test(
+    'production flavor never resolves fake backend even with fake define',
+    () {
+      expect(
+        quranSessionsBackendModeFromEnvironment(
+          firebaseInitEnabled: true,
+          environment: AppEnvironment.production,
+          distribution: 'play_production',
+        ),
+        QuranSessionsBackendMode.firebase,
+      );
+    },
+  );
 }

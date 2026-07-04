@@ -4,6 +4,7 @@ import 'package:sentry_flutter/sentry_flutter.dart';
 import 'package:tilawa_ui_kit/tilawa_ui_kit.dart';
 
 import '../../router/app_router.dart';
+import '../bootstrap/app_environment.dart';
 import 'crash_reporting_context.dart';
 import 'sentry_user_feedback.dart';
 
@@ -26,7 +27,7 @@ abstract final class SentryConfig {
     required bool autoInitializeNativeSdk,
   }) {
     options.dsn = kProfileMode ? '' : SentryConfig.dsn;
-    options.environment = kReleaseMode ? 'production' : 'development';
+    options.environment = AppEnvironment.current.sentryEnvironment;
     options.debug = kDebugMode;
     options.enableLogs = kReleaseMode;
     options.enableMetrics = true;

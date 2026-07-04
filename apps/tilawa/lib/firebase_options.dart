@@ -4,6 +4,8 @@ import 'package:firebase_core/firebase_core.dart' show FirebaseOptions;
 import 'package:flutter/foundation.dart'
     show defaultTargetPlatform, kIsWeb, TargetPlatform;
 
+import 'core/bootstrap/app_environment.dart';
+
 /// Default [FirebaseOptions] for use with your Firebase apps.
 ///
 /// Example:
@@ -16,6 +18,20 @@ import 'package:flutter/foundation.dart'
 /// ```
 class DefaultFirebaseOptions {
   static FirebaseOptions get currentPlatform {
+    return optionsForEnvironment(AppEnvironment.current);
+  }
+
+  /// Firebase options for [environment].
+  ///
+  /// All flavors currently use `quran-playera-app`. When a dedicated production
+  /// Firebase project is provisioned, map [AppEnvironment.production] here.
+  static FirebaseOptions optionsForEnvironment(AppEnvironment environment) {
+    switch (environment) {
+      case AppEnvironment.development:
+      case AppEnvironment.staging:
+      case AppEnvironment.production:
+        break;
+    }
     if (kIsWeb) {
       throw UnsupportedError(
         'DefaultFirebaseOptions have not been configured for web - '

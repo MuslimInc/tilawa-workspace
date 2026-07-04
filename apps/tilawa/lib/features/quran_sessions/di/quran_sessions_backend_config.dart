@@ -1,3 +1,5 @@
+import '../../../core/bootstrap/app_environment.dart';
+
 /// Backend mode for Quran Sessions dependency injection.
 enum QuranSessionsBackendMode {
   /// In-memory fake repositories for local UI development.
@@ -14,16 +16,18 @@ enum QuranSessionsBackendMode {
 /// - `--dart-define=USE_QURAN_SESSIONS_MVP_FAKE=true`
 ///
 /// Defaults to [firebase] — never silently falls back to fake.
-/// Fake is **never** allowed when [distribution] is `staging` or
-/// `play_production`, even if dart-defines request it.
+/// Fake is **never** allowed in staging or production flavors, even if
+/// dart-defines request it.
 QuranSessionsBackendMode quranSessionsBackendModeFromEnvironment({
   required bool firebaseInitEnabled,
-  String distribution = const String.fromEnvironment(
-    'TILAWA_DISTRIBUTION',
-    defaultValue: 'local',
-  ),
+  AppEnvironment? environment,
+  String? distribution,
 }) {
-  if (distribution == 'staging' || distribution == 'play_production') {
+  final env = environment ?? AppEnvironment.current;
+  final dist = distribution ?? resolvedTilawaDistribution(environment: env);
+  if (!env.allowsFakeQuranSessionsBackend ||
+      dist == 'staging' ||
+      dist == 'play_production') {
     return QuranSessionsBackendMode.firebase;
   }
 

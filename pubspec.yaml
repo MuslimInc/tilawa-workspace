@@ -131,6 +131,33 @@ melos:
         cd apps/tilawa_admin && npm ci && npm run build
         firebase deploy --only hosting:admin --project quran-playera-app
 
+    # -- MeMuslim app flavors (apps/tilawa) ---------------------------
+    tilawa:run:dev:
+      description: Run MeMuslim development flavor on a connected device.
+      run: |
+        cd apps/tilawa && flutter run --flavor development \
+          --dart-define-from-file=env/development.json
+
+    tilawa:run:staging:
+      description: Run MeMuslim staging flavor on a connected device.
+      run: |
+        cd apps/tilawa && flutter run --flavor staging \
+          --dart-define-from-file=env/staging.json
+
+    tilawa:run:production:
+      description: Run MeMuslim production flavor (release mode).
+      run: |
+        cd apps/tilawa && flutter run --release --flavor production \
+          --dart-define-from-file=env/production.json
+
+    tilawa:build:android:production:
+      description: Build signed-ready production App Bundle (arm64).
+      run: |
+        cd apps/tilawa && flutter build appbundle --release \
+          --flavor production \
+          --dart-define-from-file=env/production.json \
+          --target-platform android-arm64
+
 sentry:
   upload_debug_symbols: true
   upload_source_maps: true

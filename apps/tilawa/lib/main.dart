@@ -2,6 +2,7 @@ import 'package:flutter/widgets.dart';
 import 'package:sentry_flutter/sentry_flutter.dart';
 
 import 'core/bootstrap/app_error_guard.dart';
+import 'core/bootstrap/app_environment.dart';
 import 'core/bootstrap/app_startup.dart';
 import 'core/telemetry/crash_reporting_context.dart';
 import 'core/telemetry/sentry_android_context.dart';
@@ -16,6 +17,8 @@ Future<void> _runTilawaApp() async {
 Future<void> main() async {
   // Required before any plugin (PackageInfo, device_info, MethodChannel) runs.
   WidgetsFlutterBinding.ensureInitialized();
+
+  AppEnvironment.assertProductionSafety();
 
   // Install before Sentry so its integrations chain on top of the guard
   // instead of being replaced by it.

@@ -1,0 +1,4 @@
+{
+  "APP_ENV": "production",
+  "TILAWA_DISTRIBUTION": "play_production"
+}
