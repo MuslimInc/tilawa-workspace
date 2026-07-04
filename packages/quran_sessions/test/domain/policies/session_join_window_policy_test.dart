@@ -95,6 +95,32 @@ void main() {
       ).isTrue();
     });
 
+    test('allows teacher auth uid when session teacherId is profile doc', () {
+      const profileDocId = 'profile_doc_abc';
+      const authUid = 'firebase_uid_teacher';
+      final startsAt = DateTime.utc(2099, 6, 1, 12);
+      final session = QuranSession(
+        id: 'session_teacher',
+        bookingId: 'booking_teacher',
+        teacherId: profileDocId,
+        studentId: 'student_1',
+        startsAt: startsAt,
+        endsAt: startsAt.add(const Duration(hours: 1)),
+        callType: SessionCallType.videoCall,
+        status: QuranSessionStatus.scheduled,
+        lifecycleStatus: SessionLifecycleStatus.scheduled,
+      );
+
+      check(
+        joinPolicy.canJoin(
+          session: session,
+          userId: authUid,
+          now: startsAt.subtract(const Duration(minutes: 10)),
+          teacherAuthUserId: authUid,
+        ),
+      ).isTrue();
+    });
+
     test('blocks completed session even for QA uid', () {
       final startsAt = DateTime.utc(2099, 6, 1, 12);
       final session = QuranSession(

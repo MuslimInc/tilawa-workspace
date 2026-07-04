@@ -147,8 +147,8 @@ String resolvedTilawaDistribution({
   AppEnvironment? environment,
   String? explicitDistribution,
 }) {
-  final explicit = (explicitDistribution ?? AppEnvironment._explicitDistribution)
-      .trim();
+  final explicit =
+      (explicitDistribution ?? AppEnvironment._explicitDistribution).trim();
   if (explicit.isNotEmpty) {
     return explicit;
   }

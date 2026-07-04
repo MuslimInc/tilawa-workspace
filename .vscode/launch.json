@@ -28,6 +28,20 @@
             ]
         },
         {
+            "name": "MeMuslim Staging (Video QA)",
+            "request": "launch",
+            "type": "dart",
+            "program": "lib/main.dart",
+            "cwd": "${workspaceFolder}/apps/tilawa",
+            "flutterMode": "debug",
+            "toolArgs": [
+                "--flavor",
+                "staging",
+                "--dart-define-from-file=env/staging.json",
+                "--dart-define-from-file=env/staging.video.local.json"
+            ]
+        },
+        {
             "name": "MeMuslim Production",
             "request": "launch",
             "type": "dart",

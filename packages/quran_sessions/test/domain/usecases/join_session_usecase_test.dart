@@ -127,11 +127,14 @@ void main() {
       teacherProfiles.seed(
         makeTeacherProfile(id: profileDocId, userId: authUid),
       );
+      final startsAt = DateTime.now().toUtc().add(const Duration(minutes: 10));
       sessionRepo.sessions = [
         makeSession(
           id: 'session_1',
           studentId: 'student_1',
           teacherId: profileDocId,
+          startsAt: startsAt,
+          endsAt: startsAt.add(const Duration(hours: 1)),
         ),
       ];
       joinSession = JoinSessionUseCase(

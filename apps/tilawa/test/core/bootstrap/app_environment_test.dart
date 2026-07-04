@@ -2,8 +2,6 @@ import 'package:checks/checks.dart';
 import 'package:test/test.dart';
 
 import 'package:tilawa/core/bootstrap/app_environment.dart';
-import 'package:tilawa/core/bootstrap/app_launch_config.dart'
-    hide quranSessionsStagingFlagsDefaultEnabled;
 
 void main() {
   group('AppEnvironment.fromDistribution', () {

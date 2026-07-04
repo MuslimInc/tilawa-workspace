@@ -1,5 +1,6 @@
 import 'package:flutter/foundation.dart';
 import 'package:flutter/widgets.dart';
+import 'package:quran_sessions_rtc_sdk/quran_sessions_rtc_sdk.dart';
 import 'package:sentry_flutter/sentry_flutter.dart';
 import 'package:tilawa_ui_kit/tilawa_ui_kit.dart';
 
@@ -55,6 +56,53 @@ abstract final class SentryConfig {
     // Shrink-wrap dropdown/input shells can show user-selected labels.
     // ignore: experimental_member_use
     options.privacy.mask<ShrinkWrapInputShell>();
+    _configureSessionReplayVideoPrivacy(options.privacy);
+  }
+
+  /// Masks Quran Sessions RTC surfaces so live camera/participant video never
+  /// appears in Session Replay captures (privacy requirement for video calls).
+  static void _configureSessionReplayVideoPrivacy(
+    SentryPrivacyOptions privacy,
+  ) {
+    // ignore: experimental_member_use
+    privacy.mask<AgoraCallVideoPlaceholder>(
+      description: 'Quran Sessions video-call placeholder.',
+    );
+    // Type-based rule survives Dart obfuscation in release builds.
+    // ignore: experimental_member_use
+    privacy.mask<AgoraVideoView>(
+      description: 'Agora RTC camera/participant video renderer.',
+    );
+    // Private layout shells (_VideoLayout, _LiveKitVideoLayout) and
+    // LiveKit [VideoTrackRenderer] are matched by runtime type name because
+    // they are library-private; AgoraVideoView masking covers release video.
+    // ignore: experimental_member_use
+    privacy.maskCallback<Widget>(
+      _replayPrivateVideoLayoutMaskDecision,
+      name: 'PrivateRtcVideoLayouts',
+      description:
+          'Mask private Quran Sessions video layout shells in replays.',
+    );
+  }
+
+  // ignore: experimental_member_use
+  static SentryMaskingDecision _replayPrivateVideoLayoutMaskDecision(
+    Element element,
+    Widget widget,
+  ) {
+    if (widget is InheritedWidget) {
+      // ignore: experimental_member_use
+      return SentryMaskingDecision.continueProcessing;
+    }
+    // ignore: experimental_member_use
+    return switch (widget.runtimeType.toString()) {
+      '_VideoLayout' ||
+      '_LiveKitVideoLayout' ||
+      // ignore: experimental_member_use
+      'VideoTrackRenderer' => SentryMaskingDecision.mask,
+      // ignore: experimental_member_use
+      _ => SentryMaskingDecision.continueProcessing,
+    };
   }
 
   /// Root [runApp] wrapper required for Session Replay widget capture.

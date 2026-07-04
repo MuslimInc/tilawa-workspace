@@ -62,10 +62,22 @@ class JoinSessionUseCase {
       );
     }
 
+    final participantRole =
+        role ?? await _resolveParticipantRole(userId: userId, session: session);
+
+    if (participantRole == null) {
+      return const Left(UnauthorizedFailure());
+    }
+
+    final teacherAuthUserId = participantRole == SessionParticipantRole.teacher
+        ? userId
+        : null;
+
     if (!joinPolicy.canJoin(
       session: session,
       userId: userId,
       now: DateTime.now().toUtc(),
+      teacherAuthUserId: teacherAuthUserId,
     )) {
       return const Left(
         InvalidTransitionFailure(
@@ -74,13 +86,6 @@ class JoinSessionUseCase {
           reasonCode: 'join_window_closed',
         ),
       );
-    }
-
-    final participantRole =
-        role ?? await _resolveParticipantRole(userId: userId, session: session);
-
-    if (participantRole == null) {
-      return const Left(UnauthorizedFailure());
     }
 
     final request = CallJoinRequest(
