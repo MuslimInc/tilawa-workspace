@@ -1,0 +1,111 @@
+<div class="market-pricing-container">
+  <app-page-header title="Market Pricing" />
+
+  @if (loading$ | async) {
+    <app-tilawa-loading-state message="Loading market configuration..." />
+  } @else {
+    @if (error$ | async; as error) {
+      <app-tilawa-error-state [message]="error" (retry)="facade.loadMarkets()" />
+    }
+
+    @if (successMessage$ | async; as msg) {
+      <div class="tilawa-alert tilawa-alert-success mb-4" role="alert">
+        {{ msg }}
+      </div>
+    }
+
+    @if (markets$ | async; as markets) {
+      @if (markets.length > 0) {
+        <div class="tilawa-form-group mb-6 max-w-sm">
+          <label class="tilawa-label">Select Market</label>
+          <select class="tilawa-field" [value]="selectedCountryCode$ | async" (change)="onMarketSelect($event)">
+            @for (market of markets; track market.countryCode) {
+              <option [value]="market.countryCode">{{ market.countryCode }}</option>
+            }
+          </select>
+        </div>
+
+        @if (currentMarketConfig) {
+          <app-tilawa-card [title]="'Market: ' + currentMarketConfig.countryCode">
+            <form [formGroup]="pricingForm" (ngSubmit)="save()">
+              
+              <div class="mb-6">
+                <h3 class="text-lg font-medium mb-4">Global Market Settings</h3>
+                
+                <div class="tilawa-form-group mb-4">
+                  <label class="tilawa-checkbox-label">
+                    <input type="checkbox" formControlName="isEnabled" class="tilawa-checkbox" />
+                    <span>Market Enabled</span>
+                  </label>
+                </div>
+                
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  <div class="tilawa-form-group">
+                    <label class="tilawa-label">Base Session Price</label>
+                    <input type="number" formControlName="minSessionPrice" class="tilawa-field" min="0" step="1" />
+                  </div>
+                  
+                  <div class="tilawa-form-group">
+                    <label class="tilawa-label">Currency Code</label>
+                    <input type="text" formControlName="currencyCode" class="tilawa-field" placeholder="USD" />
+                  </div>
+                </div>
+              </div>
+
+              <hr class="my-6 border-t border-gray-200" />
+
+              <div formArrayName="cities">
+                <h3 class="text-lg font-medium mb-2">City-Specific Overrides</h3>
+                <p class="text-sm text-gray-500 mb-4">Leave price empty to fallback to the market base price.</p>
+                
+                <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                  @for (cityGroup of citiesFormArray.controls; track $index) {
+                    <div [formGroupName]="$index" class="p-4 border rounded-lg bg-gray-50">
+                      <div class="flex items-baseline gap-2 mb-4">
+                        <span class="font-medium text-base">
+                          {{ cityGroup.get('cityName')?.value || cityGroup.get('cityNameEn')?.value || cityGroup.get('cityId')?.value }}
+                        </span>
+                        <span class="text-sm text-gray-500">({{ cityGroup.get('cityId')?.value }})</span>
+                      </div>
+                      
+                      <div class="tilawa-form-group mb-3">
+                        <label class="tilawa-checkbox-label">
+                          <input type="checkbox" formControlName="isEnabled" class="tilawa-checkbox" />
+                          <span>Enabled</span>
+                        </label>
+                      </div>
+                      
+                      <div class="tilawa-form-group mb-0">
+                        <label class="tilawa-label text-sm">Price Override</label>
+                        <div class="flex items-center gap-2">
+                          <input type="number" formControlName="minSessionPrice" class="tilawa-field" min="0" step="1" />
+                          <span class="text-gray-600">{{ pricingForm.get('currencyCode')?.value }}</span>
+                        </div>
+                      </div>
+                    </div>
+                  }
+                </div>
+              </div>
+
+              <div class="mt-8 flex justify-end">
+                <app-tilawa-button 
+                  type="submit" 
+                  variant="primary" 
+                  [disabled]="pricingForm.invalid || pricingForm.pristine || (saving$ | async) === true"
+                  [loading]="(saving$ | async) === true">
+                  Save Changes
+                </app-tilawa-button>
+              </div>
+
+            </form>
+          </app-tilawa-card>
+        }
+      } @else {
+        <app-tilawa-empty-state 
+          icon="public" 
+          title="No Markets Found" 
+          message="No market configurations are available." />
+      }
+    }
+  }
+</div>

@@ -142,6 +142,13 @@ export const routes: Routes = [
             (m) => m.UserWalletsComponent,
           ),
       },
+      {
+        path: 'quran-sessions/market-pricing',
+        loadComponent: () =>
+          import('./features/quran-sessions/market-pricing/market-pricing.component').then(
+            (m) => m.MarketPricingComponent,
+          ),
+      },
     ],
   },
   { path: '**', redirectTo: '' },

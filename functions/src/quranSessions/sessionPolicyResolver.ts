@@ -53,16 +53,23 @@ function resolveSessionMode(raw: unknown): SessionModePolicy {
 }
 
 function resolveCityFee(
-  marketData: Record<string, unknown>,
+  policyData: Record<string, unknown>,
+  cityData: Record<string, unknown> | null,
   cityId: string,
 ): number {
-  const cities = marketData.cities as Record<string, unknown>[] | undefined;
-  const city = cities?.find((c) => c?.cityId === cityId);
-  const cityMin = city?.minSessionPrice;
+  const citiesArray = policyData.cities as Record<string, unknown>[] | undefined;
+  const arrayCity = citiesArray?.find((c) => c?.cityId === cityId);
+  const arrayMin = arrayCity?.minSessionPrice;
+  if (typeof arrayMin === "number" && arrayMin > 0) {
+    return arrayMin;
+  }
+
+  const cityMin = cityData?.minSessionPrice;
   if (typeof cityMin === "number" && cityMin > 0) {
     return cityMin;
   }
-  const marketMin = marketData.minSessionPrice;
+
+  const marketMin = policyData.minSessionPrice;
   if (typeof marketMin === "number" && marketMin > 0) {
     return marketMin;
   }
@@ -70,13 +77,20 @@ function resolveCityFee(
 }
 
 function isCityEnabled(
-  marketData: Record<string, unknown>,
+  policyData: Record<string, unknown>,
+  cityData: Record<string, unknown> | null,
   cityId: string,
 ): boolean {
-  const cities = marketData.cities as Record<string, unknown>[] | undefined;
-  const city = cities?.find((c) => c?.cityId === cityId);
-  if (city == null) return true;
-  return city.isEnabled !== false;
+  const citiesArray = policyData.cities as Record<string, unknown>[] | undefined;
+  const arrayCity = citiesArray?.find((c) => c?.cityId === cityId);
+  if (arrayCity != null && typeof arrayCity.isEnabled === "boolean") {
+    return arrayCity.isEnabled;
+  }
+
+  if (cityData != null && typeof cityData.isEnabled === "boolean") {
+    return cityData.isEnabled;
+  }
+  return true;
 }
 
 function parseTeacherWhitelist(
@@ -95,11 +109,13 @@ export async function loadEffectiveMarketPolicy(
   platformConfig: Record<string, unknown>,
   now: Date = new Date(),
 ): Promise<ResolvedMarketPolicy> {
-  const marketSnap = await db
-    .collection("quran_session_market_configs")
-    .doc(countryCode)
-    .get();
+  const marketRef = db.collection("quran_session_market_configs").doc(countryCode);
+  const [marketSnap, citySnap] = await Promise.all([
+    marketRef.get(),
+    marketRef.collection("cities").doc(cityId).get(),
+  ]);
   const marketData = marketSnap.data() ?? {};
+  const cityData = citySnap.exists ? (citySnap.data() ?? null) : null;
 
   let policyData = marketData;
   let policyVersion: string | null =
@@ -124,8 +140,8 @@ export async function loadEffectiveMarketPolicy(
   }
 
   const marketEnabled = !marketSnap.exists || marketData.isEnabled !== false;
-  const cityEnabled = isCityEnabled(policyData, cityId);
-  const sessionFeeAmount = resolveCityFee(policyData, cityId);
+  const cityEnabled = isCityEnabled(policyData, cityData, cityId);
+  const sessionFeeAmount = resolveCityFee(policyData, cityData, cityId);
   const currencyCode =
     (policyData.currencyCode as string | undefined) ?? "USD";
 
@@ -248,6 +264,7 @@ export function validatePlatformConfig(
 /** Validates market doc fields required for authoritative booking policy. */
 export function validateMarketConfigForBooking(
   marketData: Record<string, unknown> | undefined,
+  cityData: Record<string, unknown> | null,
   cityId: string,
 ): PolicyConfigValidation {
   const missingFields: string[] = [];
@@ -270,9 +287,7 @@ export function validateMarketConfigForBooking(
     invalidFields.push("quranTutorBookingMode");
   }
 
-  const cities = config.cities as Record<string, unknown>[] | undefined;
-  const city = cities?.find((c) => c?.cityId === cityId);
-  if (city != null && city.isEnabled === false) {
+  if (!isCityEnabled(config, cityData, cityId)) {
     invalidFields.push(`cities.${cityId}.isEnabled`);
   }
 
@@ -283,10 +298,10 @@ export function validateMarketConfigForBooking(
   };
 }
 
-/** Throws when platform or market policy is incomplete — booking must fail closed. */
 export function assertBookingPolicyConfigured(input: {
   platformConfig: Record<string, unknown>;
   marketData?: Record<string, unknown>;
+  cityData?: Record<string, unknown> | null;
   countryCode: string;
   cityId: string;
   marketDocExists: boolean;
@@ -316,7 +331,7 @@ export function assertBookingPolicyConfigured(input: {
     );
   }
 
-  const market = validateMarketConfigForBooking(input.marketData, input.cityId);
+  const market = validateMarketConfigForBooking(input.marketData, input.cityData ?? null, input.cityId);
   if (!market.valid) {
     throw lifecycleError(
       "policy_not_configured",

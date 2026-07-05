@@ -32,6 +32,7 @@ class MarketCityDto {
     required this.isEnabled,
     required this.sortOrder,
     this.cityNameEn,
+    this.minSessionPrice,
   });
 
   final String cityId;
@@ -42,4 +43,5 @@ class MarketCityDto {
   final String currencyCode;
   final bool isEnabled;
   final int sortOrder;
+  final double? minSessionPrice;
 }

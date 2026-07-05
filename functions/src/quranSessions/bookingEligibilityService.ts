@@ -391,9 +391,16 @@ export async function loadBookingEligibilityContext(
       .collection("quran_session_market_configs")
       .doc(student.countryCode)
       .get();
+    const citySnap = await db
+      .collection("quran_session_market_configs")
+      .doc(student.countryCode)
+      .collection("cities")
+      .doc(student.cityId)
+      .get();
     assertBookingPolicyConfigured({
       platformConfig,
       marketData: marketSnap.data(),
+      cityData: citySnap.exists ? citySnap.data() : null,
       countryCode: student.countryCode,
       cityId: student.cityId,
       marketDocExists: marketSnap.exists,

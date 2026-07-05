@@ -32,6 +32,7 @@ export { getWallet, postWalletCredit } from "./quranSessions/walletCallables";
 export { confirmBookingPayment } from "./quranSessions/confirmBookingPayment";
 export { getBookingPricingQuote } from "./quranSessions/getBookingPricingQuote";
 export { setTeacherSessionPricing } from "./quranSessions/setTeacherSessionPricing";
+export { updateMarketPricingConfig } from "./quranSessions/updateMarketPricingConfig";
 export { issueSessionRtcToken } from "./quranSessions/issueSessionRtcToken";
 export { issueDebugLiveKitToken } from "./quranSessions/issueDebugLiveKitToken";
 export { recordCallTelemetryEvent } from "./quranSessions/recordCallTelemetryEvent";

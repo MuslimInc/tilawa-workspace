@@ -37,5 +37,6 @@ extension CityConfigDtoMapper on CityConfigDto {
     currencyCode: currencyCode,
     isEnabled: isEnabled,
     sortOrder: sortOrder,
+    minSessionPrice: minSessionPrice,
   );
 }
