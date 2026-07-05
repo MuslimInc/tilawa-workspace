@@ -160,6 +160,14 @@ class JoinSessionUseCase {
         'external_meeting_launch_failed',
       );
       return Left(e);
+    } on QuranSessionsFailure catch (e) {
+      _recordJoinFailed(
+        session,
+        userId,
+        participantRole,
+        e.runtimeType.toString(),
+      );
+      return Left(e);
     } on Object {
       _recordJoinFailed(session, userId, participantRole, 'network_failure');
       return const Left(NetworkFailure());

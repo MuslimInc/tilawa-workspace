@@ -48,6 +48,23 @@
     "policyViolation": "Booking rejected due to policy \"{policy}\": {detail}.",
     "marketNotEnabledWithCity": "Sessions are not available in your city right now. Try another city.",
     "marketNotEnabled": "Sessions are not available in your country right now.",
+    "teacherNotWhitelisted": "This teacher is not currently accepting bookings in your region.",
+    "minNoticeViolation": "You must book at least {minNoticeMinutes} minutes in advance.",
+    "@minNoticeViolation": {
+        "placeholders": {
+            "minNoticeMinutes": {
+                "type": "int"
+            }
+        }
+    },
+    "maxUpcomingExceeded": "You have reached the maximum limit of {maxUpcoming} upcoming sessions.",
+    "@maxUpcomingExceeded": {
+        "placeholders": {
+            "maxUpcoming": {
+                "type": "int"
+            }
+        }
+    },
     "marketCatalogEmpty": "Country and city options are not available yet. Please try again later or contact support.",
     "teacherNotInMarket": "This teacher is not available in your area. Please choose another.",
     "dateOfBirthRequired": "Date of birth is required.",

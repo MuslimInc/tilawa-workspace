@@ -7,7 +7,7 @@
 	<key>CFBundleDevelopmentRegion</key>
 	<string>$(DEVELOPMENT_LANGUAGE)</string>
 	<key>CFBundleDisplayName</key>
-	<string>MeMuslim</string>
+	<string>$(INFOPLIST_KEY_CFBundleDisplayName)</string>
 	<key>CFBundleExecutable</key>
 	<string>$(EXECUTABLE_NAME)</string>
 	<key>CFBundleIdentifier</key>
@@ -75,7 +75,7 @@
 		<string>UIInterfaceOrientationLandscapeRight</string>
 	</array>
 	<key>GIDClientID</key>
-	<string>181575856185-n7pkcdipps2lm920ve1qbcbo4kemn45b.apps.googleusercontent.com</string>
+	<string>$(GOOGLE_SIGN_IN_CLIENT_ID)</string>
 	<key>GIDServerClientID</key>
 	<string>181575856185-2ioqgr7miir7hj7hvgcsi7qp7juo2gco.apps.googleusercontent.com</string>
 	<key>CFBundleURLTypes</key>
@@ -85,7 +85,7 @@
 			<string>Editor</string>
 			<key>CFBundleURLSchemes</key>
 			<array>
-				<string>com.googleusercontent.apps.181575856185-n7pkcdipps2lm920ve1qbcbo4kemn45b</string>
+				<string>$(GOOGLE_SIGN_IN_REVERSED_CLIENT_ID)</string>
 			</array>
 		</dict>
 	</array>

@@ -100,7 +100,13 @@ void main() {
       );
 
       // Flat: should render a DecoratedBox, not a shadowed Material surface.
-      expect(find.byType(Material), findsNothing);
+      expect(
+        find.descendant(
+          of: find.byType(TilawaMetricTile),
+          matching: find.byType(Material),
+        ),
+        findsNothing,
+      );
       expect(find.byType(DecoratedBox), findsWidgets);
     });
 

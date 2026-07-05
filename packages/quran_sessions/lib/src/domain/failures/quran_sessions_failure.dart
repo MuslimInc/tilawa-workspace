@@ -302,6 +302,31 @@ final class MarketNotEnabledFailure extends QuranSessionsFailure {
   List<Object?> get props => [countryCode, cityId];
 }
 
+/// The student has reached the maximum number of upcoming sessions.
+final class MaxUpcomingSessionsExceededFailure extends QuranSessionsFailure {
+  const MaxUpcomingSessionsExceededFailure({required this.maxUpcoming});
+
+  final int maxUpcoming;
+
+  @override
+  List<Object?> get props => [maxUpcoming];
+}
+
+/// The session start time is too close to the current time.
+final class MinBookingNoticeViolationFailure extends QuranSessionsFailure {
+  const MinBookingNoticeViolationFailure({required this.minNoticeMinutes});
+
+  final int minNoticeMinutes;
+
+  @override
+  List<Object?> get props => [minNoticeMinutes];
+}
+
+/// The teacher is not enabled in this market.
+final class TeacherNotWhitelistedFailure extends QuranSessionsFailure {
+  const TeacherNotWhitelistedFailure();
+}
+
 /// The selected teacher does not have pricing configured for the student's
 /// market (country/city). The student must choose a different teacher.
 final class TeacherNotInMarketFailure extends QuranSessionsFailure {

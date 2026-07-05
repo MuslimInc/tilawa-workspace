@@ -5,6 +5,7 @@ import {
   assertBookingEligible,
   calendarAge,
   isChild,
+  isBookingStillUpcoming,
   isGenderCombinationAllowed,
   type BookingEligibilityContext,
 } from "../../src/quranSessions/bookingEligibilityService";
@@ -205,4 +206,31 @@ test("assertBookingEligible allows a child when teacher accepts children", () =>
     NOW,
   );
   assert.equal(pricing.isPaid, false);
+});
+
+test("assertBookingEligible rejects when upcoming count reaches the market cap", () => {
+  expectCode(
+    () =>
+      assertBookingEligible(baseContext(), NOW, { upcomingCount: 3 }),
+    "max_upcoming_exceeded",
+  );
+});
+
+test("assertBookingEligible allows booking below the upcoming cap", () => {
+  const pricing = assertBookingEligible(baseContext(), NOW, {
+    upcomingCount: 2,
+  });
+  assert.equal(pricing.isPaid, false);
+});
+
+test("isBookingStillUpcoming counts only sessions that have not ended", () => {
+  const past = new Date(NOW.getTime() - 60 * 60 * 1000);
+  const future = new Date(NOW.getTime() + 60 * 60 * 1000);
+  assert.equal(isBookingStillUpcoming(future, NOW), true);
+  assert.equal(isBookingStillUpcoming(past, NOW), false);
+  // Timestamp-like objects (Admin SDK) resolve via toDate().
+  assert.equal(isBookingStillUpcoming({ toDate: () => past }, NOW), false);
+  // Missing endsAt fails closed: still counts against the cap.
+  assert.equal(isBookingStillUpcoming(null, NOW), true);
+  assert.equal(isBookingStillUpcoming("not-a-date", NOW), true);
 });

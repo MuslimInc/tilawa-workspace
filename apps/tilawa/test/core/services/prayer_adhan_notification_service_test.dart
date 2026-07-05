@@ -713,6 +713,7 @@ void main() {
             prayerName: anyNamed('prayerName'),
             prayerKey: anyNamed('prayerKey'),
             locationName: anyNamed('locationName'),
+            sound: anyNamed('sound'),
             languageCode: anyNamed('languageCode'),
           ),
         ).thenAnswer((_) async => true);
@@ -754,6 +755,7 @@ void main() {
             prayerName: anyNamed('prayerName'),
             prayerKey: anyNamed('prayerKey'),
             locationName: anyNamed('locationName'),
+            sound: anyNamed('sound'),
             languageCode: anyNamed('languageCode'),
           ),
         ).called(5);
@@ -771,6 +773,7 @@ void main() {
               prayerName: anyNamed('prayerName'),
               prayerKey: anyNamed('prayerKey'),
               locationName: anyNamed('locationName'),
+              sound: anyNamed('sound'),
               languageCode: anyNamed('languageCode'),
             ),
           ).thenAnswer((_) async => false);
@@ -1118,7 +1121,7 @@ void main() {
     group('native adhan single playback regression', () {
       /// Mirrors native [AdhanPlaybackService] silent foreground channel id.
       const String nativeForegroundChannelId =
-          'com.tilawa.app.prayer_adhan_silent_v4';
+          'com.tilawa.app.prayer_adhan_silent_v5';
 
       test(
         'native foreground notification uses silent adhan channel not audible channel',
@@ -1149,6 +1152,7 @@ void main() {
               prayerName: anyNamed('prayerName'),
               prayerKey: anyNamed('prayerKey'),
               locationName: anyNamed('locationName'),
+              sound: anyNamed('sound'),
               languageCode: anyNamed('languageCode'),
             ),
           ).thenAnswer((_) async => true);
@@ -1172,6 +1176,7 @@ void main() {
               prayerName: anyNamed('prayerName'),
               prayerKey: anyNamed('prayerKey'),
               locationName: 'Al Isaweyah',
+              sound: anyNamed('sound'),
               languageCode: anyNamed('languageCode'),
             ),
           ).called(1);
@@ -1190,6 +1195,7 @@ void main() {
               prayerName: anyNamed('prayerName'),
               prayerKey: anyNamed('prayerKey'),
               locationName: anyNamed('locationName'),
+              sound: anyNamed('sound'),
               languageCode: anyNamed('languageCode'),
             ),
           ).thenAnswer((_) async => true);
@@ -1206,6 +1212,7 @@ void main() {
               prayerName: anyNamed('prayerName'),
               prayerKey: anyNamed('prayerKey'),
               locationName: anyNamed('locationName'),
+              sound: anyNamed('sound'),
               languageCode: anyNamed('languageCode'),
             ),
           ).called(1);
@@ -1215,6 +1222,7 @@ void main() {
               prayerName: anyNamed('prayerName'),
               prayerKey: anyNamed('prayerKey'),
               locationName: anyNamed('locationName'),
+              sound: anyNamed('sound'),
               languageCode: anyNamed('languageCode'),
             ),
           );
@@ -1242,6 +1250,7 @@ void main() {
               prayerName: anyNamed('prayerName'),
               prayerKey: anyNamed('prayerKey'),
               locationName: anyNamed('locationName'),
+              sound: anyNamed('sound'),
               languageCode: anyNamed('languageCode'),
             ),
           ).thenAnswer((_) async => false);
@@ -1251,6 +1260,7 @@ void main() {
               prayerName: anyNamed('prayerName'),
               prayerKey: anyNamed('prayerKey'),
               locationName: anyNamed('locationName'),
+              sound: anyNamed('sound'),
               languageCode: anyNamed('languageCode'),
             ),
           ).thenAnswer((_) async => true);
@@ -1266,6 +1276,7 @@ void main() {
               prayerName: anyNamed('prayerName'),
               prayerKey: anyNamed('prayerKey'),
               locationName: anyNamed('locationName'),
+              sound: anyNamed('sound'),
               languageCode: anyNamed('languageCode'),
             ),
           ).called(1);
@@ -1293,6 +1304,7 @@ void main() {
               prayerName: anyNamed('prayerName'),
               prayerKey: anyNamed('prayerKey'),
               locationName: anyNamed('locationName'),
+              sound: anyNamed('sound'),
               languageCode: anyNamed('languageCode'),
             ),
           ).thenAnswer((_) async => true);
@@ -1353,6 +1365,7 @@ void main() {
               prayerName: anyNamed('prayerName'),
               prayerKey: anyNamed('prayerKey'),
               locationName: anyNamed('locationName'),
+              sound: anyNamed('sound'),
               languageCode: anyNamed('languageCode'),
             ),
           ).thenAnswer((_) async => true);
@@ -1376,6 +1389,7 @@ void main() {
               prayerName: anyNamed('prayerName'),
               prayerKey: anyNamed('prayerKey'),
               locationName: anyNamed('locationName'),
+              sound: anyNamed('sound'),
               languageCode: 'ar',
             ),
           ).called(5);
@@ -1394,6 +1408,7 @@ void main() {
               prayerName: anyNamed('prayerName'),
               prayerKey: anyNamed('prayerKey'),
               locationName: anyNamed('locationName'),
+              sound: anyNamed('sound'),
               languageCode: anyNamed('languageCode'),
             ),
           ).thenAnswer((_) async => true);
@@ -1420,6 +1435,7 @@ void main() {
               prayerName: anyNamed('prayerName'),
               prayerKey: anyNamed('prayerKey'),
               locationName: 'Al Isaweyah',
+              sound: anyNamed('sound'),
               languageCode: anyNamed('languageCode'),
             ),
           ).called(5);
@@ -1792,6 +1808,7 @@ void main() {
             prayerName: anyNamed('prayerName'),
             prayerKey: anyNamed('prayerKey'),
             locationName: anyNamed('locationName'),
+            sound: anyNamed('sound'),
             languageCode: anyNamed('languageCode'),
           ),
         ).thenThrow(Exception('native boom'));
@@ -1832,6 +1849,7 @@ void main() {
             prayerName: anyNamed('prayerName'),
             prayerKey: anyNamed('prayerKey'),
             locationName: anyNamed('locationName'),
+            sound: anyNamed('sound'),
             languageCode: anyNamed('languageCode'),
           ),
         ).thenAnswer((_) async => true);
@@ -1880,6 +1898,7 @@ void main() {
             prayerName: anyNamed('prayerName'),
             prayerKey: anyNamed('prayerKey'),
             locationName: anyNamed('locationName'),
+            sound: anyNamed('sound'),
             languageCode: anyNamed('languageCode'),
           ),
         ).thenAnswer((_) async => false);
@@ -1915,6 +1934,7 @@ void main() {
               prayerName: anyNamed('prayerName'),
               prayerKey: anyNamed('prayerKey'),
               locationName: anyNamed('locationName'),
+              sound: anyNamed('sound'),
               languageCode: anyNamed('languageCode'),
             ),
           ).thenAnswer((_) async => true);
@@ -1972,6 +1992,7 @@ void main() {
               prayerName: anyNamed('prayerName'),
               prayerKey: anyNamed('prayerKey'),
               locationName: anyNamed('locationName'),
+              sound: anyNamed('sound'),
               languageCode: anyNamed('languageCode'),
             ),
           ).thenAnswer((_) async => false);
@@ -1981,6 +2002,7 @@ void main() {
               prayerName: anyNamed('prayerName'),
               prayerKey: anyNamed('prayerKey'),
               locationName: anyNamed('locationName'),
+              sound: anyNamed('sound'),
               languageCode: anyNamed('languageCode'),
             ),
           ).thenAnswer((_) async => false);
@@ -2040,6 +2062,7 @@ void main() {
             prayerName: anyNamed('prayerName'),
             prayerKey: anyNamed('prayerKey'),
             locationName: anyNamed('locationName'),
+            sound: anyNamed('sound'),
             languageCode: anyNamed('languageCode'),
           ),
         ).thenAnswer((_) async => true);
@@ -2056,6 +2079,7 @@ void main() {
             prayerName: anyNamed('prayerName'),
             prayerKey: anyNamed('prayerKey'),
             locationName: anyNamed('locationName'),
+            sound: anyNamed('sound'),
             languageCode: LanguageConfig.defaultLanguageCode,
           ),
         ).called(1);

@@ -15,6 +15,11 @@ from pathlib import Path
 
 FLAVORS = ("development", "staging", "production")
 MODES = ("Debug", "Release", "Profile")
+PRODUCT_BUNDLE_IDENTIFIERS = {
+    "development": "com.tilawa.app.dev",
+    "staging": "com.tilawa.app.staging",
+    "production": "com.tilawa.app",
+}
 PBXPROJ = Path(__file__).resolve().parents[1] / "ios/Runner.xcodeproj/project.pbxproj"
 
 
@@ -27,7 +32,7 @@ def main() -> None:
     for flavor in FLAVORS:
         for mode in MODES:
             config_name = f"{mode}-{flavor}"
-            if f"name = {config_name};" in text:
+            if _has_configuration(text, config_name):
                 continue
             base_mode = mode
             if mode == "Profile":
@@ -73,6 +78,10 @@ def main() -> None:
 
             project_block = _rename_block(project_block, project_cfg, config_name)
             runner_block = _rename_block(runner_block, runner_cfg, config_name)
+            runner_block = _set_product_bundle_identifier(
+                runner_block,
+                PRODUCT_BUNDLE_IDENTIFIERS[flavor],
+            )
             if 'baseConfigurationReference = ' in runner_block:
                 runner_block = re.sub(
                     r"baseConfigurationReference = [A-F0-9]+ /\* [^*]+ \*/;",
@@ -109,6 +118,7 @@ def main() -> None:
                 config_name,
             )
 
+    text = _repair_runner_bundle_identifiers(text)
     PBXPROJ.write_text(text)
     print(f"Updated {PBXPROJ}")
 
@@ -131,6 +141,43 @@ def _rename_block(block: str, new_id: str, config_name: str) -> str:
     )
     block = re.sub(r"name = [^;]+;", f"name = {config_name};", block)
     return block
+
+
+def _has_configuration(text: str, config_name: str) -> bool:
+    return re.search(rf'name = "?{re.escape(config_name)}"?;', text) is not None
+
+
+def _set_product_bundle_identifier(block: str, bundle_identifier: str) -> str:
+    return re.sub(
+        r"PRODUCT_BUNDLE_IDENTIFIER = [^;]+;",
+        f"PRODUCT_BUNDLE_IDENTIFIER = {bundle_identifier};",
+        block,
+        count=1,
+    )
+
+
+def _repair_runner_bundle_identifiers(text: str) -> str:
+    for flavor, bundle_identifier in PRODUCT_BUNDLE_IDENTIFIERS.items():
+        for mode in MODES:
+            config_name = f"{mode}-{flavor}"
+            xcconfig_name = f"{config_name}.xcconfig"
+            pattern = (
+                r"(\t\t[A-F0-9]+ /\* [^*]+ \*/ = {\n"
+                rf"\t\t\tisa = XCBuildConfiguration;\n"
+                rf"\t\t\tbaseConfigurationReference = [A-F0-9]+ "
+                rf"/\* {re.escape(xcconfig_name)} \*/;[\s\S]*?\n"
+                rf'\t\t\tname = "?{re.escape(config_name)}"?;\n'
+                rf"\t\t}};\n)"
+            )
+
+            def repl(match: re.Match[str]) -> str:
+                return _set_product_bundle_identifier(
+                    match.group(1),
+                    bundle_identifier,
+                )
+
+            text = re.sub(pattern, repl, text, count=1)
+    return text
 
 
 def _append_to_config_list(

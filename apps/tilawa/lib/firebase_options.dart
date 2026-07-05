@@ -23,8 +23,8 @@ class DefaultFirebaseOptions {
 
   /// Firebase options for [environment].
   ///
-  /// All flavors currently use `quran-playera-app`. When a dedicated production
-  /// Firebase project is provisioned, map [AppEnvironment.production] here.
+  /// All flavors currently use `quran-playera-app`, but each iOS bundle ID has
+  /// its own Firebase app registration.
   static FirebaseOptions optionsForEnvironment(AppEnvironment environment) {
     switch (environment) {
       case AppEnvironment.development:
@@ -42,7 +42,11 @@ class DefaultFirebaseOptions {
       case TargetPlatform.android:
         return android;
       case TargetPlatform.iOS:
-        return ios;
+        return switch (environment) {
+          AppEnvironment.development => iosDevelopment,
+          AppEnvironment.staging => iosStaging,
+          AppEnvironment.production => ios,
+        };
       case TargetPlatform.macOS:
         throw UnsupportedError(
           'DefaultFirebaseOptions have not been configured for macos - '
@@ -71,6 +75,32 @@ class DefaultFirebaseOptions {
     messagingSenderId: '181575856185',
     projectId: 'quran-playera-app',
     storageBucket: 'quran-playera-app.firebasestorage.app',
+  );
+
+  static const FirebaseOptions iosDevelopment = FirebaseOptions(
+    apiKey: 'AIzaSyDlIxMc7sRMmNYmYCo-IJbgHo8H9avi4ws',
+    appId: '1:181575856185:ios:b2c664fdf9f8ece6381de8',
+    messagingSenderId: '181575856185',
+    projectId: 'quran-playera-app',
+    storageBucket: 'quran-playera-app.firebasestorage.app',
+    androidClientId:
+        '181575856185-3tdkcorcrq2vq5hqoj40p1u5hjupnpam.apps.googleusercontent.com',
+    iosClientId:
+        '181575856185-v2hhlsvcr0ieia4d8cvo1d0uk71l1jej.apps.googleusercontent.com',
+    iosBundleId: 'com.tilawa.app.dev',
+  );
+
+  static const FirebaseOptions iosStaging = FirebaseOptions(
+    apiKey: 'AIzaSyDlIxMc7sRMmNYmYCo-IJbgHo8H9avi4ws',
+    appId: '1:181575856185:ios:c04495544365732a381de8',
+    messagingSenderId: '181575856185',
+    projectId: 'quran-playera-app',
+    storageBucket: 'quran-playera-app.firebasestorage.app',
+    androidClientId:
+        '181575856185-3tdkcorcrq2vq5hqoj40p1u5hjupnpam.apps.googleusercontent.com',
+    iosClientId:
+        '181575856185-o2k7lc3j2itugtg2b7l4kj4kauhucsiu.apps.googleusercontent.com',
+    iosBundleId: 'com.tilawa.app.staging',
   );
 
   static const FirebaseOptions ios = FirebaseOptions(

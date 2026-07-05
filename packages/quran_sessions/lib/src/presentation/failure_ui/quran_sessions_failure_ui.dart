@@ -131,6 +131,12 @@ extension QuranSessionsFailureUi on QuranSessionsFailure {
       MarketNotEnabledFailure(cityId: final c) =>
         c != null ? loc.marketNotEnabledWithCity : loc.marketNotEnabled,
 
+      TeacherNotWhitelistedFailure() => loc.teacherNotWhitelisted,
+      MinBookingNoticeViolationFailure(minNoticeMinutes: final m) =>
+        loc.minNoticeViolation(m),
+      MaxUpcomingSessionsExceededFailure(maxUpcoming: final m) =>
+        loc.maxUpcomingExceeded(m),
+
       TeacherNotInMarketFailure() => loc.teacherNotInMarket,
 
       // ── Date of birth ───────────────────────────────────────────────────────

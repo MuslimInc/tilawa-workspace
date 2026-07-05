@@ -245,6 +245,7 @@ function parseGender(raw: unknown): Gender | null {
 
 function parseDate(raw: unknown): Date | null {
   if (raw instanceof Timestamp) return raw.toDate();
+  if (raw instanceof Date) return Number.isNaN(raw.getTime()) ? null : raw;
   if (typeof raw === "string" && raw.length > 0) {
     const d = new Date(raw);
     return Number.isNaN(d.getTime()) ? null : d;
@@ -356,9 +357,24 @@ export async function loadBookingEligibilityContext(
   return { student, teacher, policy, market, marketEnabled, pricing };
 }
 
+/**
+ * A booking only counts against the max-upcoming cap while its session has
+ * not ended. Sessions that elapsed without a lifecycle transition (no-show
+ * sweep lag, legacy data) must not block new bookings — the client's
+ * "upcoming" tab is time-bounded the same way (`endsAt >= now`).
+ *
+ * A missing/unparseable `endsAt` counts (fail closed against cap abuse).
+ */
+export function isBookingStillUpcoming(endsAtRaw: unknown, now: Date): boolean {
+  const endsAt = parseDate(endsAtRaw);
+  if (endsAt == null) return true;
+  return endsAt.getTime() > now.getTime();
+}
+
 export async function countStudentUpcomingBookings(
   db: Firestore,
   studentId: string,
+  now: Date = new Date(),
 ): Promise<number> {
   const upcomingStatuses = [
     "scheduled",
@@ -374,5 +390,7 @@ export async function countStudentUpcomingBookings(
     .where("lifecycleStatus", "in", upcomingStatuses)
     .limit(20)
     .get();
-  return snap.size;
+  return snap.docs.filter((doc) =>
+    isBookingStillUpcoming(doc.data().endsAt, now),
+  ).length;
 }

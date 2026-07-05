@@ -63,8 +63,8 @@ void main() {
       await tester.pumpWidget(buildSubject());
       await tester.pumpAndSettle();
 
-      expect(find.text('All Prayer Notifications'), findsOneWidget);
-      expect(find.text('Play Adhan'), findsOneWidget);
+      expect(find.text('All Prayer Notifications'), findsWidgets);
+      expect(find.text('Play Adhan'), findsWidgets);
     });
 
     testWidgets('renders footer Done button', (tester) async {

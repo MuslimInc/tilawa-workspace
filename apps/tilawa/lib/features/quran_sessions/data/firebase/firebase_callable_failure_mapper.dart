@@ -100,6 +100,13 @@ QuranSessionsFailure _mapLifecycleCode(
       action: details['action'] as String? ?? 'booking',
     ),
     'late_student_cancellation_blocked' => const BookingConflictFailure(),
+    'min_notice_violation' => MinBookingNoticeViolationFailure(
+      minNoticeMinutes: details['minNoticeMinutes'] as int? ?? 0,
+    ),
+    'max_upcoming_exceeded' => MaxUpcomingSessionsExceededFailure(
+      maxUpcoming: details['maxUpcoming'] as int? ?? 0,
+    ),
+    'teacher_not_whitelisted' => const TeacherNotWhitelistedFailure(),
     'unauthorized_actor' || 'not_participant' => const UnauthorizedFailure(),
     _ => const UnknownFailure(),
   };

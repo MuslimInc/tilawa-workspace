@@ -136,6 +136,20 @@ class QuranSessionsLocalizationsAr extends QuranSessionsLocalizations {
   String get marketNotEnabled => 'خدمة الجلسات غير متاحة في دولتك حالياً.';
 
   @override
+  String get teacherNotWhitelisted =>
+      'هذا المعلم لا يستقبل حجوزات في منطقتك حالياً.';
+
+  @override
+  String minNoticeViolation(int minNoticeMinutes) {
+    return 'يجب أن يكون الحجز قبل $minNoticeMinutes دقيقة على الأقل من موعد الجلسة.';
+  }
+
+  @override
+  String maxUpcomingExceeded(int maxUpcoming) {
+    return 'لقد وصلت للحد الأقصى المسموح به من الجلسات القادمة ($maxUpcoming جلسات).';
+  }
+
+  @override
   String get marketCatalogEmpty =>
       'خيارات الدولة والمدينة غير متاحة حالياً. يُرجى المحاولة لاحقاً أو التواصل مع الدعم.';
 

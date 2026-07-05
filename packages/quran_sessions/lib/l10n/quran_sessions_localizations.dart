@@ -305,6 +305,24 @@ abstract class QuranSessionsLocalizations {
   /// **'Sessions are not available in your country right now.'**
   String get marketNotEnabled;
 
+  /// No description provided for @teacherNotWhitelisted.
+  ///
+  /// In en, this message translates to:
+  /// **'This teacher is not currently accepting bookings in your region.'**
+  String get teacherNotWhitelisted;
+
+  /// No description provided for @minNoticeViolation.
+  ///
+  /// In en, this message translates to:
+  /// **'You must book at least {minNoticeMinutes} minutes in advance.'**
+  String minNoticeViolation(int minNoticeMinutes);
+
+  /// No description provided for @maxUpcomingExceeded.
+  ///
+  /// In en, this message translates to:
+  /// **'You have reached the maximum limit of {maxUpcoming} upcoming sessions.'**
+  String maxUpcomingExceeded(int maxUpcoming);
+
   /// No description provided for @marketCatalogEmpty.
   ///
   /// In en, this message translates to:

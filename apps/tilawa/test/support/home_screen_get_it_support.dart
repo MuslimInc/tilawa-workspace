@@ -1,6 +1,7 @@
 import 'package:dartz_plus/dartz_plus.dart';
 import 'package:get_it/get_it.dart';
 import 'package:mocktail/mocktail.dart';
+import 'package:quran_sessions/quran_sessions.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:tilawa/features/athkar/data/datasources/athkar_daily_progress_local_datasource.dart';
 import 'package:tilawa/features/athkar/domain/entities/athkar_category.dart';
@@ -34,9 +35,18 @@ import 'package:tilawa/features/prayer_times/domain/usecases/notify_prayer_locat
 import 'package:tilawa/features/prayer_times/domain/usecases/save_prayer_settings_use_case.dart';
 import 'package:tilawa/features/qibla/presentation/bloc/qibla_bloc.dart';
 import 'package:tilawa/features/quran_reader/domain/usecases/get_last_read_position_use_case.dart';
+import 'package:tilawa/features/settings/domain/services/teacher_capability_refresh_notifier.dart';
 import 'package:tilawa_core/core.dart';
 
 class _MockQiblaBloc extends Mock implements QiblaBloc {}
+
+class _MockGetCurrentUserTeacherCapabilityUseCase extends Mock
+    implements GetCurrentUserTeacherCapabilityUseCase {}
+
+class _MockTeacherCapabilityRefreshNotifier extends Mock
+    implements TeacherCapabilityRefreshNotifier {}
+
+class _MockAuthSessionProvider extends Mock implements AuthSessionProvider {}
 
 class _MockSharedPreferencesAsync extends Mock
     implements SharedPreferencesAsync {}
@@ -241,6 +251,27 @@ void registerHomeScreenScopeGetIt(GetIt getIt) {
     when(() => mock.isClosed).thenReturn(false);
     return mock;
   });
+
+  if (!getIt.isRegistered<AuthSessionProvider>()) {
+    final mock = _MockAuthSessionProvider();
+    when(() => mock.currentUserId).thenReturn('test_user');
+    getIt.registerSingleton<AuthSessionProvider>(mock);
+  }
+  if (!getIt.isRegistered<GetCurrentUserTeacherCapabilityUseCase>()) {
+    final mock = _MockGetCurrentUserTeacherCapabilityUseCase();
+    when(() => mock.call(any())).thenAnswer(
+      (_) async =>
+          const Right(TeacherCapability(state: TeacherCapabilityState.none)),
+    );
+    getIt.registerSingleton<GetCurrentUserTeacherCapabilityUseCase>(mock);
+  }
+  if (!getIt.isRegistered<TeacherCapabilityRefreshNotifier>()) {
+    final mock = _MockTeacherCapabilityRefreshNotifier();
+    when(
+      () => mock.onApplicationReviewed,
+    ).thenAnswer((_) => const Stream.empty());
+    getIt.registerSingleton<TeacherCapabilityRefreshNotifier>(mock);
+  }
 }
 
 class _FakeGetLastReadPositionUseCase implements GetLastReadPositionUseCase {

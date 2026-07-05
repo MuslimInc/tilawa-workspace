@@ -376,7 +376,7 @@ void main() {
       await pumpAlphabetScreen(tester);
 
       await tester.drag(
-        find.byType(TilawaRefreshIndicator),
+        find.byType(RefreshIndicator),
         const Offset(0, 300),
         warnIfMissed: false,
       );

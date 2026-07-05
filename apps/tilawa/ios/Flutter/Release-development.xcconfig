@@ -3,4 +3,6 @@
 #include "Release.xcconfig"
 PRODUCT_BUNDLE_IDENTIFIER=com.tilawa.app.dev
 INFOPLIST_KEY_CFBundleDisplayName=MeMuslim Dev
+GOOGLE_SIGN_IN_CLIENT_ID=181575856185-v2hhlsvcr0ieia4d8cvo1d0uk71l1jej.apps.googleusercontent.com
+GOOGLE_SIGN_IN_REVERSED_CLIENT_ID=com.googleusercontent.apps.181575856185-v2hhlsvcr0ieia4d8cvo1d0uk71l1jej
 IPHONEOS_DEPLOYMENT_TARGET=15.0

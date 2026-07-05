@@ -446,7 +446,7 @@ void main() {
         MeMuslimDesignTokens.light(),
       );
       expect(tokens.groupHorizontalPadding, 20.0);
-      expect(tokens.groupShadowOpacity, 0);
+      expect(tokens.groupShadowOpacity, 0.04);
       expect(tokens.tileTitleTextRole, TilawaTextRole.bodyLarge);
       expect(tokens.tileSubtitleOpacity, 0.6);
       expect(tokens.switchActiveTrackOpacity, 1);
@@ -751,9 +751,9 @@ void main() {
       );
 
       expect(tokens.bottomNavBackgroundColor, isA<Color>());
-      expect(tokens.bottomNavShadowOpacity, 0);
-      expect(tokens.bottomNavShadowBlur, 0);
-      expect(tokens.bottomNavShadowOffset, Offset.zero);
+      expect(tokens.bottomNavShadowOpacity, 0.08);
+      expect(tokens.bottomNavShadowBlur, 12.0);
+      expect(tokens.bottomNavShadowOffset, const Offset(0, -1.5));
       expect(tokens.bottomNavBackgroundColor, scheme.surface);
       expect(
         tokens.navButtonSelectedBackgroundColor,
@@ -834,9 +834,9 @@ void main() {
         tokens.bottomNavBackgroundColor,
         isA<Color>(),
       );
-      expect(tokens.bottomNavShadowOpacity, 0);
-      expect(tokens.bottomNavShadowBlur, 0);
-      expect(tokens.bottomNavShadowOffset, Offset.zero);
+      expect(tokens.bottomNavShadowOpacity, 0.08);
+      expect(tokens.bottomNavShadowBlur, 12.0);
+      expect(tokens.bottomNavShadowOffset, const Offset(0, -1.5));
       expect(tokens.bottomNavBackgroundColor, scheme.surface);
       expect(
         tokens.bottomNavOutlineColor,

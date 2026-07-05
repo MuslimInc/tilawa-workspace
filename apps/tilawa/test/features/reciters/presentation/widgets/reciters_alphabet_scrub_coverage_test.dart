@@ -6,7 +6,6 @@ import 'package:tilawa/features/reciters/presentation/cubit/favorites_cubit.dart
 import 'package:tilawa/features/reciters/presentation/reciter_semantics_ids.dart';
 import 'package:tilawa/features/settings/presentation/cubit/settings_cubit.dart';
 import 'package:tilawa_core/entities/reciter_entity.dart';
-import 'package:tilawa_ui_kit/tilawa_ui_kit.dart';
 
 import '../../../../support/reciters_screen_test_support.dart';
 
@@ -166,18 +165,18 @@ void main() {
         favoritesCubit: favoritesCubit,
       );
 
-      expect(find.byType(TilawaRefreshIndicator), findsOneWidget);
+      expect(find.byType(RefreshIndicator), findsOneWidget);
 
       final gesture = await _startAlphabetScrub(tester, letter: 'A');
       await gesture.moveBy(const Offset(0, 48));
       await tester.pump();
 
-      expect(find.byType(TilawaRefreshIndicator), findsNothing);
+      expect(find.byType(RefreshIndicator), findsNothing);
 
       await gesture.up();
       await tester.pumpAndSettle();
 
-      expect(find.byType(TilawaRefreshIndicator), findsOneWidget);
+      expect(find.byType(RefreshIndicator), findsOneWidget);
       expect(tester.takeException(), isNull);
     });
 

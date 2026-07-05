@@ -48,6 +48,23 @@
     "policyViolation": "تم رفض الحجز لمخالفة السياسة \"{policy}\": {detail}.",
     "marketNotEnabledWithCity": "خدمة الجلسات غير متاحة في مدينتك حالياً. جرّب مدينة أخرى.",
     "marketNotEnabled": "خدمة الجلسات غير متاحة في دولتك حالياً.",
+    "teacherNotWhitelisted": "هذا المعلم لا يستقبل حجوزات في منطقتك حالياً.",
+    "minNoticeViolation": "يجب أن يكون الحجز قبل {minNoticeMinutes} دقيقة على الأقل من موعد الجلسة.",
+    "@minNoticeViolation": {
+        "placeholders": {
+            "minNoticeMinutes": {
+                "type": "int"
+            }
+        }
+    },
+    "maxUpcomingExceeded": "لقد وصلت للحد الأقصى المسموح به من الجلسات القادمة ({maxUpcoming} جلسات).",
+    "@maxUpcomingExceeded": {
+        "placeholders": {
+            "maxUpcoming": {
+                "type": "int"
+            }
+        }
+    },
     "marketCatalogEmpty": "خيارات الدولة والمدينة غير متاحة حالياً. يُرجى المحاولة لاحقاً أو التواصل مع الدعم.",
     "teacherNotInMarket": "هذا المعلم غير متاح في منطقتك. يرجى اختيار معلم آخر.",
     "dateOfBirthRequired": "تاريخ الميلاد مطلوب.",

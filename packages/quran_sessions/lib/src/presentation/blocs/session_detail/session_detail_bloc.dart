@@ -229,7 +229,16 @@ class SessionDetailBloc extends Bloc<SessionDetailEvent, SessionDetailState> {
     }
 
     unawaited(
-      tokenProvider.fetchCredentials(sessionId: sessionId, userId: userId),
+      () async {
+        try {
+          await tokenProvider.fetchCredentials(
+            sessionId: sessionId,
+            userId: userId,
+          );
+        } catch (_) {
+          // Swallow prefetch errors; JoinSessionUseCase will handle them on join.
+        }
+      }(),
     );
   }
 

@@ -37,6 +37,10 @@ import 'package:tilawa/screens/cubit/main_screen_cubit.dart';
 import 'package:tilawa/screens/cubit/main_screen_state.dart';
 import 'package:tilawa_ui_kit/tilawa_ui_kit.dart';
 
+import 'package:dartz_plus/dartz_plus.dart';
+import 'package:quran_sessions/quran_sessions.dart';
+import 'package:tilawa/features/settings/domain/services/teacher_capability_refresh_notifier.dart';
+
 class _TestSharedPreferencesAsync implements SharedPreferencesAsync {
   @override
   Future<String?> getString(String key) async => null;
@@ -45,6 +49,14 @@ class _TestSharedPreferencesAsync implements SharedPreferencesAsync {
   dynamic noSuchMethod(Invocation invocation) => super.noSuchMethod(invocation);
 }
 
+class _MockGetCurrentUserTeacherCapabilityUseCase extends Mock
+    implements GetCurrentUserTeacherCapabilityUseCase {}
+
+class _MockTeacherCapabilityRefreshNotifier extends Mock
+    implements TeacherCapabilityRefreshNotifier {}
+
+class _MockAuthSessionProvider extends Mock implements AuthSessionProvider {}
+
 void main() {
   setUp(() {
     if (!GetIt.I.isRegistered<SharedPreferencesAsync>()) {
@@ -52,12 +64,41 @@ void main() {
         _TestSharedPreferencesAsync(),
       );
     }
+    if (!GetIt.I.isRegistered<AuthSessionProvider>()) {
+      final mock = _MockAuthSessionProvider();
+      when(() => mock.currentUserId).thenReturn('test_user');
+      GetIt.I.registerSingleton<AuthSessionProvider>(mock);
+    }
+    if (!GetIt.I.isRegistered<GetCurrentUserTeacherCapabilityUseCase>()) {
+      final mock = _MockGetCurrentUserTeacherCapabilityUseCase();
+      when(() => mock.call(any())).thenAnswer(
+        (_) async =>
+            const Right(TeacherCapability(state: TeacherCapabilityState.none)),
+      );
+      GetIt.I.registerSingleton<GetCurrentUserTeacherCapabilityUseCase>(mock);
+    }
+    if (!GetIt.I.isRegistered<TeacherCapabilityRefreshNotifier>()) {
+      final mock = _MockTeacherCapabilityRefreshNotifier();
+      when(
+        () => mock.onApplicationReviewed,
+      ).thenAnswer((_) => const Stream.empty());
+      GetIt.I.registerSingleton<TeacherCapabilityRefreshNotifier>(mock);
+    }
   });
 
   tearDown(() async {
     HomeDashboardMemoryCache.shared.clear();
     if (GetIt.I.isRegistered<SharedPreferencesAsync>()) {
       await GetIt.I.unregister<SharedPreferencesAsync>();
+    }
+    if (GetIt.I.isRegistered<AuthSessionProvider>()) {
+      await GetIt.I.unregister<AuthSessionProvider>();
+    }
+    if (GetIt.I.isRegistered<GetCurrentUserTeacherCapabilityUseCase>()) {
+      await GetIt.I.unregister<GetCurrentUserTeacherCapabilityUseCase>();
+    }
+    if (GetIt.I.isRegistered<TeacherCapabilityRefreshNotifier>()) {
+      await GetIt.I.unregister<TeacherCapabilityRefreshNotifier>();
     }
   });
 

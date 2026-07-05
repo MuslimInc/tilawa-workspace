@@ -187,6 +187,7 @@ class TilawaMetricTile extends StatelessWidget {
       container: true,
       label: semanticLabel,
       readOnly: true,
+      excludeSemantics: true,
       child: SizedBox(
         width: double.infinity,
         child: tile,

@@ -142,6 +142,20 @@ class QuranSessionsLocalizationsEn extends QuranSessionsLocalizations {
       'Sessions are not available in your country right now.';
 
   @override
+  String get teacherNotWhitelisted =>
+      'This teacher is not currently accepting bookings in your region.';
+
+  @override
+  String minNoticeViolation(int minNoticeMinutes) {
+    return 'You must book at least $minNoticeMinutes minutes in advance.';
+  }
+
+  @override
+  String maxUpcomingExceeded(int maxUpcoming) {
+    return 'You have reached the maximum limit of $maxUpcoming upcoming sessions.';
+  }
+
+  @override
   String get marketCatalogEmpty =>
       'Country and city options are not available yet. Please try again later or contact support.';
 

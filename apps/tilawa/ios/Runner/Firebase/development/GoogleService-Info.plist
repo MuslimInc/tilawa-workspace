@@ -1,0 +1,36 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+	<key>CLIENT_ID</key>
+	<string>181575856185-v2hhlsvcr0ieia4d8cvo1d0uk71l1jej.apps.googleusercontent.com</string>
+	<key>REVERSED_CLIENT_ID</key>
+	<string>com.googleusercontent.apps.181575856185-v2hhlsvcr0ieia4d8cvo1d0uk71l1jej</string>
+	<key>ANDROID_CLIENT_ID</key>
+	<string>181575856185-3tdkcorcrq2vq5hqoj40p1u5hjupnpam.apps.googleusercontent.com</string>
+	<key>API_KEY</key>
+	<string>AIzaSyDlIxMc7sRMmNYmYCo-IJbgHo8H9avi4ws</string>
+	<key>GCM_SENDER_ID</key>
+	<string>181575856185</string>
+	<key>PLIST_VERSION</key>
+	<string>1</string>
+	<key>BUNDLE_ID</key>
+	<string>com.tilawa.app.dev</string>
+	<key>PROJECT_ID</key>
+	<string>quran-playera-app</string>
+	<key>STORAGE_BUCKET</key>
+	<string>quran-playera-app.firebasestorage.app</string>
+	<key>IS_ADS_ENABLED</key>
+	<false></false>
+	<key>IS_ANALYTICS_ENABLED</key>
+	<false></false>
+	<key>IS_APPINVITE_ENABLED</key>
+	<true></true>
+	<key>IS_GCM_ENABLED</key>
+	<true></true>
+	<key>IS_SIGNIN_ENABLED</key>
+	<true></true>
+	<key>GOOGLE_APP_ID</key>
+	<string>1:181575856185:ios:b2c664fdf9f8ece6381de8</string>
+</dict>
+</plist>
