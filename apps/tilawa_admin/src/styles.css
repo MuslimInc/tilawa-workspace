@@ -241,6 +241,12 @@ body {
   accent-color: var(--tilawa-primary);
 }
 
+.tilawa-checkbox-label {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
 .tilawa-table tbody tr.is-selected {
   background-color: rgb(29 171 97 / 0.08);
 }

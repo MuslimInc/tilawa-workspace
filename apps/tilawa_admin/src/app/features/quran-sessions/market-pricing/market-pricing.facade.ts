@@ -91,9 +91,11 @@ export class MarketPricingFacade {
         this.updateState({ 
           markets: sorted, 
           loading: false,
-          selectedCountryCode: sorted.length > 0 && !this.state.value.selectedCountryCode 
-            ? sorted[0].countryCode 
-            : this.state.value.selectedCountryCode
+          selectedCountryCode: this.state.value.selectedCountryCode 
+            ? this.state.value.selectedCountryCode
+            : sorted.find(m => m.countryCode === 'EG') 
+              ? 'EG' 
+              : sorted.length > 0 ? sorted[0].countryCode : null
         });
       }),
       catchError(err => {
