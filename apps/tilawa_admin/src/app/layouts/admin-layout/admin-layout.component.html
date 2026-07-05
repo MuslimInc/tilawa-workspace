@@ -13,8 +13,8 @@
   <div 
     class="fixed inset-y-0 start-0 z-50 flex transform transition-transform duration-300 ease-in-out lg:static lg:translate-x-0"
     [class.translate-x-0]="isMobileMenuOpen()"
-    [class.ltr:-translate-x-full]="!isMobileMenuOpen()"
-    [class.rtl:translate-x-full]="!isMobileMenuOpen()"
+    [class.max-lg:ltr:-translate-x-full]="!isMobileMenuOpen()"
+    [class.max-lg:rtl:translate-x-full]="!isMobileMenuOpen()"
   >
     <app-sidebar />
   </div>
