@@ -124,7 +124,7 @@ export class MarketPricingFacade {
       };
       
       await callable(payload);
-      this.updateState({ saving: false, successMessage: 'Market pricing updated successfully' });
+      this.updateState({ saving: false, successMessage: 'marketPricing_updateSuccess' });
       
       // Clear success message after 3 seconds
       setTimeout(() => {

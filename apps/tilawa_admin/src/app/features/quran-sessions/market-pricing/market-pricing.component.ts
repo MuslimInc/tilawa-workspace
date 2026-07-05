@@ -8,6 +8,8 @@ import { TilawaButtonComponent } from '../../../shared/components/tilawa-button/
 import { TilawaLoadingStateComponent } from '../../../shared/components/tilawa-loading-state/tilawa-loading-state.component';
 import { TilawaErrorStateComponent } from '../../../shared/components/tilawa-error-state/tilawa-error-state.component';
 import { TilawaEmptyStateComponent } from '../../../shared/components/tilawa-empty-state/tilawa-empty-state.component';
+import { TranslatePipe } from '../../../core/i18n/translate.pipe';
+import { I18nService } from '../../../core/i18n/i18n.service';
 
 import { MarketPricingFacade, MarketConfig, MarketCity } from './market-pricing.facade';
 
@@ -22,7 +24,8 @@ import { MarketPricingFacade, MarketConfig, MarketCity } from './market-pricing.
     TilawaButtonComponent,
     TilawaLoadingStateComponent,
     TilawaErrorStateComponent,
-    TilawaEmptyStateComponent
+    TilawaEmptyStateComponent,
+    TranslatePipe
   ],
   templateUrl: './market-pricing.component.html',
   styleUrls: ['./market-pricing.component.scss']
@@ -30,6 +33,7 @@ import { MarketPricingFacade, MarketConfig, MarketCity } from './market-pricing.
 export class MarketPricingComponent implements OnInit {
   public facade = inject(MarketPricingFacade);
   private fb = inject(FormBuilder);
+  private i18n = inject(I18nService);
 
   markets$ = this.facade.markets$;
   selectedCountryCode$ = this.facade.selectedCountryCode$;
@@ -73,7 +77,7 @@ export class MarketPricingComponent implements OnInit {
     const selectEl = event.target as HTMLSelectElement;
     const countryCode = selectEl.value;
 
-    if (this.pricingForm.dirty && !confirm('You have unsaved changes. Are you sure you want to switch markets?')) {
+    if (this.pricingForm.dirty && !confirm(this.i18n.t('marketPricing_unsavedChangesWarning'))) {
       // Revert the select if the user cancels
       const current = this.pricingForm.get('countryCode')?.value;
       selectEl.value = current;
