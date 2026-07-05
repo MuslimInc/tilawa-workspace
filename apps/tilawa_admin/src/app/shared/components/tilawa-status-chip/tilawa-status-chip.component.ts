@@ -51,7 +51,7 @@ import {
     }
 
     .variant-info {
-      background-color: rgb(139 94 60 / 0.1);
+      background-color: rgb(29 171 97 / 0.1);
       color: var(--tilawa-primary);
     }
   `,

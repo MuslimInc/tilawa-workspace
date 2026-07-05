@@ -103,12 +103,12 @@ export type TilawaButtonVariant =
     @media (prefers-color-scheme: dark) {
       .variant-secondary {
         background-color: var(--tilawa-surface-highest);
-        border-color: rgb(139 94 60 / 0.55);
+        border-color: rgb(29 171 97 / 0.55);
         color: var(--tilawa-on-surface);
       }
 
       .variant-secondary:hover:not(:disabled) {
-        background-color: rgb(139 94 60 / 0.18);
+        background-color: rgb(29 171 97 / 0.18);
         border-color: var(--tilawa-primary);
       }
     }
@@ -148,16 +148,16 @@ export type TilawaButtonVariant =
     }
 
     .variant-text:hover:not(:disabled) {
-      background-color: rgb(139 94 60 / 0.08);
+      background-color: rgb(29 171 97 / 0.08);
     }
 
     @media (prefers-color-scheme: dark) {
       .variant-text {
-        color: #e8c9a8;
+        color: #8CE7B0;
       }
 
       .variant-text:hover:not(:disabled) {
-        background-color: rgb(139 94 60 / 0.2);
+        background-color: rgb(29 171 97 / 0.2);
       }
     }
 

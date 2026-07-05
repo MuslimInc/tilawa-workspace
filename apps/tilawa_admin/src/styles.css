@@ -57,7 +57,7 @@ body {
 .tilawa-field:focus {
   outline: none;
   border-color: var(--tilawa-primary);
-  box-shadow: 0 0 0 2px rgb(139 94 60 / 0.2);
+  box-shadow: 0 0 0 2px rgb(29 171 97 / 0.2);
 }
 
 /* Page vertical rhythm — flex gap works with Angular @if/@else blocks */
@@ -105,7 +105,7 @@ body {
 }
 
 .tilawa-table tbody tr:hover {
-  background-color: rgb(139 94 60 / 0.04);
+  background-color: rgb(29 171 97 / 0.04);
 }
 
 .tilawa-table-wrap {
@@ -155,11 +155,11 @@ body {
 }
 
 .tilawa-table tbody tr:hover .tilawa-table-pin {
-  background-color: rgb(139 94 60 / 0.04);
+  background-color: rgb(29 171 97 / 0.04);
 }
 
 .tilawa-table tbody tr.is-selected .tilawa-table-pin {
-  background-color: rgb(139 94 60 / 0.08);
+  background-color: rgb(29 171 97 / 0.08);
 }
 
 .tilawa-table-pin-edge {
@@ -242,7 +242,7 @@ body {
 }
 
 .tilawa-table tbody tr.is-selected {
-  background-color: rgb(139 94 60 / 0.08);
+  background-color: rgb(29 171 97 / 0.08);
 }
 
 .tilawa-detail-label {
