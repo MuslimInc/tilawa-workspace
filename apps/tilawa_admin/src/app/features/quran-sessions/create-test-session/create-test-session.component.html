@@ -14,15 +14,15 @@
     
     <!-- Student Selection -->
     <div>
-      <label class="tilawa-detail-label block mb-1">Student</label>
+      <label class="tilawa-detail-label block mb-1">{{ 'createTestSession_studentLabel' | t }}</label>
       <input 
         type="text" 
         class="tilawa-field w-full" 
-        placeholder="Search student by email or name..." 
+        [placeholder]="'createTestSession_studentPlaceholder' | t" 
         (keyup)="onStudentSearch($event)"
       />
       @if (facade.isSearchingStudents()) {
-        <p class="text-xs text-[var(--tilawa-on-surface-variant)] mt-1">Searching...</p>
+        <p class="text-xs text-[var(--tilawa-on-surface-variant)] mt-1">{{ 'createTestSession_searching' | t }}</p>
       }
       @if (facade.studentResults().length > 0) {
         <ul class="mt-2 border border-[var(--tilawa-outline-variant)] rounded-lg max-h-40 overflow-y-auto bg-[var(--tilawa-surface)]">
@@ -31,30 +31,30 @@
               class="p-2 hover:bg-[var(--tilawa-surface-high)] cursor-pointer text-sm flex justify-between text-[var(--tilawa-on-surface)]"
               (click)="selectStudent(student.id)"
             >
-              <span>{{ student.displayName ?? 'Unknown' }}</span>
-              <span class="text-[var(--tilawa-on-surface-variant)]">{{ student.email ?? 'No email' }}</span>
+              <span>{{ student.displayName ?? ('createTestSession_unknown' | t) }}</span>
+              <span class="text-[var(--tilawa-on-surface-variant)]">{{ student.email ?? ('createTestSession_noEmail' | t) }}</span>
             </li>
           }
         </ul>
       }
       <div class="mt-2">
         <p class="text-sm text-green-600 font-medium" *ngIf="form.get('studentId')?.value">
-          Selected Student ID: {{ form.get('studentId')?.value }}
+          {{ 'createTestSession_selectedStudentId' | t }} {{ form.get('studentId')?.value }}
         </p>
       </div>
     </div>
 
     <!-- Teacher Selection -->
     <div>
-      <label class="tilawa-detail-label block mb-1">Teacher</label>
+      <label class="tilawa-detail-label block mb-1">{{ 'createTestSession_teacherLabel' | t }}</label>
       <input 
         type="text" 
         class="tilawa-field w-full" 
-        placeholder="Search active teacher by name..." 
+        [placeholder]="'createTestSession_teacherPlaceholder' | t" 
         (keyup)="onTeacherSearch($event)"
       />
       @if (facade.isSearchingTeachers()) {
-        <p class="text-xs text-[var(--tilawa-on-surface-variant)] mt-1">Searching...</p>
+        <p class="text-xs text-[var(--tilawa-on-surface-variant)] mt-1">{{ 'createTestSession_searching' | t }}</p>
       }
       @if (facade.teacherResults().length > 0) {
         <ul class="mt-2 border border-[var(--tilawa-outline-variant)] rounded-lg max-h-40 overflow-y-auto bg-[var(--tilawa-surface)]">
@@ -70,32 +70,32 @@
       }
       <div class="mt-2">
         <p class="text-sm text-green-600 font-medium" *ngIf="form.get('teacherId')?.value">
-          Selected Teacher ID: {{ form.get('teacherId')?.value }}
+          {{ 'createTestSession_selectedTeacherId' | t }} {{ form.get('teacherId')?.value }}
         </p>
       </div>
     </div>
 
     <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
       <div>
-        <label class="tilawa-detail-label block mb-1">Date</label>
+        <label class="tilawa-detail-label block mb-1">{{ 'createTestSession_dateLabel' | t }}</label>
         <input type="date" formControlName="date" class="tilawa-field w-full" />
       </div>
       <div>
-        <label class="tilawa-detail-label block mb-1">Start Time</label>
+        <label class="tilawa-detail-label block mb-1">{{ 'createTestSession_startTimeLabel' | t }}</label>
         <input type="time" formControlName="startTime" class="tilawa-field w-full" />
       </div>
       <div>
-        <label class="tilawa-detail-label block mb-1">End Time</label>
+        <label class="tilawa-detail-label block mb-1">{{ 'createTestSession_endTimeLabel' | t }}</label>
         <input type="time" formControlName="endTime" class="tilawa-field w-full" />
       </div>
     </div>
 
     <div>
-      <label class="tilawa-detail-label block mb-1">Provider / Call Type</label>
+      <label class="tilawa-detail-label block mb-1">{{ 'createTestSession_providerLabel' | t }}</label>
       <select formControlName="callType" class="tilawa-field w-full">
-        <option value="externalMeeting">External Meeting (Zoom/Meet)</option>
-        <option value="voiceCall">Voice Call (Agora)</option>
-        <option value="videoCall">Video Call (Agora)</option>
+        <option value="externalMeeting">{{ 'createTestSession_providerExternal' | t }}</option>
+        <option value="voiceCall">{{ 'createTestSession_providerVoice' | t }}</option>
+        <option value="videoCall">{{ 'createTestSession_providerVideo' | t }}</option>
       </select>
     </div>
 
