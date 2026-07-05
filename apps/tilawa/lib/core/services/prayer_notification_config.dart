@@ -10,10 +10,25 @@ final class PrayerNotificationConfig {
   PrayerNotificationConfig._();
 
   // --- Notification Channels ---
+  // Android *resurrects* a deleted channel with its old settings when a
+  // channel with the same ID is recreated, so any adhan channel config change
+  // requires a NEW channel ID (bump the `_vN` suffix together with
+  // [adhanChannelVersion]) and the old ID goes into [legacyAdhanChannelIds].
+  // The silent ID must stay in sync with the native
+  // `AdhanPlaybackService.CHANNEL_ID`.
   static const String channelId = 'com.tilawa.app.prayer';
-  static const String adhanChannelId = 'com.tilawa.app.prayer_adhan';
+  static const String adhanChannelId = 'com.tilawa.app.prayer_adhan_v5';
   static const String silentAdhanChannelId =
-      'com.tilawa.app.prayer_adhan_silent';
+      'com.tilawa.app.prayer_adhan_silent_v5';
+
+  /// Channel IDs retired by earlier versions; deleted on channel upgrade so
+  /// they disappear from the system notification settings UI.
+  static const List<String> legacyAdhanChannelIds = <String>[
+    'com.tilawa.app.prayer_adhan',
+    'com.tilawa.app.prayer_adhan_silent',
+    'com.tilawa.app.prayer_adhan_v4',
+    'com.tilawa.app.prayer_adhan_silent_v4',
+  ];
   static const String channelName = 'Prayer Times';
   static const String adhanChannelName = 'Prayer Times (Adhan)';
   static const String silentAdhanChannelName = 'Prayer Times (Silent)';
@@ -32,9 +47,11 @@ final class PrayerNotificationConfig {
 
   /// Bumped whenever the adhan channel configuration changes so the channel
   /// is deleted and recreated on existing installs (Android channel sound lock).
+  /// v4: vibration disabled on the adhan and silent channels so the vibrator
+  /// never buzzes over the start of adhan playback.
   static const String adhanChannelVersionKey =
       'prayer_notifications_adhan_channel_version';
-  static const int adhanChannelVersion = 3;
+  static const int adhanChannelVersion = 5;
 
   // --- Notification IDs ---
   /// Static IDs (test / debug): fajr=2001, sunrise=2002, dhuhr=2003,

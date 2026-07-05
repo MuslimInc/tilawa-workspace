@@ -29,10 +29,10 @@ class AdhanPlaybackServiceTest {
 
     companion object {
         /** Flutter audible adhan channel — must never host native FGS playback. */
-        private const val AUDIBLE_ADHAN_CHANNEL_ID = "com.tilawa.app.prayer_adhan"
+        private const val AUDIBLE_ADHAN_CHANNEL_ID = "com.tilawa.app.prayer_adhan_v4"
 
         /** Mirrors native [AdhanPlaybackService] silent foreground channel id. */
-        private const val NATIVE_FG_CHANNEL_ID = "com.tilawa.app.prayer_adhan_silent"
+        private const val NATIVE_FG_CHANNEL_ID = "com.tilawa.app.prayer_adhan_silent_v4"
     }
 
     private lateinit var context: Context
@@ -42,6 +42,8 @@ class AdhanPlaybackServiceTest {
     @Before
     fun setup() {
         context = ApplicationProvider.getApplicationContext()
+        // Companion-held gate survives across tests in the same sandbox.
+        AdhanPlaybackService.resetStartGateForTest()
         // Mock Firebase Analytics initialization
         mockkConstructor(FirebasePrayerAnalytics::class)
         every { anyConstructed<FirebasePrayerAnalytics>().logEvent(any(), any()) } returns Unit
@@ -305,6 +307,31 @@ class AdhanPlaybackServiceTest {
     }
 
     @Test
+    fun `re-delivered alarm for the same event does not start a second playback session`() {
+        val scheduledMs = System.currentTimeMillis()
+        fun playIntent() = Intent(context, AdhanPlaybackService::class.java).apply {
+            action = AdhanPlaybackService.ACTION_PLAY
+            putExtra(AdhanScheduler.EXTRA_PRAYER_NAME, "fajr")
+            putExtra(AdhanScheduler.EXTRA_PRAYER_KEY, "fajr")
+            putExtra(AdhanScheduler.EXTRA_SCHEDULED_MS, scheduledMs)
+            putExtra(AdhanScheduler.EXTRA_SOUND, "adhan")
+        }
+
+        // First delivery plays, then the service is torn down (user stop /
+        // completion). A duplicate delivery of the SAME event must not replay.
+        val first = Robolectric.buildService(AdhanPlaybackService::class.java, playIntent())
+        first.get().onStartCommand(playIntent(), 0, 1)
+        first.destroy()
+
+        val second = Robolectric.buildService(AdhanPlaybackService::class.java, playIntent())
+        service = second.get()
+        shadowService = Shadows.shadowOf(service)
+        service.onStartCommand(playIntent(), 0, 1)
+
+        verify(exactly = 1) { anyConstructed<MediaPlayer>().start() }
+    }
+
+    @Test
     fun `native playback uses silent channel when flutter already registered audible adhan channel`() {
         val nm = context.getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
         val audibleSound = RingtoneManager.getDefaultUri(RingtoneManager.TYPE_ALARM)
@@ -353,6 +380,34 @@ class AdhanPlaybackServiceTest {
         assertEquals(
             NATIVE_FG_CHANNEL_ID,
             shadowService.lastForegroundNotification?.channelId,
+        )
+    }
+
+    @Test
+    fun `native playback silent channel is created without sound or vibration`() {
+        val nm = context.getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
+
+        val intent = Intent(context, AdhanPlaybackService::class.java).apply {
+            action = AdhanPlaybackService.ACTION_PLAY
+            putExtra(AdhanScheduler.EXTRA_PRAYER_NAME, "fajr")
+            putExtra(AdhanScheduler.EXTRA_PRAYER_KEY, "fajr")
+            putExtra(AdhanScheduler.EXTRA_SCHEDULED_MS, System.currentTimeMillis())
+            putExtra(AdhanScheduler.EXTRA_SOUND, "adhan")
+        }
+        val controller = Robolectric.buildService(AdhanPlaybackService::class.java, intent)
+        service = controller.get()
+        shadowService = Shadows.shadowOf(service)
+        service.onStartCommand(intent, 0, 1)
+
+        val nativeChannel = nm.getNotificationChannel(NATIVE_FG_CHANNEL_ID)
+        assertNotNull(nativeChannel)
+        assertFalse(
+            "FGS notification must not vibrate over the start of adhan playback",
+            nativeChannel!!.shouldVibrate(),
+        )
+        assertNull(
+            "FGS channel must stay silent so only MediaPlayer plays adhan",
+            nativeChannel.sound,
         )
     }
 

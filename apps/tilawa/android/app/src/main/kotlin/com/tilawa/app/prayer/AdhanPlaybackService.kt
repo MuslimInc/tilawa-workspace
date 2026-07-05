@@ -8,10 +8,12 @@ import android.app.Service
 import android.content.Context
 import android.content.Intent
 import android.content.pm.ServiceInfo
-import android.media.AudioAttributes
-import android.media.AudioFocusRequest
 import android.media.AudioManager
-import android.media.MediaPlayer
+import android.media.AudioFocusRequest
+import androidx.media3.exoplayer.ExoPlayer
+import androidx.media3.common.MediaItem
+import androidx.media3.common.Player
+import androidx.media3.common.PlaybackException
 import android.net.Uri
 import android.os.Build
 import android.os.IBinder
@@ -42,8 +44,11 @@ internal class AdhanPlaybackService : Service() {
         private const val FOREGROUND_NOTIFICATION_ID = 0x4144_4841 // 'ADHA'
         // Must match Flutter [PrayerNotificationConfig.silentAdhanChannelId].
         // Native MediaPlayer owns audio; the FGS notification must stay silent
-        // so we never reuse the audible `com.tilawa.app.prayer_adhan` channel.
-        private const val CHANNEL_ID = "com.tilawa.app.prayer_adhan_silent"
+        // and vibration-free (the vibration motor is audible over the start of
+        // playback), so we never reuse the audible adhan channel. Config
+        // changes require a new `_vN` suffix: Android resurrects deleted
+        // channels with their old settings when the same ID is recreated.
+        private const val CHANNEL_ID = "com.tilawa.app.prayer_adhan_silent_v5"
         private const val CHANNEL_NAME = "Prayer Times (Silent)"
         private const val WAKE_LOCK_TAG = "Tilawa::AdhanPlayback"
         private const val WAKE_LOCK_TIMEOUT_MS = 5L * 60L * 1000L
@@ -62,6 +67,15 @@ internal class AdhanPlaybackService : Service() {
         fun setActivePayloadForTest(payload: ActiveAdhanPayload?) {
             activePayload = payload
         }
+
+        /// Process-wide so duplicate alarm deliveries are still rejected after
+        /// the service instance that played the event has been destroyed.
+        private var startGate = AdhanStartGate()
+
+        @androidx.annotation.VisibleForTesting
+        fun resetStartGateForTest() {
+            startGate = AdhanStartGate()
+        }
     }
 
     data class ActiveAdhanPayload(
@@ -74,7 +88,7 @@ internal class AdhanPlaybackService : Service() {
         val languageCode: String = "",
     )
 
-    private var mediaPlayer: MediaPlayer? = null
+    private var exoPlayer: ExoPlayer? = null
     private var wakeLock: PowerManager.WakeLock? = null
     override fun onBind(intent: Intent?): IBinder? = null
     private var audioFocusRequest: AudioFocusRequest? = null
@@ -112,6 +126,7 @@ internal class AdhanPlaybackService : Service() {
     private var isPlayingInternally = false
     private var completedSuccessfully = false
     private var startTimeMs: Long = 0
+    private var playbackSessionId: String? = null
 
     private fun logDebug(message: String) {
         val isDebuggable =
@@ -224,104 +239,152 @@ internal class AdhanPlaybackService : Service() {
         } else {
             startForeground(FOREGROUND_NOTIFICATION_ID, notification)
         }
+
+        // Idempotency gate: exactly one playback session per adhan event, even
+        // when the first session already ended (which the isPlayingInternally
+        // guard cannot cover). Checked after startForeground to honour the
+        // startForegroundService contract on rejected duplicates.
+        val sessionId = startGate.tryStart(
+            prayerKey = prayerKey,
+            scheduledMs = scheduledMs,
+            nowMs = System.currentTimeMillis(),
+        )
+        if (sessionId == null) {
+            Log.w(
+                TAG,
+                "Duplicate adhan event ignored: prayerKey=$prayerKey scheduledMs=$scheduledMs",
+            )
+            analytics.logEvent(
+                PrayerEvents.DUPLICATE_GUARD,
+                mapOf(
+                    "reason" to "duplicate_event",
+                    "prayer_key" to prayerKey,
+                    "scheduled_ms" to scheduledMs,
+                ),
+            )
+            AdhanQALogger.logEvent(
+                context = this,
+                eventName = "DUPLICATE_START_IGNORED",
+                prayerName = prayerName,
+                scheduledMs = scheduledMs,
+            )
+            activePayload = null
+            removeForegroundNotification()
+            stopSelf()
+            return
+        }
+        playbackSessionId = sessionId
+        logDebug(
+            "ADHAN_AUDIT source=playback_service event=playback_session_started sessionId=$sessionId " +
+                "prayerKey=$prayerKey scheduledMs=$scheduledMs",
+        )
         acquireWakeLock()
         
         analytics.logEvent("adhan_playback_started", mapOf(
             "prayer_name" to prayerName,
             "prayer_key" to prayerKey,
-            "sound_name" to sound
+            "sound_name" to sound,
+            "session_id" to sessionId
         ))
         
-        logDebug("startPlayback: initializing MediaPlayer for sound: $sound")
+        logDebug("startPlayback: initializing ExoPlayer for sound: $sound")
         try {
             val adhanResId = resolveAdhanRawResource(sound)
 
-            mediaPlayer = MediaPlayer().apply {
-                setDataSource(this@AdhanPlaybackService, Uri.parse("android.resource://$packageName/$adhanResId"))
+            exoPlayer = androidx.media3.exoplayer.ExoPlayer.Builder(this@AdhanPlaybackService).build().apply {
+                val mediaItem = androidx.media3.common.MediaItem.fromUri(Uri.parse("android.resource://$packageName/$adhanResId"))
+                setMediaItem(mediaItem)
                 
                 // Use USAGE_ALARM for better background focus priority on Android 14+
-                setAudioAttributes(
-                    AudioAttributes.Builder()
-                        .setUsage(AudioAttributes.USAGE_ALARM)
-                        .setContentType(AudioAttributes.CONTENT_TYPE_SONIFICATION)
-                        .build()
-                )
+                val audioAttributes = androidx.media3.common.AudioAttributes.Builder()
+                    .setUsage(androidx.media3.common.C.USAGE_ALARM)
+                    .setContentType(androidx.media3.common.C.AUDIO_CONTENT_TYPE_MUSIC)
+                    .build()
                 
-                setOnCompletionListener {
-                    logDebug("Playback completed")
-                    logDebug(
-                        "ADHAN_AUDIT source=playback_service event=playback_completed prayerKey=$prayerKey " +
-                            "prayerName=$prayerName scheduledMs=$scheduledMs notificationId=$FOREGROUND_NOTIFICATION_ID " +
-                            "channelId=$CHANNEL_ID"
-                    )
-                    val durationMs = if (startTimeMs > 0) System.currentTimeMillis() - startTimeMs else null
-                    analytics.logEvent("adhan_playback_completed", mapOf(
-                        "prayer_name" to prayerName,
-                        "playback_duration_ms" to durationMs,
-                        "completed" to true
-                    ))
-                    AdhanQALogger.logEvent(
-                        context = this@AdhanPlaybackService,
-                        eventName = "PLAYBACK_COMPLETED"
-                    )
-                    completedSuccessfully = true
-                    isPlayingInternally = false
-                    removeForegroundNotification()
-                    stopSelf()
-                }
+                // false = disable automatic audio focus handling, as it is unsupported for USAGE_ALARM
+                setAudioAttributes(audioAttributes, false)
                 
-                setOnErrorListener { _, what, extra ->
-                    Log.e(TAG, "MediaPlayer error: what=$what, extra=$extra")
-                    analytics.logEvent("adhan_playback_abnormal_termination", mapOf(
-                        "reason" to "mediaplayer_error_$what",
-                        "error_what" to what,
-                        "error_extra" to extra,
-                        "abnormal_termination" to true
-                    ))
-                    isPlayingInternally = false
-                    stopSelf()
-                    true
-                }
+                addListener(object : Player.Listener {
+                    override fun onPlaybackStateChanged(playbackState: Int) {
+                        if (playbackState == Player.STATE_ENDED) {
+                            logDebug("Playback completed")
+                            logDebug(
+                                "ADHAN_AUDIT source=playback_service event=playback_completed prayerKey=$prayerKey " +
+                                    "prayerName=$prayerName scheduledMs=$scheduledMs notificationId=$FOREGROUND_NOTIFICATION_ID " +
+                                    "channelId=$CHANNEL_ID sessionId=$sessionId"
+                            )
+                            val durationMs = if (startTimeMs > 0) System.currentTimeMillis() - startTimeMs else null
+                            analytics.logEvent("adhan_playback_completed", mapOf(
+                                "prayer_name" to prayerName,
+                                "playback_duration_ms" to durationMs,
+                                "completed" to true,
+                                "session_id" to sessionId
+                            ))
+                            AdhanQALogger.logEvent(
+                                context = this@AdhanPlaybackService,
+                                eventName = "PLAYBACK_COMPLETED",
+                                details = "session=$sessionId"
+                            )
+                            completedSuccessfully = true
+                            isPlayingInternally = false
+                            removeForegroundNotification()
+                            stopSelf()
+                        }
+                    }
+
+                    override fun onPlayerError(error: PlaybackException) {
+                        Log.e(TAG, "ExoPlayer error: ${error.message}", error)
+                        analytics.logEvent("adhan_playback_abnormal_termination", mapOf(
+                            "reason" to "exoplayer_error_${error.errorCode}",
+                            "error_message" to error.message.toString(),
+                            "abnormal_termination" to true
+                        ))
+                        isPlayingInternally = false
+                        stopSelf()
+                    }
+                })
 
                 prepare()
+                
+                // Request focus as an ALARM manually
+                val audioManager = getSystemService(Context.AUDIO_SERVICE) as AudioManager
+                val focusRequest = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+                    AudioFocusRequest.Builder(AudioManager.AUDIOFOCUS_GAIN_TRANSIENT_MAY_DUCK)
+                        .setAudioAttributes(
+                            android.media.AudioAttributes.Builder()
+                                .setUsage(android.media.AudioAttributes.USAGE_ALARM)
+                                .setContentType(android.media.AudioAttributes.CONTENT_TYPE_MUSIC)
+                                .build()
+                        )
+                        .build()
+                } else {
+                    null
+                }
+
+                val focusResult = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O && focusRequest != null) {
+                    this@AdhanPlaybackService.audioFocusRequest = focusRequest
+                    audioManager.requestAudioFocus(focusRequest)
+                } else {
+                    @Suppress("DEPRECATION")
+                    audioManager.requestAudioFocus(null, AudioManager.STREAM_ALARM, AudioManager.AUDIOFOCUS_GAIN_TRANSIENT_MAY_DUCK)
+                }
+
+                if (focusResult != AudioManager.AUDIOFOCUS_REQUEST_GRANTED) {
+                    Log.w(TAG, "Audio focus denied ($focusResult), but proceeding with ALARM usage")
+                }
+                
                 isPlayingInternally = true
                 AdhanQALogger.logEvent(
                     context = this@AdhanPlaybackService,
                     eventName = "PLAYBACK_STARTED",
-                    sound = sound
+                    sound = sound,
+                    details = "session=$sessionId"
                 )
+                playWhenReady = true
             }
 
-            // Request focus as an ALARM
-            val audioManager = getSystemService(Context.AUDIO_SERVICE) as AudioManager
-            val audioFocusRequest = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-                AudioFocusRequest.Builder(AudioManager.AUDIOFOCUS_GAIN_TRANSIENT_MAY_DUCK)
-                    .setAudioAttributes(
-                        AudioAttributes.Builder()
-                            .setUsage(AudioAttributes.USAGE_ALARM)
-                            .setContentType(AudioAttributes.CONTENT_TYPE_SONIFICATION)
-                            .build()
-                    )
-                    .build()
-            } else {
-                null
-            }
-
-            val focusResult = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O && audioFocusRequest != null) {
-                this.audioFocusRequest = audioFocusRequest
-                audioManager.requestAudioFocus(audioFocusRequest)
-            } else {
-                @Suppress("DEPRECATION")
-                audioManager.requestAudioFocus(null, AudioManager.STREAM_ALARM, AudioManager.AUDIOFOCUS_GAIN_TRANSIENT_MAY_DUCK)
-            }
-
-            if (focusResult != AudioManager.AUDIOFOCUS_REQUEST_GRANTED) {
-                Log.w(TAG, "Audio focus denied ($focusResult), but proceeding with ALARM usage")
-            }
-
-            mediaPlayer?.start()
             startTimeMs = System.currentTimeMillis()
-            logDebug("MediaPlayer started successfully")
+            logDebug("ExoPlayer started successfully")
 
         } catch (e: Exception) {
             Log.e(TAG, "Failed to start playback", e)
@@ -356,13 +419,13 @@ internal class AdhanPlaybackService : Service() {
 
     private fun stopPlayback() {
         try {
-            mediaPlayer?.apply {
+            exoPlayer?.apply {
                 if (isPlaying) stop()
                 release()
             }
         } catch (_: Throwable) {
         }
-        mediaPlayer = null
+        exoPlayer = null
         abandonAudioFocus()
         releaseWakeLock()
     }
@@ -380,7 +443,8 @@ internal class AdhanPlaybackService : Service() {
 
     override fun onDestroy() {
         logDebug(
-            "ADHAN_AUDIT source=playback_service event=service_destroyed notificationId=$FOREGROUND_NOTIFICATION_ID channelId=$CHANNEL_ID"
+            "ADHAN_AUDIT source=playback_service event=service_destroyed notificationId=$FOREGROUND_NOTIFICATION_ID " +
+                "channelId=$CHANNEL_ID sessionId=$playbackSessionId"
         )
         if (!completedSuccessfully && isPlayingInternally) {
             Log.w(TAG, "Abnormal termination: service destroyed before completion")
@@ -505,8 +569,13 @@ internal class AdhanPlaybackService : Service() {
         if (Build.VERSION.SDK_INT < Build.VERSION_CODES.O) {
             return
         }
+        // Best-effort guard against a misconfigured channel: audible (only
+        // MediaPlayer may play adhan) or vibrating (the vibration motor is
+        // audible over the start of playback). Note Android may resurrect the
+        // old settings on recreate — real config changes ship under a new
+        // CHANNEL_ID, this only heals in-process anomalies.
         val existing = nm.getNotificationChannel(CHANNEL_ID)
-        if (existing != null && existing.sound != null) {
+        if (existing != null && (existing.sound != null || existing.shouldVibrate())) {
             nm.deleteNotificationChannel(CHANNEL_ID)
         }
         if (nm.getNotificationChannel(CHANNEL_ID) == null) {

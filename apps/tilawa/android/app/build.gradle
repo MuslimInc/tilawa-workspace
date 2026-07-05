@@ -174,6 +174,10 @@ dependencies {
     implementation 'com.google.firebase:firebase-analytics-ktx:21.6.2'
     implementation 'com.google.firebase:firebase-crashlytics-ktx:18.6.4'
     
+    // Jetpack Media3 ExoPlayer
+    implementation "androidx.media3:media3-exoplayer:1.2.1"
+    implementation "androidx.media3:media3-common:1.2.1"
+    
     // Testing Dependencies
     testImplementation "junit:junit:4.13.2"
     testImplementation "org.jetbrains.kotlin:kotlin-test"

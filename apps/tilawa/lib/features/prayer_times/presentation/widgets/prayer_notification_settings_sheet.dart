@@ -118,6 +118,20 @@ class _PrayerNotificationSettingsSheetState
                   },
                 ),
 
+                if (settings.fajrNotification.playAdhan ||
+                    settings.dhuhrNotification.playAdhan ||
+                    settings.asrNotification.playAdhan ||
+                    settings.maghribNotification.playAdhan ||
+                    settings.ishaNotification.playAdhan) ...[
+                  SizedBox(height: tokens.spaceMedium),
+                  _GlobalSoundSelector(
+                    currentSound: settings.dhuhrNotification.adhanSound,
+                    onSoundSelected: (sound) {
+                      _updateSettings(settings.copyWithGlobalAdhanSound(sound));
+                    },
+                  ),
+                ],
+
                 SizedBox(height: tokens.spaceMedium),
                 const Divider(),
                 SizedBox(height: tokens.spaceMedium),
@@ -368,6 +382,67 @@ class _PermissionSetupCard extends StatelessWidget {
                 color: colorScheme.onTertiaryContainer,
                 fontWeight: FontWeight.w700,
               ),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+class _GlobalSoundSelector extends StatelessWidget {
+  const _GlobalSoundSelector({
+    required this.currentSound,
+    required this.onSoundSelected,
+  });
+
+  final String currentSound;
+  final ValueChanged<String> onSoundSelected;
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final tokens = theme.tokens;
+
+    // Use default adhan if empty or unexpected
+    final normalizedSound =
+        ['adhan_1', 'adhan_2', 'adhan_3'].contains(currentSound)
+        ? currentSound
+        : 'adhan_1';
+
+    return Padding(
+      padding: EdgeInsets.symmetric(horizontal: tokens.spaceMedium),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text(
+            context.l10n.playAdhan, // Reusing localized string
+            style: theme.textTheme.titleSmall?.copyWith(
+              color: theme.colorScheme.primary,
+            ),
+          ),
+          SizedBox(height: tokens.spaceSmall),
+          SegmentedButton<String>(
+            segments: const [
+              ButtonSegment<String>(
+                value: 'adhan_1',
+                label: Text('Sound 1'),
+              ),
+              ButtonSegment<String>(
+                value: 'adhan_2',
+                label: Text('Sound 2'),
+              ),
+              ButtonSegment<String>(
+                value: 'adhan_3',
+                label: Text('Sound 3'),
+              ),
+            ],
+            selected: {normalizedSound},
+            onSelectionChanged: (Set<String> newSelection) {
+              onSoundSelected(newSelection.first);
+            },
+            style: SegmentedButton.styleFrom(
+              visualDensity: VisualDensity.compact,
             ),
           ),
         ],

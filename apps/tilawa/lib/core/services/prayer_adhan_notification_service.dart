@@ -201,20 +201,27 @@ class PrayerAdhanNotificationService
       ),
     );
 
-    // Adhan channel: delete and recreate when the version key changes so the
-    // custom sound asset is picked up on existing installs (Android locks
-    // channel sound after first creation).
+    // Adhan channels: config changes ship under a NEW channel ID because
+    // Android resurrects deleted channels (with their old settings) when the
+    // same ID is recreated. On upgrade we only delete the retired IDs so they
+    // vanish from the system settings UI.
     final int? installedVersion = await _prefs.getInt(
       PrayerNotificationConfig.adhanChannelVersionKey,
     );
     if (installedVersion != PrayerNotificationConfig.adhanChannelVersion) {
-      await androidPlugin.deleteNotificationChannel(
-        channelId: PrayerNotificationConfig.adhanChannelId,
-      );
+      for (final String legacyChannelId
+          in PrayerNotificationConfig.legacyAdhanChannelIds) {
+        await androidPlugin.deleteNotificationChannel(
+          channelId: legacyChannelId,
+        );
+      }
       logger.d(
-        '${PrayerNotificationConfig.logTag} Adhan channel upgraded to v${PrayerNotificationConfig.adhanChannelVersion}',
+        '${PrayerNotificationConfig.logTag} Adhan channels upgraded to v${PrayerNotificationConfig.adhanChannelVersion}',
       );
     }
+    // Both adhan channels must not vibrate: the notification is posted at the
+    // exact moment adhan audio starts, and the vibration motor is audible over
+    // the opening of the recording.
     await androidPlugin.createNotificationChannel(
       AndroidNotificationChannel(
         PrayerNotificationConfig.adhanChannelId,
@@ -225,6 +232,7 @@ class PrayerAdhanNotificationService
           PrayerNotificationConfig.adhanSoundRawName,
         ),
         playSound: true,
+        enableVibration: false,
         audioAttributesUsage: AudioAttributesUsage.alarm,
       ),
     );
@@ -235,6 +243,7 @@ class PrayerAdhanNotificationService
         description: l10n.prayerNotificationsSilentAdhanChannelDescription,
         importance: Importance.high,
         playSound: false,
+        enableVibration: false,
       ),
     );
     await _prefs.setInt(
@@ -377,6 +386,11 @@ class PrayerAdhanNotificationService
             prayer,
           );
           final bool useAdhan = prayerSettings.playAdhan;
+          String effectiveSound = prayerSettings.adhanSound;
+          if (prayer == PrayerType.fajr &&
+              effectiveSound.startsWith('adhan_')) {
+            effectiveSound = '${effectiveSound}_fajr';
+          }
           final String payload = jsonEncode({
             PrayerNotificationConfig.payloadTypeKey:
                 PrayerNotificationConfig.payloadTypeValue,
@@ -407,6 +421,7 @@ class PrayerAdhanNotificationService
                 scheduledTime: targetTime,
                 prayerName: prayer.name,
                 prayerKey: prayer.name.toLowerCase(),
+                sound: effectiveSound,
                 locationName: notificationLocationLabel,
                 languageCode: languageCode,
               );
@@ -423,6 +438,7 @@ class PrayerAdhanNotificationService
                     prayerName: prayer.name,
                     prayerKey: prayer.name.toLowerCase(),
                     triggerAt: targetTime,
+                    sound: effectiveSound,
                     locationName: notificationLocationLabel,
                     languageCode: languageCode,
                   ),
@@ -727,6 +743,11 @@ class PrayerAdhanNotificationService
 
       bool adhanHandledNatively = false;
       if (playAdhan && _adhanPlayer.isSupported) {
+        String effectiveSound = 'adhan_1'; // Default test sound
+        if (prayer == PrayerType.fajr) {
+          effectiveSound = 'adhan_1_fajr';
+        }
+
         try {
           final DateTime trigger = DateTime.now().add(
             const Duration(seconds: 1),
@@ -736,6 +757,7 @@ class PrayerAdhanNotificationService
             scheduledTime: trigger,
             prayerName: prayer.name,
             prayerKey: prayer.name.toLowerCase(),
+            sound: effectiveSound,
             locationName: notificationLocationLabel,
             languageCode: languageCode,
           );
@@ -1152,6 +1174,9 @@ class PrayerAdhanNotificationService
               )
             : null,
         playSound: !playAdhan || !adhanHandledNatively,
+        // Pre-O devices take vibration from the notification, not the
+        // channel; adhan notifications must not buzz over the audio.
+        enableVibration: !playAdhan,
         audioAttributesUsage: playAdhan && !adhanHandledNatively
             ? AudioAttributesUsage.alarm
             : AudioAttributesUsage.notification,

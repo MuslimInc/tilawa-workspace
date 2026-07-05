@@ -106,6 +106,7 @@ abstract class PrayerNotificationSettings with _$PrayerNotificationSettings {
   const factory PrayerNotificationSettings({
     @Default(PrayerAlertMode.adhan) PrayerAlertMode mode,
     @Default(0) int minutesBefore,
+    @Default('adhan') String adhanSound,
     String? customAdhanUrl,
   }) = _PrayerNotificationSettings;
 
@@ -260,6 +261,22 @@ abstract class PrayerSettingsEntity with _$PrayerSettingsEntity {
     );
   }
 
+  /// Copy with a global adhan sound applied to all prayers that support it.
+  PrayerSettingsEntity copyWithGlobalAdhanSound(String sound) {
+    PrayerNotificationSettings updateSound(PrayerNotificationSettings current) {
+      return current.copyWith(adhanSound: sound);
+    }
+
+    return copyWith(
+      fajrNotification: updateSound(fajrNotification),
+      sunriseNotification: sunriseNotification,
+      dhuhrNotification: updateSound(dhuhrNotification),
+      asrNotification: updateSound(asrNotification),
+      maghribNotification: updateSound(maghribNotification),
+      ishaNotification: updateSound(ishaNotification),
+    );
+  }
+
   /// Copy with global minutes before for all notifications
   PrayerSettingsEntity copyWithGlobalMinutesBefore(int minutes) {
     return copyWith(
@@ -284,13 +301,16 @@ abstract class PrayerSettingsEntity with _$PrayerSettingsEntity {
     String prayerId, {
     bool? notificationEnabled,
     bool? adhanEnabled,
+    String? adhanSound,
   }) {
     PrayerNotificationSettings update(PrayerNotificationSettings current) {
       final newEnabled = notificationEnabled ?? current.enabled;
       final newAdhan = adhanEnabled ?? current.playAdhan;
+      final newAdhanSound = adhanSound ?? current.adhanSound;
 
       final canPlayAdhan = prayerId != 'sunrise';
       return current.copyWith(
+        adhanSound: newAdhanSound,
         mode: PrayerAlertMode.fromBools(
           enabled: newEnabled,
           playAdhan: canPlayAdhan && newAdhan,

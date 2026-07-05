@@ -1118,7 +1118,7 @@ void main() {
     group('native adhan single playback regression', () {
       /// Mirrors native [AdhanPlaybackService] silent foreground channel id.
       const String nativeForegroundChannelId =
-          'com.tilawa.app.prayer_adhan_silent';
+          'com.tilawa.app.prayer_adhan_silent_v4';
 
       test(
         'native foreground notification uses silent adhan channel not audible channel',
@@ -1532,19 +1532,66 @@ void main() {
         ).called(1);
       });
 
-      test('initialize upgrades adhan channel when version is stale', () async {
-        when(
-          mockPrefs.getInt(PrayerNotificationConfig.adhanChannelVersionKey),
-        ).thenAnswer((_) async => 0);
+      test(
+        'adhan channels are created without vibration so the vibrator never '
+        'buzzes over the start of adhan playback',
+        () async {
+          when(
+            mockPrefs.getInt(PrayerNotificationConfig.adhanChannelVersionKey),
+          ).thenAnswer((_) async => null);
 
-        await service.initialize();
+          await service.initialize();
 
-        verify(
-          mockAndroidPlugin.deleteNotificationChannel(
-            channelId: PrayerNotificationConfig.adhanChannelId,
-          ),
-        ).called(1);
-      });
+          final List<AndroidNotificationChannel> channels = verify(
+            mockAndroidPlugin.createNotificationChannel(captureAny),
+          ).captured.cast<AndroidNotificationChannel>();
+          final AndroidNotificationChannel adhanChannel = channels.singleWhere(
+            (AndroidNotificationChannel c) =>
+                c.id == PrayerNotificationConfig.adhanChannelId,
+          );
+          final AndroidNotificationChannel silentChannel = channels.singleWhere(
+            (AndroidNotificationChannel c) =>
+                c.id == PrayerNotificationConfig.silentAdhanChannelId,
+          );
+
+          expect(adhanChannel.enableVibration, isFalse);
+          expect(silentChannel.enableVibration, isFalse);
+          expect(silentChannel.playSound, isFalse);
+        },
+      );
+
+      test(
+        'initialize deletes legacy adhan channels when version is stale',
+        () async {
+          when(
+            mockPrefs.getInt(PrayerNotificationConfig.adhanChannelVersionKey),
+          ).thenAnswer((_) async => 0);
+
+          await service.initialize();
+
+          // Android resurrects deleted channels recreated under the same ID,
+          // so upgrades ship new channel IDs and only the retired IDs are
+          // deleted. Current channel IDs must never be deleted here.
+          for (final String legacyChannelId
+              in PrayerNotificationConfig.legacyAdhanChannelIds) {
+            verify(
+              mockAndroidPlugin.deleteNotificationChannel(
+                channelId: legacyChannelId,
+              ),
+            ).called(1);
+          }
+          verifyNever(
+            mockAndroidPlugin.deleteNotificationChannel(
+              channelId: PrayerNotificationConfig.adhanChannelId,
+            ),
+          );
+          verifyNever(
+            mockAndroidPlugin.deleteNotificationChannel(
+              channelId: PrayerNotificationConfig.silentAdhanChannelId,
+            ),
+          );
+        },
+      );
 
       test('canScheduleExactAlarms delegates to android plugin', () async {
         when(mockAndroidPlugin.canScheduleExactNotifications()).thenAnswer(
