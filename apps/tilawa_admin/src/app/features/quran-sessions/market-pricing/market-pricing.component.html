@@ -18,9 +18,9 @@
   @if (markets.length > 0) {
   <div class="tilawa-form-group mb-6 max-w-sm">
     <label class="tilawa-label">{{ 'marketPricing_selectMarket' | t }}</label>
-    <select class="tilawa-field" [value]="selectedCountryCode$ | async" (change)="onMarketSelect($event)">
+    <select class="tilawa-field" (change)="onMarketSelect($event)">
       @for (market of markets; track market.countryCode) {
-      <option [value]="market.countryCode">{{ market.countryCode }}</option>
+      <option [value]="market.countryCode" [selected]="market.countryCode === (selectedCountryCode$ | async)">{{ market.countryCode }}</option>
       }
     </select>
   </div>
