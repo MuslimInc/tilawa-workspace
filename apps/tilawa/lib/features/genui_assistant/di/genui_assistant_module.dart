@@ -8,7 +8,7 @@ import '../data/datasources/genui_transport.dart';
 import '../data/parser/genui_parser.dart';
 import '../data/repositories/genui_repository_impl.dart';
 import '../domain/repositories/genui_repository.dart';
-import '../presentation/cubit/genui_assistant_cubit.dart';
+import '../presentation/cubit/gen_ui_assistant_cubit.dart';
 import '../presentation/render/genui_action_dispatcher.dart';
 import '../presentation/render/genui_action_resolver.dart';
 import '../presentation/render/genui_component_registry.dart';

@@ -5,62 +5,8 @@ import 'package:quran_sessions/l10n/quran_sessions_localizations.dart';
 import 'package:quran_sessions/quran_sessions.dart';
 import 'package:tilawa_ui_kit/tilawa_ui_kit.dart';
 
-import '../../helpers/fakes/fake_booking_repository.dart';
-import '../../helpers/fakes/fake_session_repository.dart';
-import '../../helpers/fakes/fake_teacher_profile_repository.dart';
 import '../../helpers/fixtures.dart';
-import '../../helpers/lifecycle_test_helpers.dart';
-
-class _JoinNavigationTestBloc extends MySessionsBloc {
-  _JoinNavigationTestBloc({required MySessionsSuccess seed})
-    : super(
-        getStudentSessions: GetStudentSessionsUseCase(FakeSessionRepository()),
-        cancelSession: buildCancelSessionViaServerUseCase(),
-        submitReview: SubmitReviewUseCase(FakeBookingRepository()),
-        joinSession: JoinSessionUseCase(
-          sessionRepository: FakeSessionRepository(),
-          callProvider: const MockSessionCallProvider(),
-          authSession: _FakeAuthSession('student_1'),
-          teacherProfileRepository: FakeTeacherProfileRepository(),
-        ),
-        studentId: 'student_1',
-      ) {
-    emit(seed);
-  }
-
-  @override
-  void add(MySessionsEvent event) {
-    if (event is MySessionsLoadRequested) {
-      return;
-    }
-    if (event is SessionJoinRequested) {
-      final current = state;
-      if (current is! MySessionsSuccess) {
-        return;
-      }
-      emit(
-        current.copyWith(
-          clearJoinInProgress: true,
-          joinCompletedSessionId: event.sessionId,
-        ),
-      );
-      return;
-    }
-    super.add(event);
-  }
-}
-
-class _FakeAuthSession implements AuthSessionProvider {
-  const _FakeAuthSession(this.userId);
-
-  final String userId;
-
-  @override
-  String? get currentUserId => userId;
-
-  @override
-  Stream<String?> watchUserId() => Stream.value(userId);
-}
+import 'my_sessions_join_navigation_test_bloc.dart';
 
 QuranSession _inAppSession({
   SessionCallProviderKind providerKind = SessionCallProviderKind.mock,
@@ -116,7 +62,7 @@ void main() {
     tester,
   ) async {
     var openedCount = 0;
-    final bloc = _JoinNavigationTestBloc(
+    final bloc = MySessionsJoinNavigationTestBloc(
       seed: const MySessionsSuccess(upcoming: [], past: []),
     );
 
@@ -136,7 +82,7 @@ void main() {
   ) async {
     String? joinedBookingId;
     String? joinedSessionId;
-    final bloc = _JoinNavigationTestBloc(
+    final bloc = MySessionsJoinNavigationTestBloc(
       seed: MySessionsSuccess(
         upcoming: [_inAppSession(providerKind: SessionCallProviderKind.mock)],
         past: const [],
@@ -162,7 +108,7 @@ void main() {
   });
 
   testWidgets('in-app join from list opens call shell', (tester) async {
-    final bloc = _JoinNavigationTestBloc(
+    final bloc = MySessionsJoinNavigationTestBloc(
       seed: MySessionsSuccess(
         upcoming: [_inAppSession(providerKind: SessionCallProviderKind.mock)],
         past: const [],
@@ -180,7 +126,7 @@ void main() {
   testWidgets('external join shows pre-join sheet before dispatching join', (
     tester,
   ) async {
-    final bloc = _JoinNavigationTestBloc(
+    final bloc = MySessionsJoinNavigationTestBloc(
       seed: MySessionsSuccess(
         upcoming: [
           makeSession(

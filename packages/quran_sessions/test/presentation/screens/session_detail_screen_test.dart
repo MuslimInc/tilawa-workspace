@@ -8,6 +8,7 @@ import 'package:quran_sessions/quran_sessions.dart';
 import 'package:tilawa_ui_kit/tilawa_ui_kit.dart';
 
 import '../../helpers/fixtures/session_aggregate_fixtures.dart';
+import 'join_loading_hold_bloc.dart';
 import 'join_navigation_test_bloc.dart';
 import 'recording_session_detail_bloc.dart';
 import 'review_emit_bloc.dart';

@@ -96,6 +96,8 @@ class SessionValidityCubit extends Cubit<SessionValidityState> {
       (value) => value,
     );
 
+    if (isClosed) return;
+
     switch (validity) {
       case SessionValidityResult.valid:
         _clearUnknownRetry();

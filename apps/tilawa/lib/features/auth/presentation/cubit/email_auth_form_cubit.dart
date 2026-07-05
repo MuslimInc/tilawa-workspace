@@ -124,8 +124,8 @@ class EmailAuthFormCubit extends Cubit<EmailAuthFormState> {
     );
   }
 
-  // ignore: avoid_public_methods_on_bloc_instances
-  bool validateForLogin() {
+  /// Validates email and password; callers read [EmailAuthFormState.isLoginValid].
+  void validateForLogin() {
     final String? emailError = EmailAuthFormPolicy.validateEmail(state.email);
     final String? passwordError = EmailAuthFormPolicy.validatePassword(
       state.password,
@@ -138,12 +138,11 @@ class EmailAuthFormCubit extends Cubit<EmailAuthFormState> {
         clearPasswordError: passwordError == null,
       ),
     );
-    return emailError == null && passwordError == null;
   }
 
-  // ignore: avoid_public_methods_on_bloc_instances
-  bool validateForRegister() {
-    final bool loginValid = validateForLogin();
+  /// Validates all fields; callers read [EmailAuthFormState.isRegisterValid].
+  void validateForRegister() {
+    validateForLogin();
     final String? confirmError = EmailAuthFormPolicy.validateConfirmPassword(
       password: state.password,
       confirmPassword: state.confirmPassword,
@@ -154,11 +153,10 @@ class EmailAuthFormCubit extends Cubit<EmailAuthFormState> {
         clearConfirmPasswordError: confirmError == null,
       ),
     );
-    return loginValid && confirmError == null;
   }
 
-  // ignore: avoid_public_methods_on_bloc_instances
-  bool validateEmailOnly() {
+  /// Validates email only; callers check [EmailAuthFormState.emailErrorKey].
+  void validateEmailOnly() {
     final String? emailError = EmailAuthFormPolicy.validateEmail(state.email);
     emit(
       state.copyWith(
@@ -166,6 +164,5 @@ class EmailAuthFormCubit extends Cubit<EmailAuthFormState> {
         clearEmailError: emailError == null,
       ),
     );
-    return emailError == null;
   }
 }

@@ -65,15 +65,13 @@ class _RegisterRetryFooterHarness extends StatelessWidget {
                           ? null
                           : () async {
                               if (isRetry) {
-                                final RegisterWithEmailResult? result =
-                                    await context
-                                        .read<EmailRegistrationCubit>()
-                                        .retryProfilePersistence();
-                                if (result is RegisterWithEmailCompleted &&
-                                    context.mounted) {
-                                  context
-                                      .read<EmailRegistrationCubit>()
-                                      .clearProfilePersistenceFailure();
+                                final EmailRegistrationCubit cubit = context
+                                    .read<EmailRegistrationCubit>();
+                                await cubit.retryProfilePersistence();
+                                if (context.mounted &&
+                                    cubit.state.status ==
+                                        EmailRegistrationStatus.editing &&
+                                    cubit.state.authenticatedUser == null) {
                                   context.read<AuthBloc>().add(
                                     const CheckAuthStatusEvent(),
                                   );

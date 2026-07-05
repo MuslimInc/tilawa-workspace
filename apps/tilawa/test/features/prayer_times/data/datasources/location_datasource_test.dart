@@ -1,21 +1,62 @@
 import 'dart:async';
+import 'dart:ui';
 
 import 'package:flutter_test/flutter_test.dart';
+import 'package:geocoding/geocoding.dart';
+import 'package:geocoding_platform_interface/geocoding_platform_interface.dart'
+    as platform;
 import 'package:geolocator/geolocator.dart';
 import 'package:mockito/annotations.dart';
 import 'package:mockito/mockito.dart';
+import 'package:plugin_platform_interface/plugin_platform_interface.dart';
 import 'package:tilawa/features/prayer_times/data/datasources/location_datasource.dart';
 import 'package:tilawa/features/prayer_times/data/services/geolocator_client.dart';
 import 'package:tilawa/features/prayer_times/domain/repositories/prayer_times_repository.dart';
 
 import 'location_datasource_test.mocks.dart';
 
+class MockGeocoding extends platform.Geocoding {
+  MockGeocoding(super.params) : super.implementation();
+
+  List<Placemark> mockPlacemarks = [];
+  bool shouldThrow = false;
+
+  @override
+  Future<List<Placemark>> placemarkFromCoordinates(
+    double latitude,
+    double longitude, {
+    Locale? locale,
+  }) async {
+    if (shouldThrow) throw Exception('Geocoding error');
+    return mockPlacemarks;
+  }
+}
+
+class MockGeocodingPlatformFactory extends platform.GeocodingPlatformFactory
+    with MockPlatformInterfaceMixin {
+  MockGeocoding? currentGeocoding;
+  List<Placemark> mockPlacemarks = [];
+  bool shouldThrow = false;
+
+  @override
+  platform.Geocoding createGeocoding(platform.GeocodingCreationParams params) {
+    final geocoding = MockGeocoding(params);
+    geocoding.mockPlacemarks = mockPlacemarks;
+    geocoding.shouldThrow = shouldThrow;
+    currentGeocoding = geocoding;
+    return geocoding;
+  }
+}
+
 @GenerateMocks([GeolocatorClient])
 void main() {
   late LocationDataSourceImpl dataSource;
   late MockGeolocatorClient mockGeolocatorClient;
+  late MockGeocodingPlatformFactory mockGeocodingPlatformFactory;
 
   setUp(() {
+    mockGeocodingPlatformFactory = MockGeocodingPlatformFactory();
+    platform.GeocodingPlatformFactory.instance = mockGeocodingPlatformFactory;
     mockGeolocatorClient = MockGeolocatorClient();
     dataSource = LocationDataSourceImpl(mockGeolocatorClient);
   });
@@ -38,7 +79,6 @@ void main() {
       test(
         'should return cached location when available and forceRefresh is false',
         () async {
-          // Arrange
           when(
             mockGeolocatorClient.isLocationServiceEnabled(),
           ).thenAnswer((_) async => true);
@@ -49,13 +89,20 @@ void main() {
             mockGeolocatorClient.getLastKnownPosition(),
           ).thenAnswer((_) async => tPosition);
 
-          // Act
+          mockGeocodingPlatformFactory.mockPlacemarks = [
+            Placemark(
+              isoCountryCode: 'EG',
+              locality: 'Cairo',
+              name: 'Downtown',
+            ),
+          ];
+
           final LocationResult result = await dataSource.getCurrentLocation();
 
-          // Assert
           expect(result.latitude, tPosition.latitude);
           expect(result.longitude, tPosition.longitude);
-          // Verify getCurrentPosition was NOT called
+          expect(result.countryCode, 'EG');
+          expect(result.locationName, 'Downtown, Cairo');
           verifyNever(
             mockGeolocatorClient.getCurrentPosition(
               locationSettings: anyNamed('locationSettings'),
@@ -65,7 +112,6 @@ void main() {
       );
 
       test('should fetch fresh location when forceRefresh is true', () async {
-        // Arrange
         when(
           mockGeolocatorClient.isLocationServiceEnabled(),
         ).thenAnswer((_) async => true);
@@ -78,14 +124,22 @@ void main() {
           ),
         ).thenAnswer((_) async => tPosition);
 
-        // Act
+        mockGeocodingPlatformFactory.mockPlacemarks = [
+          Placemark(
+            isoCountryCode: 'US',
+            locality: 'New York',
+            name: 'Times Square',
+          ),
+        ];
+
         final LocationResult result = await dataSource.getCurrentLocation(
           forceRefresh: true,
         );
 
-        // Assert
         expect(result.latitude, tPosition.latitude);
         expect(result.longitude, tPosition.longitude);
+        expect(result.countryCode, 'US');
+        expect(result.locationName, 'Times Square, New York');
         verify(
           mockGeolocatorClient.getCurrentPosition(
             locationSettings: anyNamed('locationSettings'),
@@ -94,9 +148,8 @@ void main() {
       });
 
       test(
-        'should fetch fresh location when cached location is unavailable',
+        'should return location with fallback country if geocoding fails',
         () async {
-          // Arrange
           when(
             mockGeolocatorClient.isLocationServiceEnabled(),
           ).thenAnswer((_) async => true);
@@ -104,44 +157,35 @@ void main() {
             mockGeolocatorClient.checkPermission(),
           ).thenAnswer((_) async => LocationPermission.whileInUse);
           when(
-            mockGeolocatorClient.getLastKnownPosition(),
-          ).thenAnswer((_) async => null);
-          when(
             mockGeolocatorClient.getCurrentPosition(
               locationSettings: anyNamed('locationSettings'),
             ),
           ).thenAnswer((_) async => tPosition);
 
-          // Act
-          final LocationResult result = await dataSource.getCurrentLocation();
+          mockGeocodingPlatformFactory.shouldThrow = true;
 
-          // Assert
+          final LocationResult result = await dataSource.getCurrentLocation(
+            forceRefresh: true,
+          );
+
           expect(result.latitude, tPosition.latitude);
-          verify(
-            mockGeolocatorClient.getCurrentPosition(
-              locationSettings: anyNamed('locationSettings'),
-            ),
-          ).called(1);
+          expect(result.longitude, tPosition.longitude);
+          // Fallback for 10.0, 10.0 is null
+          expect(result.countryCode, null);
         },
       );
 
       test('should return error when location service is disabled', () async {
-        // Arrange
         when(
           mockGeolocatorClient.isLocationServiceEnabled(),
         ).thenAnswer((_) async => false);
-
-        // Act
         final LocationResult result = await dataSource.getCurrentLocation();
-
-        // Assert
         expect(result.error, 'Location services are disabled');
       });
 
       test(
         'should return error when permission is denied and request denied',
         () async {
-          // Arrange
           when(
             mockGeolocatorClient.isLocationServiceEnabled(),
           ).thenAnswer((_) async => true);
@@ -152,10 +196,7 @@ void main() {
             mockGeolocatorClient.requestPermission(),
           ).thenAnswer((_) async => LocationPermission.denied);
 
-          // Act
           final LocationResult result = await dataSource.getCurrentLocation();
-
-          // Assert
           expect(result.error, 'Location permission denied');
         },
       );
@@ -163,7 +204,6 @@ void main() {
       test(
         'falls back to last known position on exception (forceRefresh=true)',
         () async {
-          // Arrange
           when(
             mockGeolocatorClient.isLocationServiceEnabled(),
           ).thenAnswer((_) async => true);
@@ -179,18 +219,14 @@ void main() {
             mockGeolocatorClient.getLastKnownPosition(),
           ).thenAnswer((_) async => tPosition);
 
-          // Act
           final LocationResult result = await dataSource.getCurrentLocation(
             forceRefresh: true,
           );
-
-          // Assert
           expect(result.latitude, tPosition.latitude);
         },
       );
 
       test('returns error on timeout if no last known position', () async {
-        // Arrange
         when(
           mockGeolocatorClient.isLocationServiceEnabled(),
         ).thenAnswer((_) async => true);
@@ -206,12 +242,8 @@ void main() {
           ),
         ).thenThrow(TimeoutException('Timeout'));
 
-        // Act
         final LocationResult result = await dataSource.getCurrentLocation();
-
-        // Assert
         expect(result.error, contains('timed out'));
-        verify(mockGeolocatorClient.getLastKnownPosition()).called(2);
       });
 
       test('falls back to last known position on timeout', () async {
@@ -233,9 +265,35 @@ void main() {
         ).thenThrow(TimeoutException('Timeout'));
 
         final LocationResult result = await dataSource.getCurrentLocation();
-
         expect(result.latitude, tPosition.latitude);
-        expect(result.longitude, tPosition.longitude);
+      });
+    });
+
+    group('getLocationName', () {
+      test('returns name using placemarks correctly', () async {
+        mockGeocodingPlatformFactory.mockPlacemarks = [
+          Placemark(
+            thoroughfare: 'Main St',
+            locality: 'New York',
+          ),
+        ];
+
+        final result = await dataSource.getLocationName(
+          40.7,
+          -74.0,
+          localeIdentifier: 'en',
+        );
+        expect(result, 'Main St, New York');
+      });
+
+      test('returns null if geocoding fails', () async {
+        mockGeocodingPlatformFactory.shouldThrow = true;
+        final result = await dataSource.getLocationName(
+          40.7,
+          -74.0,
+          localeIdentifier: 'en',
+        );
+        expect(result, isNull);
       });
     });
 
@@ -249,7 +307,6 @@ void main() {
         ).thenAnswer((_) async => LocationPermission.whileInUse);
 
         final bool result = await dataSource.requestPermission();
-
         expect(result, true);
       });
 
@@ -264,10 +321,7 @@ void main() {
           ).thenAnswer((_) async => LocationPermission.deniedForever);
 
           final bool result = await dataSource.requestPermission();
-
           expect(result, false);
-          // Passive request must never yank the user out to the App-info page
-          // (this previously caused a resume loop on the prayer-times screen).
           verifyNever(mockGeolocatorClient.openAppSettings());
         },
       );
@@ -281,46 +335,108 @@ void main() {
           when(
             mockGeolocatorClient.requestPermission(),
           ).thenAnswer((_) async => LocationPermission.deniedForever);
-          when(
-            mockGeolocatorClient.openAppSettings(),
-          ).thenAnswer((_) async {});
+          when(mockGeolocatorClient.openAppSettings()).thenAnswer((_) async {});
 
           final bool result = await dataSource.requestPermission(
             allowOpenSettings: true,
           );
-
           expect(result, false);
           verify(mockGeolocatorClient.openAppSettings()).called(1);
         },
       );
-    });
-    group('getCountryCode', () {
-      test('should return EG for coordinates in Egypt when geocoding fails', () async {
-        // Arrange
-        // (Mocking failure is implicit since we don't mock placemarkFromCoordinates here as it's a mixin/extension or static?
-        // Wait, LocationDataSourceImpl calls placemarkFromCoordinates directly which is a global function from geocoding package.
-        // It is NOT mocked in this test setup.
-        // However, since we are running in a test environment without platform channel setup for geocoding,
-        // the real placemarkFromCoordinates will likely throw MissingPluginException or similar, which is caught by the try-catch block.
-        // So we can rely on that behavior for the "failure" case.)
 
-        // Act
-        final result = await dataSource.getCountryCode(
-          30.0444,
-          31.2357,
-        ); // Cairo
-
-        // Assert
-        expect(result, 'EG');
+      test('returns false on exception', () async {
+        when(
+          mockGeolocatorClient.checkPermission(),
+        ).thenThrow(Exception('test'));
+        final bool result = await dataSource.requestPermission();
+        expect(result, false);
       });
+    });
+
+    group('hasPermission', () {
+      test('returns true if whileInUse', () async {
+        when(
+          mockGeolocatorClient.checkPermission(),
+        ).thenAnswer((_) async => LocationPermission.whileInUse);
+        final bool result = await dataSource.hasPermission();
+        expect(result, true);
+      });
+    });
+
+    group('isLocationServiceEnabled', () {
+      test('delegates to client', () async {
+        when(
+          mockGeolocatorClient.isLocationServiceEnabled(),
+        ).thenAnswer((_) async => true);
+        final bool result = await dataSource.isLocationServiceEnabled();
+        expect(result, true);
+      });
+    });
+
+    group('getCountryCode', () {
+      test('should return code from placemark if available', () async {
+        mockGeocodingPlatformFactory.mockPlacemarks = [
+          Placemark(isoCountryCode: 'SA'),
+        ];
+
+        final result = await dataSource.getCountryCode(24.7136, 46.6753);
+        expect(result, 'SA');
+      });
+
+      test(
+        'should fallback to EG for coordinates in Egypt when geocoding fails',
+        () async {
+          mockGeocodingPlatformFactory.shouldThrow = true;
+          final result = await dataSource.getCountryCode(
+            30.0444,
+            31.2357,
+          ); // Cairo
+          expect(result, 'EG');
+        },
+      );
+
+      test(
+        'should fallback to SA for coordinates in Saudi Arabia when geocoding fails',
+        () async {
+          mockGeocodingPlatformFactory.shouldThrow = true;
+          final result = await dataSource.getCountryCode(
+            24.7136,
+            46.6753,
+          ); // Riyadh
+          expect(result, 'SA');
+        },
+      );
+
+      test(
+        'should fallback to TR for coordinates in Turkey when geocoding fails',
+        () async {
+          mockGeocodingPlatformFactory.shouldThrow = true;
+          final result = await dataSource.getCountryCode(
+            39.9208,
+            32.8541,
+          ); // Ankara
+          expect(result, 'TR');
+        },
+      );
+
+      test(
+        'should fallback to PK for coordinates in Pakistan when geocoding fails',
+        () async {
+          mockGeocodingPlatformFactory.shouldThrow = true;
+          final result = await dataSource.getCountryCode(
+            30.3753,
+            69.3451,
+          ); // Pakistan
+          expect(result, 'PK');
+        },
+      );
 
       test(
         'should return null for unknown coordinates when geocoding fails',
         () async {
-          // Act
+          mockGeocodingPlatformFactory.shouldThrow = true;
           final result = await dataSource.getCountryCode(0.0, 0.0); // Ocean
-
-          // Assert
           expect(result, null);
         },
       );

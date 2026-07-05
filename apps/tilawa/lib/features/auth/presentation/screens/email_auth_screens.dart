@@ -11,7 +11,6 @@ import '../../../../router/app_router.dart';
 import '../../../../router/app_router_config.dart';
 import '../../domain/entities/email_auth_failure_key.dart';
 import '../../domain/entities/email_registration_step.dart';
-import '../../domain/entities/register_with_email_result.dart';
 import '../bloc/auth_bloc.dart';
 import '../cubit/email_auth_form_cubit.dart';
 import '../cubit/email_registration_cubit.dart';
@@ -164,10 +163,11 @@ class _EmailLoginBody extends StatelessWidget {
 
   void _submit(BuildContext context) {
     final EmailAuthFormCubit formCubit = context.read<EmailAuthFormCubit>();
-    if (!formCubit.validateForLogin()) {
+    formCubit.validateForLogin();
+    final EmailAuthFormState form = formCubit.state;
+    if (!form.isLoginValid) {
       return;
     }
-    final EmailAuthFormState form = formCubit.state;
     context.read<AuthBloc>().add(
       AuthEvent.signInWithEmail(
         email: form.email.trim(),
@@ -397,16 +397,18 @@ class _RegisterBodyState extends State<_RegisterBody> {
     final EmailRegistrationCubit cubit = context.read<EmailRegistrationCubit>();
 
     if (regState.status == EmailRegistrationStatus.profilePersistenceFailed) {
-      final RegisterWithEmailResult? result = await cubit
-          .retryProfilePersistence();
-      if (!context.mounted || result == null) {
+      await cubit.retryProfilePersistence();
+      if (!context.mounted) {
         return;
       }
-      if (result is RegisterWithEmailCompleted) {
-        cubit.clearProfilePersistenceFailure();
+      final EmailRegistrationState retried = cubit.state;
+      // Completed retries emit editing and clear the authenticated user;
+      // persistence failures keep the failed status.
+      if (retried.status == EmailRegistrationStatus.editing &&
+          retried.authenticatedUser == null) {
         context.read<AuthBloc>().add(const AuthEvent.checkAuthStatus());
       }
-      if (result is RegisterWithEmailProfilePersistenceFailed) {
+      if (retried.status == EmailRegistrationStatus.profilePersistenceFailed) {
         TilawaFeedback.showToast(
           context,
           message: context.l10n.registrationProfilePersistenceFailed,
@@ -417,12 +419,13 @@ class _RegisterBodyState extends State<_RegisterBody> {
     }
 
     if (regState.currentStep == EmailRegistrationStep.review) {
-      if (!cubit.validateCurrentStep()) {
+      cubit.validateCurrentStep();
+      if (!cubit.state.isCurrentStepValid) {
         return;
       }
       _registrationSubmitInFlight = true;
       context.read<AuthBloc>().add(
-        AuthEvent.registerWithEmail(draft: cubit.buildSubmissionDraft()),
+        AuthEvent.registerWithEmail(draft: cubit.state.draft),
       );
       return;
     }
@@ -577,7 +580,8 @@ class _ForgotPasswordBody extends StatelessWidget {
 
   void _submit(BuildContext context) {
     final EmailAuthFormCubit formCubit = context.read<EmailAuthFormCubit>();
-    if (!formCubit.validateEmailOnly()) {
+    formCubit.validateEmailOnly();
+    if (formCubit.state.emailErrorKey != null) {
       return;
     }
     context.read<ForgotPasswordCubit>().submit(

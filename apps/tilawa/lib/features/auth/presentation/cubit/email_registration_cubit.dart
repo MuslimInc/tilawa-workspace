@@ -68,16 +68,15 @@ class EmailRegistrationCubit extends Cubit<EmailRegistrationState> {
     );
   }
 
-  // ignore: avoid_public_methods_on_bloc_instances
-  bool validateCurrentStep() {
+  /// Validates the current step; callers read
+  /// [EmailRegistrationState.isCurrentStepValid].
+  void validateCurrentStep() {
     final Map<String, String?> errors =
         EmailRegistrationFormPolicy.validateStep(
           step: state.currentStep,
           draft: state.draft,
         );
-    final bool valid = errors.values.every((String? value) => value == null);
     emit(state.copyWith(fieldErrors: errors));
-    return valid;
   }
 
   void goBack() {
@@ -96,14 +95,14 @@ class EmailRegistrationCubit extends Cubit<EmailRegistrationState> {
     );
   }
 
-  // ignore: avoid_public_methods_on_bloc_instances
-  bool goNext() {
-    if (!validateCurrentStep()) {
-      return false;
+  void goNext() {
+    validateCurrentStep();
+    if (!state.isCurrentStepValid) {
+      return;
     }
     final EmailRegistrationStep? next = state.currentStep.next();
     if (next == null) {
-      return false;
+      return;
     }
     emit(
       state.copyWith(
@@ -111,11 +110,7 @@ class EmailRegistrationCubit extends Cubit<EmailRegistrationState> {
         clearFieldErrors: true,
       ),
     );
-    return true;
   }
-
-  // ignore: avoid_public_methods_on_bloc_instances
-  EmailRegistrationDraft buildSubmissionDraft() => state.draft;
 
   void onRegistrationAuthFailed({String? emailErrorKey}) {
     final Map<String, String?> fieldErrors = emailErrorKey == null
@@ -151,11 +146,13 @@ class EmailRegistrationCubit extends Cubit<EmailRegistrationState> {
     );
   }
 
-  // ignore: avoid_public_methods_on_bloc_instances
-  Future<RegisterWithEmailResult?> retryProfilePersistence() async {
+  /// Retries persisting the profile; callers observe the outcome via
+  /// [EmailRegistrationState.status] and
+  /// [EmailRegistrationState.authenticatedUser].
+  Future<void> retryProfilePersistence() async {
     final UserEntity? user = state.authenticatedUser;
     if (user == null) {
-      return null;
+      return;
     }
     emit(state.copyWith(status: EmailRegistrationStatus.submitting));
     final RegisterWithEmailResult result = await _registerWithEmail
@@ -163,6 +160,8 @@ class EmailRegistrationCubit extends Cubit<EmailRegistrationState> {
           user: user,
           draft: state.draft,
         );
+
+    if (isClosed) return;
 
     switch (result) {
       case RegisterWithEmailCompleted():
@@ -182,8 +181,6 @@ class EmailRegistrationCubit extends Cubit<EmailRegistrationState> {
           ),
         );
     }
-
-    return result;
   }
 
   Map<String, String?> _clearFieldError(String key) {

@@ -8,95 +8,8 @@ import 'package:quran_sessions/l10n/quran_sessions_localizations.dart';
 import 'package:quran_sessions/quran_sessions.dart';
 import 'package:tilawa_ui_kit/tilawa_ui_kit.dart';
 
-import '../../helpers/availability_test_helpers.dart';
-import '../../helpers/fakes/fake_market_config_repository.dart';
-import '../../helpers/fakes/fake_session_policy_repository.dart';
-import '../../helpers/fakes/fake_session_repository.dart';
-import '../../helpers/fakes/fake_teacher_repository.dart';
-import '../../helpers/fakes/fake_user_profile_repository.dart';
-import '../../helpers/fakes/fake_teacher_profile_repository.dart';
-import '../../helpers/lifecycle_test_helpers.dart';
-
-class _SeededBookingBloc extends BookingBloc {
-  _SeededBookingBloc({required BookingSelecting seed})
-    : super(
-        getAvailability: buildGetTeacherAvailabilityUseCase(
-          scheduleRepository: FakeScheduleRepository(),
-          sessionRepository: FakeSessionRepository(),
-        ),
-        submitBooking: buildSubmitSessionBookingUseCase(
-          getAvailability: buildGetTeacherAvailabilityUseCase(
-            scheduleRepository: FakeScheduleRepository(),
-            sessionRepository: FakeSessionRepository(),
-          ),
-        ),
-        validateEligibility: ValidateBookingEligibilityUseCase(
-          profileRepository: FakeUserProfileRepository(),
-          policyRepository: FakeSessionPolicyRepository(),
-          teacherRepository: FakeTeacherRepository(),
-          marketConfigRepository: FakeMarketConfigRepository(),
-        ),
-        getTeacherProfile: GetTeacherProfileByIdUseCase(
-          FakeTeacherProfileRepository(
-            profile: TeacherProfile(
-              id: 'teacher_1',
-              userId: 'teacher_1',
-              displayName: 'Teacher',
-              verificationStatus: TeacherVerificationStatus.verified,
-              teachingLanguages: const ['ar'],
-              specializations: const ['tajweed'],
-              averageRating: 0,
-              reviewCount: 0,
-              isActive: true,
-              profileCompleteness: TeacherProfileCompletenessStatus.complete,
-              isPubliclyVisible: true,
-              externalMeetingUrl: 'https://meet.google.com/room',
-              createdAt: DateTime.utc(2024, 1, 1),
-              updatedAt: DateTime.utc(2024, 1, 2),
-            ),
-          ),
-        ),
-      ) {
-    emit(seed);
-  }
-
-  @override
-  void add(BookingEvent event) {}
-}
-
-class _SuccessEmittingBookingBloc extends BookingBloc {
-  _SuccessEmittingBookingBloc()
-    : super(
-        getAvailability: buildGetTeacherAvailabilityUseCase(
-          scheduleRepository: FakeScheduleRepository(),
-          sessionRepository: FakeSessionRepository(),
-        ),
-        submitBooking: buildSubmitSessionBookingUseCase(
-          getAvailability: buildGetTeacherAvailabilityUseCase(
-            scheduleRepository: FakeScheduleRepository(),
-            sessionRepository: FakeSessionRepository(),
-          ),
-        ),
-        validateEligibility: ValidateBookingEligibilityUseCase(
-          profileRepository: FakeUserProfileRepository(),
-          policyRepository: FakeSessionPolicyRepository(),
-          teacherRepository: FakeTeacherRepository(),
-          marketConfigRepository: FakeMarketConfigRepository(),
-        ),
-        getTeacherProfile: GetTeacherProfileByIdUseCase(
-          FakeTeacherProfileRepository(),
-        ),
-      ) {
-    emit(
-      const BookingSelecting(teacherId: 'teacher_1', availableSlots: []),
-    );
-  }
-
-  @override
-  void add(BookingEvent event) {}
-
-  void emitSuccess(QuranBooking booking) => emit(BookingSuccess(booking));
-}
+import 'seeded_booking_bloc.dart';
+import 'success_emitting_booking_bloc.dart';
 
 TeacherAvailability _slot(int day) {
   final start = DateTime.utc(2026, 7, day, 10);
@@ -126,7 +39,7 @@ void main() {
         ],
         supportedLocales: QuranSessionsLocalizations.supportedLocales,
         home: BlocProvider<BookingBloc>(
-          create: (_) => _SeededBookingBloc(
+          create: (_) => SeededBookingBloc(
             seed: BookingSelecting(
               teacherId: 'teacher_1',
               availableSlots: slots,
@@ -158,7 +71,7 @@ void main() {
     String? capturedPricingType;
     String? capturedCallType;
 
-    final bloc = _SuccessEmittingBookingBloc();
+    final bloc = SuccessEmittingBookingBloc();
 
     await tester.pumpWidget(
       MaterialApp(
@@ -239,7 +152,7 @@ void main() {
         ],
         supportedLocales: QuranSessionsLocalizations.supportedLocales,
         home: BlocProvider<BookingBloc>(
-          create: (_) => _SeededBookingBloc(
+          create: (_) => SeededBookingBloc(
             seed: BookingSelecting(
               teacherId: 'teacher_1',
               availableSlots: slots,
@@ -277,7 +190,7 @@ void main() {
         ],
         supportedLocales: QuranSessionsLocalizations.supportedLocales,
         home: BlocProvider<BookingBloc>(
-          create: (_) => _SeededBookingBloc(
+          create: (_) => SeededBookingBloc(
             seed: BookingSelecting(
               teacherId: 'teacher_1',
               availableSlots: slots,
@@ -334,7 +247,7 @@ void main() {
         ],
         supportedLocales: QuranSessionsLocalizations.supportedLocales,
         home: BlocProvider<BookingBloc>(
-          create: (_) => _SeededBookingBloc(
+          create: (_) => SeededBookingBloc(
             seed: BookingSelecting(
               teacherId: 'teacher_1',
               availableSlots: slots,

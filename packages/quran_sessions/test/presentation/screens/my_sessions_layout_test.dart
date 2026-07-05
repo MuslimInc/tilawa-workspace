@@ -6,64 +6,9 @@ import 'package:quran_sessions/quran_sessions.dart';
 import 'package:quran_sessions/src/presentation/layout/quran_sessions_scroll_padding.dart';
 import 'package:tilawa_ui_kit/tilawa_ui_kit.dart';
 
-import '../../helpers/fakes/fake_booking_repository.dart';
-import '../../helpers/fakes/fake_session_repository.dart';
-import '../../helpers/fakes/fake_teacher_profile_repository.dart';
 import '../../helpers/fixtures.dart';
-import '../../helpers/lifecycle_test_helpers.dart';
-
-class _MySessionsLayoutBloc extends MySessionsBloc {
-  _MySessionsLayoutBloc({required MySessionsSuccess seed})
-    : super(
-        getStudentSessions: GetStudentSessionsUseCase(FakeSessionRepository()),
-        cancelSession: buildCancelSessionViaServerUseCase(),
-        submitReview: SubmitReviewUseCase(FakeBookingRepository()),
-        joinSession: JoinSessionUseCase(
-          sessionRepository: FakeSessionRepository(),
-          callProvider: const MockSessionCallProvider(),
-          authSession: const _FakeAuthSession('student_1'),
-          teacherProfileRepository: FakeTeacherProfileRepository(),
-        ),
-        studentId: 'student_1',
-      ) {
-    emit(seed);
-  }
-
-  @override
-  void add(MySessionsEvent event) {}
-}
-
-class _MySessionsEmptyBloc extends MySessionsBloc {
-  _MySessionsEmptyBloc()
-    : super(
-        getStudentSessions: GetStudentSessionsUseCase(FakeSessionRepository()),
-        cancelSession: buildCancelSessionViaServerUseCase(),
-        submitReview: SubmitReviewUseCase(FakeBookingRepository()),
-        joinSession: JoinSessionUseCase(
-          sessionRepository: FakeSessionRepository(),
-          callProvider: const MockSessionCallProvider(),
-          authSession: const _FakeAuthSession('student_1'),
-          teacherProfileRepository: FakeTeacherProfileRepository(),
-        ),
-        studentId: 'student_1',
-      ) {
-    emit(const MySessionsEmpty());
-  }
-
-  @override
-  void add(MySessionsEvent event) {}
-}
-
-class _FakeAuthSession implements AuthSessionProvider {
-  const _FakeAuthSession(this.userId);
-  final String userId;
-
-  @override
-  String? get currentUserId => userId;
-
-  @override
-  Stream<String?> watchUserId() => Stream.value(userId);
-}
+import 'my_sessions_empty_bloc.dart';
+import 'my_sessions_layout_bloc.dart';
 
 Future<void> _pumpMySessions(
   WidgetTester tester,
@@ -89,7 +34,7 @@ Future<void> _pumpMySessions(
       localizationsDelegates: QuranSessionsLocalizations.localizationsDelegates,
       supportedLocales: QuranSessionsLocalizations.supportedLocales,
       home: BlocProvider<MySessionsBloc>.value(
-        value: _MySessionsLayoutBloc(seed: seed),
+        value: MySessionsLayoutBloc(seed: seed),
         child: MediaQuery(
           data: MediaQueryData(
             textScaler: TextScaler.linear(textScaleFactor),
@@ -170,7 +115,7 @@ void main() {
             QuranSessionsLocalizations.localizationsDelegates,
         supportedLocales: QuranSessionsLocalizations.supportedLocales,
         home: BlocProvider<MySessionsBloc>.value(
-          value: _MySessionsEmptyBloc(),
+          value: MySessionsEmptyBloc(),
           child: const MySessionsScreen(studentId: 'student_1'),
         ),
       ),

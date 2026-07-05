@@ -1,48 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:dartz_plus/dartz_plus.dart';
 import 'package:quran_sessions/l10n/quran_sessions_localizations.dart';
 import 'package:quran_sessions/quran_sessions.dart';
 import 'package:tilawa_ui_kit/tilawa_ui_kit.dart';
 
-import '../../helpers/availability_test_helpers.dart';
-import '../../helpers/fakes/fake_booked_slot_lock_repository.dart';
-import '../../helpers/fakes/fake_teacher_repository.dart';
 import '../../helpers/fixtures.dart';
-
-class _StaticAvailabilityUseCase extends GetTeacherAvailabilityUseCase {
-  _StaticAvailabilityUseCase(this.slots)
-    : super(
-        scheduleRepository: FakeScheduleRepository(),
-        bookedSlotLocks: FakeBookedSlotLockRepository(),
-      );
-
-  final Map<String, List<TeacherAvailability>> slots;
-
-  @override
-  Future<Either<QuranSessionsFailure, List<TeacherAvailability>>> call(
-    String teacherId, {
-    required DateTime from,
-    required DateTime to,
-    WeeklySchedule? preloadedSchedule,
-  }) async {
-    return Right(slots[teacherId] ?? const []);
-  }
-}
-
-class _TeacherListTestBloc extends TeacherListBloc {
-  _TeacherListTestBloc(TeacherListState seed)
-    : super(
-        GetTeachersUseCase(FakeTeacherRepository()),
-        _StaticAvailabilityUseCase(const {}),
-      ) {
-    emit(seed);
-  }
-
-  @override
-  void add(TeacherListEvent event) {}
-}
+import 'teacher_list_test_bloc.dart';
 
 void main() {
   group('TeacherListScreen', () {
@@ -62,7 +26,7 @@ void main() {
               QuranSessionsLocalizations.localizationsDelegates,
           supportedLocales: QuranSessionsLocalizations.supportedLocales,
           home: BlocProvider<TeacherListBloc>(
-            create: (_) => _TeacherListTestBloc(
+            create: (_) => TeacherListTestBloc(
               TeacherListSuccess(
                 teachers: teachers,
                 hasMore: false,
@@ -91,7 +55,7 @@ void main() {
               QuranSessionsLocalizations.localizationsDelegates,
           supportedLocales: QuranSessionsLocalizations.supportedLocales,
           home: BlocProvider<TeacherListBloc>(
-            create: (_) => _TeacherListTestBloc(
+            create: (_) => TeacherListTestBloc(
               TeacherListSuccess(
                 teachers: [makeTeacher(id: 't1', avatarUrl: '')],
                 hasMore: false,
@@ -126,7 +90,7 @@ void main() {
           home: Directionality(
             textDirection: TextDirection.rtl,
             child: BlocProvider<TeacherListBloc>(
-              create: (_) => _TeacherListTestBloc(
+              create: (_) => TeacherListTestBloc(
                 TeacherListSuccess(
                   teachers: [makeTeacher(id: 't1', avatarUrl: '')],
                   hasMore: false,
@@ -180,7 +144,7 @@ void main() {
           home: Directionality(
             textDirection: TextDirection.rtl,
             child: BlocProvider<TeacherListBloc>(
-              create: (_) => _TeacherListTestBloc(
+              create: (_) => TeacherListTestBloc(
                 TeacherListSuccess(
                   teachers: teachers,
                   hasMore: false,
@@ -241,7 +205,7 @@ void main() {
               QuranSessionsLocalizations.localizationsDelegates,
           supportedLocales: QuranSessionsLocalizations.supportedLocales,
           home: BlocProvider<TeacherListBloc>(
-            create: (_) => _TeacherListTestBloc(const TeacherListEmpty()),
+            create: (_) => TeacherListTestBloc(const TeacherListEmpty()),
             child: TeacherListScreen(
               featureConfig: const QuranSessionsFeatureConfig(),
             ),
@@ -265,7 +229,7 @@ void main() {
               QuranSessionsLocalizations.localizationsDelegates,
           supportedLocales: QuranSessionsLocalizations.supportedLocales,
           home: BlocProvider<TeacherListBloc>(
-            create: (_) => _TeacherListTestBloc(
+            create: (_) => TeacherListTestBloc(
               TeacherListSuccess(
                 teachers: [makeTeacher(id: 't1', avatarUrl: '')],
                 hasMore: false,
@@ -300,7 +264,7 @@ void main() {
               QuranSessionsLocalizations.localizationsDelegates,
           supportedLocales: QuranSessionsLocalizations.supportedLocales,
           home: BlocProvider<TeacherListBloc>(
-            create: (_) => _TeacherListTestBloc(
+            create: (_) => TeacherListTestBloc(
               TeacherListSuccess(
                 teachers: teachers,
                 hasMore: false,

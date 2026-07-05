@@ -4,7 +4,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:tilawa_ui_kit/tilawa_ui_kit.dart';
 
 import '../../domain/repositories/genui_repository.dart';
-import '../cubit/genui_assistant_cubit.dart';
+import '../cubit/gen_ui_assistant_cubit.dart';
 import '../cubit/genui_assistant_state.dart';
 import '../render/genui_action_dispatcher.dart';
 import '../render/genui_component_registry.dart';

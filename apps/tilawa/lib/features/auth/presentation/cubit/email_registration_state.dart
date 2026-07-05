@@ -33,6 +33,10 @@ class EmailRegistrationState extends Equatable {
 
   bool get canGoBack => currentStep != EmailRegistrationStep.account;
 
+  /// Whether the most recent step validation produced no field errors.
+  bool get isCurrentStepValid =>
+      fieldErrors.values.every((String? value) => value == null);
+
   String? fieldError(String key) => fieldErrors[key];
 
   EmailRegistrationState copyWith({

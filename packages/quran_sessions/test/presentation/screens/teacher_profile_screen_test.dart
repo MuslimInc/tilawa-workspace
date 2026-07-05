@@ -6,26 +6,8 @@ import 'package:quran_sessions/l10n/quran_sessions_localizations.dart';
 import 'package:quran_sessions/quran_sessions.dart';
 import 'package:tilawa_ui_kit/tilawa_ui_kit.dart';
 
-import '../../helpers/availability_test_helpers.dart';
-import '../../helpers/fakes/fake_session_repository.dart';
-import '../../helpers/fakes/fake_teacher_repository.dart';
 import '../../helpers/fixtures.dart';
-
-class _TeacherProfileTestBloc extends TeacherProfileBloc {
-  _TeacherProfileTestBloc(TeacherProfileSuccess seed)
-    : super(
-        getProfile: GetTeacherProfileUseCase(FakeTeacherRepository()),
-        getAvailability: buildGetTeacherAvailabilityUseCase(
-          scheduleRepository: FakeScheduleRepository(),
-          sessionRepository: FakeSessionRepository(),
-        ),
-      ) {
-    emit(seed);
-  }
-
-  @override
-  void add(TeacherProfileEvent event) {}
-}
+import 'teacher_profile_test_bloc.dart';
 
 Future<void> _pumpProfile(
   WidgetTester tester,
@@ -61,7 +43,7 @@ Future<void> _pumpProfile(
               textScaler: TextScaler.linear(textScaleFactor),
             ),
             child: BlocProvider<TeacherProfileBloc>.value(
-              value: _TeacherProfileTestBloc(seed),
+              value: TeacherProfileTestBloc(seed),
               child: TeacherProfileScreen(
                 teacherId: seed.teacher.id,
                 analytics: analytics,
@@ -153,7 +135,7 @@ void main() {
           child: Directionality(
             textDirection: TextDirection.rtl,
             child: BlocProvider<TeacherProfileBloc>.value(
-              value: _TeacherProfileTestBloc(seed),
+              value: TeacherProfileTestBloc(seed),
               child: TeacherProfileScreen(
                 teacherId: seed.teacher.id,
                 onBookTapped: (teacherId, slotId) {

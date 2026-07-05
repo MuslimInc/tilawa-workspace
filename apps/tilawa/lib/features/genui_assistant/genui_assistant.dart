@@ -21,7 +21,7 @@ export 'domain/entities/genui_node.dart';
 export 'domain/entities/genui_schema.dart';
 export 'domain/failures/genui_failure.dart';
 export 'domain/repositories/genui_repository.dart';
-export 'presentation/cubit/genui_assistant_cubit.dart';
+export 'presentation/cubit/gen_ui_assistant_cubit.dart';
 export 'presentation/cubit/genui_assistant_state.dart';
 export 'presentation/render/components/genui_components.dart';
 export 'presentation/render/genui_action_dispatcher.dart';
