@@ -1,10 +1,41 @@
-<div class="tilawa-admin-shell">
-  <app-sidebar />
+<div class="tilawa-admin-shell relative flex h-full w-full overflow-hidden">
+  
+  <!-- Mobile Backdrop Overlay -->
+  @if (isMobileMenuOpen()) {
+    <div 
+      class="fixed inset-0 z-40 bg-black/50 transition-opacity lg:hidden"
+      (click)="closeMobileMenu()"
+      aria-hidden="true"
+    ></div>
+  }
 
-  <div class="tilawa-admin-main">
-    <header class="tilawa-admin-header">
-      <div class="tilawa-admin-header-start">
-        <label class="tilawa-admin-search">
+  <!-- Sidebar Container -->
+  <div 
+    class="fixed inset-y-0 start-0 z-50 flex transform transition-transform duration-300 ease-in-out lg:static lg:translate-x-0"
+    [class.translate-x-0]="isMobileMenuOpen()"
+    [class.-translate-x-full]="!isMobileMenuOpen()"
+  >
+    <app-sidebar />
+  </div>
+
+  <div class="tilawa-admin-main flex flex-1 flex-col min-w-0">
+    <header class="tilawa-admin-header flex items-center justify-between px-4 lg:px-6">
+      <div class="tilawa-admin-header-start flex items-center gap-3 lg:gap-0">
+        <!-- Mobile Menu Toggle -->
+        <button 
+          type="button" 
+          class="lg:hidden p-2 -ms-2 text-gray-500 hover:text-gray-700 hover:bg-gray-100 rounded-md focus:outline-none focus:ring-2 focus:ring-inset focus:ring-tilawa-primary transition-colors"
+          (click)="toggleMobileMenu()"
+          [attr.aria-expanded]="isMobileMenuOpen()"
+        >
+          <span class="sr-only">Open sidebar</span>
+          <svg class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" aria-hidden="true">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M3.75 6.75h16.5M3.75 12h16.5m-16.5 5.25h16.5" />
+          </svg>
+        </button>
+
+        <!-- Search Bar -->
+        <label class="tilawa-admin-search hidden sm:block relative w-full max-w-[12rem] md:max-w-xs lg:max-w-md">
           <span class="sr-only">{{ 'layout_search' | t }}</span>
           <svg
             class="tilawa-admin-search-icon"
@@ -28,14 +59,20 @@
         </label>
       </div>
 
-      <div class="tilawa-admin-header-end" style="display: flex; gap: 0.5rem; align-items: center">
+      <div class="tilawa-admin-header-end flex gap-2 items-center">
+        <!-- Show only icon on very small screens if we want to add search toggle later -->
+        <button class="sm:hidden p-2 text-gray-500 hover:text-gray-700 rounded-md focus:outline-none">
+          <svg class="h-5 w-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+          </svg>
+        </button>
         <app-theme-switcher />
         <app-language-switcher />
       </div>
     </header>
 
-    <main class="tilawa-admin-content">
-      <div class="tilawa-admin-content-inner">
+    <main class="tilawa-admin-content flex-1 overflow-y-auto">
+      <div class="tilawa-admin-content-inner p-4 lg:p-6 w-full max-w-[80rem] mx-auto">
         <router-outlet />
       </div>
     </main>

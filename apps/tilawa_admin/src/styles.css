@@ -64,7 +64,13 @@ body {
 .tilawa-page-stack {
   display: flex;
   flex-direction: column;
-  gap: var(--tilawa-space-6);
+  gap: var(--tilawa-space-4); /* Default for mobile */
+}
+
+@media (min-width: 768px) {
+  .tilawa-page-stack {
+    gap: var(--tilawa-space-6);
+  }
 }
 
 /* Data table */
