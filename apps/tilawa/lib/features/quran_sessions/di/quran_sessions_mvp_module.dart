@@ -5,11 +5,13 @@ import 'package:tilawa/core/di/get_it_idempotent.dart';
 import 'package:tilawa/features/quran_sessions/quran_sessions_launch_policy.dart';
 import 'package:tilawa_core/network/network_info.dart';
 
+import '../data/external_meeting_url_launcher.dart';
 import '../data/fake_auth_session_provider.dart';
 import '../data/fake_mvp_availability_provider.dart';
 import '../data/fake_mvp_booking_repository.dart';
 import '../data/fake_mvp_market_config_repository.dart';
 import '../data/fake_mvp_schedule_repository.dart';
+import '../data/fake_mvp_session_lifecycle.dart';
 import '../data/fake_mvp_session_policy_repository.dart';
 import '../data/fake_mvp_session_repository.dart';
 import '../data/fake_mvp_teacher_application_repository.dart';
@@ -17,8 +19,6 @@ import '../data/fake_mvp_teacher_profile_repository.dart';
 import '../data/fake_mvp_teacher_repository.dart';
 import '../data/fake_mvp_user_profile_repository.dart';
 import '../data/fake_mvp_wallet_repository.dart';
-import '../data/fake_mvp_session_lifecycle.dart';
-import '../data/external_meeting_url_launcher.dart';
 import '../data/manual_payment_link_launcher.dart';
 import '../data/quran_sessions_mvp_store.dart';
 import '../data/session_backed_booked_slot_lock_repository.dart';
@@ -392,7 +392,6 @@ class QuranSessionsMvpModule {
           submitBooking: sl<SubmitSessionBookingUseCase>(),
           validateEligibility: sl<ValidateBookingEligibilityUseCase>(),
           getTeacherProfile: sl<GetTeacherProfileByIdUseCase>(),
-          getTeacherListing: sl<GetTeacherProfileUseCase>(),
           getUserProfile: sl<GetUserProfileUseCase>(),
           getMarketConfig: sl<GetMarketConfigUseCase>(),
           sessionModePolicy: sessionModePolicyFromLaunchConfig(launchConfig),

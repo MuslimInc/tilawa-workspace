@@ -507,9 +507,6 @@ class _SuccessBody extends StatelessWidget {
     );
   }
 
-  bool _isCancelledSession(QuranSession session) =>
-      SessionListClassifier.isCancelledSession(session);
-
   bool _canStudentRequestReschedule(QuranSession session, DateTime now) {
     if (session.effectiveLifecycleStatus.phase !=
         SessionLifecyclePhase.active) {

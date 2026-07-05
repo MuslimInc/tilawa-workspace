@@ -13,7 +13,7 @@ import '../../../domain/policies/session_mode_policy.dart';
 import '../../../domain/usecases/get_market_config_usecase.dart';
 import '../../../domain/usecases/get_teacher_availability_usecase.dart';
 import '../../../domain/usecases/get_teacher_profile_by_id_usecase.dart';
-import '../../../domain/usecases/get_teacher_profile_usecase.dart';
+
 import '../../../domain/usecases/get_user_profile_usecase.dart';
 import '../../../domain/usecases/submit_session_booking_usecase.dart';
 import '../../../domain/usecases/validate_booking_eligibility_usecase.dart';
@@ -26,7 +26,6 @@ class BookingBloc extends Bloc<BookingEvent, BookingState> {
     required this._submitBooking,
     required this._validateEligibility,
     required this._getTeacherProfile,
-    this._getTeacherListing,
     this._getUserProfile,
     this._getMarketConfig,
     this._sessionModePolicy = SessionModePolicy.videoOnly,
@@ -49,7 +48,6 @@ class BookingBloc extends Bloc<BookingEvent, BookingState> {
   final SubmitSessionBookingUseCase _submitBooking;
   final ValidateBookingEligibilityUseCase _validateEligibility;
   final GetTeacherProfileByIdUseCase _getTeacherProfile;
-  final GetTeacherProfileUseCase? _getTeacherListing;
   final GetUserProfileUseCase? _getUserProfile;
   final GetMarketConfigUseCase? _getMarketConfig;
   final SessionModePolicy _sessionModePolicy;
