@@ -1,4 +1,4 @@
-<div class="tilawa-admin-shell relative flex h-full w-full overflow-hidden">
+<div class="tilawa-admin-shell relative flex h-[100dvh] w-full overflow-hidden">
   
   <!-- Mobile Backdrop Overlay -->
   @if (isMobileMenuOpen()) {
@@ -13,7 +13,8 @@
   <div 
     class="fixed inset-y-0 start-0 z-50 flex transform transition-transform duration-300 ease-in-out lg:static lg:translate-x-0"
     [class.translate-x-0]="isMobileMenuOpen()"
-    [class.-translate-x-full]="!isMobileMenuOpen()"
+    [class.ltr:-translate-x-full]="!isMobileMenuOpen()"
+    [class.rtl:translate-x-full]="!isMobileMenuOpen()"
   >
     <app-sidebar />
   </div>
