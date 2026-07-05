@@ -10,7 +10,7 @@ import {
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 
-import { TeacherProfile } from '../../../core/domain/entities/teacher-profile.entity';
+import { TeacherListItemVm } from '../../../core/data/view-models/quran-sessions.view-model';
 import { TranslatePipe } from '../../../core/i18n/translate.pipe';
 import { TilawaButtonComponent } from '../../../shared/components/tilawa-button/tilawa-button.component';
 import { TeacherPricingFacade, TeacherPricingMode } from './teacher-pricing.facade';
@@ -30,7 +30,7 @@ import { TeacherPricingFacade, TeacherPricingMode } from './teacher-pricing.faca
 export class TeacherPricingPanelComponent implements OnInit {
   private readonly facade = inject(TeacherPricingFacade);
 
-  @Input({ required: true }) teacher!: TeacherProfile;
+  @Input({ required: true }) teacher!: TeacherListItemVm;
   @Output() readonly saved = new EventEmitter<void>();
   @Output() readonly closed = new EventEmitter<void>();
 

@@ -1,6 +1,6 @@
 import { TeacherApplication } from '../../domain/entities/teacher-application.entity';
 import { TeacherApplicationStatus } from '../../domain/entities/teacher-application-status.enum';
-import { ProfileCompleteness, TeacherProfile } from '../../domain/entities/teacher-profile.entity';
+import { ProfileCompleteness, TeacherProfile, TeacherSessionPriceOverride } from '../../domain/entities/teacher-profile.entity';
 import { QuranSessionsUser } from '../../domain/entities/quran-sessions-user.entity';
 import { AdminSessionSummary } from '../../domain/entities/admin-session-summary.entity';
 import { SessionCompensationSummary } from '../../domain/entities/session-compensation-summary.entity';
@@ -58,6 +58,7 @@ export interface TeacherListItemVm {
   readonly profileCompleteness: ProfileCompleteness;
   readonly isPubliclyVisible: boolean;
   readonly missingFields: readonly string[];
+  readonly sessionPriceOverride: TeacherSessionPriceOverride | null;
   readonly updatedAt: Date;
   readonly createdAt: Date;
 }
@@ -263,6 +264,7 @@ export class QuranSessionsViewModelMapper {
       profileCompleteness: profile.profileCompleteness,
       isPubliclyVisible: profile.isPubliclyVisible,
       missingFields: computeMissingPublicProfileFields(profile),
+      sessionPriceOverride: profile.sessionPriceOverride,
       updatedAt: profile.updatedAt,
       createdAt: profile.createdAt,
     };
