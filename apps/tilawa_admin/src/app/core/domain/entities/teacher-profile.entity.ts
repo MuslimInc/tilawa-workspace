@@ -40,8 +40,4 @@ export const TEACHER_PROFILE_DEFAULT_SORT = {
   direction: 'desc',
 } as const;
 
-export const TEACHER_PROFILE_SORT_FIELDS = [
-  'updatedAt',
-  'createdAt',
-  'displayName',
-] as const;
+export const TEACHER_PROFILE_SORT_FIELDS = ['updatedAt', 'createdAt', 'displayName'] as const;

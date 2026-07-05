@@ -1,16 +1,11 @@
 import { Inject, Injectable } from '@angular/core';
 
 import { ApplicationModerationAction } from '../entities/moderation-action.enum';
-import {
-  MODERATION_GATEWAY,
-  ModerationGateway,
-} from '../repositories/moderation.gateway';
+import { MODERATION_GATEWAY, ModerationGateway } from '../repositories/moderation.gateway';
 
 @Injectable({ providedIn: 'root' })
 export class ReviewTeacherApplicationUseCase {
-  constructor(
-    @Inject(MODERATION_GATEWAY) private readonly gateway: ModerationGateway,
-  ) {}
+  constructor(@Inject(MODERATION_GATEWAY) private readonly gateway: ModerationGateway) {}
 
   async execute(
     applicationId: string,

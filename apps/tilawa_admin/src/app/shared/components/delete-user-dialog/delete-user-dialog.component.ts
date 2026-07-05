@@ -21,9 +21,7 @@ export interface DeleteUserDialogSubmit {
             class="fixed inset-0 bg-gray-500/75 dark:bg-gray-900/80"
             (click)="cancel.emit()"
           ></div>
-          <div
-            class="relative w-full max-w-lg rounded-lg bg-white dark:bg-gray-800 p-6 shadow-xl"
-          >
+          <div class="relative w-full max-w-lg rounded-lg bg-white dark:bg-gray-800 p-6 shadow-xl">
             <h3 class="text-lg font-medium text-red-700 dark:text-red-400">
               {{ title }}
             </h3>
@@ -35,7 +33,9 @@ export interface DeleteUserDialogSubmit {
                 {{ 'userDeletion_targetEmail' | t }}: {{ targetEmail }}
               </p>
             }
-            <p class="mt-3 rounded-md bg-amber-50 dark:bg-amber-950/40 p-3 text-sm text-amber-900 dark:text-amber-200">
+            <p
+              class="mt-3 rounded-md bg-amber-50 dark:bg-amber-950/40 p-3 text-sm text-amber-900 dark:text-amber-200"
+            >
               {{ warning }}
             </p>
             <label class="mt-4 block text-sm font-medium text-gray-700 dark:text-gray-200">
@@ -133,4 +133,3 @@ export class DeleteUserDialogComponent {
     this.reason = '';
   }
 }
-

@@ -18,10 +18,7 @@ export interface SessionDisputeFirestoreDto {
 }
 
 export abstract class SessionDisputeMapper {
-  static fromFirestore(
-    id: string,
-    data: SessionDisputeFirestoreDto,
-  ): SessionDisputeSummary {
+  static fromFirestore(id: string, data: SessionDisputeFirestoreDto): SessionDisputeSummary {
     return {
       id,
       bookingId: data.bookingId ?? '',

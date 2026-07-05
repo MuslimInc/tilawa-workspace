@@ -1,10 +1,6 @@
 import { Injectable, inject, signal } from '@angular/core';
 
-import {
-  DEFAULT_PAGE_SIZE,
-  SortRequest,
-  sortsEqual,
-} from '../../domain/entities/pagination.types';
+import { DEFAULT_PAGE_SIZE, SortRequest, sortsEqual } from '../../domain/entities/pagination.types';
 
 type LoadState = 'idle' | 'loading' | 'success' | 'error';
 
@@ -17,9 +13,7 @@ export interface FacadeListLoadOptions {
 /**
  * Shared cursor-list state: sort change always resets to page 1.
  */
-export function createPaginatedListState<TItem, TSort extends SortRequest>(
-  defaultSort: TSort,
-) {
+export function createPaginatedListState<TItem, TSort extends SortRequest>(defaultSort: TSort) {
   const listState = signal<LoadState>('idle');
   const listError = signal<string | null>(null);
   const listItems = signal<TItem[]>([]);

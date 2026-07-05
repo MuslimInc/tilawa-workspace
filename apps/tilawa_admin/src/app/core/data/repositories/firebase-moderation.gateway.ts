@@ -58,10 +58,7 @@ export class FirebaseModerationGateway implements ModerationGateway {
     });
   }
 
-  private async invokeCallable(
-    name: string,
-    data: Record<string, unknown>,
-  ): Promise<void> {
+  private async invokeCallable(name: string, data: Record<string, unknown>): Promise<void> {
     const callable = httpsCallable(this.functions, name);
 
     try {
@@ -92,9 +89,7 @@ export class FirebaseModerationGateway implements ModerationGateway {
   }
 }
 
-function isCallableError(
-  error: unknown,
-): error is { code: string; message: string } {
+function isCallableError(error: unknown): error is { code: string; message: string } {
   return (
     typeof error === 'object' &&
     error !== null &&

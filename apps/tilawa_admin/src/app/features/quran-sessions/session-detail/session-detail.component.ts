@@ -20,12 +20,7 @@ import { TilawaDataTableComponent } from '../../../shared/components/tilawa-data
 import { TilawaLoadingStateComponent } from '../../../shared/components/tilawa-loading-state/tilawa-loading-state.component';
 import { TilawaErrorStateComponent } from '../../../shared/components/tilawa-error-state/tilawa-error-state.component';
 
-type PendingAction =
-  | 'cancel'
-  | 'noShow'
-  | 'complete'
-  | 'compensation'
-  | 'refund';
+type PendingAction = 'cancel' | 'noShow' | 'complete' | 'compensation' | 'refund';
 
 @Component({
   selector: 'app-session-detail',
@@ -197,11 +192,7 @@ export class SessionDetailComponent implements OnInit {
       return;
     }
     await this.run(async () => {
-      await this.facade.confirmReschedule(
-        this.rescheduleRequestId.trim(),
-        this.bookingId,
-        accept,
-      );
+      await this.facade.confirmReschedule(this.rescheduleRequestId.trim(), this.bookingId, accept);
     });
   }
 
@@ -210,9 +201,7 @@ export class SessionDetailComponent implements OnInit {
     try {
       await action();
     } catch (error) {
-      this.actionError.set(
-        error instanceof Error ? error.message : 'Action failed.',
-      );
+      this.actionError.set(error instanceof Error ? error.message : 'Action failed.');
     }
   }
 }

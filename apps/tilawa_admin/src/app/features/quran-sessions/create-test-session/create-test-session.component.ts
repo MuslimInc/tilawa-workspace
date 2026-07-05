@@ -11,7 +11,7 @@ import { TranslatePipe } from '../../../core/i18n/translate.pipe';
   standalone: true,
   imports: [ReactiveFormsModule, CommonModule, TranslatePipe],
   templateUrl: './create-test-session.component.html',
-  styleUrl: './create-test-session.component.css'
+  styleUrl: './create-test-session.component.css',
 })
 export class CreateTestSessionComponent implements OnInit, OnDestroy {
   private readonly fb = inject(FormBuilder);
@@ -30,25 +30,21 @@ export class CreateTestSessionComponent implements OnInit, OnDestroy {
       date: ['', Validators.required],
       startTime: ['', Validators.required],
       endTime: ['', Validators.required],
-      callType: ['externalMeeting', Validators.required]
+      callType: ['externalMeeting', Validators.required],
     });
   }
 
   ngOnInit(): void {
     // Debounce prefix searches so we don't fire Firestore queries per keystroke.
     this.subs.add(
-      this.studentSearch$
-        .pipe(debounceTime(250), distinctUntilChanged())
-        .subscribe((query) => {
-          if (query.length >= 3) this.facade.searchStudents(query);
-        }),
+      this.studentSearch$.pipe(debounceTime(250), distinctUntilChanged()).subscribe((query) => {
+        if (query.length >= 3) this.facade.searchStudents(query);
+      }),
     );
     this.subs.add(
-      this.teacherSearch$
-        .pipe(debounceTime(250), distinctUntilChanged())
-        .subscribe((query) => {
-          if (query.length >= 3) this.facade.searchTeachers(query);
-        }),
+      this.teacherSearch$.pipe(debounceTime(250), distinctUntilChanged()).subscribe((query) => {
+        if (query.length >= 3) this.facade.searchTeachers(query);
+      }),
     );
   }
 

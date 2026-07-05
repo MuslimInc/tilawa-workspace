@@ -1,25 +1,47 @@
 <div class="tilawa-page-stack">
-  <app-page-header [title]="'reports_title' | t" [subtitle]="'reports_subtitle' | t" [hasActions]="false" />
+  <app-page-header
+    [title]="'reports_title' | t"
+    [subtitle]="'reports_subtitle' | t"
+    [hasActions]="false"
+  />
 
   <app-tilawa-filter-bar (apply)="reload()">
-    <input type="search" class="tilawa-field" [(ngModel)]="searchQuery" (keyup.enter)="reload()" [placeholder]="'reports_searchPlaceholder' | t" />
+    <input
+      type="search"
+      class="tilawa-field"
+      [(ngModel)]="searchQuery"
+      (keyup.enter)="reload()"
+      [placeholder]="'reports_searchPlaceholder' | t"
+    />
     <select class="tilawa-field" [(ngModel)]="statusFilter">
       <option value="">{{ 'common_allStatuses' | t }}</option>
-      @for (status of statusOptions; track status) { <option [value]="status">{{ status | statusLabel }}</option> }
+      @for (status of statusOptions; track status) {
+        <option [value]="status">{{ status | statusLabel }}</option>
+      }
     </select>
     <select class="tilawa-field" [(ngModel)]="severityFilter">
       <option value="">{{ 'common_allSeverities' | t }}</option>
-      @for (severity of severityOptions; track severity) { <option [value]="severity">{{ severity | statusLabel }}</option> }
+      @for (severity of severityOptions; track severity) {
+        <option [value]="severity">{{ severity | statusLabel }}</option>
+      }
     </select>
-    <input class="tilawa-field" [(ngModel)]="categoryFilter" [placeholder]="'reports_categoryPlaceholder' | t" />
+    <input
+      class="tilawa-field"
+      [(ngModel)]="categoryFilter"
+      [placeholder]="'reports_categoryPlaceholder' | t"
+    />
   </app-tilawa-filter-bar>
 
   @if (loadState() === 'loading') {
     <app-tilawa-loading-state [message]="'reports_loading' | t" />
   } @else if (loadState() === 'error') {
-    <app-tilawa-error-state [message]="errorMessage() ?? 'Error'" [showRetry]="true" (retry)="reload()" />
+    <app-tilawa-error-state
+      [message]="errorMessage() ?? 'Error'"
+      [showRetry]="true"
+      (retry)="reload()"
+    />
   } @else if (items().length === 0) {
-    <app-tilawa-empty-state [title]="'reports_empty' | t" />
+    <app-tilawa-empty-state [boxed]="true" [title]="'reports_empty' | t" />
   } @else {
     <app-tilawa-data-table pinMode="leading" leadingSize="compact">
       <thead>
@@ -31,8 +53,18 @@
           <th scope="col">{{ 'common_status' | t }}</th>
           <th scope="col">{{ 'common_reporter' | t }}</th>
           <th scope="col">{{ 'common_preview' | t }}</th>
-          <app-sortable-th [label]="'common_filed' | t" field="createdAt" [sort]="sort()" (sortChange)="onSortChange($event)" />
-          <app-sortable-th [label]="'common_updated' | t" field="updatedAt" [sort]="sort()" (sortChange)="onSortChange($event)" />
+          <app-sortable-th
+            [label]="'common_filed' | t"
+            field="createdAt"
+            [sort]="sort()"
+            (sortChange)="onSortChange($event)"
+          />
+          <app-sortable-th
+            [label]="'common_updated' | t"
+            field="updatedAt"
+            [sort]="sort()"
+            (sortChange)="onSortChange($event)"
+          />
         </tr>
       </thead>
       <tbody>
@@ -40,7 +72,9 @@
           <tr>
             <td class="tilawa-table-pin tilawa-table-leading tilawa-table-pin-edge">
               <div class="tilawa-table-leading-inner">
-                <span class="tilawa-table-leading-label" [title]="item.category">{{ item.category }}</span>
+                <span class="tilawa-table-leading-label" [title]="item.category">{{
+                  item.category
+                }}</span>
                 <div class="tilawa-table-leading-actions">
                   <app-tilawa-button
                     variant="primary"
@@ -51,12 +85,26 @@
                 </div>
               </div>
             </td>
-            <td><app-status-chip [label]="item.severity | statusLabel" [status]="item.severity" [scholar]="true" /></td>
+            <td>
+              <app-status-chip
+                [label]="item.severity | statusLabel"
+                [status]="item.severity"
+                [scholar]="true"
+              />
+            </td>
             <td><app-status-chip [label]="item.status | statusLabel" [status]="item.status" /></td>
-            <td class="font-mono text-xs tilawa-table-cell-truncate" [title]="item.reporterUserId">{{ item.reporterUserId }}</td>
+            <td class="font-mono text-xs tilawa-table-cell-truncate" [title]="item.reporterUserId">
+              {{ item.reporterUserId }}
+            </td>
             <td class="max-w-xs truncate">{{ item.descriptionPreview }}</td>
-            <td>{{ item.createdAt | date:'medium' }}</td>
-            <td>@if (item.updatedAt) { {{ item.updatedAt | date:'medium' }} } @else { {{ 'common_none' | t }} }</td>
+            <td>{{ item.createdAt | date: 'medium' }}</td>
+            <td>
+              @if (item.updatedAt) {
+                {{ item.updatedAt | date: 'medium' }}
+              } @else {
+                {{ 'common_none' | t }}
+              }
+            </td>
           </tr>
         }
       </tbody>

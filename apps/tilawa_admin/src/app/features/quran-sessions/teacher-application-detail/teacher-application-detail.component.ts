@@ -63,11 +63,7 @@ export class TeacherApplicationDetailComponent implements OnInit {
 
   /** Skips em-dash placeholders so avatar initials resolve from account name or email. */
   avatarDisplayName(app: TeacherApplicationDetailVm): string {
-    return resolveDetailAvatarDisplayName(
-      app.publicDisplayName,
-      app.accountDisplayName,
-      app.email,
-    );
+    return resolveDetailAvatarDisplayName(app.publicDisplayName, app.accountDisplayName, app.email);
   }
 
   openApprove(): void {
@@ -116,17 +112,12 @@ export class TeacherApplicationDetailComponent implements OnInit {
     this.rejectOpen.set(false);
   }
 
-  private async runAction(
-    action: ApplicationModerationAction,
-    reason?: string,
-  ): Promise<void> {
+  private async runAction(action: ApplicationModerationAction, reason?: string): Promise<void> {
     this.actionError.set(null);
     try {
       await this.facade.review(this.applicationId, action, reason);
     } catch (error) {
-      this.actionError.set(
-        error instanceof Error ? error.message : 'Action failed.',
-      );
+      this.actionError.set(error instanceof Error ? error.message : 'Action failed.');
     }
   }
 }

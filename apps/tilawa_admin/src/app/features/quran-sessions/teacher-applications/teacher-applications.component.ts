@@ -65,9 +65,7 @@ export class TeacherApplicationsComponent implements OnInit {
 
   buildFilters(): TeacherApplicationFilters {
     return {
-      status: this.statusFilter
-        ? (this.statusFilter as TeacherApplicationStatus)
-        : null,
+      status: this.statusFilter ? (this.statusFilter as TeacherApplicationStatus) : null,
       countryCode: this.countryFilter || null,
       cityId: this.cityFilter || null,
       specialization: this.specializationFilter || null,

@@ -68,9 +68,7 @@ export class SessionsComponent implements OnInit {
 
   buildFilters(): AdminSessionFilters {
     return {
-      status: this.statusFilter
-        ? (this.statusFilter as SessionLifecycleStatus)
-        : null,
+      status: this.statusFilter ? (this.statusFilter as SessionLifecycleStatus) : null,
       teacherId: this.teacherFilter || null,
       studentId: this.studentFilter || null,
       countryCode: this.countryFilter || null,

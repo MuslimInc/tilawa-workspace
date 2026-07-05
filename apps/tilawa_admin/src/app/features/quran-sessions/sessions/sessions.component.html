@@ -53,8 +53,9 @@
     />
   } @else if (items().length === 0) {
     <app-tilawa-empty-state
+      [boxed]="true"
       [title]="'sessions_empty' | t"
-      [description]="'sessions_subtitle' | t"
+      [description]="'sessions_emptyDescription' | t"
     />
   } @else {
     <app-tilawa-data-table pinMode="leading" leadingSize="compact">
@@ -93,7 +94,9 @@
           <tr>
             <td class="tilawa-table-pin tilawa-table-leading tilawa-table-pin-edge">
               <div class="tilawa-table-leading-inner">
-                <span class="tilawa-table-leading-label font-mono text-xs" [title]="item.id">{{ item.id }}</span>
+                <span class="tilawa-table-leading-label font-mono text-xs" [title]="item.id">{{
+                  item.id
+                }}</span>
                 <div class="tilawa-table-leading-actions">
                   <app-tilawa-button
                     variant="primary"
@@ -104,27 +107,30 @@
                 </div>
               </div>
             </td>
-            <td class="font-mono text-xs tilawa-table-cell-truncate" [title]="item.sessionId ?? ''">{{ item.sessionId ?? ('common_none' | t) }}</td>
-            <td>{{ item.startsAt | date:'medium' }}</td>
+            <td class="font-mono text-xs tilawa-table-cell-truncate" [title]="item.sessionId ?? ''">
+              {{ item.sessionId ?? ('common_none' | t) }}
+            </td>
+            <td>{{ item.startsAt | date: 'medium' }}</td>
             <td>
               <app-status-chip
                 [label]="item.lifecycleStatus | statusLabel"
                 [status]="item.lifecycleStatus"
               />
             </td>
-            <td class="font-mono text-xs tilawa-table-cell-truncate" [title]="item.studentId">{{ item.studentId }}</td>
-            <td class="font-mono text-xs tilawa-table-cell-truncate" [title]="item.teacherId">{{ item.teacherId }}</td>
+            <td class="font-mono text-xs tilawa-table-cell-truncate" [title]="item.studentId">
+              {{ item.studentId }}
+            </td>
+            <td class="font-mono text-xs tilawa-table-cell-truncate" [title]="item.teacherId">
+              {{ item.teacherId }}
+            </td>
             <td>{{ item.countryCode }} / {{ item.cityId }}</td>
-            <td>{{ item.createdAt | date:'medium' }}</td>
-            <td>{{ item.updatedAt | date:'medium' }}</td>
+            <td>{{ item.createdAt | date: 'medium' }}</td>
+            <td>{{ item.updatedAt | date: 'medium' }}</td>
           </tr>
         }
       </tbody>
     </app-tilawa-data-table>
 
-    <app-tilawa-pagination
-      [canLoadMore]="canLoadMore()"
-      (loadMore)="loadMore()"
-    />
+    <app-tilawa-pagination [canLoadMore]="canLoadMore()" (loadMore)="loadMore()" />
   }
 </div>

@@ -1,6 +1,4 @@
-function isCallableError(
-  error: unknown,
-): error is { code: string; message: string } {
+function isCallableError(error: unknown): error is { code: string; message: string } {
   return (
     typeof error === 'object' &&
     error !== null &&
@@ -12,10 +10,7 @@ function isCallableError(
 }
 
 /** Maps Firebase callable errors to admin-facing messages. */
-export function mapCallableFunctionError(
-  error: unknown,
-  functionName: string,
-): string {
+export function mapCallableFunctionError(error: unknown, functionName: string): string {
   if (isCallableError(error)) {
     const message = error.message?.trim();
     const hasSpecificMessage =

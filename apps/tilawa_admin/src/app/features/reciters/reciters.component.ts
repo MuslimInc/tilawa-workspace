@@ -7,13 +7,7 @@ import { TilawaEmptyStateComponent } from '../../shared/components/tilawa-empty-
 
 @Component({
   selector: 'app-reciters',
-  imports: [
-    TranslatePipe,
-    PageHeaderComponent,
-    TilawaButtonComponent,
-    TilawaCardComponent,
-    TilawaEmptyStateComponent,
-  ],
+  imports: [TranslatePipe, PageHeaderComponent, TilawaButtonComponent, TilawaEmptyStateComponent],
   templateUrl: './reciters.component.html',
 })
 export class RecitersComponent {}

@@ -14,10 +14,7 @@ describe('TilawaUsersFacade', () => {
   beforeEach(() => {
     listUseCase.execute.mockReset();
     TestBed.configureTestingModule({
-      providers: [
-        TilawaUsersFacade,
-        { provide: ListTilawaUsersUseCase, useValue: listUseCase },
-      ],
+      providers: [TilawaUsersFacade, { provide: ListTilawaUsersUseCase, useValue: listUseCase }],
     });
     facade = TestBed.inject(TilawaUsersFacade);
   });
@@ -98,11 +95,6 @@ describe('TilawaUsersFacade', () => {
 
     await facade.loadList({});
 
-    expect(facade.items().map((user) => user.hasDuplicateEmail)).toEqual([
-      true,
-      true,
-      false,
-    ]);
+    expect(facade.items().map((user) => user.hasDuplicateEmail)).toEqual([true, true, false]);
   });
 });
-

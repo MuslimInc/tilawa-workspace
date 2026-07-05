@@ -31,15 +31,20 @@
   @if (loadState() === 'loading') {
     <app-tilawa-loading-state [message]="'teacherApplications_loading' | t" />
   } @else if (loadState() === 'error') {
-    <app-tilawa-error-state [message]="errorMessage() ?? 'Error'" [showRetry]="true" (retry)="reload()" />
+    <app-tilawa-error-state
+      [message]="errorMessage() ?? 'Error'"
+      [showRetry]="true"
+      (retry)="reload()"
+    />
   } @else if (items().length === 0) {
-    <app-tilawa-empty-state [title]="'teacherApplications_empty' | t" />
+    <app-tilawa-empty-state [boxed]="true" [title]="'teacherApplications_empty' | t" />
   } @else {
     <app-tilawa-data-table pinMode="leading">
       <thead>
         <tr>
           <th scope="col" class="tilawa-table-pin tilawa-table-leading tilawa-table-pin-edge">
-            {{ 'teacherApplications_publicName' | t }} · {{ 'teacherApplications_reviewActions' | t }}
+            {{ 'teacherApplications_publicName' | t }} ·
+            {{ 'teacherApplications_reviewActions' | t }}
           </th>
           <th scope="col">{{ 'teacherApplications_accountName' | t }}</th>
           <th scope="col">{{ 'common_email' | t }}</th>
@@ -80,7 +85,7 @@
             <td>
               <app-status-chip [label]="item.status | statusLabel" [status]="item.status" />
             </td>
-            <td>{{ item.submittedAt | date:'medium' }}</td>
+            <td>{{ item.submittedAt | date: 'medium' }}</td>
           </tr>
         }
       </tbody>

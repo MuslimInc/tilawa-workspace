@@ -4,12 +4,11 @@ import {
   ListTeachersUseCase,
   ModerateTeacherProfileUseCase,
 } from '../../domain/usecases/teacher-profile.usecases';
-import { TeacherProfileFilters, TEACHER_PROFILE_DEFAULT_SORT } from '../../domain/entities/teacher-profile.entity';
 import {
-  DEFAULT_PAGE_SIZE,
-  SortRequest,
-  sortsEqual,
-} from '../../domain/entities/pagination.types';
+  TeacherProfileFilters,
+  TEACHER_PROFILE_DEFAULT_SORT,
+} from '../../domain/entities/teacher-profile.entity';
+import { DEFAULT_PAGE_SIZE, SortRequest, sortsEqual } from '../../domain/entities/pagination.types';
 import { TeacherProfileModerationAction } from '../../domain/entities/moderation-action.enum';
 import {
   TeacherListItemVm,
@@ -72,9 +71,7 @@ export class TeachersFacade {
       this.listState.set('success');
     } catch (error) {
       this.listState.set('error');
-      this.listError.set(
-        error instanceof Error ? error.message : 'Failed to load teachers.',
-      );
+      this.listError.set(error instanceof Error ? error.message : 'Failed to load teachers.');
     }
   }
 
@@ -89,10 +86,7 @@ export class TeachersFacade {
     });
   }
 
-  async changeSort(
-    filters: TeacherProfileFilters,
-    sort: SortRequest,
-  ): Promise<void> {
+  async changeSort(filters: TeacherProfileFilters, sort: SortRequest): Promise<void> {
     await this.loadList(filters, { sort, append: false, cursor: null });
   }
 

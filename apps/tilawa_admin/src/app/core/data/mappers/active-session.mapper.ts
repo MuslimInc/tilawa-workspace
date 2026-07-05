@@ -26,19 +26,13 @@ export interface ActiveSessionEnrichment {
   readonly trackingUpdatedAt: Date | null;
 }
 
-function callTrackingVm(
-  summary: CallTrackingSummary | null,
-  callType: string,
-) {
+function callTrackingVm(summary: CallTrackingSummary | null, callType: string) {
   if (!summary) {
     return null;
   }
   const teacherJoinedAt = resolveJoinAt(summary, 'teacher');
   const studentJoinedAt = resolveJoinAt(summary, 'student');
-  const connectedSeconds = Math.max(
-    0,
-    summary.bothParticipantsConnectedSeconds,
-  );
+  const connectedSeconds = Math.max(0, summary.bothParticipantsConnectedSeconds);
   return {
     whoJoinedFirst: summary.firstJoinRole ?? '—',
     teacherJoinedAt,
@@ -60,10 +54,7 @@ function callTrackingVm(
   };
 }
 
-function resolveJoinAt(
-  summary: CallTrackingSummary,
-  role: 'teacher' | 'student',
-): Date | null {
+function resolveJoinAt(summary: CallTrackingSummary, role: 'teacher' | 'student'): Date | null {
   if (summary.firstJoinRole === role) {
     return summary.firstJoinAt;
   }
@@ -83,10 +74,7 @@ function roleJoined(summary: CallTrackingSummary, role: 'teacher' | 'student'): 
 
 /** Derives admin operational status from lifecycle + aggregated call summary. */
 export function deriveActiveSessionOperationalStatus(
-  session: Pick<
-    AdminSessionSummary,
-    'lifecycleStatus' | 'startsAt' | 'endsAt'
-  >,
+  session: Pick<AdminSessionSummary, 'lifecycleStatus' | 'startsAt' | 'endsAt'>,
   summary: CallTrackingSummary | null,
   now: Date = new Date(),
 ): ActiveSessionOperationalStatus {
@@ -114,11 +102,7 @@ export function deriveActiveSessionOperationalStatus(
     return ActiveSessionOperationalStatus.NoShowCandidate;
   }
 
-  if (
-    summary &&
-    !summary.actualCallStartedAt &&
-    session.startsAt.getTime() <= nowMs
-  ) {
+  if (summary && !summary.actualCallStartedAt && session.startsAt.getTime() <= nowMs) {
     const teacherJoined = roleJoined(summary, 'teacher');
     const studentJoined = roleJoined(summary, 'student');
     if (!teacherJoined && !studentJoined) {
@@ -186,11 +170,7 @@ export function enrichActiveSessionRow(
   now: Date = new Date(),
 ): ActiveSessionEnrichment {
   const call = callTrackingVm(summary, session.callType);
-  const operationalStatus = deriveActiveSessionOperationalStatus(
-    session,
-    summary,
-    now,
-  );
+  const operationalStatus = deriveActiveSessionOperationalStatus(session, summary, now);
   return {
     operationalStatus,
     callPhase: resolveSessionCallPhase(session.lifecycleStatus, call),

@@ -55,16 +55,11 @@ export class DuplicateAccountsComponent implements OnInit {
   readonly keepPreview = computed(() => this.keepUserId());
   readonly deletingGoogleAccounts = computed(() =>
     this.accounts().filter(
-      (account) =>
-        account.hasGoogleProvider && this.selectedDeleteIds().has(account.uid),
+      (account) => account.hasGoogleProvider && this.selectedDeleteIds().has(account.uid),
     ),
   );
-  readonly requiresForceForGoogle = computed(
-    () => this.deletingGoogleAccounts().length > 0,
-  );
-  readonly canUseKeepGoogle = computed(
-    () => this.facade.applyKeepGooglePlan() != null,
-  );
+  readonly requiresForceForGoogle = computed(() => this.deletingGoogleAccounts().length > 0);
+  readonly canUseKeepGoogle = computed(() => this.facade.applyKeepGooglePlan() != null);
   readonly requiresManualSelection = computed(() => {
     const accounts = this.accounts();
     return this.facade.googleAccountCount(accounts) > 1;
@@ -132,11 +127,7 @@ export class DuplicateAccountsComponent implements OnInit {
   get canOpenConfirm(): boolean {
     const keep = this.keepUserId();
     const deletes = this.deletePreview();
-    return (
-      !!keep &&
-      deletes.length > 0 &&
-      !deletes.includes(keep)
-    );
+    return !!keep && deletes.length > 0 && !deletes.includes(keep);
   }
 
   get confirmEmailMatches(): boolean {

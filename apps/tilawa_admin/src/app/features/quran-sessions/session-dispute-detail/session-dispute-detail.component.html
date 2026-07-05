@@ -24,7 +24,9 @@
         </div>
         <div>
           <dt class="tilawa-detail-label">{{ 'common_openedBy' | t }}</dt>
-          <dd class="tilawa-detail-value font-mono">{{ item.openedByUserId }} ({{ item.openedByRole }})</dd>
+          <dd class="tilawa-detail-value font-mono">
+            {{ item.openedByUserId }} ({{ item.openedByRole }})
+          </dd>
         </div>
         <div>
           <dt class="tilawa-detail-label">{{ 'common_student' | t }}</dt>
@@ -32,7 +34,9 @@
             @if (item.studentId) {
               <span class="font-mono">{{ item.studentId }}</span>
               @if (item.studentName) {
-                <span class="text-[var(--tilawa-on-surface-variant)]"> — {{ item.studentName }}</span>
+                <span class="text-[var(--tilawa-on-surface-variant)]">
+                  — {{ item.studentName }}</span
+                >
               }
             } @else {
               {{ 'common_none' | t }}
@@ -45,7 +49,9 @@
             @if (item.teacherId) {
               <span class="font-mono">{{ item.teacherId }}</span>
               @if (item.teacherName) {
-                <span class="text-[var(--tilawa-on-surface-variant)]"> — {{ item.teacherName }}</span>
+                <span class="text-[var(--tilawa-on-surface-variant)]">
+                  — {{ item.teacherName }}</span
+                >
               }
             } @else {
               {{ 'common_none' | t }}
@@ -56,7 +62,10 @@
           <dt class="tilawa-detail-label">{{ 'common_booking' | t }}</dt>
           <dd class="tilawa-detail-value">
             @if (item.bookingId) {
-              <a [routerLink]="['/quran-sessions/sessions', item.bookingId]" class="tilawa-link font-mono">
+              <a
+                [routerLink]="['/quran-sessions/sessions', item.bookingId]"
+                class="tilawa-link font-mono"
+              >
                 {{ item.bookingId }}
               </a>
             } @else {
@@ -70,31 +79,45 @@
         </div>
         <div>
           <dt class="tilawa-detail-label">{{ 'common_opened' | t }}</dt>
-          <dd class="tilawa-detail-value">{{ item.createdAt | date:'medium' }}</dd>
+          <dd class="tilawa-detail-value">{{ item.createdAt | date: 'medium' }}</dd>
         </div>
         <div>
           <dt class="tilawa-detail-label">{{ 'common_updated' | t }}</dt>
-          <dd class="tilawa-detail-value">{{ item.updatedAt ? (item.updatedAt | date:'medium') : ('common_none' | t) }}</dd>
+          <dd class="tilawa-detail-value">
+            {{ item.updatedAt ? (item.updatedAt | date: 'medium') : ('common_none' | t) }}
+          </dd>
         </div>
         <div>
           <dt class="tilawa-detail-label">{{ 'common_resolved' | t }}</dt>
-          <dd class="tilawa-detail-value">{{ item.resolvedAt ? (item.resolvedAt | date:'medium') : ('common_none' | t) }}</dd>
+          <dd class="tilawa-detail-value">
+            {{ item.resolvedAt ? (item.resolvedAt | date: 'medium') : ('common_none' | t) }}
+          </dd>
         </div>
         <div>
           <dt class="tilawa-detail-label">{{ 'common_resolvedBy' | t }}</dt>
-          <dd class="tilawa-detail-value font-mono">{{ item.resolvedByUserId ?? ('common_none' | t) }}</dd>
+          <dd class="tilawa-detail-value font-mono">
+            {{ item.resolvedByUserId ?? ('common_none' | t) }}
+          </dd>
         </div>
       </dl>
 
       <div class="mt-6 border-t border-[var(--tilawa-outline-variant)] pt-6">
-        <h2 class="text-lg font-semibold text-[var(--tilawa-on-surface)]">{{ 'common_reason' | t }}</h2>
-        <p class="mt-2 whitespace-pre-wrap text-sm text-[var(--tilawa-on-surface)]">{{ item.reason }}</p>
+        <h2 class="text-lg font-semibold text-[var(--tilawa-on-surface)]">
+          {{ 'common_reason' | t }}
+        </h2>
+        <p class="mt-2 whitespace-pre-wrap text-sm text-[var(--tilawa-on-surface)]">
+          {{ item.reason }}
+        </p>
       </div>
 
       @if (item.resolutionReason) {
         <div class="mt-6 border-t border-[var(--tilawa-outline-variant)] pt-6">
-          <h2 class="text-lg font-semibold text-[var(--tilawa-on-surface)]">{{ 'disputes_resolutionNotes' | t }}</h2>
-          <p class="mt-2 whitespace-pre-wrap text-sm text-[var(--tilawa-on-surface)]">{{ item.resolutionReason }}</p>
+          <h2 class="text-lg font-semibold text-[var(--tilawa-on-surface)]">
+            {{ 'disputes_resolutionNotes' | t }}
+          </h2>
+          <p class="mt-2 whitespace-pre-wrap text-sm text-[var(--tilawa-on-surface)]">
+            {{ item.resolutionReason }}
+          </p>
         </div>
       }
     </app-tilawa-card>

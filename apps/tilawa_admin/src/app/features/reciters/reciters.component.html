@@ -1,8 +1,5 @@
-<div class="space-y-6">
-  <app-page-header
-    [title]="'reciters_title' | t"
-    [subtitle]="'reciters_subtitle' | t"
-  >
+<div class="tilawa-page-stack">
+  <app-page-header [title]="'reciters_title' | t" [subtitle]="'reciters_subtitle' | t">
     <div actions>
       <app-tilawa-button variant="primary" size="sm">
         {{ 'reciters_addReciter' | t }}
@@ -10,10 +7,9 @@
     </div>
   </app-page-header>
 
-  <app-tilawa-card>
-    <app-tilawa-empty-state
-      [title]="'reciters_moduleTitle' | t"
-      [description]="'reciters_contentLoading' | t"
-    />
-  </app-tilawa-card>
+  <app-tilawa-empty-state
+    [boxed]="true"
+    [title]="'reciters_moduleTitle' | t"
+    [description]="'reciters_contentLoading' | t"
+  />
 </div>

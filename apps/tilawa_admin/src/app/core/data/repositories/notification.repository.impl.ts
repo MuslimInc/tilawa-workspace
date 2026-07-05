@@ -7,7 +7,7 @@ import { NotificationModelMapper } from '../models/notification.model';
 import { TilawaPaths } from '../paths/quran-sessions.paths';
 
 @Injectable({
-  providedIn: 'root'
+  providedIn: 'root',
 })
 export class NotificationRepositoryImpl implements NotificationRepository {
   private firestore = inject(Firestore);
@@ -15,7 +15,7 @@ export class NotificationRepositoryImpl implements NotificationRepository {
   async sendNotification(notification: NotificationEntity): Promise<void> {
     const notificationsCollection = collection(this.firestore, TilawaPaths.notifications);
     const dto = NotificationModelMapper.toFirestore(notification);
-    
+
     await addDoc(notificationsCollection, dto);
   }
 }

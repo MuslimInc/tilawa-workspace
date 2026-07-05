@@ -80,15 +80,9 @@ export function computeMissingPublicProfileFields(profile: {
 }
 
 export function resolveApplicationPublicDisplayName(
-  application: Pick<
-    TeacherApplication,
-    'publicDisplayName' | 'teacherDisplayName'
-  >,
+  application: Pick<TeacherApplication, 'publicDisplayName' | 'teacherDisplayName'>,
 ): string | null {
-  for (const candidate of [
-    application.publicDisplayName,
-    application.teacherDisplayName,
-  ]) {
+  for (const candidate of [application.publicDisplayName, application.teacherDisplayName]) {
     const trimmed = trimString(candidate);
     if (trimmed.length > 0) {
       return trimmed;
@@ -178,19 +172,13 @@ export function parseApplicationStatus(raw: string): TeacherApplicationStatus {
 }
 
 export class TeacherApplicationMapper {
-  static fromFirestore(
-    id: string,
-    dto: TeacherApplicationFirestoreDto,
-  ): TeacherApplication {
+  static fromFirestore(id: string, dto: TeacherApplicationFirestoreDto): TeacherApplication {
     const now = new Date();
     return {
       id,
       userId: dto.userId ?? '',
       status: parseApplicationStatus(dto.status ?? 'none'),
-      publicDisplayName:
-        trimString(dto.publicDisplayName) ||
-        trimString(dto.displayName) ||
-        null,
+      publicDisplayName: trimString(dto.publicDisplayName) || trimString(dto.displayName) || null,
       teacherDisplayName: trimString(dto.teacherDisplayName) || null,
       phoneNumber: dto.phoneNumber ?? null,
       phoneCountryCode: dto.phoneCountryCode ?? null,
@@ -209,10 +197,7 @@ export class TeacherApplicationMapper {
 }
 
 export class TeacherProfileMapper {
-  static fromFirestore(
-    id: string,
-    dto: TeacherProfileFirestoreDto,
-  ): TeacherProfile {
+  static fromFirestore(id: string, dto: TeacherProfileFirestoreDto): TeacherProfile {
     const now = new Date();
     const rawStatus = dto.verificationStatus ?? 'pending';
     const verificationStatus = rawStatus as TeacherVerificationStatus;
@@ -262,10 +247,7 @@ export class TeacherProfileMapper {
 }
 
 export class QuranSessionsUserMapper {
-  static fromUserDoc(
-    userId: string,
-    dto: TilawaUserFirestoreDto,
-  ): QuranSessionsUser | null {
+  static fromUserDoc(userId: string, dto: TilawaUserFirestoreDto): QuranSessionsUser | null {
     const profile = dto.quranSessionsProfile;
     if (!profile) {
       return null;
@@ -280,10 +262,7 @@ export class QuranSessionsUserMapper {
       email: dto.email ?? null,
       displayName: dto.displayName ?? null,
       avatarUrl: dto.photoUrl ?? null,
-      gender:
-        genderRaw === UserGender.Male || genderRaw === UserGender.Female
-          ? genderRaw
-          : null,
+      gender: genderRaw === UserGender.Male || genderRaw === UserGender.Female ? genderRaw : null,
       countryCode: (profile['countryCode'] as string | undefined) ?? null,
       countryName: (profile['countryName'] as string | undefined) ?? null,
       cityId: (profile['cityId'] as string | undefined) ?? null,

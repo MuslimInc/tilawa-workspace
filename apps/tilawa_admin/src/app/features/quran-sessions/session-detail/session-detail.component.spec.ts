@@ -61,9 +61,7 @@ function callVm(overrides: Partial<CallTrackingVm> = {}): CallTrackingVm {
   };
 }
 
-function participantsVm(
-  overrides: Partial<SessionParticipantsVm> = {},
-): SessionParticipantsVm {
+function participantsVm(overrides: Partial<SessionParticipantsVm> = {}): SessionParticipantsVm {
   return {
     teacher: {
       loadState: 'loaded',

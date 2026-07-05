@@ -1,13 +1,23 @@
 <div class="tilawa-page-stack">
-  <app-page-header [title]="'quranSessionsUsers_title' | t" [subtitle]="'quranSessionsUsers_subtitle' | t" [hasActions]="false" />
+  <app-page-header
+    [title]="'quranSessionsUsers_title' | t"
+    [subtitle]="'quranSessionsUsers_subtitle' | t"
+    [hasActions]="false"
+  />
 
   <app-tilawa-filter-bar (apply)="reload()">
-    <input class="tilawa-field" [(ngModel)]="searchQuery" [placeholder]="'quranSessionsUsers_searchPlaceholder' | t" />
+    <input
+      class="tilawa-field"
+      [(ngModel)]="searchQuery"
+      [placeholder]="'quranSessionsUsers_searchPlaceholder' | t"
+    />
     <input class="tilawa-field" [(ngModel)]="countryFilter" [placeholder]="'common_country' | t" />
     <input class="tilawa-field" [(ngModel)]="cityFilter" [placeholder]="'common_city' | t" />
     <select class="tilawa-field" [(ngModel)]="genderFilter">
       <option value="">{{ 'common_allGenders' | t }}</option>
-      @for (gender of genders; track gender) { <option [value]="gender">{{ gender | statusLabel }}</option> }
+      @for (gender of genders; track gender) {
+        <option [value]="gender">{{ gender | statusLabel }}</option>
+      }
     </select>
     <select class="tilawa-field" [(ngModel)]="profileCompletedFilter">
       <option value="">{{ 'common_profileCompletion' | t }}</option>
@@ -16,14 +26,20 @@
     </select>
     <select class="tilawa-field" [(ngModel)]="statusFilter">
       <option value="">{{ 'common_allStatuses' | t }}</option>
-      @for (status of accountStatuses; track status) { <option [value]="status">{{ status | statusLabel }}</option> }
+      @for (status of accountStatuses; track status) {
+        <option [value]="status">{{ status | statusLabel }}</option>
+      }
     </select>
   </app-tilawa-filter-bar>
 
   @if (loadState() === 'loading') {
     <app-tilawa-loading-state [message]="'quranSessionsUsers_loading' | t" />
   } @else if (loadState() === 'error') {
-    <app-tilawa-error-state [message]="errorMessage() ?? 'Error'" [showRetry]="true" (retry)="reload()" />
+    <app-tilawa-error-state
+      [message]="errorMessage() ?? 'Error'"
+      [showRetry]="true"
+      (retry)="reload()"
+    />
   } @else if (items().length === 0) {
     <app-tilawa-empty-state [title]="'quranSessionsUsers_empty' | t" />
   } @else {
@@ -37,8 +53,18 @@
           <th scope="col">{{ 'common_email' | t }}</th>
           <th scope="col">{{ 'quranSessionsUsers_qsProfileStatus' | t }}</th>
           <th scope="col">{{ 'quranSessionsUsers_teacherApplyAccess' | t }}</th>
-          <app-sortable-th [label]="'common_updated' | t" field="quranSessionsProfile.updatedAt" [sort]="sort()" (sortChange)="onSortChange($event)" />
-          <app-sortable-th [label]="'common_date' | t" field="quranSessionsProfile.createdAt" [sort]="sort()" (sortChange)="onSortChange($event)" />
+          <app-sortable-th
+            [label]="'common_updated' | t"
+            field="quranSessionsProfile.updatedAt"
+            [sort]="sort()"
+            (sortChange)="onSortChange($event)"
+          />
+          <app-sortable-th
+            [label]="'common_date' | t"
+            field="quranSessionsProfile.createdAt"
+            [sort]="sort()"
+            (sortChange)="onSortChange($event)"
+          />
         </tr>
       </thead>
       <tbody>
@@ -59,7 +85,8 @@
                   @if (isPendingDeletion(user.accountStatus)) {
                     @if (user.deletionPurgeAfter) {
                       <span class="text-xs text-gray-500 dark:text-gray-400">
-                        {{ 'userDeletion_purgeAfter' | t }}: {{ user.deletionPurgeAfter | date:'medium' }}
+                        {{ 'userDeletion_purgeAfter' | t }}:
+                        {{ user.deletionPurgeAfter | date: 'medium' }}
                       </span>
                     }
                     <app-tilawa-button
@@ -117,22 +144,51 @@
                 </div>
               </div>
             </td>
-            <td class="font-mono text-xs tilawa-table-col-mono" [title]="user.userId">{{ user.userId }}</td>
+            <td class="font-mono text-xs tilawa-table-col-mono" [title]="user.userId">
+              {{ user.userId }}
+            </td>
             <td>
               {{ user.email }}
               @if (user.hasDuplicateEmail) {
-                <app-status-chip class="ms-2" [label]="'quranSessionsUsers_duplicateEmail' | t" status="pending" />
+                <app-status-chip
+                  class="ms-2"
+                  [label]="'quranSessionsUsers_duplicateEmail' | t"
+                  status="pending"
+                />
               }
             </td>
-            <td><app-status-chip [label]="user.accountStatus | statusLabel" [status]="user.accountStatus" /></td>
+            <td>
+              <app-status-chip
+                [label]="user.accountStatus | statusLabel"
+                [status]="user.accountStatus"
+              />
+            </td>
             <td>
               <app-status-chip
                 [label]="teacherApplyAccessLabel(user.canApplyAsTeacher) | t"
-                [status]="user.canApplyAsTeacher === true ? 'approved' : user.canApplyAsTeacher === false ? 'rejected' : 'pending'"
+                [status]="
+                  user.canApplyAsTeacher === true
+                    ? 'approved'
+                    : user.canApplyAsTeacher === false
+                      ? 'rejected'
+                      : 'pending'
+                "
               />
             </td>
-            <td>@if (user.updatedAt) { {{ user.updatedAt | date:'medium' }} } @else { {{ 'common_none' | t }} }</td>
-            <td>@if (user.createdAt) { {{ user.createdAt | date:'medium' }} } @else { {{ 'common_none' | t }} }</td>
+            <td>
+              @if (user.updatedAt) {
+                {{ user.updatedAt | date: 'medium' }}
+              } @else {
+                {{ 'common_none' | t }}
+              }
+            </td>
+            <td>
+              @if (user.createdAt) {
+                {{ user.createdAt | date: 'medium' }}
+              } @else {
+                {{ 'common_none' | t }}
+              }
+            </td>
           </tr>
         }
       </tbody>
@@ -140,7 +196,15 @@
     <app-tilawa-pagination [canLoadMore]="canLoadMore()" (loadMore)="loadMore()" />
   }
 
-  <app-reject-reason-dialog [isOpen]="suspendOpen" [title]="'quranSessionsUsers_suspendTitle' | t" [message]="'quranSessionsUsers_suspendMessage' | t" [confirmLabel]="'teacherApplications_suspend' | t" [loading]="isActionLoading()" (submit)="onSuspend($event)" (cancel)="suspendOpen = false" />
+  <app-reject-reason-dialog
+    [isOpen]="suspendOpen"
+    [title]="'quranSessionsUsers_suspendTitle' | t"
+    [message]="'quranSessionsUsers_suspendMessage' | t"
+    [confirmLabel]="'teacherApplications_suspend' | t"
+    [loading]="isActionLoading()"
+    (submit)="onSuspend($event)"
+    (cancel)="suspendOpen = false"
+  />
 
   <app-delete-user-dialog
     [isOpen]="deleteOpen"
@@ -150,12 +214,12 @@
     [targetEmail]="pendingUserEmail"
     [confirmLabel]="'userDeletion_confirmLabel' | t"
     [confirmPlaceholder]="'userDeletion_confirmPlaceholder' | t"
-  [submitLabel]="'userDeletion_deleteAccount' | t"
-  [loading]="isActionLoading()"
-  [errorMessage]="actionErrorMessage()"
-  (submit)="onDelete($event)"
-  (cancel)="onDeleteCancel()"
-/>
+    [submitLabel]="'userDeletion_deleteAccount' | t"
+    [loading]="isActionLoading()"
+    [errorMessage]="actionErrorMessage()"
+    (submit)="onDelete($event)"
+    (cancel)="onDeleteCancel()"
+  />
 
   <app-reject-reason-dialog
     [isOpen]="cancelDeletionOpen"
@@ -178,16 +242,24 @@
       <div class="flex min-h-screen items-center justify-center p-4">
         <div class="fixed inset-0 bg-gray-500/75 dark:bg-gray-900/80" (click)="closeAudit()"></div>
         <div class="relative w-full max-w-2xl rounded-lg bg-white dark:bg-gray-800 p-6 shadow-xl">
-          <h3 class="text-lg font-medium text-gray-900 dark:text-white">{{ 'userDeletion_auditTitle' | t }}</h3>
+          <h3 class="text-lg font-medium text-gray-900 dark:text-white">
+            {{ 'userDeletion_auditTitle' | t }}
+          </h3>
           @if (deletionAuditEvents().length === 0) {
-            <p class="mt-4 text-sm text-gray-600 dark:text-gray-300">{{ 'userDeletion_auditEmpty' | t }}</p>
+            <p class="mt-4 text-sm text-gray-600 dark:text-gray-300">
+              {{ 'userDeletion_auditEmpty' | t }}
+            </p>
           } @else {
             <ul class="mt-4 space-y-3">
               @for (event of deletionAuditEvents(); track event.id) {
                 <li class="rounded-md border border-gray-200 dark:border-gray-700 p-3 text-sm">
-                  <div class="font-medium text-gray-900 dark:text-white">{{ auditActionLabel(event.action) }}</div>
+                  <div class="font-medium text-gray-900 dark:text-white">
+                    {{ auditActionLabel(event.action) }}
+                  </div>
                   @if (event.createdAt) {
-                    <div class="text-gray-500 dark:text-gray-400">{{ event.createdAt | date:'medium' }}</div>
+                    <div class="text-gray-500 dark:text-gray-400">
+                      {{ event.createdAt | date: 'medium' }}
+                    </div>
                   }
                   @if (event.reason) {
                     <div class="mt-1 text-gray-700 dark:text-gray-200">{{ event.reason }}</div>
@@ -198,7 +270,11 @@
             </ul>
           }
           <div class="mt-6 flex justify-end">
-            <button type="button" (click)="closeAudit()" class="rounded-md border border-gray-300 dark:border-gray-600 px-4 py-2 text-sm">
+            <button
+              type="button"
+              (click)="closeAudit()"
+              class="rounded-md border border-gray-300 dark:border-gray-600 px-4 py-2 text-sm"
+            >
               {{ 'common_cancel' | t }}
             </button>
           </div>
@@ -217,4 +293,3 @@
     (cancel)="reactivateOpen = false"
   />
 </div>
-

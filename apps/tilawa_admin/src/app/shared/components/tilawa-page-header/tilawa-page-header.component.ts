@@ -24,7 +24,7 @@ import { CommonModule } from '@angular/common';
     .tilawa-page-header {
       display: flex;
       flex-wrap: wrap;
-      align-items: flex-start;
+      align-items: center;
       justify-content: space-between;
       gap: 1rem;
     }

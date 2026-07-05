@@ -26,10 +26,7 @@ export class ListCallEventsUseCase {
     private readonly repository: CallTrackingRepository,
   ) {}
 
-  execute(
-    sessionId: string,
-    page: PageRequest,
-  ): Promise<PageResult<CallEvent>> {
+  execute(sessionId: string, page: PageRequest): Promise<PageResult<CallEvent>> {
     return this.repository.listEvents(sessionId, page);
   }
 }

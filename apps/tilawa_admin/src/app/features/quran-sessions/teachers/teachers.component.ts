@@ -75,12 +75,7 @@ export class TeachersComponent implements OnInit {
       search: this.searchQuery || null,
       countryCode: null,
       cityId: null,
-      isActive:
-        this.activeFilter === 'true'
-          ? true
-          : this.activeFilter === 'false'
-            ? false
-            : null,
+      isActive: this.activeFilter === 'true' ? true : this.activeFilter === 'false' ? false : null,
       verificationStatus: this.verificationFilter
         ? (this.verificationFilter as TeacherVerificationStatus)
         : null,
@@ -101,10 +96,7 @@ export class TeachersComponent implements OnInit {
     void this.facade.changeSort(this.buildFilters(), sort);
   }
 
-  openModeration(
-    teacherId: string,
-    action: TeacherProfileModerationAction,
-  ): void {
+  openModeration(teacherId: string, action: TeacherProfileModerationAction): void {
     this.pendingTeacherId = teacherId;
     this.pendingAction = action;
     this.confirmOpen = true;

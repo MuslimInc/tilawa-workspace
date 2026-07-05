@@ -1,18 +1,13 @@
 import { Component, Input } from '@angular/core';
 import { CommonModule } from '@angular/common';
 
-import {
-  resolveStatusVariant,
-  StatusChipVariant,
-} from '../../utils/status-chip.util';
+import { resolveStatusVariant, StatusChipVariant } from '../../utils/status-chip.util';
 
 @Component({
   selector: 'app-status-chip, app-tilawa-status-chip',
   standalone: true,
   imports: [CommonModule],
-  template: `
-    <span [class]="chipClass" [attr.data-variant]="variant">{{ label }}</span>
-  `,
+  template: ` <span [class]="chipClass" [attr.data-variant]="variant">{{ label }}</span> `,
   styles: `
     span {
       display: inline-flex;

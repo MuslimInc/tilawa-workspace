@@ -80,10 +80,13 @@ describe('QuranSessionsUsersFacade', () => {
     });
 
     await facade.loadList({});
-    await facade.changeSort({}, {
-      field: 'quranSessionsProfile.createdAt',
-      direction: 'asc',
-    });
+    await facade.changeSort(
+      {},
+      {
+        field: 'quranSessionsProfile.createdAt',
+        direction: 'asc',
+      },
+    );
 
     expect(listUseCase.execute).toHaveBeenLastCalledWith(
       {},

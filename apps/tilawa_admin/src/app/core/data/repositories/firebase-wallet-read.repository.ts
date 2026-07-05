@@ -9,10 +9,7 @@ import {
   WALLET_TRANSACTION_SORT_FIELDS,
   WalletTransactionSummary,
 } from '../../domain/entities/user-wallet-summary.entity';
-import {
-  DEFAULT_PAGE_SIZE,
-  PageRequest,
-} from '../../domain/entities/pagination.types';
+import { DEFAULT_PAGE_SIZE, PageRequest } from '../../domain/entities/pagination.types';
 import { WalletReadRepository } from '../../domain/repositories/wallet-read.repository';
 import { fetchPaginatedList } from '../firestore/firestore-list-query.util';
 
@@ -36,14 +33,9 @@ function readAmount(value: unknown): number {
 export class FirebaseWalletReadRepository implements WalletReadRepository {
   private readonly firestore = inject(Firestore);
 
-  async getByUserId(
-    userId: string,
-    transactionsPage?: PageRequest,
-  ): Promise<UserWalletDetail> {
+  async getByUserId(userId: string, transactionsPage?: PageRequest): Promise<UserWalletDetail> {
     const walletId = `wallet_${userId}`;
-    const walletSnap = await getDoc(
-      doc(this.firestore, QuranSessionsPaths.userWallets, walletId),
-    );
+    const walletSnap = await getDoc(doc(this.firestore, QuranSessionsPaths.userWallets, walletId));
 
     const page = transactionsPage ?? { pageSize: DEFAULT_PAGE_SIZE };
     const txnPage = await fetchPaginatedList({
@@ -57,19 +49,14 @@ export class FirebaseWalletReadRepository implements WalletReadRepository {
     });
 
     return {
-      wallet: walletSnap.exists()
-        ? this.mapWallet(walletSnap.id, walletSnap.data())
-        : null,
+      wallet: walletSnap.exists() ? this.mapWallet(walletSnap.id, walletSnap.data()) : null,
       transactions: [...txnPage.items],
       transactionsHasMore: txnPage.hasMore,
       transactionsNextCursor: txnPage.nextCursor,
     };
   }
 
-  private mapWallet(
-    walletId: string,
-    data: Record<string, unknown>,
-  ): UserWalletSummary {
+  private mapWallet(walletId: string, data: Record<string, unknown>): UserWalletSummary {
     return {
       walletId,
       userId: String(data['userId'] ?? ''),
@@ -81,10 +68,7 @@ export class FirebaseWalletReadRepository implements WalletReadRepository {
     };
   }
 
-  private mapTransaction(
-    id: string,
-    data: Record<string, unknown>,
-  ): WalletTransactionSummary {
+  private mapTransaction(id: string, data: Record<string, unknown>): WalletTransactionSummary {
     return {
       id,
       walletId: String(data['walletId'] ?? ''),
@@ -94,10 +78,7 @@ export class FirebaseWalletReadRepository implements WalletReadRepository {
       amount: readAmount(data['amount']),
       currency: String(data['currency'] ?? 'EGP'),
       description: String(data['description'] ?? ''),
-      balanceAfter:
-        data['balanceAfter'] == null
-          ? null
-          : readAmount(data['balanceAfter']),
+      balanceAfter: data['balanceAfter'] == null ? null : readAmount(data['balanceAfter']),
       sourceId: data['sourceId'] == null ? null : String(data['sourceId']),
       createdAt: readTimestamp(data['createdAt']) ?? new Date(0),
     };

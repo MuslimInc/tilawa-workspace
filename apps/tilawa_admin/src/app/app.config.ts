@@ -117,4 +117,3 @@ export const appConfig: ApplicationConfig = {
     { provide: AUTH_ADMIN_GATEWAY, useClass: FirebaseAuthAdminGateway },
   ],
 };
-

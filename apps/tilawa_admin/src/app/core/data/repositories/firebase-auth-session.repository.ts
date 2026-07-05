@@ -27,11 +27,7 @@ export class FirebaseAuthSessionRepository implements AuthSessionRepository {
   );
 
   async signIn(email: string, password: string): Promise<AdminSession> {
-    const credential = await signInWithEmailAndPassword(
-      this.auth,
-      email.trim(),
-      password,
-    );
+    const credential = await signInWithEmailAndPassword(this.auth, email.trim(), password);
     const token = await credential.user.getIdTokenResult();
     const session: AdminSession = {
       uid: credential.user.uid,

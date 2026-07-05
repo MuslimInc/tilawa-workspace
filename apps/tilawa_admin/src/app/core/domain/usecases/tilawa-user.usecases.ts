@@ -1,9 +1,6 @@
 import { Inject, Injectable } from '@angular/core';
 
-import {
-  TilawaUser,
-  TilawaUserFilters,
-} from '../entities/tilawa-user.entity';
+import { TilawaUser, TilawaUserFilters } from '../entities/tilawa-user.entity';
 import { PageRequest, PageResult } from '../entities/pagination.types';
 import {
   TILAWA_USER_REPOSITORY,
@@ -17,10 +14,7 @@ export class ListTilawaUsersUseCase {
     private readonly repository: TilawaUserRepository,
   ) {}
 
-  execute(
-    filters: TilawaUserFilters,
-    page: PageRequest,
-  ): Promise<PageResult<TilawaUser>> {
+  execute(filters: TilawaUserFilters, page: PageRequest): Promise<PageResult<TilawaUser>> {
     return this.repository.list(filters, page);
   }
 }

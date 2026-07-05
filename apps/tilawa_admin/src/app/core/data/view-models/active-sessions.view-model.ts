@@ -4,10 +4,7 @@ import { TeacherProfile } from '../../domain/entities/teacher-profile.entity';
 import { QuranSessionsUser } from '../../domain/entities/quran-sessions-user.entity';
 import { CallTrackingSummary } from '../../domain/entities/call-tracking.entity';
 import { enrichActiveSessionRow } from '../mappers/active-session.mapper';
-import {
-  SessionParticipantJoinStatus,
-  SessionCallPhase,
-} from './quran-sessions.view-model';
+import { SessionParticipantJoinStatus, SessionCallPhase } from './quran-sessions.view-model';
 
 export interface ActiveSessionListItemVm {
   readonly bookingId: string;
@@ -49,11 +46,7 @@ export class ActiveSessionsViewModelMapper {
     student: QuranSessionsUser | null;
     now?: Date;
   }): ActiveSessionListItemVm {
-    const enrichment = enrichActiveSessionRow(
-      input.session,
-      input.summary,
-      input.now,
-    );
+    const enrichment = enrichActiveSessionRow(input.session, input.summary, input.now);
 
     return {
       bookingId: input.session.id,
@@ -70,8 +63,7 @@ export class ActiveSessionsViewModelMapper {
       teacherIsActive: input.teacher?.isActive ?? null,
       teacherUserId: input.teacher?.userId ?? null,
       studentId: input.session.studentId,
-      studentName:
-        input.student?.displayName ?? input.student?.email ?? null,
+      studentName: input.student?.displayName ?? input.student?.email ?? null,
       studentAccountStatus: input.student?.accountStatus ?? null,
       whoJoinedFirst: enrichment.whoJoinedFirst,
       teacherJoinStatus: enrichment.teacherJoinStatus,

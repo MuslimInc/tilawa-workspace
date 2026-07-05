@@ -7,10 +7,14 @@ import { TranslatePipe } from '../../core/i18n/translate.pipe';
 
 @Component({
   selector: 'app-admin-layout',
-  imports: [RouterOutlet, SidebarComponent, LanguageSwitcherComponent, ThemeSwitcherComponent, TranslatePipe],
+  imports: [
+    RouterOutlet,
+    SidebarComponent,
+    LanguageSwitcherComponent,
+    ThemeSwitcherComponent,
+    TranslatePipe,
+  ],
   templateUrl: './admin-layout.component.html',
-  styleUrl: './admin-layout.component.css'
+  styleUrl: './admin-layout.component.css',
 })
-export class AdminLayoutComponent {
-
-}
+export class AdminLayoutComponent {}

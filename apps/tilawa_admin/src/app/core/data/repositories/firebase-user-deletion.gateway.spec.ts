@@ -21,9 +21,7 @@ describe('mapCallableFunctionError', () => {
         { code: 'functions/not-found', message: 'NOT_FOUND' },
         'requestUserDeletion',
       ),
-    ).toBe(
-      'requestUserDeletion is not deployed. Run firebase deploy --only functions.',
-    );
+    ).toBe('requestUserDeletion is not deployed. Run firebase deploy --only functions.');
   });
 
   it('passes through failed-precondition messages', () => {

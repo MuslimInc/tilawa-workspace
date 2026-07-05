@@ -34,10 +34,7 @@ export class MarkSessionNoShowUseCase {
     private readonly gateway: SessionModerationGateway,
   ) {}
 
-  async execute(
-    sessionId: string,
-    classification: NoShowClassification,
-  ): Promise<void> {
+  async execute(sessionId: string, classification: NoShowClassification): Promise<void> {
     if (!sessionId.trim()) {
       throw new Error('Session id is required.');
     }

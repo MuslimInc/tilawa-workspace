@@ -16,11 +16,7 @@ export interface UserDeletionGateway {
    * schedules the hard purge after the grace period. `confirmEmail` must
    * match the target's Auth email, the target uid (when no email), or DELETE.
    */
-  requestUserDeletion(
-    targetUserId: string,
-    reason: string,
-    confirmEmail: string,
-  ): Promise<void>;
+  requestUserDeletion(targetUserId: string, reason: string, confirmEmail: string): Promise<void>;
 
   /** Cancels a pending deletion during the grace period. */
   cancelUserDeletion(targetUserId: string, reason: string): Promise<void>;
@@ -29,9 +25,7 @@ export interface UserDeletionGateway {
   listAuditEvents(targetUserId: string): Promise<readonly UserDeletionAuditEvent[]>;
 
   /** Lists every Auth account sharing an email address. */
-  lookupDuplicateAccountsByEmail(
-    email: string,
-  ): Promise<DuplicateAccountsLookupResult>;
+  lookupDuplicateAccountsByEmail(email: string): Promise<DuplicateAccountsLookupResult>;
 
   /** Soft-deletes selected duplicate accounts via the existing deletion flow. */
   requestDuplicateAccountsDeletion(input: {
@@ -44,7 +38,4 @@ export interface UserDeletionGateway {
   }): Promise<DuplicateAccountsDeletionResult>;
 }
 
-export const USER_DELETION_GATEWAY = new InjectionToken<UserDeletionGateway>(
-  'UserDeletionGateway',
-);
-
+export const USER_DELETION_GATEWAY = new InjectionToken<UserDeletionGateway>('UserDeletionGateway');

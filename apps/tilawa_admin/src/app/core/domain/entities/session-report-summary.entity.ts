@@ -1,8 +1,4 @@
-export type SessionReportStatus =
-  | 'open'
-  | 'under_review'
-  | 'resolved'
-  | 'dismissed';
+export type SessionReportStatus = 'open' | 'under_review' | 'resolved' | 'dismissed';
 
 export type SessionReportSeverity = 'high' | 'normal';
 

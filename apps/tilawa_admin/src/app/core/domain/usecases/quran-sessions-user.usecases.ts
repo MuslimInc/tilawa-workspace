@@ -10,10 +10,7 @@ import {
   QuranSessionsUserRepository,
 } from '../repositories/quran-sessions-user.repository';
 import { UserModerationAction } from '../entities/moderation-action.enum';
-import {
-  MODERATION_GATEWAY,
-  ModerationGateway,
-} from '../repositories/moderation.gateway';
+import { MODERATION_GATEWAY, ModerationGateway } from '../repositories/moderation.gateway';
 
 @Injectable({ providedIn: 'root' })
 export class ListQuranSessionsUsersUseCase {
@@ -32,32 +29,18 @@ export class ListQuranSessionsUsersUseCase {
 
 @Injectable({ providedIn: 'root' })
 export class ModerateQuranSessionsUserUseCase {
-  constructor(
-    @Inject(MODERATION_GATEWAY) private readonly gateway: ModerationGateway,
-  ) {}
+  constructor(@Inject(MODERATION_GATEWAY) private readonly gateway: ModerationGateway) {}
 
-  execute(
-    userId: string,
-    action: UserModerationAction,
-    reason?: string,
-  ): Promise<void> {
+  execute(userId: string, action: UserModerationAction, reason?: string): Promise<void> {
     return this.gateway.moderateQuranSessionsUser(userId, action, reason);
   }
 }
 
 @Injectable({ providedIn: 'root' })
 export class SetUserTeacherApplicationAccessUseCase {
-  constructor(
-    @Inject(MODERATION_GATEWAY) private readonly gateway: ModerationGateway,
-  ) {}
+  constructor(@Inject(MODERATION_GATEWAY) private readonly gateway: ModerationGateway) {}
 
-  execute(
-    userId: string,
-    canApplyAsTeacher: boolean | null,
-  ): Promise<void> {
-    return this.gateway.setUserTeacherApplicationAccess(
-      userId,
-      canApplyAsTeacher,
-    );
+  execute(userId: string, canApplyAsTeacher: boolean | null): Promise<void> {
+    return this.gateway.setUserTeacherApplicationAccess(userId, canApplyAsTeacher);
   }
 }

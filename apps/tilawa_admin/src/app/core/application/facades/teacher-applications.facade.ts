@@ -8,11 +8,7 @@ import {
   TEACHER_APPLICATION_DEFAULT_SORT,
   TeacherApplicationFilters,
 } from '../../domain/entities/teacher-application.entity';
-import {
-  DEFAULT_PAGE_SIZE,
-  SortRequest,
-  sortsEqual,
-} from '../../domain/entities/pagination.types';
+import { DEFAULT_PAGE_SIZE, SortRequest, sortsEqual } from '../../domain/entities/pagination.types';
 import { ApplicationModerationAction } from '../../domain/entities/moderation-action.enum';
 import {
   TeacherApplicationDetailVm,
@@ -85,15 +81,10 @@ export class TeacherApplicationsFacade {
         sort,
       });
 
-      const users = await this.userRepository.getByIds(
-        page.items.map((item) => item.userId),
-      );
+      const users = await this.userRepository.getByIds(page.items.map((item) => item.userId));
 
       let mapped = page.items.map((item) =>
-        QuranSessionsViewModelMapper.toApplicationListItem(
-          item,
-          users.get(item.userId) ?? null,
-        ),
+        QuranSessionsViewModelMapper.toApplicationListItem(item, users.get(item.userId) ?? null),
       );
 
       if (filters.search?.trim()) {
@@ -114,9 +105,7 @@ export class TeacherApplicationsFacade {
       this.listState.set('success');
     } catch (error) {
       this.listState.set('error');
-      this.listError.set(
-        error instanceof Error ? error.message : 'Failed to load applications.',
-      );
+      this.listError.set(error instanceof Error ? error.message : 'Failed to load applications.');
     }
   }
 
@@ -131,10 +120,7 @@ export class TeacherApplicationsFacade {
     });
   }
 
-  async changeSort(
-    filters: TeacherApplicationFilters,
-    sort: SortRequest,
-  ): Promise<void> {
+  async changeSort(filters: TeacherApplicationFilters, sort: SortRequest): Promise<void> {
     await this.loadList(filters, { sort, append: false, cursor: null });
   }
 
@@ -152,15 +138,11 @@ export class TeacherApplicationsFacade {
       }
 
       const user = await this.userRepository.getById(application.userId);
-      this.detailItem.set(
-        QuranSessionsViewModelMapper.toApplicationDetail(application, user),
-      );
+      this.detailItem.set(QuranSessionsViewModelMapper.toApplicationDetail(application, user));
       this.detailState.set('success');
     } catch (error) {
       this.detailState.set('error');
-      this.detailError.set(
-        error instanceof Error ? error.message : 'Failed to load application.',
-      );
+      this.detailError.set(error instanceof Error ? error.message : 'Failed to load application.');
     }
   }
 

@@ -5,8 +5,8 @@
 
 :root {
   /* Brand */
-  --tilawa-primary: #1DAB61;
-  --tilawa-primary-dark: #17894D;
+  --tilawa-primary: #1dab61;
+  --tilawa-primary-dark: #17894d;
   --tilawa-on-primary: #ffffff;
   --tilawa-secondary: #65734f;
   --tilawa-on-secondary: #ffffff;
@@ -124,7 +124,7 @@
   --tilawa-shadow-card: 0 2px 8px rgb(0 0 0 / 0.2);
 
   --tilawa-avatar-1-bg: rgb(29 171 97 / 0.28);
-  --tilawa-avatar-1-fg: #8CE7B0;
+  --tilawa-avatar-1-fg: #8ce7b0;
   --tilawa-avatar-2-bg: rgb(101 115 79 / 0.28);
   --tilawa-avatar-2-fg: #c8d4b8;
   --tilawa-avatar-3-bg: rgb(140 104 31 / 0.28);

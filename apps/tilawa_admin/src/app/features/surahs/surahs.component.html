@@ -1,14 +1,13 @@
-<div class="space-y-6">
+<div class="tilawa-page-stack">
   <app-page-header
     [title]="'surahs_title' | t"
     [subtitle]="'surahs_subtitle' | t"
     [hasActions]="false"
   />
 
-  <app-tilawa-card>
-    <app-tilawa-empty-state
-      [title]="'surahs_moduleTitle' | t"
-      [description]="'surahs_contentLoading' | t"
-    />
-  </app-tilawa-card>
+  <app-tilawa-empty-state
+    [boxed]="true"
+    [title]="'surahs_moduleTitle' | t"
+    [description]="'surahs_contentLoading' | t"
+  />
 </div>

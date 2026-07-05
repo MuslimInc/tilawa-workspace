@@ -9,10 +9,7 @@ import {
 export interface SessionModerationGateway {
   cancelSessionBooking(bookingId: string, reason: string): Promise<void>;
 
-  markSessionNoShow(
-    sessionId: string,
-    classification: NoShowClassification,
-  ): Promise<void>;
+  markSessionNoShow(sessionId: string, classification: NoShowClassification): Promise<void>;
 
   completeSession(sessionId: string): Promise<void>;
 

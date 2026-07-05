@@ -41,9 +41,7 @@ export class I18nService {
 
     return Object.entries(params).reduce(
       (text, [name, replacement]) =>
-        text
-          .replaceAll(`{${name}}`, replacement)
-          .replaceAll(`{{${name}}}`, replacement),
+        text.replaceAll(`{${name}}`, replacement).replaceAll(`{{${name}}}`, replacement),
       value,
     );
   }

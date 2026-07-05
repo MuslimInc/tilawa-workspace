@@ -153,7 +153,7 @@ export type TilawaButtonVariant =
 
     @media (prefers-color-scheme: dark) {
       .variant-text {
-        color: #8CE7B0;
+        color: #8ce7b0;
       }
 
       .variant-text:hover:not(:disabled) {

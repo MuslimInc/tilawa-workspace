@@ -5,7 +5,7 @@ export type ThemeMode = 'light' | 'dark';
 const STORAGE_KEY = 'tilawa-admin-theme';
 
 @Injectable({
-  providedIn: 'root'
+  providedIn: 'root',
 })
 export class ThemeService {
   readonly theme = signal<ThemeMode>('light');
@@ -31,6 +31,6 @@ export class ThemeService {
   }
 
   toggleTheme(): void {
-    this.theme.update(t => t === 'light' ? 'dark' : 'light');
+    this.theme.update((t) => (t === 'light' ? 'dark' : 'light'));
   }
 }

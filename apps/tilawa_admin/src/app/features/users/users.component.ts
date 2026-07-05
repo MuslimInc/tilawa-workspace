@@ -5,7 +5,10 @@ import { RouterLink } from '@angular/router';
 import { NotificationModalComponent } from './components/notification-modal/notification-modal.component';
 import { DeleteUserDialogComponent } from '../../shared/components/delete-user-dialog/delete-user-dialog.component';
 import { SendNotificationUseCase } from '../../core/domain/usecases/send-notification.usecase';
-import { NotificationEntity, NotificationTargetType } from '../../core/domain/entities/notification.entity';
+import {
+  NotificationEntity,
+  NotificationTargetType,
+} from '../../core/domain/entities/notification.entity';
 import { TranslatePipe } from '../../core/i18n/translate.pipe';
 import { I18nService } from '../../core/i18n/i18n.service';
 import { TilawaUsersFacade } from '../../core/application/facades/tilawa-users.facade';
@@ -136,7 +139,7 @@ export class UsersComponent implements OnInit {
         Array.from(this.selectedUserIds),
         new Date(),
         payload.type,
-        payload.data
+        payload.data,
       );
 
       await this.sendNotificationUseCase.execute(entity);
@@ -154,8 +157,7 @@ export class UsersComponent implements OnInit {
   openDelete(userId: string, email: string): void {
     this.usersFacade.clearActionError();
     this.pendingUserId = userId;
-    this.pendingUserEmail =
-      email && email !== this.i18n.t('appUsers_notAvailable') ? email : null;
+    this.pendingUserEmail = email && email !== this.i18n.t('appUsers_notAvailable') ? email : null;
     this.deleteOpen = true;
   }
 
@@ -178,5 +180,3 @@ export class UsersComponent implements OnInit {
     }
   }
 }
-
-

@@ -1,13 +1,27 @@
 <div class="tilawa-page-stack">
-  <app-page-header [title]="'wallets_title' | t" [subtitle]="'wallets_subtitle' | t" [hasActions]="false" />
+  <app-page-header
+    [title]="'wallets_title' | t"
+    [subtitle]="'wallets_subtitle' | t"
+    [hasActions]="false"
+  />
 
   <app-tilawa-card>
     <form class="flex flex-col gap-3 sm:flex-row sm:items-end" (ngSubmit)="loadWallet()">
       <label class="flex-1 text-sm">
-        <span class="mb-1 block font-medium text-[var(--tilawa-on-surface)]">{{ 'wallets_userIdLabel' | t }}</span>
-        <input class="tilawa-field" name="userId" [(ngModel)]="userIdQuery" [placeholder]="'wallets_userIdPlaceholder' | t" required />
+        <span class="mb-1 block font-medium text-[var(--tilawa-on-surface)]">{{
+          'wallets_userIdLabel' | t
+        }}</span>
+        <input
+          class="tilawa-field"
+          name="userId"
+          [(ngModel)]="userIdQuery"
+          [placeholder]="'wallets_userIdPlaceholder' | t"
+          required
+        />
       </label>
-      <app-tilawa-button type="submit" variant="primary" size="sm">{{ 'wallets_loadWallet' | t }}</app-tilawa-button>
+      <app-tilawa-button type="submit" variant="primary" size="sm">{{
+        'wallets_loadWallet' | t
+      }}</app-tilawa-button>
     </form>
   </app-tilawa-card>
 
@@ -23,16 +37,38 @@
     @if (detail(); as walletDetail) {
       <div class="grid gap-4 md:grid-cols-3">
         <app-tilawa-card [padded]="true">
-          <p class="text-xs font-semibold uppercase tracking-wide text-[var(--tilawa-on-surface-variant)]">{{ 'wallets_available' | t }}</p>
-          <p class="mt-2 text-2xl font-bold">{{ walletDetail.wallet?.availableBalance ?? 0 | number: '1.2-2' }} {{ walletDetail.wallet?.currency ?? 'EGP' }}</p>
+          <p
+            class="text-xs font-semibold uppercase tracking-wide text-[var(--tilawa-on-surface-variant)]"
+          >
+            {{ 'wallets_available' | t }}
+          </p>
+          <p class="mt-2 text-2xl font-bold">
+            {{ walletDetail.wallet?.availableBalance ?? 0 | number: '1.2-2' }}
+            {{ walletDetail.wallet?.currency ?? 'EGP' }}
+          </p>
         </app-tilawa-card>
         <app-tilawa-card [padded]="true">
-          <p class="text-xs font-semibold uppercase tracking-wide text-[var(--tilawa-on-surface-variant)]">{{ 'wallets_held' | t }}</p>
-          <p class="mt-2 text-2xl font-bold">{{ walletDetail.wallet?.heldBalance ?? 0 | number: '1.2-2' }} {{ walletDetail.wallet?.currency ?? 'EGP' }}</p>
+          <p
+            class="text-xs font-semibold uppercase tracking-wide text-[var(--tilawa-on-surface-variant)]"
+          >
+            {{ 'wallets_held' | t }}
+          </p>
+          <p class="mt-2 text-2xl font-bold">
+            {{ walletDetail.wallet?.heldBalance ?? 0 | number: '1.2-2' }}
+            {{ walletDetail.wallet?.currency ?? 'EGP' }}
+          </p>
         </app-tilawa-card>
         <app-tilawa-card [padded]="true">
-          <p class="text-xs font-semibold uppercase tracking-wide text-[var(--tilawa-on-surface-variant)]">{{ 'common_status' | t }}</p>
-          <app-status-chip class="mt-2 inline-block" [label]="(walletDetail.wallet?.status ?? 'none') | statusLabel" [status]="walletDetail.wallet?.status ?? 'none'" />
+          <p
+            class="text-xs font-semibold uppercase tracking-wide text-[var(--tilawa-on-surface-variant)]"
+          >
+            {{ 'common_status' | t }}
+          </p>
+          <app-status-chip
+            class="mt-2 inline-block"
+            [label]="walletDetail.wallet?.status ?? 'none' | statusLabel"
+            [status]="walletDetail.wallet?.status ?? 'none'"
+          />
         </app-tilawa-card>
       </div>
 
@@ -57,14 +93,26 @@
                   <td class="whitespace-nowrap">{{ txn.createdAt | date: 'medium' }}</td>
                   <td>{{ txn.type }}</td>
                   <td>{{ txn.description }}</td>
-                  <td>{{ txn.direction === 'credit' ? '+' : '-' }}{{ txn.amount | number: '1.2-2' }} {{ txn.currency }}</td>
-                  <td>@if (txn.balanceAfter != null) { {{ txn.balanceAfter | number: '1.2-2' }} } @else { {{ 'common_none' | t }} }</td>
+                  <td>
+                    {{ txn.direction === 'credit' ? '+' : '-' }}{{ txn.amount | number: '1.2-2' }}
+                    {{ txn.currency }}
+                  </td>
+                  <td>
+                    @if (txn.balanceAfter != null) {
+                      {{ txn.balanceAfter | number: '1.2-2' }}
+                    } @else {
+                      {{ 'common_none' | t }}
+                    }
+                  </td>
                   <td class="font-mono text-xs">{{ txn.sourceId ?? ('common_none' | t) }}</td>
                 </tr>
               }
             </tbody>
           </app-tilawa-data-table>
-          <app-tilawa-pagination [canLoadMore]="canLoadMoreTransactions()" (loadMore)="loadMoreTransactions()" />
+          <app-tilawa-pagination
+            [canLoadMore]="canLoadMoreTransactions()"
+            (loadMore)="loadMoreTransactions()"
+          />
         }
       </app-tilawa-card>
     }

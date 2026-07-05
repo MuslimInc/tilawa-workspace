@@ -188,13 +188,19 @@ export class SessionsFacade {
       // Phase 2 — secondary (non-blocking): timeline, compensations, call tracking, and participants.
       this.participantsLoading.set(true);
 
-      this.timelineUseCase.execute(session.aggregateId)
-        .then(events => this.timeline.set(events.map(QuranSessionsViewModelMapper.toTimelineEvent)))
-        .catch(error => console.error('Failed to load timeline:', error));
+      this.timelineUseCase
+        .execute(session.aggregateId)
+        .then((events) =>
+          this.timeline.set(events.map(QuranSessionsViewModelMapper.toTimelineEvent)),
+        )
+        .catch((error) => console.error('Failed to load timeline:', error));
 
-      this.compensationsUseCase.execute(session.id)
-        .then(comps => this.compensations.set(comps.map(QuranSessionsViewModelMapper.toCompensation)))
-        .catch(error => console.error('Failed to load compensations:', error));
+      this.compensationsUseCase
+        .execute(session.id)
+        .then((comps) =>
+          this.compensations.set(comps.map(QuranSessionsViewModelMapper.toCompensation)),
+        )
+        .catch((error) => console.error('Failed to load compensations:', error));
 
       const callSummaryPromise = session.sessionId
         ? this.callSummaryUseCase.execute(session.sessionId)

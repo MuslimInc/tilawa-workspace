@@ -67,10 +67,7 @@ export class FirebaseCallTrackingRepository implements CallTrackingRepository {
     return result;
   }
 
-  async listEvents(
-    sessionId: string,
-    page: PageRequest,
-  ): Promise<PageResult<CallEvent>> {
+  async listEvents(sessionId: string, page: PageRequest): Promise<PageResult<CallEvent>> {
     const pageSize = page.pageSize || DEFAULT_EVENTS_PAGE_SIZE;
     const eventsCollection = collection(
       this.firestore,
@@ -81,11 +78,7 @@ export class FirebaseCallTrackingRepository implements CallTrackingRepository {
 
     // Bounded query: newest-first, single-field order (auto-indexed),
     // limit(pageSize + 1) to detect hasMore without a count read.
-    let q = query(
-      eventsCollection,
-      orderBy('recordedAt', 'desc'),
-      limit(pageSize + 1),
-    );
+    let q = query(eventsCollection, orderBy('recordedAt', 'desc'), limit(pageSize + 1));
 
     if (page.cursor) {
       const cursorDoc = await getDoc(
@@ -108,14 +101,10 @@ export class FirebaseCallTrackingRepository implements CallTrackingRepository {
     const pageDocs = hasMore ? docs.slice(0, pageSize) : docs;
 
     const items = pageDocs.map((snap) =>
-      CallTrackingMapper.eventFromFirestore(
-        snap.id,
-        snap.data() as CallEventFirestoreDto,
-      ),
+      CallTrackingMapper.eventFromFirestore(snap.id, snap.data() as CallEventFirestoreDto),
     );
 
-    const nextCursor =
-      hasMore && pageDocs.length > 0 ? pageDocs[pageDocs.length - 1].id : null;
+    const nextCursor = hasMore && pageDocs.length > 0 ? pageDocs[pageDocs.length - 1].id : null;
 
     return { items, nextCursor, hasMore };
   }

@@ -18,9 +18,7 @@ export class DuplicateAccountsFacade {
 
   private readonly lookupState = signal<LoadState>('idle');
   private readonly lookupError = signal<string | null>(null);
-  private readonly lookupResult = signal<DuplicateAccountsLookupResult | null>(
-    null,
-  );
+  private readonly lookupResult = signal<DuplicateAccountsLookupResult | null>(null);
   private readonly actionLoading = signal(false);
   private readonly actionError = signal<string | null>(null);
 
@@ -39,9 +37,7 @@ export class DuplicateAccountsFacade {
       this.lookupState.set('success');
     } catch (error) {
       this.lookupState.set('error');
-      this.lookupError.set(
-        error instanceof Error ? error.message : 'Lookup failed.',
-      );
+      this.lookupError.set(error instanceof Error ? error.message : 'Lookup failed.');
     }
   }
 
@@ -71,9 +67,7 @@ export class DuplicateAccountsFacade {
       await this.deleteUseCase.execute(input);
       await this.lookupByEmail(input.email);
     } catch (error) {
-      this.actionError.set(
-        error instanceof Error ? error.message : 'Deletion request failed.',
-      );
+      this.actionError.set(error instanceof Error ? error.message : 'Deletion request failed.');
       throw error;
     } finally {
       this.actionLoading.set(false);

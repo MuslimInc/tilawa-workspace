@@ -1,17 +1,11 @@
 import { TeacherApplication } from '../../domain/entities/teacher-application.entity';
 import { TeacherApplicationStatus } from '../../domain/entities/teacher-application-status.enum';
-import {
-  ProfileCompleteness,
-  TeacherProfile,
-} from '../../domain/entities/teacher-profile.entity';
+import { ProfileCompleteness, TeacherProfile } from '../../domain/entities/teacher-profile.entity';
 import { QuranSessionsUser } from '../../domain/entities/quran-sessions-user.entity';
 import { AdminSessionSummary } from '../../domain/entities/admin-session-summary.entity';
 import { SessionCompensationSummary } from '../../domain/entities/session-compensation-summary.entity';
 import { SessionTimelineEvent } from '../../domain/entities/session-timeline-event.entity';
-import {
-  CallEvent,
-  CallTrackingSummary,
-} from '../../domain/entities/call-tracking.entity';
+import { CallEvent, CallTrackingSummary } from '../../domain/entities/call-tracking.entity';
 import {
   computeMissingPublicProfileFields,
   resolveApplicationPublicDisplayName,
@@ -169,11 +163,7 @@ export interface CallEventVm {
 
 export type ParticipantLoadState = 'loaded' | 'not_found';
 
-export type SessionCallPhase =
-  | 'not_started'
-  | 'waiting'
-  | 'active'
-  | 'ended';
+export type SessionCallPhase = 'not_started' | 'waiting' | 'active' | 'ended';
 
 export type SessionParticipantJoinStatus =
   | 'not_available'
@@ -222,8 +212,7 @@ export class QuranSessionsViewModelMapper {
     return {
       id: application.id,
       userId: application.userId,
-      publicDisplayName:
-        resolveApplicationPublicDisplayName(application) ?? '—',
+      publicDisplayName: resolveApplicationPublicDisplayName(application) ?? '—',
       accountDisplayName: user?.displayName ?? '—',
       email: user?.email ?? '—',
       phoneNumber: application.phoneNumber,
@@ -242,8 +231,7 @@ export class QuranSessionsViewModelMapper {
     return {
       id: application.id,
       userId: application.userId,
-      publicDisplayName:
-        resolveApplicationPublicDisplayName(application) ?? '—',
+      publicDisplayName: resolveApplicationPublicDisplayName(application) ?? '—',
       accountDisplayName: user?.displayName ?? '—',
       avatarUrl: user?.avatarUrl ?? null,
       email: user?.email ?? '—',
@@ -331,8 +319,7 @@ export class QuranSessionsViewModelMapper {
       countryCode: session.countryCode ?? '—',
       cityId: session.cityId ?? '—',
       paymentStatus: session.paymentStatus ?? '—',
-      amountPaidUsd:
-        session.amountPaidUsd == null ? '—' : session.amountPaidUsd.toFixed(2),
+      amountPaidUsd: session.amountPaidUsd == null ? '—' : session.amountPaidUsd.toFixed(2),
       cancellationReason: session.cancellationReason,
       createdAt: session.createdAt,
       updatedAt: session.updatedAt,
@@ -353,47 +340,30 @@ export class QuranSessionsViewModelMapper {
     };
   }
 
-  static toCompensation(
-    compensation: SessionCompensationSummary,
-  ): SessionCompensationVm {
+  static toCompensation(compensation: SessionCompensationSummary): SessionCompensationVm {
     return {
       id: compensation.id,
       type: compensation.type,
       status: compensation.status,
-      amountUsd:
-        compensation.amountUsd == null
-          ? '—'
-          : compensation.amountUsd.toFixed(2),
+      amountUsd: compensation.amountUsd == null ? '—' : compensation.amountUsd.toFixed(2),
       issuedByRole: compensation.issuedByRole,
       createdAt: compensation.createdAt,
       completedAt: compensation.completedAt,
     };
   }
 
-  static toCallTracking(
-    summary: CallTrackingSummary,
-    providerType: string,
-  ): CallTrackingVm {
+  static toCallTracking(summary: CallTrackingSummary, providerType: string): CallTrackingVm {
     const teacherJoinedAt = resolveJoinAt(summary, 'teacher');
     const studentJoinedAt = resolveJoinAt(summary, 'student');
-    const connectedSeconds = Math.max(
-      0,
-      summary.bothParticipantsConnectedSeconds,
-    );
+    const connectedSeconds = Math.max(0, summary.bothParticipantsConnectedSeconds);
     return {
       whoJoinedFirst: summary.firstJoinRole ?? '—',
       teacherJoinedAt,
       studentJoinedAt,
       teacherLate: summary.teacherLate,
       studentLate: summary.studentLate,
-      teacherDelayMinutes: computeDelayMinutes(
-        summary.scheduledStartsAt,
-        teacherJoinedAt,
-      ),
-      studentDelayMinutes: computeDelayMinutes(
-        summary.scheduledStartsAt,
-        studentJoinedAt,
-      ),
+      teacherDelayMinutes: computeDelayMinutes(summary.scheduledStartsAt, teacherJoinedAt),
+      studentDelayMinutes: computeDelayMinutes(summary.scheduledStartsAt, studentJoinedAt),
       actualCallStartedAt: summary.actualCallStartedAt,
       actualCallEndedAt: summary.callEndedAt,
       connectedSeconds,
@@ -408,9 +378,7 @@ export class QuranSessionsViewModelMapper {
   }
 
   static toCallEvent(event: CallEvent): CallEventVm {
-    const parts = [event.reasonCode, event.networkQuality].filter(
-      (part): part is string => !!part,
-    );
+    const parts = [event.reasonCode, event.networkQuality].filter((part): part is string => !!part);
     return {
       id: event.id,
       eventType: event.eventType,
@@ -427,10 +395,7 @@ export class QuranSessionsViewModelMapper {
     studentUser: QuranSessionsUser | null;
     callTracking: CallTrackingVm | null;
   }): SessionParticipantsVm {
-    const callPhase = resolveSessionCallPhase(
-      input.session.lifecycleStatus,
-      input.callTracking,
-    );
+    const callPhase = resolveSessionCallPhase(input.session.lifecycleStatus, input.callTracking);
     return {
       teacher: toTeacherParticipantVm(
         input.session.teacherId,
@@ -560,8 +525,7 @@ export function resolveParticipantJoinStatus(
   if (role === 'student' && call.studentNoShow) {
     return 'no_show';
   }
-  const joinedAt =
-    role === 'teacher' ? call.teacherJoinedAt : call.studentJoinedAt;
+  const joinedAt = role === 'teacher' ? call.teacherJoinedAt : call.studentJoinedAt;
   if (joinedAt) {
     return 'joined';
   }
@@ -572,10 +536,7 @@ export function resolveParticipantJoinStatus(
 }
 
 /** Resolves a participant's first-connect time from the role-tagged joins. */
-function resolveJoinAt(
-  summary: CallTrackingSummary,
-  role: 'teacher' | 'student',
-): Date | null {
+function resolveJoinAt(summary: CallTrackingSummary, role: 'teacher' | 'student'): Date | null {
   if (summary.firstJoinRole === role) {
     return summary.firstJoinAt;
   }
@@ -586,10 +547,7 @@ function resolveJoinAt(
 }
 
 /** Whole minutes between the scheduled start and a join, clamped at zero. */
-function computeDelayMinutes(
-  scheduledStartsAt: Date | null,
-  joinedAt: Date | null,
-): number | null {
+function computeDelayMinutes(scheduledStartsAt: Date | null, joinedAt: Date | null): number | null {
   if (!scheduledStartsAt || !joinedAt) {
     return null;
   }

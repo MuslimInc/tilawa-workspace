@@ -10,7 +10,10 @@
   } @else if (loadState() === 'error') {
     <app-tilawa-error-state [message]="errorMessage() ?? 'Error'" />
   } @else if (detail(); as app) {
-    <app-page-header [title]="'teacherApplications_detailTitle' | t" [subtitle]="app.publicDisplayName">
+    <app-page-header
+      [title]="'teacherApplications_detailTitle' | t"
+      [subtitle]="app.publicDisplayName"
+    >
       <div actions class="flex flex-wrap gap-2">
         <app-tilawa-button
           type="button"
@@ -68,9 +71,11 @@
             [email]="app.email"
             [photoUrl]="app.avatarUrl"
           />
-          <p class="mt-4 text-lg font-semibold text-[var(--tilawa-on-surface)]">{{ app.publicDisplayName }}</p>
+          <p class="mt-4 text-lg font-semibold text-[var(--tilawa-on-surface)]">
+            {{ app.publicDisplayName }}
+          </p>
           <p class="text-sm text-[var(--tilawa-on-surface-variant)]">
-            {{ 'teacherApplications_accountLabel' | t:{ name: app.accountDisplayName } }}
+            {{ 'teacherApplications_accountLabel' | t: { name: app.accountDisplayName } }}
           </p>
           <app-status-chip class="mt-2" [label]="app.status | statusLabel" [status]="app.status" />
         </div>
@@ -108,19 +113,23 @@
           </div>
           <div>
             <dt class="tilawa-detail-label">{{ 'teacherApplications_languages' | t }}</dt>
-            <dd class="tilawa-detail-value">{{ app.languages.join(', ') || ('common_none' | t) }}</dd>
+            <dd class="tilawa-detail-value">
+              {{ app.languages.join(', ') || ('common_none' | t) }}
+            </dd>
           </div>
           <div>
             <dt class="tilawa-detail-label">{{ 'teacherApplications_specializations' | t }}</dt>
-            <dd class="tilawa-detail-value">{{ app.specializations.join(', ') || ('common_none' | t) }}</dd>
+            <dd class="tilawa-detail-value">
+              {{ app.specializations.join(', ') || ('common_none' | t) }}
+            </dd>
           </div>
           <div>
             <dt class="tilawa-detail-label">{{ 'teacherApplications_submitted' | t }}</dt>
-            <dd class="tilawa-detail-value">{{ app.submittedAt | date:'medium' }}</dd>
+            <dd class="tilawa-detail-value">{{ app.submittedAt | date: 'medium' }}</dd>
           </div>
           <div>
             <dt class="tilawa-detail-label">{{ 'teacherApplications_reviewed' | t }}</dt>
-            <dd class="tilawa-detail-value">{{ app.reviewedAt | date:'medium' }}</dd>
+            <dd class="tilawa-detail-value">{{ app.reviewedAt | date: 'medium' }}</dd>
           </div>
           <div>
             <dt class="tilawa-detail-label">{{ 'teacherApplications_reviewedBy' | t }}</dt>
@@ -132,7 +141,9 @@
           </div>
           <div class="sm:col-span-2">
             <dt class="tilawa-detail-label">{{ 'teacherApplications_rejectionReason' | t }}</dt>
-            <dd class="tilawa-detail-value mt-1">{{ app.rejectionReason ?? ('common_none' | t) }}</dd>
+            <dd class="tilawa-detail-value mt-1">
+              {{ app.rejectionReason ?? ('common_none' | t) }}
+            </dd>
           </div>
         </dl>
       </app-tilawa-card>

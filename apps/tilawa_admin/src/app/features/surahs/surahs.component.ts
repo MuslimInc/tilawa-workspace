@@ -6,12 +6,7 @@ import { TilawaEmptyStateComponent } from '../../shared/components/tilawa-empty-
 
 @Component({
   selector: 'app-surahs',
-  imports: [
-    TranslatePipe,
-    PageHeaderComponent,
-    TilawaCardComponent,
-    TilawaEmptyStateComponent,
-  ],
+  imports: [TranslatePipe, PageHeaderComponent, TilawaEmptyStateComponent],
   templateUrl: './surahs.component.html',
 })
 export class SurahsComponent {}

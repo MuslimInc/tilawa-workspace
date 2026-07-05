@@ -38,17 +38,13 @@ describe('AdminSessionMapper', () => {
   });
 
   it('falls back legacy status when lifecycleStatus missing', () => {
-    expect(
-      resolveLifecycleStatus({ status: 'completed' }),
-    ).toBe(SessionLifecycleStatus.Completed);
+    expect(resolveLifecycleStatus({ status: 'completed' })).toBe(SessionLifecycleStatus.Completed);
   });
 });
 
 describe('parseSessionLifecycleStatus', () => {
   it('returns unknown for invalid values', () => {
-    expect(parseSessionLifecycleStatus('not_a_status')).toBe(
-      SessionLifecycleStatus.Unknown,
-    );
+    expect(parseSessionLifecycleStatus('not_a_status')).toBe(SessionLifecycleStatus.Unknown);
   });
 });
 

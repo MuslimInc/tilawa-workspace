@@ -38,8 +38,4 @@ export const TEACHER_APPLICATION_DEFAULT_SORT = {
   direction: 'desc',
 } as const;
 
-export const TEACHER_APPLICATION_SORT_FIELDS = [
-  'updatedAt',
-  'submittedAt',
-  'createdAt',
-] as const;
+export const TEACHER_APPLICATION_SORT_FIELDS = ['updatedAt', 'submittedAt', 'createdAt'] as const;
