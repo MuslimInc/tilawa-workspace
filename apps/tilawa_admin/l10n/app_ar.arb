@@ -1,5 +1,10 @@
 {
   "@@locale": "ar",
+  "createTestSession_title": "إنشاء جلسة اختبار",
+  "createTestSession_subtitle": "إنشاء جلسة فردية مجانية يدوياً للاختبار واستكشاف الأخطاء.",
+  "createTestSession_creating": "جاري الإنشاء...",
+  "sidebar_createTestSession": "إنشاء جلسة اختبار",
+  "sidebar_disputes": "النزاعات",
   "app_title": "لوحة تلاوة",
   "activeSessions_empty": "لا توجد جلسات قرآن نشطة الآن.",
   "activeSessions_emptyDescription": "ستظهر هنا الجلسات ضمن النافذة التشغيلية عند جدولتها أو بثّها أو انتهائها مؤخراً.",
@@ -351,6 +356,7 @@
   "sessions_title": "جلسات القرآن",
   "sidebar_appUsers": "مستخدمو التطبيق",
   "sidebar_dashboard": "لوحة التحكم",
+  "sidebar_disputes": "النزاعات",
   "sidebar_duplicateAccounts": "حسابات مكررة",
   "sidebar_mainMenu": "القائمة الرئيسية",
   "sidebar_quranSessions": "جلسات القرآن",

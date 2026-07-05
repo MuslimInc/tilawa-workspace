@@ -4,11 +4,12 @@ import { CreateTestSessionFacade } from './create-test-session.facade';
 import { debounceTime, distinctUntilChanged } from 'rxjs/operators';
 import { Subject, Subscription } from 'rxjs';
 import { CommonModule } from '@angular/common';
+import { TranslatePipe } from '../../../core/i18n/translate.pipe';
 
 @Component({
   selector: 'app-create-test-session',
   standalone: true,
-  imports: [ReactiveFormsModule, CommonModule],
+  imports: [ReactiveFormsModule, CommonModule, TranslatePipe],
   templateUrl: './create-test-session.component.html',
   styleUrl: './create-test-session.component.css'
 })

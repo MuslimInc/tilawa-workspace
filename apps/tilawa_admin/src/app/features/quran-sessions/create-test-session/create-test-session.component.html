@@ -1,7 +1,7 @@
 <div class="tilawa-page-stack">
   <div class="mb-4">
-    <h1 class="text-2xl font-bold text-[var(--tilawa-on-surface)]">Create Test Session</h1>
-    <p class="text-sm text-[var(--tilawa-on-surface-variant)]">Manually create a free, individual session for testing and troubleshooting.</p>
+    <h1 class="text-2xl font-bold text-[var(--tilawa-on-surface)]">{{ 'createTestSession_title' | t }}</h1>
+    <p class="text-sm text-[var(--tilawa-on-surface-variant)]">{{ 'createTestSession_subtitle' | t }}</p>
   </div>
 
   @if (facade.error()) {
@@ -105,7 +105,7 @@
         class="bg-[var(--tilawa-primary)] text-white px-4 py-2 rounded-lg text-sm font-medium disabled:opacity-50"
         [disabled]="form.invalid || facade.isSubmitting()"
       >
-        {{ facade.isSubmitting() ? 'Creating...' : 'Create Test Session' }}
+        {{ facade.isSubmitting() ? ('createTestSession_creating' | t) : ('createTestSession_title' | t) }}
       </button>
     </div>
   </form>

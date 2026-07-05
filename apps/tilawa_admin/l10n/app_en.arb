@@ -1,5 +1,10 @@
 {
   "@@locale": "en",
+  "createTestSession_title": "Create Test Session",
+  "createTestSession_subtitle": "Manually create a free, individual session for testing and troubleshooting.",
+  "createTestSession_creating": "Creating...",
+  "sidebar_createTestSession": "Create Test Session",
+  "sidebar_disputes": "Disputes",
   "app_title": "Tilawa Admin",
   "activeSessions_empty": "No active Quran Sessions right now.",
   "activeSessions_emptyDescription": "Sessions in the operational window will appear here when scheduled, live, or recently ended.",
@@ -362,6 +367,7 @@
   "sidebar_activeSessions": "Active Sessions",
   "sidebar_appUsers": "App Users",
   "sidebar_dashboard": "Dashboard",
+  "sidebar_disputes": "Disputes",
   "sidebar_duplicateAccounts": "Duplicate accounts",
   "sidebar_mainMenu": "Main Menu",
   "sidebar_quranSessions": "Quran Sessions",

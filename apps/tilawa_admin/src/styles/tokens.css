@@ -95,8 +95,7 @@
   --tilawa-sidebar-border: rgb(255 255 255 / 0.08);
 }
 
-@media (prefers-color-scheme: dark) {
-  :root {
+:root.dark {
     --tilawa-canvas: #101816;
     --tilawa-surface: #16201d;
     --tilawa-surface-high: #1c2925;
@@ -138,5 +137,4 @@
     --tilawa-sidebar-muted: #7a8a83;
     --tilawa-sidebar-active: rgb(29 171 97 / 0.35);
     --tilawa-sidebar-border: rgb(255 255 255 / 0.06);
-  }
 }
