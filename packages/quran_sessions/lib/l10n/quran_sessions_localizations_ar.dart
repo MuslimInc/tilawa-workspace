@@ -1868,6 +1868,10 @@ class QuranSessionsLocalizationsAr extends QuranSessionsLocalizations {
       'يُخصم مرة واحدة عند التأكيد (تجريبي فقط).';
 
   @override
+  String get bookingPaymentUnavailableNotice =>
+      'هذه الجلسة مدفوعة، والدفع غير متاح حالياً. الحجز غير متاح مؤقتاً.';
+
+  @override
   String get walletSandboxNotice =>
       'محفظة تجريبية — أرصدة من الاستردادات والمدفوعات التجريبية فقط. ليست أموالًا حقيقية.';
 

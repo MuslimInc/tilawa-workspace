@@ -26,9 +26,11 @@ export {
   resolveSessionReport,
 } from "./quranSessions/sessionReportCallables";
 export { expirePendingReservations } from "./quranSessions/expirePendingReservations";
+export { finalizeElapsedSessions } from "./quranSessions/finalizeElapsedSessions";
 export { deliverSessionNotification } from "./quranSessions/deliverSessionNotification";
 export { getWallet, postWalletCredit } from "./quranSessions/walletCallables";
 export { confirmBookingPayment } from "./quranSessions/confirmBookingPayment";
+export { getBookingPricingQuote } from "./quranSessions/getBookingPricingQuote";
 export { issueSessionRtcToken } from "./quranSessions/issueSessionRtcToken";
 export { issueDebugLiveKitToken } from "./quranSessions/issueDebugLiveKitToken";
 export { recordCallTelemetryEvent } from "./quranSessions/recordCallTelemetryEvent";

@@ -3383,6 +3383,12 @@ abstract class QuranSessionsLocalizations {
   /// **'Charged once when you confirm (sandbox only).'**
   String get bookingPricePerSessionHint;
 
+  /// No description provided for @bookingPaymentUnavailableNotice.
+  ///
+  /// In en, this message translates to:
+  /// **'This session requires payment, but payment is not available yet. Booking is temporarily unavailable.'**
+  String get bookingPaymentUnavailableNotice;
+
   /// No description provided for @walletSandboxNotice.
   ///
   /// In en, this message translates to:

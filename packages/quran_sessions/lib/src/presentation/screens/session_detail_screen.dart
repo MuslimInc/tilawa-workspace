@@ -97,6 +97,7 @@ class _SessionDetailScreenState extends State<SessionDetailScreen>
                       previous.cancellationInProgress !=
                           current.cancellationInProgress ||
                       previous.canOpenDispute != current.canOpenDispute ||
+                      previous.canReportConcern != current.canReportConcern ||
                       previous.canOpenMeetingAgain !=
                           current.canOpenMeetingAgain ||
                       previous.canReview != current.canReview ||
@@ -711,8 +712,20 @@ class _SessionDetailFooter extends StatelessWidget {
 
   final SessionDetailSuccess state;
 
+  bool get _hasActions =>
+      state.canJoin ||
+      state.canCancel ||
+      state.canOpenMeetingAgain ||
+      state.canReview ||
+      state.canReportConcern ||
+      state.canOpenDispute;
+
   @override
   Widget build(BuildContext context) {
+    if (!_hasActions) {
+      return const SizedBox.shrink();
+    }
+
     final l10n = context.quranSessionsL10n;
     final tokens = Theme.of(context).tokens;
 

@@ -1,6 +1,7 @@
 import 'package:equatable/equatable.dart';
 
 import '../../../domain/entities/quran_teacher.dart';
+import '../../../domain/entities/session_pricing_quote.dart';
 import '../../../domain/entities/session_review.dart';
 import '../../../domain/entities/teacher_availability.dart';
 import '../../../domain/failures/quran_sessions_failure.dart';
@@ -32,6 +33,7 @@ final class TeacherProfileSuccess extends TeacherProfileState {
     this.reportInProgress = false,
     this.reportFailure,
     this.reportSubmitted = false,
+    this.pricingQuote,
   });
 
   final QuranTeacher teacher;
@@ -45,6 +47,10 @@ final class TeacherProfileSuccess extends TeacherProfileState {
   final QuranSessionsFailure? reportFailure;
   final bool reportSubmitted;
 
+  /// Market-resolved pricing for the current viewer — the same source used by
+  /// the booking screen. Null while unresolved (badge hides, never "free").
+  final SessionPricingQuote? pricingQuote;
+
   @override
   List<Object?> get props => [
     teacher,
@@ -57,6 +63,7 @@ final class TeacherProfileSuccess extends TeacherProfileState {
     reportInProgress,
     reportFailure,
     reportSubmitted,
+    pricingQuote,
   ];
 
   TeacherProfileSuccess copyWith({
@@ -73,6 +80,7 @@ final class TeacherProfileSuccess extends TeacherProfileState {
     bool clearReportFailure = false,
     bool? reportSubmitted,
     bool clearReportSubmitted = false,
+    SessionPricingQuote? pricingQuote,
   }) => TeacherProfileSuccess(
     teacher: teacher ?? this.teacher,
     availability: availability ?? this.availability,
@@ -90,6 +98,7 @@ final class TeacherProfileSuccess extends TeacherProfileState {
     reportSubmitted: clearReportSubmitted
         ? false
         : reportSubmitted ?? this.reportSubmitted,
+    pricingQuote: pricingQuote ?? this.pricingQuote,
   );
 }
 

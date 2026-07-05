@@ -169,8 +169,11 @@ class JoinSessionUseCase {
       );
       return Left(e);
     } on Object {
-      _recordJoinFailed(session, userId, participantRole, 'network_failure');
-      return const Left(NetworkFailure());
+      _recordJoinFailed(session, userId, participantRole, 'unknown_failure');
+      // We cannot log easily without injecting a logger here, but mapping to
+      // UnknownFailure ensures we don't present a false "No internet connection"
+      // to the user when the problem is an SDK crash or permission error.
+      return const Left(UnknownFailure());
     }
   }
 

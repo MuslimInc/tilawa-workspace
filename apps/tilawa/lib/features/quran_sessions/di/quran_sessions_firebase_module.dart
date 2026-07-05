@@ -15,6 +15,7 @@ import '../data/firebase/firebase_reschedule_request_repository.dart';
 import '../data/firebase/firebase_session_aggregate_repository.dart';
 import '../data/firebase/firebase_session_command_gateway.dart';
 import '../data/firebase/firebase_session_mutation_gateway.dart';
+import '../data/firebase/firebase_session_pricing_quote_gateway.dart';
 import '../data/firebase/firebase_session_notification_gateway.dart';
 import '../data/firebase/firestore_availability_repository.dart';
 import '../data/firebase/firestore_booked_slot_lock_data_source.dart';
@@ -73,6 +74,14 @@ class QuranSessionsFirebaseModule {
     );
     sl.registerLazySingletonIfAbsent<SessionMutationGateway>(
       () => mutationGateway,
+    );
+
+    sl.registerLazySingletonIfAbsent<SessionPricingQuoteGateway>(
+      () => FirebaseSessionPricingQuoteGateway(
+        functions,
+        sl<CallableSessionPayloadBuilder>(),
+        sl<PerformanceMonitoringService>(),
+      ),
     );
 
     final aggregateRepository = FirebaseSessionAggregateRepository(

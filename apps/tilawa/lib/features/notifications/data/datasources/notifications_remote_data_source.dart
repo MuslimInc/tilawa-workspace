@@ -21,8 +21,13 @@ class NotificationsRemoteDataSourceImpl
   }
 
   @override
-  Future<String?> getToken() {
-    return _firebaseMessaging.getToken();
+  Future<String?> getToken() async {
+    try {
+      return await _firebaseMessaging.getToken();
+    } catch (_) {
+      // Gracefully handle simulator environments where APNS token is not available
+      return null;
+    }
   }
 
   @override

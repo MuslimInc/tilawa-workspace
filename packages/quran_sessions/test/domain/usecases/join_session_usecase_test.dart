@@ -253,6 +253,38 @@ void main() {
     telemetry.dispose();
     hub.dispose();
   });
+
+  test('maps unhandled provider exceptions to UnknownFailure', () async {
+    routingProvider = RoutingSessionCallProvider(
+      external: ExternalMeetingCallProvider(
+        getMeetingUrl: (_) async => 'https://meet.example.com/r',
+        urlLauncher: (_) async => throw Exception('Crash'),
+      ),
+      mock: MockSessionCallProvider(onJoin: (_) {}),
+    );
+    joinSession = JoinSessionUseCase(
+      sessionRepository: sessionRepo,
+      callProvider: routingProvider,
+      authSession: _FakeAuthSession('student_1'),
+      teacherProfileRepository: teacherProfiles,
+    );
+
+    sessionRepo.sessions = [
+      makeSession(
+        id: 'session_1',
+        studentId: 'student_1',
+        startsAt: withinJoinWindowStart(),
+      ),
+    ];
+
+    final result = await joinSession(sessionId: 'session_1');
+
+    check(result.isLeft()).isTrue();
+    result.fold(
+      (f) => check(f).isA<UnknownFailure>(),
+      (_) => fail('expected Left'),
+    );
+  });
 }
 
 class _FakeAuthSession implements AuthSessionProvider {

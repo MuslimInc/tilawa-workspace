@@ -6,6 +6,7 @@ import 'package:tilawa_ui_kit/tilawa_ui_kit.dart';
 import '../../domain/entities/quran_teacher.dart';
 import '../../domain/entities/session_call_type.dart';
 import '../../domain/policies/session_mode_policy.dart';
+import '../../domain/entities/session_pricing_quote.dart';
 import '../../domain/entities/session_review.dart';
 import '../../domain/entities/teacher_availability.dart';
 import '../../domain/value_objects/teacher_public_name.dart';
@@ -161,6 +162,7 @@ class _TeacherProfileScreenState extends State<TeacherProfileScreen> {
               :final availability,
               :final reviews,
               :final isLoadingAvailability,
+              :final pricingQuote,
             ) =>
               _isTeacherMarketplaceVisible(teacher)
                   ? _TeacherProfileBody(
@@ -168,6 +170,7 @@ class _TeacherProfileScreenState extends State<TeacherProfileScreen> {
                       availability: availability,
                       reviews: reviews,
                       isLoadingAvailability: isLoadingAvailability,
+                      pricingQuote: pricingQuote,
                       bookingEnabled: widget.bookingEnabled,
                       sessionModePolicy: widget.sessionModePolicy,
                       onBookTapped: widget.onBookTapped == null
@@ -240,6 +243,7 @@ class _TeacherProfileBody extends StatefulWidget {
     this.onBookTapped,
     this.onSlotSelected,
     this.selectedSlotId,
+    this.pricingQuote,
   });
 
   final QuranTeacher teacher;
@@ -252,6 +256,9 @@ class _TeacherProfileBody extends StatefulWidget {
   final void Function(String? slotId)? onBookTapped;
   final ValueChanged<String>? onSlotSelected;
   final String? selectedSlotId;
+
+  /// Server-resolved pricing (same source as booking); null hides the badge.
+  final SessionPricingQuote? pricingQuote;
 
   @override
   State<_TeacherProfileBody> createState() => _TeacherProfileBodyState();
@@ -315,7 +322,10 @@ class _TeacherProfileBodyState extends State<_TeacherProfileBody> {
                 child: Row(
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: [
-                    QuranSessionPriceChip(teacher: widget.teacher),
+                    QuranSessionPriceChip(
+                      teacher: widget.teacher,
+                      pricing: widget.pricingQuote,
+                    ),
                     for (final code in widget.teacher.specializations) ...[
                       SizedBox(width: tokens.spaceExtraSmall),
                       TilawaMetadataChip(

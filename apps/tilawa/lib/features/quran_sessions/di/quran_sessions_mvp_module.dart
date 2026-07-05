@@ -372,6 +372,9 @@ class QuranSessionsMvpModule {
       () => TeacherListBloc(
         sl<GetTeachersUseCase>(),
         sl<GetTeacherAvailabilityUseCase>(),
+        getPricingQuote: sl.isRegistered<SessionPricingQuoteGateway>()
+            ? GetBookingPricingQuoteUseCase(sl<SessionPricingQuoteGateway>())
+            : null,
       ),
     );
     sl.registerFactoryIfAbsent(
@@ -380,6 +383,9 @@ class QuranSessionsMvpModule {
         getAvailability: sl<GetTeacherAvailabilityUseCase>(),
         reportConcern: sl.isRegistered<ReportSessionConcernUseCase>()
             ? sl<ReportSessionConcernUseCase>()
+            : null,
+        getPricingQuote: sl.isRegistered<SessionPricingQuoteGateway>()
+            ? GetBookingPricingQuoteUseCase(sl<SessionPricingQuoteGateway>())
             : null,
       ),
     );
@@ -394,6 +400,9 @@ class QuranSessionsMvpModule {
           getTeacherProfile: sl<GetTeacherProfileByIdUseCase>(),
           getUserProfile: sl<GetUserProfileUseCase>(),
           getMarketConfig: sl<GetMarketConfigUseCase>(),
+          getPricingQuote: sl.isRegistered<SessionPricingQuoteGateway>()
+              ? GetBookingPricingQuoteUseCase(sl<SessionPricingQuoteGateway>())
+              : null,
           sessionModePolicy: sessionModePolicyFromLaunchConfig(launchConfig),
           paymentConfirmation: sl.isRegistered<SessionPaymentConfirmation>()
               ? sl<SessionPaymentConfirmation>()

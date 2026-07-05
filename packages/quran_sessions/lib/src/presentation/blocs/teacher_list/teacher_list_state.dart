@@ -1,6 +1,7 @@
 import 'package:equatable/equatable.dart';
 
 import '../../../domain/entities/quran_teacher.dart';
+import '../../../domain/entities/session_pricing_quote.dart';
 import '../../../domain/failures/quran_sessions_failure.dart';
 import '../../models/teacher_availability_summary.dart';
 
@@ -28,6 +29,7 @@ final class TeacherListSuccess extends TeacherListState {
     this.isLoadingMore = false,
     this.activeSpecialization,
     this.activeLanguage,
+    this.pricingQuote,
   });
 
   final List<QuranTeacher> teachers;
@@ -41,6 +43,10 @@ final class TeacherListSuccess extends TeacherListState {
   final String? activeSpecialization;
   final String? activeLanguage;
 
+  /// Market-resolved pricing for the current viewer (one quote labels all
+  /// rows); null hides price badges rather than defaulting to "free".
+  final SessionPricingQuote? pricingQuote;
+
   @override
   List<Object?> get props => [
     teachers,
@@ -50,6 +56,7 @@ final class TeacherListSuccess extends TeacherListState {
     isLoadingMore,
     activeSpecialization,
     activeLanguage,
+    pricingQuote,
   ];
 
   TeacherListSuccess copyWith({
@@ -60,6 +67,7 @@ final class TeacherListSuccess extends TeacherListState {
     bool? isLoadingMore,
     String? activeSpecialization,
     String? activeLanguage,
+    SessionPricingQuote? pricingQuote,
   }) => TeacherListSuccess(
     teachers: teachers ?? this.teachers,
     hasMore: hasMore ?? this.hasMore,
@@ -68,6 +76,7 @@ final class TeacherListSuccess extends TeacherListState {
     isLoadingMore: isLoadingMore ?? this.isLoadingMore,
     activeSpecialization: activeSpecialization ?? this.activeSpecialization,
     activeLanguage: activeLanguage ?? this.activeLanguage,
+    pricingQuote: pricingQuote ?? this.pricingQuote,
   );
 }
 

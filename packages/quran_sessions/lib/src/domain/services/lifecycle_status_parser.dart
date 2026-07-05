@@ -144,6 +144,11 @@ SessionAction parseSessionActionFromRaw(String raw) {
     'adminCancelled' ||
     'cancelled_by_admin' ||
     'cancelledByAdmin' => SessionAction.cancelByAdmin,
+    // Elapsed-session finalizer (server sweep) audit actions.
+    'expire_unattended_session' ||
+    'expireUnattendedSession' => SessionAction.expireReservation,
+    'finalize_completed_session' ||
+    'finalizeCompletedSession' => SessionAction.completeSession,
     _ => SessionAction.confirmBooking,
   };
 }

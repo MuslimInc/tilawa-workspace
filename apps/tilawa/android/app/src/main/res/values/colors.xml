@@ -4,9 +4,9 @@
     <!-- Must match AppColors.launchSplashBackground in Flutter (ui_kit).
          Logo: @dimen/splash_logo_display_size == AppColors.launchSplashLogoSize
          in @dimen/splash_logo_frame_size frame. -->
-    <!-- Production: brand splash green #2A9C64 -->
-    <color name="launch_background">#2A9C64</color>
+    <!-- Production: brand primary green #1DAB61 -->
+    <color name="launch_background">#1DAB61</color>
     <!-- Matches AppColors.notificationAccent (#1DAB61) for FCM / system metadata. -->
     <color name="notification_accent">#FF1DAB61</color>
+    <color name="ic_launcher_background">#1DAB61</color>
 </resources>
-

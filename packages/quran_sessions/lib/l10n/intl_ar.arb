@@ -794,6 +794,7 @@
     "paymentCheckoutConfirmFree": "تأكيد الحجز",
     "bookingPriceSummaryTitle": "سعر الجلسة",
     "bookingPricePerSessionHint": "يُخصم مرة واحدة عند التأكيد (تجريبي فقط).",
+    "bookingPaymentUnavailableNotice": "هذه الجلسة مدفوعة، والدفع غير متاح حالياً. الحجز غير متاح مؤقتاً.",
     "walletSandboxNotice": "محفظة تجريبية — أرصدة من الاستردادات والمدفوعات التجريبية فقط. ليست أموالًا حقيقية.",
     "restrictionReasonFalseIdentity": "بيانات هوية مزيفة",
     "restrictionReasonPolicyViolation": "مخالفة السياسات",

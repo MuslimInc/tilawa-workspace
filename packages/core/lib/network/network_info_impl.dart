@@ -1,28 +1,18 @@
 import 'dart:async';
-import 'dart:io';
 
 import 'package:connectivity_plus/connectivity_plus.dart';
 import 'package:injectable/injectable.dart';
 
 import 'network_info.dart';
 
-typedef InternetLookup =
-    Future<List<InternetAddress>> Function(
-      String host, {
-      InternetAddressType type,
-    });
-
 @Injectable(as: NetworkInfo)
 class NetworkInfoImpl implements NetworkInfo {
   NetworkInfoImpl(
     this._connectivity, {
-    @factoryParam InternetLookup? internetLookup,
     @ignoreParam DateTime Function()? now,
-  }) : internetLookup = internetLookup ?? InternetAddress.lookup,
-       _now = now ?? DateTime.now;
+  }) : _now = now ?? DateTime.now;
 
   final Connectivity _connectivity;
-  final InternetLookup internetLookup;
   final DateTime Function() _now;
 
   /// Checks run inside tap-triggered guards (login/logout/delete), so the
@@ -80,14 +70,8 @@ class NetworkInfoImpl implements NetworkInfo {
       if (result.contains(ConnectivityResult.none)) {
         return false;
       }
-      // Double check with actual internet lookup (with timeout to avoid long waits)
-      final List<InternetAddress> lookupResult = await internetLookup(
-        'google.com',
-      ).timeout(lookupTimeout);
-      return lookupResult.isNotEmpty && lookupResult[0].rawAddress.isNotEmpty;
-    } on SocketException catch (_) {
-      return false;
-    } on TimeoutException catch (_) {
+      return true;
+    } on Exception catch (_) {
       return false;
     }
   }

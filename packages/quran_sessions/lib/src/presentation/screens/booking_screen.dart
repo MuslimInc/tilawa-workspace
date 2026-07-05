@@ -238,6 +238,7 @@ class _BookingScreenState extends State<BookingScreen> {
             :final pricingType,
             :final sessionPrice,
             :final manualPaymentPrice,
+            :final isPaymentBlocked,
           ) =>
             Padding(
               padding: EdgeInsets.all(tokens.spaceMedium),
@@ -256,6 +257,11 @@ class _BookingScreenState extends State<BookingScreen> {
                         pricingType: pricingType,
                         sessionPrice: sessionPrice,
                       ),
+                    ),
+                  if (isPaymentBlocked)
+                    Padding(
+                      padding: EdgeInsets.only(bottom: tokens.spaceSmall),
+                      child: const _PaymentUnavailableNotice(),
                     ),
                   Text(
                     l10n.selectSlot,
@@ -421,6 +427,43 @@ class _BookingPriceSummary extends StatelessWidget {
               ),
             ),
           ],
+        ],
+      ),
+    );
+  }
+}
+
+/// Paid session while the payment provider is disabled: the student sees why
+/// booking is blocked instead of hitting `payment_provider_unavailable`.
+class _PaymentUnavailableNotice extends StatelessWidget {
+  const _PaymentUnavailableNotice();
+
+  @override
+  Widget build(BuildContext context) {
+    final l10n = context.quranSessionsL10n;
+    final theme = Theme.of(context);
+    final scheme = theme.colorScheme;
+    final tokens = theme.tokens;
+
+    return TilawaCard(
+      backgroundColor: scheme.errorContainer,
+      padding: EdgeInsets.all(tokens.spaceMedium),
+      child: Row(
+        children: [
+          Icon(
+            TilawaIcons.warning,
+            size: tokens.iconSizeSmall,
+            color: scheme.onErrorContainer,
+          ),
+          SizedBox(width: tokens.spaceExtraSmall),
+          Expanded(
+            child: Text(
+              l10n.bookingPaymentUnavailableNotice,
+              style: theme.textTheme.bodyMedium?.copyWith(
+                color: scheme.onErrorContainer,
+              ),
+            ),
+          ),
         ],
       ),
     );

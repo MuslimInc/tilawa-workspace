@@ -41,6 +41,7 @@ final class BookingSelecting extends BookingState {
     this.pricingType,
     this.sessionPrice,
     this.manualPaymentPrice,
+    this.paymentProviderAvailable,
   });
 
   final String teacherId;
@@ -55,10 +56,19 @@ final class BookingSelecting extends BookingState {
   /// screen shows a paid-session notice instead of the free price summary.
   final ManualPaymentPrice? manualPaymentPrice;
 
+  /// Server quote signal; null when no quote was obtained (client preview).
+  final bool? paymentProviderAvailable;
+
   bool get hasExternalMeetingUrl =>
       SessionModePolicy.hasExternalMeetingUrl(teacherExternalMeetingUrl);
 
-  bool get canSubmit => selectedSlot != null;
+  /// Paid session whose payment cannot currently be taken — submission is
+  /// blocked so the student never hits `payment_provider_unavailable`.
+  bool get isPaymentBlocked =>
+      pricingType == SessionPricingType.fixedPerSession &&
+      paymentProviderAvailable == false;
+
+  bool get canSubmit => selectedSlot != null && !isPaymentBlocked;
 
   @override
   List<Object?> get props => [
@@ -70,6 +80,7 @@ final class BookingSelecting extends BookingState {
     pricingType,
     sessionPrice,
     manualPaymentPrice,
+    paymentProviderAvailable,
   ];
 
   BookingSelecting copyWith({
@@ -80,6 +91,7 @@ final class BookingSelecting extends BookingState {
     SessionPricingType? pricingType,
     SessionPrice? sessionPrice,
     ManualPaymentPrice? manualPaymentPrice,
+    bool? paymentProviderAvailable,
   }) => BookingSelecting(
     teacherId: teacherId,
     availableSlots: availableSlots ?? this.availableSlots,
@@ -90,6 +102,8 @@ final class BookingSelecting extends BookingState {
     pricingType: pricingType ?? this.pricingType,
     sessionPrice: sessionPrice ?? this.sessionPrice,
     manualPaymentPrice: manualPaymentPrice ?? this.manualPaymentPrice,
+    paymentProviderAvailable:
+        paymentProviderAvailable ?? this.paymentProviderAvailable,
   );
 }
 

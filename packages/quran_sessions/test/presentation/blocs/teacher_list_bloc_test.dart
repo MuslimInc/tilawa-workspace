@@ -5,7 +5,10 @@ import 'package:flutter_test/flutter_test.dart';
 
 import 'package:quran_sessions/src/domain/entities/teacher_availability.dart';
 import 'package:quran_sessions/src/domain/entities/weekly_schedule.dart';
+import 'package:quran_sessions/src/domain/entities/session_pricing_quote.dart';
+import 'package:quran_sessions/src/domain/entities/session_pricing_type.dart';
 import 'package:quran_sessions/src/domain/failures/quran_sessions_failure.dart';
+import 'package:quran_sessions/src/domain/usecases/get_booking_pricing_quote_usecase.dart';
 import 'package:quran_sessions/src/domain/usecases/get_teacher_availability_usecase.dart';
 import 'package:quran_sessions/src/domain/usecases/get_teachers_usecase.dart';
 import 'package:quran_sessions/src/presentation/models/teacher_availability_summary.dart';
@@ -13,6 +16,7 @@ import 'package:quran_sessions/src/presentation/blocs/teacher_list/teacher_list_
 import 'package:quran_sessions/src/presentation/blocs/teacher_list/teacher_list_event.dart';
 import 'package:quran_sessions/src/presentation/blocs/teacher_list/teacher_list_state.dart';
 import '../../helpers/fakes/fake_booked_slot_lock_repository.dart';
+import '../../helpers/fakes/fake_session_pricing_quote_gateway.dart';
 import '../../helpers/fakes/fake_teacher_repository.dart';
 import '../../helpers/availability_test_helpers.dart';
 import '../../helpers/fixtures.dart';
@@ -156,6 +160,57 @@ void main() {
       verify: (b) {
         final state = b.state as TeacherListSuccess;
         check(state.activeSpecialization).equals('hifz');
+      },
+    );
+
+    blocTest<TeacherListBloc, TeacherListState>(
+      'exposes one market pricing quote for all rows when available',
+      build: () {
+        repo.teachers = [makeTeacher(id: 't1'), makeTeacher(id: 't2')];
+        return TeacherListBloc(
+          GetTeachersUseCase(repo),
+          _StaticAvailabilityUseCase(const {}),
+          getPricingQuote: GetBookingPricingQuoteUseCase(
+            FakeSessionPricingQuoteGateway(
+              quote: const SessionPricingQuote(
+                pricingType: SessionPricingType.fixedPerSession,
+                amount: 100,
+                currencyCode: 'EGP',
+                paymentRequired: true,
+                paymentProviderAvailable: false,
+              ),
+            ),
+          ),
+        );
+      },
+      act: (b) => b.add(const LoadTeachersRequested()),
+      wait: const Duration(milliseconds: 50),
+      verify: (b) {
+        final state = b.state as TeacherListSuccess;
+        final quote = state.pricingQuote;
+        check(quote).isNotNull();
+        check(quote!.isFree).isFalse();
+        check(quote.amount).equals(100);
+      },
+    );
+
+    blocTest<TeacherListBloc, TeacherListState>(
+      'keeps pricing unresolved when the quote fails',
+      build: () {
+        repo.teachers = [makeTeacher(id: 't1')];
+        return TeacherListBloc(
+          GetTeachersUseCase(repo),
+          _StaticAvailabilityUseCase(const {}),
+          getPricingQuote: GetBookingPricingQuoteUseCase(
+            FakeSessionPricingQuoteGateway(failure: const NetworkFailure()),
+          ),
+        );
+      },
+      act: (b) => b.add(const LoadTeachersRequested()),
+      wait: const Duration(milliseconds: 50),
+      verify: (b) {
+        final state = b.state as TeacherListSuccess;
+        check(state.pricingQuote).isNull();
       },
     );
   });

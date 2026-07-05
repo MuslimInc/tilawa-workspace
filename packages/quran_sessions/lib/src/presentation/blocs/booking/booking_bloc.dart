@@ -10,6 +10,8 @@ import '../../../domain/failures/quran_sessions_failure.dart';
 import '../../../domain/mappers/session_aggregate_mapper.dart';
 import '../../../domain/policies/market_session_price_policy.dart';
 import '../../../domain/policies/session_mode_policy.dart';
+import '../../../domain/entities/session_pricing_quote.dart';
+import '../../../domain/usecases/get_booking_pricing_quote_usecase.dart';
 import '../../../domain/usecases/get_market_config_usecase.dart';
 import '../../../domain/usecases/get_teacher_availability_usecase.dart';
 import '../../../domain/usecases/get_teacher_profile_by_id_usecase.dart';
@@ -28,6 +30,7 @@ class BookingBloc extends Bloc<BookingEvent, BookingState> {
     required this._getTeacherProfile,
     this._getUserProfile,
     this._getMarketConfig,
+    this._getPricingQuote,
     this._sessionModePolicy = SessionModePolicy.videoOnly,
     this._onBookingLostDueToNoAvailability,
     this._resolveMarketCode,
@@ -50,6 +53,10 @@ class BookingBloc extends Bloc<BookingEvent, BookingState> {
   final GetTeacherProfileByIdUseCase _getTeacherProfile;
   final GetUserProfileUseCase? _getUserProfile;
   final GetMarketConfigUseCase? _getMarketConfig;
+
+  /// Server-authoritative price preview; when available it supersedes the
+  /// client-side market read (which ignores policy-version overlays).
+  final GetBookingPricingQuoteUseCase? _getPricingQuote;
   final SessionModePolicy _sessionModePolicy;
   final SessionPaymentConfirmation? _paymentConfirmation;
 
@@ -111,24 +118,35 @@ class BookingBloc extends Bloc<BookingEvent, BookingState> {
 
     SessionPricingType? pricingType;
     SessionPrice? sessionPrice;
-    final getUserProfile = _getUserProfile;
-    final getMarketConfig = _getMarketConfig;
-    if (getUserProfile != null && getMarketConfig != null) {
-      final studentResult = await getUserProfile(studentId);
-      await studentResult.fold((_) async {}, (student) async {
-        final country = student.countryCode;
-        final cityId = student.cityId;
-        if (country == null || cityId == null) return;
-        final marketResult = await getMarketConfig(country);
-        marketResult.fold((_) {}, (market) {
-          final preview = MarketSessionPricePolicy.resolvePreview(
-            market: market,
-            cityId: cityId,
-          );
-          pricingType = preview.pricingType;
-          sessionPrice = preview.price;
+    bool? paymentProviderAvailable;
+
+    final quote = await _fetchServerQuote(teacherId);
+    if (quote != null) {
+      pricingType = quote.pricingType;
+      sessionPrice = quote.price;
+      paymentProviderAvailable = quote.paymentProviderAvailable;
+    } else {
+      // Fallback: client-side market read. Advisory only — it cannot see
+      // policy-version overlays or the payment provider gate.
+      final getUserProfile = _getUserProfile;
+      final getMarketConfig = _getMarketConfig;
+      if (getUserProfile != null && getMarketConfig != null) {
+        final studentResult = await getUserProfile(studentId);
+        await studentResult.fold((_) async {}, (student) async {
+          final country = student.countryCode;
+          final cityId = student.cityId;
+          if (country == null || cityId == null) return;
+          final marketResult = await getMarketConfig(country);
+          marketResult.fold((_) {}, (market) {
+            final preview = MarketSessionPricePolicy.resolvePreview(
+              market: market,
+              cityId: cityId,
+            );
+            pricingType = preview.pricingType;
+            sessionPrice = preview.price;
+          });
         });
-      });
+      }
     }
 
     final defaultCallType = SessionModePolicy.defaultCallType(
@@ -164,8 +182,16 @@ class BookingBloc extends Bloc<BookingEvent, BookingState> {
         pricingType: pricingType,
         sessionPrice: sessionPrice,
         manualPaymentPrice: null,
+        paymentProviderAvailable: paymentProviderAvailable,
       ),
     );
+  }
+
+  Future<SessionPricingQuote?> _fetchServerQuote(String teacherId) async {
+    final getPricingQuote = _getPricingQuote;
+    if (getPricingQuote == null) return null;
+    final result = await getPricingQuote(teacherId: teacherId);
+    return result.fold((_) => null, (quote) => quote);
   }
 
   Future<void> _emitBookingLost({

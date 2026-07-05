@@ -49,9 +49,9 @@ abstract final class AppColors {
   /// Retained for migration compatibility only.
   static const Color primaryGold = Color(0xFF2D6B47);
 
-  /// Brand splash canvas — flat launch / native splash green (`#2A9C64`).
-  /// Restricted to splash and launch screens only. Do not use in UI components.
-  static const Color brandSplashGreen = Color(0xFF2A9C64);
+  /// @Deprecated('Use brandActionGreen instead for a unified brand experience')
+  /// Brand splash canvas alias (`#1DAB61`).
+  static const Color brandSplashGreen = brandActionGreen;
 
   /// Global accent — nav, switches, selected states, CTAs (`#1DAB61`).
   static const Color brandActionGreen = Color(0xFF1DAB61);
@@ -367,7 +367,7 @@ abstract final class AppColors {
   /// Action tile fill — dark theme.
   static const Color homeQuickActionTileBackgroundDark = Color(0xFF1C2422);
 
-  /// Launch / splash canvas — brand splash green (`#2A9C64`).
+  /// Launch / splash canvas — brand primary green (`#1DAB61`).
   static const Color launchSplashBackground = brandSplashGreen;
 
   /// Wordmark and progress on launch surfaces (`#FFFFFF`).

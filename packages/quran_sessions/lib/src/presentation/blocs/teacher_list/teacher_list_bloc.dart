@@ -2,6 +2,8 @@ import 'package:bloc_concurrency/bloc_concurrency.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
 import '../../../domain/entities/quran_teacher.dart';
+import '../../../domain/entities/session_pricing_quote.dart';
+import '../../../domain/usecases/get_booking_pricing_quote_usecase.dart';
 import '../../../domain/usecases/get_teacher_availability_usecase.dart';
 import '../../../domain/usecases/get_teachers_usecase.dart';
 import '../../models/teacher_availability_summary.dart';
@@ -13,6 +15,7 @@ class TeacherListBloc extends Bloc<TeacherListEvent, TeacherListState> {
     this._getTeachers,
     this._getAvailability, {
     this._availabilityPresenter = const TeacherAvailabilitySummaryPresenter(),
+    this._getPricingQuote,
   }) : super(const TeacherListInitial()) {
     on<LoadTeachersRequested>(_onLoadRequested, transformer: restartable());
     on<LoadMoreTeachersRequested>(_onLoadMore, transformer: droppable());
@@ -22,6 +25,10 @@ class TeacherListBloc extends Bloc<TeacherListEvent, TeacherListState> {
   final GetTeachersUseCase _getTeachers;
   final GetTeacherAvailabilityUseCase _getAvailability;
   final TeacherAvailabilitySummaryPresenter _availabilityPresenter;
+
+  /// Market-level pricing is identical for every teacher the student can see,
+  /// so one quote per list load labels all rows — same source as booking.
+  final GetBookingPricingQuoteUseCase? _getPricingQuote;
 
   static const _availabilityWindow = Duration(days: 14);
 
@@ -61,10 +68,12 @@ class TeacherListBloc extends Bloc<TeacherListEvent, TeacherListState> {
     final availabilitySummaries = await _loadAvailabilitySummaries(
       page.teachers,
     );
+    final pricingQuote = await _fetchPricingQuote(page.teachers);
     emit(
       TeacherListSuccess(
         teachers: page.teachers,
         hasMore: page.nextCursor != null,
+        pricingQuote: pricingQuote,
         availabilitySummaries: availabilitySummaries,
         nextCursor: page.nextCursor,
         activeSpecialization: event.specialization,
@@ -122,6 +131,16 @@ class TeacherListBloc extends Bloc<TeacherListEvent, TeacherListState> {
       ),
       emit,
     );
+  }
+
+  Future<SessionPricingQuote?> _fetchPricingQuote(
+    List<QuranTeacher> teachers,
+  ) async {
+    final getPricingQuote = _getPricingQuote;
+    if (getPricingQuote == null || teachers.isEmpty) return null;
+    // Pricing is market-level in v1 — the teacherId only scopes the request.
+    final result = await getPricingQuote(teacherId: teachers.first.id);
+    return result.fold((_) => null, (quote) => quote);
   }
 
   Future<Map<String, TeacherAvailabilitySummary>> _loadAvailabilitySummaries(

@@ -3,7 +3,10 @@ import assert from "node:assert/strict";
 
 import { buildOperationKey } from "../../src/quranSessions/idempotencyService";
 import { isPaymentProviderEnabled } from "../../src/quranSessions/payment/envGate";
-import { financialExecutionStatus } from "../../src/quranSessions/paymentProviderStatus";
+import {
+  assertPaidBookingAllowed,
+  financialExecutionStatus,
+} from "../../src/quranSessions/paymentProviderStatus";
 import { resolvePaymentProvider } from "../../src/quranSessions/payment/paymentProviderRegistry";
 import { DisabledPaymentProvider } from "../../src/quranSessions/payment/disabledPaymentProvider";
 
@@ -21,4 +24,22 @@ test("resolvePaymentProvider returns disabled provider by default", () => {
   const provider = resolvePaymentProvider();
   assert.ok(provider instanceof DisabledPaymentProvider);
   assert.equal(provider.kind, "none");
+});
+
+test("assertPaidBookingAllowed rejects paid bookings while provider disabled", () => {
+  assert.equal(isPaymentProviderEnabled(), false);
+  assert.doesNotThrow(() => assertPaidBookingAllowed("free"));
+  assert.throws(
+    () => assertPaidBookingAllowed("fixedPerSession"),
+    /payment_provider_unavailable/,
+  );
+});
+
+test("assertPaidBookingAllowed permits paid bookings when the gate is on", () => {
+  process.env.QURAN_SESSIONS_PAYMENT_PROVIDER_ENABLED = "true";
+  try {
+    assert.doesNotThrow(() => assertPaidBookingAllowed("fixedPerSession"));
+  } finally {
+    delete process.env.QURAN_SESSIONS_PAYMENT_PROVIDER_ENABLED;
+  }
 });

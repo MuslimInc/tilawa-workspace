@@ -5,6 +5,7 @@ import 'package:quran_sessions/l10n/quran_sessions_localizations.dart';
 import 'package:tilawa_ui_kit/tilawa_ui_kit.dart';
 
 import '../../domain/entities/quran_teacher.dart';
+import '../../domain/entities/session_pricing_quote.dart';
 import '../blocs/teacher_list/teacher_list_bloc.dart';
 import '../blocs/teacher_list/teacher_list_event.dart';
 import '../blocs/teacher_list/teacher_list_state.dart';
@@ -156,12 +157,14 @@ class _TeacherListScreenState extends State<TeacherListScreen> {
             :final teachers,
             :final availabilitySummaries,
             :final isLoadingMore,
+            :final pricingQuote,
           ) =>
             _buildSuccessList(
               context,
               teachers: teachers,
               availabilitySummaries: availabilitySummaries,
               isLoadingMore: isLoadingMore,
+              pricingQuote: pricingQuote,
             ),
         },
       ),
@@ -173,6 +176,7 @@ class _TeacherListScreenState extends State<TeacherListScreen> {
     required List<QuranTeacher> teachers,
     required Map<String, TeacherAvailabilitySummary> availabilitySummaries,
     required bool isLoadingMore,
+    SessionPricingQuote? pricingQuote,
   }) {
     final l10n = context.quranSessionsL10n;
     final tokens = Theme.of(context).tokens;
@@ -239,6 +243,7 @@ class _TeacherListScreenState extends State<TeacherListScreen> {
             teacher: teacher,
             onTap: () => _onTeacherTapped(teacher.id),
             availabilitySummary: availabilitySummaries[teacher.id],
+            pricing: pricingQuote,
           );
         },
       ),

@@ -125,42 +125,44 @@ class _QuranSessionsHomeScreenState extends State<QuranSessionsHomeScreen> {
               ),
             ),
           ),
-          TeacherListSuccess(:final teachers) => ListView.builder(
-            itemCount: teachers.take(3).length + 2,
-            itemBuilder: (context, i) {
-              final preview = teachers.take(3).toList();
-              if (i == 0) {
-                return Padding(
-                  padding: EdgeInsetsDirectional.fromSTEB(
-                    tokens.spaceMedium,
-                    tokens.spaceSmall,
-                    tokens.spaceMedium,
-                    tokens.spaceExtraSmall,
-                  ),
-                  child: QuranSessionsPageHeader(
-                    subtitle: l10n.teacherListSubtitle,
-                    compact: true,
+          TeacherListSuccess(:final teachers, :final pricingQuote) =>
+            ListView.builder(
+              itemCount: teachers.take(3).length + 2,
+              itemBuilder: (context, i) {
+                final preview = teachers.take(3).toList();
+                if (i == 0) {
+                  return Padding(
+                    padding: EdgeInsetsDirectional.fromSTEB(
+                      tokens.spaceMedium,
+                      tokens.spaceSmall,
+                      tokens.spaceMedium,
+                      tokens.spaceExtraSmall,
+                    ),
+                    child: QuranSessionsPageHeader(
+                      subtitle: l10n.teacherListSubtitle,
+                      compact: true,
+                    ),
+                  );
+                }
+                final teacherIndex = i - 1;
+                if (teacherIndex < preview.length) {
+                  return TeacherCard(
+                    teacher: preview[teacherIndex],
+                    onTap: () =>
+                        widget.onTeacherTapped?.call(preview[teacherIndex].id),
+                    pricing: pricingQuote,
+                  );
+                }
+                return Center(
+                  child: TilawaButton(
+                    text: l10n.seeAllTeachers,
+                    onPressed: widget.onSeeAllTeachers,
+                    variant: TilawaButtonVariant.ghost,
+                    size: TilawaButtonSize.small,
                   ),
                 );
-              }
-              final teacherIndex = i - 1;
-              if (teacherIndex < preview.length) {
-                return TeacherCard(
-                  teacher: preview[teacherIndex],
-                  onTap: () =>
-                      widget.onTeacherTapped?.call(preview[teacherIndex].id),
-                );
-              }
-              return Center(
-                child: TilawaButton(
-                  text: l10n.seeAllTeachers,
-                  onPressed: widget.onSeeAllTeachers,
-                  variant: TilawaButtonVariant.ghost,
-                  size: TilawaButtonSize.small,
-                ),
-              );
-            },
-          ),
+              },
+            ),
         },
       ),
     );

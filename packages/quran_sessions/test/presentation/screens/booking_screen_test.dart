@@ -277,4 +277,113 @@ void main() {
       findsOneWidget,
     );
   });
+
+  testWidgets(
+    'paid session shows price summary and price is visible before booking',
+    (tester) async {
+      final slots = [_slot(1)];
+
+      await tester.pumpWidget(
+        MaterialApp(
+          theme: AppTheme.getLightTheme(primaryColor: AppColors.defaultPrimary),
+          localizationsDelegates: const [
+            QuranSessionsLocalizations.delegate,
+            GlobalMaterialLocalizations.delegate,
+            GlobalWidgetsLocalizations.delegate,
+          ],
+          supportedLocales: QuranSessionsLocalizations.supportedLocales,
+          home: BlocProvider<BookingBloc>(
+            create: (_) => SeededBookingBloc(
+              seed: BookingSelecting(
+                teacherId: 'teacher_1',
+                availableSlots: slots,
+                selectedSlot: slots.first,
+                selectedCallType: SessionCallType.videoCall,
+                pricingType: SessionPricingType.fixedPerSession,
+                sessionPrice: const SessionPrice(
+                  amount: 50,
+                  currencyCode: 'EGP',
+                  countryCode: 'EG',
+                  cityId: 'cairo',
+                ),
+                paymentProviderAvailable: true,
+              ),
+            ),
+            child: const BookingScreen(
+              teacherId: 'teacher_1',
+              studentId: 'student_1',
+            ),
+          ),
+        ),
+      );
+      await tester.pumpAndSettle();
+
+      expect(find.text('Session price'), findsOneWidget);
+      expect(find.textContaining('50'), findsWidgets);
+      // Provider available: the confirm CTA stays enabled.
+      final button = tester.widget<TilawaButton>(
+        find.byWidgetPredicate(
+          (w) => w is TilawaButton && w.text == 'Confirm booking',
+        ),
+      );
+      expect(button.onPressed, isNotNull);
+    },
+  );
+
+  testWidgets(
+    'paid session with payment provider disabled blocks booking in the UI',
+    (tester) async {
+      final slots = [_slot(1)];
+
+      await tester.pumpWidget(
+        MaterialApp(
+          theme: AppTheme.getLightTheme(primaryColor: AppColors.defaultPrimary),
+          localizationsDelegates: const [
+            QuranSessionsLocalizations.delegate,
+            GlobalMaterialLocalizations.delegate,
+            GlobalWidgetsLocalizations.delegate,
+          ],
+          supportedLocales: QuranSessionsLocalizations.supportedLocales,
+          home: BlocProvider<BookingBloc>(
+            create: (_) => SeededBookingBloc(
+              seed: BookingSelecting(
+                teacherId: 'teacher_1',
+                availableSlots: slots,
+                selectedSlot: slots.first,
+                selectedCallType: SessionCallType.videoCall,
+                pricingType: SessionPricingType.fixedPerSession,
+                sessionPrice: const SessionPrice(
+                  amount: 50,
+                  currencyCode: 'EGP',
+                  countryCode: 'EG',
+                  cityId: 'cairo',
+                ),
+                paymentProviderAvailable: false,
+              ),
+            ),
+            child: const BookingScreen(
+              teacherId: 'teacher_1',
+              studentId: 'student_1',
+            ),
+          ),
+        ),
+      );
+      await tester.pumpAndSettle();
+
+      expect(
+        find.text(
+          'This session requires payment, but payment is not available '
+          'yet. Booking is temporarily unavailable.',
+        ),
+        findsOneWidget,
+      );
+      // The confirm CTA must be disabled even with a slot selected.
+      final button = tester.widget<TilawaButton>(
+        find.byWidgetPredicate(
+          (w) => w is TilawaButton && w.text == 'Confirm booking',
+        ),
+      );
+      expect(button.onPressed, isNull);
+    },
+  );
 }

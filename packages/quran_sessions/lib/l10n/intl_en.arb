@@ -789,6 +789,7 @@
     "paymentCheckoutConfirmFree": "Confirm booking",
     "bookingPriceSummaryTitle": "Session price",
     "bookingPricePerSessionHint": "Charged once when you confirm (sandbox only).",
+    "bookingPaymentUnavailableNotice": "This session requires payment, but payment is not available yet. Booking is temporarily unavailable.",
     "walletSandboxNotice": "Sandbox wallet — credits from refunds and test payments only. Not real money.",
     "restrictionReasonFalseIdentity": "False identity information",
     "restrictionReasonPolicyViolation": "Policy violation",

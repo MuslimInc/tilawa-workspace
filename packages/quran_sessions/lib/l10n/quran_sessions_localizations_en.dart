@@ -1895,6 +1895,10 @@ class QuranSessionsLocalizationsEn extends QuranSessionsLocalizations {
       'Charged once when you confirm (sandbox only).';
 
   @override
+  String get bookingPaymentUnavailableNotice =>
+      'This session requires payment, but payment is not available yet. Booking is temporarily unavailable.';
+
+  @override
   String get walletSandboxNotice =>
       'Sandbox wallet — credits from refunds and test payments only. Not real money.';
 

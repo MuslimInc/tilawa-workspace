@@ -215,6 +215,42 @@ void main() {
     expect(find.text('Join'), findsOneWidget);
   });
 
+  testWidgets(
+    'bottom action area is not rendered when no actions are available',
+    (tester) async {
+      final aggregate = makeAggregate(
+        status: SessionLifecycleStatus.incomplete,
+        startsAt: DateTime.now().toUtc().subtract(const Duration(hours: 2)),
+      ).copyWith(sessionId: 'session_1');
+
+      await tester.pumpWidget(
+        MaterialApp(
+          theme: AppTheme.getLightTheme(
+            primaryColor: AppColors.defaultPrimary,
+          ),
+          localizationsDelegates: const [
+            QuranSessionsLocalizations.delegate,
+            GlobalMaterialLocalizations.delegate,
+            GlobalWidgetsLocalizations.delegate,
+          ],
+          supportedLocales: QuranSessionsLocalizations.supportedLocales,
+          home: BlocProvider<SessionDetailBloc>(
+            create: (_) => RecordingSessionDetailBloc(
+              seed: SessionDetailSuccess(
+                aggregate: aggregate,
+                timeline: const [],
+              ),
+            ),
+            child: const SessionDetailScreen(bookingId: 'session_1'),
+          ),
+        ),
+      );
+      await tester.pumpAndSettle();
+
+      expect(find.byType(TilawaBottomActionArea), findsNothing);
+    },
+  );
+
   testWidgets('join button stays visible with loading while preparing', (
     tester,
   ) async {
