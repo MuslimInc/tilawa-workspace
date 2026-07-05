@@ -6,6 +6,8 @@ import {
   calendarAge,
   isChild,
   isBookingStillUpcoming,
+  parseTeacherPricingOverride,
+  resolvePricingWithOverride,
   isGenderCombinationAllowed,
   type BookingEligibilityContext,
 } from "../../src/quranSessions/bookingEligibilityService";
@@ -71,6 +73,7 @@ function baseContext(
     },
     marketEnabled: overrides.marketEnabled ?? true,
     pricing: overrides.pricing ?? { isPaid: false, amount: 0, currencyCode: "USD" },
+    pricingSource: "market",
   };
 }
 
@@ -233,4 +236,61 @@ test("isBookingStillUpcoming counts only sessions that have not ended", () => {
   // Missing endsAt fails closed: still counts against the cap.
   assert.equal(isBookingStillUpcoming(null, NOW), true);
   assert.equal(isBookingStillUpcoming("not-a-date", NOW), true);
+});
+
+test("parseTeacherPricingOverride ignores disabled or invalid overrides", () => {
+  assert.equal(parseTeacherPricingOverride(undefined), null);
+  assert.equal(parseTeacherPricingOverride({ amount: 50 }), null); // not enabled
+  assert.equal(parseTeacherPricingOverride({ enabled: true }), null); // no amount
+  assert.equal(
+    parseTeacherPricingOverride({ enabled: true, amount: -5 }),
+    null,
+  );
+});
+
+test("parseTeacherPricingOverride accepts amount 0 (free) and a positive fee", () => {
+  assert.deepEqual(parseTeacherPricingOverride({ enabled: true, amount: 0 }), {
+    amount: 0,
+    currencyCode: null,
+  });
+  assert.deepEqual(
+    parseTeacherPricingOverride({
+      enabled: true,
+      amount: 30,
+      currencyCode: "EGP",
+    }),
+    { amount: 30, currencyCode: "EGP" },
+  );
+});
+
+test("resolvePricingWithOverride falls back to market when no override", () => {
+  const market = { isPaid: true, amount: 100, currencyCode: "EGP" };
+  const resolved = resolvePricingWithOverride(market, null);
+  assert.equal(resolved.source, "market");
+  assert.deepEqual(resolved.pricing, market);
+});
+
+test("resolvePricingWithOverride: teacher override of 0 makes a paid market free", () => {
+  const market = { isPaid: true, amount: 100, currencyCode: "EGP" };
+  const resolved = resolvePricingWithOverride(market, {
+    amount: 0,
+    currencyCode: null,
+  });
+  assert.equal(resolved.source, "teacher_override");
+  assert.equal(resolved.pricing.isPaid, false);
+  assert.equal(resolved.pricing.amount, 0);
+  // Currency falls back to the market currency.
+  assert.equal(resolved.pricing.currencyCode, "EGP");
+});
+
+test("resolvePricingWithOverride: positive override wins over the market price", () => {
+  const market = { isPaid: true, amount: 100, currencyCode: "EGP" };
+  const resolved = resolvePricingWithOverride(market, {
+    amount: 40,
+    currencyCode: "SAR",
+  });
+  assert.equal(resolved.source, "teacher_override");
+  assert.equal(resolved.pricing.isPaid, true);
+  assert.equal(resolved.pricing.amount, 40);
+  assert.equal(resolved.pricing.currencyCode, "SAR");
 });

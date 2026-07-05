@@ -331,6 +331,57 @@ void main() {
   );
 
   testWidgets(
+    'free session with payment provider disabled shows no payment error '
+    'and enables submit once a slot is selected',
+    (tester) async {
+      final slots = [_slot(1)];
+
+      await tester.pumpWidget(
+        MaterialApp(
+          theme: AppTheme.getLightTheme(primaryColor: AppColors.defaultPrimary),
+          localizationsDelegates: const [
+            QuranSessionsLocalizations.delegate,
+            GlobalMaterialLocalizations.delegate,
+            GlobalWidgetsLocalizations.delegate,
+          ],
+          supportedLocales: QuranSessionsLocalizations.supportedLocales,
+          home: BlocProvider<BookingBloc>(
+            create: (_) => SeededBookingBloc(
+              seed: BookingSelecting(
+                teacherId: 'teacher_1',
+                availableSlots: slots,
+                selectedSlot: slots.first,
+                selectedCallType: SessionCallType.videoCall,
+                pricingType: SessionPricingType.free,
+                sessionPrice: null,
+                // Provider off must not surface any payment error for free.
+                paymentProviderAvailable: false,
+              ),
+            ),
+            child: const BookingScreen(
+              teacherId: 'teacher_1',
+              studentId: 'student_1',
+            ),
+          ),
+        ),
+      );
+      await tester.pumpAndSettle();
+
+      expect(find.text('Free'), findsOneWidget);
+      expect(
+        find.textContaining('payment is not available'),
+        findsNothing,
+      );
+      final button = tester.widget<TilawaButton>(
+        find.byWidgetPredicate(
+          (w) => w is TilawaButton && w.text == 'Confirm booking',
+        ),
+      );
+      expect(button.onPressed, isNotNull);
+    },
+  );
+
+  testWidgets(
     'paid session with payment provider disabled blocks booking in the UI',
     (tester) async {
       final slots = [_slot(1)];
@@ -384,6 +435,63 @@ void main() {
         ),
       );
       expect(button.onPressed, isNull);
+    },
+  );
+
+  testWidgets(
+    'free session shows no payment error and enables the CTA even when the '
+    'payment provider is unavailable',
+    (tester) async {
+      final slots = [_slot(1)];
+
+      await tester.pumpWidget(
+        MaterialApp(
+          theme: AppTheme.getLightTheme(primaryColor: AppColors.defaultPrimary),
+          localizationsDelegates: const [
+            QuranSessionsLocalizations.delegate,
+            GlobalMaterialLocalizations.delegate,
+            GlobalWidgetsLocalizations.delegate,
+          ],
+          supportedLocales: QuranSessionsLocalizations.supportedLocales,
+          home: BlocProvider<BookingBloc>(
+            create: (_) => SeededBookingBloc(
+              seed: BookingSelecting(
+                teacherId: 'teacher_1',
+                availableSlots: slots,
+                selectedSlot: slots.first,
+                selectedCallType: SessionCallType.videoCall,
+                // Free session: no price, provider unavailability is irrelevant.
+                pricingType: SessionPricingType.free,
+                sessionPrice: null,
+                paymentProviderAvailable: false,
+              ),
+            ),
+            child: const BookingScreen(
+              teacherId: 'teacher_1',
+              studentId: 'student_1',
+            ),
+          ),
+        ),
+      );
+      await tester.pumpAndSettle();
+
+      // The paid-session payment-unavailable notice must NOT appear.
+      expect(
+        find.text(
+          'This session requires payment, but payment is not available '
+          'yet. Booking is temporarily unavailable.',
+        ),
+        findsNothing,
+      );
+      // The price summary shows the session as free.
+      expect(find.text('Free'), findsOneWidget);
+      // A valid slot alone enables submission for a free session.
+      final button = tester.widget<TilawaButton>(
+        find.byWidgetPredicate(
+          (w) => w is TilawaButton && w.text == 'Confirm booking',
+        ),
+      );
+      expect(button.onPressed, isNotNull);
     },
   );
 }

@@ -54,6 +54,9 @@ service cloud.firestore {
         && incomingUnchanged('totalSessionsCompleted')
         && incomingUnchanged('teacherStatus')
         && incomingUnchanged('manualPaymentPrice')
+        // Pricing is admin-controlled (setTeacherSessionPricing CF) — a teacher
+        // must never set their own session price override.
+        && incomingUnchanged('sessionPriceOverride')
         && incomingUnchanged('createdAt');
     }
 

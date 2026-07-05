@@ -430,6 +430,34 @@ void main() {
     );
 
     blocTest<BookingBloc, BookingState>(
+      'free session with payment provider unavailable still allows booking',
+      build: () => buildWithQuote(
+        FakeSessionPricingQuoteGateway(
+          quote: const SessionPricingQuote(
+            pricingType: SessionPricingType.free,
+            amount: 0,
+            currencyCode: 'USD',
+            paymentRequired: false,
+            // Provider off must never gate a free session.
+            paymentProviderAvailable: false,
+          ),
+        ),
+      ),
+      act: (b) async {
+        openScreen(b);
+        await b.stream.firstWhere((s) => s is BookingSelecting);
+        final selecting = b.state as BookingSelecting;
+        b.add(SlotSelected(selecting.availableSlots.first));
+      },
+      verify: (b) {
+        final state = b.state as BookingSelecting;
+        check(state.isPaymentBlocked).isFalse();
+        check(state.selectedSlot).isNotNull();
+        check(state.canSubmit).isTrue();
+      },
+    );
+
+    blocTest<BookingBloc, BookingState>(
       'paid quote with provider available shows the price and permits submit',
       build: () => buildWithQuote(
         FakeSessionPricingQuoteGateway(

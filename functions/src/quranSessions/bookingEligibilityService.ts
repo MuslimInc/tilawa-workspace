@@ -51,6 +51,19 @@ export interface ResolvedPricing {
   currencyCode: string;
 }
 
+/** Where the authoritative price came from — recorded on the fee snapshot. */
+export type PricingSource = "teacher_override" | "market";
+
+/**
+ * Admin-configured teacher-level price. When enabled it overrides the market
+ * default for this teacher (amount 0 = the teacher teaches for free even in a
+ * paid market). Stored on `quran_teacher_profiles/{id}.sessionPriceOverride`.
+ */
+export interface TeacherPricingOverride {
+  amount: number;
+  currencyCode: string | null;
+}
+
 export interface BookingEligibilityContext {
   student: StudentEligibilityProfile;
   teacher: TeacherEligibilityProfile;
@@ -59,9 +72,55 @@ export interface BookingEligibilityContext {
   /** Only blocking when the market doc explicitly disables the country. */
   marketEnabled: boolean;
   pricing: ResolvedPricing;
+  /** Provenance of [pricing] — teacher override vs market default. */
+  pricingSource: PricingSource;
 }
 
 // ── Pure helpers (unit-tested, no I/O) ──────────────────────────────────────
+
+/**
+ * Parses an admin-configured teacher price override. Returns null (fall back
+ * to market) unless the override is explicitly enabled with a valid,
+ * non-negative amount. An amount of 0 is valid and means "free".
+ */
+export function parseTeacherPricingOverride(
+  raw: unknown,
+): TeacherPricingOverride | null {
+  if (raw == null || typeof raw !== "object") return null;
+  const o = raw as Record<string, unknown>;
+  if (o.enabled !== true) return null;
+  const amount = o.amount;
+  if (typeof amount !== "number" || !Number.isFinite(amount) || amount < 0) {
+    return null;
+  }
+  const currencyCode =
+    typeof o.currencyCode === "string" && o.currencyCode.trim().length > 0
+      ? o.currencyCode
+      : null;
+  return { amount, currencyCode };
+}
+
+/**
+ * Resolves the authoritative price: an enabled teacher override wins over the
+ * market default (0 ⇒ free). Currency falls back to the market currency when
+ * the override does not specify one. Returns the source for the fee snapshot.
+ */
+export function resolvePricingWithOverride(
+  marketPricing: ResolvedPricing,
+  override: TeacherPricingOverride | null,
+): { pricing: ResolvedPricing; source: PricingSource } {
+  if (override == null) {
+    return { pricing: marketPricing, source: "market" };
+  }
+  return {
+    pricing: {
+      isPaid: override.amount > 0,
+      amount: override.amount,
+      currencyCode: override.currencyCode ?? marketPricing.currencyCode,
+    },
+    source: "teacher_override",
+  };
+}
 
 /** Calendar age in whole years, matching the domain `_calendarAge`. */
 export function calendarAge(dob: Date, now: Date): number {
@@ -354,7 +413,24 @@ export async function loadBookingEligibilityContext(
     };
   }
 
-  return { student, teacher, policy, market, marketEnabled, pricing };
+  // Admin-configured teacher price override wins over the market default
+  // (0 ⇒ this teacher is free even in a paid market). Applied here so the
+  // quote (getBookingPricingQuote) and the booking (createSessionBooking)
+  // share one resolution and can never disagree.
+  const teacherOverride = parseTeacherPricingOverride(
+    teacherData.sessionPriceOverride,
+  );
+  const resolved = resolvePricingWithOverride(pricing, teacherOverride);
+
+  return {
+    student,
+    teacher,
+    policy,
+    market,
+    marketEnabled,
+    pricing: resolved.pricing,
+    pricingSource: resolved.source,
+  };
 }
 
 /**

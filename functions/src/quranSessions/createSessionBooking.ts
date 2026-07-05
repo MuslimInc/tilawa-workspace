@@ -382,6 +382,7 @@ async function handleCreateSessionBooking(
           amount: pricing.amount,
           currencyCode: pricing.currencyCode,
           pricingType: serverPricingType,
+          pricingSource: eligibility.pricingSource,
           policyVersion: eligibility.market.policyVersion,
           capturedAt: now,
         };

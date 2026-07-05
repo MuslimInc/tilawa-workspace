@@ -4,6 +4,7 @@ import assert from "node:assert/strict";
 import { buildPricingQuote } from "../../src/quranSessions/getBookingPricingQuote";
 import {
   assertBookingEligible,
+  resolvePricingWithOverride,
   type BookingEligibilityContext,
 } from "../../src/quranSessions/bookingEligibilityService";
 
@@ -61,6 +62,7 @@ function context(overrides: {
       amount: fee,
       currencyCode: currency,
     },
+    pricingSource: "market",
   };
 }
 
@@ -103,4 +105,26 @@ test("quote and booking resolve the identical price from one context", () => {
   assert.equal(quote.amount, bookingPricing.amount);
   assert.equal(quote.currencyCode, bookingPricing.currencyCode);
   assert.equal(quote.isFree, !bookingPricing.isPaid);
+});
+
+test("a teacher override of 0 produces a free quote even in a paid market", () => {
+  // Market prices 100 EGP, but the admin set this teacher free: resolution
+  // (resolvePricingWithOverride) runs before buildPricingQuote, so the quote
+  // the student sees is free — matching what the booking will record.
+  const ctx = context({ sessionFeeAmount: 100, currencyCode: "EGP" });
+  const resolved = resolvePricingWithOverride(ctx.pricing, {
+    amount: 0,
+    currencyCode: null,
+  });
+  const overriddenCtx = {
+    ...ctx,
+    pricing: resolved.pricing,
+    pricingSource: resolved.source,
+  };
+  const quote = buildPricingQuote(overriddenCtx, false);
+  assert.equal(quote.isFree, true);
+  assert.equal(quote.pricingType, "free");
+  assert.equal(quote.paymentRequired, false);
+  // A free session is bookable regardless of payment provider availability.
+  assert.equal(quote.payableAmount, 0);
 });

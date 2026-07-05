@@ -315,6 +315,41 @@ test("rules: verified teacher owner can update externalMeetingUrl", async () => 
   assert.equal(snap.data()?.externalMeetingUrl, "https://meet.google.com/teacher-room");
 });
 
+test("rules: verified teacher owner cannot self-set sessionPriceOverride", async () => {
+  await testEnv.clearFirestore();
+  await testEnv.withSecurityRulesDisabled(async (context) => {
+    const adminDb = context.firestore();
+    await setDoc(doc(adminDb, "quran_teacher_profiles/teacher1"), {
+      userId: "uid_teacher",
+      displayName: "Teacher",
+      publicBio: "Bio",
+      verificationStatus: "verified",
+      teachingLanguages: ["ar"],
+      specializations: ["tajweed"],
+      averageRating: 0,
+      reviewCount: 0,
+      isActive: true,
+      profileCompleteness: "complete",
+      isPubliclyVisible: true,
+      createdAt: new Date(),
+      updatedAt: new Date(),
+    });
+  });
+
+  const teacherDb = testEnv.authenticatedContext("uid_teacher").firestore();
+  // Pricing is admin-controlled — a teacher must not set their own price.
+  await assertFails(
+    setDoc(
+      doc(teacherDb, "quran_teacher_profiles/teacher1"),
+      {
+        sessionPriceOverride: { enabled: true, amount: 0 },
+        updatedAt: new Date(),
+      },
+      { merge: true },
+    ),
+  );
+});
+
 test("rules: client cannot create or mutate quran_bookings", async () => {
   await testEnv.clearFirestore();
   await seedSlotLock();
