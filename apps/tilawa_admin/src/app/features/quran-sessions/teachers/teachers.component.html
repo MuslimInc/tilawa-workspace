@@ -105,7 +105,19 @@
                       (click)="openModeration(teacher.id, TeacherProfileModerationAction.Activate)"
                     />
                   }
+                  <app-tilawa-button
+                    variant="secondary"
+                    size="xs"
+                    [label]="'teacherPricing_action' | t"
+                    (click)="togglePricing(teacher.id)"
+                  />
                 </div>
+                @if (pricingTeacherId === teacher.id) {
+                  <app-teacher-pricing-panel
+                    [teacher]="teacher"
+                    (saved)="onPricingSaved()"
+                  />
+                }
               </div>
             </td>
             <td class="font-mono text-xs tilawa-table-col-mono" [title]="teacher.userId">

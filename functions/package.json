@@ -23,6 +23,8 @@
     "quran-sessions:staging-smoke": "ts-node --project tsconfig.scripts.json scripts/stagingFreeBetaSmoke.ts",
     "quran-sessions:verify-teacher-activation": "ts-node --project tsconfig.scripts.json scripts/verifyTeacherActivation.ts",
     "quran-sessions:backfill-approved-activation": "ts-node --project tsconfig.scripts.json scripts/backfillApprovedTeacherActivation.ts",
+    "quran-sessions:set-teacher-pricing": "ts-node --project tsconfig.scripts.json scripts/setTeacherPricingAdmin.ts",
+    "quran-sessions:set-teacher-pricing:apply": "ts-node --project tsconfig.scripts.json scripts/setTeacherPricingAdmin.ts --apply",
     "migrate:fcm-tokens": "ts-node --project tsconfig.scripts.json scripts/migrateFcmTokensToActiveField.ts",
     "migrate:fcm-tokens:apply": "ts-node --project tsconfig.scripts.json scripts/migrateFcmTokensToActiveField.ts --apply",
     "test": "node -r ts-node/register --test test/**/*.test.ts",

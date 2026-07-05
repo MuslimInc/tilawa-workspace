@@ -21,6 +21,7 @@ import { TilawaAvatarComponent } from '../../../shared/components/tilawa-avatar/
 import { TranslatePipe } from '../../../core/i18n/translate.pipe';
 import { StatusLabelPipe } from '../../../core/i18n/status-label.pipe';
 import { SortRequest } from '../../../core/domain/entities/pagination.types';
+import { TeacherPricingPanelComponent } from '../teacher-pricing/teacher-pricing-panel.component';
 
 @Component({
   selector: 'app-teachers',
@@ -42,6 +43,7 @@ import { SortRequest } from '../../../core/domain/entities/pagination.types';
     TilawaAvatarComponent,
     TranslatePipe,
     StatusLabelPipe,
+    TeacherPricingPanelComponent,
   ],
   templateUrl: './teachers.component.html',
 })
@@ -66,7 +68,19 @@ export class TeachersComponent implements OnInit {
   pendingAction: TeacherProfileModerationAction | null = null;
   readonly TeacherProfileModerationAction = TeacherProfileModerationAction;
 
+  /** Row whose pricing panel is expanded; '' when none. */
+  pricingTeacherId = '';
+
   ngOnInit(): void {
+    void this.reload();
+  }
+
+  togglePricing(teacherId: string): void {
+    this.pricingTeacherId = this.pricingTeacherId === teacherId ? '' : teacherId;
+  }
+
+  onPricingSaved(): void {
+    this.pricingTeacherId = '';
     void this.reload();
   }
 

@@ -3,6 +3,7 @@ import { TeacherApplication } from '../../domain/entities/teacher-application.en
 import {
   ProfileCompleteness,
   TeacherProfile,
+  TeacherSessionPriceOverride,
   TeacherVerificationStatus,
 } from '../../domain/entities/teacher-profile.entity';
 import { QuranSessionsUser, UserGender } from '../../domain/entities/quran-sessions-user.entity';
@@ -125,6 +126,11 @@ export interface TeacherProfileFirestoreDto {
   isActive?: boolean;
   profileCompleteness?: string;
   isPubliclyVisible?: boolean;
+  sessionPriceOverride?: {
+    enabled?: boolean;
+    amount?: number;
+    currencyCode?: string | null;
+  };
   createdAt?: unknown;
   updatedAt?: unknown;
 }
@@ -240,10 +246,33 @@ export class TeacherProfileMapper {
       isActive,
       profileCompleteness,
       isPubliclyVisible,
+      sessionPriceOverride: parseSessionPriceOverride(dto.sessionPriceOverride),
       createdAt: readRequiredTimestamp(dto.createdAt, now),
       updatedAt: readRequiredTimestamp(dto.updatedAt, now),
     };
   }
+}
+
+/**
+ * Reads the admin price override. Returns null (⇒ inherit market) unless it is
+ * explicitly enabled with a valid non-negative amount — mirrors the server's
+ * `parseTeacherPricingOverride` so the admin UI and booking engine agree.
+ */
+export function parseSessionPriceOverride(
+  raw: TeacherProfileFirestoreDto['sessionPriceOverride'],
+): TeacherSessionPriceOverride | null {
+  if (!raw || raw.enabled !== true) {
+    return null;
+  }
+  const amount = raw.amount;
+  if (typeof amount !== 'number' || !Number.isFinite(amount) || amount < 0) {
+    return null;
+  }
+  const currencyCode =
+    typeof raw.currencyCode === 'string' && raw.currencyCode.trim().length > 0
+      ? raw.currencyCode
+      : null;
+  return { enabled: true, amount, currencyCode };
 }
 
 export class QuranSessionsUserMapper {

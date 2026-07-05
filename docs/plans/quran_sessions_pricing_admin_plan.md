@@ -99,10 +99,17 @@ paid market. Market pricing stays the default/fallback.
 - **Client**: no change required — the app already consumes the server quote,
   so the override flows through automatically once set.
 
-**Remaining (UI)**: Angular teacher-detail "Pricing" panel calling
-`setTeacherSessionPricing` (Free / Fixed toggle, amount, currency, "inherit
-market" clear action). Until it ships, set the override via the callable or
-Firestore console.
+- **Ops script** (SHIPPED): `npm run quran-sessions:set-teacher-pricing` (dry
+  run) / `:set-teacher-pricing:apply` — `--teacherId --mode=free|fixed|clear
+  [--amount --currency]`. Reuses `buildSessionPriceOverrideWrite`, so it writes
+  exactly what the callable does, plus the same audit event.
+
+- **Admin Panel UI** (SHIPPED): teacher-list row "Pricing" action opens
+  `TeacherPricingPanelComponent` (Inherit market / Free / Fixed toggle, amount,
+  currency) → `TeacherPricingFacade` → `FirebaseTeacherPricingGateway` →
+  `setTeacherSessionPricing`. The teacher entity/mapper now read
+  `sessionPriceOverride` so the panel shows current state. Facade + mapper
+  vitest specs added.
 
 ## Follow-ups
 
@@ -110,6 +117,8 @@ Firestore console.
    `sessionPolicyResolver.ts` and the client catalog data source; include
    `minSessionPrice` in the client city DTO mapping.
 2. `updateMarketPricingConfig` callable + rules-parity tests.
-3. Angular market-pricing page + teacher-pricing panel + facade/mapper specs.
+3. Angular market-pricing page (country-level) + facade/mapper specs.
 4. When a real payment provider lands, replace the env gate with per-market
    provider config surfaced on the same admin page.
+5. Pre-existing: 3 admin facade specs fail (missing `UserDeletionGateway` test
+   provider) — unrelated to pricing, tracked separately.
