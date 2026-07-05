@@ -77,12 +77,39 @@ quran_session_market_configs/{countryCode}
     minSessionPrice?, currencyCode?, cities?…   // overlay fields
 ```
 
+## Teacher-level price override (SHIPPED — backend)
+
+Per-teacher override so a teacher can be free (or set a specific fee) even in a
+paid market. Market pricing stays the default/fallback.
+
+- **Data**: `quran_teacher_profiles/{teacherId}.sessionPriceOverride =
+  { enabled: bool, amount: number, currencyCode?: string, updatedAt, updatedBy }`.
+  `enabled: true, amount: 0` ⇒ the teacher is free. Disabled/absent ⇒ market.
+- **Resolution** (`bookingEligibilityService.ts`): `parseTeacherPricingOverride`
+  + `resolvePricingWithOverride` fold the override into `pricing` inside
+  `loadBookingEligibilityContext` — the single path shared by
+  `getBookingPricingQuote` (preview) and `createSessionBooking` (booking), so
+  price badge, booking screen, and recorded fee can never disagree. The
+  authoritative `pricingSource` (`teacher_override` | `market`) is stamped on
+  the booking `feeSnapshot`.
+- **Write path**: admin-only callable `setTeacherSessionPricing` (validates
+  amount ≥ 0, normalizes currency, audit event `set_teacher_session_pricing`).
+  `firestore.rules` adds `sessionPriceOverride` to
+  `teacherProfileTrustFieldsUnchanged` so a teacher can never self-price.
+- **Client**: no change required — the app already consumes the server quote,
+  so the override flows through automatically once set.
+
+**Remaining (UI)**: Angular teacher-detail "Pricing" panel calling
+`setTeacherSessionPricing` (Free / Fixed toggle, amount, currency, "inherit
+market" clear action). Until it ships, set the override via the callable or
+Firestore console.
+
 ## Follow-ups
 
 1. Unify city override source (subcollection) between
    `sessionPolicyResolver.ts` and the client catalog data source; include
    `minSessionPrice` in the client city DTO mapping.
 2. `updateMarketPricingConfig` callable + rules-parity tests.
-3. Angular market-pricing page + facade + mapper specs.
+3. Angular market-pricing page + teacher-pricing panel + facade/mapper specs.
 4. When a real payment provider lands, replace the env gate with per-market
    provider config surfaced on the same admin page.
