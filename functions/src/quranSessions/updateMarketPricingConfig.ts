@@ -3,7 +3,7 @@ import { getFirestore, FieldValue } from "firebase-admin/firestore";
 
 import { requireAdmin } from "./sessionAuth";
 import { sessionCallableHttpsOptions } from "./sessionCallableOptions";
-import { validateMarketConfigForBooking } from "./sessionPolicyResolver";
+
 
 export interface CityPricingOverride {
   cityId: string;
@@ -47,18 +47,15 @@ export const updateMarketPricingConfig = onCall(
       currencyCode: data.currencyCode.trim().toUpperCase(),
     };
 
-    // Before writing, validate each city (to fail closed).
     for (const city of data.cities) {
-      const cityData = {
-        isEnabled: city.isEnabled,
-        minSessionPrice: city.minSessionPrice ?? null,
-      };
-      const validation = validateMarketConfigForBooking(marketDataPatch, cityData, city.cityId);
-      if (!validation.valid) {
-        throw new HttpsError(
-          "failed-precondition",
-          `Validation failed for city ${city.cityId}: ${validation.invalidFields.join(", ")} ${validation.missingFields.join(", ")}`
-        );
+      if (!city.cityId || typeof city.cityId !== "string") {
+        throw new HttpsError("invalid-argument", "cityId must be a valid string.");
+      }
+      if (typeof city.isEnabled !== "boolean") {
+        throw new HttpsError("invalid-argument", `isEnabled must be boolean for city ${city.cityId}.`);
+      }
+      if (city.minSessionPrice != null && (typeof city.minSessionPrice !== "number" || !Number.isFinite(city.minSessionPrice) || city.minSessionPrice < 0)) {
+        throw new HttpsError("invalid-argument", `minSessionPrice must be a finite number >= 0 for city ${city.cityId}.`);
       }
     }
 
