@@ -137,6 +137,10 @@ class _TasbeehView extends StatelessWidget {
             children: [
               const Positioned.fill(child: AthkarAmbientBackground()),
               SafeArea(
+                // The pinned TilawaBottomActionInset owns the bottom clearance
+                // (floatingBottomPadding + extraBottom); a bottom SafeArea here
+                // would double-count the device inset. Matches the auth screens.
+                bottom: false,
                 child: Column(
                   children: [
                     Expanded(
