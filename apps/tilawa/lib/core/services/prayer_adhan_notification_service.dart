@@ -830,15 +830,9 @@ class PrayerAdhanNotificationService
   }
 
   @override
-  Future<void> debugScheduleTestAdhan() async {
+  Future<AdhanDebugScheduleResult> debugScheduleTestAdhan() async {
     const String tag = '[AdhanManualTest]';
     try {
-      final bool isIgnoringBattery = await _adhanPlayer
-          .isIgnoringBatteryOptimizations();
-      logger.i(
-        '$tag Starting test schedule sequence (delay=10s) | batteryOptimizationsIgnored=$isIgnoringBattery',
-      );
-
       final DateTime now = DateTime.now();
       final DateTime triggerAt = now.add(const Duration(seconds: 10));
       final int testId = PrayerNotificationConfig.debugManualTestId;
@@ -847,12 +841,20 @@ class PrayerAdhanNotificationService
           .isPermissionGranted();
       if (!hasPermission) {
         logger.w('$tag Permission missing: POST_NOTIFICATIONS');
-        return;
+        return const AdhanDebugScheduleResult.blocked();
       }
+
+      final bool isIgnoringBattery = await _adhanPlayer
+          .isIgnoringBatteryOptimizations();
+      logger.i(
+        '$tag Starting test schedule sequence (delay=10s) | batteryOptimizationsIgnored=$isIgnoringBattery',
+      );
 
       final bool canExact = await canScheduleExactAlarms();
       if (!canExact) {
-        logger.w('$tag Permission missing: USE_EXACT_ALARM');
+        logger.w(
+          '$tag Permission missing: SCHEDULE_EXACT_ALARM (Alarms & reminders)',
+        );
       }
 
       bool nativeSuccess = false;
@@ -889,6 +891,10 @@ class PrayerAdhanNotificationService
       );
 
       if (!nativeSuccess) {
+        logger.w(
+          '$tag Native schedule failed; using Flutter Local Notifications '
+          'fallback (${canExact ? 'exact' : 'inexact'}).',
+        );
         await _notifications.zonedSchedule(
           id: testId,
           title: 'MeMuslim Debug',
@@ -913,9 +919,16 @@ class PrayerAdhanNotificationService
             'notification_id': testId,
           }),
         );
+        return AdhanDebugScheduleResult.fallback(
+          exactAlarmAvailable: canExact,
+        );
       }
+      return AdhanDebugScheduleResult.native(exactAlarmAvailable: canExact);
     } catch (e, st) {
       logger.e('$tag Failed: $e', error: e, stackTrace: st);
+      return const AdhanDebugScheduleResult.blocked(
+        notificationPermissionGranted: true,
+      );
     }
   }
 

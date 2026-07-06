@@ -3969,6 +3969,14 @@
     "@adhanDebugScheduled": {
         "description": "Confirmation shown after scheduling the debug Adhan test"
     },
+    "adhanDebugNativeInexactScheduled": "تمت جدولة اختبار الأذان أصليًا بتوقيت تقريبي. فعّل التنبيهات والتذكيرات للتوقيت الدقيق.",
+    "@adhanDebugNativeInexactScheduled": {
+        "description": "Warning shown when the debug Adhan test used native inexact alarm fallback because exact alarm permission is unavailable"
+    },
+    "adhanDebugFallbackScheduled": "تمت جدولة اختبار الأذان بالمسار الاحتياطي. فعّل التنبيهات والتذكيرات للتشغيل الأصلي.",
+    "@adhanDebugFallbackScheduled": {
+        "description": "Warning shown when the debug Adhan test used local-notification fallback because native exact alarm scheduling was unavailable"
+    },
     "adhanDebugPermissionMissing": "يلزم إذن الإشعارات قبل جدولة اختبار الأذان",
     "@adhanDebugPermissionMissing": {
         "description": "Error shown when notification permission is missing for the debug Adhan test"

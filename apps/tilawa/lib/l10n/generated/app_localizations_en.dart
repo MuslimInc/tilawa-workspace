@@ -3465,6 +3465,14 @@ class AppLocalizationsEn extends AppLocalizations {
       'Adhan test scheduled for 10 seconds from now';
 
   @override
+  String get adhanDebugNativeInexactScheduled =>
+      'Native Adhan test scheduled with inexact timing. Enable Alarms & reminders for exact timing.';
+
+  @override
+  String get adhanDebugFallbackScheduled =>
+      'Fallback Adhan test scheduled. Enable Alarms & reminders for native playback.';
+
+  @override
   String get adhanDebugPermissionMissing =>
       'Notification permission is required before scheduling the Adhan test';
 

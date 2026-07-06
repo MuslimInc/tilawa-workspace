@@ -1,5 +1,6 @@
 import 'dart:async';
 
+import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:mockito/annotations.dart';
 import 'package:mockito/mockito.dart';
@@ -92,6 +93,41 @@ void main() {
         expect(navCalls.single.extra, payload);
         verify(mockPlayer.isAdhanPlaying()).called(1);
         verify(mockPlayer.getActiveAdhanPayload()).called(1);
+      },
+    );
+
+    test(
+      'routes active adhan before skipping an already processed launch id',
+      () async {
+        const int notificationId = 20000000;
+        const String payload = '{"prayer_name":"fajr"}';
+        AppRouter.lastProcessedNotificationId = notificationId;
+        when(mockPlayer.isAdhanPlaying()).thenAnswer((_) async => true);
+        when(
+          mockPlayer.getActiveAdhanPayload(),
+        ).thenAnswer((_) async => payload);
+        when(mockDispatcher.getNotificationAppLaunchDetails()).thenAnswer(
+          (_) async => const NotificationAppLaunchDetails(
+            true,
+            notificationResponse: NotificationResponse(
+              id: notificationId,
+              notificationResponseType:
+                  NotificationResponseType.selectedNotification,
+              payload: payload,
+            ),
+          ),
+        );
+
+        final service = makeService();
+        await service.handleAppResume();
+
+        expect(navCalls, hasLength(1));
+        expect(
+          navCalls.single.location,
+          const PrayerNotificationStatusRoute().location,
+        );
+        expect(navCalls.single.extra, payload);
+        verifyNever(mockDispatcher.processLaunchNotification());
       },
     );
 

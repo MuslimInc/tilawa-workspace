@@ -10,10 +10,10 @@ interface PrayerStorage {
     fun addActiveId(id: Int)
     fun removeActiveId(id: Int)
     fun clearActiveIds()
-    
+
     fun getPendingAlarmsJson(): String?
     fun setPendingAlarmsJson(json: String?)
-    
+
     fun setNeedsReschedule(needs: Boolean)
     fun needsReschedule(): Boolean
 
@@ -26,6 +26,16 @@ interface PrayerStorage {
  */
 interface PrayerAlarmManager {
     fun scheduleExact(
+        id: Int,
+        name: String,
+        key: String,
+        triggerMs: Long,
+        sound: String,
+        locationName: String = "",
+        languageCode: String = "",
+    ): Boolean
+
+    fun scheduleInexact(
         id: Int,
         name: String,
         key: String,

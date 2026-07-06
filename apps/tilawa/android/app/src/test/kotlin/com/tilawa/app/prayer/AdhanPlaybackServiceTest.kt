@@ -29,10 +29,10 @@ class AdhanPlaybackServiceTest {
 
     companion object {
         /** Flutter audible adhan channel — must never host native FGS playback. */
-        private const val AUDIBLE_ADHAN_CHANNEL_ID = "com.tilawa.app.prayer_adhan_v4"
+        private const val AUDIBLE_ADHAN_CHANNEL_ID = "com.tilawa.app.prayer_adhan_v5"
 
         /** Mirrors native [AdhanPlaybackService] silent foreground channel id. */
-        private const val NATIVE_FG_CHANNEL_ID = "com.tilawa.app.prayer_adhan_silent_v4"
+        private const val NATIVE_FG_CHANNEL_ID = "com.tilawa.app.prayer_adhan_silent_v5"
     }
 
     private lateinit var context: Context

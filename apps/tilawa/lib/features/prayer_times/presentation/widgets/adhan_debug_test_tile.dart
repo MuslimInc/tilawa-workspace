@@ -81,14 +81,40 @@ class _AdhanDebugTestTileState extends State<AdhanDebugTestTile> {
       final prayerNotifications =
           widget.prayerNotificationService ??
           getIt<IPrayerAdhanNotificationService>();
-      await prayerNotifications.debugScheduleTestAdhan();
+      final result = await prayerNotifications.debugScheduleTestAdhan();
       if (!mounted) {
         return;
       }
+      if (!result.notificationPermissionGranted) {
+        TilawaFeedback.showToast(
+          context,
+          message: context.l10n.adhanDebugPermissionMissing,
+          variant: TilawaFeedbackVariant.error,
+        );
+        return;
+      }
+      if (!result.scheduled) {
+        TilawaFeedback.showToast(
+          context,
+          message: context.l10n.adhanDebugFailed,
+          variant: TilawaFeedbackVariant.error,
+        );
+        return;
+      }
+      final nativeExact =
+          result.nativeScheduleSuccess && result.exactAlarmAvailable;
+      final nativeInexact =
+          result.nativeScheduleSuccess && !result.exactAlarmAvailable;
       TilawaFeedback.showToast(
         context,
-        message: context.l10n.adhanDebugScheduled,
-        variant: TilawaFeedbackVariant.success,
+        message: nativeExact
+            ? context.l10n.adhanDebugScheduled
+            : nativeInexact
+            ? context.l10n.adhanDebugNativeInexactScheduled
+            : context.l10n.adhanDebugFallbackScheduled,
+        variant: nativeExact
+            ? TilawaFeedbackVariant.success
+            : TilawaFeedbackVariant.warning,
       );
     } catch (_) {
       if (mounted) {

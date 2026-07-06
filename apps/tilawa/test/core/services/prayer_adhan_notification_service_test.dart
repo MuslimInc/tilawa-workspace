@@ -762,7 +762,65 @@ void main() {
       });
 
       test(
-        'falls back to adhan channel (with sound) when native adhan scheduling fails',
+        'does not schedule FLN when exact alarms are denied but native fallback succeeds',
+        () async {
+          await initialize();
+          when(mockAndroidPlugin.canScheduleExactNotifications()).thenAnswer(
+            (_) async => false,
+          );
+          when(mockAdhanPlayer.isSupported).thenReturn(true);
+          when(
+            mockAdhanPlayer.scheduleAdhan(
+              id: anyNamed('id'),
+              scheduledTime: anyNamed('scheduledTime'),
+              prayerName: anyNamed('prayerName'),
+              prayerKey: anyNamed('prayerKey'),
+              locationName: anyNamed('locationName'),
+              sound: anyNamed('sound'),
+              languageCode: anyNamed('languageCode'),
+            ),
+          ).thenAnswer((_) async => true);
+
+          final PrayerSettingsEntity playAdhan = allEnabled.copyWith(
+            fajrNotification: allEnabled.fajrNotification.copyWith(
+              mode: PrayerAlertMode.adhan,
+            ),
+          );
+
+          await service.schedulePrayerNotifications(
+            settings: playAdhan,
+            prayerTimesForDays: [buildFutureDay(0)],
+            forceReschedule: true,
+          );
+
+          verify(
+            mockAdhanPlayer.scheduleAdhan(
+              id: anyNamed('id'),
+              scheduledTime: anyNamed('scheduledTime'),
+              prayerName: anyNamed('prayerName'),
+              prayerKey: anyNamed('prayerKey'),
+              locationName: anyNamed('locationName'),
+              sound: anyNamed('sound'),
+              languageCode: anyNamed('languageCode'),
+            ),
+          ).called(5);
+          verifyNever(
+            mockPlugin.zonedSchedule(
+              id: anyNamed('id'),
+              title: anyNamed('title'),
+              body: anyNamed('body'),
+              scheduledDate: anyNamed('scheduledDate'),
+              notificationDetails: anyNamed('notificationDetails'),
+              androidScheduleMode: anyNamed('androidScheduleMode'),
+              matchDateTimeComponents: anyNamed('matchDateTimeComponents'),
+              payload: anyNamed('payload'),
+            ),
+          );
+        },
+      );
+
+      test(
+        'falls back to adhan channel when native exact and inexact scheduling fail',
         () async {
           await initialize();
           when(mockAdhanPlayer.isSupported).thenReturn(true);
@@ -1903,7 +1961,10 @@ void main() {
           ),
         ).thenAnswer((_) async => false);
 
-        await service.debugScheduleTestAdhan();
+        final result = await service.debugScheduleTestAdhan();
+
+        expect(result.nativeScheduleSuccess, isFalse);
+        expect(result.fallbackScheduled, isTrue);
 
         verify(
           mockPlugin.zonedSchedule(
@@ -1939,7 +2000,54 @@ void main() {
             ),
           ).thenAnswer((_) async => true);
 
-          await service.debugScheduleTestAdhan();
+          final result = await service.debugScheduleTestAdhan();
+
+          expect(result.nativeScheduleSuccess, isTrue);
+          expect(result.fallbackScheduled, isFalse);
+
+          verifyNever(
+            mockPlugin.zonedSchedule(
+              id: anyNamed('id'),
+              title: anyNamed('title'),
+              body: anyNamed('body'),
+              scheduledDate: anyNamed('scheduledDate'),
+              notificationDetails: anyNamed('notificationDetails'),
+              androidScheduleMode: anyNamed('androidScheduleMode'),
+              matchDateTimeComponents: anyNamed('matchDateTimeComponents'),
+              payload: anyNamed('payload'),
+            ),
+          );
+        },
+      );
+
+      test(
+        'debugScheduleTestAdhan reports native inexact when exact permission is denied',
+        () async {
+          await initialize();
+          when(mockAndroidPlugin.canScheduleExactNotifications()).thenAnswer(
+            (_) async => false,
+          );
+          when(mockAdhanPlayer.isSupported).thenReturn(true);
+          when(mockAdhanPlayer.isIgnoringBatteryOptimizations()).thenAnswer(
+            (_) async => true,
+          );
+          when(
+            mockAdhanPlayer.scheduleAdhan(
+              id: anyNamed('id'),
+              scheduledTime: anyNamed('scheduledTime'),
+              prayerName: anyNamed('prayerName'),
+              prayerKey: anyNamed('prayerKey'),
+              locationName: anyNamed('locationName'),
+              sound: anyNamed('sound'),
+              languageCode: anyNamed('languageCode'),
+            ),
+          ).thenAnswer((_) async => true);
+
+          final result = await service.debugScheduleTestAdhan();
+
+          expect(result.nativeScheduleSuccess, isTrue);
+          expect(result.exactAlarmAvailable, isFalse);
+          expect(result.fallbackScheduled, isFalse);
 
           verifyNever(
             mockPlugin.zonedSchedule(
@@ -1962,7 +2070,10 @@ void main() {
           mockNotificationPermissions.isPermissionGranted(),
         ).thenAnswer((_) async => false);
 
-        await service.debugScheduleTestAdhan();
+        final result = await service.debugScheduleTestAdhan();
+
+        expect(result.notificationPermissionGranted, isFalse);
+        expect(result.scheduled, isFalse);
 
         verifyNever(
           mockPlugin.zonedSchedule(

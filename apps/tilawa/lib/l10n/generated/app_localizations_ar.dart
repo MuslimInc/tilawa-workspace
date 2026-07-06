@@ -3435,6 +3435,14 @@ class AppLocalizationsAr extends AppLocalizations {
   String get adhanDebugScheduled => 'تمت جدولة اختبار الأذان بعد 10 ثوانٍ';
 
   @override
+  String get adhanDebugNativeInexactScheduled =>
+      'تمت جدولة اختبار الأذان أصليًا بتوقيت تقريبي. فعّل التنبيهات والتذكيرات للتوقيت الدقيق.';
+
+  @override
+  String get adhanDebugFallbackScheduled =>
+      'تمت جدولة اختبار الأذان بالمسار الاحتياطي. فعّل التنبيهات والتذكيرات للتشغيل الأصلي.';
+
+  @override
   String get adhanDebugPermissionMissing =>
       'يلزم إذن الإشعارات قبل جدولة اختبار الأذان';
 

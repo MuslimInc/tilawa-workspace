@@ -90,6 +90,69 @@ void main() {
     );
   });
 
+  testWidgets(
+    'shows native inexact warning when exact alarm permission is missing',
+    (
+      tester,
+    ) async {
+      final permissionService = _FakeNotificationPermissionService();
+      final prayerNotificationService = _FakePrayerAdhanNotificationService(
+        debugScheduleResult: const AdhanDebugScheduleResult.native(
+          exactAlarmAvailable: false,
+        ),
+      );
+
+      await tester.pumpWidget(
+        _buildHarness(
+          permissionService: permissionService,
+          prayerNotificationService: prayerNotificationService,
+        ),
+      );
+
+      await tester.tap(find.text('Test Adhan in 10 seconds'));
+      await tester.pump();
+      await tester.pump(const Duration(milliseconds: 300));
+
+      expect(prayerNotificationService.debugScheduleCalls, 1);
+      expect(
+        find.text(
+          'Native Adhan test scheduled with inexact timing. Enable Alarms & reminders for exact timing.',
+        ),
+        findsOneWidget,
+      );
+    },
+  );
+
+  testWidgets('shows fallback warning when native scheduling fails', (
+    tester,
+  ) async {
+    final permissionService = _FakeNotificationPermissionService();
+    final prayerNotificationService = _FakePrayerAdhanNotificationService(
+      debugScheduleResult: const AdhanDebugScheduleResult.fallback(
+        exactAlarmAvailable: false,
+      ),
+    );
+
+    await tester.pumpWidget(
+      _buildHarness(
+        permissionService: permissionService,
+        prayerNotificationService: prayerNotificationService,
+      ),
+    );
+
+    await tester.tap(find.text('Test Adhan in 10 seconds'));
+    await tester.pump();
+    await tester.pump(const Duration(milliseconds: 300));
+
+    expect(prayerNotificationService.debugScheduleCalls, 1);
+    expect(
+      find.text(
+        'Fallback Adhan test scheduled. Enable Alarms & reminders for native playback.',
+      ),
+      findsOneWidget,
+    );
+  });
+
   testWidgets('does not schedule adhan when notification permission is denied', (
     tester,
   ) async {
@@ -121,7 +184,7 @@ void main() {
   });
 
   testWidgets('shows loading state and ignores repeat taps', (tester) async {
-    final completer = Completer<void>();
+    final completer = Completer<AdhanDebugScheduleResult>();
     final prayerNotificationService = _FakePrayerAdhanNotificationService(
       debugScheduleCompleter: completer,
     );
@@ -143,7 +206,9 @@ void main() {
 
     expect(prayerNotificationService.debugScheduleCalls, 1);
 
-    completer.complete();
+    completer.complete(
+      const AdhanDebugScheduleResult.native(exactAlarmAvailable: true),
+    );
     await tester.pumpAndSettle();
   });
 }
@@ -238,21 +303,32 @@ class _FakeNotificationPermissionService
 
 class _FakePrayerAdhanNotificationService
     implements IPrayerAdhanNotificationService {
-  _FakePrayerAdhanNotificationService({this.debugScheduleCompleter});
+  _FakePrayerAdhanNotificationService({
+    this.debugScheduleCompleter,
+    this.debugScheduleResult = const AdhanDebugScheduleResult.native(
+      exactAlarmAvailable: true,
+    ),
+  });
 
-  final Completer<void>? debugScheduleCompleter;
+  final Completer<AdhanDebugScheduleResult>? debugScheduleCompleter;
+  final AdhanDebugScheduleResult debugScheduleResult;
   int debugScheduleCalls = 0;
+  int exactAlarmChecks = 0;
 
   @override
   Future<void> cancelAllPrayerNotifications() async {}
 
   @override
-  Future<bool> canScheduleExactAlarms() async => true;
+  Future<bool> canScheduleExactAlarms() async {
+    exactAlarmChecks++;
+    return debugScheduleResult.exactAlarmAvailable;
+  }
 
   @override
-  Future<void> debugScheduleTestAdhan() {
+  Future<AdhanDebugScheduleResult> debugScheduleTestAdhan() {
     debugScheduleCalls++;
-    return debugScheduleCompleter?.future ?? Future<void>.value();
+    return debugScheduleCompleter?.future ??
+        Future<AdhanDebugScheduleResult>.value(debugScheduleResult);
   }
 
   @override

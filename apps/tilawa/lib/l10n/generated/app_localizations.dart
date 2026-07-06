@@ -6104,6 +6104,18 @@ abstract class AppLocalizations {
   /// **'Adhan test scheduled for 10 seconds from now'**
   String get adhanDebugScheduled;
 
+  /// Warning shown when the debug Adhan test used native inexact alarm fallback because exact alarm permission is unavailable
+  ///
+  /// In en, this message translates to:
+  /// **'Native Adhan test scheduled with inexact timing. Enable Alarms & reminders for exact timing.'**
+  String get adhanDebugNativeInexactScheduled;
+
+  /// Warning shown when the debug Adhan test used local-notification fallback because native exact alarm scheduling was unavailable
+  ///
+  /// In en, this message translates to:
+  /// **'Fallback Adhan test scheduled. Enable Alarms & reminders for native playback.'**
+  String get adhanDebugFallbackScheduled;
+
   /// Error shown when notification permission is missing for the debug Adhan test
   ///
   /// In en, this message translates to:

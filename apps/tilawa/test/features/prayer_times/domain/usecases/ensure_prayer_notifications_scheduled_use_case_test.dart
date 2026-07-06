@@ -359,7 +359,8 @@ class _FakePrayerAdhanNotificationService
   Future<void> requestExactAlarmPermission() async {}
 
   @override
-  Future<void> debugScheduleTestAdhan() async {}
+  Future<AdhanDebugScheduleResult> debugScheduleTestAdhan() async =>
+      const AdhanDebugScheduleResult.native(exactAlarmAvailable: true);
 }
 
 class _FakeAdhanAlarmPlayer implements IAdhanAlarmPlayer {
