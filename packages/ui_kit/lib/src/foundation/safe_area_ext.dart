@@ -93,11 +93,10 @@ extension TilawaSafeAreaX on BuildContext {
   /// - keyboard height + buffer when keyboard is visible
   /// - floating bottom padding when keyboard is hidden
   double get keyboardAwareBottomPadding {
-    if (isKeyboardVisible) {
-      return effectiveKeyboardInset + theme.tokens.spaceSmall;
-    }
-
-    return floatingBottomPadding;
+    return math.max(
+      floatingBottomPadding,
+      effectiveKeyboardInset + theme.tokens.spaceSmall,
+    );
   }
 
   /// For cases where you want direct control over minimum spacing.
@@ -111,16 +110,11 @@ extension TilawaSafeAreaX on BuildContext {
     double? fallbackMinSpacing,
   }) {
     final buffer = keyboardBuffer ?? theme.tokens.spaceSmall;
+    final baseSpacing = fallbackMinSpacing != null
+        ? math.max(floatingBottomPadding, fallbackMinSpacing)
+        : floatingBottomPadding;
 
-    if (isKeyboardVisible) {
-      return effectiveKeyboardInset + buffer;
-    }
-
-    if (fallbackMinSpacing != null) {
-      return math.max(floatingBottomPadding, fallbackMinSpacing);
-    }
-
-    return floatingBottomPadding;
+    return math.max(baseSpacing, effectiveKeyboardInset + buffer);
   }
 
   /// Bottom padding for scroll content hosted in [TilawaAdaptiveShell] tabs.

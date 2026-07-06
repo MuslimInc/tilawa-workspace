@@ -1,5 +1,6 @@
-import 'package:flutter/material.dart';
+import 'dart:math' as math;
 
+import 'package:flutter/material.dart';
 import 'content_bounds.dart';
 import 'design_tokens.dart';
 import 'safe_area_ext.dart';
@@ -36,12 +37,21 @@ class TilawaBottomActionInset extends StatelessWidget {
   final double? horizontal;
 
   /// Minimum bottom spacing when the device reports no system inset.
+  ///
+  /// Folded into the base padding, so it is respected when the keyboard is
+  /// hidden and relaxed (home-indicator clearance is moot) while it is open.
   final double? minBottom;
 
   /// Additional bottom clearance (shell nav, mini-player, FAB stack).
   final double extraBottom;
 
-  /// When true, uses [TilawaSafeAreaX.keyboardAwareBottomPadding].
+  /// Lifts the child by the full keyboard inset plus a small buffer, like
+  /// [TilawaSafeAreaX.keyboardAwareBottomPadding] but also honoring [minBottom].
+  ///
+  /// Leave `false` inside a resizing [Scaffold] (the default): the ancestor
+  /// resize already lifts the content, so only a small residual is added. Set
+  /// `true` only in non-resizing hosts where this widget must clear the keyboard
+  /// itself; otherwise the child would be double-lifted.
   final bool keyboardAware;
 
   /// When set, constrains [child] via [TilawaContentBounds.resolveMaxWidth].
@@ -79,15 +89,22 @@ class TilawaBottomActionInset extends StatelessWidget {
   }
 
   double _resolveBottom(BuildContext context, MeMuslimDesignTokens tokens) {
+    final double basePadding = minBottom != null
+        ? context.floatingBottomPaddingWithMin(minBottom!)
+        : context.floatingBottomPadding;
+
     if (keyboardAware) {
-      return context.keyboardAwareBottomPadding;
+      return math.max(
+        basePadding,
+        context.effectiveKeyboardInset + tokens.spaceSmall,
+      );
     }
-    if (context.isKeyboardVisible) {
-      return tokens.spaceMedium;
-    }
-    if (minBottom != null) {
-      return context.floatingBottomPaddingWithMin(minBottom!);
-    }
-    return context.floatingBottomPadding;
+
+    final double targetTotal = math.max(
+      basePadding,
+      context.effectiveKeyboardInset + tokens.spaceMedium,
+    );
+
+    return math.max(0.0, targetTotal - context.effectiveKeyboardInset);
   }
 }
