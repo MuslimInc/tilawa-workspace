@@ -4,17 +4,32 @@ import { TestBed } from '@angular/core/testing';
 import { TilawaUsersFacade } from './tilawa-users.facade';
 import { ListTilawaUsersUseCase } from '../../domain/usecases/tilawa-user.usecases';
 import { TILAWA_USER_DEFAULT_SORT } from '../../domain/entities/tilawa-user.entity';
+import { AUTH_ADMIN_GATEWAY } from '../../domain/repositories/auth-admin.gateway';
+import { RequestUserDeletionUseCase } from '../../domain/usecases/user-deletion.usecases';
+import { AuthFacade } from './auth.facade';
 
 describe('TilawaUsersFacade', () => {
   let facade: TilawaUsersFacade;
   const listUseCase = {
     execute: vi.fn(),
   };
+  const requestDeletionUseCase = { execute: vi.fn() };
+  const authAdminGateway = { 
+    revokeTokens: vi.fn(), 
+    lookupUserAuthMetadata: vi.fn().mockResolvedValue({ adminUserIds: [], authBackedUserIds: [] }) 
+  };
+  const authFacade = { session: vi.fn().mockReturnValue(null) };
 
   beforeEach(() => {
     listUseCase.execute.mockReset();
     TestBed.configureTestingModule({
-      providers: [TilawaUsersFacade, { provide: ListTilawaUsersUseCase, useValue: listUseCase }],
+      providers: [
+        TilawaUsersFacade,
+        { provide: ListTilawaUsersUseCase, useValue: listUseCase },
+        { provide: RequestUserDeletionUseCase, useValue: requestDeletionUseCase },
+        { provide: AUTH_ADMIN_GATEWAY, useValue: authAdminGateway },
+        { provide: AuthFacade, useValue: authFacade },
+      ],
     });
     facade = TestBed.inject(TilawaUsersFacade);
   });
