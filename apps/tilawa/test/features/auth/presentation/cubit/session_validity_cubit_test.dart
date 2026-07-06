@@ -59,13 +59,15 @@ void main() {
     sessionRevokedNotifier.resetDedupeForTest();
   });
 
-  SessionValidityCubit buildCubit() => SessionValidityCubit(
-    mockAuthRepository,
-    mockCheckValidity,
-    mockSignOut,
-    sessionRevokedNotifier,
-    signInSessionTracker,
-  );
+  SessionValidityCubit buildCubit({bool multiDeviceLoginEnabled = false}) =>
+      SessionValidityCubit(
+        mockAuthRepository,
+        mockCheckValidity,
+        mockSignOut,
+        sessionRevokedNotifier,
+        signInSessionTracker,
+        multiDeviceLoginEnabled: () => multiDeviceLoginEnabled,
+      );
 
   blocTest<SessionValidityCubit, SessionValidityState>(
     'checkOnResume signs out when background session_revoked flag is set',
@@ -89,6 +91,34 @@ void main() {
     verify: (_) {
       verify(() => mockSignOut(skipServerTokenClear: true)).called(1);
       verifyNever(() => mockCheckValidity(any()));
+    },
+  );
+
+  blocTest<SessionValidityCubit, SessionValidityState>(
+    'multi-device login ignores pending background session_revoked flag',
+    build: () => buildCubit(multiDeviceLoginEnabled: true),
+    setUp: () {
+      final mapPrefs = MapBackedSharedPreferencesAsync({
+        PendingSessionRevokeStore.key: true,
+      });
+      PendingSessionRevokeStore.setPrefsFactoryForTesting(() => mapPrefs.prefs);
+      defaultRevokePrefs = mapPrefs;
+    },
+    tearDown: () {
+      PendingSessionRevokeStore.setPrefsFactoryForTesting(null);
+    },
+    act: (cubit) async {
+      await cubit.checkOnResume();
+      await Future<void>.delayed(Duration.zero);
+    },
+    expect: () => <SessionValidityState>[],
+    verify: (_) {
+      verifyNever(() => mockCheckValidity(any()));
+      verifyNever(() => mockSignOut(skipServerTokenClear: true));
+      expect(
+        defaultRevokePrefs.store[PendingSessionRevokeStore.key],
+        isNull,
+      );
     },
   );
 
@@ -184,6 +214,19 @@ void main() {
     ],
     verify: (_) {
       verify(() => mockSignOut(skipServerTokenClear: true)).called(1);
+    },
+  );
+
+  blocTest<SessionValidityCubit, SessionValidityState>(
+    'multi-device login ignores FCM session_revoked',
+    build: () => buildCubit(multiDeviceLoginEnabled: true),
+    act: (cubit) async {
+      sessionRevokedNotifier.notifySessionRevoked();
+      await Future<void>.delayed(Duration.zero);
+    },
+    expect: () => <SessionValidityState>[],
+    verify: (_) {
+      verifyNever(() => mockSignOut(skipServerTokenClear: true));
     },
   );
 

@@ -11,6 +11,7 @@ import 'package:tilawa_core/errors/failures.dart';
 import '../../application/account_deletion_flow_tracker.dart';
 import '../../data/services/google_sign_in_session_tracker.dart';
 import '../../data/services/pending_session_revoke_store.dart';
+import '../../device_registry_feature_flags.dart';
 import '../../domain/entities/auth_error_key.dart';
 import '../../domain/entities/auth_result.dart';
 import '../../domain/entities/email_auth_failure_key.dart';
@@ -44,8 +45,9 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
     this._getCurrentLanguage,
     this._syncUserLanguagePreference,
     this._accountDeletionFlow,
-    this._signInSessionTracker,
-  ) : super(const AuthState.initial()) {
+    this._signInSessionTracker, {
+    this._multiDeviceLoginEnabled = isMultiDeviceLoginEnabled,
+  }) : super(const AuthState.initial()) {
     on<SignInWithGoogleEvent>(_onSignInWithGoogle);
     on<SignInWithEmailEvent>(_onSignInWithEmail);
     on<RegisterWithEmailEvent>(_onRegisterWithEmail);
@@ -69,6 +71,7 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
   final SyncUserLanguagePreferenceUseCase _syncUserLanguagePreference;
   final AccountDeletionFlowTracker _accountDeletionFlow;
   final GoogleSignInSessionTracker _signInSessionTracker;
+  final bool Function() _multiDeviceLoginEnabled;
 
   Future<void> _onSignInWithGoogle(
     SignInWithGoogleEvent event,
@@ -385,6 +388,9 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
     SessionInvalidatedEvent event,
     Emitter<AuthState> emit,
   ) {
+    if (_multiDeviceLoginEnabled()) {
+      return;
+    }
     _interactiveSignInGeneration++;
     emit(const AuthState.unauthenticated());
   }
@@ -406,7 +412,7 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
         _isStaleDeviceFailure,
         (_) => false,
       );
-      if (staleDevice) {
+      if (staleDevice && !_multiDeviceLoginEnabled()) {
         await _signOut(skipServerTokenClear: true);
         emit(const AuthState.unauthenticated());
         return;

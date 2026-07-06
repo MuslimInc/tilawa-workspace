@@ -73,6 +73,23 @@ void main() {
     createdAt: DateTime.utc(2023),
   );
 
+  AuthBloc buildAuthBloc({bool multiDeviceLoginEnabled = false}) {
+    return AuthBloc(
+      mockSignInWithGoogleUseCase,
+      mockSignInWithEmailUseCase,
+      mockRegisterWithEmailUseCase,
+      mockSignOut,
+      mockDeleteAccount,
+      mockGetCurrentUserUseCase,
+      mockSyncDeviceTokenUseCase,
+      mockGetCurrentLanguageUseCase,
+      mockSyncUserLanguagePreference,
+      accountDeletionFlowTracker,
+      signInSessionTracker,
+      multiDeviceLoginEnabled: () => multiDeviceLoginEnabled,
+    );
+  }
+
   setUp(() {
     defaultRevokePrefs = MapBackedSharedPreferencesAsync();
     PendingSessionRevokeStore.setPrefsFactoryForTesting(
@@ -104,19 +121,7 @@ void main() {
       (_) async => const Right(null),
     );
 
-    authBloc = AuthBloc(
-      mockSignInWithGoogleUseCase,
-      mockSignInWithEmailUseCase,
-      mockRegisterWithEmailUseCase,
-      mockSignOut,
-      mockDeleteAccount,
-      mockGetCurrentUserUseCase,
-      mockSyncDeviceTokenUseCase,
-      mockGetCurrentLanguageUseCase,
-      mockSyncUserLanguagePreference,
-      accountDeletionFlowTracker,
-      signInSessionTracker,
-    );
+    authBloc = buildAuthBloc();
   });
 
   tearDown(() {
@@ -157,6 +162,25 @@ void main() {
         verify: (_) {
           verify(mockSignOut(skipServerTokenClear: true)).called(1);
           verifyNever(mockGetCurrentLanguageUseCase());
+        },
+      );
+
+      blocTest<AuthBloc, AuthState>(
+        'multi-device login ignores stale passive sync and keeps user',
+        build: () {
+          when(mockGetCurrentUserUseCase()).thenReturn(tUser);
+          when(mockSyncDeviceTokenUseCase(tUser.id)).thenAnswer(
+            (_) async => const Left(
+              PermissionFailure(AuthErrorKey.staleDeviceRejected),
+            ),
+          );
+          return buildAuthBloc(multiDeviceLoginEnabled: true);
+        },
+        act: (bloc) => bloc.add(const CheckAuthStatusEvent()),
+        expect: () => [AuthState.authenticated(user: tUser)],
+        verify: (_) {
+          verifyNever(mockSignOut(skipServerTokenClear: true));
+          verify(mockGetCurrentLanguageUseCase()).called(1);
         },
       );
 
@@ -531,6 +555,14 @@ void main() {
         build: () => authBloc,
         act: (bloc) => bloc.add(const SessionInvalidatedEvent()),
         expect: () => [const AuthState.unauthenticated()],
+      );
+
+      blocTest<AuthBloc, AuthState>(
+        'multi-device login ignores remote session invalidation',
+        seed: () => AuthState.authenticated(user: tUser),
+        build: () => buildAuthBloc(multiDeviceLoginEnabled: true),
+        act: (bloc) => bloc.add(const SessionInvalidatedEvent()),
+        expect: () => <AuthState>[],
       );
     });
 

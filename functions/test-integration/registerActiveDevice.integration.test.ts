@@ -5,6 +5,7 @@ import { mock } from "node:test";
 import { registerActiveDevice } from "../src/registerActiveDevice";
 import * as adminAuth from "firebase-admin/auth";
 import * as adminMessaging from "firebase-admin/messaging";
+import * as multiDeviceLogin from "../src/multiDeviceLogin";
 import { clearFirestore, db } from "./support/emulator";
 
 interface CallableLike {
@@ -22,14 +23,23 @@ interface CallableLike {
 }
 
 const callable = registerActiveDevice as unknown as CallableLike;
+let revokedUsers: string[] = [];
+let sentMessages: unknown[] = [];
 
 test.beforeEach(() => {
   db();
+  revokedUsers = [];
+  sentMessages = [];
   mock.method(adminAuth, "getAuth", () => ({
-    revokeRefreshTokens: async () => {},
+    revokeRefreshTokens: async (uid: string) => {
+      revokedUsers.push(uid);
+    },
   }));
   mock.method(adminMessaging, "getMessaging", () => ({
-    send: async () => "msg-id",
+    send: async (message: unknown) => {
+      sentMessages.push(message);
+      return "msg-id";
+    },
   }));
 });
 
@@ -367,4 +377,77 @@ test("integration: soft cap is surfaced without blocking registration", async ()
 
   const sixth = await devicesCol.doc("device-sixth").get();
   assert.equal(sixth.exists, true);
+});
+
+test("integration: multi-device flag registers a second device without replacing the active session", async () => {
+  mock.method(multiDeviceLogin, "isMultiDeviceLoginEnabled", () => true);
+  await db().collection("users").doc("user_1").set({
+    session: { epoch: 7, activeDeviceId: "device-a" },
+    notifications: { activeFcmToken: "tok-a", platform: "android" },
+  });
+
+  const result = await callable.run({
+    auth: { uid: "user_1" },
+    data: {
+      deviceId: "device-b",
+      fcmToken: "tok-b",
+      platform: "ios",
+      registrationMode: "explicit_sign_in",
+    },
+  });
+
+  assert.equal(result.status, "registered");
+  assert.equal(result.sessionEpoch, 7);
+  assert.equal(result.activeDeviceId, "device-b");
+  assert.equal(result.deviceCapExceeded, false);
+  assert.equal(result.registeredDeviceCount, 1);
+
+  const userSnap = await db().collection("users").doc("user_1").get();
+  assert.equal(userSnap.get("session.epoch"), 7);
+  assert.equal(userSnap.get("session.activeDeviceId"), "device-a");
+  assert.equal(userSnap.get("notifications.activeFcmToken"), "tok-a");
+
+  const deviceSnap = await db()
+    .collection("users")
+    .doc("user_1")
+    .collection("devices")
+    .doc("device-b")
+    .get();
+  assert.equal(deviceSnap.exists, true);
+  assert.equal(deviceSnap.get("fcmToken"), "tok-b");
+  assert.equal(deviceSnap.get("revokedAt"), null);
+  assert.deepEqual(revokedUsers, []);
+  assert.deepEqual(sentMessages, []);
+});
+
+test("integration: multi-device flag accepts passive sync from a non-active device", async () => {
+  mock.method(multiDeviceLogin, "isMultiDeviceLoginEnabled", () => true);
+  await db().collection("users").doc("user_1").set({
+    session: { epoch: 8, activeDeviceId: "device-a" },
+    notifications: { activeFcmToken: "tok-a", platform: "android" },
+  });
+
+  const result = await callable.run({
+    auth: { uid: "user_1" },
+    data: {
+      deviceId: "device-b",
+      fcmToken: "tok-b",
+      platform: "ios",
+      registrationMode: "passive_sync",
+    },
+  });
+
+  assert.equal(result.status, "registered");
+  assert.equal(result.sessionEpoch, 8);
+
+  const deviceSnap = await db()
+    .collection("users")
+    .doc("user_1")
+    .collection("devices")
+    .doc("device-b")
+    .get();
+  assert.equal(deviceSnap.exists, true);
+  assert.equal(deviceSnap.get("fcmToken"), "tok-b");
+  assert.deepEqual(revokedUsers, []);
+  assert.deepEqual(sentMessages, []);
 });

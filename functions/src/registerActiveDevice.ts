@@ -18,6 +18,7 @@ import {
   DEVICES_SUBCOLLECTION,
   isDeviceCapExceeded,
 } from "./deviceRegistry";
+import { isMultiDeviceLoginEnabled } from "./multiDeviceLogin";
 
 export const SESSION_REVOKED_ACTION = "session_revoked";
 
@@ -261,6 +262,16 @@ function activeSessionClearWrite(
   };
 }
 
+function revokedDeviceRegistryWrite(
+  now: FirebaseFirestore.FieldValue,
+): Record<string, unknown> {
+  return {
+    fcmToken: FieldValue.delete(),
+    revokedAt: now,
+    lastSeenAt: now,
+  };
+}
+
 function responseFor(
   status: DeviceRegistrationStatus,
   sessionEpoch: number,
@@ -296,9 +307,13 @@ export const registerActiveDevice = onCall(
     const appVersion = optionalString(data.appVersion, "appVersion");
     const deviceInfo = sanitizeDeviceInfo(data.deviceInfo);
     const signOut = data.signOut === true;
+    const multiDeviceLoginEnabled = isMultiDeviceLoginEnabled();
     // ADR-008 Phase 0: client (gated by `deviceRegistryWriteEnabled`) opts into
-    // the additive, non-exclusive device registry. Never written on sign-out.
-    const writeDeviceRegistry = data.writeDeviceRegistry === true && !signOut;
+    // the additive, non-exclusive device registry. Phase 1's server flag also
+    // forces the registry write so older clients have a fan-out target.
+    const writeDeviceRegistry =
+      !signOut && (data.writeDeviceRegistry === true || multiDeviceLoginEnabled);
+    const revokeRegistryDevice = signOut && multiDeviceLoginEnabled;
 
     if (!platform) {
       throw new HttpsError("invalid-argument", "platform is required.");
@@ -324,9 +339,9 @@ export const registerActiveDevice = onCall(
       // All transaction reads must precede all writes: read the registry (if
       // requested) here, then stage its write below alongside the session write.
       const devicesCol = userRef.collection(DEVICES_SUBCOLLECTION);
+      let deviceExists = false;
       if (writeDeviceRegistry) {
         const devicesSnap = await tx.get(devicesCol);
-        let deviceExists = false;
         const activeDeviceIds: string[] = [];
         for (const doc of devicesSnap.docs) {
           if (doc.id === deviceId) {
@@ -384,6 +399,27 @@ export const registerActiveDevice = onCall(
         typeof currentNotifications?.activeFcmToken === "string"
           ? currentNotifications.activeFcmToken
           : null;
+
+      if (multiDeviceLoginEnabled) {
+        const sessionEpoch = readServerSessionEpoch(userData);
+        if (revokeRegistryDevice) {
+          tx.set(
+            devicesCol.doc(deviceId),
+            revokedDeviceRegistryWrite(now),
+            { merge: true },
+          );
+        }
+        return {
+          ...responseFor(
+            signOut || deviceExists ? "updated_same_device" : "registered",
+            sessionEpoch,
+            deviceId,
+          ),
+          previousToken: null,
+          deviceChanged: false,
+          noOp: false,
+        } satisfies TransactionResult;
+      }
 
       if (plan.noOp) {
         return {

@@ -3,6 +3,7 @@ import 'package:injectable/injectable.dart';
 import 'package:dartz_plus/dartz_plus.dart';
 import 'package:tilawa_core/errors/failures.dart';
 
+import '../../device_registry_feature_flags.dart';
 import '../entities/auth_error_key.dart';
 import '../services/session_revoked_notifier.dart';
 import 'register_active_device_use_case.dart';
@@ -11,11 +12,13 @@ import 'register_active_device_use_case.dart';
 class SyncDeviceTokenUseCase {
   SyncDeviceTokenUseCase(
     this._registerActiveDeviceUseCase,
-    this._sessionRevokedNotifier,
-  );
+    this._sessionRevokedNotifier, {
+    this._multiDeviceLoginEnabled = isMultiDeviceLoginEnabled,
+  });
 
   final RegisterActiveDeviceUseCase _registerActiveDeviceUseCase;
   final SessionRevokedNotifier _sessionRevokedNotifier;
+  final bool Function() _multiDeviceLoginEnabled;
 
   Future<Either<Failure, void>> call(String userId) async {
     final result = await _registerActiveDeviceUseCase.syncPassive(userId);
@@ -39,6 +42,9 @@ class SyncDeviceTokenUseCase {
   }
 
   void _notifyWhenStale<T>(Either<Failure, T> result) {
+    if (_multiDeviceLoginEnabled()) {
+      return;
+    }
     result.fold((failure) {
       if (failure.message == AuthErrorKey.staleDeviceRejected) {
         _sessionRevokedNotifier.notifySessionRevoked();

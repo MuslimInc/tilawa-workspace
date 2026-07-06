@@ -7,6 +7,7 @@ import {
   readServerSessionEpoch,
 } from "./sessionRegistration";
 import type { ActorRole } from "./sessionLifecycleGuard";
+import { isMultiDeviceLoginEnabled } from "../multiDeviceLogin";
 
 export interface BookingParticipants {
   studentId: string;
@@ -28,6 +29,9 @@ export async function requireValidSessionEpoch(
   uid: string,
   db: FirebaseFirestore.Firestore = getFirestore(),
 ): Promise<void> {
+  if (isMultiDeviceLoginEnabled()) {
+    return;
+  }
   const data = request.data as Record<string, unknown> | undefined;
   const userSnap = await db.collection("users").doc(uid).get();
   const serverEpoch = readServerSessionEpoch(userSnap.data());

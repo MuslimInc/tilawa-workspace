@@ -22,6 +22,7 @@ void main() {
     useCase = SyncDeviceTokenUseCase(
       mockRegisterActiveDevice,
       sessionRevokedNotifier,
+      multiDeviceLoginEnabled: () => false,
     );
   });
 
@@ -83,6 +84,30 @@ void main() {
 
     expect(result.isLeft(), isTrue);
     expect(revoked, isTrue);
+    await subscription.cancel();
+  });
+
+  test('multi-device login does not notify on passive stale failure', () async {
+    final multiDeviceUseCase = SyncDeviceTokenUseCase(
+      mockRegisterActiveDevice,
+      sessionRevokedNotifier,
+      multiDeviceLoginEnabled: () => true,
+    );
+    var revoked = false;
+    final subscription = sessionRevokedNotifier.onSessionRevoked.listen((_) {
+      revoked = true;
+    });
+    when(() => mockRegisterActiveDevice.syncPassive('user_1')).thenAnswer(
+      (_) async => const Left(
+        PermissionFailure(AuthErrorKey.staleDeviceRejected),
+      ),
+    );
+
+    final result = await multiDeviceUseCase('user_1');
+    await Future<void>.delayed(Duration.zero);
+
+    expect(result.isLeft(), isTrue);
+    expect(revoked, isFalse);
     await subscription.cancel();
   });
 
