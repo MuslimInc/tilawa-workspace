@@ -105,6 +105,7 @@ void main() {
       mockSignOut,
       SessionRevokedNotifier(),
       signInSessionTracker,
+      multiDeviceLoginEnabled: () => false,
     );
   }
 

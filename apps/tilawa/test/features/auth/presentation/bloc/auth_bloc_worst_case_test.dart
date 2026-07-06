@@ -97,6 +97,7 @@ void main() {
       mockSyncUserLanguagePreference,
       accountDeletionFlowTracker,
       signInSessionTracker,
+      multiDeviceLoginEnabled: () => false,
     );
   });
 
