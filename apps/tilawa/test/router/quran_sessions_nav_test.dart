@@ -10,6 +10,8 @@ import 'package:quran_sessions/quran_sessions.dart';
 import 'package:tilawa/core/bootstrap/app_launch_config.dart';
 import 'package:tilawa/core/di/injection.dart';
 import 'package:tilawa/features/quran_sessions/data/fake_auth_session_provider.dart';
+import 'package:tilawa/features/quran_sessions/domain/entities/quran_sessions_platform_config.dart';
+import 'package:tilawa/features/quran_sessions/quran_sessions_platform_config_store.dart';
 import 'package:tilawa/features/quran_sessions/router/quran_sessions_nav.dart';
 import 'package:tilawa/router/app_router_config.dart';
 import 'package:tilawa_ui_kit/tilawa_ui_kit.dart';
@@ -137,32 +139,42 @@ GoRoute _teacherDashboardRoute() {
   );
 }
 
+void seedPlatformConfig({
+  required bool studentEntryEnabled,
+  required bool bookingEnabled,
+}) {
+  final store = QuranSessionsPlatformConfigStore()
+    ..setConfig(
+      QuranSessionsPlatformConfig(
+        quranSessionsEnabled: true,
+        studentEntryEnabled: studentEntryEnabled,
+        bookingEnabled: bookingEnabled,
+        bookingMode: 'requiresTutorApproval',
+        sessionMode: 'videoOnly',
+        enabledCallProviders: const {'external', 'mock'},
+      ),
+    );
+  if (getIt.isRegistered<QuranSessionsPlatformConfigStore>()) {
+    getIt.unregister<QuranSessionsPlatformConfigStore>();
+  }
+  if (!getIt.isRegistered<AppLaunchConfig>()) {
+    getIt.registerSingleton<AppLaunchConfig>(const AppLaunchConfig());
+  }
+  getIt.registerSingleton<QuranSessionsPlatformConfigStore>(store);
+}
+
 void main() {
-  tearDown(() {
-    if (getIt.isRegistered<AppLaunchConfig>()) {
-      getIt.unregister<AppLaunchConfig>();
-    }
-    if (getIt.isRegistered<AuthSessionProvider>()) {
-      getIt.unregister<AuthSessionProvider>();
-    }
+  tearDown(() async {
+    await getIt.reset();
   });
 
   group('booking route redirect', () {
-    tearDown(() {
-      if (getIt.isRegistered<AppLaunchConfig>()) {
-        getIt.unregister<AppLaunchConfig>();
-      }
-    });
-
     testWidgets('redirects to sessions home when booking kill switch off', (
       tester,
     ) async {
-      getIt.registerSingleton<AppLaunchConfig>(
-        const AppLaunchConfig(
-          quranSessionsEnabled: true,
-          learnQuranStudentFeatureEnabled: true,
-          quranSessionsBookingEnabled: false,
-        ),
+      seedPlatformConfig(
+        studentEntryEnabled: true,
+        bookingEnabled: false,
       );
 
       final result = await redirectBookingRoute(
@@ -173,12 +185,9 @@ void main() {
     });
 
     testWidgets('allows navigation when booking enabled', (tester) async {
-      getIt.registerSingleton<AppLaunchConfig>(
-        const AppLaunchConfig(
-          quranSessionsEnabled: true,
-          learnQuranStudentFeatureEnabled: true,
-          quranSessionsBookingEnabled: true,
-        ),
+      seedPlatformConfig(
+        studentEntryEnabled: true,
+        bookingEnabled: true,
       );
       getIt.registerSingleton<AuthSessionProvider>(
         const FakeAuthSessionProvider(userId: 'student_1'),
@@ -249,11 +258,9 @@ void main() {
       (tester) async {
         final pendingCapability =
             Completer<Either<QuranSessionsFailure, TeacherCapability>>();
-        getIt.registerSingleton<AppLaunchConfig>(
-          const AppLaunchConfig(
-            quranSessionsEnabled: true,
-            learnQuranStudentFeatureEnabled: true,
-          ),
+        seedPlatformConfig(
+          studentEntryEnabled: true,
+          bookingEnabled: true,
         );
         getIt.registerSingleton<AuthSessionProvider>(
           const FakeAuthSessionProvider(userId: 'teacher_user'),

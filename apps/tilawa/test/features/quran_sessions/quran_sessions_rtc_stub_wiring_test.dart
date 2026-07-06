@@ -3,6 +3,7 @@ import 'package:get_it/get_it.dart';
 import 'package:quran_sessions/quran_sessions.dart';
 import 'package:quran_sessions_rtc_stub/quran_sessions_rtc_stub.dart';
 import 'package:tilawa/core/bootstrap/app_launch_config.dart';
+import 'package:tilawa/features/quran_sessions/domain/entities/quran_sessions_platform_config.dart';
 import 'package:tilawa/features/quran_sessions/quran_sessions_launch_policy.dart';
 
 void main() {
@@ -38,10 +39,10 @@ void main() {
     );
   });
 
-  test('play_production launch config keeps rtc on external and mock only', () {
-    const config = AppLaunchConfig();
-    final rtc = resolveRtcLaunchConfig(
-      config,
+  test('safe fallback keeps rtc on external and mock only', () {
+    final rtc = resolveRtcLaunchConfigFromPlatformConfig(
+      QuranSessionsPlatformConfig.safeFallback,
+      const AppLaunchConfig(),
       distribution: 'play_production',
       debugMode: false,
     );

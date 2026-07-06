@@ -51,6 +51,12 @@ export interface ResolvedPricing {
   currencyCode: string;
 }
 
+export interface PlatformFeaturePolicy {
+  quranSessionsEnabled: boolean;
+  studentEntryEnabled: boolean;
+  bookingEnabled: boolean;
+}
+
 /** Where the authoritative price came from — recorded on the fee snapshot. */
 export type PricingSource = "teacher_override" | "market";
 
@@ -65,6 +71,7 @@ export interface TeacherPricingOverride {
 }
 
 export interface BookingEligibilityContext {
+  platform: PlatformFeaturePolicy;
   student: StudentEligibilityProfile;
   teacher: TeacherEligibilityProfile;
   policy: GlobalSafetyPolicy;
@@ -120,6 +127,35 @@ export function resolvePricingWithOverride(
     },
     source: "teacher_override",
   };
+}
+
+export function parsePlatformFeaturePolicy(
+  raw: Record<string, unknown>,
+): PlatformFeaturePolicy {
+  return {
+    quranSessionsEnabled: raw.quranSessionsEnabled === true,
+    studentEntryEnabled: raw.studentEntryEnabled === true,
+    bookingEnabled: raw.bookingEnabled === true,
+  };
+}
+
+export function assertPlatformBookingEnabled(
+  platform: PlatformFeaturePolicy,
+): void {
+  if (!platform.quranSessionsEnabled) {
+    throw lifecycleError(
+      "feature_disabled",
+      "Quran Sessions are disabled by platform configuration.",
+      { field: "quranSessionsEnabled" },
+    );
+  }
+  if (!platform.bookingEnabled) {
+    throw lifecycleError(
+      "feature_disabled",
+      "Quran Sessions booking is disabled by platform configuration.",
+      { field: "bookingEnabled" },
+    );
+  }
 }
 
 /** Calendar age in whole years, matching the domain `_calendarAge`. */
@@ -194,6 +230,8 @@ export function assertBookingEligible(
     upcomingCount?: number;
   },
 ): ResolvedPricing {
+  assertPlatformBookingEnabled(ctx.platform);
+
   const { student, teacher, policy, market } = ctx;
 
   if (!student.exists) {
@@ -342,6 +380,7 @@ export async function loadBookingEligibilityContext(
   ]);
 
   const platformConfig = policySnap.data() ?? {};
+  const platform = parsePlatformFeaturePolicy(platformConfig);
 
   const studentProfile =
     (studentSnap.data()?.quranSessionsProfile as Record<string, unknown>) ?? {};
@@ -439,6 +478,7 @@ export async function loadBookingEligibilityContext(
   const resolved = resolvePricingWithOverride(pricing, teacherOverride);
 
   return {
+    platform,
     student,
     teacher,
     policy,

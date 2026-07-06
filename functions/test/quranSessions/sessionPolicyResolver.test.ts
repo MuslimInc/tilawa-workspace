@@ -10,13 +10,28 @@ import {
 test("validatePlatformConfig rejects missing required fields", () => {
   const result = validatePlatformConfig({});
   assert.equal(result.valid, false);
-  assert.ok(result.missingFields.includes("quranTutorBookingMode"));
+  assert.ok(result.missingFields.includes("quranSessionsEnabled"));
+  assert.ok(result.missingFields.includes("bookingEnabled"));
+  assert.ok(result.missingFields.includes("bookingMode"));
   assert.ok(result.missingFields.includes("sessionMode"));
   assert.ok(result.missingFields.includes("childAgeThreshold"));
 });
 
 test("validatePlatformConfig accepts production-shaped doc", () => {
   const result = validatePlatformConfig({
+    quranSessionsEnabled: true,
+    bookingEnabled: true,
+    bookingMode: "autoConfirm",
+    sessionMode: "videoOnly",
+    childAgeThreshold: 14,
+  });
+  assert.equal(result.valid, true);
+});
+
+test("validatePlatformConfig accepts legacy booking mode alias", () => {
+  const result = validatePlatformConfig({
+    quranSessionsEnabled: true,
+    bookingEnabled: true,
     quranTutorBookingMode: "autoConfirm",
     sessionMode: "videoOnly",
     childAgeThreshold: 14,
@@ -35,7 +50,9 @@ test("assertBookingPolicyConfigured fails closed when market doc missing", () =>
     () =>
       assertBookingPolicyConfigured({
         platformConfig: {
-          quranTutorBookingMode: "autoConfirm",
+          quranSessionsEnabled: true,
+          bookingEnabled: true,
+          bookingMode: "autoConfirm",
           sessionMode: "freeBeta",
           childAgeThreshold: 14,
         },

@@ -1,6 +1,7 @@
 import 'package:flutter/foundation.dart';
 import 'package:quran_sessions/quran_sessions.dart';
 import 'package:tilawa/core/bootstrap/app_launch_config.dart';
+import 'package:tilawa/features/quran_sessions/domain/entities/quran_sessions_platform_config.dart';
 
 /// Public LiveKit server URL for staging builds (token minting stays server-side).
 ///
@@ -30,81 +31,49 @@ class RtcLaunchConfig {
       livekitServerUrl.trim().isNotEmpty;
 }
 
-Set<String> parseEnabledCallProviders(AppLaunchConfig config) {
-  if (config.enabledCallProvidersCsv.trim().isEmpty) {
-    return {'external', 'mock'};
-  }
-  return config.enabledCallProvidersCsv
-      .split(',')
-      .map((value) => value.trim())
-      .where((value) => value.isNotEmpty)
-      .toSet();
-}
-
-/// Resolves client RTC wiring from [AppLaunchConfig] and build distribution.
-///
-/// When [distribution] is `staging` or [debugMode] is true, LiveKit is enabled
-/// by default unless explicit dart-defines override — so `flutter run` (debug)
-/// and staging release builds can join LiveKit sessions without Agora defines.
-RtcLaunchConfig resolveRtcLaunchConfig(
-  AppLaunchConfig config, {
+RtcLaunchConfig resolveRtcLaunchConfigFromPlatformConfig(
+  QuranSessionsPlatformConfig platformConfig,
+  AppLaunchConfig launchConfig, {
   String distribution = const String.fromEnvironment(
     'TILAWA_DISTRIBUTION',
     defaultValue: 'local',
   ),
   bool debugMode = kDebugMode,
 }) {
-  var enabledCsv = config.enabledCallProvidersCsv;
-  var agoraAppId = config.agoraAppId;
-  var livekitServerUrl = config.livekitServerUrl;
+  var agoraAppId = launchConfig.agoraAppId;
+  var livekitServerUrl = launchConfig.livekitServerUrl;
+  final enabledProviders = platformConfig.enabledCallProviders;
 
   if (distribution == 'staging' || debugMode) {
-    var enabled = parseEnabledCallProviders(
-      AppLaunchConfig(enabledCallProvidersCsv: enabledCsv),
-    );
-    if (!enabled.contains('livekit') && !enabled.contains('agora')) {
-      final trimmed = enabledCsv.trim();
-      enabledCsv = trimmed.isEmpty
-          ? 'external,mock,livekit'
-          : '$trimmed,livekit';
-    }
-    enabled = parseEnabledCallProviders(
-      AppLaunchConfig(enabledCallProvidersCsv: enabledCsv),
-    );
-    if (agoraAppId.trim().isEmpty && enabled.contains('agora')) {
+    if (agoraAppId.trim().isEmpty && enabledProviders.contains('agora')) {
       agoraAppId = kStagingAgoraAppId;
     }
-    if (livekitServerUrl.trim().isEmpty && enabled.contains('livekit')) {
+    if (livekitServerUrl.trim().isEmpty &&
+        enabledProviders.contains('livekit')) {
       livekitServerUrl = kStagingLiveKitUrl;
     }
   }
 
   return RtcLaunchConfig(
-    enabledProviders: parseEnabledCallProviders(
-      AppLaunchConfig(enabledCallProvidersCsv: enabledCsv),
-    ),
+    enabledProviders: enabledProviders,
     agoraAppId: agoraAppId.trim(),
     livekitServerUrl: livekitServerUrl.trim(),
   );
 }
 
 /// Client RTC provider for voice/video bookings (UI hint; server is authoritative).
-///
-/// Mirrors [RTC_PROVIDER_PRIORITY] in Cloud Functions when launch config matches
-/// Firestore `quran_session_platform_config/global.enabledCallProviders`.
-///
-/// Production (`play_production`) ships external + mock only; native Agora/LiveKit
-/// are excluded from the release dependency graph via `configure_rtc_deps.dart`.
-SessionCallProviderKind resolveVoiceVideoProviderHint(
-  AppLaunchConfig config, {
+SessionCallProviderKind resolveVoiceVideoProviderHintFromPlatformConfig(
+  QuranSessionsPlatformConfig platformConfig,
+  AppLaunchConfig launchConfig, {
   String distribution = const String.fromEnvironment(
     'TILAWA_DISTRIBUTION',
     defaultValue: 'local',
   ),
   bool debugMode = kDebugMode,
 }) {
-  final rtc = resolveRtcLaunchConfig(
-    config,
+  final rtc = resolveRtcLaunchConfigFromPlatformConfig(
+    platformConfig,
+    launchConfig,
     distribution: distribution,
     debugMode: debugMode,
   );
@@ -117,52 +86,18 @@ SessionCallProviderKind resolveVoiceVideoProviderHint(
   return SessionCallProviderKind.mock;
 }
 
-/// Resolves effective tutor booking mode for client UI hints.
-///
-/// Server is authoritative on create; this drives pre-submit copy only.
-QuranTutorBookingMode resolveQuranTutorBookingModeHint({
-  AppLaunchConfig? launchConfig,
-  String? firestoreModeRaw,
+SessionModePolicy sessionModePolicyFromPlatformConfig(
+  QuranSessionsPlatformConfig platformConfig,
+  AppLaunchConfig launchConfig, {
   String distribution = const String.fromEnvironment(
     'TILAWA_DISTRIBUTION',
     defaultValue: 'local',
   ),
   bool debugMode = kDebugMode,
 }) {
-  if (distribution != 'play_production' && debugMode) {
-    const defineOverride = String.fromEnvironment(
-      'TILAWA_LAUNCH_QURAN_TUTOR_BOOKING_MODE',
-      defaultValue: '',
-    );
-    final fromDefine = QuranTutorBookingModeParsing.tryParse(
-      defineOverride.isEmpty ? null : defineOverride,
-    );
-    if (fromDefine != null) {
-      return fromDefine;
-    }
-  }
-  final fromFirestore = QuranTutorBookingModeParsing.tryParse(
-    firestoreModeRaw,
-  );
-  if (fromFirestore != null) {
-    return fromFirestore;
-  }
-  return distributionDefaultQuranTutorBookingMode(distribution: distribution);
-}
-
-/// Booking UI policy derived from [AppLaunchConfig] RTC flags.
-///
-/// Production exposes in-app video only (Q-VC-01).
-SessionModePolicy sessionModePolicyFromLaunchConfig(
-  AppLaunchConfig config, {
-  String distribution = const String.fromEnvironment(
-    'TILAWA_DISTRIBUTION',
-    defaultValue: 'local',
-  ),
-  bool debugMode = kDebugMode,
-}) {
-  final hint = resolveVoiceVideoProviderHint(
-    config,
+  final hint = resolveVoiceVideoProviderHintFromPlatformConfig(
+    platformConfig,
+    launchConfig,
     distribution: distribution,
     debugMode: debugMode,
   );

@@ -5,12 +5,13 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:go_router/go_router.dart';
 import 'package:mocktail/mocktail.dart';
 import 'package:quran_sessions/quran_sessions.dart';
-import 'package:tilawa/core/bootstrap/app_launch_config.dart';
 import 'package:tilawa/core/di/injection.dart';
 import 'package:tilawa/features/auth/domain/entities/user_entity.dart';
 import 'package:tilawa/features/auth/presentation/bloc/auth_bloc.dart';
 import 'package:tilawa/features/auth/presentation/cubit/session_validity_cubit.dart';
 import 'package:tilawa/features/quran_sessions/data/fake_auth_session_provider.dart';
+import 'package:tilawa/features/quran_sessions/domain/entities/quran_sessions_platform_config.dart';
+import 'package:tilawa/features/quran_sessions/quran_sessions_platform_config_store.dart';
 import 'package:tilawa/router/app_router_config.dart';
 import 'package:tilawa/router/quran_sessions_session_guard.dart';
 
@@ -27,6 +28,28 @@ class FakeGoRouterState extends Fake implements GoRouterState {
 
   @override
   Uri get uri => Uri.parse(path);
+}
+
+void seedPlatformConfig({
+  required bool quranSessionsEnabled,
+  required bool studentEntryEnabled,
+  bool bookingEnabled = false,
+}) {
+  final store = QuranSessionsPlatformConfigStore()
+    ..setConfig(
+      QuranSessionsPlatformConfig(
+        quranSessionsEnabled: quranSessionsEnabled,
+        studentEntryEnabled: studentEntryEnabled,
+        bookingEnabled: bookingEnabled,
+        bookingMode: 'requiresTutorApproval',
+        sessionMode: 'videoOnly',
+        enabledCallProviders: const {'external', 'mock'},
+      ),
+    );
+  if (getIt.isRegistered<QuranSessionsPlatformConfigStore>()) {
+    getIt.unregister<QuranSessionsPlatformConfigStore>();
+  }
+  getIt.registerSingleton<QuranSessionsPlatformConfigStore>(store);
 }
 
 void main() {
@@ -162,18 +185,14 @@ void main() {
   }
 
   group('quranSessionsFeatureRedirect', () {
-    tearDown(() {
-      if (getIt.isRegistered<AppLaunchConfig>()) {
-        getIt.unregister<AppLaunchConfig>();
-      }
+    tearDown(() async {
+      await getIt.reset();
     });
 
     test('returns null when student feature enabled', () {
-      getIt.registerSingleton<AppLaunchConfig>(
-        const AppLaunchConfig(
-          quranSessionsEnabled: true,
-          learnQuranStudentFeatureEnabled: true,
-        ),
+      seedPlatformConfig(
+        quranSessionsEnabled: true,
+        studentEntryEnabled: true,
       );
       final result = quranSessionsFeatureRedirect(
         FakeGoRouterState(QuranSessionsRoutes.home),
@@ -182,6 +201,10 @@ void main() {
     });
 
     test('returns null when feature enabled (default) for teacher routes', () {
+      seedPlatformConfig(
+        quranSessionsEnabled: true,
+        studentEntryEnabled: false,
+      );
       final result = quranSessionsFeatureRedirect(
         FakeGoRouterState(QuranSessionsRoutes.teacherDashboard),
       );
@@ -189,11 +212,9 @@ void main() {
     });
 
     test('redirects student routes when student feature disabled', () {
-      getIt.registerSingleton<AppLaunchConfig>(
-        const AppLaunchConfig(
-          quranSessionsEnabled: true,
-          learnQuranStudentFeatureEnabled: false,
-        ),
+      seedPlatformConfig(
+        quranSessionsEnabled: true,
+        studentEntryEnabled: false,
       );
       final result = quranSessionsFeatureRedirect(
         FakeGoRouterState(QuranSessionsRoutes.mySessions),
@@ -202,11 +223,9 @@ void main() {
     });
 
     test('allows teacher dashboard when student feature disabled', () {
-      getIt.registerSingleton<AppLaunchConfig>(
-        const AppLaunchConfig(
-          quranSessionsEnabled: true,
-          learnQuranStudentFeatureEnabled: false,
-        ),
+      seedPlatformConfig(
+        quranSessionsEnabled: true,
+        studentEntryEnabled: false,
       );
       final result = quranSessionsFeatureRedirect(
         FakeGoRouterState(QuranSessionsRoutes.teacherDashboard),
@@ -215,11 +234,9 @@ void main() {
     });
 
     test('allows session detail when student feature disabled', () {
-      getIt.registerSingleton<AppLaunchConfig>(
-        const AppLaunchConfig(
-          quranSessionsEnabled: true,
-          learnQuranStudentFeatureEnabled: false,
-        ),
+      seedPlatformConfig(
+        quranSessionsEnabled: true,
+        studentEntryEnabled: false,
       );
       final result = quranSessionsFeatureRedirect(
         FakeGoRouterState(
@@ -233,11 +250,9 @@ void main() {
     });
 
     test('allows reschedule when student feature disabled', () {
-      getIt.registerSingleton<AppLaunchConfig>(
-        const AppLaunchConfig(
-          quranSessionsEnabled: true,
-          learnQuranStudentFeatureEnabled: false,
-        ),
+      seedPlatformConfig(
+        quranSessionsEnabled: true,
+        studentEntryEnabled: false,
       );
       final result = quranSessionsFeatureRedirect(
         FakeGoRouterState(
@@ -251,8 +266,9 @@ void main() {
     });
 
     test('redirects to home when feature disabled', () {
-      getIt.registerSingleton<AppLaunchConfig>(
-        const AppLaunchConfig(quranSessionsEnabled: false),
+      seedPlatformConfig(
+        quranSessionsEnabled: false,
+        studentEntryEnabled: false,
       );
       final result = quranSessionsFeatureRedirect(
         FakeGoRouterState(QuranSessionsRoutes.mySessions),
@@ -261,8 +277,9 @@ void main() {
     });
 
     test('ignores non-sessions routes', () {
-      getIt.registerSingleton<AppLaunchConfig>(
-        const AppLaunchConfig(quranSessionsEnabled: false),
+      seedPlatformConfig(
+        quranSessionsEnabled: false,
+        studentEntryEnabled: false,
       );
       final result = quranSessionsFeatureRedirect(
         FakeGoRouterState('/settings'),

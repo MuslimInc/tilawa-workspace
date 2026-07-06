@@ -56,32 +56,6 @@ void main() {
     });
   });
 
-  group('quranSessionsStagingFlagsDefaultEnabled', () {
-    test('is off when distribution is play_production', () {
-      check(
-        quranSessionsStagingFlagsDefaultEnabled(
-          distribution: 'play_production',
-        ),
-      ).equals(false);
-    });
-
-    test('is on for staging flavor', () {
-      check(
-        quranSessionsStagingFlagsDefaultEnabled(
-          distribution: 'staging',
-        ),
-      ).equals(true);
-    });
-
-    test('is on for play internal track', () {
-      check(
-        quranSessionsStagingFlagsDefaultEnabled(
-          distribution: 'play_internal',
-        ),
-      ).equals(true);
-    });
-  });
-
   group('AppEnvironment.assertProductionSafety', () {
     test('throws when fake backend requested in production', () {
       check(

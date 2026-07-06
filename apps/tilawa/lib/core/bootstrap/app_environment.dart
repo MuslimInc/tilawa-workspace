@@ -130,18 +130,6 @@ String get resolvedDistribution {
   return AppEnvironment.current.defaultDistribution;
 }
 
-/// Whether Quran Sessions staging beta flags default to enabled.
-bool quranSessionsStagingFlagsDefaultEnabled({
-  String? distribution,
-}) {
-  final dist = distribution ?? resolvedDistribution;
-  return dist != 'play_production';
-}
-
-/// Legacy alias used by [AppLaunchConfig].
-bool quranSessionsStagingFlagsDefaultEnabledFromEnvironment() =>
-    quranSessionsStagingFlagsDefaultEnabled();
-
 /// Effective distribution for const launch-flag defaults.
 String resolvedTilawaDistribution({
   AppEnvironment? environment,

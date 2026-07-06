@@ -55,6 +55,7 @@ import 'package:tilawa/features/prayer_times/domain/services/adhan_alarm_player_
 import 'package:tilawa/features/prayer_times/domain/services/prayer_adhan_notification_service_interface.dart';
 import 'package:tilawa/features/prayer_times/domain/services/prayer_notification_watchdog_scheduler.dart';
 import 'package:tilawa/features/prayer_times/domain/usecases/usecases.dart';
+import 'package:tilawa/features/quran_sessions/data/quran_sessions_platform_config_repository.dart';
 import 'package:tilawa/firebase_options.dart';
 import 'package:tilawa/router/app_router_config.dart';
 import 'package:tilawa/router/notification_navigation_resolver.dart';
@@ -346,6 +347,8 @@ class AppStartupTasks {
     } else {
       _logDisabled('PRAYER_NOTIFICATION_WATCHDOG');
     }
+
+    unawaited(refreshQuranSessionsPlatformConfig());
   }
 
   Future<void> _ensurePrayerNotificationWatchdogScheduled() async {
@@ -362,6 +365,23 @@ class AppStartupTasks {
     } catch (e) {
       logger.d(
         '[AppLaunch] source=AppStartupTasks._ensurePrayerNotificationWatchdogScheduled: Warning: Could not schedule watchdog at (${DateTime.now()}): $e',
+      );
+    }
+  }
+
+  Future<void> refreshQuranSessionsPlatformConfig() async {
+    logger.d(
+      '[AppLaunch] source=AppStartupTasks.refreshQuranSessionsPlatformConfig: Start in (${DateTime.now()})',
+    );
+    try {
+      if (!getIt.isRegistered<QuranSessionsPlatformConfigRepository>()) {
+        return;
+      }
+      await getIt<QuranSessionsPlatformConfigRepository>()
+          .refreshRemoteConfig();
+    } catch (e) {
+      logger.d(
+        '[AppLaunch] source=AppStartupTasks.refreshQuranSessionsPlatformConfig: Warning: Could not refresh config at (${DateTime.now()}): $e',
       );
     }
   }

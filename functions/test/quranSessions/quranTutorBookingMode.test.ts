@@ -31,7 +31,18 @@ test("defaults play_production to requiresTutorApproval", () => {
 
 test("reads valid Firestore config", () => {
   assert.equal(
+    resolveQuranTutorBookingMode({ bookingMode: "autoConfirm" }),
+    "autoConfirm",
+  );
+});
+
+test("reads legacy Firestore aliases", () => {
+  assert.equal(
     resolveQuranTutorBookingMode({ quranTutorBookingMode: "autoConfirm" }),
+    "autoConfirm",
+  );
+  assert.equal(
+    resolveQuranTutorBookingMode({ defaultBookingMode: "autoConfirm" }),
     "autoConfirm",
   );
 });

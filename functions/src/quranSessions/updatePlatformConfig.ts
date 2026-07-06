@@ -9,11 +9,20 @@ export interface UpdatePlatformConfigRequest {
   studentEntryEnabled: boolean;
   bookingEnabled: boolean;
   sessionMode: "videoOnly";
-  defaultBookingMode: "requiresTutorApproval" | "autoConfirm";
+  bookingMode: "requiresTutorApproval" | "autoConfirm";
+  defaultBookingMode?: "requiresTutorApproval" | "autoConfirm";
+  quranTutorBookingMode?: "requiresTutorApproval" | "autoConfirm";
   defaultJoinWindowLeadMs: number;
   defaultTutorApprovalSlaMs: number;
   defaultMinBookingNoticeMs: number;
   defaultMaxUpcomingPerStudent: number;
+  childAgeThreshold?: number;
+}
+
+function resolveBookingMode(
+  data: Partial<UpdatePlatformConfigRequest>,
+): "requiresTutorApproval" | "autoConfirm" | undefined {
+  return data.bookingMode ?? data.defaultBookingMode ?? data.quranTutorBookingMode;
 }
 
 export function validateUpdatePlatformConfig(data: Partial<UpdatePlatformConfigRequest>): void {
@@ -29,8 +38,9 @@ export function validateUpdatePlatformConfig(data: Partial<UpdatePlatformConfigR
   if (data.sessionMode !== "videoOnly") {
     throw new HttpsError("invalid-argument", "sessionMode must be 'videoOnly'.");
   }
-  if (data.defaultBookingMode !== "requiresTutorApproval" && data.defaultBookingMode !== "autoConfirm") {
-    throw new HttpsError("invalid-argument", "defaultBookingMode must be 'requiresTutorApproval' or 'autoConfirm'.");
+  const bookingMode = resolveBookingMode(data);
+  if (bookingMode !== "requiresTutorApproval" && bookingMode !== "autoConfirm") {
+    throw new HttpsError("invalid-argument", "bookingMode must be 'requiresTutorApproval' or 'autoConfirm'.");
   }
   if (typeof data.defaultJoinWindowLeadMs !== "number" || !Number.isFinite(data.defaultJoinWindowLeadMs) || data.defaultJoinWindowLeadMs < 0) {
     throw new HttpsError("invalid-argument", "defaultJoinWindowLeadMs must be a finite number >= 0.");
@@ -44,6 +54,14 @@ export function validateUpdatePlatformConfig(data: Partial<UpdatePlatformConfigR
   if (typeof data.defaultMaxUpcomingPerStudent !== "number" || !Number.isFinite(data.defaultMaxUpcomingPerStudent) || data.defaultMaxUpcomingPerStudent < 0) {
     throw new HttpsError("invalid-argument", "defaultMaxUpcomingPerStudent must be a finite number >= 0.");
   }
+  if (
+    data.childAgeThreshold != null &&
+    (typeof data.childAgeThreshold !== "number" ||
+      !Number.isFinite(data.childAgeThreshold) ||
+      data.childAgeThreshold <= 0)
+  ) {
+    throw new HttpsError("invalid-argument", "childAgeThreshold must be a finite number > 0.");
+  }
 }
 
 export const updatePlatformConfig = onCall(
@@ -53,6 +71,7 @@ export const updatePlatformConfig = onCall(
     const data = request.data as Partial<UpdatePlatformConfigRequest>;
 
     validateUpdatePlatformConfig(data);
+    const bookingMode = resolveBookingMode(data)!;
 
     const db = getFirestore();
     const batch = db.batch();
@@ -63,7 +82,8 @@ export const updatePlatformConfig = onCall(
       studentEntryEnabled: data.studentEntryEnabled,
       bookingEnabled: data.bookingEnabled,
       sessionMode: data.sessionMode,
-      defaultBookingMode: data.defaultBookingMode,
+      bookingMode,
+      childAgeThreshold: data.childAgeThreshold ?? 14,
       defaultJoinWindowLeadMs: data.defaultJoinWindowLeadMs,
       defaultTutorApprovalSlaMs: data.defaultTutorApprovalSlaMs,
       defaultMinBookingNoticeMs: data.defaultMinBookingNoticeMs,
@@ -83,7 +103,8 @@ export const updatePlatformConfig = onCall(
       studentEntryEnabled: data.studentEntryEnabled,
       bookingEnabled: data.bookingEnabled,
       sessionMode: data.sessionMode,
-      defaultBookingMode: data.defaultBookingMode,
+      bookingMode,
+      childAgeThreshold: data.childAgeThreshold ?? 14,
       defaultJoinWindowLeadMs: data.defaultJoinWindowLeadMs,
       defaultTutorApprovalSlaMs: data.defaultTutorApprovalSlaMs,
       defaultMinBookingNoticeMs: data.defaultMinBookingNoticeMs,

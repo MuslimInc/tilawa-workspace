@@ -1,8 +1,6 @@
 import 'package:equatable/equatable.dart';
 import 'package:flutter/foundation.dart';
 
-import 'app_environment.dart' as app_env;
-
 /// Launch-time feature toggles for startup orchestration.
 ///
 /// Most toggles default to enabled and can be overridden via `--dart-define`.
@@ -18,31 +16,18 @@ import 'app_environment.dart' as app_env;
 /// Example: `--dart-define=TILAWA_LAUNCH_RECITATION_PRACTICE_ENABLED=true`
 /// Example: `--dart-define=TILAWA_LAUNCH_SMART_KHATMA_ENABLED=true`
 /// Example: `--dart-define=TILAWA_LAUNCH_TODAY_PLAN_ENABLED=true`
-/// Example: `--dart-define=TILAWA_LAUNCH_QURAN_SESSIONS_ENABLED=true`
-/// Example: `--dart-define=TILAWA_LAUNCH_TEACHER_APPLICATION_ENABLED=true`
-/// Example: `--dart-define=TILAWA_LAUNCH_TEACHER_APPLICATION_ENTRY_ENABLED=true`
-/// Example: `--dart-define=TILAWA_LAUNCH_HOME_TEACHER_APPLICATION_CARD_ENABLED=true`
-/// Example: `--dart-define=TILAWA_LAUNCH_LEARN_QURAN_STUDENT_FEATURE_ENABLED=true`
 /// Example: `--dart-define=TILAWA_LAUNCH_TEACHER_APPLICATION_FORM_URL=https://…`
-/// Example: `--dart-define=TILAWA_LAUNCH_TEACHER_APPLICATION_DISCOVERABILITY=profileAndEmptyState`
-/// Example: `--dart-define=TILAWA_LAUNCH_QURAN_SESSIONS_BOOKING_ENABLED=true`
-/// Example: `--dart-define=TILAWA_LAUNCH_QURAN_TUTOR_BOOKING_MODE=autoConfirm`
-/// Example: `--dart-define=TILAWA_LAUNCH_QURAN_TUTOR_BOOKING_MODE=requiresTutorApproval`
-/// Example: `--dart-define=TILAWA_LAUNCH_ENABLED_CALL_PROVIDERS=external,mock,livekit`
 /// Example: `--dart-define=TILAWA_LAUNCH_AGORA_APP_ID=your_agora_app_id`
 /// Example: `--dart-define=TILAWA_LAUNCH_LIVEKIT_URL=wss://tilawa-7whzug8z.livekit.cloud`
 /// Example: `--dart-define=TILAWA_LAUNCH_DEVICE_REGISTRY_WRITE_ENABLED=true`
 /// Example: `--dart-define=TILAWA_LAUNCH_MULTI_DEVICE_LOGIN_ENABLED=true`
 ///
-/// Staging / pre-production builds default QuranTutor beta flags ON via
-/// [quranSessionsStagingFlagsDefaultEnabled] (everything except
-/// `play_production`). Override per flag with `TILAWA_LAUNCH_*` dart-defines.
+/// Quran Sessions product behavior is controlled by Admin Panel Firestore
+/// config, not launch config. Launch config only carries SDK credentials such
+/// as Agora App ID and LiveKit URL.
 /// Google Form for experienced Quran teacher/tutor applications (production default).
 const String kDefaultTeacherApplicationFormUrl =
     'https://docs.google.com/forms/d/e/1FAIpQLScjFOySgVJqDxaY0IgR9GYDEnemxOkPSbW2QQea7KrORvRQQA/viewform';
-
-bool quranSessionsStagingFlagsDefaultEnabled() =>
-    app_env.quranSessionsStagingFlagsDefaultEnabledFromEnvironment();
 
 /// Compile-time `--dart-define` values for [AppLaunchConfig.fromEnvironment].
 ///
@@ -380,9 +365,6 @@ class AppLaunchConfig extends Equatable {
   final bool todayPlanEnabled;
   final bool notificationPermissionRequest;
   final bool quranSessionsEnabled;
-
-  /// Student marketplace: hub, teachers list, booking, my sessions.
-  /// Default **false** in production — enable via dart-define for staging.
   final bool learnQuranStudentFeatureEnabled;
 
   /// One-read teacher dashboard: serve `/sessions/dashboard` from the
@@ -404,33 +386,19 @@ class AppLaunchConfig extends Equatable {
   /// Functions env var. Default off in production, on for staging/local builds.
   final bool multiDeviceLoginEnabled;
 
-  /// Settings/Profile Google Form teacher application entry.
   final bool teacherApplicationEntryEnabled;
-
-  /// Optional calm Home inline card for teacher application (no auto modal).
   final bool homeTeacherApplicationCardEnabled;
 
   /// External Google Form URL opened from teacher application entry points.
   final String teacherApplicationFormUrl;
 
   final bool teacherApplicationEnabled;
-
-  /// One of: `none`, `profileOnly`, `profileAndEmptyState`.
   final String teacherApplicationDiscoverability;
   final bool quranSessionsBookingEnabled;
-
-  /// Staging-only sandbox PSP checkout (requires CF
-  /// `QURAN_SESSIONS_PAYMENT_PROVIDER_ENABLED=true`). Default **false**.
   final bool quranSessionsPaidBookingSandboxEnabled;
-
-  /// Comma-separated RTC providers registered client-side (must match Firestore
-  /// `enabledCallProviders`). Example: `external,mock,agora`.
-  ///
-  /// Play production builds default to `external,mock` only and exclude native
-  /// Agora/LiveKit via [tool/configure_rtc_deps.dart] before release AAB build.
   final String enabledCallProvidersCsv;
 
-  /// Agora App ID — required when `agora` is in [enabledCallProvidersCsv].
+  /// Agora App ID — used only when Admin config enables `agora`.
   final String agoraAppId;
 
   /// LiveKit server URL (`wss://…`) — required when `livekit` is enabled.

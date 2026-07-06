@@ -2,19 +2,24 @@ import { Injectable, inject } from '@angular/core';
 import { Firestore, doc, docData } from '@angular/fire/firestore';
 import { Functions, httpsCallable } from '@angular/fire/functions';
 import { BehaviorSubject, Observable } from 'rxjs';
-import { catchError, finalize, tap } from 'rxjs/operators';
+import { catchError, map, tap } from 'rxjs/operators';
 
 export interface PlatformConfig {
   quranSessionsEnabled: boolean;
   studentEntryEnabled: boolean;
   bookingEnabled: boolean;
   sessionMode: 'videoOnly';
-  defaultBookingMode: 'requiresTutorApproval' | 'autoConfirm';
+  bookingMode: 'requiresTutorApproval' | 'autoConfirm';
   defaultJoinWindowLeadMs: number;
   defaultTutorApprovalSlaMs: number;
   defaultMinBookingNoticeMs: number;
   defaultMaxUpcomingPerStudent: number;
 }
+
+type LegacyPlatformConfig = PlatformConfig & {
+  defaultBookingMode?: PlatformConfig['bookingMode'];
+  quranTutorBookingMode?: PlatformConfig['bookingMode'];
+};
 
 @Injectable({ providedIn: 'root' })
 export class GlobalSettingsFacade {
@@ -36,7 +41,18 @@ export class GlobalSettingsFacade {
   getConfig(): Observable<PlatformConfig | undefined> {
     this.loadingSubject.next(true);
     const docRef = doc(this.firestore, 'quran_session_platform_config/global');
-    return (docData(docRef) as Observable<PlatformConfig | undefined>).pipe(
+    return (docData(docRef) as Observable<LegacyPlatformConfig | undefined>).pipe(
+      map(config => {
+        if (!config) return undefined;
+        return {
+          ...config,
+          bookingMode:
+            config.bookingMode ??
+            config.defaultBookingMode ??
+            config.quranTutorBookingMode ??
+            'requiresTutorApproval'
+        } satisfies PlatformConfig;
+      }),
       tap(() => this.loadingSubject.next(false)),
       catchError(err => {
         this.errorSubject.next(err.message);

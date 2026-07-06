@@ -19,6 +19,7 @@ import 'package:tilawa/core/extensions.dart';
 import 'package:tilawa/core/logging/app_logger.dart';
 import 'package:tilawa/core/telemetry/sentry_navigator_observer.dart';
 import 'package:tilawa/router/app_links_config.dart';
+import 'package:tilawa/features/quran_sessions/quran_sessions_platform_config_store.dart';
 import 'package:tilawa_core/constants/app_strings.dart';
 import 'package:tilawa_core/entities/reciter_entity.dart';
 import 'package:tilawa_ui_kit/tilawa_ui_kit.dart';
@@ -461,6 +462,10 @@ class AppRouter {
         restorationScopeId: disableStateRestoration
             ? null
             : AppStrings.routerRestorationScopeId,
+        refreshListenable:
+            getIt.isRegistered<QuranSessionsPlatformConfigStore>()
+            ? getIt<QuranSessionsPlatformConfigStore>()
+            : null,
         redirect: redirect,
         routes: [...$appRoutes, ...quranSessionsRoutes],
         errorBuilder: errorBuilder,

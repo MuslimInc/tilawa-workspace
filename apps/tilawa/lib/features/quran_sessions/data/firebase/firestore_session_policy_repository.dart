@@ -42,7 +42,10 @@ class FirestoreSessionPolicyDataSource
         videoCallAllowedForChildren:
             data['videoCallAllowedForChildren'] as bool? ?? false,
         recordingEnabled: data['recordingEnabled'] as bool? ?? false,
-        quranTutorBookingMode: data['quranTutorBookingMode'] as String?,
+        quranTutorBookingMode:
+            (data['bookingMode'] as String?) ??
+            (data['quranTutorBookingMode'] as String?) ??
+            (data['defaultBookingMode'] as String?),
       );
     } on FirebaseException catch (e) {
       throw mapFirebaseException(e);

@@ -1,13 +1,19 @@
 import 'package:flutter/foundation.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:get_it/get_it.dart';
 import 'package:injectable/injectable.dart';
 import 'package:quran_sessions/quran_sessions.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import 'package:tilawa/core/bootstrap/app_launch_config.dart';
 import 'package:tilawa/features/auth/device_registry_feature_flags.dart';
 import 'package:tilawa/features/genui_assistant/di/genui_assistant_module.dart';
+import 'package:tilawa/features/quran_sessions/data/firebase/firestore_platform_config_data_source.dart';
+import 'package:tilawa/features/quran_sessions/data/local/shared_preferences_platform_config_data_source.dart';
+import 'package:tilawa/features/quran_sessions/data/quran_sessions_platform_config_repository.dart';
 import 'package:tilawa/features/quran_sessions/di/quran_sessions_backend_config.dart';
 import 'package:tilawa/features/quran_sessions/di/quran_sessions_firebase_module.dart';
 import 'package:tilawa/features/quran_sessions/di/quran_sessions_mvp_module.dart';
+import 'package:tilawa/features/quran_sessions/quran_sessions_platform_config_store.dart';
 import 'package:tilawa/features/settings/presentation/cubit/settings_cubit.dart';
 import 'package:tilawa_core/di/injection.module.dart';
 import 'package:tilawa_core/network/network_info.dart';
@@ -69,8 +75,7 @@ Future<void> configureDependencies({AppLaunchConfig? launchConfig}) async {
   if (kDebugMode) {
     debugPrint(
       '[AppLaunchConfig] distribution=${const String.fromEnvironment('TILAWA_DISTRIBUTION', defaultValue: 'local')} '
-      'learnQuranStudent=${config.learnQuranStudentFeatureEnabled} '
-      'quranSessions=${config.quranSessionsEnabled}',
+      'firebaseInit=${config.firebaseInit}',
     );
   }
 
@@ -91,8 +96,46 @@ Future<void> configureDependencies({AppLaunchConfig? launchConfig}) async {
     }
   }
 
+  await _registerQuranSessionsPlatformConfig(config);
   _registerQuranSessionsIfNeeded(config);
   GenUiAssistantModule.register(getIt, config: config);
+}
+
+Future<void> _registerQuranSessionsPlatformConfig(
+  AppLaunchConfig config,
+) async {
+  if (!getIt.isRegistered<QuranSessionsPlatformConfigStore>()) {
+    getIt.registerSingleton<QuranSessionsPlatformConfigStore>(
+      QuranSessionsPlatformConfigStore(),
+    );
+  }
+  if (!getIt.isRegistered<SharedPreferencesPlatformConfigDataSource>()) {
+    getIt.registerLazySingleton<SharedPreferencesPlatformConfigDataSource>(
+      () => SharedPreferencesPlatformConfigDataSource(
+        getIt<SharedPreferencesAsync>(),
+      ),
+    );
+  }
+  if (!getIt.isRegistered<FirestorePlatformConfigDataSource>() &&
+      config.firebaseInit) {
+    getIt.registerLazySingleton<FirestorePlatformConfigDataSource>(
+      () => FirestorePlatformConfigDataSource(getIt<FirebaseFirestore>()),
+    );
+  }
+  if (!getIt.isRegistered<QuranSessionsPlatformConfigRepository>()) {
+    getIt.registerLazySingleton<QuranSessionsPlatformConfigRepository>(
+      () => QuranSessionsPlatformConfigRepository(
+        remoteDataSource:
+            getIt.isRegistered<FirestorePlatformConfigDataSource>()
+            ? getIt<FirestorePlatformConfigDataSource>()
+            : null,
+        localDataSource: getIt<SharedPreferencesPlatformConfigDataSource>(),
+        store: getIt<QuranSessionsPlatformConfigStore>(),
+      ),
+    );
+  }
+
+  await getIt<QuranSessionsPlatformConfigRepository>().loadCachedConfig();
 }
 
 void _registerQuranSessionsIfNeeded(AppLaunchConfig config) {

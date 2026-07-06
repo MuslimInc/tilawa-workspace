@@ -8,6 +8,7 @@ export type LifecycleErrorCode =
   | "late_student_cancellation_blocked"
   | "not_participant"
   | "payment_provider_unavailable"
+  | "feature_disabled"
   // Booking eligibility (server-side parity with ValidateBookingEligibilityUseCase).
   | "account_blocked"
   | "profile_incomplete"

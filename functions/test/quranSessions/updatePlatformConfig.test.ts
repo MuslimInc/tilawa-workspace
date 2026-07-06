@@ -21,7 +21,7 @@ test("validateUpdatePlatformConfig accepts valid config", () => {
     studentEntryEnabled: true,
     bookingEnabled: true,
     sessionMode: "videoOnly",
-    defaultBookingMode: "autoConfirm",
+    bookingMode: "autoConfirm",
     defaultJoinWindowLeadMs: 300000,
     defaultTutorApprovalSlaMs: 3600000,
     defaultMinBookingNoticeMs: 1800000,
@@ -31,13 +31,29 @@ test("validateUpdatePlatformConfig accepts valid config", () => {
   assert.doesNotThrow(() => validateUpdatePlatformConfig(validData));
 });
 
+test("validateUpdatePlatformConfig accepts legacy booking mode alias", () => {
+  const validData: Omit<UpdatePlatformConfigRequest, "bookingMode"> = {
+    quranSessionsEnabled: true,
+    studentEntryEnabled: true,
+    bookingEnabled: true,
+    sessionMode: "videoOnly",
+    defaultBookingMode: "autoConfirm",
+    defaultJoinWindowLeadMs: 300000,
+    defaultTutorApprovalSlaMs: 3600000,
+    defaultMinBookingNoticeMs: 1800000,
+    defaultMaxUpcomingPerStudent: 3,
+  };
+
+  assert.doesNotThrow(() => validateUpdatePlatformConfig(validData));
+});
+
 test("validateUpdatePlatformConfig rejects invalid sessionMode", () => {
   const data: any = {
     quranSessionsEnabled: true,
     studentEntryEnabled: true,
     bookingEnabled: true,
     sessionMode: "audioOnly", // Invalid
-    defaultBookingMode: "autoConfirm",
+    bookingMode: "autoConfirm",
     defaultJoinWindowLeadMs: 300000,
     defaultTutorApprovalSlaMs: 3600000,
     defaultMinBookingNoticeMs: 1800000,
@@ -56,7 +72,7 @@ test("validateUpdatePlatformConfig rejects negative defaultJoinWindowLeadMs", ()
     studentEntryEnabled: true,
     bookingEnabled: true,
     sessionMode: "videoOnly",
-    defaultBookingMode: "autoConfirm",
+    bookingMode: "autoConfirm",
     defaultJoinWindowLeadMs: -1, // Invalid
     defaultTutorApprovalSlaMs: 3600000,
     defaultMinBookingNoticeMs: 1800000,

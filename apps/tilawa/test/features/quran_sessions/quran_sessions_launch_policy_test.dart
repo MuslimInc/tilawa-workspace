@@ -1,104 +1,119 @@
 import 'package:flutter_test/flutter_test.dart';
 import 'package:quran_sessions/quran_sessions.dart';
 import 'package:tilawa/core/bootstrap/app_launch_config.dart';
+import 'package:tilawa/features/quran_sessions/domain/entities/quran_sessions_platform_config.dart';
 import 'package:tilawa/features/quran_sessions/quran_sessions_launch_policy.dart';
 
 void main() {
-  test('resolveVoiceVideoProviderHint picks livekit when url present', () {
-    const config = AppLaunchConfig(
-      enabledCallProvidersCsv: 'external,mock,livekit',
-      livekitServerUrl: kStagingLiveKitUrl,
+  test('platform config picks livekit when url present', () {
+    const platformConfig = QuranSessionsPlatformConfig(
+      quranSessionsEnabled: true,
+      studentEntryEnabled: true,
+      bookingEnabled: true,
+      bookingMode: 'autoConfirm',
+      sessionMode: 'videoOnly',
+      enabledCallProviders: {'external', 'mock', 'livekit'},
     );
+    const launchConfig = AppLaunchConfig(livekitServerUrl: kStagingLiveKitUrl);
 
     expect(
-      resolveVoiceVideoProviderHint(config),
+      resolveVoiceVideoProviderHintFromPlatformConfig(
+        platformConfig,
+        launchConfig,
+      ),
       SessionCallProviderKind.livekit,
     );
     expect(
-      sessionModePolicyFromLaunchConfig(config).isEnabled(
-        SessionCallType.videoCall,
-      ),
+      sessionModePolicyFromPlatformConfig(
+        platformConfig,
+        launchConfig,
+      ).isEnabled(SessionCallType.videoCall),
       isTrue,
     );
     expect(
-      sessionModePolicyFromLaunchConfig(config).isEnabled(
-        SessionCallType.voiceCall,
-      ),
+      sessionModePolicyFromPlatformConfig(
+        platformConfig,
+        launchConfig,
+      ).isEnabled(SessionCallType.voiceCall),
       isFalse,
     );
     expect(
-      sessionModePolicyFromLaunchConfig(config).voiceVideoUseMockProvider,
+      sessionModePolicyFromPlatformConfig(
+        platformConfig,
+        launchConfig,
+      ).voiceVideoUseMockProvider,
       isFalse,
     );
   });
 
-  test(
-    'resolveVoiceVideoProviderHint picks agora when livekit url missing',
-    () {
-      const config = AppLaunchConfig(
-        enabledCallProvidersCsv: 'external,mock,agora,livekit',
-        agoraAppId: kStagingAgoraAppId,
-      );
+  test('platform config picks agora when livekit url missing', () {
+    const platformConfig = QuranSessionsPlatformConfig(
+      quranSessionsEnabled: true,
+      studentEntryEnabled: true,
+      bookingEnabled: true,
+      bookingMode: 'autoConfirm',
+      sessionMode: 'videoOnly',
+      enabledCallProviders: {'external', 'mock', 'agora', 'livekit'},
+    );
+    const launchConfig = AppLaunchConfig(agoraAppId: kStagingAgoraAppId);
 
-      expect(
-        resolveVoiceVideoProviderHint(
-          config,
-          distribution: 'local',
-          debugMode: false,
-        ),
-        SessionCallProviderKind.agora,
-      );
-    },
-  );
+    expect(
+      resolveVoiceVideoProviderHintFromPlatformConfig(
+        platformConfig,
+        launchConfig,
+        distribution: 'local',
+        debugMode: false,
+      ),
+      SessionCallProviderKind.agora,
+    );
+  });
 
-  test(
-    'resolveVoiceVideoProviderHint falls back to mock without rtc credentials',
-    () {
-      const config = AppLaunchConfig(
-        enabledCallProvidersCsv: 'external,mock,livekit',
-      );
+  test('platform config falls back to mock without rtc credentials', () {
+    const platformConfig = QuranSessionsPlatformConfig(
+      quranSessionsEnabled: true,
+      studentEntryEnabled: true,
+      bookingEnabled: true,
+      bookingMode: 'autoConfirm',
+      sessionMode: 'videoOnly',
+      enabledCallProviders: {'external', 'mock', 'livekit'},
+    );
 
-      expect(
-        resolveVoiceVideoProviderHint(config, debugMode: false),
-        SessionCallProviderKind.mock,
-      );
-    },
-  );
+    expect(
+      resolveVoiceVideoProviderHintFromPlatformConfig(
+        platformConfig,
+        const AppLaunchConfig(),
+        debugMode: false,
+      ),
+      SessionCallProviderKind.mock,
+    );
+  });
 
-  test(
-    'staging distribution injects livekit defaults when dart-defines omitted',
-    () {
-      const config = AppLaunchConfig(
-        enabledCallProvidersCsv: 'external,mock',
-      );
+  test('staging injects livekit credential when admin enables livekit', () {
+    const platformConfig = QuranSessionsPlatformConfig(
+      quranSessionsEnabled: true,
+      studentEntryEnabled: true,
+      bookingEnabled: true,
+      bookingMode: 'autoConfirm',
+      sessionMode: 'videoOnly',
+      enabledCallProviders: {'external', 'mock', 'livekit'},
+    );
 
-      final rtc = resolveRtcLaunchConfig(config, distribution: 'staging');
+    final rtc = resolveRtcLaunchConfigFromPlatformConfig(
+      platformConfig,
+      const AppLaunchConfig(),
+      distribution: 'staging',
+      debugMode: false,
+    );
 
-      expect(rtc.isLiveKitEnabled, isTrue);
-      expect(rtc.livekitServerUrl, kStagingLiveKitUrl);
-      expect(
-        resolveVoiceVideoProviderHint(
-          config,
-          distribution: 'staging',
-          debugMode: false,
-        ),
-        SessionCallProviderKind.livekit,
-      );
-      expect(
-        resolveRtcLaunchConfig(
-          config,
-          distribution: 'staging',
-        ).enabledProviders,
-        contains('livekit'),
-      );
-    },
-  );
+    expect(rtc.isLiveKitEnabled, isTrue);
+    expect(rtc.livekitServerUrl, kStagingLiveKitUrl);
+    expect(rtc.enabledProviders, contains('livekit'));
+  });
 
-  test('local release keeps rtc off without explicit dart-defines', () {
-    const config = AppLaunchConfig();
-
-    final rtc = resolveRtcLaunchConfig(
-      config,
+  test('safe fallback keeps rtc on external and mock only', () {
+    final rtc = resolveRtcLaunchConfigFromPlatformConfig(
+      QuranSessionsPlatformConfig.safeFallback,
+      const AppLaunchConfig(),
       distribution: 'local',
       debugMode: false,
     );
@@ -108,41 +123,56 @@ void main() {
     expect(rtc.enabledProviders, containsAll(['external', 'mock']));
   });
 
-  test(
-    'debug build injects livekit defaults when dart-defines omitted',
-    () {
-      const config = AppLaunchConfig(
-        enabledCallProvidersCsv: 'external,mock',
-      );
+  test('debug injects livekit credential only when admin enables livekit', () {
+    const platformConfig = QuranSessionsPlatformConfig(
+      quranSessionsEnabled: true,
+      studentEntryEnabled: true,
+      bookingEnabled: true,
+      bookingMode: 'autoConfirm',
+      sessionMode: 'videoOnly',
+      enabledCallProviders: {'external', 'mock', 'livekit'},
+    );
 
-      final rtc = resolveRtcLaunchConfig(
-        config,
-        distribution: 'local',
-        debugMode: true,
-      );
+    final rtc = resolveRtcLaunchConfigFromPlatformConfig(
+      platformConfig,
+      const AppLaunchConfig(),
+      distribution: 'local',
+      debugMode: true,
+    );
 
-      expect(rtc.isLiveKitEnabled, isTrue);
-      expect(rtc.livekitServerUrl, kStagingLiveKitUrl);
-      expect(rtc.enabledProviders, contains('livekit'));
-    },
-  );
+    expect(rtc.isLiveKitEnabled, isTrue);
+    expect(rtc.livekitServerUrl, kStagingLiveKitUrl);
+    expect(rtc.enabledProviders, contains('livekit'));
+  });
 
-  test('staging respects explicit agora dart-defines over livekit', () {
+  test('explicit agora credential is preserved when admin enables agora', () {
     const customId = 'custom-agora-app-id';
-    const config = AppLaunchConfig(
-      enabledCallProvidersCsv: 'external,mock,agora,livekit',
+    const platformConfig = QuranSessionsPlatformConfig(
+      quranSessionsEnabled: true,
+      studentEntryEnabled: true,
+      bookingEnabled: true,
+      bookingMode: 'autoConfirm',
+      sessionMode: 'videoOnly',
+      enabledCallProviders: {'external', 'mock', 'agora', 'livekit'},
+    );
+    const launchConfig = AppLaunchConfig(
       agoraAppId: customId,
       livekitServerUrl: kStagingLiveKitUrl,
     );
 
-    final rtc = resolveRtcLaunchConfig(config, distribution: 'staging');
+    final rtc = resolveRtcLaunchConfigFromPlatformConfig(
+      platformConfig,
+      launchConfig,
+      distribution: 'staging',
+    );
 
     expect(rtc.agoraAppId, customId);
     expect(rtc.isAgoraEnabled, isTrue);
     expect(rtc.isLiveKitEnabled, isTrue);
     expect(
-      resolveVoiceVideoProviderHint(
-        config,
+      resolveVoiceVideoProviderHintFromPlatformConfig(
+        platformConfig,
+        launchConfig,
         distribution: 'staging',
         debugMode: false,
       ),
@@ -150,69 +180,49 @@ void main() {
     );
   });
 
-  test(
-    'play_production release keeps agora and livekit out of provider set',
-    () {
-      const config = AppLaunchConfig();
+  test('play production safe fallback excludes native rtc providers', () {
+    final rtc = resolveRtcLaunchConfigFromPlatformConfig(
+      QuranSessionsPlatformConfig.safeFallback,
+      const AppLaunchConfig(),
+      distribution: 'play_production',
+      debugMode: false,
+    );
 
-      final rtc = resolveRtcLaunchConfig(
-        config,
+    expect(rtc.enabledProviders, containsAll(['external', 'mock']));
+    expect(rtc.enabledProviders, isNot(contains('agora')));
+    expect(rtc.enabledProviders, isNot(contains('livekit')));
+    expect(rtc.isAgoraEnabled, isFalse);
+    expect(rtc.isLiveKitEnabled, isFalse);
+    expect(
+      resolveVoiceVideoProviderHintFromPlatformConfig(
+        QuranSessionsPlatformConfig.safeFallback,
+        const AppLaunchConfig(),
         distribution: 'play_production',
         debugMode: false,
-      );
-
-      expect(rtc.enabledProviders, containsAll(['external', 'mock']));
-      expect(rtc.enabledProviders, isNot(contains('agora')));
-      expect(rtc.enabledProviders, isNot(contains('livekit')));
-      expect(rtc.isAgoraEnabled, isFalse);
-      expect(rtc.isLiveKitEnabled, isFalse);
-      expect(
-        resolveVoiceVideoProviderHint(
-          config,
-          distribution: 'play_production',
-          debugMode: false,
-        ),
-        SessionCallProviderKind.mock,
-      );
-    },
-  );
-
-  test('resolveQuranTutorBookingModeHint uses Firestore when set', () {
-    expect(
-      resolveQuranTutorBookingModeHint(
-        firestoreModeRaw: 'autoConfirm',
-        distribution: 'play_production',
       ),
-      QuranTutorBookingMode.autoConfirm,
+      SessionCallProviderKind.mock,
     );
   });
 
-  test(
-    'play_alpha release keeps livekit disabled without explicit url',
-    () {
-      const config = AppLaunchConfig(
-        enabledCallProvidersCsv: 'external,mock,livekit',
-      );
+  test('play alpha keeps livekit disabled without explicit url', () {
+    const platformConfig = QuranSessionsPlatformConfig(
+      quranSessionsEnabled: true,
+      studentEntryEnabled: true,
+      bookingEnabled: true,
+      bookingMode: 'autoConfirm',
+      sessionMode: 'videoOnly',
+      enabledCallProviders: {'external', 'mock', 'livekit'},
+    );
 
-      final rtc = resolveRtcLaunchConfig(
-        config,
-        distribution: 'play_alpha',
-        debugMode: false,
-      );
+    final rtc = resolveRtcLaunchConfigFromPlatformConfig(
+      platformConfig,
+      const AppLaunchConfig(),
+      distribution: 'play_alpha',
+      debugMode: false,
+    );
 
-      expect(rtc.enabledProviders, contains('livekit'));
-      expect(rtc.isLiveKitEnabled, isFalse);
-      expect(rtc.livekitServerUrl, isEmpty);
-    },
-  );
-
-  test(
-    'resolveQuranTutorBookingModeHint defaults play_production to approval',
-    () {
-      expect(
-        resolveQuranTutorBookingModeHint(distribution: 'play_production'),
-        QuranTutorBookingMode.requiresTutorApproval,
-      );
-    },
-  );
+    expect(rtc.enabledProviders, contains('livekit'));
+    expect(rtc.isLiveKitEnabled, isFalse);
+    expect(rtc.livekitServerUrl, isEmpty);
+  });
 }

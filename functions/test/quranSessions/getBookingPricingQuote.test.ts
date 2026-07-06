@@ -17,6 +17,11 @@ function context(overrides: {
   const fee = overrides.sessionFeeAmount ?? 0;
   const currency = overrides.currencyCode ?? "USD";
   return {
+    platform: {
+      quranSessionsEnabled: true,
+      studentEntryEnabled: true,
+      bookingEnabled: true,
+    },
     student: {
       exists: true,
       accountStatus: "active",

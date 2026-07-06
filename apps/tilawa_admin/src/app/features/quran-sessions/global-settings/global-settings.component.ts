@@ -40,7 +40,7 @@ export class GlobalSettingsComponent implements OnInit {
     studentEntryEnabled: [false],
     bookingEnabled: [false],
     sessionMode: ['videoOnly', Validators.required],
-    defaultBookingMode: ['requiresTutorApproval', Validators.required],
+    bookingMode: ['requiresTutorApproval', Validators.required],
     defaultJoinWindowLeadMs: [0, [Validators.required, Validators.min(0)]],
     defaultTutorApprovalSlaMs: [0, [Validators.required, Validators.min(0)]],
     defaultMinBookingNoticeMs: [0, [Validators.required, Validators.min(0)]],

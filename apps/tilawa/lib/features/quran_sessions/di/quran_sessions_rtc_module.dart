@@ -7,6 +7,7 @@ import 'package:tilawa/features/auth/data/services/device_identity_service.dart'
 import 'package:tilawa/features/auth/domain/services/callable_session_payload_builder.dart';
 import 'package:tilawa/features/quran_sessions/data/external_meeting_url_launcher.dart';
 import 'package:tilawa/features/quran_sessions/data/firebase/firebase_call_token_provider.dart';
+import 'package:tilawa/features/quran_sessions/quran_sessions_feature_flags.dart';
 import 'package:tilawa/features/quran_sessions/quran_sessions_launch_policy.dart';
 import 'package:tilawa/features/quran_sessions/rtc/quran_sessions_rtc_impl.dart';
 
@@ -46,7 +47,10 @@ class QuranSessionsRtcModule {
     GetIt sl,
     AppLaunchConfig config,
   ) {
-    final rtc = resolveRtcLaunchConfig(config);
+    final rtc = resolveRtcLaunchConfigFromPlatformConfig(
+      quranSessionsEffectivePlatformConfig(),
+      config,
+    );
     final eventHub = sl.isRegistered<SessionCallProviderEventHub>()
         ? sl<SessionCallProviderEventHub>()
         : null;
@@ -103,7 +107,10 @@ class QuranSessionsRtcModule {
   }
 
   static void register(GetIt sl, AppLaunchConfig config) {
-    final rtc = resolveRtcLaunchConfig(config);
+    final rtc = resolveRtcLaunchConfigFromPlatformConfig(
+      quranSessionsEffectivePlatformConfig(),
+      config,
+    );
     final needsTokenProvider = rtc.isAgoraEnabled || rtc.isLiveKitEnabled;
     if (needsTokenProvider) {
       sl.registerLazySingletonIfAbsent<CallTokenProvider>(

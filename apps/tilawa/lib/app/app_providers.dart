@@ -12,6 +12,7 @@ import '../features/auth/presentation/cubit/session_validity_cubit.dart';
 import '../features/auth/presentation/widgets/account_deletion_navigation_listener.dart';
 import '../features/auth/presentation/widgets/session_revoked_navigation_listener.dart';
 import '../features/localization/presentation/bloc/localization_bloc.dart';
+import '../features/quran_sessions/quran_sessions_platform_config_store.dart';
 import '../features/quran_sessions/presentation/widgets/session_taken_over_listener.dart';
 import '../features/settings/presentation/cubit/settings_cubit.dart';
 import '../features/theme/presentation/cubit/theme_cubit.dart';
@@ -47,7 +48,7 @@ class AppProviders {
   ];
 
   static Widget create({required Widget child}) {
-    return MultiBlocProvider(
+    Widget content = MultiBlocProvider(
       providers: providers,
       child: ChangeNotifierProvider<QuranPlayerChromeNotifier>(
         create: (_) => QuranPlayerChromeNotifier(),
@@ -74,5 +75,12 @@ class AppProviders {
         ),
       ),
     );
+    if (getIt.isRegistered<QuranSessionsPlatformConfigStore>()) {
+      content = ChangeNotifierProvider<QuranSessionsPlatformConfigStore>.value(
+        value: getIt<QuranSessionsPlatformConfigStore>(),
+        child: content,
+      );
+    }
+    return content;
   }
 }

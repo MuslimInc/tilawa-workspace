@@ -7,6 +7,7 @@ import 'package:shared_preferences/shared_preferences.dart';
 import 'package:tilawa/core/bootstrap/app_launch_config.dart';
 import 'package:tilawa/core/di/get_it_idempotent.dart';
 import 'package:tilawa/features/auth/domain/services/callable_session_payload_builder.dart';
+import 'package:tilawa/features/quran_sessions/quran_sessions_feature_flags.dart';
 import 'package:tilawa_core/services/performance_monitoring_service.dart';
 
 import '../data/firebase/firebase_auth_session_provider.dart';
@@ -155,7 +156,7 @@ class QuranSessionsFirebaseModule {
       ),
     );
 
-    if (config.quranSessionsPaidBookingSandboxEnabled) {
+    if (quranSessionsEffectivePlatformConfig().walletEnabled) {
       final sandbox = SandboxPaymentProvider(
         functions,
         sl<CallableSessionPayloadBuilder>(),

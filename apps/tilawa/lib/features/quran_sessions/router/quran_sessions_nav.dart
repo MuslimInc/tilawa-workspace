@@ -179,6 +179,8 @@ List<RouteBase> get quranSessionsRoutes => [
     },
     builder: (context, state) {
       final teacherId = state.pathParameters['teacherId']!;
+      final launchConfig = getIt<AppLaunchConfig>();
+      final platformConfig = quranSessionsEffectivePlatformConfig();
       final bookingEnabled =
           quranSessionsFeatureConfig().quranSessionsBookingEnabled;
       return BlocProvider(
@@ -196,8 +198,9 @@ List<RouteBase> get quranSessionsRoutes => [
           TeacherProfileScreen(
             teacherId: teacherId,
             bookingEnabled: bookingEnabled,
-            sessionModePolicy: sessionModePolicyFromLaunchConfig(
-              getIt<AppLaunchConfig>(),
+            sessionModePolicy: sessionModePolicyFromPlatformConfig(
+              platformConfig,
+              launchConfig,
             ),
             analytics: quranSessionsAnalyticsCallbacks(),
             onBookTapped: bookingEnabled
@@ -226,6 +229,7 @@ List<RouteBase> get quranSessionsRoutes => [
       final teacherId = state.pathParameters['teacherId']!;
       final preSelectedSlotId = state.extra as String?;
       final launchConfig = getIt<AppLaunchConfig>();
+      final platformConfig = quranSessionsEffectivePlatformConfig();
       return _QuranSessionsSignedInGate(
         builder: (studentId) => BlocProvider(
           create: (_) => getIt<BookingBloc>(),
@@ -235,15 +239,20 @@ List<RouteBase> get quranSessionsRoutes => [
               studentId: studentId,
               analytics: quranSessionsAnalyticsCallbacks(),
               preSelectedSlotId: preSelectedSlotId,
-              sessionModePolicy: sessionModePolicyFromLaunchConfig(
+              sessionModePolicy: sessionModePolicyFromPlatformConfig(
+                platformConfig,
                 launchConfig,
               ),
-              bookingModeHint: resolveQuranTutorBookingModeHint(
-                launchConfig: launchConfig,
-              ),
-              voiceVideoProviderHint: resolveVoiceVideoProviderHint(
-                launchConfig,
-              ),
+              bookingModeHint:
+                  QuranTutorBookingModeParsing.tryParse(
+                    platformConfig.bookingMode,
+                  ) ??
+                  QuranTutorBookingMode.requiresTutorApproval,
+              voiceVideoProviderHint:
+                  resolveVoiceVideoProviderHintFromPlatformConfig(
+                    platformConfig,
+                    launchConfig,
+                  ),
               onBookingSuccess: (_) {
                 context
                   ..pop()
@@ -368,7 +377,8 @@ List<RouteBase> get quranSessionsRoutes => [
     path: QuranSessionsRoutes.teacherDashboard,
     redirect: quranSessionsAuthRequiredRedirect,
     builder: (context, state) {
-      final sessionModePolicy = sessionModePolicyFromLaunchConfig(
+      final sessionModePolicy = sessionModePolicyFromPlatformConfig(
+        quranSessionsEffectivePlatformConfig(),
         getIt<AppLaunchConfig>(),
       );
       final showExternalMeetingSettings = sessionModePolicy.isEnabled(
@@ -460,7 +470,8 @@ List<RouteBase> get quranSessionsRoutes => [
             userId: userId,
             getCapability: getIt<GetCurrentUserTeacherCapabilityUseCase>(),
             saveProfile: getIt<SaveTeacherPublicProfileUseCase>(),
-            sessionModePolicy: sessionModePolicyFromLaunchConfig(
+            sessionModePolicy: sessionModePolicyFromPlatformConfig(
+              quranSessionsEffectivePlatformConfig(),
               getIt<AppLaunchConfig>(),
             ),
             onComplete: () {

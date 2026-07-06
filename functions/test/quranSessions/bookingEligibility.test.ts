@@ -3,10 +3,12 @@ import assert from "node:assert/strict";
 
 import {
   assertBookingEligible,
+  assertPlatformBookingEnabled,
   calendarAge,
   isChild,
   isBookingStillUpcoming,
   parseTeacherPricingOverride,
+  parsePlatformFeaturePolicy,
   resolvePricingWithOverride,
   isGenderCombinationAllowed,
   type BookingEligibilityContext,
@@ -16,6 +18,7 @@ const NOW = new Date("2024-06-01T00:00:00.000Z");
 
 function baseContext(
   overrides: {
+    platform?: Partial<BookingEligibilityContext["platform"]>;
     student?: Partial<BookingEligibilityContext["student"]>;
     teacher?: Partial<BookingEligibilityContext["teacher"]>;
     policy?: Partial<BookingEligibilityContext["policy"]>;
@@ -28,6 +31,12 @@ function baseContext(
   } = {},
 ): BookingEligibilityContext {
   return {
+    platform: {
+      quranSessionsEnabled: true,
+      studentEntryEnabled: true,
+      bookingEnabled: true,
+      ...overrides.platform,
+    },
     student: {
       exists: true,
       accountStatus: "active",
@@ -97,6 +106,26 @@ test("isChild treats a null DOB as adult (safe default)", () => {
   assert.equal(isChild(new Date("2008-01-01Z"), 14, NOW), false); // age 16
 });
 
+test("parsePlatformFeaturePolicy fails closed when config is missing", () => {
+  assert.deepEqual(parsePlatformFeaturePolicy({}), {
+    quranSessionsEnabled: false,
+    studentEntryEnabled: false,
+    bookingEnabled: false,
+  });
+});
+
+test("assertPlatformBookingEnabled rejects disabled quote/booking flow", () => {
+  expectCode(
+    () =>
+      assertPlatformBookingEnabled({
+        quranSessionsEnabled: false,
+        studentEntryEnabled: true,
+        bookingEnabled: true,
+      }),
+    "feature_disabled",
+  );
+});
+
 test("gender matrix: teacher maleOnly rejects female student", () => {
   assert.equal(
     isGenderCombinationAllowed({
@@ -143,6 +172,28 @@ test("assertBookingEligible passes the happy path and returns pricing", () => {
   );
   assert.equal(pricing.isPaid, true);
   assert.equal(pricing.amount, 12);
+});
+
+test("assertBookingEligible rejects when global Quran Sessions are disabled", () => {
+  expectCode(
+    () =>
+      assertBookingEligible(
+        baseContext({ platform: { quranSessionsEnabled: false } }),
+        NOW,
+      ),
+    "feature_disabled",
+  );
+});
+
+test("assertBookingEligible rejects when booking is disabled", () => {
+  expectCode(
+    () =>
+      assertBookingEligible(
+        baseContext({ platform: { bookingEnabled: false } }),
+        NOW,
+      ),
+    "feature_disabled",
+  );
 });
 
 test("assertBookingEligible rejects a blocked student account", () => {

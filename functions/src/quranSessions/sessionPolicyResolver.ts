@@ -204,7 +204,8 @@ export interface PolicyConfigValidation {
 }
 
 const PLATFORM_REQUIRED_FIELDS = [
-  "quranTutorBookingMode",
+  "quranSessionsEnabled",
+  "bookingEnabled",
   "sessionMode",
   "childAgeThreshold",
 ] as const;
@@ -235,17 +236,43 @@ export function validatePlatformConfig(
   const invalidFields: string[] = [];
   const config = data ?? {};
 
+  if (
+    config.quranSessionsEnabled === false ||
+    config.bookingEnabled === false
+  ) {
+    return { valid: true, missingFields, invalidFields };
+  }
+
   for (const field of PLATFORM_REQUIRED_FIELDS) {
     if (config[field] == null) {
       missingFields.push(field);
     }
   }
+  if (
+    config.bookingMode == null &&
+    config.quranTutorBookingMode == null &&
+    config.defaultBookingMode == null
+  ) {
+    missingFields.push("bookingMode");
+  }
 
+  if (
+    config.bookingMode != null &&
+    !isValidBookingMode(config.bookingMode)
+  ) {
+    invalidFields.push("bookingMode");
+  }
   if (
     config.quranTutorBookingMode != null &&
     !isValidBookingMode(config.quranTutorBookingMode)
   ) {
     invalidFields.push("quranTutorBookingMode");
+  }
+  if (
+    config.defaultBookingMode != null &&
+    !isValidBookingMode(config.defaultBookingMode)
+  ) {
+    invalidFields.push("defaultBookingMode");
   }
   if (config.sessionMode != null && !isValidSessionMode(config.sessionMode)) {
     invalidFields.push("sessionMode");
@@ -311,6 +338,13 @@ export function assertBookingPolicyConfigured(input: {
   cityId: string;
   marketDocExists: boolean;
 }): void {
+  if (
+    input.platformConfig.quranSessionsEnabled === false ||
+    input.platformConfig.bookingEnabled === false
+  ) {
+    return;
+  }
+
   const platform = validatePlatformConfig(input.platformConfig);
   if (!platform.valid) {
     throw lifecycleError(

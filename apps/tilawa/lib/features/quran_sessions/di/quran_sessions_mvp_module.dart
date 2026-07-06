@@ -2,6 +2,7 @@ import 'package:get_it/get_it.dart';
 import 'package:quran_sessions/quran_sessions.dart';
 import 'package:tilawa/core/bootstrap/app_launch_config.dart';
 import 'package:tilawa/core/di/get_it_idempotent.dart';
+import 'package:tilawa/features/quran_sessions/quran_sessions_feature_flags.dart';
 import 'package:tilawa/features/quran_sessions/quran_sessions_launch_policy.dart';
 import 'package:tilawa_core/network/network_info.dart';
 
@@ -393,6 +394,7 @@ class QuranSessionsMvpModule {
       () {
         final schedulingAnalytics = quranSessionsSchedulingAnalyticsCallbacks();
         final launchConfig = sl<AppLaunchConfig>();
+        final platformConfig = quranSessionsEffectivePlatformConfig();
         return BookingBloc(
           getAvailability: sl<GetTeacherAvailabilityUseCase>(),
           submitBooking: sl<SubmitSessionBookingUseCase>(),
@@ -403,7 +405,10 @@ class QuranSessionsMvpModule {
           getPricingQuote: sl.isRegistered<SessionPricingQuoteGateway>()
               ? GetBookingPricingQuoteUseCase(sl<SessionPricingQuoteGateway>())
               : null,
-          sessionModePolicy: sessionModePolicyFromLaunchConfig(launchConfig),
+          sessionModePolicy: sessionModePolicyFromPlatformConfig(
+            platformConfig,
+            launchConfig,
+          ),
           paymentConfirmation: sl.isRegistered<SessionPaymentConfirmation>()
               ? sl<SessionPaymentConfirmation>()
               : null,

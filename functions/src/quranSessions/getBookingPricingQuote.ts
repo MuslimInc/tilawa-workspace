@@ -2,6 +2,7 @@ import { onCall, HttpsError } from "firebase-functions/v2/https";
 import { getFirestore } from "firebase-admin/firestore";
 
 import {
+  assertPlatformBookingEnabled,
   loadBookingEligibilityContext,
   type BookingEligibilityContext,
 } from "./bookingEligibilityService";
@@ -79,6 +80,7 @@ export const getBookingPricingQuote = onCall(
     // student profile or market policy is incomplete — the client already
     // maps those codes to localized copy.
     const ctx = await loadBookingEligibilityContext(db, uid, data.teacherId);
+    assertPlatformBookingEnabled(ctx.platform);
     return buildPricingQuote(ctx, isPaymentProviderEnabled());
   },
 );

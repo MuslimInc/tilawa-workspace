@@ -276,7 +276,10 @@ export function formatAuthAccountReport(result: VerifyAccountResult): string {
 
 export function buildMaestroPlatformConfig(): Record<string, unknown> {
   return {
-    quranTutorBookingMode: "requiresTutorApproval",
+    quranSessionsEnabled: true,
+    studentEntryEnabled: true,
+    bookingEnabled: true,
+    bookingMode: "requiresTutorApproval",
     sessionMode: "videoOnly",
     enabledCallProviders: ["mock", "agora"],
     childAgeThreshold: 14,

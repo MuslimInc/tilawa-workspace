@@ -88,7 +88,7 @@ function codeOf(error: unknown): string | undefined {
 
 test("integration: tutor approval booking stays pending and exposes allowed actions", async () => {
   await prepareIntegrationFirestore();
-  await patchPlatformConfig({ quranTutorBookingMode: "requiresTutorApproval" });
+  await patchPlatformConfig({ bookingMode: "requiresTutorApproval" });
   await seedVerifiedTeacher("teacher1");
   await seedCompleteStudent("student1");
   await seedUserSession("student1");
@@ -107,7 +107,7 @@ test("integration: tutor approval booking stays pending and exposes allowed acti
 
 test("integration: student cancel from pending releases slot and clears join", async () => {
   await prepareIntegrationFirestore();
-  await patchPlatformConfig({ quranTutorBookingMode: "requiresTutorApproval" });
+  await patchPlatformConfig({ bookingMode: "requiresTutorApproval" });
   await seedVerifiedTeacher("teacher1");
   await seedCompleteStudent("student1");
   await seedUserSession("student1");
