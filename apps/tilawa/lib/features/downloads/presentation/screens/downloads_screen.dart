@@ -208,7 +208,7 @@ class _DownloadsScreenAppBar extends StatelessWidget
           : null,
       actions: <Widget>[
         _DownloadsRefreshButton(onPressed: onRefresh),
-        const _DownloadsClearAllButton(),
+        _DownloadsClearAllButton(enabled: totalBytes > 0),
       ],
     );
   }
@@ -229,13 +229,20 @@ class _DownloadsRefreshButton extends StatelessWidget {
 }
 
 class _DownloadsClearAllButton extends StatelessWidget {
-  const _DownloadsClearAllButton();
+  const _DownloadsClearAllButton({required this.enabled});
+
+  final bool enabled;
 
   @override
   Widget build(BuildContext context) {
     return TilawaIconActionButton(
       icon: Icons.delete_sweep_rounded,
-      onTap: () => _ClearAllDownloadsDialog.show(context),
+      enabled: enabled,
+      onTap: () {
+        if (enabled) {
+          _ClearAllDownloadsDialog.show(context);
+        }
+      },
     );
   }
 }
