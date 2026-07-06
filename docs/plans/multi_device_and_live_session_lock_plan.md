@@ -422,11 +422,27 @@ Flags follow the existing `AppLaunchConfig` / `TILAWA_LAUNCH_*` convention
      it is no longer sent). Client stops treating it as global logout;
      repurposed as device-targeted `session_taken_over` in Phase 2.
 
-- **Phase 2 — Live-session lock.**
-  Add `liveLocks` + `forceTakeover` to `issueSessionRtcToken`; LiveKit
-  `identity = uid#deviceId` + eviction; client join/switch UX + device-targeted
-  control FCM. Clear locks in `completeSession`/`finalizeElapsedSessions`. Flag:
-  `liveSessionDeviceLockEnabled`.
+- **Phase 2 — Live-session lock. IMPLEMENTED (commit `cc8726ba3`).**
+  Per-participant lease at `quran_sessions/{sessionId}.liveLocks.{uid}` acquired
+  in a transaction inside `issueSessionRtcToken` (`liveSessionLock.ts` pure
+  `decideLockGrant` + `liveSessionLockService.ts`); lease TTL = RTC token TTL
+  (`LIVE_LOCK_LEASE_TTL_MS` 1h); LiveKit `identity = uid#deviceId` with
+  `removeParticipant` eviction on takeover (`liveKitEviction.ts`), Agora
+  **deny-only**; device-targeted `session_taken_over` push
+  (`liveSessionTakeoverPush.ts`); deny-by-default + `forceTakeover` (own device
+  only); locks cleared in `completeSession`/`finalizeElapsedSessions`. Client:
+  `firebase_call_token_provider` sends `deviceId`+`forceTakeover`,
+  `firebase_callable_failure_mapper` maps `already_active_on_other_device`,
+  `SessionTakenOverListener`/`SessionTakenOverNotifier` surface the "Moved to
+  another device" dialog. `firestore.rules` denies all client writes to
+  `quran_sessions` (liveLocks CF-only). Tests: `liveSessionLock.test.ts`,
+  `issueSessionRtcToken.test.ts`, client mapper/token/notifications tests — green.
+
+  **Deviation:** gated by the **server-only** `LIVE_SESSION_DEVICE_LOCK_ENABLED`
+  env (no client flag) — client behaviors (send deviceId, handle takeover) are
+  inert when the server does not enforce the lock, so a client flag is
+  unnecessary. **Known gap:** no widget test for `SessionTakenOverListener`
+  (flagged as a follow-up task).
 
 - **Phase 3 — Manage Devices screen** (optional, §9). Flag:
   `manageDevicesScreenEnabled`.
