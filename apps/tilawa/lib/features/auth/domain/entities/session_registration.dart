@@ -31,11 +31,21 @@ class SessionRegistration {
     required this.status,
     this.sessionEpoch,
     this.activeDeviceId,
+    this.deviceCapExceeded,
+    this.registeredDeviceCount,
   });
 
   final SessionRegistrationStatus status;
   final int? sessionEpoch;
   final String? activeDeviceId;
+
+  /// ADR-008 Phase 0 — set only when the device registry write was requested.
+  /// `true` means the user is at/over the 5-device soft cap; never blocking.
+  final bool? deviceCapExceeded;
+
+  /// Number of registered (non-revoked) devices after this registration, when
+  /// the registry write was requested.
+  final int? registeredDeviceCount;
 
   int get epoch => sessionEpoch ?? 0;
 

@@ -8,7 +8,7 @@ import {
   assertSucceeds,
   type RulesTestEnvironment,
 } from "@firebase/rules-unit-testing";
-import { doc, getDoc, setDoc, updateDoc } from "firebase/firestore";
+import { doc, deleteDoc, getDoc, setDoc, updateDoc } from "firebase/firestore";
 
 const PROJECT_ID = "demo-tilawa-rules";
 let testEnv: RulesTestEnvironment;
@@ -154,4 +154,79 @@ test("rules: owner can set languageCode", async () => {
 
   const snap = await assertSucceeds(getDoc(doc(ownerDb, "users/student1")));
   assert.equal(snap.get("languageCode"), "ar");
+});
+
+// ADR-008 Phase 0 — device registry (users/{uid}/devices) is Cloud-Functions
+// -only for writes; owner may read only their own devices.
+async function seedDevice(): Promise<void> {
+  await testEnv.withSecurityRulesDisabled(async (context) => {
+    const adminDb = context.firestore();
+    await setDoc(doc(adminDb, "users/student1/devices/device-a"), {
+      platform: "android",
+      fcmToken: "token-a",
+      lastSeenAt: new Date(),
+      createdAt: new Date(),
+      revokedAt: null,
+    });
+  });
+}
+
+test("rules: owner cannot create a device doc", async () => {
+  await testEnv.clearFirestore();
+  await seedUser();
+
+  const ownerDb = testEnv.authenticatedContext("student1").firestore();
+  await assertFails(
+    setDoc(doc(ownerDb, "users/student1/devices/device-b"), {
+      platform: "android",
+      fcmToken: "spoofed",
+    }),
+  );
+});
+
+test("rules: owner cannot update a device doc", async () => {
+  await testEnv.clearFirestore();
+  await seedUser();
+  await seedDevice();
+
+  const ownerDb = testEnv.authenticatedContext("student1").firestore();
+  await assertFails(
+    updateDoc(doc(ownerDb, "users/student1/devices/device-a"), {
+      fcmToken: "spoofed",
+    }),
+  );
+});
+
+test("rules: owner cannot delete a device doc", async () => {
+  await testEnv.clearFirestore();
+  await seedUser();
+  await seedDevice();
+
+  const ownerDb = testEnv.authenticatedContext("student1").firestore();
+  await assertFails(
+    deleteDoc(doc(ownerDb, "users/student1/devices/device-a")),
+  );
+});
+
+test("rules: owner can read own device doc", async () => {
+  await testEnv.clearFirestore();
+  await seedUser();
+  await seedDevice();
+
+  const ownerDb = testEnv.authenticatedContext("student1").firestore();
+  const snap = await assertSucceeds(
+    getDoc(doc(ownerDb, "users/student1/devices/device-a")),
+  );
+  assert.equal(snap.get("platform"), "android");
+});
+
+test("rules: non-owner cannot read another user's device doc", async () => {
+  await testEnv.clearFirestore();
+  await seedUser();
+  await seedDevice();
+
+  const otherDb = testEnv.authenticatedContext("student2").firestore();
+  await assertFails(
+    getDoc(doc(otherDb, "users/student1/devices/device-a")),
+  );
 });

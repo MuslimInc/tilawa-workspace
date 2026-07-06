@@ -19,13 +19,16 @@ test("planDeviceRegistration bumps epoch on new device", () => {
       deviceId: "device-b",
       fcmToken: "token-b",
       platform: "android",
+      registrationMode: "explicit_sign_in",
     },
   );
 
   assert.equal(plan.deviceChanged, true);
   assert.equal(plan.nextEpoch, 3);
   assert.equal(plan.nextActiveDeviceId, "device-b");
-  assert.equal(plan.clearTokenOnly, false);
+  assert.equal(plan.clearActiveSession, false);
+  assert.equal(plan.writeActiveDevice, true);
+  assert.equal(plan.noOp, false);
 });
 
 test("planDeviceRegistration keeps epoch on same device token refresh", () => {
@@ -35,25 +38,31 @@ test("planDeviceRegistration keeps epoch on same device token refresh", () => {
       deviceId: "device-a",
       fcmToken: "token-new",
       platform: "ios",
+      registrationMode: "passive_sync",
     },
   );
 
   assert.equal(plan.deviceChanged, false);
   assert.equal(plan.nextEpoch, 4);
+  assert.equal(plan.writeActiveDevice, true);
+  assert.equal(plan.clearActiveSession, false);
+  assert.equal(plan.noOp, false);
 });
 
-test("planDeviceRegistration signOut clears token only for active device", () => {
+test("planDeviceRegistration signOut clears active session for active device", () => {
   const plan = planDeviceRegistration(
     { epoch: 1, activeDeviceId: "device-a" },
     {
       deviceId: "device-a",
       fcmToken: "",
       platform: "android",
+      registrationMode: "explicit_sign_in",
       signOut: true,
     },
   );
 
-  assert.equal(plan.clearTokenOnly, true);
+  assert.equal(plan.clearActiveSession, true);
+  assert.equal(plan.writeActiveDevice, false);
   assert.equal(plan.noOp, false);
   assert.equal(plan.nextEpoch, 1);
 });
@@ -65,12 +74,14 @@ test("planDeviceRegistration signOut is no-op for stale device", () => {
       deviceId: "device-a",
       fcmToken: "",
       platform: "android",
+      registrationMode: "explicit_sign_in",
       signOut: true,
     },
   );
 
   assert.equal(plan.noOp, true);
-  assert.equal(plan.clearTokenOnly, false);
+  assert.equal(plan.clearActiveSession, false);
+  assert.equal(plan.writeActiveDevice, false);
   assert.equal(plan.nextEpoch, 2);
   assert.equal(plan.nextActiveDeviceId, "device-b");
 });
@@ -82,12 +93,14 @@ test("planDeviceRegistration signOut is no-op when deviceId missing", () => {
       deviceId: "",
       fcmToken: "",
       platform: "android",
+      registrationMode: "explicit_sign_in",
       signOut: true,
     },
   );
 
   assert.equal(plan.noOp, true);
-  assert.equal(plan.clearTokenOnly, false);
+  assert.equal(plan.clearActiveSession, false);
+  assert.equal(plan.writeActiveDevice, false);
 });
 
 test("readServerSessionEpoch defaults missing session to zero", () => {

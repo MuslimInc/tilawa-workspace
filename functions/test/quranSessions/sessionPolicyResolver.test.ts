@@ -25,7 +25,7 @@ test("validatePlatformConfig accepts production-shaped doc", () => {
 });
 
 test("validateMarketConfigForBooking rejects missing fee fields", () => {
-  const result = validateMarketConfigForBooking({}, "cairo");
+  const result = validateMarketConfigForBooking({}, null, "cairo");
   assert.equal(result.valid, false);
   assert.ok(result.missingFields.includes("minSessionPrice"));
 });

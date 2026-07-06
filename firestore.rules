@@ -440,6 +440,14 @@ service cloud.firestore {
         allow write: if false;
       }
 
+      // Non-exclusive device registry (ADR-008). Owner may read their own
+      // devices; all writes are Cloud-Functions-only (registerActiveDevice,
+      // and future Manage Devices callables). Clients never write directly.
+      match /devices/{deviceId} {
+        allow read: if isOwner(userId);
+        allow write: if false;
+      }
+
       match /favorites/{favoriteDoc}/items/{itemId} {
         allow read, write: if isOwner(userId);
       }

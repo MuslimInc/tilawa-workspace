@@ -16,6 +16,8 @@ interface CallableLike {
     sessionEpoch?: number;
     epoch?: number;
     activeDeviceId?: string;
+    deviceCapExceeded?: boolean;
+    registeredDeviceCount?: number;
   }>;
 }
 
@@ -264,4 +266,105 @@ test("integration: unsafe device info fields are rejected", async () => {
       }),
     (error: { code?: string }) => error.code === "invalid-argument",
   );
+});
+
+// ADR-008 Phase 0 — device registry dual-write (opt-in via writeDeviceRegistry).
+
+test("integration: writeDeviceRegistry upserts the device doc and keeps legacy session behavior", async () => {
+  const result = await callable.run({
+    auth: { uid: "user_1" },
+    data: {
+      deviceId: "device-a",
+      fcmToken: "tok-a",
+      platform: "android",
+      registrationMode: "explicit_sign_in",
+      appVersion: "2.0.0",
+      deviceInfo: { manufacturer: "OPPO", model: "A98 5G" },
+      writeDeviceRegistry: true,
+    },
+  });
+
+  // Legacy exclusive session behavior is unchanged.
+  assert.equal(result.status, "registered");
+  assert.equal(result.sessionEpoch, 1);
+  assert.equal(result.activeDeviceId, "device-a");
+  // Registry outcome surfaced (soft cap not exceeded on first device).
+  assert.equal(result.deviceCapExceeded, false);
+  assert.equal(result.registeredDeviceCount, 1);
+
+  const userSnap = await db().collection("users").doc("user_1").get();
+  assert.equal(userSnap.get("session.activeDeviceId"), "device-a");
+  assert.equal(userSnap.get("notifications.activeFcmToken"), "tok-a");
+
+  const deviceSnap = await db()
+    .collection("users")
+    .doc("user_1")
+    .collection("devices")
+    .doc("device-a")
+    .get();
+  assert.equal(deviceSnap.exists, true);
+  assert.equal(deviceSnap.get("platform"), "android");
+  assert.equal(deviceSnap.get("fcmToken"), "tok-a");
+  assert.equal(deviceSnap.get("deviceInfo.manufacturer"), "OPPO");
+  assert.equal(deviceSnap.get("revokedAt"), null);
+  assert.notEqual(deviceSnap.get("createdAt"), undefined);
+});
+
+test("integration: without writeDeviceRegistry no device doc is written", async () => {
+  const result = await callable.run({
+    auth: { uid: "user_1" },
+    data: {
+      deviceId: "device-a",
+      fcmToken: "tok-a",
+      platform: "android",
+      registrationMode: "explicit_sign_in",
+    },
+  });
+
+  assert.equal(result.status, "registered");
+  assert.equal(result.deviceCapExceeded, undefined);
+  assert.equal(result.registeredDeviceCount, undefined);
+
+  const devices = await db()
+    .collection("users")
+    .doc("user_1")
+    .collection("devices")
+    .get();
+  assert.equal(devices.empty, true);
+});
+
+test("integration: soft cap is surfaced without blocking registration", async () => {
+  const devicesCol = db()
+    .collection("users")
+    .doc("user_1")
+    .collection("devices");
+  // Seed 5 active (non-revoked) devices — the soft cap.
+  for (let i = 0; i < 5; i += 1) {
+    await devicesCol.doc(`seeded-${i}`).set({
+      platform: "android",
+      revokedAt: null,
+      lastSeenAt: new Date(),
+      createdAt: new Date(),
+    });
+  }
+
+  const result = await callable.run({
+    auth: { uid: "user_1" },
+    data: {
+      deviceId: "device-sixth",
+      fcmToken: "tok-6",
+      platform: "android",
+      registrationMode: "explicit_sign_in",
+      writeDeviceRegistry: true,
+    },
+  });
+
+  // Cap is surfaced but never blocks — registration still succeeds and the
+  // sixth device is written.
+  assert.equal(result.status, "registered");
+  assert.equal(result.deviceCapExceeded, true);
+  assert.equal(result.registeredDeviceCount, 6);
+
+  const sixth = await devicesCol.doc("device-sixth").get();
+  assert.equal(sixth.exists, true);
 });

@@ -31,6 +31,8 @@ import 'app_environment.dart' as app_env;
 /// Example: `--dart-define=TILAWA_LAUNCH_ENABLED_CALL_PROVIDERS=external,mock,livekit`
 /// Example: `--dart-define=TILAWA_LAUNCH_AGORA_APP_ID=your_agora_app_id`
 /// Example: `--dart-define=TILAWA_LAUNCH_LIVEKIT_URL=wss://tilawa-7whzug8z.livekit.cloud`
+/// Example: `--dart-define=TILAWA_LAUNCH_DEVICE_REGISTRY_WRITE_ENABLED=true`
+/// Example: `--dart-define=TILAWA_LAUNCH_MULTI_DEVICE_LOGIN_ENABLED=true`
 ///
 /// Staging / pre-production builds default QuranTutor beta flags ON via
 /// [quranSessionsStagingFlagsDefaultEnabled] (everything except
@@ -183,6 +185,14 @@ abstract final class _LaunchEnvironment {
     'TILAWA_LAUNCH_TEACHER_DASHBOARD_SUMMARY_READ_ENABLED',
     defaultValue: stagingFlagsOn,
   );
+  static const bool deviceRegistryWriteEnabled = bool.fromEnvironment(
+    'TILAWA_LAUNCH_DEVICE_REGISTRY_WRITE_ENABLED',
+    defaultValue: stagingFlagsOn,
+  );
+  static const bool multiDeviceLoginEnabled = bool.fromEnvironment(
+    'TILAWA_LAUNCH_MULTI_DEVICE_LOGIN_ENABLED',
+    defaultValue: stagingFlagsOn,
+  );
   static const bool teacherApplicationEntryEnabled = bool.fromEnvironment(
     'TILAWA_LAUNCH_TEACHER_APPLICATION_ENTRY_ENABLED',
     defaultValue: false,
@@ -266,6 +276,8 @@ class AppLaunchConfig extends Equatable {
     this.quranSessionsEnabled = true,
     this.learnQuranStudentFeatureEnabled = false,
     this.teacherDashboardSummaryReadEnabled = false,
+    this.deviceRegistryWriteEnabled = false,
+    this.multiDeviceLoginEnabled = false,
     this.teacherApplicationEntryEnabled = false,
     this.homeTeacherApplicationCardEnabled = false,
     this.teacherApplicationFormUrl = kDefaultTeacherApplicationFormUrl,
@@ -317,6 +329,8 @@ class AppLaunchConfig extends Equatable {
           _LaunchEnvironment.learnQuranStudentFeatureEnabled,
       teacherDashboardSummaryReadEnabled:
           _LaunchEnvironment.teacherDashboardSummaryReadEnabled,
+      deviceRegistryWriteEnabled: _LaunchEnvironment.deviceRegistryWriteEnabled,
+      multiDeviceLoginEnabled: _LaunchEnvironment.multiDeviceLoginEnabled,
       teacherApplicationEntryEnabled:
           _LaunchEnvironment.teacherApplicationEntryEnabled,
       homeTeacherApplicationCardEnabled:
@@ -375,6 +389,20 @@ class AppLaunchConfig extends Equatable {
   /// server-maintained summary doc, falling back to per-collection reads.
   /// Default off in production, on for staging/local builds.
   final bool teacherDashboardSummaryReadEnabled;
+
+  /// Phase 0 of the multi-device strategy (ADR-008): when on, sign-in/device
+  /// registration also upserts the non-exclusive `users/{uid}/devices/{deviceId}`
+  /// registry alongside the existing single-device behavior. Purely additive and
+  /// reversible — no login/`sessionEpoch` behavior changes until Phase 1.
+  /// Default off in production, on for staging/local builds.
+  final bool deviceRegistryWriteEnabled;
+
+  /// Phase 1 of the multi-device strategy (ADR-008): when on, the client no
+  /// longer treats a superseded session (`session_revoked` push /
+  /// `session_epoch_stale`) as a whole-app logout, enabling true multi-device
+  /// login. The matching server gate is the `MULTI_DEVICE_LOGIN_ENABLED`
+  /// Functions env var. Default off in production, on for staging/local builds.
+  final bool multiDeviceLoginEnabled;
 
   /// Settings/Profile Google Form teacher application entry.
   final bool teacherApplicationEntryEnabled;
@@ -450,6 +478,8 @@ class AppLaunchConfig extends Equatable {
     quranSessionsEnabled,
     learnQuranStudentFeatureEnabled,
     teacherDashboardSummaryReadEnabled,
+    deviceRegistryWriteEnabled,
+    multiDeviceLoginEnabled,
     teacherApplicationEntryEnabled,
     homeTeacherApplicationCardEnabled,
     teacherApplicationFormUrl,
