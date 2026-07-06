@@ -34,13 +34,6 @@ class ReciterDetailsAppBar extends StatelessWidget {
       color: foregroundColor,
       fontWeight: FontWeight.w700,
     );
-    const double avatarDiameter = 32;
-    final double titleHeight = tilawaMeasureTextHeight(
-      context: context,
-      style: titleStyle,
-      text: reciter.name,
-      maxLines: 1,
-    );
     return TilawaSliverAppBar(
       surface: TilawaAppBarSurface.parchment,
       leading: TilawaBackButton(color: foregroundColor),

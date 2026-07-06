@@ -1,8 +1,9 @@
+import 'dart:math' as math;
+
 import 'package:flutter/material.dart';
 
 import '../foundation/component_tokens.dart';
 import '../foundation/design_tokens.dart';
-import 'tilawa_button.dart';
 import 'tilawa_state_visual.dart';
 
 /// A reusable, feature-agnostic state layout with an illustration slot.
@@ -83,20 +84,7 @@ class TilawaIllustratedState extends StatelessWidget {
     } else {
       stateVisual = const SizedBox.shrink();
     }
-    final double actionMaxWidth = maxWidth ?? designTokens.contentMaxWidthForm;
-    Widget layoutAction(Widget action) {
-      final Widget slotAction = action is TilawaButton
-          ? _fullWidthIllustratedAction(action)
-          : action;
-
-      return SizedBox(
-        width: double.infinity,
-        child: ConstrainedBox(
-          constraints: BoxConstraints(maxWidth: actionMaxWidth),
-          child: slotAction,
-        ),
-      );
-    }
+    final double actionMaxWidth = maxWidth ?? stateTokens.actionMaxWidth;
 
     final String? resolvedSemanticLabel =
         semanticLabel ??
@@ -140,18 +128,43 @@ class TilawaIllustratedState extends StatelessWidget {
             ],
             if (primaryAction != null || secondaryAction != null) ...[
               SizedBox(height: stateTokens.actionSpacing),
-              Wrap(
-                alignment: WrapAlignment.center,
-                crossAxisAlignment: WrapCrossAlignment.center,
-                spacing: designTokens.spaceSmall,
-                runSpacing: designTokens.spaceSmall,
-                children: [
-                  // Primary CTA leads in reading order (hierarchy / one obvious
-                  // next step). When actions wrap on narrow widths, primary
-                  // stacks above secondary.
-                  if (primaryAction != null) layoutAction(primaryAction!),
-                  if (secondaryAction != null) layoutAction(secondaryAction!),
-                ],
+              LayoutBuilder(
+                builder: (context, constraints) {
+                  final double availableWidth = constraints.maxWidth;
+                  final double effectiveMaxWidth = math.min(
+                    actionMaxWidth,
+                    availableWidth,
+                  );
+                  final double effectiveMinWidth = math.min(
+                    stateTokens.actionMinWidth,
+                    effectiveMaxWidth,
+                  );
+
+                  Widget layoutAction(Widget action) {
+                    return ConstrainedBox(
+                      constraints: BoxConstraints(
+                        minWidth: effectiveMinWidth,
+                        maxWidth: effectiveMaxWidth,
+                      ),
+                      child: action,
+                    );
+                  }
+
+                  return Wrap(
+                    alignment: WrapAlignment.center,
+                    crossAxisAlignment: WrapCrossAlignment.center,
+                    spacing: designTokens.spaceSmall,
+                    runSpacing: designTokens.spaceSmall,
+                    children: [
+                      // Primary CTA leads in reading order (hierarchy / one obvious
+                      // next step). When actions wrap on narrow widths, primary
+                      // stacks above secondary.
+                      if (primaryAction != null) layoutAction(primaryAction!),
+                      if (secondaryAction != null)
+                        layoutAction(secondaryAction!),
+                    ],
+                  );
+                },
               ),
             ],
           ],
@@ -192,30 +205,4 @@ String? _composeSemanticLabel({
     return title;
   }
   return '$title. $trimmedSubtitle';
-}
-
-TilawaButton _fullWidthIllustratedAction(TilawaButton button) {
-  if (button.isFullWidth) {
-    return button;
-  }
-
-  return TilawaButton(
-    key: button.key,
-    text: button.text,
-    onPressed: button.onPressed,
-    variant: button.variant,
-    size: button.size,
-    leadingIcon: button.leadingIcon,
-    trailingIcon: button.trailingIcon,
-    isLoading: button.isLoading,
-    isFullWidth: true,
-    semanticLabel: button.semanticLabel,
-    backgroundColor: button.backgroundColor,
-    foregroundColor: button.foregroundColor,
-    borderColor: button.borderColor,
-    borderRadius: button.borderRadius,
-    padding: button.padding,
-    textStyle: button.textStyle,
-    shrinkWrapTapTarget: button.shrinkWrapTapTarget,
-  );
 }

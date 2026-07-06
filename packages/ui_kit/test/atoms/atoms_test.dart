@@ -366,26 +366,31 @@ void main() {
     });
 
     test('lerp interpolates values', () {
-      const a = TilawaEmptyStateTokens(
-        iconSize: 40.0,
-        iconOpacity: 0.3,
-        titleSpacing: 12.0,
-        subtitleSpacing: 6.0,
-        actionSpacing: 20.0,
-        padding: EdgeInsets.all(16.0),
-      );
-      const b = TilawaEmptyStateTokens(
-        iconSize: 60.0,
+      final tokens1 = TilawaEmptyStateTokens(
+        iconSize: 50,
         iconOpacity: 0.5,
-        titleSpacing: 20.0,
-        subtitleSpacing: 10.0,
-        actionSpacing: 28.0,
-        padding: EdgeInsets.all(32.0),
+        titleSpacing: 10,
+        subtitleSpacing: 10,
+        actionSpacing: 10,
+        padding: const EdgeInsets.all(10),
+        actionMinWidth: 200,
+        actionMaxWidth: 300,
       );
-      final result = TilawaEmptyStateTokens.lerp(a, b, 0.5);
-      expect(result.iconSize, closeTo(50.0, 0.01));
-      expect(result.iconOpacity, closeTo(0.4, 0.01));
-      expect(result.titleSpacing, closeTo(16.0, 0.01));
+
+      final tokens2 = TilawaEmptyStateTokens(
+        iconSize: 100,
+        iconOpacity: 1.0,
+        titleSpacing: 20,
+        subtitleSpacing: 20,
+        actionSpacing: 20,
+        padding: const EdgeInsets.all(20),
+        actionMinWidth: 300,
+        actionMaxWidth: 400,
+      );
+      final result = TilawaEmptyStateTokens.lerp(tokens1, tokens2, 0.5);
+      expect(result.iconSize, closeTo(75.0, 0.01));
+      expect(result.iconOpacity, closeTo(0.75, 0.01));
+      expect(result.titleSpacing, closeTo(15.0, 0.01));
     });
   });
 
