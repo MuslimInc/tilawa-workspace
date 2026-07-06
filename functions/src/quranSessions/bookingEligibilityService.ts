@@ -225,6 +225,14 @@ export function assertBookingEligible(
     });
   }
 
+  if (ctx.pricing.isPaid && !market.paymentProviderEnabled) {
+    throw lifecycleError(
+      "payment_provider_unavailable",
+      "Paid bookings are not currently available in this market.",
+      { countryCode: student.countryCode }
+    );
+  }
+
   const teacherId = options?.teacherId;
   if (
     teacherId != null &&
@@ -383,6 +391,7 @@ export async function loadBookingEligibilityContext(
     sessionMode: "videoOnly",
     policyVersion: null,
     effectiveFrom: null,
+    paymentProviderEnabled: false,
   };
   let pricing: ResolvedPricing = { isPaid: false, amount: 0, currencyCode: "USD" };
 

@@ -1,0 +1,112 @@
+<app-page-header title="{{ 'quranSessions_globalSettings' | t }}"></app-page-header>
+
+<div class="p-6 max-w-4xl mx-auto">
+  
+  <app-tilawa-loading-state *ngIf="loading$ | async"></app-tilawa-loading-state>
+  <app-tilawa-error-state *ngIf="error$ | async as error" [message]="error"></app-tilawa-error-state>
+
+  <div *ngIf="successMessage$ | async as success" class="mb-6 p-4 bg-green-100 text-green-800 rounded-lg border border-green-200">
+    {{ success }}
+  </div>
+
+  <app-tilawa-card *ngIf="!(loading$ | async)" class="mb-6">
+    <div card-header>
+      <h2 class="text-xl font-semibold">{{ 'globalSettings_title' | t }}</h2>
+      <p class="text-gray-500 text-sm mt-1">{{ 'globalSettings_subtitle' | t }}</p>
+    </div>
+
+    <div card-body>
+      <form [formGroup]="settingsForm" (ngSubmit)="save()" class="space-y-6">
+        
+        <!-- Feature Toggles -->
+        <div class="space-y-4 pb-6 border-b border-gray-200">
+          <h3 class="text-lg font-medium">{{ 'globalSettings_featureToggles' | t }}</h3>
+          
+          <label class="tilawa-checkbox-label">
+            <input type="checkbox" id="quranSessionsEnabled" formControlName="quranSessionsEnabled" class="tilawa-checkbox">
+            <span class="text-sm text-gray-900">
+              {{ 'globalSettings_quranSessionsEnabled' | t }}
+            </span>
+          </label>
+
+          <label class="tilawa-checkbox-label">
+            <input type="checkbox" id="studentEntryEnabled" formControlName="studentEntryEnabled" class="tilawa-checkbox">
+            <span class="text-sm text-gray-900">
+              {{ 'globalSettings_studentEntryEnabled' | t }}
+            </span>
+          </label>
+
+          <label class="tilawa-checkbox-label">
+            <input type="checkbox" id="bookingEnabled" formControlName="bookingEnabled" class="tilawa-checkbox">
+            <span class="text-sm text-gray-900">
+              {{ 'globalSettings_bookingEnabled' | t }}
+            </span>
+          </label>
+        </div>
+
+        <!-- Mode Settings -->
+        <div class="space-y-4 pb-6 border-b border-gray-200">
+          <h3 class="text-lg font-medium">{{ 'globalSettings_modeSettings' | t }}</h3>
+          
+          <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div>
+              <label class="block text-sm font-medium text-gray-700 mb-1">{{ 'globalSettings_sessionMode' | t }}</label>
+              <select formControlName="sessionMode" class="mt-1 block w-full pl-3 pr-10 py-2 text-base border-gray-300 focus:outline-none focus:ring-primary focus:border-primary sm:text-sm rounded-md">
+                <option value="videoOnly">{{ 'globalSettings_sessionModeVideo' | t }}</option>
+              </select>
+            </div>
+            
+            <div>
+              <label class="block text-sm font-medium text-gray-700 mb-1">{{ 'globalSettings_defaultBookingMode' | t }}</label>
+              <select formControlName="defaultBookingMode" class="mt-1 block w-full pl-3 pr-10 py-2 text-base border-gray-300 focus:outline-none focus:ring-primary focus:border-primary sm:text-sm rounded-md">
+                <option value="requiresTutorApproval">{{ 'globalSettings_bookingModeApproval' | t }}</option>
+                <option value="autoConfirm">{{ 'globalSettings_bookingModeAuto' | t }}</option>
+              </select>
+            </div>
+          </div>
+        </div>
+
+        <!-- Time & Limits -->
+        <div class="space-y-4">
+          <h3 class="text-lg font-medium">{{ 'globalSettings_timeAndLimits' | t }}</h3>
+          
+          <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div>
+              <label class="block text-sm font-medium text-gray-700 mb-1">{{ 'globalSettings_defaultJoinWindowLeadMs' | t }}</label>
+              <input type="number" formControlName="defaultJoinWindowLeadMs" class="shadow-sm focus:ring-primary focus:border-primary block w-full sm:text-sm border-gray-300 rounded-md">
+              <p class="text-xs text-gray-500 mt-1">Milliseconds</p>
+            </div>
+            
+            <div>
+              <label class="block text-sm font-medium text-gray-700 mb-1">{{ 'globalSettings_defaultTutorApprovalSlaMs' | t }}</label>
+              <input type="number" formControlName="defaultTutorApprovalSlaMs" class="shadow-sm focus:ring-primary focus:border-primary block w-full sm:text-sm border-gray-300 rounded-md">
+              <p class="text-xs text-gray-500 mt-1">Milliseconds</p>
+            </div>
+
+            <div>
+              <label class="block text-sm font-medium text-gray-700 mb-1">{{ 'globalSettings_defaultMinBookingNoticeMs' | t }}</label>
+              <input type="number" formControlName="defaultMinBookingNoticeMs" class="shadow-sm focus:ring-primary focus:border-primary block w-full sm:text-sm border-gray-300 rounded-md">
+              <p class="text-xs text-gray-500 mt-1">Milliseconds</p>
+            </div>
+            
+            <div>
+              <label class="block text-sm font-medium text-gray-700 mb-1">{{ 'globalSettings_defaultMaxUpcomingPerStudent' | t }}</label>
+              <input type="number" formControlName="defaultMaxUpcomingPerStudent" class="shadow-sm focus:ring-primary focus:border-primary block w-full sm:text-sm border-gray-300 rounded-md">
+            </div>
+          </div>
+        </div>
+
+      </form>
+    </div>
+
+    <div card-footer class="flex justify-end gap-3">
+      <app-tilawa-button 
+        variant="primary" 
+        [disabled]="settingsForm.invalid || settingsForm.pristine || (saving$ | async) === true"
+        [loading]="(saving$ | async) === true"
+        (click)="save()">
+        {{ 'common_save' | t }}
+      </app-tilawa-button>
+    </div>
+  </app-tilawa-card>
+</div>

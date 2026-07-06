@@ -108,6 +108,13 @@ export const routes: Routes = [
           ),
       },
       {
+        path: 'quran-sessions/resolved-config-inspector',
+        loadComponent: () =>
+          import('./features/quran-sessions/resolved-config-inspector/resolved-config-inspector.component').then(
+            (m) => m.ResolvedConfigInspectorComponent,
+          ),
+      },
+      {
         path: 'quran-sessions/reports/:id',
         loadComponent: () =>
           import('./features/quran-sessions/session-report-detail/session-report-detail.component').then(
@@ -147,6 +154,13 @@ export const routes: Routes = [
         loadComponent: () =>
           import('./features/quran-sessions/market-pricing/market-pricing.component').then(
             (m) => m.MarketPricingComponent,
+          ),
+      },
+      {
+        path: 'quran-sessions/global-settings',
+        loadComponent: () =>
+          import('./features/quran-sessions/global-settings/global-settings.component').then(
+            (m) => m.GlobalSettingsComponent,
           ),
       },
     ],

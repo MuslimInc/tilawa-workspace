@@ -53,6 +53,61 @@
         </div>
       </div>
 
+      <div class="mb-6">
+        <h3 class="text-lg font-medium mb-4">{{ 'marketPricing_policySettings' | t }}</h3>
+        
+        <div class="tilawa-form-group mb-4">
+          <label class="tilawa-checkbox-label text-red-600 font-bold">
+            <input type="checkbox" formControlName="paymentProviderEnabled" class="tilawa-checkbox" (change)="onPaymentToggle($event)" />
+            <span>{{ 'marketPricing_paymentProviderEnabled' | t }}</span>
+          </label>
+        </div>
+
+        <div class="tilawa-form-group mb-4">
+          <label class="tilawa-checkbox-label">
+            <input type="checkbox" formControlName="genderMatchingEnabled" class="tilawa-checkbox" />
+            <span>{{ 'marketPricing_genderMatchingEnabled' | t }}</span>
+          </label>
+        </div>
+
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <div class="tilawa-form-group">
+            <label class="tilawa-label">{{ 'globalSettings_sessionMode' | t }}</label>
+            <select formControlName="sessionMode" class="tilawa-field">
+              <option value="videoOnly">{{ 'globalSettings_sessionModeVideo' | t }}</option>
+            </select>
+          </div>
+
+          <div class="tilawa-form-group">
+            <label class="tilawa-label">{{ 'globalSettings_defaultBookingMode' | t }}</label>
+            <select formControlName="bookingMode" class="tilawa-field">
+              <option value="requiresTutorApproval">{{ 'globalSettings_bookingModeApproval' | t }}</option>
+              <option value="autoConfirm">{{ 'globalSettings_bookingModeAuto' | t }}</option>
+            </select>
+          </div>
+
+          <div class="tilawa-form-group">
+            <label class="tilawa-label">{{ 'globalSettings_defaultJoinWindowLeadMs' | t }}</label>
+            <input type="number" formControlName="joinWindowLeadMs" class="tilawa-field" />
+          </div>
+
+          <div class="tilawa-form-group">
+            <label class="tilawa-label">{{ 'globalSettings_defaultTutorApprovalSlaMs' | t }}</label>
+            <input type="number" formControlName="tutorApprovalSlaMs" class="tilawa-field" />
+          </div>
+
+          <div class="tilawa-form-group">
+            <label class="tilawa-label">{{ 'globalSettings_defaultMinBookingNoticeMs' | t }}</label>
+            <input type="number" formControlName="minBookingNoticeMs" class="tilawa-field" />
+          </div>
+
+          <div class="tilawa-form-group">
+            <label class="tilawa-label">{{ 'globalSettings_defaultMaxUpcomingPerStudent' | t }}</label>
+            <input type="number" formControlName="maxConcurrentUpcomingPerStudent" class="tilawa-field" />
+          </div>
+        </div>
+      </div>
+
       <hr class="my-6 border-t border-[var(--tilawa-outline-variant)]" />
 
       <div formArrayName="cities">

@@ -47,6 +47,14 @@ export class MarketPricingComponent implements OnInit {
     isEnabled: [true],
     minSessionPrice: [0, [Validators.required, Validators.min(0)]],
     currencyCode: ['', Validators.required],
+    paymentProviderEnabled: [false],
+    bookingMode: ['requiresTutorApproval'],
+    joinWindowLeadMs: [0, Validators.min(0)],
+    tutorApprovalSlaMs: [0, Validators.min(0)],
+    minBookingNoticeMs: [0, Validators.min(0)],
+    maxConcurrentUpcomingPerStudent: [0, Validators.min(1)],
+    sessionMode: ['videoOnly'],
+    genderMatchingEnabled: [false],
     cities: this.fb.array([])
   });
 
@@ -86,12 +94,30 @@ export class MarketPricingComponent implements OnInit {
     this.facade.selectCountry(countryCode);
   }
 
+  onPaymentToggle(event: Event) {
+    const inputEl = event.target as HTMLInputElement;
+    if (inputEl.checked) {
+      if (!confirm(this.i18n.t('marketPricing_paymentToggleWarning'))) {
+        inputEl.checked = false;
+        this.pricingForm.get('paymentProviderEnabled')?.setValue(false, { emitEvent: false });
+      }
+    }
+  }
+
   updateForm(market: MarketConfig) {
     this.pricingForm.patchValue({
       countryCode: market.countryCode,
       isEnabled: market.isEnabled,
       minSessionPrice: market.minSessionPrice,
-      currencyCode: market.currencyCode
+      currencyCode: market.currencyCode,
+      paymentProviderEnabled: market.paymentProviderEnabled ?? false,
+      bookingMode: market.bookingMode ?? 'requiresTutorApproval',
+      joinWindowLeadMs: market.joinWindowLeadMs ?? 0,
+      tutorApprovalSlaMs: market.tutorApprovalSlaMs ?? 0,
+      minBookingNoticeMs: market.minBookingNoticeMs ?? 0,
+      maxConcurrentUpcomingPerStudent: market.maxConcurrentUpcomingPerStudent ?? 3,
+      sessionMode: market.sessionMode ?? 'videoOnly',
+      genderMatchingEnabled: market.genderMatchingEnabled ?? false
     }, { emitEvent: false });
 
     this.citiesFormArray.clear();
@@ -122,6 +148,14 @@ export class MarketPricingComponent implements OnInit {
       isEnabled: formValue.isEnabled,
       minSessionPrice: formValue.minSessionPrice,
       currencyCode: formValue.currencyCode,
+      paymentProviderEnabled: formValue.paymentProviderEnabled,
+      bookingMode: formValue.bookingMode,
+      joinWindowLeadMs: formValue.joinWindowLeadMs,
+      tutorApprovalSlaMs: formValue.tutorApprovalSlaMs,
+      minBookingNoticeMs: formValue.minBookingNoticeMs,
+      maxConcurrentUpcomingPerStudent: formValue.maxConcurrentUpcomingPerStudent,
+      sessionMode: formValue.sessionMode,
+      genderMatchingEnabled: formValue.genderMatchingEnabled,
       cities: formValue.cities.map((c: any) => ({
         cityId: c.cityId,
         cityName: c.cityName,

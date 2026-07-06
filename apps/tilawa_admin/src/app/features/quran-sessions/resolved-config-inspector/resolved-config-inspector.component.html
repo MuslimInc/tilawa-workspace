@@ -1,0 +1,41 @@
+<div class="resolved-config-inspector-container">
+  <app-page-header [title]="'resolvedConfigInspector_title' | t" />
+
+  <app-tilawa-card [title]="'resolvedConfigInspector_query' | t">
+    <form [formGroup]="inspectorForm" (ngSubmit)="inspect()" class="mb-4">
+      <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+        <div class="tilawa-form-group">
+          <label class="tilawa-label">{{ 'resolvedConfigInspector_studentId' | t }}</label>
+          <input type="text" formControlName="studentId" class="tilawa-field" placeholder="student_id_here" />
+        </div>
+        
+        <div class="tilawa-form-group">
+          <label class="tilawa-label">{{ 'resolvedConfigInspector_teacherId' | t }}</label>
+          <input type="text" formControlName="teacherId" class="tilawa-field" placeholder="teacher_id_here" />
+        </div>
+      </div>
+      
+      <div class="mt-4 flex justify-end">
+        <button type="submit" class="tilawa-btn tilawa-btn-primary" [disabled]="inspectorForm.invalid || (loading$ | async)">
+          {{ 'common_search' | t }}
+        </button>
+      </div>
+    </form>
+  </app-tilawa-card>
+
+  @if (loading$ | async) {
+    <app-tilawa-loading-state [message]="'common_loading' | t" />
+  }
+
+  @if (error$ | async; as error) {
+    <app-tilawa-error-state [message]="error" />
+  }
+
+  @if (result$ | async; as result) {
+    <app-tilawa-card [title]="'resolvedConfigInspector_result' | t" class="mt-6">
+      <div class="bg-[var(--tilawa-surface-variant)] p-4 rounded-lg overflow-x-auto">
+        <pre class="text-sm font-mono text-[var(--tilawa-ink-default)] whitespace-pre-wrap">{{ result | json }}</pre>
+      </div>
+    </app-tilawa-card>
+  }
+</div>

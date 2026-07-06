@@ -11,6 +11,7 @@ import {
   type QuranTutorBookingMode,
   resolveQuranTutorBookingMode,
 } from "./quranTutorBookingMode";
+import { isPaymentProviderEnabled } from "./payment/envGate";
 
 export type SessionModePolicy = "videoOnly" | "freeBeta";
 
@@ -31,6 +32,7 @@ export interface ResolvedMarketPolicy {
   sessionMode: SessionModePolicy;
   policyVersion: string | null;
   effectiveFrom: Date | null;
+  paymentProviderEnabled: boolean;
 }
 
 function parseTimestamp(raw: unknown): Date | null {
@@ -189,6 +191,9 @@ export async function loadEffectiveMarketPolicy(
     ),
     policyVersion,
     effectiveFrom,
+    paymentProviderEnabled: typeof policyData.paymentProviderEnabled === "boolean" 
+      ? policyData.paymentProviderEnabled 
+      : isPaymentProviderEnabled(),
   };
 }
 

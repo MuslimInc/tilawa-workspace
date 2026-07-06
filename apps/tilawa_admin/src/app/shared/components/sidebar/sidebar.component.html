@@ -116,11 +116,25 @@
             </a>
           }
           <a
+            routerLink="/quran-sessions/global-settings"
+            routerLinkActive="is-active"
+            class="tilawa-sidebar-sublink"
+          >
+            {{ 'quranSessions_globalSettings' | t }}
+          </a>
+          <a
             routerLink="/quran-sessions/market-pricing"
             routerLinkActive="is-active"
             class="tilawa-sidebar-sublink"
           >
             {{ 'marketPricing_title' | t }}
+          </a>
+          <a
+            routerLink="/quran-sessions/resolved-config-inspector"
+            routerLinkActive="is-active"
+            class="tilawa-sidebar-sublink"
+          >
+            {{ 'resolvedConfigInspector_title' | t }}
           </a>
         </div>
       }

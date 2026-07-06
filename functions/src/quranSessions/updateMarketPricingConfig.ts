@@ -4,7 +4,6 @@ import { getFirestore, FieldValue } from "firebase-admin/firestore";
 import { requireAdmin } from "./sessionAuth";
 import { sessionCallableHttpsOptions } from "./sessionCallableOptions";
 
-
 export interface CityPricingOverride {
   cityId: string;
   isEnabled: boolean;
@@ -16,6 +15,16 @@ export interface UpdateMarketPricingConfigRequest {
   isEnabled: boolean;
   minSessionPrice: number;
   currencyCode: string;
+  studentBookingEnabled: boolean;
+  teacherDiscoveryEnabled: boolean;
+  bookingMode: "requiresTutorApproval" | "autoConfirm";
+  minBookingNoticeMs: number;
+  maxConcurrentUpcomingPerStudent: number;
+  joinWindowLeadMs: number;
+  tutorApprovalSlaMs: number;
+  genderMatchingEnabled: boolean;
+  teacherWhitelist: string[] | null;
+  paymentProviderEnabled: boolean;
   cities: CityPricingOverride[];
 }
 
@@ -23,7 +32,7 @@ export const updateMarketPricingConfig = onCall(
   sessionCallableHttpsOptions,
   async (request) => {
     const adminUid = requireAdmin(request);
-    const data = request.data as UpdateMarketPricingConfigRequest;
+    const data = request.data as Partial<UpdateMarketPricingConfigRequest>;
 
     if (!data.countryCode || typeof data.countryCode !== "string") {
       throw new HttpsError("invalid-argument", "countryCode required.");
@@ -37,6 +46,39 @@ export const updateMarketPricingConfig = onCall(
     if (!data.currencyCode || typeof data.currencyCode !== "string") {
       throw new HttpsError("invalid-argument", "currencyCode required.");
     }
+    
+    // Validate new policy fields
+    if (typeof data.studentBookingEnabled !== "boolean") {
+      throw new HttpsError("invalid-argument", "studentBookingEnabled (boolean) required.");
+    }
+    if (typeof data.teacherDiscoveryEnabled !== "boolean") {
+      throw new HttpsError("invalid-argument", "teacherDiscoveryEnabled (boolean) required.");
+    }
+    if (data.bookingMode !== "requiresTutorApproval" && data.bookingMode !== "autoConfirm") {
+      throw new HttpsError("invalid-argument", "bookingMode must be 'requiresTutorApproval' or 'autoConfirm'.");
+    }
+    if (typeof data.minBookingNoticeMs !== "number" || !Number.isFinite(data.minBookingNoticeMs) || data.minBookingNoticeMs < 0) {
+      throw new HttpsError("invalid-argument", "minBookingNoticeMs must be a finite number >= 0.");
+    }
+    if (typeof data.maxConcurrentUpcomingPerStudent !== "number" || !Number.isFinite(data.maxConcurrentUpcomingPerStudent) || data.maxConcurrentUpcomingPerStudent < 0) {
+      throw new HttpsError("invalid-argument", "maxConcurrentUpcomingPerStudent must be a finite number >= 0.");
+    }
+    if (typeof data.joinWindowLeadMs !== "number" || !Number.isFinite(data.joinWindowLeadMs) || data.joinWindowLeadMs < 0) {
+      throw new HttpsError("invalid-argument", "joinWindowLeadMs must be a finite number >= 0.");
+    }
+    if (typeof data.tutorApprovalSlaMs !== "number" || !Number.isFinite(data.tutorApprovalSlaMs) || data.tutorApprovalSlaMs < 0) {
+      throw new HttpsError("invalid-argument", "tutorApprovalSlaMs must be a finite number >= 0.");
+    }
+    if (typeof data.genderMatchingEnabled !== "boolean") {
+      throw new HttpsError("invalid-argument", "genderMatchingEnabled (boolean) required.");
+    }
+    if (data.teacherWhitelist !== null && !Array.isArray(data.teacherWhitelist)) {
+      throw new HttpsError("invalid-argument", "teacherWhitelist must be an array or null.");
+    }
+    if (typeof data.paymentProviderEnabled !== "boolean") {
+      throw new HttpsError("invalid-argument", "paymentProviderEnabled (boolean) required.");
+    }
+
     if (!Array.isArray(data.cities)) {
       throw new HttpsError("invalid-argument", "cities array required.");
     }
@@ -45,6 +87,18 @@ export const updateMarketPricingConfig = onCall(
       isEnabled: data.isEnabled,
       minSessionPrice: data.minSessionPrice,
       currencyCode: data.currencyCode.trim().toUpperCase(),
+      studentBookingEnabled: data.studentBookingEnabled,
+      teacherDiscoveryEnabled: data.teacherDiscoveryEnabled,
+      bookingMode: data.bookingMode,
+      minBookingNoticeMs: data.minBookingNoticeMs,
+      maxConcurrentUpcomingPerStudent: data.maxConcurrentUpcomingPerStudent,
+      joinWindowLeadMs: data.joinWindowLeadMs,
+      tutorApprovalSlaMs: data.tutorApprovalSlaMs,
+      genderMatchingEnabled: data.genderMatchingEnabled,
+      teacherWhitelist: data.teacherWhitelist,
+      paymentProviderEnabled: data.paymentProviderEnabled,
+      updatedBy: adminUid,
+      updatedAt: FieldValue.serverTimestamp(),
     };
 
     for (const city of data.cities) {
@@ -85,9 +139,7 @@ export const updateMarketPricingConfig = onCall(
       actorRole: "admin",
       action: "update_market_pricing",
       source: "adminPanel",
-      isEnabled: data.isEnabled,
-      minSessionPrice: data.minSessionPrice,
-      currencyCode: data.currencyCode,
+      ...marketDataPatch,
     });
 
     await batch.commit();

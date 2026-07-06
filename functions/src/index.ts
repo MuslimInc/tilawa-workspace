@@ -36,6 +36,8 @@ export { updateMarketPricingConfig } from "./quranSessions/updateMarketPricingCo
 export { issueSessionRtcToken } from "./quranSessions/issueSessionRtcToken";
 export { issueDebugLiveKitToken } from "./quranSessions/issueDebugLiveKitToken";
 export { recordCallTelemetryEvent } from "./quranSessions/recordCallTelemetryEvent";
+export { updatePlatformConfig } from "./quranSessions/updatePlatformConfig";
+export { getResolvedSessionConfig } from "./quranSessions/getResolvedSessionConfig";
 export { sessionReminders } from "./quranSessions/sessionReminders";
 export {
   projectDashboardOnSessionWrite,

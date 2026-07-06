@@ -19,6 +19,14 @@ export interface MarketConfig {
   minSessionPrice: number;
   currencyCode: string;
   cities?: MarketCity[];
+  paymentProviderEnabled?: boolean;
+  bookingMode?: 'requiresTutorApproval' | 'autoConfirm';
+  joinWindowLeadMs?: number;
+  tutorApprovalSlaMs?: number;
+  minBookingNoticeMs?: number;
+  maxConcurrentUpcomingPerStudent?: number;
+  sessionMode?: 'videoOnly';
+  genderMatchingEnabled?: boolean;
 }
 
 interface MarketPricingState {
@@ -78,6 +86,14 @@ export class MarketPricingFacade {
                 isEnabled: market.isEnabled ?? true,
                 minSessionPrice: market.minSessionPrice ?? 0,
                 currencyCode: market.currencyCode ?? 'USD',
+                paymentProviderEnabled: market.paymentProviderEnabled,
+                bookingMode: market.bookingMode,
+                joinWindowLeadMs: market.joinWindowLeadMs,
+                tutorApprovalSlaMs: market.tutorApprovalSlaMs,
+                minBookingNoticeMs: market.minBookingNoticeMs,
+                maxConcurrentUpcomingPerStudent: market.maxConcurrentUpcomingPerStudent,
+                sessionMode: market.sessionMode,
+                genderMatchingEnabled: market.genderMatchingEnabled,
                 cities
               } as MarketConfig;
             })
