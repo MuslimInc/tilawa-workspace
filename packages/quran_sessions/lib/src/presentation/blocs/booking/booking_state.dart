@@ -1,6 +1,7 @@
 import 'package:equatable/equatable.dart';
 
 import '../../../domain/policies/session_mode_policy.dart';
+import '../../../domain/entities/booking_block_reason.dart';
 import '../../../domain/entities/quran_booking.dart';
 import '../../../domain/entities/session_booking_outcome.dart';
 import '../../../domain/entities/manual_payment_price.dart';
@@ -42,6 +43,7 @@ final class BookingSelecting extends BookingState {
     this.sessionPrice,
     this.manualPaymentPrice,
     this.paymentProviderAvailable,
+    this.blockReason = BookingBlockReason.none,
   });
 
   final String teacherId;
@@ -59,16 +61,22 @@ final class BookingSelecting extends BookingState {
   /// Server quote signal; null when no quote was obtained (client preview).
   final bool? paymentProviderAvailable;
 
+  /// Server-authoritative typed block reason. Drives the booking banner copy
+  /// and disables submission. Defaults to [BookingBlockReason.none] for the
+  /// client-only preview path (no server quote) so it never falsely blocks.
+  final BookingBlockReason blockReason;
+
   bool get hasExternalMeetingUrl =>
       SessionModePolicy.hasExternalMeetingUrl(teacherExternalMeetingUrl);
 
-  /// Paid session whose payment cannot currently be taken — submission is
-  /// blocked so the student never hits `payment_provider_unavailable`.
-  bool get isPaymentBlocked =>
-      pricingType == SessionPricingType.fixedPerSession &&
-      paymentProviderAvailable == false;
+  /// True when the booking screen must show a block banner and disable submit.
+  /// Derived from the server-reported [blockReason] — never inferred from
+  /// loose booleans, so admin-disabled / pricing-missing / market-disabled /
+  /// teacher-not-bookable each get distinct, accurate copy.
+  bool get isPaymentBlocked => blockReason != BookingBlockReason.none;
 
-  bool get canSubmit => selectedSlot != null && !isPaymentBlocked;
+  bool get canSubmit =>
+      selectedSlot != null && blockReason == BookingBlockReason.none;
 
   @override
   List<Object?> get props => [
@@ -81,6 +89,7 @@ final class BookingSelecting extends BookingState {
     sessionPrice,
     manualPaymentPrice,
     paymentProviderAvailable,
+    blockReason,
   ];
 
   BookingSelecting copyWith({
@@ -92,6 +101,7 @@ final class BookingSelecting extends BookingState {
     SessionPrice? sessionPrice,
     ManualPaymentPrice? manualPaymentPrice,
     bool? paymentProviderAvailable,
+    BookingBlockReason? blockReason,
   }) => BookingSelecting(
     teacherId: teacherId,
     availableSlots: availableSlots ?? this.availableSlots,
@@ -104,6 +114,7 @@ final class BookingSelecting extends BookingState {
     manualPaymentPrice: manualPaymentPrice ?? this.manualPaymentPrice,
     paymentProviderAvailable:
         paymentProviderAvailable ?? this.paymentProviderAvailable,
+    blockReason: blockReason ?? this.blockReason,
   );
 }
 

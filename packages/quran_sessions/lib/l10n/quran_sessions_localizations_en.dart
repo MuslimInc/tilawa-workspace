@@ -1926,6 +1926,47 @@ class QuranSessionsLocalizationsEn extends QuranSessionsLocalizations {
       'This session requires payment, but payment is not available yet. Booking is temporarily unavailable.';
 
   @override
+  String get bookingPaidUnavailableTitle =>
+      'Paid booking is currently unavailable.';
+
+  @override
+  String get bookingPaidUnavailableSubtitle =>
+      'You can choose a free teacher or try again later.';
+
+  @override
+  String get bookingDisabledByAdminTitle => 'Booking is currently unavailable.';
+
+  @override
+  String get bookingDisabledByAdminSubtitle =>
+      'Booking has been temporarily paused by the admin.';
+
+  @override
+  String get pricingConfigIncompleteTitle =>
+      'Booking is unavailable right now.';
+
+  @override
+  String get pricingConfigIncompleteSubtitle =>
+      'Pricing configuration is incomplete. Please try again later.';
+
+  @override
+  String get marketDisabledBookingTitle =>
+      'Booking is unavailable in your area.';
+
+  @override
+  String get marketDisabledBookingSubtitle =>
+      'This market is not open for bookings yet.';
+
+  @override
+  String get teacherNotBookableTitle =>
+      'This teacher is not available for booking.';
+
+  @override
+  String get teacherNotBookableSubtitle => 'Please choose a different teacher.';
+
+  @override
+  String get sessionFreeBadge => 'This session is free.';
+
+  @override
   String get walletSandboxNotice =>
       'Sandbox wallet — credits from refunds and test payments only. Not real money.';
 

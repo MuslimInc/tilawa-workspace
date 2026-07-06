@@ -2,7 +2,6 @@ import { onCall, HttpsError } from "firebase-functions/v2/https";
 import { getFirestore } from "firebase-admin/firestore";
 
 import {
-  assertPlatformBookingEnabled,
   loadBookingEligibilityContext,
   type BookingEligibilityContext,
 } from "./bookingEligibilityService";
@@ -17,12 +16,35 @@ import { sessionCallableHttpsOptions } from "./sessionCallableOptions";
  * Authoritative pricing preview for the booking screen.
  *
  * Resolves price from the exact same source as `createSessionBooking`
- * (`loadBookingEligibilityContext` → admin market config + policy version
- * overlay), so the quote the student sees is the price the booking records.
- * Also exposes whether the payment provider is enabled, letting the client
- * block paid bookings *before* submit instead of surfacing
- * `payment_provider_unavailable` after the fact.
+ * (`loadBookingEligibilityContext` → admin market config + teacher override +
+ * policy version overlay), so the quote the student sees is the price the
+ * booking records. The quote is **best-effort**: config-level blocks (admin
+ * disabled bookings, pricing config missing, market disabled, teacher not
+ * bookable) and the paid+payment-provider-disabled case are returned as a
+ * typed `blockReason` in a *successful* response so the client can render a
+ * precise, distinct message instead of inferring from loose booleans.
+ *
+ * `slot_unavailable` is intentionally NOT a quote reason — a slot is selected
+ * after the quote, and is enforced at `createSessionBooking` time.
+ *
+ * `createSessionBooking` still throws typed lifecycle errors for real
+ * enforcement; only the *preview* is lenient here.
  */
+
+/** Where the effective price was resolved from (stamped on the fee snapshot). */
+export type EffectivePricingSource =
+  | "teacherOverride"
+  | "marketConfig"
+  | "platformFallback";
+
+/** Typed reason the booking screen must block submission. */
+export type BookingBlockReason =
+  | "none"
+  | "paymentProviderUnavailable"
+  | "bookingDisabledByAdmin"
+  | "pricingConfigMissing"
+  | "teacherNotBookable"
+  | "marketDisabled";
 
 export interface BookingPricingQuote {
   pricingType: "free" | "fixedPerSession";
@@ -38,15 +60,38 @@ export interface BookingPricingQuote {
   countryCode: string | null;
   cityId: string | null;
   policyVersion: string | null;
+  /** Platform + market feature flags (from the resolved context). */
+  bookingEnabled: boolean;
+  quranSessionsEnabled: boolean;
+  /** Provenance of `amount` — matches the `feeSnapshot.pricingSource`. */
+  effectivePricingSource: EffectivePricingSource;
+  /** Typed booking-block reason; `none` when the session is bookable. */
+  blockReason: BookingBlockReason;
+}
+
+function mapPricingSource(
+  source: BookingEligibilityContext["pricingSource"],
+): EffectivePricingSource {
+  return source === "teacher_override"
+    ? "teacherOverride"
+    : source === "market"
+      ? "marketConfig"
+      : "platformFallback";
 }
 
 /** Pure quote assembly — unit-tested; shares `ctx.pricing` with booking. */
 export function buildPricingQuote(
   ctx: BookingEligibilityContext,
   paymentProviderEnabled: boolean,
+  options?: { teacherId?: string },
 ): BookingPricingQuote {
   const { pricing } = ctx;
   const isFree = !pricing.isPaid;
+  const blockReason = resolveBlockReasonWithTeacher(
+    ctx,
+    paymentProviderEnabled,
+    options?.teacherId,
+  );
   return {
     pricingType: isFree ? "free" : "fixedPerSession",
     isFree,
@@ -58,11 +103,91 @@ export function buildPricingQuote(
     countryCode: ctx.student.countryCode,
     cityId: ctx.student.cityId,
     policyVersion: ctx.market.policyVersion,
+    bookingEnabled: ctx.platform.bookingEnabled,
+    quranSessionsEnabled: ctx.platform.quranSessionsEnabled,
+    effectivePricingSource: mapPricingSource(ctx.pricingSource),
+    blockReason,
   };
+}
+
+/** Quote for the config-missing path: pricing cannot be resolved. */
+export function buildBlockedPricingQuote(
+  blockReason: Exclude<BookingBlockReason, "none" | "paymentProviderUnavailable">,
+  platform: {
+    bookingEnabled: boolean;
+    quranSessionsEnabled: boolean;
+  },
+  countryCode: string | null = null,
+  cityId: string | null = null,
+): BookingPricingQuote {
+  return {
+    pricingType: "free",
+    isFree: true,
+    amount: 0,
+    currencyCode: "USD",
+    paymentRequired: false,
+    paymentProviderAvailable: false,
+    payableAmount: 0,
+    countryCode,
+    cityId,
+    policyVersion: null,
+    bookingEnabled: platform.bookingEnabled,
+    quranSessionsEnabled: platform.quranSessionsEnabled,
+    // Pricing could not be resolved; report the fallback rather than guessing.
+    effectivePricingSource: "platformFallback",
+    blockReason,
+  };
+}
+
+function resolveBlockReasonWithTeacher(
+  ctx: BookingEligibilityContext,
+  paymentProviderEnabled: boolean,
+  teacherId?: string,
+): BookingBlockReason {
+  if (!ctx.platform.quranSessionsEnabled || !ctx.platform.bookingEnabled) {
+    return "bookingDisabledByAdmin";
+  }
+  if (!ctx.marketEnabled || !ctx.market.marketEnabled) {
+    return "marketDisabled";
+  }
+  if (
+    !ctx.teacher.exists ||
+    ctx.teacher.verificationStatus !== "verified"
+  ) {
+    return "teacherNotBookable";
+  }
+  if (
+    teacherId != null &&
+    ctx.market.teacherWhitelist != null &&
+    !ctx.market.teacherWhitelist.includes(teacherId)
+  ) {
+    return "teacherNotBookable";
+  }
+  if (ctx.pricing.isPaid && !paymentProviderEnabled) {
+    return "paymentProviderUnavailable";
+  }
+  return "none";
 }
 
 interface GetBookingPricingQuoteRequest {
   teacherId: string;
+}
+
+function lifecycleErrorCode(e: unknown): string | null {
+  if (e instanceof HttpsError) {
+    const details = e.details as { code?: unknown } | undefined;
+    return typeof details?.code === "string" ? details.code : null;
+  }
+  return null;
+}
+
+function readPlatformFlags(e: unknown): {
+  bookingEnabled: boolean;
+  quranSessionsEnabled: boolean;
+} {
+  // Best-effort: config-missing throws carry no platform flags, so fail open to
+  // `true` — the blockReason itself signals the block, not these flags.
+  return { bookingEnabled: true, quranSessionsEnabled: true };
 }
 
 export const getBookingPricingQuote = onCall(
@@ -76,11 +201,34 @@ export const getBookingPricingQuote = onCall(
     }
 
     const db = getFirestore();
-    // Throws the same typed lifecycle errors as createSessionBooking when the
-    // student profile or market policy is incomplete — the client already
-    // maps those codes to localized copy.
-    const ctx = await loadBookingEligibilityContext(db, uid, data.teacherId);
-    assertPlatformBookingEnabled(ctx.platform);
-    return buildPricingQuote(ctx, isPaymentProviderEnabled());
+    const teacherId = data.teacherId;
+
+    // Best-effort preview: convert config-level lifecycle errors into a typed
+    // blockReason inside a successful response. Auth/epoch/transport errors
+    // still throw (handled by the client failure mapper).
+    try {
+      const ctx = await loadBookingEligibilityContext(db, uid, teacherId);
+      return buildPricingQuote(ctx, isPaymentProviderEnabled(), { teacherId });
+    } catch (e) {
+      const code = lifecycleErrorCode(e);
+      if (code === "policy_not_configured") {
+        return buildBlockedPricingQuote("pricingConfigMissing", readPlatformFlags(e));
+      }
+      if (code === "feature_disabled") {
+        // Platform disabled sessions or bookings — report as admin block.
+        const platform = readPlatformFlags(e);
+        return buildBlockedPricingQuote("bookingDisabledByAdmin", {
+          bookingEnabled: false,
+          quranSessionsEnabled: platform.quranSessionsEnabled,
+        });
+      }
+      if (code === "market_not_enabled") {
+        return buildBlockedPricingQuote("marketDisabled", readPlatformFlags(e));
+      }
+      if (code === "teacher_not_whitelisted" || code === "teacher_not_verified") {
+        return buildBlockedPricingQuote("teacherNotBookable", readPlatformFlags(e));
+      }
+      throw e;
+    }
   },
 );

@@ -116,6 +116,8 @@ export 'src/domain/entities/quran_teacher.dart';
 export 'src/domain/entities/teacher_credential.dart';
 export 'src/domain/entities/session_call_type.dart';
 export 'src/domain/entities/session_policy.dart';
+export 'src/domain/entities/booking_block_reason.dart';
+export 'src/domain/entities/effective_pricing_source.dart';
 export 'src/domain/entities/session_price.dart';
 export 'src/domain/entities/session_pricing_quote.dart';
 export 'src/domain/entities/session_pricing_type.dart';

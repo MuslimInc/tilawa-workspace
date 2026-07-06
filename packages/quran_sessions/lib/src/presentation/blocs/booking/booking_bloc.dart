@@ -2,6 +2,7 @@ import 'package:bloc_concurrency/bloc_concurrency.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
 import '../../../boundaries/payment/session_payment_confirmation.dart';
+import '../../../domain/entities/booking_block_reason.dart';
 import '../../../domain/entities/session_lifecycle_status.dart';
 import '../../../domain/entities/session_price.dart';
 import '../../../domain/entities/session_pricing_type.dart';
@@ -119,15 +120,24 @@ class BookingBloc extends Bloc<BookingEvent, BookingState> {
     SessionPricingType? pricingType;
     SessionPrice? sessionPrice;
     bool? paymentProviderAvailable;
+    BookingBlockReason blockReason = BookingBlockReason.none;
 
-    final quote = await _fetchServerQuote(teacherId);
-    if (quote != null) {
-      pricingType = quote.pricingType;
-      sessionPrice = quote.price;
-      paymentProviderAvailable = quote.paymentProviderAvailable;
+    final fetched = await _fetchServerQuote(teacherId);
+    if (fetched.quote != null) {
+      pricingType = fetched.quote!.pricingType;
+      sessionPrice = fetched.quote!.price;
+      paymentProviderAvailable = fetched.quote!.paymentProviderAvailable;
+      blockReason = fetched.failureBlockReason ?? BookingBlockReason.none;
+    } else if (fetched.failureBlockReason != null) {
+      // The server reported a typed config/admin block (a non-best-effort
+      // backend that still throws). Surface the typed reason and do NOT fall
+      // back to the client market preview — that would hide the block and
+      // let the student reach submit, only to be rejected server-side.
+      blockReason = fetched.failureBlockReason!;
     } else {
-      // Fallback: client-side market read. Advisory only — it cannot see
-      // policy-version overlays or the payment provider gate.
+      // Transport-level quote failure only: fall back to the advisory
+      // client-side market read. It cannot see policy-version overlays or the
+      // payment provider gate, so it never blocks (preview only).
       final getUserProfile = _getUserProfile;
       final getMarketConfig = _getMarketConfig;
       if (getUserProfile != null && getMarketConfig != null) {
@@ -183,15 +193,44 @@ class BookingBloc extends Bloc<BookingEvent, BookingState> {
         sessionPrice: sessionPrice,
         manualPaymentPrice: null,
         paymentProviderAvailable: paymentProviderAvailable,
+        blockReason: blockReason,
       ),
     );
   }
 
-  Future<SessionPricingQuote?> _fetchServerQuote(String teacherId) async {
+  /// Fetches the server quote and splits the outcome so config/admin blocks
+  /// are surfaced as typed [BookingBlockReason]s rather than swallowed into
+  /// the silent client-side fallback.
+  Future<({SessionPricingQuote? quote, BookingBlockReason? failureBlockReason})>
+  _fetchServerQuote(String teacherId) async {
     final getPricingQuote = _getPricingQuote;
-    if (getPricingQuote == null) return null;
+    if (getPricingQuote == null) {
+      return (quote: null, failureBlockReason: null);
+    }
     final result = await getPricingQuote(teacherId: teacherId);
-    return result.fold((_) => null, (quote) => quote);
+    return result.fold(
+      (f) => (quote: null, failureBlockReason: _blockReasonFromFailure(f)),
+      (quote) => (quote: quote, failureBlockReason: quote.blockReason),
+    );
+  }
+
+  /// Maps a quote failure of a *config/admin* kind to a typed block reason.
+  /// Returns null for transport/auth failures so the bloc falls back to the
+  /// advisory client market preview.
+  BookingBlockReason? _blockReasonFromFailure(QuranSessionsFailure f) {
+    if (f is PlatformBookingDisabledFailure) {
+      return BookingBlockReason.bookingDisabledByAdmin;
+    }
+    if (f is PricingConfigMissingFailure) {
+      return BookingBlockReason.pricingConfigMissing;
+    }
+    if (f is MarketNotEnabledFailure) {
+      return BookingBlockReason.marketDisabled;
+    }
+    if (f is TeacherNotWhitelistedFailure || f is TeacherNotVerifiedFailure) {
+      return BookingBlockReason.teacherNotBookable;
+    }
+    return null;
   }
 
   Future<void> _emitBookingLost({

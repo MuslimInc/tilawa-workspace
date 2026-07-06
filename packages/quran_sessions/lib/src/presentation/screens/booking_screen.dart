@@ -17,11 +17,13 @@ import '../blocs/booking/booking_bloc.dart';
 import '../blocs/booking/booking_event.dart';
 import '../blocs/booking/booking_state.dart';
 import '../config/quran_sessions_analytics_callbacks.dart';
+import '../widgets/booking_block_notice.dart';
 import '../failure_ui/quran_sessions_failure_ui.dart';
 import '../widgets/availability_slot_picker.dart';
 import '../widgets/paid_session_notice.dart';
 import '../widgets/payment_checkout_sheet.dart';
 import '../widgets/quran_sessions_scaffold.dart';
+import '../../domain/entities/booking_block_reason.dart';
 import '../../domain/entities/session_price.dart';
 import '../../domain/entities/session_pricing_type.dart';
 import '../../utils/price_formatter.dart';
@@ -238,7 +240,7 @@ class _BookingScreenState extends State<BookingScreen> {
             :final pricingType,
             :final sessionPrice,
             :final manualPaymentPrice,
-            :final isPaymentBlocked,
+            :final blockReason,
           ) =>
             Padding(
               padding: EdgeInsets.all(tokens.spaceMedium),
@@ -250,7 +252,8 @@ class _BookingScreenState extends State<BookingScreen> {
                       padding: EdgeInsets.only(bottom: tokens.spaceSmall),
                       child: PaidSessionNotice(price: manualPaymentPrice),
                     )
-                  else if (pricingType != null)
+                  else if (pricingType != null &&
+                      blockReason == BookingBlockReason.none)
                     Padding(
                       padding: EdgeInsets.only(bottom: tokens.spaceSmall),
                       child: _BookingPriceSummary(
@@ -258,10 +261,10 @@ class _BookingScreenState extends State<BookingScreen> {
                         sessionPrice: sessionPrice,
                       ),
                     ),
-                  if (isPaymentBlocked)
+                  if (blockReason != BookingBlockReason.none)
                     Padding(
                       padding: EdgeInsets.only(bottom: tokens.spaceSmall),
-                      child: const _PaymentUnavailableNotice(),
+                      child: BookingBlockNotice(blockReason: blockReason),
                     ),
                   Text(
                     l10n.selectSlot,
@@ -427,43 +430,6 @@ class _BookingPriceSummary extends StatelessWidget {
               ),
             ),
           ],
-        ],
-      ),
-    );
-  }
-}
-
-/// Paid session while the payment provider is disabled: the student sees why
-/// booking is blocked instead of hitting `payment_provider_unavailable`.
-class _PaymentUnavailableNotice extends StatelessWidget {
-  const _PaymentUnavailableNotice();
-
-  @override
-  Widget build(BuildContext context) {
-    final l10n = context.quranSessionsL10n;
-    final theme = Theme.of(context);
-    final scheme = theme.colorScheme;
-    final tokens = theme.tokens;
-
-    return TilawaCard(
-      backgroundColor: scheme.errorContainer,
-      padding: EdgeInsets.all(tokens.spaceMedium),
-      child: Row(
-        children: [
-          Icon(
-            TilawaIcons.warning,
-            size: tokens.iconSizeSmall,
-            color: scheme.onErrorContainer,
-          ),
-          SizedBox(width: tokens.spaceExtraSmall),
-          Expanded(
-            child: Text(
-              l10n.bookingPaymentUnavailableNotice,
-              style: theme.textTheme.bodyMedium?.copyWith(
-                color: scheme.onErrorContainer,
-              ),
-            ),
-          ),
         ],
       ),
     );

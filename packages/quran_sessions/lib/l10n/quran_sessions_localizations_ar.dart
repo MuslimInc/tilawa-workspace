@@ -1898,6 +1898,42 @@ class QuranSessionsLocalizationsAr extends QuranSessionsLocalizations {
       'هذه الجلسة مدفوعة، والدفع غير متاح حالياً. الحجز غير متاح مؤقتاً.';
 
   @override
+  String get bookingPaidUnavailableTitle => 'الحجز المدفوع غير متاح حالياً.';
+
+  @override
+  String get bookingPaidUnavailableSubtitle =>
+      'يمكنك اختيار معلم مجاني أو المحاولة لاحقاً.';
+
+  @override
+  String get bookingDisabledByAdminTitle => 'الحجز غير متاح حالياً.';
+
+  @override
+  String get bookingDisabledByAdminSubtitle =>
+      'تم إيقاف الحجز مؤقتاً من الإدارة.';
+
+  @override
+  String get pricingConfigIncompleteTitle => 'الحجز غير متاح حالياً.';
+
+  @override
+  String get pricingConfigIncompleteSubtitle =>
+      'إعداد التسعير غير مكتمل. يرجى المحاولة لاحقاً.';
+
+  @override
+  String get marketDisabledBookingTitle => 'الحجز غير متاح في منطقتك.';
+
+  @override
+  String get marketDisabledBookingSubtitle => 'هذا السوق غير مفتوح للحجز بعد.';
+
+  @override
+  String get teacherNotBookableTitle => 'هذا المعلم غير متاح للحجز.';
+
+  @override
+  String get teacherNotBookableSubtitle => 'يرجى اختيار معلم آخر.';
+
+  @override
+  String get sessionFreeBadge => 'هذه الجلسة مجانية.';
+
+  @override
   String get walletSandboxNotice =>
       'محفظة تجريبية — أرصدة من الاستردادات والمدفوعات التجريبية فقط. ليست أموالًا حقيقية.';
 

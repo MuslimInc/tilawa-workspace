@@ -3437,6 +3437,72 @@ abstract class QuranSessionsLocalizations {
   /// **'This session requires payment, but payment is not available yet. Booking is temporarily unavailable.'**
   String get bookingPaymentUnavailableNotice;
 
+  /// No description provided for @bookingPaidUnavailableTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Paid booking is currently unavailable.'**
+  String get bookingPaidUnavailableTitle;
+
+  /// No description provided for @bookingPaidUnavailableSubtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'You can choose a free teacher or try again later.'**
+  String get bookingPaidUnavailableSubtitle;
+
+  /// No description provided for @bookingDisabledByAdminTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Booking is currently unavailable.'**
+  String get bookingDisabledByAdminTitle;
+
+  /// No description provided for @bookingDisabledByAdminSubtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Booking has been temporarily paused by the admin.'**
+  String get bookingDisabledByAdminSubtitle;
+
+  /// No description provided for @pricingConfigIncompleteTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Booking is unavailable right now.'**
+  String get pricingConfigIncompleteTitle;
+
+  /// No description provided for @pricingConfigIncompleteSubtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Pricing configuration is incomplete. Please try again later.'**
+  String get pricingConfigIncompleteSubtitle;
+
+  /// No description provided for @marketDisabledBookingTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Booking is unavailable in your area.'**
+  String get marketDisabledBookingTitle;
+
+  /// No description provided for @marketDisabledBookingSubtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'This market is not open for bookings yet.'**
+  String get marketDisabledBookingSubtitle;
+
+  /// No description provided for @teacherNotBookableTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'This teacher is not available for booking.'**
+  String get teacherNotBookableTitle;
+
+  /// No description provided for @teacherNotBookableSubtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Please choose a different teacher.'**
+  String get teacherNotBookableSubtitle;
+
+  /// No description provided for @sessionFreeBadge.
+  ///
+  /// In en, this message translates to:
+  /// **'This session is free.'**
+  String get sessionFreeBadge;
+
   /// No description provided for @walletSandboxNotice.
   ///
   /// In en, this message translates to:

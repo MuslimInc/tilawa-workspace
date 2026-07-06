@@ -51,6 +51,14 @@ class FirebaseSessionPricingQuoteGateway implements SessionPricingQuoteGateway {
       paymentRequired: data['paymentRequired'] as bool? ?? false,
       paymentProviderAvailable:
           data['paymentProviderAvailable'] as bool? ?? false,
+      bookingEnabled: data['bookingEnabled'] as bool? ?? true,
+      quranSessionsEnabled: data['quranSessionsEnabled'] as bool? ?? true,
+      effectivePricingSource: EffectivePricingSource.fromString(
+        data['effectivePricingSource'] as String?,
+      ),
+      blockReason: BookingBlockReason.fromString(
+        data['blockReason'] as String?,
+      ),
       countryCode: data['countryCode'] as String?,
       cityId: data['cityId'] as String?,
       policyVersion: data['policyVersion'] as String?,

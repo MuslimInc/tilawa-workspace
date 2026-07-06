@@ -5,6 +5,8 @@ import 'package:flutter_test/flutter_test.dart';
 
 import 'package:quran_sessions/src/domain/entities/teacher_availability.dart';
 import 'package:quran_sessions/src/domain/entities/weekly_schedule.dart';
+import 'package:quran_sessions/src/domain/entities/booking_block_reason.dart';
+import 'package:quran_sessions/src/domain/entities/effective_pricing_source.dart';
 import 'package:quran_sessions/src/domain/entities/session_pricing_quote.dart';
 import 'package:quran_sessions/src/domain/entities/session_pricing_type.dart';
 import 'package:quran_sessions/src/domain/failures/quran_sessions_failure.dart';
@@ -178,6 +180,10 @@ void main() {
                 currencyCode: 'EGP',
                 paymentRequired: true,
                 paymentProviderAvailable: false,
+                bookingEnabled: true,
+                quranSessionsEnabled: true,
+                effectivePricingSource: EffectivePricingSource.marketConfig,
+                blockReason: BookingBlockReason.paymentProviderUnavailable,
               ),
             ),
           ),

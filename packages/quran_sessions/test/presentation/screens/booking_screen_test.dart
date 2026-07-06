@@ -410,6 +410,7 @@ void main() {
                   cityId: 'cairo',
                 ),
                 paymentProviderAvailable: false,
+                blockReason: BookingBlockReason.paymentProviderUnavailable,
               ),
             ),
             child: const BookingScreen(
@@ -421,11 +422,14 @@ void main() {
       );
       await tester.pumpAndSettle();
 
+      // The server-reported typed block reason maps to the paid-unavailable
+      // banner — not the old generic "payment not available" string.
       expect(
-        find.text(
-          'This session requires payment, but payment is not available '
-          'yet. Booking is temporarily unavailable.',
-        ),
+        find.text('Paid booking is currently unavailable.'),
+        findsOneWidget,
+      );
+      expect(
+        find.text('You can choose a free teacher or try again later.'),
         findsOneWidget,
       );
       // The confirm CTA must be disabled even with a slot selected.
@@ -492,6 +496,113 @@ void main() {
         ),
       );
       expect(button.onPressed, isNotNull);
+    },
+  );
+
+  testWidgets(
+    'admin booking disabled shows the admin-disabled banner and blocks submit',
+    (tester) async {
+      final slots = [_slot(1)];
+
+      await tester.pumpWidget(
+        MaterialApp(
+          theme: AppTheme.getLightTheme(primaryColor: AppColors.defaultPrimary),
+          localizationsDelegates: const [
+            QuranSessionsLocalizations.delegate,
+            GlobalMaterialLocalizations.delegate,
+            GlobalWidgetsLocalizations.delegate,
+          ],
+          supportedLocales: QuranSessionsLocalizations.supportedLocales,
+          home: BlocProvider<BookingBloc>(
+            create: (_) => SeededBookingBloc(
+              seed: BookingSelecting(
+                teacherId: 'teacher_1',
+                availableSlots: slots,
+                selectedSlot: slots.first,
+                selectedCallType: SessionCallType.videoCall,
+                blockReason: BookingBlockReason.bookingDisabledByAdmin,
+              ),
+            ),
+            child: const BookingScreen(
+              teacherId: 'teacher_1',
+              studentId: 'student_1',
+            ),
+          ),
+        ),
+      );
+      await tester.pumpAndSettle();
+
+      expect(
+        find.text('Booking is currently unavailable.'),
+        findsOneWidget,
+      );
+      expect(
+        find.text('Booking has been temporarily paused by the admin.'),
+        findsOneWidget,
+      );
+      // Admin-disabled must NOT show the paid-unavailable banner.
+      expect(
+        find.text('Paid booking is currently unavailable.'),
+        findsNothing,
+      );
+      final button = tester.widget<TilawaButton>(
+        find.byWidgetPredicate(
+          (w) => w is TilawaButton && w.text == 'Confirm booking',
+        ),
+      );
+      expect(button.onPressed, isNull);
+    },
+  );
+
+  testWidgets(
+    'pricing config missing shows the pricing-incomplete banner and blocks submit',
+    (tester) async {
+      final slots = [_slot(1)];
+
+      await tester.pumpWidget(
+        MaterialApp(
+          theme: AppTheme.getLightTheme(primaryColor: AppColors.defaultPrimary),
+          localizationsDelegates: const [
+            QuranSessionsLocalizations.delegate,
+            GlobalMaterialLocalizations.delegate,
+            GlobalWidgetsLocalizations.delegate,
+          ],
+          supportedLocales: QuranSessionsLocalizations.supportedLocales,
+          home: BlocProvider<BookingBloc>(
+            create: (_) => SeededBookingBloc(
+              seed: BookingSelecting(
+                teacherId: 'teacher_1',
+                availableSlots: slots,
+                selectedSlot: slots.first,
+                selectedCallType: SessionCallType.videoCall,
+                blockReason: BookingBlockReason.pricingConfigMissing,
+              ),
+            ),
+            child: const BookingScreen(
+              teacherId: 'teacher_1',
+              studentId: 'student_1',
+            ),
+          ),
+        ),
+      );
+      await tester.pumpAndSettle();
+
+      expect(
+        find.text('Booking is unavailable right now.'),
+        findsOneWidget,
+      );
+      expect(
+        find.text(
+          'Pricing configuration is incomplete. Please try again later.',
+        ),
+        findsOneWidget,
+      );
+      final button = tester.widget<TilawaButton>(
+        find.byWidgetPredicate(
+          (w) => w is TilawaButton && w.text == 'Confirm booking',
+        ),
+      );
+      expect(button.onPressed, isNull);
     },
   );
 }

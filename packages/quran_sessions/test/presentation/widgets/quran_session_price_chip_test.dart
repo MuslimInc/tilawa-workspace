@@ -13,6 +13,10 @@ void main() {
     currencyCode: 'EGP',
     paymentRequired: true,
     paymentProviderAvailable: false,
+    bookingEnabled: true,
+    quranSessionsEnabled: true,
+    effectivePricingSource: EffectivePricingSource.marketConfig,
+    blockReason: BookingBlockReason.paymentProviderUnavailable,
     countryCode: 'EG',
     cityId: 'cairo',
   );
@@ -23,6 +27,10 @@ void main() {
     currencyCode: 'USD',
     paymentRequired: false,
     paymentProviderAvailable: false,
+    bookingEnabled: true,
+    quranSessionsEnabled: true,
+    effectivePricingSource: EffectivePricingSource.teacherOverride,
+    blockReason: BookingBlockReason.none,
   );
 
   testWidgets('renders nothing when pricing is unresolved — never "Free"', (

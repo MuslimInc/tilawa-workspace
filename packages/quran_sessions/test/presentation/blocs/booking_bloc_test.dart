@@ -11,6 +11,8 @@ import 'package:quran_sessions/src/domain/entities/session_call_type.dart';
 import 'package:quran_sessions/src/domain/entities/user_profile.dart';
 import 'package:quran_sessions/src/domain/entities/weekly_schedule.dart';
 import 'package:quran_sessions/src/domain/failures/quran_sessions_failure.dart';
+import 'package:quran_sessions/src/domain/entities/booking_block_reason.dart';
+import 'package:quran_sessions/src/domain/entities/effective_pricing_source.dart';
 import 'package:quran_sessions/src/domain/entities/session_pricing_quote.dart';
 import 'package:quran_sessions/src/domain/entities/session_pricing_type.dart';
 import 'package:quran_sessions/src/domain/usecases/get_booking_pricing_quote_usecase.dart';
@@ -415,6 +417,10 @@ void main() {
             currencyCode: 'USD',
             paymentRequired: false,
             paymentProviderAvailable: false,
+            bookingEnabled: true,
+            quranSessionsEnabled: true,
+            effectivePricingSource: EffectivePricingSource.marketConfig,
+            blockReason: BookingBlockReason.none,
           ),
         ),
       ),
@@ -426,6 +432,7 @@ void main() {
         check(state.pricingType).equals(SessionPricingType.free);
         check(state.sessionPrice).isNull();
         check(state.isPaymentBlocked).isFalse();
+        check(state.blockReason).equals(BookingBlockReason.none);
       },
     );
 
@@ -440,6 +447,10 @@ void main() {
             paymentRequired: false,
             // Provider off must never gate a free session.
             paymentProviderAvailable: false,
+            bookingEnabled: true,
+            quranSessionsEnabled: true,
+            effectivePricingSource: EffectivePricingSource.teacherOverride,
+            blockReason: BookingBlockReason.none,
           ),
         ),
       ),
@@ -467,6 +478,10 @@ void main() {
             currencyCode: 'EGP',
             paymentRequired: true,
             paymentProviderAvailable: true,
+            bookingEnabled: true,
+            quranSessionsEnabled: true,
+            effectivePricingSource: EffectivePricingSource.marketConfig,
+            blockReason: BookingBlockReason.none,
             countryCode: 'EG',
             cityId: 'cairo',
           ),
@@ -495,6 +510,10 @@ void main() {
             currencyCode: 'EGP',
             paymentRequired: true,
             paymentProviderAvailable: false,
+            bookingEnabled: true,
+            quranSessionsEnabled: true,
+            effectivePricingSource: EffectivePricingSource.marketConfig,
+            blockReason: BookingBlockReason.paymentProviderUnavailable,
             countryCode: 'EG',
             cityId: 'cairo',
           ),
@@ -527,9 +546,79 @@ void main() {
       expect: () => [isA<BookingSelecting>()],
       verify: (b) {
         final state = b.state as BookingSelecting;
-        // Fallback preview carries no provider signal, so it never blocks.
+        // A transport-level quote failure is the only case that falls back to
+        // the advisory client preview — it carries no provider signal and so
+        // never blocks. Config/admin failures are surfaced as typed reasons
+        // (see tests below) and never reach this fallback.
         check(state.paymentProviderAvailable).isNull();
         check(state.isPaymentBlocked).isFalse();
+        check(state.blockReason).equals(BookingBlockReason.none);
+      },
+    );
+
+    blocTest<BookingBloc, BookingState>(
+      'admin booking disabled quote failure surfaces blockReason and blocks submit',
+      build: () => buildWithQuote(
+        FakeSessionPricingQuoteGateway(
+          failure: const PlatformBookingDisabledFailure(),
+        ),
+      ),
+      act: (b) async {
+        openScreen(b);
+        await b.stream.firstWhere((s) => s is BookingSelecting);
+        final selecting = b.state as BookingSelecting;
+        b.add(SlotSelected(selecting.availableSlots.first));
+      },
+      verify: (b) {
+        final state = b.state as BookingSelecting;
+        check(
+          state.blockReason,
+        ).equals(BookingBlockReason.bookingDisabledByAdmin);
+        check(state.isPaymentBlocked).isTrue();
+        // Posting the admin-disabled banner must NOT fall back to the client
+        // preview, which would hide the block and let the student submit.
+        check(state.selectedSlot).isNotNull();
+        check(state.canSubmit).isFalse();
+      },
+    );
+
+    blocTest<BookingBloc, BookingState>(
+      'pricing config missing quote failure surfaces blockReason and blocks submit',
+      build: () => buildWithQuote(
+        FakeSessionPricingQuoteGateway(
+          failure: const PricingConfigMissingFailure(),
+        ),
+      ),
+      act: (b) async {
+        openScreen(b);
+        await b.stream.firstWhere((s) => s is BookingSelecting);
+        final selecting = b.state as BookingSelecting;
+        b.add(SlotSelected(selecting.availableSlots.first));
+      },
+      verify: (b) {
+        final state = b.state as BookingSelecting;
+        check(
+          state.blockReason,
+        ).equals(BookingBlockReason.pricingConfigMissing);
+        check(state.isPaymentBlocked).isTrue();
+        check(state.selectedSlot).isNotNull();
+        check(state.canSubmit).isFalse();
+      },
+    );
+
+    blocTest<BookingBloc, BookingState>(
+      'teacher not bookable quote failure surfaces blockReason',
+      build: () => buildWithQuote(
+        FakeSessionPricingQuoteGateway(
+          failure: const TeacherNotWhitelistedFailure(),
+        ),
+      ),
+      act: openScreen,
+      skip: 2,
+      verify: (b) {
+        final state = b.state as BookingSelecting;
+        check(state.blockReason).equals(BookingBlockReason.teacherNotBookable);
+        check(state.canSubmit).isFalse();
       },
     );
   });

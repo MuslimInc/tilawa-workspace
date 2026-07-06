@@ -110,6 +110,14 @@ QuranSessionsFailure _mapLifecycleCode(
       maxUpcoming: details['maxUpcoming'] as int? ?? 0,
     ),
     'teacher_not_whitelisted' => const TeacherNotWhitelistedFailure(),
+    'feature_disabled' => PlatformBookingDisabledFailure(
+      scope: details['field'] as String?,
+    ),
+    'policy_not_configured' => PricingConfigMissingFailure(
+      scope: details['scope'] as String?,
+      countryCode: details['countryCode'] as String?,
+      missingFields: _stringList(details['missingFields']),
+    ),
     'already_active_on_other_device' => LiveSessionAlreadyActiveFailure(
       sessionId: sessionId ?? '',
       activeDeviceId: details['activeDeviceId'] as String? ?? '',

@@ -438,6 +438,39 @@ final class InvalidDateOfBirthFailure extends QuranSessionsFailure {
 
 // ── Teacher application ───────────────────────────────────────────────────────
 
+/// Admin disabled bookings (platform `bookingEnabled`/`quranSessionsEnabled`
+/// flag). Bookings are blocked for all teachers regardless of price. Distinct
+/// from [PaymentProviderFailure] so the UI can render admin-specific copy.
+final class PlatformBookingDisabledFailure extends QuranSessionsFailure {
+  const PlatformBookingDisabledFailure({this.scope});
+
+  /// 'quranSessionsEnabled' or 'bookingEnabled'; null when unspecified.
+  final String? scope;
+
+  @override
+  List<Object?> get props => [scope];
+}
+
+/// Pricing/booking config is incomplete or missing — the market/platform doc
+/// has not been seeded or required fields are absent. Fail-closed: bookings
+/// are blocked until an admin completes the config. Distinct from
+/// [PlatformBookingDisabledFailure] so the UI can point the user to retry.
+final class PricingConfigMissingFailure extends QuranSessionsFailure {
+  const PricingConfigMissingFailure({
+    this.scope,
+    this.countryCode,
+    this.missingFields = const [],
+  });
+
+  /// 'platform' or 'market'; null when unspecified.
+  final String? scope;
+  final String? countryCode;
+  final List<String> missingFields;
+
+  @override
+  List<Object?> get props => [scope, countryCode, missingFields];
+}
+
 /// No [TeacherApplication] exists for the given user.
 /// Callers should treat this as [TeacherApplicationStatus.none].
 final class TeacherApplicationNotFoundFailure extends QuranSessionsFailure {

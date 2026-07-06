@@ -171,6 +171,10 @@ extension QuranSessionsFailureUi on QuranSessionsFailure {
       PaymentCancelledFailure() => loc.paymentCancelled,
       PaymentProviderFailure() => loc.paymentProviderFailure,
 
+      // ── Admin / config blocks (booking submit path) ────────────────────────
+      PlatformBookingDisabledFailure() => loc.bookingDisabledByAdminTitle,
+      PricingConfigMissingFailure() => loc.pricingConfigIncompleteTitle,
+
       // ── Storage ─────────────────────────────────────────────────────────────
       CacheFailure() => loc.cacheFailure,
 
