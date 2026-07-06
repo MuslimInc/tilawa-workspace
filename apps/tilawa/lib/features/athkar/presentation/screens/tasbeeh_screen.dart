@@ -149,6 +149,7 @@ class _TasbeehView extends StatelessWidget {
                       TilawaBottomActionInset(
                         top: Theme.of(context).tokens.spaceSmall,
                         extraBottom: bottomActionExtraInset(context),
+                        maxWidthKind: TilawaContentKind.form,
                         child: bottomActions,
                       ),
                   ],
