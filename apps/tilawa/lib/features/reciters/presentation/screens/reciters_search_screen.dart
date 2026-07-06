@@ -90,13 +90,6 @@ class _RecitersSearchScreenState extends State<RecitersSearchScreen> {
       // Keep the catalog chrome at a fixed height; inset the list instead.
       resizeToAvoidBottomInset: false,
       appBar: TilawaCatalogAppBar(
-        preferredHeight: TilawaCatalogAppBar.resolvePreferredHeight(
-          context,
-          title: context.l10n.reciters,
-          automaticallyImplyLeading: true,
-          bottomContentHeight: theme.componentTokens.searchField.height,
-        ),
-        automaticallyImplyLeading: true,
         title: context.l10n.reciters,
         bottomContent: RecitersCatalogSearchField(
           controller: _controller,

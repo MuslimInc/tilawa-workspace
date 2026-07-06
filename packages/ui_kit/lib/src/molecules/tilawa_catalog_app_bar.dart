@@ -1,26 +1,20 @@
 import 'package:flutter/material.dart';
-
-import '../foundation/design_tokens.dart';
-import 'tilawa_app_bar.dart';
-import 'tilawa_search_field.dart';
+import 'package:tilawa_ui_kit/tilawa_ui_kit.dart';
 
 /// Pinterest-style feature header: white [TilawaAppBarSurface.parchment],
 /// left-aligned title, optional search row — the kit's catalog screen chrome.
 ///
-/// Prefer this over a raw [TilawaAppBar] on list/catalog screens. Pass
-/// [preferredHeight] from [TilawaAppBarConfig.catalogTitleOnlyHeight],
-/// [TilawaAppBarConfig.catalogTitleAndSearchHeight], or
-/// [TilawaAppBarConfig.catalogTitleAndContentHeight].
+/// Prefer this over a raw [TilawaAppBar] on list/catalog screens.
 class TilawaCatalogAppBar extends StatelessWidget
     implements PreferredSizeWidget {
   const TilawaCatalogAppBar({
     super.key,
-    required this.preferredHeight,
     this.title,
     this.titleWidget,
     this.leading,
     this.actions,
     this.bottomContent,
+    this.bottomContentHeight,
     this.automaticallyImplyLeading = true,
     this.onBackPressed,
     this.showBottomHairline = TilawaAppBarConfig.showBottomHairline,
@@ -28,18 +22,18 @@ class TilawaCatalogAppBar extends StatelessWidget
     this.centerTitle = false,
   }) : assert(title != null || titleWidget != null);
 
-  /// Must match laid-out column height (use [TilawaAppBarConfig] helpers).
-  final double preferredHeight;
-
   final String? title;
   final Widget? titleWidget;
   final Widget? leading;
   final List<Widget>? actions;
 
   /// Placed below the title row (search field, filters, segments).
-  ///
-  /// Do not wrap in [TilawaSearchFieldSlot]; this bar applies catalog padding.
   final Widget? bottomContent;
+
+  /// Explicit height for [bottomContent]. If omitted, it will try to infer
+  /// from standard search field height or fallback.
+  final double? bottomContentHeight;
+
   final bool automaticallyImplyLeading;
 
   /// GoRouter-friendly back handler; defaults to [Navigator.maybePop].
@@ -49,52 +43,6 @@ class TilawaCatalogAppBar extends StatelessWidget
 
   /// When true, the title is centered between balanced leading/trailing slots.
   final bool centerTitle;
-
-  /// Resolves [preferredHeight] from live chrome (title copy, leading, actions).
-  static double resolvePreferredHeight(
-    BuildContext context, {
-    String? title,
-    Widget? leading,
-    List<Widget>? actions,
-    bool automaticallyImplyLeading = true,
-    VoidCallback? onBackPressed,
-    bool centerTitle = false,
-    Widget? bottomContent,
-    double? bottomContentHeight,
-    double? titleBlockHeight,
-    int? actionCount,
-  }) {
-    final bool hasLeading =
-        TilawaAppBarChrome.resolveCatalogRowLeading(
-          context,
-          leading: leading,
-          automaticallyImplyLeading: automaticallyImplyLeading,
-          onBackPressed: onBackPressed,
-        ) !=
-        null;
-    final int resolvedActionCount = actionCount ?? actions?.length ?? 0;
-
-    if (bottomContentHeight != null) {
-      return TilawaAppBarConfig.catalogTitleAndContentHeight(
-        context,
-        contentHeight: bottomContentHeight,
-        title: title,
-        hasLeading: hasLeading,
-        actionCount: resolvedActionCount,
-        centerTitle: centerTitle,
-        titleBlockHeight: titleBlockHeight,
-      );
-    }
-
-    return TilawaAppBarConfig.catalogTitleOnlyHeight(
-      context,
-      title: title,
-      hasLeading: hasLeading,
-      actionCount: resolvedActionCount,
-      centerTitle: centerTitle,
-      titleBlockHeight: titleBlockHeight,
-    );
-  }
 
   /// Title-only catalog header.
   factory TilawaCatalogAppBar.titleOnly(
@@ -112,16 +60,6 @@ class TilawaCatalogAppBar extends StatelessWidget
   }) {
     return TilawaCatalogAppBar(
       key: key,
-      preferredHeight: resolvePreferredHeight(
-        context,
-        title: title,
-        leading: leading,
-        actions: actions,
-        automaticallyImplyLeading: automaticallyImplyLeading,
-        onBackPressed: onBackPressed,
-        centerTitle: centerTitle,
-        titleBlockHeight: titleBlockHeight,
-      ),
       title: title,
       leading: leading,
       actions: actions,
@@ -133,135 +71,62 @@ class TilawaCatalogAppBar extends StatelessWidget
     );
   }
 
-  @override
-  Size get preferredSize => Size.fromHeight(preferredHeight);
+  double _resolveBottomHeight(BuildContext context) {
+    if (bottomContent == null) return 0;
+    if (bottomContentHeight != null) return bottomContentHeight!;
 
-  @override
-  Widget build(BuildContext context) {
-    final ThemeData theme = Theme.of(context);
-    final MeMuslimDesignTokens tokens = theme.tokens;
-    final ColorScheme colorScheme = theme.colorScheme;
-    final TextStyle? titleStyle = theme.textTheme.titleLarge?.copyWith(
-      fontWeight: FontWeight.w700,
-    );
-    final Widget titleChild = titleWidget ?? Text(title!, style: titleStyle);
-    final Color backgroundColor = TilawaAppBarChrome.backgroundColor(
-      colorScheme,
-      TilawaAppBarSurface.parchment,
-    );
-
-    return TilawaAppBarScope(
-      surface: TilawaAppBarSurface.parchment,
-      showLeadingControlBackground:
-          TilawaAppBarConfig.showLeadingControlBackground,
-      showActionControlBackground:
-          TilawaAppBarConfig.showActionControlBackground,
-      child: Material(
-        color: backgroundColor,
-        elevation: TilawaAppBarChrome.elevation(enabled: showElevationShadow),
-        shadowColor: TilawaAppBarChrome.elevationShadowColor(
-          colorScheme,
-          tokens,
-          enabled: showElevationShadow,
-        ),
-        surfaceTintColor: Colors.transparent,
-        shape: showBottomHairline
-            ? TilawaAppBarChrome.bottomHairline(colorScheme, tokens)
-            : null,
-        child: Semantics(
-          header: true,
-          label: title,
-          explicitChildNodes: true,
-          child: TilawaSearchFieldSlot(
-            padding: TilawaAppBarConfig.catalogChromePaddingWithStatusBar(
-              context,
-              tokens,
-              includeBottomInset: bottomContent != null,
-            ),
-            child: Column(
-              mainAxisSize: MainAxisSize.min,
-              crossAxisAlignment: CrossAxisAlignment.stretch,
-              spacing: tokens.spaceSmall,
-              children: [
-                _CatalogTitleRow(
-                  centerTitle: centerTitle,
-                  leading: TilawaAppBarChrome.resolveCatalogRowLeading(
-                    context,
-                    leading: leading,
-                    automaticallyImplyLeading: automaticallyImplyLeading,
-                    onBackPressed: onBackPressed,
-                  ),
-                  title: titleChild,
-                  actions: actions,
-                ),
-                ?bottomContent,
-              ],
-            ),
-          ),
-        ),
-      ),
-    );
+    // Default to search field height plus padding if no height was provided
+    final searchHeight = Theme.of(context).componentTokens.searchField.height;
+    return searchHeight + Theme.of(context).tokens.spaceMedium;
   }
-}
 
-class _CatalogTitleRow extends StatelessWidget {
-  const _CatalogTitleRow({
-    required this.title,
-    this.leading,
-    this.actions,
-    this.centerTitle = false,
-  });
-
-  final Widget title;
-  final Widget? leading;
-  final List<Widget>? actions;
-  final bool centerTitle;
+  @override
+  Size get preferredSize {
+    // We must return a size before context is available in build().
+    // Scaffold will still rely on this for the bounding box.
+    // However, since we can't reliably get theme without context here,
+    // if bottomContentHeight is missing, we use a rough estimate (48 + 16 = 64).
+    final double bottomHeight = bottomContent != null
+        ? (bottomContentHeight ?? 64.0)
+        : 0;
+    return Size.fromHeight(kToolbarHeight + bottomHeight);
+  }
 
   @override
   Widget build(BuildContext context) {
-    final MeMuslimDesignTokens tokens = Theme.of(context).tokens;
-    final List<Widget>? spacedActions = TilawaAppBarChrome.spacedActions(
-      actions,
-      tokens,
-    );
-
-    if (!centerTitle) {
-      return Row(
-        crossAxisAlignment: CrossAxisAlignment.center,
-        children: [
-          if (leading != null) ...<Widget>[
-            leading!,
-            SizedBox(width: tokens.spaceSmall),
-          ],
-          Expanded(child: title),
-          ...?spacedActions,
-        ],
+    // Wrap bottom content in standard spacing and max-width slot.
+    PreferredSizeWidget? resolvedBottom;
+    if (bottomContent != null) {
+      final double bottomHeight = _resolveBottomHeight(context);
+      resolvedBottom = PreferredSize(
+        preferredSize: Size.fromHeight(bottomHeight),
+        child: Container(
+          height: bottomHeight,
+          alignment: Alignment.center,
+          padding: EdgeInsets.only(bottom: Theme.of(context).tokens.spaceSmall),
+          child: TilawaSearchFieldSlot(child: bottomContent!),
+        ),
       );
     }
 
-    final double sideSlotWidth = tokens.minInteractiveDimension;
-    final Widget? trailing = spacedActions == null
-        ? null
-        : Row(
-            mainAxisSize: MainAxisSize.min,
-            children: spacedActions,
-          );
+    final Widget? resolvedLeading = TilawaAppBarChrome.resolveCatalogRowLeading(
+      context,
+      leading: leading,
+      automaticallyImplyLeading: automaticallyImplyLeading,
+      onBackPressed: onBackPressed,
+    );
 
-    return Row(
-      crossAxisAlignment: CrossAxisAlignment.center,
-      children: [
-        SizedBox(
-          width: sideSlotWidth,
-          child: Align(
-            alignment: AlignmentDirectional.centerStart,
-            child: leading,
-          ),
-        ),
-        Expanded(
-          child: Center(child: title),
-        ),
-        if (trailing != null) trailing else SizedBox(width: sideSlotWidth),
-      ],
+    return TilawaAppBar(
+      title: title,
+      titleWidget: titleWidget,
+      leading: resolvedLeading,
+      actions: actions,
+      bottom: resolvedBottom,
+      centerTitle: centerTitle,
+      automaticallyImplyLeading: automaticallyImplyLeading,
+      surface: TilawaAppBarSurface.parchment,
+      showBottomHairline: showBottomHairline,
+      showElevationShadow: showElevationShadow,
     );
   }
 }

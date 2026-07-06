@@ -41,11 +41,7 @@ abstract final class MoleculesDemos {
   static Widget catalogAppBar(BuildContext context) {
     return Scaffold(
       appBar: TilawaCatalogAppBar(
-        preferredHeight: TilawaAppBarConfig.catalogTitleAndSearchHeight(
-          context,
-        ),
         title: 'Reciters',
-        automaticallyImplyLeading: true,
         bottomContent: TilawaSearchField(
           hintText: 'Search reciters',
           variant: TilawaSearchFieldVariant.catalog,

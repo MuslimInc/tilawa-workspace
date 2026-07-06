@@ -123,12 +123,6 @@ class _TasbeehView extends StatelessWidget {
 
         return Scaffold(
           appBar: TilawaCatalogAppBar(
-            preferredHeight: TilawaCatalogAppBar.resolvePreferredHeight(
-              context,
-              title: appBarTitle,
-              leading: appBarLeading,
-              actions: appBarActions,
-            ),
             title: appBarTitle,
             leading: appBarLeading,
             actions: appBarActions,

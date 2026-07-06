@@ -46,41 +46,6 @@ class _HistoryScreenState extends State<HistoryScreen> {
         final bool hasHistory = state.historyList.isNotEmpty;
         final PreferredSizeWidget appBar = hasHistory
             ? TilawaCatalogAppBar(
-                preferredHeight: TilawaCatalogAppBar.resolvePreferredHeight(
-                  context,
-                  title: context.l10n.listeningHistory,
-                  leading: TilawaAppBarChrome.catalogBackButton(
-                    context: context,
-                    onPressed: () => context.pop(),
-                  ),
-                  actions: [
-                    PopupMenuButton<String>(
-                      onSelected: (value) {
-                        if (value == 'clear_all') {
-                          _showClearAllDialog(context);
-                        }
-                      },
-                      itemBuilder: (context) => [
-                        PopupMenuItem(
-                          value: 'clear_all',
-                          child: Row(
-                            children: [
-                              Icon(
-                                Icons.delete_sweep,
-                                color: Theme.of(context).colorScheme.error,
-                              ),
-                              const SizedBox(width: 12),
-                              Text(context.l10n.clearAll),
-                            ],
-                          ),
-                        ),
-                      ],
-                    ),
-                  ],
-                  bottomContentHeight: Theme.of(
-                    context,
-                  ).componentTokens.searchField.height,
-                ),
                 title: context.l10n.listeningHistory,
                 leading: TilawaAppBarChrome.catalogBackButton(
                   context: context,
@@ -110,6 +75,9 @@ class _HistoryScreenState extends State<HistoryScreen> {
                     ],
                   ),
                 ],
+                bottomContentHeight: Theme.of(
+                  context,
+                ).componentTokens.searchField.height,
                 bottomContent: HistorySearchBar(
                   controller: _searchController,
                   onChanged: (query) {

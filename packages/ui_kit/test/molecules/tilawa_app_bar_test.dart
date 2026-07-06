@@ -171,15 +171,7 @@ void main() {
                         MaterialPageRoute<void>(
                           builder: (innerContext) {
                             return Scaffold(
-                              appBar: TilawaCatalogAppBar(
-                                preferredHeight:
-                                    TilawaAppBarConfig.catalogTitleOnlyHeight(
-                                      innerContext,
-                                    ),
-                                title: 'Detail',
-                                // No automaticallyImplyLeading passed —
-                                // relies on the default.
-                              ),
+                              appBar: TilawaCatalogAppBar(),
                               body: const SizedBox.shrink(),
                             );
                           },
@@ -218,10 +210,6 @@ void main() {
                           builder: (innerContext) {
                             return Scaffold(
                               appBar: TilawaCatalogAppBar(
-                                preferredHeight:
-                                    TilawaAppBarConfig.catalogTitleOnlyHeight(
-                                      innerContext,
-                                    ),
                                 title: 'Detail',
                                 automaticallyImplyLeading: false,
                               ),
@@ -256,9 +244,6 @@ void main() {
               builder: (context) {
                 return Scaffold(
                   appBar: TilawaCatalogAppBar(
-                    preferredHeight: TilawaAppBarConfig.catalogTitleOnlyHeight(
-                      context,
-                    ),
                     title: 'Home',
                     // default automaticallyImplyLeading — root route, no back
                   ),
@@ -298,10 +283,6 @@ void main() {
                                       title: 'Detail',
                                     )
                                   : TilawaCatalogAppBar(
-                                      preferredHeight:
-                                          TilawaAppBarConfig.catalogTitleOnlyHeight(
-                                            innerContext,
-                                          ),
                                       title: 'Detail',
                                     );
                               return Scaffold(

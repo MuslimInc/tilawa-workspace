@@ -27,23 +27,6 @@ class BookmarksScreen extends StatelessWidget {
       // Search lives in the app bar; inset the list instead of resizing.
       resizeToAvoidBottomInset: false,
       appBar: TilawaCatalogAppBar(
-        preferredHeight: TilawaCatalogAppBar.resolvePreferredHeight(
-          context,
-          title: context.l10n.bookmarks,
-          automaticallyImplyLeading: true,
-          onBackPressed: () => context.pop(),
-          actions: [
-            TilawaIconActionButton(
-              icon: Icons.refresh,
-              onTap: () {
-                context.read<BookmarksBloc>().add(const LoadBookmarksEvent());
-              },
-            ),
-          ],
-          bottomContentHeight: Theme.of(
-            context,
-          ).componentTokens.searchField.height,
-        ),
         title: context.l10n.bookmarks,
         automaticallyImplyLeading: true,
         onBackPressed: () => context.pop(),

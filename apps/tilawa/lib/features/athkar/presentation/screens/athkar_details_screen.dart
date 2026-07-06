@@ -55,13 +55,6 @@ class _AthkarDetailsScreenState extends State<AthkarDetailsScreen> {
           builder: (context, state) {
             return Scaffold(
               appBar: TilawaCatalogAppBar(
-                preferredHeight: TilawaCatalogAppBar.resolvePreferredHeight(
-                  context,
-                  title: widget.categoryName,
-                  automaticallyImplyLeading: true,
-                  onBackPressed: () => context.pop(),
-                  actionCount: state is AthkarItemsLoaded ? 1 : 0,
-                ),
                 title: widget.categoryName,
                 automaticallyImplyLeading: true,
                 onBackPressed: () => context.pop(),

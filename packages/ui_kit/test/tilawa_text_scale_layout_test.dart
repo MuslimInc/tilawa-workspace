@@ -97,11 +97,6 @@ void main() {
               hostContext = context;
               return Scaffold(
                 appBar: TilawaCatalogAppBar(
-                  preferredHeight:
-                      TilawaAppBarConfig.catalogTitleAndSearchHeight(
-                        context,
-                        title: 'Bookmarks',
-                      ),
                   title: 'Bookmarks',
                   bottomContent: const TilawaSearchField(
                     hintText: 'Search',
@@ -146,16 +141,8 @@ void main() {
           home: Builder(
             builder: (context) {
               final tokens = Theme.of(context).tokens;
-              final double segmentBarHeight =
-                  TilawaSegmentedControl.layoutHeight(context);
               return Scaffold(
                 appBar: TilawaCatalogAppBar(
-                  preferredHeight: TilawaCatalogAppBar.resolvePreferredHeight(
-                    context,
-                    title: 'القرآن',
-                    automaticallyImplyLeading: false,
-                    bottomContentHeight: segmentBarHeight + tokens.spaceSmall,
-                  ),
                   title: 'القرآن',
                   automaticallyImplyLeading: false,
                   bottomContent: Padding(
@@ -208,13 +195,6 @@ void main() {
             child: Builder(
               builder: (context) => Scaffold(
                 appBar: TilawaCatalogAppBar(
-                  preferredHeight: TilawaCatalogAppBar.resolvePreferredHeight(
-                    context,
-                    title: longTitle,
-                    leading: TilawaAppBarChrome.catalogBackButton(
-                      context: context,
-                    ),
-                  ),
                   title: longTitle,
                   leading: TilawaAppBarChrome.catalogBackButton(
                     context: context,
