@@ -14,6 +14,8 @@ import {
 } from "./teacherProfileUserId";
 import { validateTransition, type SessionAction } from "./sessionLifecycleGuard";
 import type { LifecycleStatus } from "./sessionLifecycleService";
+import { isLiveSessionDeviceLockEnabled } from "../liveSessionDeviceLock";
+import { clearAllLiveLocksField } from "./liveSessionLockService";
 
 /**
  * Finalizes sessions whose scheduled end passed without a lifecycle
@@ -232,7 +234,7 @@ async function finalizeSession(
         { bookingRef: bookingRef ?? sessionRef, sessionRef },
         guard.to,
         {},
-        {},
+        isLiveSessionDeviceLockEnabled() ? clearAllLiveLocksField() : {},
         fresh,
       );
 

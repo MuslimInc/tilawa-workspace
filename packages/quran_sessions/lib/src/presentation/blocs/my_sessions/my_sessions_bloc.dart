@@ -162,7 +162,10 @@ class MySessionsBloc extends Bloc<MySessionsEvent, MySessionsState> {
       current.copyWith(clearJoinFailure: true, joinInProgress: event.sessionId),
     );
 
-    final result = await _joinSession(sessionId: event.sessionId);
+    final result = await _joinSession(
+      sessionId: event.sessionId,
+      forceTakeover: event.forceTakeover,
+    );
 
     final after = state;
     if (after is! MySessionsSuccess) return;

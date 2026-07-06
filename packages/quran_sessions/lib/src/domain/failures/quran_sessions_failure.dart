@@ -152,6 +152,30 @@ final class RtcCallJoinFailure extends QuranSessionsFailure {
   List<Object?> get props => [reasonCode];
 }
 
+/// The same user is already live in this session from another device
+/// (ADR-008 Phase 2). The UI offers an explicit "Switch to this device" action,
+/// which retries the join with `forceTakeover: true`. Never a whole-app
+/// sign-out — distinct from the legacy `session_revoked` path.
+final class LiveSessionAlreadyActiveFailure extends QuranSessionsFailure {
+  const LiveSessionAlreadyActiveFailure({
+    required this.sessionId,
+    required this.activeDeviceId,
+    required this.sinceMs,
+  });
+
+  /// The session the caller tried to join.
+  final String sessionId;
+
+  /// Device id of the current lock holder.
+  final String activeDeviceId;
+
+  /// Epoch milliseconds when the current lease was acquired/last renewed.
+  final int sinceMs;
+
+  @override
+  List<Object?> get props => [sessionId, activeDeviceId, sinceMs];
+}
+
 /// WebRTC signaling/TURN infrastructure is not deployed yet.
 final class WebRtcSignalingUnavailableFailure extends QuranSessionsFailure {
   const WebRtcSignalingUnavailableFailure();

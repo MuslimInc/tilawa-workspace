@@ -7,6 +7,7 @@ import 'package:tilawa_ui_kit/tilawa_ui_kit.dart';
 
 import '../failure_ui/quran_sessions_failure_body.dart';
 import '../layout/quran_sessions_scroll_padding.dart';
+import '../widgets/live_session_takeover_dialog.dart';
 
 enum _MySessionsTab { upcoming, pending, past, cancelled }
 
@@ -154,11 +155,25 @@ class _MySessionsScreenState extends State<MySessionsScreen> {
                 );
               }
               if (state is MySessionsSuccess && state.joinFailure != null) {
-                TilawaFeedback.showToast(
-                  context,
-                  message: state.joinFailure!.toLocalizedMessage(context),
-                  variant: TilawaFeedbackVariant.error,
-                );
+                final failure = state.joinFailure!;
+                if (failure is LiveSessionAlreadyActiveFailure) {
+                  showLiveSessionTakeoverDialog(
+                    context,
+                    failure,
+                    onSwitch: () => context.read<MySessionsBloc>().add(
+                      SessionJoinRequested(
+                        sessionId: failure.sessionId,
+                        forceTakeover: true,
+                      ),
+                    ),
+                  );
+                } else {
+                  TilawaFeedback.showToast(
+                    context,
+                    message: failure.toLocalizedMessage(context),
+                    variant: TilawaFeedbackVariant.error,
+                  );
+                }
               }
             },
           ),

@@ -553,6 +553,33 @@ class QuranSessionsLocalizationsEn extends QuranSessionsLocalizations {
       'This call link expired or is invalid. Tap Join again to get a fresh connection.';
 
   @override
+  String get liveSessionAlreadyActiveMessage =>
+      'This session is already active on another device.';
+
+  @override
+  String get liveSessionTakeoverTitle => 'Active on another device';
+
+  @override
+  String get liveSessionTakeoverBody =>
+      'You\'re already in this session on another device. Switch to this device? The other device will be disconnected.';
+
+  @override
+  String get liveSessionTakeoverSwitch => 'Switch to this device';
+
+  @override
+  String get liveSessionTakeoverCancel => 'Cancel';
+
+  @override
+  String get liveSessionTakenOverTitle => 'Moved to another device';
+
+  @override
+  String get liveSessionTakenOverBody =>
+      'You joined this session on another device.';
+
+  @override
+  String get liveSessionTakenOverDismiss => 'OK';
+
+  @override
   String get webrtcSignalingUnavailable =>
       'In-app WebRTC calls are not available yet. Choose voice with Agora or an external meeting link.';
 

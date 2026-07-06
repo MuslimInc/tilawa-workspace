@@ -9,6 +9,7 @@ import 'package:tilawa/features/notifications/data/datasources/notifications_rem
 import 'package:tilawa/features/notifications/data/repositories/notifications_repository_impl.dart';
 import 'package:tilawa/features/notifications/presentation/services/fcm_notification_handler_service.dart';
 import 'package:tilawa/features/auth/domain/services/session_revoked_notifier.dart';
+import 'package:tilawa/features/quran_sessions/domain/services/session_taken_over_notifier.dart';
 import 'package:tilawa/features/settings/domain/services/teacher_capability_refresh_notifier.dart';
 import 'package:tilawa_core/services/interfaces/notification_dispatcher_interface.dart';
 
@@ -31,6 +32,9 @@ class MockTeacherCapabilityRefreshNotifier extends Mock
 class MockSessionRevokedNotifier extends Mock
     implements SessionRevokedNotifier {}
 
+class MockSessionTakenOverNotifier extends Mock
+    implements SessionTakenOverNotifier {}
+
 class _FallbackRemoteMessage extends Fake implements RemoteMessage {}
 
 void main() {
@@ -42,6 +46,7 @@ void main() {
   late MockTeacherCapabilityRefreshNotifier
   mockTeacherCapabilityRefreshNotifier;
   late MockSessionRevokedNotifier mockSessionRevokedNotifier;
+  late MockSessionTakenOverNotifier mockSessionTakenOverNotifier;
 
   setUpAll(() {
     registerFallbackValue(_FallbackRemoteMessage());
@@ -55,6 +60,7 @@ void main() {
     mockTeacherCapabilityRefreshNotifier =
         MockTeacherCapabilityRefreshNotifier();
     mockSessionRevokedNotifier = MockSessionRevokedNotifier();
+    mockSessionTakenOverNotifier = MockSessionTakenOverNotifier();
 
     when(
       () => mockLogger.d(
@@ -76,6 +82,7 @@ void main() {
       mockLogger,
       mockTeacherCapabilityRefreshNotifier,
       mockSessionRevokedNotifier,
+      mockSessionTakenOverNotifier,
     );
   });
 
@@ -359,6 +366,41 @@ void main() {
 
         verify(
           () => mockSessionRevokedNotifier.notifySessionRevoked(),
+        ).called(1);
+        await messageController.close();
+      },
+    );
+
+    test(
+      'session_taken_over foreground message notifies session takeover',
+      () async {
+        final messageController = StreamController<RemoteMessage>.broadcast();
+        when(
+          () => mockRemoteDataSource.onMessage,
+        ).thenAnswer((_) => messageController.stream);
+        when(
+          () => mockRemoteDataSource.onMessageOpenedApp,
+        ).thenAnswer((_) => const Stream.empty());
+        when(
+          () => mockFcmHandlerService.showForegroundNotification(any()),
+        ).thenAnswer((_) async {});
+
+        await repository.initializeListeners();
+
+        messageController.add(
+          RemoteMessage(
+            data: const {
+              'actionType': 'session_taken_over',
+              'sessionId': 'session_42',
+            },
+          ),
+        );
+        await Future<void>.delayed(Duration.zero);
+
+        verify(
+          () => mockSessionTakenOverNotifier.notifySessionTakenOver(
+            'session_42',
+          ),
         ).called(1);
         await messageController.close();
       },

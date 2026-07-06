@@ -31,11 +31,21 @@ export async function buildLiveKitRtcToken(params: {
   credentials: LiveKitRtcCredentials;
   roomName: string;
   identity: string;
+  /**
+   * Token lifetime in seconds. When omitted, LiveKit's SDK default applies.
+   * The live-session device lock sets this so the lease TTL equals the token
+   * TTL (ADR-008 Phase 2), making lock renewal piggyback on token refresh.
+   */
+  ttlSeconds?: number;
 }): Promise<string> {
+  const options: { identity: string; ttl?: number } = { identity: params.identity };
+  if (params.ttlSeconds != null) {
+    options.ttl = params.ttlSeconds;
+  }
   const token = new AccessToken(
     params.credentials.apiKey,
     params.credentials.apiSecret,
-    { identity: params.identity },
+    options,
   );
   token.addGrant({
     roomJoin: true,

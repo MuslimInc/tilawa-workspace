@@ -366,7 +366,10 @@ class SessionDetailBloc extends Bloc<SessionDetailEvent, SessionDetailState> {
 
     emit(current.copyWith(joinInProgress: true, clearJoinFailure: true));
 
-    final result = await joinSession(sessionId: sessionId);
+    final result = await joinSession(
+      sessionId: sessionId,
+      forceTakeover: event.forceTakeover,
+    );
     final after = state;
     if (after is! SessionDetailSuccess) return;
 

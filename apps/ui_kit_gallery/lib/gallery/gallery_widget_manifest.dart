@@ -108,6 +108,10 @@ const List<GalleryWidgetCoverage> galleryWidgetManifest = [
     galleryId: 'tilawa_count_progress_ring',
   ),
   GalleryWidgetCoverage(
+    symbol: 'TilawaMetricTile',
+    galleryId: 'tilawa_metric_tile',
+  ),
+  GalleryWidgetCoverage(
     symbol: 'TilawaFeedbackStrip',
     galleryId: 'tilawa_feedback_strip',
   ),

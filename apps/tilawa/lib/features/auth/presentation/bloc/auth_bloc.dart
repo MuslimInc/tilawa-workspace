@@ -8,6 +8,7 @@ import 'package:injectable/injectable.dart';
 import 'package:tilawa/core/logging/app_logger.dart';
 import 'package:tilawa_core/errors/failures.dart';
 
+import '../../../localization/domain/usecases/get_current_language_use_case.dart';
 import '../../application/account_deletion_flow_tracker.dart';
 import '../../data/services/google_sign_in_session_tracker.dart';
 import '../../data/services/pending_session_revoke_store.dart';
@@ -26,7 +27,6 @@ import '../../domain/usecases/sign_in_with_google_use_case.dart';
 import '../../domain/usecases/sign_out.dart';
 import '../../domain/usecases/sync_device_token_use_case.dart';
 import '../../domain/usecases/sync_user_language_preference_use_case.dart';
-import '../../../localization/domain/usecases/get_current_language_use_case.dart';
 
 part 'auth_bloc.freezed.dart';
 part 'auth_event.dart';
@@ -71,7 +71,7 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
   final SyncUserLanguagePreferenceUseCase _syncUserLanguagePreference;
   final AccountDeletionFlowTracker _accountDeletionFlow;
   final GoogleSignInSessionTracker _signInSessionTracker;
-  final bool Function() _multiDeviceLoginEnabled;
+  final MultiDeviceLoginEnabledPredicate _multiDeviceLoginEnabled;
 
   Future<void> _onSignInWithGoogle(
     SignInWithGoogleEvent event,

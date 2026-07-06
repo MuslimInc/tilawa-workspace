@@ -13,7 +13,7 @@ dependencies:
   flutter:
     sdk: flutter
 
-  equatable: ^2.0.8
+  equatable: ^2.1.0
   dartz_plus:
     path: ../dartz_plus
   flutter_bloc: ^9.1.1

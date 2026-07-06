@@ -8,6 +8,7 @@ QuranSessionsFailure mapQuranSessionsCallableFailure(
   String? slotId,
   String? teacherId,
   SessionCallType? callType,
+  String? sessionId,
 }) {
   final lifecycleCode = _readLifecycleCode(error);
 
@@ -18,6 +19,7 @@ QuranSessionsFailure mapQuranSessionsCallableFailure(
       slotId: slotId,
       teacherId: teacherId,
       callType: callType,
+      sessionId: sessionId,
     );
   }
 
@@ -57,6 +59,7 @@ QuranSessionsFailure _mapLifecycleCode(
   String? slotId,
   String? teacherId,
   SessionCallType? callType,
+  String? sessionId,
 }) {
   final details = error.details is Map ? error.details as Map : const {};
 
@@ -107,6 +110,11 @@ QuranSessionsFailure _mapLifecycleCode(
       maxUpcoming: details['maxUpcoming'] as int? ?? 0,
     ),
     'teacher_not_whitelisted' => const TeacherNotWhitelistedFailure(),
+    'already_active_on_other_device' => LiveSessionAlreadyActiveFailure(
+      sessionId: sessionId ?? '',
+      activeDeviceId: details['activeDeviceId'] as String? ?? '',
+      sinceMs: (details['sinceTs'] as num?)?.toInt() ?? 0,
+    ),
     'unauthorized_actor' || 'not_participant' => const UnauthorizedFailure(),
     _ => const UnknownFailure(),
   };

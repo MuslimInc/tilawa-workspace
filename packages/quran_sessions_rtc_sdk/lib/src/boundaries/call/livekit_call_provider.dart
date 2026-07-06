@@ -68,6 +68,7 @@ class LiveKitCallProvider implements SessionCallProvider, CallProvider {
     final credentials = await tokenProvider.fetchCredentials(
       sessionId: request.sessionId,
       userId: userId,
+      forceTakeover: request.forceTakeover,
     );
 
     if (credentials.token.isEmpty) {

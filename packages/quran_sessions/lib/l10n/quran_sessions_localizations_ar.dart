@@ -542,6 +542,32 @@ class QuranSessionsLocalizationsAr extends QuranSessionsLocalizations {
       'انتهت صلاحية رابط المكالمة أو أنه غير صالح. اضغط انضمام مرة أخرى للحصول على اتصال جديد.';
 
   @override
+  String get liveSessionAlreadyActiveMessage =>
+      'هذه الجلسة نشطة بالفعل على جهاز آخر.';
+
+  @override
+  String get liveSessionTakeoverTitle => 'نشطة على جهاز آخر';
+
+  @override
+  String get liveSessionTakeoverBody =>
+      'أنت منضم إلى هذه الجلسة على جهاز آخر. التحويل إلى هذا الجهاز؟ سيتم فصل الجهاز الآخر.';
+
+  @override
+  String get liveSessionTakeoverSwitch => 'التحويل إلى هذا الجهاز';
+
+  @override
+  String get liveSessionTakeoverCancel => 'إلغاء';
+
+  @override
+  String get liveSessionTakenOverTitle => 'تم النقل إلى جهاز آخر';
+
+  @override
+  String get liveSessionTakenOverBody => 'انضممت إلى هذه الجلسة على جهاز آخر.';
+
+  @override
+  String get liveSessionTakenOverDismiss => 'حسناً';
+
+  @override
   String get webrtcSignalingUnavailable =>
       'مكالمات WebRTC داخل التطبيق غير متاحة بعد. اختر الصوت عبر Agora أو رابط اجتماع خارجي.';
 

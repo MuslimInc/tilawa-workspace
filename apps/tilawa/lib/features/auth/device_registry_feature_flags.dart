@@ -1,6 +1,11 @@
 import 'package:tilawa/core/bootstrap/app_launch_config.dart';
 import 'package:tilawa/core/di/injection.dart';
 
+/// Predicate type for launch-flag checks used as injectable constructor
+/// parameters. `injectable_generator` cannot resolve inline `bool Function()`
+/// types — a named typedef is required.
+typedef MultiDeviceLoginEnabledPredicate = bool Function();
+
 /// Whether the client opts into the non-exclusive device registry
 /// (`users/{uid}/devices`) — ADR-008 Phase 0. When on, active-device
 /// registration also asks the server to upsert the registry doc; the write is

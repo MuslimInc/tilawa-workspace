@@ -36,6 +36,7 @@ class JoinSessionUseCase {
   Future<Either<QuranSessionsFailure, void>> call({
     required String sessionId,
     SessionParticipantRole? role,
+    bool forceTakeover = false,
   }) async {
     final userId = authSession.currentUserId;
     if (userId == null || userId.isEmpty) {
@@ -96,6 +97,7 @@ class JoinSessionUseCase {
       joinUrl: session.joinUrl,
       providerSessionId: session.providerSessionId,
       joinToken: session.joinToken,
+      forceTakeover: forceTakeover,
     );
 
     callTelemetry?.recordJoinRequested(

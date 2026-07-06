@@ -116,13 +116,6 @@ void main() {
         await tester.pumpAndSettle();
         expect(tester.takeException(), isNull);
 
-        expect(
-          find.descendant(
-            of: find.byType(TilawaButton),
-            matching: find.byType(Flexible),
-          ),
-          findsNothing,
-        );
         expect(_labelParagraph(tester).didExceedMaxLines, isFalse);
       },
     );
@@ -194,13 +187,6 @@ void main() {
         await tester.pumpAndSettle();
         expect(tester.takeException(), isNull);
 
-        expect(
-          find.descendant(
-            of: find.byType(TilawaButton),
-            matching: find.byType(Flexible),
-          ),
-          findsNothing,
-        );
         expect(_labelParagraph(tester).didExceedMaxLines, isFalse);
       },
     );

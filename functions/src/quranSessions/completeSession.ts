@@ -21,6 +21,8 @@ import { validateTransition } from "./sessionLifecycleGuard";
 import type { LifecycleStatus } from "./sessionLifecycleService";
 import type { ActorRole } from "./sessionLifecycleGuard";
 import { sessionCallableHttpsOptions } from "./sessionCallableOptions";
+import { isLiveSessionDeviceLockEnabled } from "../liveSessionDeviceLock";
+import { clearAllLiveLocksField } from "./liveSessionLockService";
 
 interface CompleteSessionRequest {
   sessionId: string;
@@ -95,7 +97,10 @@ export const completeSession = onCall(
           { bookingRef, sessionRef },
           guard.to,
           { completedAt: FieldValue.serverTimestamp() },
-          { completedAt: FieldValue.serverTimestamp() },
+          {
+            completedAt: FieldValue.serverTimestamp(),
+            ...(isLiveSessionDeviceLockEnabled() ? clearAllLiveLocksField() : {}),
+          },
           fresh,
         );
 

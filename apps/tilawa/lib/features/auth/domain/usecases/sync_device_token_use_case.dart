@@ -1,6 +1,5 @@
-import 'package:injectable/injectable.dart';
-
 import 'package:dartz_plus/dartz_plus.dart';
+import 'package:injectable/injectable.dart';
 import 'package:tilawa_core/errors/failures.dart';
 
 import '../../device_registry_feature_flags.dart';
@@ -18,7 +17,7 @@ class SyncDeviceTokenUseCase {
 
   final RegisterActiveDeviceUseCase _registerActiveDeviceUseCase;
   final SessionRevokedNotifier _sessionRevokedNotifier;
-  final bool Function() _multiDeviceLoginEnabled;
+  final MultiDeviceLoginEnabledPredicate _multiDeviceLoginEnabled;
 
   Future<Either<Failure, void>> call(String userId) async {
     final result = await _registerActiveDeviceUseCase.syncPassive(userId);

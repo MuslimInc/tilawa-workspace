@@ -981,7 +981,10 @@ class TeacherDashboardBloc
       ),
     );
 
-    final result = await _joinSession(sessionId: event.sessionId);
+    final result = await _joinSession(
+      sessionId: event.sessionId,
+      forceTakeover: event.forceTakeover,
+    );
 
     final after = state;
     if (after is! TeacherDashboardSuccess) return;

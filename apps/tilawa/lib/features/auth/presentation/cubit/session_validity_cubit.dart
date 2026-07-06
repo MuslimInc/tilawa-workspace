@@ -48,7 +48,8 @@ class SessionValidityCubit extends Cubit<SessionValidityState> {
     this._signOut,
     this._sessionRevokedNotifier,
     this._signInSessionTracker, {
-    bool Function() multiDeviceLoginEnabled = isMultiDeviceLoginEnabled,
+    MultiDeviceLoginEnabledPredicate multiDeviceLoginEnabled =
+        isMultiDeviceLoginEnabled,
   }) : super(const SessionValidityState()) {
     _multiDeviceLoginEnabled = multiDeviceLoginEnabled;
     _revokedSubscription = _sessionRevokedNotifier.onSessionRevoked.listen(
@@ -67,7 +68,7 @@ class SessionValidityCubit extends Cubit<SessionValidityState> {
   final SignOut _signOut;
   final SessionRevokedNotifier _sessionRevokedNotifier;
   final GoogleSignInSessionTracker _signInSessionTracker;
-  late final bool Function() _multiDeviceLoginEnabled;
+  late final MultiDeviceLoginEnabledPredicate _multiDeviceLoginEnabled;
   late final StreamSubscription<void> _revokedSubscription;
   Timer? _unknownRetryTimer;
   int _unknownRetryCount = 0;

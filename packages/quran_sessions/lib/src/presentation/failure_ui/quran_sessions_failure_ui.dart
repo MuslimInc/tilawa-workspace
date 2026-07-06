@@ -175,6 +175,7 @@ extension QuranSessionsFailureUi on QuranSessionsFailure {
       CacheFailure() => loc.cacheFailure,
 
       // ── Catch-all ───────────────────────────────────────────────────────────
+      LiveSessionAlreadyActiveFailure() => loc.liveSessionAlreadyActiveMessage,
       UnknownFailure() => loc.unknownFailure,
     };
   }

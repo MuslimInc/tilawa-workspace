@@ -3,6 +3,7 @@ import 'package:get_it/get_it.dart';
 import 'package:quran_sessions/quran_sessions.dart';
 import 'package:tilawa/core/bootstrap/app_launch_config.dart';
 import 'package:tilawa/core/di/get_it_idempotent.dart';
+import 'package:tilawa/features/auth/data/services/device_identity_service.dart';
 import 'package:tilawa/features/auth/domain/services/callable_session_payload_builder.dart';
 import 'package:tilawa/features/quran_sessions/data/external_meeting_url_launcher.dart';
 import 'package:tilawa/features/quran_sessions/data/firebase/firebase_call_token_provider.dart';
@@ -108,6 +109,7 @@ class QuranSessionsRtcModule {
       sl.registerLazySingletonIfAbsent<CallTokenProvider>(
         () => FirebaseCallTokenProvider(
           sl<CallableSessionPayloadBuilder>(),
+          sl<DeviceIdentityService>(),
           functions: FirebaseFunctions.instanceFor(region: 'us-central1'),
         ),
       );

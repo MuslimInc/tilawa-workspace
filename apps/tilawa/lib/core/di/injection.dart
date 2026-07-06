@@ -3,6 +3,7 @@ import 'package:get_it/get_it.dart';
 import 'package:injectable/injectable.dart';
 import 'package:quran_sessions/quran_sessions.dart';
 import 'package:tilawa/core/bootstrap/app_launch_config.dart';
+import 'package:tilawa/features/auth/device_registry_feature_flags.dart';
 import 'package:tilawa/features/genui_assistant/di/genui_assistant_module.dart';
 import 'package:tilawa/features/quran_sessions/di/quran_sessions_backend_config.dart';
 import 'package:tilawa/features/quran_sessions/di/quran_sessions_firebase_module.dart';
@@ -56,6 +57,15 @@ Future<void> configureDependencies({AppLaunchConfig? launchConfig}) async {
     getIt.unregister<AppLaunchConfig>();
   }
   getIt.registerSingleton<AppLaunchConfig>(config);
+  // Register the multi-device-login predicate so injectable-resolved
+  // constructors (AuthBloc, SessionValidityCubit, SyncDeviceTokenUseCase)
+  // receive the real flag reader. The typedef is required because
+  // injectable_generator cannot resolve inline `bool Function()` types.
+  if (!getIt.isRegistered<MultiDeviceLoginEnabledPredicate>()) {
+    getIt.registerSingleton<MultiDeviceLoginEnabledPredicate>(
+      isMultiDeviceLoginEnabled,
+    );
+  }
   if (kDebugMode) {
     debugPrint(
       '[AppLaunchConfig] distribution=${const String.fromEnvironment('TILAWA_DISTRIBUTION', defaultValue: 'local')} '

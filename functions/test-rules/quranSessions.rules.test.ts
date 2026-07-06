@@ -405,6 +405,25 @@ test("rules: client cannot create or mutate quran_sessions", async () => {
       { merge: true },
     ),
   );
+  // ADR-008 Phase 2: liveLocks is a Cloud-Functions-only field on the session
+  // doc. A client must not be able to forge or overwrite a lease.
+  await assertFails(
+    setDoc(
+      doc(studentDb, "quran_sessions/session1"),
+      {
+        liveLocks: {
+          student2: {
+            deviceId: "attacker_device",
+            identity: "student2#attacker_device",
+            leaseUntil: new Date("2099-01-01T00:00:00.000Z"),
+            lockEpoch: 99,
+            updatedAt: new Date(),
+          },
+        },
+      },
+      { merge: true },
+    ),
+  );
 });
 
 async function seedRescheduleRequest(): Promise<void> {

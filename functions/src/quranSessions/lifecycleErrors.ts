@@ -25,20 +25,22 @@ export type LifecycleErrorCode =
   | "unsupported_session_mode"
   | "unsupported_call_provider"
   | "session_epoch_stale"
-  | "session_epoch_required";
+  | "session_epoch_required"
+  | "already_active_on_other_device";
 
 export function lifecycleError(
   code: LifecycleErrorCode,
   message: string,
   details?: Record<string, unknown>,
 ): HttpsError {
-  const httpCode = code === "unauthorized_actor" || code === "not_participant"
-    ? "permission-denied"
-    : code === "slot_unavailable"
-      ? "already-exists"
-      : code === "payment_provider_unavailable"
-        ? "failed-precondition"
-        : "failed-precondition";
+  const httpCode =
+    code === "unauthorized_actor" || code === "not_participant"
+      ? "permission-denied"
+      : code === "slot_unavailable" || code === "already_active_on_other_device"
+        ? "already-exists"
+        : code === "payment_provider_unavailable"
+          ? "failed-precondition"
+          : "failed-precondition";
 
   return new HttpsError(httpCode, message, { code, ...details });
 }

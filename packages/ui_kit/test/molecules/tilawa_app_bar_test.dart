@@ -171,7 +171,7 @@ void main() {
                         MaterialPageRoute<void>(
                           builder: (innerContext) {
                             return Scaffold(
-                              appBar: TilawaCatalogAppBar(),
+                              appBar: TilawaCatalogAppBar(title: 'Detail'),
                               body: const SizedBox.shrink(),
                             );
                           },

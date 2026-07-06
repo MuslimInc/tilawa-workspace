@@ -612,6 +612,7 @@ class _RecordingTokenProvider implements CallTokenProvider {
   Future<RtcJoinCredentials> fetchCredentials({
     required String sessionId,
     required String userId,
+    bool forceTakeover = false,
   }) async {
     return const RtcJoinCredentials(
       token: 'tok',

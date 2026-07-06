@@ -66,6 +66,7 @@ class _NoopTokenProvider implements CallTokenProvider {
   Future<RtcJoinCredentials> fetchCredentials({
     required String sessionId,
     required String userId,
+    bool forceTakeover = false,
   }) async => const RtcJoinCredentials(
     token: 'token',
     channelId: 'room',

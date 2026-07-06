@@ -9,6 +9,7 @@ import '../failure_ui/quran_sessions_failure_body.dart';
 import '../utils/teacher_availability_by_date.dart';
 import '../widgets/date_grouped_day_tab_bar.dart';
 import '../widgets/friday_review_reminder_banner.dart';
+import '../widgets/live_session_takeover_dialog.dart';
 import '../widgets/teacher_dashboard_inline_empty_state.dart';
 import '../widgets/teacher_dashboard_loading_skeleton.dart';
 import '../widgets/teacher_dashboard_schedule_section.dart';
@@ -216,11 +217,25 @@ class _TeacherDashboardScreenState extends State<TeacherDashboardScreen> {
             }
 
             if (state.joinFailure != null) {
-              TilawaFeedback.showToast(
-                context,
-                message: state.joinFailure!.toLocalizedMessage(context),
-                variant: TilawaFeedbackVariant.error,
-              );
+              final failure = state.joinFailure!;
+              if (failure is LiveSessionAlreadyActiveFailure) {
+                showLiveSessionTakeoverDialog(
+                  context,
+                  failure,
+                  onSwitch: () => context.read<TeacherDashboardBloc>().add(
+                    TeacherDashboardSessionJoinRequested(
+                      sessionId: failure.sessionId,
+                      forceTakeover: true,
+                    ),
+                  ),
+                );
+              } else {
+                TilawaFeedback.showToast(
+                  context,
+                  message: failure.toLocalizedMessage(context),
+                  variant: TilawaFeedbackVariant.error,
+                );
+              }
             }
 
             if (state.slotFailure != null) {

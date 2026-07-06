@@ -20,7 +20,14 @@ final class SessionDetailLoadRequested extends SessionDetailEvent {
 
 /// User taps join on session detail.
 final class SessionDetailJoinRequested extends SessionDetailEvent {
-  const SessionDetailJoinRequested();
+  const SessionDetailJoinRequested({this.forceTakeover = false});
+
+  /// ADR-008 Phase 2: true when retrying after a "Switch to this device"
+  /// prompt (the live lock denied a second device).
+  final bool forceTakeover;
+
+  @override
+  List<Object?> get props => [forceTakeover];
 }
 
 /// Re-opens the external meeting link without re-running join validation.

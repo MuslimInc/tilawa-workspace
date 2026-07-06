@@ -1001,6 +1001,54 @@ abstract class QuranSessionsLocalizations {
   /// **'This call link expired or is invalid. Tap Join again to get a fresh connection.'**
   String get rtcCallJoinInvalidToken;
 
+  /// No description provided for @liveSessionAlreadyActiveMessage.
+  ///
+  /// In en, this message translates to:
+  /// **'This session is already active on another device.'**
+  String get liveSessionAlreadyActiveMessage;
+
+  /// No description provided for @liveSessionTakeoverTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Active on another device'**
+  String get liveSessionTakeoverTitle;
+
+  /// No description provided for @liveSessionTakeoverBody.
+  ///
+  /// In en, this message translates to:
+  /// **'You\'re already in this session on another device. Switch to this device? The other device will be disconnected.'**
+  String get liveSessionTakeoverBody;
+
+  /// No description provided for @liveSessionTakeoverSwitch.
+  ///
+  /// In en, this message translates to:
+  /// **'Switch to this device'**
+  String get liveSessionTakeoverSwitch;
+
+  /// No description provided for @liveSessionTakeoverCancel.
+  ///
+  /// In en, this message translates to:
+  /// **'Cancel'**
+  String get liveSessionTakeoverCancel;
+
+  /// No description provided for @liveSessionTakenOverTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Moved to another device'**
+  String get liveSessionTakenOverTitle;
+
+  /// No description provided for @liveSessionTakenOverBody.
+  ///
+  /// In en, this message translates to:
+  /// **'You joined this session on another device.'**
+  String get liveSessionTakenOverBody;
+
+  /// No description provided for @liveSessionTakenOverDismiss.
+  ///
+  /// In en, this message translates to:
+  /// **'OK'**
+  String get liveSessionTakenOverDismiss;
+
   /// No description provided for @webrtcSignalingUnavailable.
   ///
   /// In en, this message translates to:
