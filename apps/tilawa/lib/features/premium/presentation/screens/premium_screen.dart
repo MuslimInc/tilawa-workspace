@@ -321,15 +321,12 @@ class _PremiumScreenState extends State<PremiumScreen> {
               ),
             ),
             SizedBox(height: tokens.spaceMedium),
-            SizedBox(
-              width: double.infinity,
-              child: TilawaButton(
-                text: context.l10n.startFreeTrial,
-                variant: TilawaButtonVariant.primary,
-                leadingIcon: const Icon(Icons.play_arrow_rounded),
-                onPressed: () => _startTrial(context),
-                isFullWidth: true,
-              ),
+            TilawaButton(
+              text: context.l10n.startFreeTrial,
+              variant: TilawaButtonVariant.primary,
+              leadingIcon: const Icon(Icons.play_arrow_rounded),
+              onPressed: () => _startTrial(context),
+              isFullWidth: true,
             ),
           ],
         ),

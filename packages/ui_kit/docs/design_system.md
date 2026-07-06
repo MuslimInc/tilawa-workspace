@@ -199,6 +199,22 @@ bones matching loaded copy heights).
 
 ---
 
+## 4.3 Call to Action (CTA) Guidelines
+
+**Rule:** Primary CTAs must feel substantial but should never stretch arbitrarily to unbounded screen edges on tablets. Use the appropriate design-system constraints for the context.
+
+| Context | Recommended Pattern | Constraints & Behaviors |
+|---------|---------------------|--------------------------|
+| **Empty states** | `TilawaIllustratedState` / `TilawaEmptyState` | Handled natively. Buttons use `actionMinWidth` (240dp) and `actionMaxWidth` (320dp). Hugs content organically while preventing overstretch on tablets. |
+| **Pinned bottom** | `TilawaBottomActionInset` | Wrap the bottom area in `TilawaBottomActionInset(maxWidthKind: TilawaContentKind.form)`. This expands cleanly on phones but restricts stretch on large tablets, keeping thumb reach safe. |
+| **Inline (cards/dialogs)** | `TilawaButton(isFullWidth: true)` | Relies on the parent container (e.g. Card padding or Dialog width). Do **not** wrap in `SizedBox(width: double.infinity)` which forcefully breaks out of responsive constraints. |
+
+**Important notes:**
+- Avoid manual safe area logic or arbitrary `double.infinity` wrappers.
+- `TilawaButton` scales nicely for text wrapping and RTL alignment inherently. Let the button hug or fill its parent constraint.
+
+---
+
 ## 5. Testing contract
 
 | Suite | Path | Purpose |
