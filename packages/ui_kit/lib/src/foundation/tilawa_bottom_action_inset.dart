@@ -70,7 +70,9 @@ class TilawaBottomActionInset extends StatelessWidget {
     final double side = horizontal ?? tokens.bottomActionHorizontalInset;
     final double bottom = _resolveBottom(context, tokens) + extraBottom;
 
-    return Padding(
+    return AnimatedPadding(
+      duration: tokens.durationFast,
+      curve: tokens.curveEmphasized,
       padding: EdgeInsets.fromLTRB(side, top, side, bottom),
       child: content,
     );
@@ -79,6 +81,9 @@ class TilawaBottomActionInset extends StatelessWidget {
   double _resolveBottom(BuildContext context, MeMuslimDesignTokens tokens) {
     if (keyboardAware) {
       return context.keyboardAwareBottomPadding;
+    }
+    if (context.isKeyboardVisible) {
+      return tokens.spaceMedium;
     }
     if (minBottom != null) {
       return context.floatingBottomPaddingWithMin(minBottom!);
