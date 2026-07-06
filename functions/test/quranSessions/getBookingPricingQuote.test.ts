@@ -48,6 +48,7 @@ function context(overrides: {
       bookingMode: "autoConfirm",
       genderMatchingEnabled: true,
       teacherWhitelist: null,
+      paymentProviderEnabled: true,
       tutorApprovalSlaMs: 24 * 60 * 60 * 1000,
       minBookingNoticeMs: 60 * 60 * 1000,
       maxConcurrentUpcomingPerStudent: 3,

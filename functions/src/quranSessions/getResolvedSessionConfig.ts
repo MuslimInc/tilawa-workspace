@@ -9,6 +9,29 @@ export interface GetResolvedSessionConfigRequest {
   teacherId: string;
 }
 
+export function resolveSessionConfigWarnings(context: any): string[] {
+  const warnings: string[] = [];
+  if (!context.marketEnabled) {
+    warnings.push("market_disabled");
+  }
+  if (context.pricing.isPaid && !context.market.paymentProviderEnabled) {
+    warnings.push("paid_but_payment_disabled");
+  }
+  if (!context.teacher.exists || context.teacher.verificationStatus !== "verified") {
+    warnings.push("teacher_not_verified");
+  }
+  if (
+    context.market.teacherWhitelist != null &&
+    !context.market.teacherWhitelist.includes(context.teacher.id)
+  ) {
+    warnings.push("teacher_not_whitelisted");
+  }
+  if (!context.student.exists || context.student.accountStatus !== "active") {
+    warnings.push("student_not_active");
+  }
+  return warnings;
+}
+
 export const getResolvedSessionConfig = onCall(
   sessionCallableHttpsOptions,
   async (request) => {
@@ -25,25 +48,14 @@ export const getResolvedSessionConfig = onCall(
     const db = getFirestore();
     const context = await loadBookingEligibilityContext(db, data.studentId, data.teacherId);
 
-    const warnings: string[] = [];
-    if (!context.marketEnabled) {
-      warnings.push("market_disabled");
-    }
-    if (context.pricing.isPaid && !context.market.paymentProviderEnabled) {
-      warnings.push("paid_but_payment_disabled");
-    }
-    if (!context.teacher.exists || context.teacher.verificationStatus !== "verified") {
-      warnings.push("teacher_not_verified");
-    }
-    if (
-      context.market.teacherWhitelist != null &&
-      !context.market.teacherWhitelist.includes(data.teacherId)
-    ) {
-      warnings.push("teacher_not_whitelisted");
-    }
-    if (!context.student.exists || context.student.accountStatus !== "active") {
-      warnings.push("student_not_active");
-    }
+    const resolvedContext = {
+      ...context,
+      teacher: {
+        ...context.teacher,
+        id: data.teacherId,
+      }
+    };
+    const warnings = resolveSessionConfigWarnings(resolvedContext);
 
     return {
       context,
