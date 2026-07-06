@@ -161,7 +161,7 @@ jobs:
           # still AOT-compiles all ABIs unless --target-platform is set (they
           # do not conflict — unlike --split-per-abi).
           flutter build appbundle --release \
-            --flavor staging \
+            --flavor production \
             --dart-define-from-file=env/staging.json \
             --dart-define-from-file=env/staging.video.local.json.example \
             --dart-define=TILAWA_LAUNCH_AGORA_APP_ID=${{ secrets.AGORA_APP_ID }} \
@@ -185,8 +185,8 @@ jobs:
         uses: r0adkll/upload-google-play@v1.1.5
         with:
           serviceAccountJsonPlainText: ${{ secrets.PLAY_SERVICE_ACCOUNT_JSON }}
-          packageName: com.tilawa.app.staging
-          releaseFiles: apps/tilawa/build/app/outputs/bundle/stagingRelease/app-staging-release.aab
+          packageName: com.tilawa.app
+          releaseFiles: apps/tilawa/build/app/outputs/bundle/productionRelease/app-production-release.aab
           tracks: ${{ inputs.track }}
           # Staged rollout only applies to production with a fraction < 1.0.
           status: ${{ (inputs.track == 'production' && inputs.rollout != '1.0') && 'inProgress' || 'completed' }}
@@ -211,5 +211,5 @@ jobs:
         uses: actions/upload-artifact@v7
         with:
           name: app-release-aab
-          path: apps/tilawa/build/app/outputs/bundle/stagingRelease/app-staging-release.aab
+          path: apps/tilawa/build/app/outputs/bundle/productionRelease/app-production-release.aab
           if-no-files-found: ignore
