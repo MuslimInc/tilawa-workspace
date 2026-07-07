@@ -803,6 +803,8 @@
     "bookingPriceSummaryTitle": "سعر الجلسة",
     "bookingPricePerSessionHint": "يُخصم مرة واحدة عند التأكيد (تجريبي فقط).",
     "bookingPaymentUnavailableNotice": "هذه الجلسة مدفوعة، والدفع غير متاح حالياً. الحجز غير متاح مؤقتاً.",
+    "pricingQuoteUnavailableTitle": "تعذر التحقق من سعر الجلسة حالياً.",
+    "pricingQuoteUnavailableSubtitle": "تحقق من اتصالك بالإنترنت وحاول مرة أخرى.",
     "bookingPaidUnavailableTitle": "الحجز المدفوع غير متاح حالياً.",
     "bookingPaidUnavailableSubtitle": "يمكنك اختيار معلم مجاني أو المحاولة لاحقاً.",
     "bookingDisabledByAdminTitle": "الحجز غير متاح حالياً.",

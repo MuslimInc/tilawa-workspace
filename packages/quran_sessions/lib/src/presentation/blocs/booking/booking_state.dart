@@ -61,18 +61,18 @@ final class BookingSelecting extends BookingState {
   /// Server quote signal; null when no quote was obtained (client preview).
   final bool? paymentProviderAvailable;
 
-  /// Server-authoritative typed block reason. Drives the booking banner copy
-  /// and disables submission. Defaults to [BookingBlockReason.none] for the
-  /// client-only preview path (no server quote) so it never falsely blocks.
+  /// Typed block reason. Backend reasons are authoritative; transport-level
+  /// quote failures use [BookingBlockReason.pricingQuoteUnavailable] so Flutter
+  /// never derives final paid/free state from a market-only preview.
   final BookingBlockReason blockReason;
 
   bool get hasExternalMeetingUrl =>
       SessionModePolicy.hasExternalMeetingUrl(teacherExternalMeetingUrl);
 
   /// True when the booking screen must show a block banner and disable submit.
-  /// Derived from the server-reported [blockReason] — never inferred from
-  /// loose booleans, so admin-disabled / pricing-missing / market-disabled /
-  /// teacher-not-bookable each get distinct, accurate copy.
+  /// Derived from [blockReason] — never inferred from loose payment booleans,
+  /// so admin-disabled / pricing-missing / market-disabled /
+  /// teacher-not-bookable / quote-unavailable each get distinct copy.
   bool get isPaymentBlocked => blockReason != BookingBlockReason.none;
 
   bool get canSubmit =>

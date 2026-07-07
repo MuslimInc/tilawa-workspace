@@ -9,15 +9,11 @@ import '../../../domain/entities/session_pricing_type.dart';
 import '../../../domain/entities/teacher_availability.dart';
 import '../../../domain/failures/quran_sessions_failure.dart';
 import '../../../domain/mappers/session_aggregate_mapper.dart';
-import '../../../domain/policies/market_session_price_policy.dart';
 import '../../../domain/policies/session_mode_policy.dart';
 import '../../../domain/entities/session_pricing_quote.dart';
 import '../../../domain/usecases/get_booking_pricing_quote_usecase.dart';
-import '../../../domain/usecases/get_market_config_usecase.dart';
 import '../../../domain/usecases/get_teacher_availability_usecase.dart';
 import '../../../domain/usecases/get_teacher_profile_by_id_usecase.dart';
-
-import '../../../domain/usecases/get_user_profile_usecase.dart';
 import '../../../domain/usecases/submit_session_booking_usecase.dart';
 import '../../../domain/usecases/validate_booking_eligibility_usecase.dart';
 import 'booking_event.dart';
@@ -29,8 +25,6 @@ class BookingBloc extends Bloc<BookingEvent, BookingState> {
     required this._submitBooking,
     required this._validateEligibility,
     required this._getTeacherProfile,
-    this._getUserProfile,
-    this._getMarketConfig,
     this._getPricingQuote,
     this._sessionModePolicy = SessionModePolicy.videoOnly,
     this._onBookingLostDueToNoAvailability,
@@ -52,11 +46,9 @@ class BookingBloc extends Bloc<BookingEvent, BookingState> {
   final SubmitSessionBookingUseCase _submitBooking;
   final ValidateBookingEligibilityUseCase _validateEligibility;
   final GetTeacherProfileByIdUseCase _getTeacherProfile;
-  final GetUserProfileUseCase? _getUserProfile;
-  final GetMarketConfigUseCase? _getMarketConfig;
 
-  /// Server-authoritative price preview; when available it supersedes the
-  /// client-side market read (which ignores policy-version overlays).
+  /// Server-authoritative price preview. Flutter must not derive final
+  /// paid/free or payment-block state without this quote.
   final GetBookingPricingQuoteUseCase? _getPricingQuote;
   final SessionModePolicy _sessionModePolicy;
   final SessionPaymentConfirmation? _paymentConfirmation;
@@ -135,28 +127,12 @@ class BookingBloc extends Bloc<BookingEvent, BookingState> {
       // let the student reach submit, only to be rejected server-side.
       blockReason = fetched.failureBlockReason!;
     } else {
-      // Transport-level quote failure only: fall back to the advisory
-      // client-side market read. It cannot see policy-version overlays or the
-      // payment provider gate, so it never blocks (preview only).
-      final getUserProfile = _getUserProfile;
-      final getMarketConfig = _getMarketConfig;
-      if (getUserProfile != null && getMarketConfig != null) {
-        final studentResult = await getUserProfile(studentId);
-        await studentResult.fold((_) async {}, (student) async {
-          final country = student.countryCode;
-          final cityId = student.cityId;
-          if (country == null || cityId == null) return;
-          final marketResult = await getMarketConfig(country);
-          marketResult.fold((_) {}, (market) {
-            final preview = MarketSessionPricePolicy.resolvePreview(
-              market: market,
-              cityId: cityId,
-            );
-            pricingType = preview.pricingType;
-            sessionPrice = preview.price;
-          });
-        });
-      }
+      // Transport-level quote failure only (network/App Check/timeout).
+      // The client-side market preview cannot see teacher-level pricing
+      // overrides, so it must not decide whether this session is paid/free or
+      // whether payment is unavailable. Keep the price unknown and block submit
+      // with neutral retry copy until the server quote is available.
+      blockReason = BookingBlockReason.pricingQuoteUnavailable;
     }
 
     final defaultCallType = SessionModePolicy.defaultCallType(
@@ -215,8 +191,8 @@ class BookingBloc extends Bloc<BookingEvent, BookingState> {
   }
 
   /// Maps a quote failure of a *config/admin* kind to a typed block reason.
-  /// Returns null for transport/auth failures so the bloc falls back to the
-  /// advisory client market preview.
+  /// Returns null for transport/auth failures so the bloc surfaces neutral
+  /// pricing-unavailable copy instead of inferring payment state.
   BookingBlockReason? _blockReasonFromFailure(QuranSessionsFailure f) {
     if (f is PlatformBookingDisabledFailure) {
       return BookingBlockReason.bookingDisabledByAdmin;

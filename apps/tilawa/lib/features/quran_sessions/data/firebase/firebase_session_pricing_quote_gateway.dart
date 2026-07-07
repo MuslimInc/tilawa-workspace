@@ -42,23 +42,39 @@ class FirebaseSessionPricingQuoteGateway implements SessionPricingQuoteGateway {
   }
 
   SessionPricingQuote _quoteFromResponse(Map<String, dynamic> data) {
+    final paymentRequired = data['paymentRequired'] as bool? ?? false;
+    final paymentProviderAvailable =
+        data['paymentProviderAvailable'] as bool? ?? false;
+
+    // Backward-compat: a backend that has not yet shipped the typed
+    // `blockReason` field returns only the loose booleans. Derive the paid-
+    // unavailable reason from them so the booking screen still blocks a paid
+    // session before submit — without this, a pre-deployment backend would
+    // let the student tap Confirm and hit `payment_provider_unavailable`
+    // server-side (9.8s wasted round-trip in live logs). Admin-disabled /
+    // config-missing cannot be derived here; those still rely on the new
+    // backend (or the submit-time failure mapper).
+    final rawBlockReason = data['blockReason'] as String?;
+    final blockReason = rawBlockReason != null && rawBlockReason != 'none'
+        ? BookingBlockReason.fromString(rawBlockReason)
+        : (paymentRequired && !paymentProviderAvailable
+              ? BookingBlockReason.paymentProviderUnavailable
+              : BookingBlockReason.none);
+
     return SessionPricingQuote(
       pricingType: data['pricingType'] == 'fixedPerSession'
           ? SessionPricingType.fixedPerSession
           : SessionPricingType.free,
       amount: (data['amount'] as num?)?.toDouble() ?? 0,
       currencyCode: data['currencyCode'] as String? ?? 'USD',
-      paymentRequired: data['paymentRequired'] as bool? ?? false,
-      paymentProviderAvailable:
-          data['paymentProviderAvailable'] as bool? ?? false,
+      paymentRequired: paymentRequired,
+      paymentProviderAvailable: paymentProviderAvailable,
       bookingEnabled: data['bookingEnabled'] as bool? ?? true,
       quranSessionsEnabled: data['quranSessionsEnabled'] as bool? ?? true,
       effectivePricingSource: EffectivePricingSource.fromString(
         data['effectivePricingSource'] as String?,
       ),
-      blockReason: BookingBlockReason.fromString(
-        data['blockReason'] as String?,
-      ),
+      blockReason: blockReason,
       countryCode: data['countryCode'] as String?,
       cityId: data['cityId'] as String?,
       policyVersion: data['policyVersion'] as String?,

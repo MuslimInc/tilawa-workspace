@@ -1,22 +1,24 @@
-/// Typed reason the booking screen must block submission, derived
-/// server-side from `getBookingPricingQuote` and never inferred in Flutter.
+/// Typed reason the booking screen must block submission.
+///
+/// Business reasons come from `getBookingPricingQuote`. Transport quote
+/// failures use [pricingQuoteUnavailable] so Flutter never infers payment state
+/// from market-only data.
 ///
 /// `slotUnavailable` is intentionally excluded — it is per-slot and enforced
 /// only at `createSessionBooking` time, never on the per-teacher quote.
 enum BookingBlockReason {
   none,
+  pricingQuoteUnavailable,
   paymentProviderUnavailable,
   bookingDisabledByAdmin,
   pricingConfigMissing,
   teacherNotBookable,
   marketDisabled,
-  /// Alias kept for clarity in switch arms: same meaning as
-  /// [paymentProviderUnavailable] when a paid session's market has no
-  /// available payment provider.
   ;
 
   static BookingBlockReason fromString(String? raw) {
     return switch (raw) {
+      'pricingQuoteUnavailable' => pricingQuoteUnavailable,
       'paymentProviderUnavailable' => paymentProviderUnavailable,
       'bookingDisabledByAdmin' => bookingDisabledByAdmin,
       'pricingConfigMissing' => pricingConfigMissing,

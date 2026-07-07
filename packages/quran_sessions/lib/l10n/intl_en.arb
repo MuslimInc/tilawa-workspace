@@ -798,6 +798,8 @@
     "bookingPriceSummaryTitle": "Session price",
     "bookingPricePerSessionHint": "Charged once when you confirm (sandbox only).",
     "bookingPaymentUnavailableNotice": "This session requires payment, but payment is not available yet. Booking is temporarily unavailable.",
+    "pricingQuoteUnavailableTitle": "We could not verify the session price right now.",
+    "pricingQuoteUnavailableSubtitle": "Please check your connection and try again.",
     "bookingPaidUnavailableTitle": "Paid booking is currently unavailable.",
     "bookingPaidUnavailableSubtitle": "You can choose a free teacher or try again later.",
     "bookingDisabledByAdminTitle": "Booking is currently unavailable.",

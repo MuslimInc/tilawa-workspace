@@ -500,6 +500,61 @@ void main() {
   );
 
   testWidgets(
+    'pricing quote unavailable shows retry copy and blocks submit',
+    (tester) async {
+      final slots = [_slot(1)];
+
+      await tester.pumpWidget(
+        MaterialApp(
+          theme: AppTheme.getLightTheme(primaryColor: AppColors.defaultPrimary),
+          localizationsDelegates: const [
+            QuranSessionsLocalizations.delegate,
+            GlobalMaterialLocalizations.delegate,
+            GlobalWidgetsLocalizations.delegate,
+          ],
+          supportedLocales: QuranSessionsLocalizations.supportedLocales,
+          home: BlocProvider<BookingBloc>(
+            create: (_) => SeededBookingBloc(
+              seed: BookingSelecting(
+                teacherId: 'teacher_1',
+                availableSlots: slots,
+                selectedSlot: slots.first,
+                selectedCallType: SessionCallType.videoCall,
+                blockReason: BookingBlockReason.pricingQuoteUnavailable,
+              ),
+            ),
+            child: const BookingScreen(
+              teacherId: 'teacher_1',
+              studentId: 'student_1',
+            ),
+          ),
+        ),
+      );
+      await tester.pumpAndSettle();
+
+      expect(
+        find.text('We could not verify the session price right now.'),
+        findsOneWidget,
+      );
+      expect(
+        find.text('Please check your connection and try again.'),
+        findsOneWidget,
+      );
+      expect(
+        find.text('Paid booking is currently unavailable.'),
+        findsNothing,
+      );
+      expect(find.text('Session price'), findsNothing);
+      final button = tester.widget<TilawaButton>(
+        find.byWidgetPredicate(
+          (w) => w is TilawaButton && w.text == 'Confirm booking',
+        ),
+      );
+      expect(button.onPressed, isNull);
+    },
+  );
+
+  testWidgets(
     'admin booking disabled shows the admin-disabled banner and blocks submit',
     (tester) async {
       final slots = [_slot(1)];

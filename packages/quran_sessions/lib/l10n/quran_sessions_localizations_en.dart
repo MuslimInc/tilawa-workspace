@@ -1926,6 +1926,14 @@ class QuranSessionsLocalizationsEn extends QuranSessionsLocalizations {
       'This session requires payment, but payment is not available yet. Booking is temporarily unavailable.';
 
   @override
+  String get pricingQuoteUnavailableTitle =>
+      'We could not verify the session price right now.';
+
+  @override
+  String get pricingQuoteUnavailableSubtitle =>
+      'Please check your connection and try again.';
+
+  @override
   String get bookingPaidUnavailableTitle =>
       'Paid booking is currently unavailable.';
 

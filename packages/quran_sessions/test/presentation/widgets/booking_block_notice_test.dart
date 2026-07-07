@@ -8,6 +8,7 @@ import '../../helpers/widget_pump.dart';
 
 void main() {
   for (final reason in [
+    BookingBlockReason.pricingQuoteUnavailable,
     BookingBlockReason.paymentProviderUnavailable,
     BookingBlockReason.bookingDisabledByAdmin,
     BookingBlockReason.pricingConfigMissing,
@@ -72,6 +73,10 @@ void main() {
 
 ({String title, String subtitle}) _expectedAr(BookingBlockReason r) =>
     switch (r) {
+      BookingBlockReason.pricingQuoteUnavailable => (
+        title: 'تعذر التحقق من سعر الجلسة حالياً.',
+        subtitle: 'تحقق من اتصالك بالإنترنت وحاول مرة أخرى.',
+      ),
       BookingBlockReason.paymentProviderUnavailable => (
         title: 'الحجز المدفوع غير متاح حالياً.',
         subtitle: 'يمكنك اختيار معلم مجاني أو المحاولة لاحقاً.',
@@ -97,6 +102,10 @@ void main() {
 
 ({String title, String subtitle}) _expectedEn(BookingBlockReason r) =>
     switch (r) {
+      BookingBlockReason.pricingQuoteUnavailable => (
+        title: 'We could not verify the session price right now.',
+        subtitle: 'Please check your connection and try again.',
+      ),
       BookingBlockReason.paymentProviderUnavailable => (
         title: 'Paid booking is currently unavailable.',
         subtitle: 'You can choose a free teacher or try again later.',

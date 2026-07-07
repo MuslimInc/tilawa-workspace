@@ -1898,6 +1898,14 @@ class QuranSessionsLocalizationsAr extends QuranSessionsLocalizations {
       'هذه الجلسة مدفوعة، والدفع غير متاح حالياً. الحجز غير متاح مؤقتاً.';
 
   @override
+  String get pricingQuoteUnavailableTitle =>
+      'تعذر التحقق من سعر الجلسة حالياً.';
+
+  @override
+  String get pricingQuoteUnavailableSubtitle =>
+      'تحقق من اتصالك بالإنترنت وحاول مرة أخرى.';
+
+  @override
   String get bookingPaidUnavailableTitle => 'الحجز المدفوع غير متاح حالياً.';
 
   @override

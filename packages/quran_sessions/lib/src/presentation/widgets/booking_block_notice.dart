@@ -24,6 +24,11 @@ class BookingBlockNotice extends StatelessWidget {
     final tokens = theme.tokens;
 
     final (title, subtitle, isError) = switch (blockReason) {
+      BookingBlockReason.pricingQuoteUnavailable => (
+        l10n.pricingQuoteUnavailableTitle,
+        l10n.pricingQuoteUnavailableSubtitle,
+        false,
+      ),
       BookingBlockReason.paymentProviderUnavailable => (
         l10n.bookingPaidUnavailableTitle,
         l10n.bookingPaidUnavailableSubtitle,

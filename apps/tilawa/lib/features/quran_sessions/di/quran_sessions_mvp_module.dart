@@ -400,8 +400,6 @@ class QuranSessionsMvpModule {
           submitBooking: sl<SubmitSessionBookingUseCase>(),
           validateEligibility: sl<ValidateBookingEligibilityUseCase>(),
           getTeacherProfile: sl<GetTeacherProfileByIdUseCase>(),
-          getUserProfile: sl<GetUserProfileUseCase>(),
-          getMarketConfig: sl<GetMarketConfigUseCase>(),
           getPricingQuote: sl.isRegistered<SessionPricingQuoteGateway>()
               ? GetBookingPricingQuoteUseCase(sl<SessionPricingQuoteGateway>())
               : null,

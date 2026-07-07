@@ -6,6 +6,7 @@ import 'package:quran_sessions/src/domain/entities/teacher_availability.dart';
 import 'package:quran_sessions/src/domain/entities/teacher_profile.dart';
 import 'package:quran_sessions/src/domain/entities/teacher_verification_status.dart';
 import 'package:quran_sessions/src/domain/rules/teacher_profile_completeness.dart';
+import 'package:quran_sessions/src/domain/entities/market_config.dart';
 import 'package:quran_sessions/src/domain/entities/quran_booking.dart';
 import 'package:quran_sessions/src/domain/entities/session_call_type.dart';
 import 'package:quran_sessions/src/domain/entities/user_profile.dart';
@@ -437,7 +438,7 @@ void main() {
     );
 
     blocTest<BookingBloc, BookingState>(
-      'free session with payment provider unavailable still allows booking',
+      'free teacher override quote with provider disabled still allows booking',
       build: () => buildWithQuote(
         FakeSessionPricingQuoteGateway(
           quote: const SessionPricingQuote(
@@ -462,7 +463,11 @@ void main() {
       },
       verify: (b) {
         final state = b.state as BookingSelecting;
+        check(state.pricingType).equals(SessionPricingType.free);
+        check(state.sessionPrice).isNull();
+        check(state.paymentProviderAvailable).equals(false);
         check(state.isPaymentBlocked).isFalse();
+        check(state.blockReason).equals(BookingBlockReason.none);
         check(state.selectedSlot).isNotNull();
         check(state.canSubmit).isTrue();
       },
@@ -535,24 +540,163 @@ void main() {
     );
 
     blocTest<BookingBloc, BookingState>(
-      'quote failure falls back to the client-side market preview',
+      'successful quote with pricing config missing surfaces config block',
       build: () => buildWithQuote(
         FakeSessionPricingQuoteGateway(
-          failure: const NetworkFailure(),
+          quote: const SessionPricingQuote(
+            pricingType: SessionPricingType.free,
+            amount: 0,
+            currencyCode: 'EGP',
+            paymentRequired: false,
+            paymentProviderAvailable: false,
+            bookingEnabled: true,
+            quranSessionsEnabled: true,
+            effectivePricingSource: EffectivePricingSource.platformFallback,
+            blockReason: BookingBlockReason.pricingConfigMissing,
+            countryCode: 'EG',
+            cityId: 'cairo',
+          ),
         ),
       ),
+      act: (b) async {
+        openScreen(b);
+        await b.stream.firstWhere((s) => s is BookingSelecting);
+        final selecting = b.state as BookingSelecting;
+        b.add(SlotSelected(selecting.availableSlots.first));
+      },
+      verify: (b) {
+        final state = b.state as BookingSelecting;
+        check(
+          state.blockReason,
+        ).equals(BookingBlockReason.pricingConfigMissing);
+        check(state.isPaymentBlocked).isTrue();
+        check(state.canSubmit).isFalse();
+      },
+    );
+
+    blocTest<BookingBloc, BookingState>(
+      'successful quote with admin booking disabled surfaces admin block',
+      build: () => buildWithQuote(
+        FakeSessionPricingQuoteGateway(
+          quote: const SessionPricingQuote(
+            pricingType: SessionPricingType.free,
+            amount: 0,
+            currencyCode: 'EGP',
+            paymentRequired: false,
+            paymentProviderAvailable: false,
+            bookingEnabled: false,
+            quranSessionsEnabled: true,
+            effectivePricingSource: EffectivePricingSource.platformFallback,
+            blockReason: BookingBlockReason.bookingDisabledByAdmin,
+            countryCode: 'EG',
+            cityId: 'cairo',
+          ),
+        ),
+      ),
+      act: (b) async {
+        openScreen(b);
+        await b.stream.firstWhere((s) => s is BookingSelecting);
+        final selecting = b.state as BookingSelecting;
+        b.add(SlotSelected(selecting.availableSlots.first));
+      },
+      verify: (b) {
+        final state = b.state as BookingSelecting;
+        check(
+          state.blockReason,
+        ).equals(BookingBlockReason.bookingDisabledByAdmin);
+        check(state.isPaymentBlocked).isTrue();
+        check(state.canSubmit).isFalse();
+      },
+    );
+
+    blocTest<BookingBloc, BookingState>(
+      'quote transport failure shows pricing unavailable without payment block',
+      build: () {
+        marketConfigRepo.marketConfigOverride = _paidMarketConfig();
+        return buildWithQuote(
+          FakeSessionPricingQuoteGateway(
+            failure: const NetworkFailure(),
+          ),
+        );
+      },
       act: openScreen,
       skip: 2,
       expect: () => [isA<BookingSelecting>()],
       verify: (b) {
         final state = b.state as BookingSelecting;
-        // A transport-level quote failure is the only case that falls back to
-        // the advisory client preview — it carries no provider signal and so
-        // never blocks. Config/admin failures are surfaced as typed reasons
-        // (see tests below) and never reach this fallback.
+        // Market-only preview cannot see teacher overrides, so transport
+        // failures must not claim a paid session or payment-provider block.
+        check(state.pricingType).isNull();
+        check(state.sessionPrice).isNull();
         check(state.paymentProviderAvailable).isNull();
-        check(state.isPaymentBlocked).isFalse();
-        check(state.blockReason).equals(BookingBlockReason.none);
+        check(state.blockReason).equals(
+          BookingBlockReason.pricingQuoteUnavailable,
+        );
+        check(state.isPaymentBlocked).isTrue();
+        check(state.canSubmit).isFalse();
+      },
+    );
+
+    blocTest<BookingBloc, BookingState>(
+      'paid market quote transport failure still does not infer payment block',
+      build: () {
+        marketConfigRepo.marketConfigOverride = _paidMarketConfig();
+        return buildWithQuote(
+          FakeSessionPricingQuoteGateway(
+            failure: const NetworkFailure(),
+          ),
+        );
+      },
+      act: (b) async {
+        openScreen(b);
+        await b.stream.firstWhere((s) => s is BookingSelecting);
+        final selecting = b.state as BookingSelecting;
+        b.add(SlotSelected(selecting.availableSlots.first));
+      },
+      verify: (b) {
+        final state = b.state as BookingSelecting;
+        check(state.pricingType).isNull();
+        check(state.sessionPrice).isNull();
+        check(state.blockReason).equals(
+          BookingBlockReason.pricingQuoteUnavailable,
+        );
+        check(state.selectedSlot).isNotNull();
+        check(state.canSubmit).isFalse();
+      },
+    );
+
+    blocTest<BookingBloc, BookingState>(
+      'free teacher in paid market quote transport failure keeps pricing unknown',
+      build: () {
+        teacherRepo.teachers = [
+          makeTeacher(
+            id: 'teacher_1',
+            pricingType: SessionPricingType.free,
+            price: null,
+          ),
+        ];
+        marketConfigRepo.marketConfigOverride = _paidMarketConfig();
+        return buildWithQuote(
+          FakeSessionPricingQuoteGateway(
+            failure: const NetworkFailure(),
+          ),
+        );
+      },
+      act: (b) async {
+        openScreen(b);
+        await b.stream.firstWhere((s) => s is BookingSelecting);
+        final selecting = b.state as BookingSelecting;
+        b.add(SlotSelected(selecting.availableSlots.first));
+      },
+      verify: (b) {
+        final state = b.state as BookingSelecting;
+        check(state.pricingType).isNull();
+        check(state.sessionPrice).isNull();
+        check(state.blockReason).equals(
+          BookingBlockReason.pricingQuoteUnavailable,
+        );
+        check(state.selectedSlot).isNotNull();
+        check(state.canSubmit).isFalse();
       },
     );
 
@@ -644,3 +788,26 @@ TeacherProfile _teacherProfile({required String? externalMeetingUrl}) =>
         updatedAt: DateTime.utc(2026, 1, 1),
       ),
     );
+
+MarketConfig _paidMarketConfig() => const MarketConfig(
+  countryCode: 'EG',
+  countryName: 'Egypt',
+  currencyCode: 'EGP',
+  defaultCityId: 'cairo',
+  isEnabled: true,
+  cities: [
+    CityConfig(
+      cityId: 'cairo',
+      cityName: 'Cairo',
+      countryCode: 'EG',
+      timezone: 'Africa/Cairo',
+      currencyCode: 'EGP',
+      isEnabled: true,
+      minSessionPrice: 100,
+      maxSessionPrice: 100,
+    ),
+  ],
+  minSessionPrice: 100,
+  maxSessionPrice: 100,
+  platformCommissionPercent: 0,
+);

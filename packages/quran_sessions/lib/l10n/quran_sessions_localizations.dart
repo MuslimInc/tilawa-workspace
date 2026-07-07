@@ -3437,6 +3437,18 @@ abstract class QuranSessionsLocalizations {
   /// **'This session requires payment, but payment is not available yet. Booking is temporarily unavailable.'**
   String get bookingPaymentUnavailableNotice;
 
+  /// No description provided for @pricingQuoteUnavailableTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'We could not verify the session price right now.'**
+  String get pricingQuoteUnavailableTitle;
+
+  /// No description provided for @pricingQuoteUnavailableSubtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Please check your connection and try again.'**
+  String get pricingQuoteUnavailableSubtitle;
+
   /// No description provided for @bookingPaidUnavailableTitle.
   ///
   /// In en, this message translates to:
