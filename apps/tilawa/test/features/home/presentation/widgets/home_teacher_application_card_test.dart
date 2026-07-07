@@ -40,10 +40,7 @@ void main() {
   ) async {
     await _pumpHomeCard(
       tester,
-      config: const AppLaunchConfig(
-        quranSessionsEnabled: true,
-        learnQuranStudentFeatureEnabled: false,
-      ),
+      config: const AppLaunchConfig(),
     );
 
     expect(find.text('Learn Quran'), findsNothing);
@@ -55,12 +52,7 @@ void main() {
   ) async {
     await _pumpHomeCard(
       tester,
-      config: const AppLaunchConfig(
-        quranSessionsEnabled: true,
-        learnQuranStudentFeatureEnabled: true,
-        teacherApplicationEntryEnabled: true,
-        homeTeacherApplicationCardEnabled: true,
-      ),
+      config: const AppLaunchConfig(),
     );
 
     expect(find.text('التقديم كمعلّم قرآن'), findsNothing);

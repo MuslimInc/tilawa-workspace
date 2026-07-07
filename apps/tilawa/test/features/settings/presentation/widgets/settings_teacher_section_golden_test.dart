@@ -83,10 +83,7 @@ void main() {
     when(() => mockAuthBloc.stream).thenAnswer((_) => const Stream.empty());
 
     scopeGetIt().registerSingleton<AppLaunchConfig>(
-      const AppLaunchConfig(
-        teacherApplicationEnabled: true,
-        teacherApplicationDiscoverability: 'profileOnly',
-      ),
+      const AppLaunchConfig(),
     );
     scopeGetIt().registerSingleton<AuthSessionProvider>(
       const FakeAuthSessionProvider(userId: 'user_1'),

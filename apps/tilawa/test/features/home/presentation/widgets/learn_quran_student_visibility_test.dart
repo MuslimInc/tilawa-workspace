@@ -20,10 +20,7 @@ void main() {
   group('LearnQuranStudentVisibility', () {
     test('shows home card for student when feature enabled', () {
       getIt.registerSingleton<AppLaunchConfig>(
-        const AppLaunchConfig(
-          quranSessionsEnabled: true,
-          learnQuranStudentFeatureEnabled: true,
-        ),
+        const AppLaunchConfig(),
       );
       getIt.registerSingleton<QuranSessionsPlatformConfigStore>(
         QuranSessionsPlatformConfigStore()..setConfig(
@@ -51,10 +48,7 @@ void main() {
 
     test('hides home card for approved teacher', () {
       getIt.registerSingleton<AppLaunchConfig>(
-        const AppLaunchConfig(
-          quranSessionsEnabled: true,
-          learnQuranStudentFeatureEnabled: true,
-        ),
+        const AppLaunchConfig(),
       );
       getIt.registerSingleton<QuranSessionsPlatformConfigStore>(
         QuranSessionsPlatformConfigStore()..setConfig(
@@ -84,10 +78,7 @@ void main() {
 
     test('hides home card while capability unresolved', () {
       getIt.registerSingleton<AppLaunchConfig>(
-        const AppLaunchConfig(
-          quranSessionsEnabled: true,
-          learnQuranStudentFeatureEnabled: true,
-        ),
+        const AppLaunchConfig(),
       );
       getIt.registerSingleton<QuranSessionsPlatformConfigStore>(
         QuranSessionsPlatformConfigStore()..setConfig(

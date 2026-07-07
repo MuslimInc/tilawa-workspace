@@ -175,10 +175,7 @@ void main() {
     when(() => _mockAuthBloc.stream).thenAnswer((_) => const Stream.empty());
 
     scopeGetIt().registerSingleton<AppLaunchConfig>(
-      const AppLaunchConfig(
-        teacherApplicationEnabled: true,
-        teacherApplicationDiscoverability: 'profileOnly',
-      ),
+      const AppLaunchConfig(),
     );
     scopeGetIt().registerSingleton<AuthSessionProvider>(
       const FakeAuthSessionProvider(userId: 'user_1'),
@@ -286,11 +283,7 @@ void main() {
   ) async {
     await resetScopeGetIt();
     scopeGetIt().registerSingleton<AppLaunchConfig>(
-      const AppLaunchConfig(
-        quranSessionsEnabled: true,
-        teacherApplicationEntryEnabled: true,
-        homeTeacherApplicationCardEnabled: true,
-      ),
+      const AppLaunchConfig(),
     );
     scopeGetIt().registerSingleton<AuthSessionProvider>(
       const FakeAuthSessionProvider(userId: 'user_1'),

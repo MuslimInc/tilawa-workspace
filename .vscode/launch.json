@@ -28,21 +28,7 @@
             ]
         },
         {
-            "name": "MeMuslim Staging (Video QA)",
-            "request": "launch",
-            "type": "dart",
-            "program": "lib/main.dart",
-            "cwd": "${workspaceFolder}/apps/tilawa",
-            "flutterMode": "debug",
-            "toolArgs": [
-                "--flavor",
-                "staging",
-                "--dart-define-from-file=env/staging.json",
-                "--dart-define-from-file=env/staging.video.local.json"
-            ]
-        },
-        {
-            "name": "MeMuslim Staging (Multi-Device QA)",
+            "name": "MeMuslim Staging (Video/LiveKit QA)",
             "request": "launch",
             "type": "dart",
             "program": "lib/main.dart",
@@ -53,23 +39,6 @@
                 "staging",
                 "--dart-define-from-file=env/staging.json",
                 "--dart-define-from-file=env/staging.video.local.json",
-                "--dart-define=TILAWA_LAUNCH_DEVICE_REGISTRY_WRITE_ENABLED=true",
-                "--dart-define=TILAWA_LAUNCH_MULTI_DEVICE_LOGIN_ENABLED=true"
-            ]
-        },
-        {
-            "name": "MeMuslim Staging (Multi-Device QA - LiveKit)",
-            "request": "launch",
-            "type": "dart",
-            "program": "lib/main.dart",
-            "cwd": "${workspaceFolder}/apps/tilawa",
-            "flutterMode": "debug",
-            "toolArgs": [
-                "--flavor",
-                "staging",
-                "--dart-define-from-file=env/staging.json",
-                "--dart-define=TILAWA_LAUNCH_DEVICE_REGISTRY_WRITE_ENABLED=true",
-                "--dart-define=TILAWA_LAUNCH_MULTI_DEVICE_LOGIN_ENABLED=true",
                 "--dart-define=TILAWA_LAUNCH_LIVEKIT_URL=wss://tilawa-7whzug8z.livekit.cloud"
             ]
         },

@@ -37,7 +37,6 @@ void main() {
     getIt
       ..registerSingleton<AppLaunchConfig>(
         const AppLaunchConfig(
-          teacherApplicationEntryEnabled: true,
           teacherApplicationFormUrl: kDefaultTeacherApplicationFormUrl,
         ),
       )
@@ -78,7 +77,6 @@ void main() {
     getIt
       ..registerSingleton<AppLaunchConfig>(
         const AppLaunchConfig(
-          teacherApplicationEntryEnabled: true,
           teacherApplicationFormUrl: kDefaultTeacherApplicationFormUrl,
         ),
       )

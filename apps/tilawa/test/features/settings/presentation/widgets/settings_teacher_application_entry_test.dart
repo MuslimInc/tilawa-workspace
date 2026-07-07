@@ -39,7 +39,7 @@ void main() {
   ) async {
     await _pumpSettingsTile(
       tester,
-      config: const AppLaunchConfig(teacherApplicationEntryEnabled: false),
+      config: const AppLaunchConfig(),
     );
 
     expect(find.text('التقديم كمعلّم قرآن'), findsNothing);
@@ -50,10 +50,7 @@ void main() {
   ) async {
     await _pumpSettingsTile(
       tester,
-      config: const AppLaunchConfig(
-        quranSessionsEnabled: true,
-        teacherApplicationEntryEnabled: true,
-      ),
+      config: const AppLaunchConfig(),
     );
 
     expect(find.text('التقديم كمعلّم قرآن'), findsNothing);

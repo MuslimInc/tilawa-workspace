@@ -86,10 +86,7 @@ Future<RecordingAnalyticsService> _pumpRoutedCard(WidgetTester tester) async {
       ),
     )
     ..registerSingleton<AppLaunchConfig>(
-      const AppLaunchConfig(
-        quranSessionsEnabled: true,
-        learnQuranStudentFeatureEnabled: true,
-      ),
+      const AppLaunchConfig(),
     )
     ..registerSingleton<AnalyticsService>(analytics)
     ..registerSingleton<AuthSessionProvider>(_NullAuthSessionProvider());
@@ -134,10 +131,7 @@ void main() {
   testWidgets('hides Learn Quran card for approved teacher', (tester) async {
     await resetScopeGetIt();
     getIt.registerSingleton<AppLaunchConfig>(
-      const AppLaunchConfig(
-        quranSessionsEnabled: true,
-        learnQuranStudentFeatureEnabled: true,
-      ),
+      const AppLaunchConfig(),
     );
     getIt.registerSingleton<QuranSessionsPlatformConfigStore>(
       QuranSessionsPlatformConfigStore()..setConfig(
@@ -182,10 +176,7 @@ void main() {
   ) async {
     await resetScopeGetIt();
     getIt.registerSingleton<AppLaunchConfig>(
-      const AppLaunchConfig(
-        quranSessionsEnabled: true,
-        learnQuranStudentFeatureEnabled: true,
-      ),
+      const AppLaunchConfig(),
     );
     getIt.registerSingleton<QuranSessionsPlatformConfigStore>(
       QuranSessionsPlatformConfigStore()..setConfig(
@@ -227,10 +218,7 @@ void main() {
   ) async {
     await resetScopeGetIt();
     getIt.registerSingleton<AppLaunchConfig>(
-      const AppLaunchConfig(
-        quranSessionsEnabled: true,
-        learnQuranStudentFeatureEnabled: true,
-      ),
+      const AppLaunchConfig(),
     );
     getIt.registerSingleton<QuranSessionsPlatformConfigStore>(
       QuranSessionsPlatformConfigStore()..setConfig(
@@ -264,10 +252,7 @@ void main() {
     (tester) async {
       await resetScopeGetIt();
       getIt.registerSingleton<AppLaunchConfig>(
-        const AppLaunchConfig(
-          quranSessionsEnabled: true,
-          learnQuranStudentFeatureEnabled: true,
-        ),
+        const AppLaunchConfig(),
       );
       getIt.registerSingleton<QuranSessionsPlatformConfigStore>(
         QuranSessionsPlatformConfigStore()..setConfig(
@@ -321,10 +306,7 @@ void main() {
     (tester) async {
       await resetScopeGetIt();
       getIt.registerSingleton<AppLaunchConfig>(
-        const AppLaunchConfig(
-          quranSessionsEnabled: true,
-          learnQuranStudentFeatureEnabled: true,
-        ),
+        const AppLaunchConfig(),
       );
       getIt.registerSingleton<QuranSessionsPlatformConfigStore>(
         QuranSessionsPlatformConfigStore()..setConfig(
@@ -356,10 +338,7 @@ void main() {
   ) async {
     await resetScopeGetIt();
     getIt.registerSingleton<AppLaunchConfig>(
-      const AppLaunchConfig(
-        quranSessionsEnabled: true,
-        learnQuranStudentFeatureEnabled: true,
-      ),
+      const AppLaunchConfig(),
     );
     getIt.registerSingleton<QuranSessionsPlatformConfigStore>(
       QuranSessionsPlatformConfigStore()..setConfig(
@@ -415,10 +394,7 @@ void main() {
         ),
       )
       ..registerSingleton<AppLaunchConfig>(
-        const AppLaunchConfig(
-          quranSessionsEnabled: true,
-          learnQuranStudentFeatureEnabled: true,
-        ),
+        const AppLaunchConfig(),
       )
       ..registerSingleton<AnalyticsService>(analytics);
 
@@ -471,10 +447,7 @@ void main() {
         ),
       )
       ..registerSingleton<AppLaunchConfig>(
-        const AppLaunchConfig(
-          quranSessionsEnabled: true,
-          learnQuranStudentFeatureEnabled: true,
-        ),
+        const AppLaunchConfig(),
       )
       ..registerSingleton<AnalyticsService>(analytics);
 
@@ -544,10 +517,7 @@ void main() {
         ),
       )
       ..registerSingleton<AppLaunchConfig>(
-        const AppLaunchConfig(
-          quranSessionsEnabled: true,
-          learnQuranStudentFeatureEnabled: false,
-        ),
+        const AppLaunchConfig(),
       )
       ..registerSingleton<AnalyticsService>(analytics);
 

@@ -158,14 +158,6 @@ abstract final class _LaunchEnvironment {
     'TILAWA_LAUNCH_NOTIFICATION_PERMISSION_REQUEST',
     defaultValue: true,
   );
-  static const bool quranSessionsEnabled = bool.fromEnvironment(
-    'TILAWA_LAUNCH_QURAN_SESSIONS_ENABLED',
-    defaultValue: true,
-  );
-  static const bool learnQuranStudentFeatureEnabled = bool.fromEnvironment(
-    'TILAWA_LAUNCH_LEARN_QURAN_STUDENT_FEATURE_ENABLED',
-    defaultValue: false,
-  );
   static const bool teacherDashboardSummaryReadEnabled = bool.fromEnvironment(
     'TILAWA_LAUNCH_TEACHER_DASHBOARD_SUMMARY_READ_ENABLED',
     defaultValue: stagingFlagsOn,
@@ -178,39 +170,9 @@ abstract final class _LaunchEnvironment {
     'TILAWA_LAUNCH_MULTI_DEVICE_LOGIN_ENABLED',
     defaultValue: stagingFlagsOn,
   );
-  static const bool teacherApplicationEntryEnabled = bool.fromEnvironment(
-    'TILAWA_LAUNCH_TEACHER_APPLICATION_ENTRY_ENABLED',
-    defaultValue: false,
-  );
-  static const bool homeTeacherApplicationCardEnabled = bool.fromEnvironment(
-    'TILAWA_LAUNCH_HOME_TEACHER_APPLICATION_CARD_ENABLED',
-    defaultValue: false,
-  );
   static const String teacherApplicationFormUrl = String.fromEnvironment(
     'TILAWA_LAUNCH_TEACHER_APPLICATION_FORM_URL',
     defaultValue: kDefaultTeacherApplicationFormUrl,
-  );
-  static const bool teacherApplicationEnabled = bool.fromEnvironment(
-    'TILAWA_LAUNCH_TEACHER_APPLICATION_ENABLED',
-    defaultValue: stagingFlagsOn,
-  );
-  static const String teacherApplicationDiscoverability =
-      String.fromEnvironment(
-        'TILAWA_LAUNCH_TEACHER_APPLICATION_DISCOVERABILITY',
-        defaultValue: 'profileAndEmptyState',
-      );
-  static const bool quranSessionsBookingEnabled = bool.fromEnvironment(
-    'TILAWA_LAUNCH_QURAN_SESSIONS_BOOKING_ENABLED',
-    defaultValue: stagingFlagsOn,
-  );
-  static const bool quranSessionsPaidBookingSandboxEnabled =
-      bool.fromEnvironment(
-        'TILAWA_LAUNCH_QURAN_SESSIONS_PAID_BOOKING_SANDBOX_ENABLED',
-        defaultValue: false,
-      );
-  static const String enabledCallProvidersCsv = String.fromEnvironment(
-    'TILAWA_LAUNCH_ENABLED_CALL_PROVIDERS',
-    defaultValue: stagingFlagsOn ? 'external,mock,livekit' : 'external,mock',
   );
   static const String agoraAppId = String.fromEnvironment(
     'TILAWA_LAUNCH_AGORA_APP_ID',
@@ -258,19 +220,10 @@ class AppLaunchConfig extends Equatable {
     this.smartKhatmaEnabled = false,
     this.todayPlanEnabled = false,
     this.notificationPermissionRequest = true,
-    this.quranSessionsEnabled = true,
-    this.learnQuranStudentFeatureEnabled = false,
     this.teacherDashboardSummaryReadEnabled = false,
     this.deviceRegistryWriteEnabled = false,
     this.multiDeviceLoginEnabled = false,
-    this.teacherApplicationEntryEnabled = false,
-    this.homeTeacherApplicationCardEnabled = false,
     this.teacherApplicationFormUrl = kDefaultTeacherApplicationFormUrl,
-    this.teacherApplicationEnabled = false,
-    this.teacherApplicationDiscoverability = 'profileAndEmptyState',
-    this.quranSessionsBookingEnabled = false,
-    this.quranSessionsPaidBookingSandboxEnabled = false,
-    this.enabledCallProvidersCsv = 'external,mock',
     this.agoraAppId = '',
     this.livekitServerUrl = '',
     this.genUiAssistantEnabled = false,
@@ -309,26 +262,11 @@ class AppLaunchConfig extends Equatable {
       todayPlanEnabled: _LaunchEnvironment.todayPlanEnabled,
       notificationPermissionRequest:
           _LaunchEnvironment.notificationPermissionRequest,
-      quranSessionsEnabled: _LaunchEnvironment.quranSessionsEnabled,
-      learnQuranStudentFeatureEnabled:
-          _LaunchEnvironment.learnQuranStudentFeatureEnabled,
       teacherDashboardSummaryReadEnabled:
           _LaunchEnvironment.teacherDashboardSummaryReadEnabled,
       deviceRegistryWriteEnabled: _LaunchEnvironment.deviceRegistryWriteEnabled,
       multiDeviceLoginEnabled: _LaunchEnvironment.multiDeviceLoginEnabled,
-      teacherApplicationEntryEnabled:
-          _LaunchEnvironment.teacherApplicationEntryEnabled,
-      homeTeacherApplicationCardEnabled:
-          _LaunchEnvironment.homeTeacherApplicationCardEnabled,
       teacherApplicationFormUrl: _LaunchEnvironment.teacherApplicationFormUrl,
-      teacherApplicationEnabled: _LaunchEnvironment.teacherApplicationEnabled,
-      teacherApplicationDiscoverability:
-          _LaunchEnvironment.teacherApplicationDiscoverability,
-      quranSessionsBookingEnabled:
-          _LaunchEnvironment.quranSessionsBookingEnabled,
-      quranSessionsPaidBookingSandboxEnabled:
-          _LaunchEnvironment.quranSessionsPaidBookingSandboxEnabled,
-      enabledCallProvidersCsv: _LaunchEnvironment.enabledCallProvidersCsv,
       agoraAppId: _LaunchEnvironment.agoraAppId,
       livekitServerUrl: _LaunchEnvironment.livekitServerUrl,
       genUiAssistantEnabled: _LaunchEnvironment.genUiAssistantEnabled,
@@ -364,8 +302,6 @@ class AppLaunchConfig extends Equatable {
   final bool smartKhatmaEnabled;
   final bool todayPlanEnabled;
   final bool notificationPermissionRequest;
-  final bool quranSessionsEnabled;
-  final bool learnQuranStudentFeatureEnabled;
 
   /// One-read teacher dashboard: serve `/sessions/dashboard` from the
   /// server-maintained summary doc, falling back to per-collection reads.
@@ -386,17 +322,8 @@ class AppLaunchConfig extends Equatable {
   /// Functions env var. Default off in production, on for staging/local builds.
   final bool multiDeviceLoginEnabled;
 
-  final bool teacherApplicationEntryEnabled;
-  final bool homeTeacherApplicationCardEnabled;
-
   /// External Google Form URL opened from teacher application entry points.
   final String teacherApplicationFormUrl;
-
-  final bool teacherApplicationEnabled;
-  final String teacherApplicationDiscoverability;
-  final bool quranSessionsBookingEnabled;
-  final bool quranSessionsPaidBookingSandboxEnabled;
-  final String enabledCallProvidersCsv;
 
   /// Agora App ID — used only when Admin config enables `agora`.
   final String agoraAppId;
@@ -443,19 +370,10 @@ class AppLaunchConfig extends Equatable {
     smartKhatmaEnabled,
     todayPlanEnabled,
     notificationPermissionRequest,
-    quranSessionsEnabled,
-    learnQuranStudentFeatureEnabled,
     teacherDashboardSummaryReadEnabled,
     deviceRegistryWriteEnabled,
     multiDeviceLoginEnabled,
-    teacherApplicationEntryEnabled,
-    homeTeacherApplicationCardEnabled,
     teacherApplicationFormUrl,
-    teacherApplicationEnabled,
-    teacherApplicationDiscoverability,
-    quranSessionsBookingEnabled,
-    quranSessionsPaidBookingSandboxEnabled,
-    enabledCallProvidersCsv,
     agoraAppId,
     livekitServerUrl,
     genUiAssistantEnabled,

@@ -315,7 +315,7 @@ void main() {
 
     if (!getIt.isRegistered<AppLaunchConfig>()) {
       getIt.registerSingleton<AppLaunchConfig>(
-        const AppLaunchConfig(quranSessionsEnabled: false),
+        const AppLaunchConfig(),
       );
     }
     addTearDown(() async {
@@ -521,10 +521,7 @@ void main() {
 
       if (!getIt.isRegistered<AppLaunchConfig>()) {
         getIt.registerSingleton<AppLaunchConfig>(
-          const AppLaunchConfig(
-            quranSessionsEnabled: true,
-            learnQuranStudentFeatureEnabled: true,
-          ),
+          const AppLaunchConfig(),
         );
       }
       addTearDown(() async {
