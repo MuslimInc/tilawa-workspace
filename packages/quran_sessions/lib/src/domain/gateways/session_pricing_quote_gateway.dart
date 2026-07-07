@@ -9,4 +9,11 @@ abstract interface class SessionPricingQuoteGateway {
   Future<Either<QuranSessionsFailure, SessionPricingQuote>> getPricingQuote({
     required String teacherId,
   });
+
+  /// Batch variant (`getBookingPricingQuotes` callable): resolves the shared
+  /// student/market/platform context once and returns a `teacherId → quote`
+  /// map, eliminating the per-teacher N+1 on list load. A teacher id absent
+  /// from the returned map has no quote (treated as transiently unresolved).
+  Future<Either<QuranSessionsFailure, Map<String, SessionPricingQuote>>>
+  getPricingQuotes({required List<String> teacherIds});
 }

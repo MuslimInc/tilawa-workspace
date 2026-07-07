@@ -10,6 +10,24 @@
     </p>
   </header>
 
+  <div class="tilawa-pricing-panel__status">
+    <dl class="tilawa-pricing-panel__status-grid">
+      <dt>{{ 'teacherPricing_sourceLabel' | t }}</dt>
+      <dd>{{ effectivePricingSourceKey() | t }}</dd>
+      <dt>{{ 'teacherPricing_effectiveLabel' | t }}</dt>
+      <dd>
+        @if (effectivePriceKey()) {
+          {{ effectivePriceKey() | t }}
+        } @else {
+          {{ effectivePriceValue() }}
+        }
+      </dd>
+    </dl>
+    <p class="tilawa-pricing-panel__bookability-note">
+      {{ 'teacherPricing_bookabilityNote' | t }}
+    </p>
+  </div>
+
   <form (ngSubmit)="onSubmit()">
     <fieldset class="tilawa-pricing-panel__modes" [disabled]="isSubmitting()">
       <label>

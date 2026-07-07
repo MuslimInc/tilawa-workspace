@@ -11,8 +11,10 @@ import 'package:quran_sessions/src/domain/entities/session_pricing_quote.dart';
 import 'package:quran_sessions/src/domain/entities/session_pricing_type.dart';
 import 'package:quran_sessions/src/domain/failures/quran_sessions_failure.dart';
 import 'package:quran_sessions/src/domain/usecases/get_booking_pricing_quote_usecase.dart';
+// GetBookingPricingQuotesUseCase (batch) lives in the same file as the single.
 import 'package:quran_sessions/src/domain/usecases/get_teacher_availability_usecase.dart';
 import 'package:quran_sessions/src/domain/usecases/get_teachers_usecase.dart';
+import 'package:quran_sessions/src/domain/usecases/resolve_teacher_list_usecase.dart';
 import 'package:quran_sessions/src/presentation/models/teacher_availability_summary.dart';
 import 'package:quran_sessions/src/presentation/blocs/teacher_list/teacher_list_bloc.dart';
 import 'package:quran_sessions/src/presentation/blocs/teacher_list/teacher_list_event.dart';
@@ -22,6 +24,33 @@ import '../../helpers/fakes/fake_session_pricing_quote_gateway.dart';
 import '../../helpers/fakes/fake_teacher_repository.dart';
 import '../../helpers/availability_test_helpers.dart';
 import '../../helpers/fixtures.dart';
+
+/// Free, bookable quote — the row stays visible in the teacher list.
+const _freeQuote = SessionPricingQuote(
+  pricingType: SessionPricingType.free,
+  amount: 0,
+  currencyCode: 'EGP',
+  paymentRequired: false,
+  paymentProviderAvailable: false,
+  bookingEnabled: true,
+  quranSessionsEnabled: true,
+  effectivePricingSource: EffectivePricingSource.marketConfig,
+  blockReason: BookingBlockReason.none,
+);
+
+/// Paid quote while the payment provider is disabled — a non-transient block,
+/// so the teacher-list filter must hide the row.
+const _paidUnavailableQuote = SessionPricingQuote(
+  pricingType: SessionPricingType.fixedPerSession,
+  amount: 100,
+  currencyCode: 'EGP',
+  paymentRequired: true,
+  paymentProviderAvailable: false,
+  bookingEnabled: true,
+  quranSessionsEnabled: true,
+  effectivePricingSource: EffectivePricingSource.marketConfig,
+  blockReason: BookingBlockReason.paymentProviderUnavailable,
+);
 
 class _StaticAvailabilityUseCase extends GetTeacherAvailabilityUseCase {
   _StaticAvailabilityUseCase(this.slots)
@@ -50,7 +79,7 @@ void main() {
   setUp(() {
     repo = FakeTeacherRepository();
     bloc = TeacherListBloc(
-      GetTeachersUseCase(repo),
+      ResolveTeacherListUseCase(GetTeachersUseCase(repo)),
       _StaticAvailabilityUseCase(const {}),
     );
   });
@@ -82,7 +111,7 @@ void main() {
         final DateTime slotStart = DateTime.now().add(const Duration(hours: 2));
         repo.teachers = [makeTeacher(id: 'teacher_with_slots')];
         return TeacherListBloc(
-          GetTeachersUseCase(repo),
+          ResolveTeacherListUseCase(GetTeachersUseCase(repo)),
           _StaticAvailabilityUseCase({
             'teacher_with_slots': [
               makeSlot(
@@ -166,37 +195,86 @@ void main() {
     );
 
     blocTest<TeacherListBloc, TeacherListState>(
-      'exposes one market pricing quote for all rows when available',
+      'hides every teacher and emits NoBookableTeachers when all quotes are '
+      'paid while the payment provider is unavailable',
       build: () {
         repo.teachers = [makeTeacher(id: 't1'), makeTeacher(id: 't2')];
         return TeacherListBloc(
-          GetTeachersUseCase(repo),
+          ResolveTeacherListUseCase(
+            GetTeachersUseCase(repo),
+            getPricingQuote: GetBookingPricingQuoteUseCase(
+              FakeSessionPricingQuoteGateway(quote: _paidUnavailableQuote),
+            ),
+          ),
           _StaticAvailabilityUseCase(const {}),
-          getPricingQuote: GetBookingPricingQuoteUseCase(
-            FakeSessionPricingQuoteGateway(
-              quote: const SessionPricingQuote(
-                pricingType: SessionPricingType.fixedPerSession,
-                amount: 100,
-                currencyCode: 'EGP',
-                paymentRequired: true,
-                paymentProviderAvailable: false,
-                bookingEnabled: true,
-                quranSessionsEnabled: true,
-                effectivePricingSource: EffectivePricingSource.marketConfig,
-                blockReason: BookingBlockReason.paymentProviderUnavailable,
+        );
+      },
+      act: (b) => b.add(const LoadTeachersRequested()),
+      wait: const Duration(milliseconds: 50),
+      expect: () => [
+        isA<TeacherListLoading>(),
+        isA<TeacherListNoBookableTeachers>(),
+      ],
+    );
+
+    blocTest<TeacherListBloc, TeacherListState>(
+      'keeps bookable teachers, hides non-transient blocked ones, and exposes '
+      'per-teacher quotes',
+      build: () {
+        repo.teachers = [makeTeacher(id: 't1'), makeTeacher(id: 't2')];
+        return TeacherListBloc(
+          ResolveTeacherListUseCase(
+            GetTeachersUseCase(repo),
+            getPricingQuote: GetBookingPricingQuoteUseCase(
+              FakeSessionPricingQuoteGateway(
+                quotesByTeacher: const {
+                  't1': _freeQuote,
+                  't2': _paidUnavailableQuote,
+                },
               ),
             ),
           ),
+          _StaticAvailabilityUseCase(const {}),
         );
       },
       act: (b) => b.add(const LoadTeachersRequested()),
       wait: const Duration(milliseconds: 50),
       verify: (b) {
         final state = b.state as TeacherListSuccess;
-        final quote = state.pricingQuote;
-        check(quote).isNotNull();
-        check(quote!.isFree).isFalse();
-        check(quote.amount).equals(100);
+        // The paid+unavailable teacher (t2) is hidden from the visible list.
+        check(state.teachers.map((t) => t.id).toList()).deepEquals(['t1']);
+        // The visible row carries its own free quote.
+        check(state.pricingQuotes['t1']!.isFree).isTrue();
+      },
+    );
+
+    blocTest<TeacherListBloc, TeacherListState>(
+      'resolves the page via one batch quote call and applies the '
+      'bookability filter',
+      build: () {
+        repo.teachers = [makeTeacher(id: 't1'), makeTeacher(id: 't2')];
+        final gateway = FakeSessionPricingQuoteGateway(
+          quotesByTeacher: const {
+            't1': _freeQuote,
+            't2': _paidUnavailableQuote,
+          },
+        );
+        return TeacherListBloc(
+          ResolveTeacherListUseCase(
+            GetTeachersUseCase(repo),
+            getPricingQuote: GetBookingPricingQuoteUseCase(gateway),
+            getPricingQuotes: GetBookingPricingQuotesUseCase(gateway),
+          ),
+          _StaticAvailabilityUseCase(const {}),
+        );
+      },
+      act: (b) => b.add(const LoadTeachersRequested()),
+      wait: const Duration(milliseconds: 50),
+      verify: (b) {
+        final state = b.state as TeacherListSuccess;
+        // Batch quotes flow through the same filter: t2 (paid+unavailable) hidden.
+        check(state.teachers.map((t) => t.id).toList()).deepEquals(['t1']);
+        check(state.pricingQuotes['t1']!.isFree).isTrue();
       },
     );
 
@@ -205,11 +283,13 @@ void main() {
       build: () {
         repo.teachers = [makeTeacher(id: 't1')];
         return TeacherListBloc(
-          GetTeachersUseCase(repo),
-          _StaticAvailabilityUseCase(const {}),
-          getPricingQuote: GetBookingPricingQuoteUseCase(
-            FakeSessionPricingQuoteGateway(failure: const NetworkFailure()),
+          ResolveTeacherListUseCase(
+            GetTeachersUseCase(repo),
+            getPricingQuote: GetBookingPricingQuoteUseCase(
+              FakeSessionPricingQuoteGateway(failure: const NetworkFailure()),
+            ),
           ),
+          _StaticAvailabilityUseCase(const {}),
         );
       },
       act: (b) => b.add(const LoadTeachersRequested()),

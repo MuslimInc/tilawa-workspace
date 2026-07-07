@@ -148,6 +148,9 @@ class _TeacherListScreenState extends State<TeacherListScreen> {
                     onTeacherApplyEntry: widget.onTeacherApplyEntry,
                     onEmptyStateSeen: widget.onEmptyStateSeen,
                   ),
+          TeacherListNoBookableTeachers() => _NoBookableTeachersEmptyView(
+            onRetry: _retry,
+          ),
           TeacherListFailure(:final failure) => buildQuranSessionsFailureBody(
             context,
             failure: failure,
@@ -157,14 +160,14 @@ class _TeacherListScreenState extends State<TeacherListScreen> {
             :final teachers,
             :final availabilitySummaries,
             :final isLoadingMore,
-            :final pricingQuote,
+            :final pricingQuotes,
           ) =>
             _buildSuccessList(
               context,
               teachers: teachers,
               availabilitySummaries: availabilitySummaries,
               isLoadingMore: isLoadingMore,
-              pricingQuote: pricingQuote,
+              pricingQuotes: pricingQuotes,
             ),
         },
       ),
@@ -176,7 +179,7 @@ class _TeacherListScreenState extends State<TeacherListScreen> {
     required List<QuranTeacher> teachers,
     required Map<String, TeacherAvailabilitySummary> availabilitySummaries,
     required bool isLoadingMore,
-    SessionPricingQuote? pricingQuote,
+    required Map<String, SessionPricingQuote> pricingQuotes,
   }) {
     final l10n = context.quranSessionsL10n;
     final tokens = Theme.of(context).tokens;
@@ -243,7 +246,7 @@ class _TeacherListScreenState extends State<TeacherListScreen> {
             teacher: teacher,
             onTap: () => _onTeacherTapped(teacher.id),
             availabilitySummary: availabilitySummaries[teacher.id],
-            pricing: pricingQuote,
+            pricing: pricingQuotes[teacher.id],
           );
         },
       ),
@@ -310,6 +313,33 @@ class _TeacherListHeader extends StatelessWidget {
           ),
         ),
       ],
+    );
+  }
+}
+
+class _NoBookableTeachersEmptyView extends StatelessWidget {
+  const _NoBookableTeachersEmptyView({required this.onRetry});
+
+  final VoidCallback onRetry;
+
+  @override
+  Widget build(BuildContext context) {
+    final l10n = context.quranSessionsL10n;
+    return Center(
+      child: Padding(
+        padding: EdgeInsets.all(Theme.of(context).tokens.spaceLarge),
+        child: TilawaIllustratedState(
+          icon: Icons.hourglass_disabled_outlined,
+          title: l10n.noFreeTeachersAvailableTitle,
+          subtitle: l10n.noFreeTeachersAvailableSubtitle,
+          semanticLabel: l10n.noFreeTeachersAvailableTitle,
+          primaryAction: TilawaButton(
+            text: l10n.retry,
+            variant: TilawaButtonVariant.secondary,
+            onPressed: onRetry,
+          ),
+        ),
+      ),
     );
   }
 }

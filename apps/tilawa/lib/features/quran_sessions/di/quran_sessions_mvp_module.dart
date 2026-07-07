@@ -371,11 +371,16 @@ class QuranSessionsMvpModule {
     );
     sl.registerFactoryIfAbsent(
       () => TeacherListBloc(
-        sl<GetTeachersUseCase>(),
+        ResolveTeacherListUseCase(
+          sl<GetTeachersUseCase>(),
+          getPricingQuote: sl.isRegistered<SessionPricingQuoteGateway>()
+              ? GetBookingPricingQuoteUseCase(sl<SessionPricingQuoteGateway>())
+              : null,
+          getPricingQuotes: sl.isRegistered<SessionPricingQuoteGateway>()
+              ? GetBookingPricingQuotesUseCase(sl<SessionPricingQuoteGateway>())
+              : null,
+        ),
         sl<GetTeacherAvailabilityUseCase>(),
-        getPricingQuote: sl.isRegistered<SessionPricingQuoteGateway>()
-            ? GetBookingPricingQuoteUseCase(sl<SessionPricingQuoteGateway>())
-            : null,
       ),
     );
     sl.registerFactoryIfAbsent(

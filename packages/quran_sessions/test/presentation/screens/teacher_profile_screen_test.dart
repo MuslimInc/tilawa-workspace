@@ -4,6 +4,7 @@ import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:quran_sessions/l10n/quran_sessions_localizations.dart';
 import 'package:quran_sessions/quran_sessions.dart';
+import 'package:quran_sessions/src/presentation/widgets/booking_block_notice.dart';
 import 'package:tilawa_ui_kit/tilawa_ui_kit.dart';
 
 import '../../helpers/fixtures.dart';
@@ -157,6 +158,70 @@ void main() {
     expect(selectedTeacherId, seed.teacher.id);
     expect(selectedSlotId, isNull);
   });
+
+  testWidgets(
+    'paid teacher without payment provider shows disabled booking and block notice',
+    (
+      tester,
+    ) async {
+      final slot = makeSlot(
+        startsAt: DateTime.now().add(const Duration(days: 1)),
+      );
+
+      tester.view.physicalSize = const Size(360, 1200);
+      tester.view.devicePixelRatio = 1;
+      addTearDown(() {
+        tester.view.resetPhysicalSize();
+        tester.view.resetDevicePixelRatio();
+      });
+
+      final seed = TeacherProfileSuccess(
+        teacher: makeTeacher(avatarUrl: ''),
+        availability: [slot],
+        reviews: const [],
+        pricingQuote: const SessionPricingQuote(
+          pricingType: SessionPricingType.fixedPerSession,
+          amount: 50,
+          currencyCode: 'USD',
+          paymentRequired: true,
+          paymentProviderAvailable: false,
+          bookingEnabled: true,
+          quranSessionsEnabled: true,
+          effectivePricingSource: EffectivePricingSource.teacherOverride,
+          blockReason: BookingBlockReason.paymentProviderUnavailable,
+        ),
+      );
+
+      await tester.pumpWidget(
+        MaterialApp(
+          theme: AppTheme.getLightTheme(primaryColor: AppColors.defaultPrimary),
+          locale: const Locale('en'),
+          localizationsDelegates:
+              QuranSessionsLocalizations.localizationsDelegates,
+          supportedLocales: QuranSessionsLocalizations.supportedLocales,
+          home: QuranSessionsThemeScope(
+            child: Directionality(
+              textDirection: TextDirection.ltr,
+              child: BlocProvider<TeacherProfileBloc>.value(
+                value: TeacherProfileTestBloc(seed),
+                child: TeacherProfileScreen(
+                  teacherId: seed.teacher.id,
+                  onBookTapped: (teacherId, slotId) {},
+                ),
+              ),
+            ),
+          ),
+        ),
+      );
+      await tester.pump();
+      await tester.pump(const Duration(milliseconds: 500));
+
+      expect(find.byType(BookingBlockNotice), findsOneWidget);
+
+      final bookButton = tester.widget<TilawaButton>(find.byType(TilawaButton));
+      expect(bookButton.onPressed, isNull);
+    },
+  );
 
   testWidgets('hides report tutor action for launch rollout', (
     tester,

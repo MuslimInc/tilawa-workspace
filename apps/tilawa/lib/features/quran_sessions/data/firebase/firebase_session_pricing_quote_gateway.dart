@@ -41,6 +41,30 @@ class FirebaseSessionPricingQuoteGateway implements SessionPricingQuoteGateway {
     });
   }
 
+  @override
+  Future<Either<QuranSessionsFailure, Map<String, SessionPricingQuote>>>
+  getPricingQuotes({required List<String> teacherIds}) async {
+    return _perf.trace('functions_getBookingPricingQuotes', () async {
+      try {
+        final callable = _functions.httpsCallable('getBookingPricingQuotes');
+        final response = await callable.call<Map<String, dynamic>>(
+          await _sessionPayloadBuilder.withSessionEpoch({
+            'teacherIds': teacherIds,
+          }),
+        );
+        final rawQuotes = (response.data['quotes'] as Map?) ?? const {};
+        return Right(<String, SessionPricingQuote>{
+          for (final entry in rawQuotes.entries)
+            entry.key as String: _quoteFromResponse(
+              Map<String, dynamic>.from(entry.value as Map),
+            ),
+        });
+      } on FirebaseFunctionsException catch (e) {
+        return Left(mapQuranSessionsCallableFailure(e));
+      }
+    });
+  }
+
   SessionPricingQuote _quoteFromResponse(Map<String, dynamic> data) {
     final paymentRequired = data['paymentRequired'] as bool? ?? false;
     final paymentProviderAvailable =

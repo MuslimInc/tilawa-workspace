@@ -4354,6 +4354,30 @@ abstract class QuranSessionsLocalizations {
   /// In en, this message translates to:
   /// **'{count} min'**
   String tutorSessionDurationMinutes(int count);
+
+  /// No description provided for @noFreeTeachersAvailableTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'No teachers available right now'**
+  String get noFreeTeachersAvailableTitle;
+
+  /// No description provided for @noFreeTeachersAvailableSubtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Free teachers are not available at the moment. Please check back later.'**
+  String get noFreeTeachersAvailableSubtitle;
+
+  /// No description provided for @videoOnlyCallTypeLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Video call'**
+  String get videoOnlyCallTypeLabel;
+
+  /// No description provided for @teacherNotBookableForStudent.
+  ///
+  /// In en, this message translates to:
+  /// **'This teacher is not available for booking at the moment.'**
+  String get teacherNotBookableForStudent;
 }
 
 class _QuranSessionsLocalizationsDelegate

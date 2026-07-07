@@ -210,27 +210,58 @@ void main() {
     await tester.pumpAndSettle();
 
     expect(find.text('External link'), findsOneWidget);
-    expect(find.text('Voice'), findsOneWidget);
-    expect(find.text('Video'), findsOneWidget);
-
-    final voiceSemantics = tester.getSemantics(find.text('Voice'));
-    final videoSemantics = tester.getSemantics(find.text('Video'));
-    expect(voiceSemantics.flagsCollection.isEnabled, Tristate.isFalse);
-    expect(videoSemantics.flagsCollection.isEnabled, Tristate.isFalse);
-
-    await tester.tap(find.text('Voice'));
-    await tester.pump();
-
-    final externalSemantics = tester.getSemantics(find.text('External link'));
-    expect(externalSemantics.flagsCollection.isSelected, Tristate.isTrue);
-
-    expect(
-      find.text(
-        'Voice sessions are not available yet. Choose external link.',
-      ),
-      findsOneWidget,
-    );
+    // Voice and Video are no longer rendered as disabled segments; the control is hidden.
+    expect(find.text('Voice'), findsNothing);
+    expect(find.text('Video'), findsNothing);
+    expect(find.byType(TilawaSegmentedControl<SessionCallType>), findsNothing);
   });
+
+  testWidgets(
+    'videoOnly policy shows static label instead of segmented control',
+    (
+      tester,
+    ) async {
+      final slots = [_slot(1)];
+
+      await tester.pumpWidget(
+        MaterialApp(
+          theme: AppTheme.getLightTheme(primaryColor: AppColors.defaultPrimary),
+          localizationsDelegates: const [
+            QuranSessionsLocalizations.delegate,
+            GlobalMaterialLocalizations.delegate,
+            GlobalWidgetsLocalizations.delegate,
+          ],
+          supportedLocales: QuranSessionsLocalizations.supportedLocales,
+          home: BlocProvider<BookingBloc>(
+            create: (_) => SeededBookingBloc(
+              seed: BookingSelecting(
+                teacherId: 'teacher_1',
+                availableSlots: slots,
+                selectedSlot: slots.first,
+                selectedCallType: SessionCallType.videoCall,
+                teacherExternalMeetingUrl: null,
+              ),
+            ),
+            child: const BookingScreen(
+              teacherId: 'teacher_1',
+              studentId: 'student_1',
+              sessionModePolicy: SessionModePolicy.videoOnly,
+            ),
+          ),
+        ),
+      );
+      await tester.pumpAndSettle();
+
+      expect(find.text('Video session'), findsOneWidget);
+      // Should NOT show segments for other types
+      expect(find.text('External link'), findsNothing);
+      expect(find.text('Voice'), findsNothing);
+      expect(
+        find.byType(TilawaSegmentedControl<SessionCallType>),
+        findsNothing,
+      );
+    },
+  );
 
   testWidgets('teacher without meeting URL disables external and selects voice', (
     tester,

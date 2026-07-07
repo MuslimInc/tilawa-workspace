@@ -8,6 +8,12 @@ import 'package:tilawa_ui_kit/tilawa_ui_kit.dart';
 import '../../helpers/fixtures.dart';
 import 'teacher_list_test_bloc.dart';
 
+/// Builds resolved list items (no pricing quote) from plain teachers for the
+/// widget-state fixtures below.
+List<TeacherListItem> _items(List<QuranTeacher> teachers) => [
+  for (final teacher in teachers) TeacherListItem(teacher: teacher),
+];
+
 void main() {
   group('TeacherListScreen', () {
     testWidgets('renders compact teacher cards with filter chips', (
@@ -28,7 +34,7 @@ void main() {
           home: BlocProvider<TeacherListBloc>(
             create: (_) => TeacherListTestBloc(
               TeacherListSuccess(
-                teachers: teachers,
+                items: _items(teachers),
                 hasMore: false,
               ),
             ),
@@ -57,7 +63,7 @@ void main() {
           home: BlocProvider<TeacherListBloc>(
             create: (_) => TeacherListTestBloc(
               TeacherListSuccess(
-                teachers: [makeTeacher(id: 't1', avatarUrl: '')],
+                items: _items([makeTeacher(id: 't1', avatarUrl: '')]),
                 hasMore: false,
               ),
             ),
@@ -92,7 +98,7 @@ void main() {
             child: BlocProvider<TeacherListBloc>(
               create: (_) => TeacherListTestBloc(
                 TeacherListSuccess(
-                  teachers: [makeTeacher(id: 't1', avatarUrl: '')],
+                  items: _items([makeTeacher(id: 't1', avatarUrl: '')]),
                   hasMore: false,
                 ),
               ),
@@ -146,7 +152,7 @@ void main() {
             child: BlocProvider<TeacherListBloc>(
               create: (_) => TeacherListTestBloc(
                 TeacherListSuccess(
-                  teachers: teachers,
+                  items: _items(teachers),
                   hasMore: false,
                   availabilitySummaries: {
                     't1':
@@ -231,7 +237,7 @@ void main() {
           home: BlocProvider<TeacherListBloc>(
             create: (_) => TeacherListTestBloc(
               TeacherListSuccess(
-                teachers: [makeTeacher(id: 't1', avatarUrl: '')],
+                items: _items([makeTeacher(id: 't1', avatarUrl: '')]),
                 hasMore: false,
               ),
             ),
@@ -266,7 +272,7 @@ void main() {
           home: BlocProvider<TeacherListBloc>(
             create: (_) => TeacherListTestBloc(
               TeacherListSuccess(
-                teachers: teachers,
+                items: _items(teachers),
                 hasMore: false,
               ),
             ),

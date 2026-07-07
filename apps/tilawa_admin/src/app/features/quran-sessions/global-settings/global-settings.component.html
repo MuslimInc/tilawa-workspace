@@ -44,6 +44,41 @@
           </label>
         </div>
 
+        <!-- Tutor / Teacher Application Entry -->
+        <div class="space-y-4 pb-6 border-b border-gray-200">
+          <h3 class="text-lg font-medium">{{ 'globalSettings_tutorEntry' | t }}</h3>
+
+          <label class="tilawa-checkbox-label">
+            <input type="checkbox" id="teacherApplicationEnabled" formControlName="teacherApplicationEnabled" class="tilawa-checkbox">
+            <span class="text-sm text-gray-900">
+              {{ 'globalSettings_teacherApplicationEnabled' | t }}
+            </span>
+          </label>
+
+          <label class="tilawa-checkbox-label">
+            <input type="checkbox" id="teacherApplicationEntryEnabled" formControlName="teacherApplicationEntryEnabled" class="tilawa-checkbox">
+            <span class="text-sm text-gray-900">
+              {{ 'globalSettings_teacherApplicationEntryEnabled' | t }}
+            </span>
+          </label>
+
+          <label class="tilawa-checkbox-label">
+            <input type="checkbox" id="homeTeacherApplicationCardEnabled" formControlName="homeTeacherApplicationCardEnabled" class="tilawa-checkbox">
+            <span class="text-sm text-gray-900">
+              {{ 'globalSettings_homeTeacherApplicationCardEnabled' | t }}
+            </span>
+          </label>
+
+          <div class="max-w-sm">
+            <label class="block text-sm font-medium text-gray-700 mb-1">{{ 'globalSettings_teacherApplicationDiscoverability' | t }}</label>
+            <select formControlName="teacherApplicationDiscoverability" class="mt-1 block w-full pl-3 pr-10 py-2 text-base border-gray-300 focus:outline-none focus:ring-primary focus:border-primary sm:text-sm rounded-md">
+              <option value="none">{{ 'globalSettings_discoverabilityNone' | t }}</option>
+              <option value="profileOnly">{{ 'globalSettings_discoverabilityProfileOnly' | t }}</option>
+              <option value="profileAndEmptyState">{{ 'globalSettings_discoverabilityProfileAndEmptyState' | t }}</option>
+            </select>
+          </div>
+        </div>
+
         <!-- Mode Settings -->
         <div class="space-y-4 pb-6 border-b border-gray-200">
           <h3 class="text-lg font-medium">{{ 'globalSettings_modeSettings' | t }}</h3>

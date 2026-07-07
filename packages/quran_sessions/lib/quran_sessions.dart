@@ -217,6 +217,8 @@ export 'src/domain/usecases/get_weekly_schedule_usecase.dart';
 export 'src/domain/usecases/get_teacher_profile_usecase.dart';
 export 'src/domain/usecases/get_teacher_sessions_usecase.dart';
 export 'src/domain/usecases/get_teachers_usecase.dart';
+export 'src/domain/usecases/resolve_teacher_list_usecase.dart';
+export 'src/domain/entities/teacher_list_item.dart';
 export 'src/domain/usecases/get_user_profile_usecase.dart';
 export 'src/domain/usecases/get_wallet_snapshot_usecase.dart';
 export 'src/domain/usecases/resolve_teacher_application_access_usecase.dart';

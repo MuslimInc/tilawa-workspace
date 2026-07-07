@@ -4,6 +4,17 @@ import { getFirestore, FieldValue } from "firebase-admin/firestore";
 import { requireAdmin } from "./sessionAuth";
 import { sessionCallableHttpsOptions } from "./sessionCallableOptions";
 
+export type TeacherApplicationDiscoverability =
+  | "none"
+  | "profileOnly"
+  | "profileAndEmptyState";
+
+const DISCOVERABILITY_VALUES: readonly TeacherApplicationDiscoverability[] = [
+  "none",
+  "profileOnly",
+  "profileAndEmptyState",
+];
+
 export interface UpdatePlatformConfigRequest {
   quranSessionsEnabled: boolean;
   studentEntryEnabled: boolean;
@@ -17,6 +28,35 @@ export interface UpdatePlatformConfigRequest {
   defaultMinBookingNoticeMs: number;
   defaultMaxUpcomingPerStudent: number;
   childAgeThreshold?: number;
+  // Tutor (teacher application) entry — admin-controlled. Optional so legacy
+  // callers keep working; when omitted, `{ merge: true }` preserves the
+  // existing Firestore values instead of clobbering them.
+  teacherApplicationEnabled?: boolean;
+  teacherApplicationEntryEnabled?: boolean;
+  homeTeacherApplicationCardEnabled?: boolean;
+  teacherApplicationDiscoverability?: TeacherApplicationDiscoverability;
+}
+
+/** Collects only the tutor-entry fields that were explicitly provided. */
+function pickTeacherApplicationFields(
+  data: Partial<UpdatePlatformConfigRequest>,
+): Record<string, boolean | string> {
+  const fields: Record<string, boolean | string> = {};
+  if (data.teacherApplicationEnabled != null) {
+    fields.teacherApplicationEnabled = data.teacherApplicationEnabled;
+  }
+  if (data.teacherApplicationEntryEnabled != null) {
+    fields.teacherApplicationEntryEnabled = data.teacherApplicationEntryEnabled;
+  }
+  if (data.homeTeacherApplicationCardEnabled != null) {
+    fields.homeTeacherApplicationCardEnabled =
+      data.homeTeacherApplicationCardEnabled;
+  }
+  if (data.teacherApplicationDiscoverability != null) {
+    fields.teacherApplicationDiscoverability =
+      data.teacherApplicationDiscoverability;
+  }
+  return fields;
 }
 
 function resolveBookingMode(
@@ -62,6 +102,24 @@ export function validateUpdatePlatformConfig(data: Partial<UpdatePlatformConfigR
   ) {
     throw new HttpsError("invalid-argument", "childAgeThreshold must be a finite number > 0.");
   }
+  validateOptionalBoolean(data.teacherApplicationEnabled, "teacherApplicationEnabled");
+  validateOptionalBoolean(data.teacherApplicationEntryEnabled, "teacherApplicationEntryEnabled");
+  validateOptionalBoolean(data.homeTeacherApplicationCardEnabled, "homeTeacherApplicationCardEnabled");
+  if (
+    data.teacherApplicationDiscoverability != null &&
+    !DISCOVERABILITY_VALUES.includes(data.teacherApplicationDiscoverability)
+  ) {
+    throw new HttpsError(
+      "invalid-argument",
+      "teacherApplicationDiscoverability must be one of none|profileOnly|profileAndEmptyState.",
+    );
+  }
+}
+
+function validateOptionalBoolean(value: unknown, field: string): void {
+  if (value != null && typeof value !== "boolean") {
+    throw new HttpsError("invalid-argument", `${field} must be a boolean when provided.`);
+  }
 }
 
 export const updatePlatformConfig = onCall(
@@ -72,6 +130,7 @@ export const updatePlatformConfig = onCall(
 
     validateUpdatePlatformConfig(data);
     const bookingMode = resolveBookingMode(data)!;
+    const teacherApplicationFields = pickTeacherApplicationFields(data);
 
     const db = getFirestore();
     const batch = db.batch();
@@ -88,6 +147,7 @@ export const updatePlatformConfig = onCall(
       defaultTutorApprovalSlaMs: data.defaultTutorApprovalSlaMs,
       defaultMinBookingNoticeMs: data.defaultMinBookingNoticeMs,
       defaultMaxUpcomingPerStudent: data.defaultMaxUpcomingPerStudent,
+      ...teacherApplicationFields,
       updatedBy: adminUid,
       updatedAt: FieldValue.serverTimestamp(),
     }, { merge: true });
@@ -109,6 +169,7 @@ export const updatePlatformConfig = onCall(
       defaultTutorApprovalSlaMs: data.defaultTutorApprovalSlaMs,
       defaultMinBookingNoticeMs: data.defaultMinBookingNoticeMs,
       defaultMaxUpcomingPerStudent: data.defaultMaxUpcomingPerStudent,
+      ...teacherApplicationFields,
     });
 
     await batch.commit();

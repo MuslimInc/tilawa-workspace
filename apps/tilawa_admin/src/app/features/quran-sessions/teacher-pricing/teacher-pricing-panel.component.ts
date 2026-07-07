@@ -26,6 +26,7 @@ import { TeacherPricingFacade, TeacherPricingMode } from './teacher-pricing.faca
   changeDetection: ChangeDetectionStrategy.OnPush,
   imports: [CommonModule, FormsModule, TranslatePipe, TilawaButtonComponent],
   templateUrl: './teacher-pricing-panel.component.html',
+  styleUrl: './teacher-pricing-panel.component.css',
 })
 export class TeacherPricingPanelComponent implements OnInit {
   private readonly facade = inject(TeacherPricingFacade);
@@ -63,6 +64,39 @@ export class TeacherPricingPanelComponent implements OnInit {
   currentSummaryValue(): string {
     const override = this.teacher.sessionPriceOverride;
     if (!override?.enabled || !override.amount || override.amount <= 0) return '';
+    return `${override.amount} ${override.currencyCode ?? ''}`.trim();
+  }
+
+  /**
+   * i18n key for the pricing-source row. Authoritative for *this* teacher's
+   * override (the value the admin is editing); mirrors the server's
+   * `effectivePricingSource` for the override-vs-market distinction.
+   */
+  effectivePricingSourceKey(): string {
+    return this.teacher.sessionPriceOverride?.enabled
+      ? 'teacherPricing_sourceOverride'
+      : 'teacherPricing_sourceMarket';
+  }
+
+  /**
+   * i18n key for the effective-price row, or '' when a raw amount is shown
+   * (see [effectivePriceValue]).
+   */
+  effectivePriceKey(): string {
+    const override = this.teacher.sessionPriceOverride;
+    if (!override?.enabled) return 'teacherPricing_effectiveInherit';
+    if (!override.amount || override.amount <= 0) {
+      return 'teacherPricing_effectiveFree';
+    }
+    return '';
+  }
+
+  /** Raw effective price when a fixed override is set; '' otherwise. */
+  effectivePriceValue(): string {
+    const override = this.teacher.sessionPriceOverride;
+    if (!override?.enabled || !override.amount || override.amount <= 0) {
+      return '';
+    }
     return `${override.amount} ${override.currencyCode ?? ''}`.trim();
   }
 

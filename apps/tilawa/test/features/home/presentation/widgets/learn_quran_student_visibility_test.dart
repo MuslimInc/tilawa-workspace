@@ -1,5 +1,7 @@
 import 'package:checks/checks.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:tilawa/features/quran_sessions/quran_sessions_platform_config_store.dart';
+import 'package:tilawa/features/quran_sessions/domain/entities/quran_sessions_platform_config.dart';
 import 'package:quran_sessions/quran_sessions.dart';
 import 'package:tilawa/core/bootstrap/app_launch_config.dart';
 import 'package:tilawa/core/di/injection.dart';
@@ -10,6 +12,9 @@ void main() {
     if (getIt.isRegistered<AppLaunchConfig>()) {
       await getIt.unregister<AppLaunchConfig>();
     }
+    if (getIt.isRegistered<QuranSessionsPlatformConfigStore>()) {
+      await getIt.unregister<QuranSessionsPlatformConfigStore>();
+    }
   });
 
   group('LearnQuranStudentVisibility', () {
@@ -18,6 +23,22 @@ void main() {
         const AppLaunchConfig(
           quranSessionsEnabled: true,
           learnQuranStudentFeatureEnabled: true,
+        ),
+      );
+      getIt.registerSingleton<QuranSessionsPlatformConfigStore>(
+        QuranSessionsPlatformConfigStore()..setConfig(
+          QuranSessionsPlatformConfig(
+            quranSessionsEnabled: true,
+            studentEntryEnabled: true,
+            bookingEnabled: true,
+            bookingMode: 'requiresTutorApproval',
+            sessionMode: 'videoOnly',
+            enabledCallProviders: {'mock'},
+            teacherApplicationEnabled: false,
+            teacherApplicationEntryEnabled: false,
+            homeTeacherApplicationCardEnabled: false,
+            teacherApplicationDiscoverability: 'none',
+          ),
         ),
       );
 
@@ -35,6 +56,22 @@ void main() {
           learnQuranStudentFeatureEnabled: true,
         ),
       );
+      getIt.registerSingleton<QuranSessionsPlatformConfigStore>(
+        QuranSessionsPlatformConfigStore()..setConfig(
+          QuranSessionsPlatformConfig(
+            quranSessionsEnabled: true,
+            studentEntryEnabled: true,
+            bookingEnabled: true,
+            bookingMode: 'requiresTutorApproval',
+            sessionMode: 'videoOnly',
+            enabledCallProviders: {'mock'},
+            teacherApplicationEnabled: false,
+            teacherApplicationEntryEnabled: false,
+            homeTeacherApplicationCardEnabled: false,
+            teacherApplicationDiscoverability: 'none',
+          ),
+        ),
+      );
 
       final show = LearnQuranStudentVisibility.shouldShowHomeCard(
         capabilityLoaded: true,
@@ -50,6 +87,22 @@ void main() {
         const AppLaunchConfig(
           quranSessionsEnabled: true,
           learnQuranStudentFeatureEnabled: true,
+        ),
+      );
+      getIt.registerSingleton<QuranSessionsPlatformConfigStore>(
+        QuranSessionsPlatformConfigStore()..setConfig(
+          QuranSessionsPlatformConfig(
+            quranSessionsEnabled: true,
+            studentEntryEnabled: true,
+            bookingEnabled: true,
+            bookingMode: 'requiresTutorApproval',
+            sessionMode: 'videoOnly',
+            enabledCallProviders: {'mock'},
+            teacherApplicationEnabled: false,
+            teacherApplicationEntryEnabled: false,
+            homeTeacherApplicationCardEnabled: false,
+            teacherApplicationDiscoverability: 'none',
+          ),
         ),
       );
 

@@ -29,7 +29,7 @@ class _StaticAvailabilityUseCase extends GetTeacherAvailabilityUseCase {
 class TeacherListTestBloc extends TeacherListBloc {
   TeacherListTestBloc(TeacherListState seed)
     : super(
-        GetTeachersUseCase(FakeTeacherRepository()),
+        ResolveTeacherListUseCase(GetTeachersUseCase(FakeTeacherRepository())),
         _StaticAvailabilityUseCase(const {}),
       ) {
     emit(seed);

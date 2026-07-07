@@ -14,3 +14,15 @@ class GetBookingPricingQuoteUseCase {
     required String teacherId,
   }) => _gateway.getPricingQuote(teacherId: teacherId);
 }
+
+/// Fetches server-authoritative price previews for many teachers in one call,
+/// so the discovery list resolves a whole page without a per-teacher N+1.
+class GetBookingPricingQuotesUseCase {
+  const GetBookingPricingQuotesUseCase(this._gateway);
+
+  final SessionPricingQuoteGateway _gateway;
+
+  Future<Either<QuranSessionsFailure, Map<String, SessionPricingQuote>>> call({
+    required List<String> teacherIds,
+  }) => _gateway.getPricingQuotes(teacherIds: teacherIds);
+}

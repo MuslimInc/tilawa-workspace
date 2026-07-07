@@ -3,6 +3,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:quran_sessions/core/l10n_extensions.dart';
 import 'package:tilawa_ui_kit/tilawa_ui_kit.dart';
 
+import '../../domain/entities/booking_block_reason.dart';
 import '../../domain/entities/quran_teacher.dart';
 import '../../domain/entities/session_call_type.dart';
 import '../../domain/policies/session_mode_policy.dart';
@@ -18,6 +19,7 @@ import '../blocs/teacher_profile/teacher_profile_event.dart';
 import '../blocs/teacher_profile/teacher_profile_state.dart';
 import '../theme/quran_sessions_status_colors.dart';
 import '../widgets/availability_slot_picker.dart';
+import '../widgets/booking_block_notice.dart';
 import '../widgets/paid_session_notice.dart';
 import '../widgets/quran_session_price_chip.dart';
 import '../widgets/quran_sessions_scaffold.dart';
@@ -100,7 +102,11 @@ class _TeacherProfileScreenState extends State<TeacherProfileScreen> {
                     !_isTeacherMarketplaceVisible(state.teacher)) {
                   return const SizedBox.shrink();
                 }
+                final blocked = _isNonTransientBlock(
+                  state.pricingQuote?.blockReason,
+                );
                 final canBook =
+                    !blocked &&
                     !state.isLoadingAvailability &&
                     state.availability.isNotEmpty;
                 return TilawaBottomActionArea(
@@ -208,6 +214,14 @@ bool _isTeacherMarketplaceVisible(QuranTeacher teacher) {
   return ValidateTeacherPublicName.isValid(teacher.displayName) &&
       teacher.bio.trim().isNotEmpty &&
       teacher.isVerified;
+}
+
+/// True when the block reason is server-authoritative and non-transient.
+/// Transient = `none` (bookable) or `pricingQuoteUnavailable` (retry).
+bool _isNonTransientBlock(BookingBlockReason? reason) {
+  if (reason == null) return false;
+  return reason != BookingBlockReason.none &&
+      reason != BookingBlockReason.pricingQuoteUnavailable;
 }
 
 class _TeacherProfileUnavailableBody extends StatelessWidget {
@@ -352,6 +366,15 @@ class _TeacherProfileBodyState extends State<_TeacherProfileBody> {
         if (widget.teacher.manualPaymentPrice case final manualPrice?) ...[
           SizedBox(height: tokens.spaceSmall),
           PaidSessionNotice(price: manualPrice),
+        ],
+        if (widget.pricingQuote != null &&
+            _isNonTransientBlock(
+              widget.pricingQuote!.blockReason,
+            )) ...[
+          SizedBox(height: tokens.spaceSmall),
+          BookingBlockNotice(
+            blockReason: widget.pricingQuote!.blockReason,
+          ),
         ],
         if (bio.isNotEmpty) ...[
           SizedBox(height: tokens.spaceSmall),

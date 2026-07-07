@@ -598,6 +598,34 @@ class _CallTypePicker extends StatelessWidget {
       );
     }
 
+    // Single enabled type (e.g. video-only rollout): show a static label
+    // instead of a segmented control with disabled segments.
+    if (enabledSegments.length == 1) {
+      final type = enabledSegments.first.value;
+      final label = type == SessionCallType.videoCall
+          ? l10n.videoOnlyCallTypeLabel
+          : enabledSegments.first.label;
+      return Row(
+        children: [
+          Icon(
+            Icons.videocam_outlined,
+            size: tokens.iconSizeSmall,
+            color: scheme.primary,
+          ),
+          SizedBox(width: tokens.spaceExtraSmall),
+          Expanded(
+            child: Text(
+              label,
+              style: theme.textTheme.titleSmall?.copyWith(
+                fontWeight: FontWeight.w600,
+                color: scheme.onSurface,
+              ),
+            ),
+          ),
+        ],
+      );
+    }
+
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [

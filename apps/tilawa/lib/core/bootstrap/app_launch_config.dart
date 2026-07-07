@@ -68,7 +68,7 @@ abstract final class _LaunchEnvironment {
   );
   static const bool blocObserver = bool.fromEnvironment(
     'TILAWA_LAUNCH_BLOC_OBSERVER',
-    defaultValue: false,
+    defaultValue: kDebugMode,
   );
   static const bool notificationLaunchProbe = bool.fromEnvironment(
     'TILAWA_LAUNCH_NOTIFICATION_LAUNCH_PROBE',

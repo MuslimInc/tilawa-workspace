@@ -1,4 +1,4 @@
-import { Firestore, Timestamp } from "firebase-admin/firestore";
+import { Firestore, Timestamp, DocumentSnapshot } from "firebase-admin/firestore";
 
 import { lifecycleError } from "./lifecycleErrors";
 import {
@@ -81,6 +81,22 @@ export interface BookingEligibilityContext {
   pricing: ResolvedPricing;
   /** Provenance of [pricing] — teacher override vs market default. */
   pricingSource: PricingSource;
+}
+
+/**
+ * The student/market/platform slice of a booking context — everything that does
+ * NOT depend on which teacher is being priced. Resolved once and shared across a
+ * batch of teachers so a list-load prices N teachers with 1 student+market read
+ * plus N teacher reads, instead of re-reading the shared context N times.
+ */
+export interface SharedBookingContext {
+  platform: PlatformFeaturePolicy;
+  student: StudentEligibilityProfile;
+  policy: GlobalSafetyPolicy;
+  market: ResolvedMarketPolicy;
+  marketEnabled: boolean;
+  /** Market-default pricing before any per-teacher override is applied. */
+  marketPricing: ResolvedPricing;
 }
 
 // ── Pure helpers (unit-tested, no I/O) ──────────────────────────────────────
@@ -368,23 +384,12 @@ function parseAllowedStudentGender(raw: unknown): AllowedStudentGender {
   return "both";
 }
 
-export async function loadBookingEligibilityContext(
-  db: Firestore,
-  studentId: string,
-  teacherId: string,
-): Promise<BookingEligibilityContext> {
-  const [studentSnap, teacherSnap, policySnap] = await Promise.all([
-    db.collection("users").doc(studentId).get(),
-    db.collection("quran_teacher_profiles").doc(teacherId).get(),
-    db.collection("quran_session_platform_config").doc("global").get(),
-  ]);
-
-  const platformConfig = policySnap.data() ?? {};
-  const platform = parsePlatformFeaturePolicy(platformConfig);
-
+function parseStudentProfile(
+  studentSnap: DocumentSnapshot,
+): StudentEligibilityProfile {
   const studentProfile =
     (studentSnap.data()?.quranSessionsProfile as Record<string, unknown>) ?? {};
-  const student: StudentEligibilityProfile = {
+  return {
     exists: studentSnap.exists && studentSnap.data()?.quranSessionsProfile != null,
     accountStatus: (studentProfile.accountStatus as string) ?? "active",
     gender: parseGender(studentProfile.gender),
@@ -393,24 +398,56 @@ export async function loadBookingEligibilityContext(
     cityId: (studentProfile.cityId as string) ?? null,
     restrictionReason: (studentProfile.restrictionReason as string) ?? null,
   };
+}
 
+function parseTeacherEligibilityProfile(
+  teacherSnap: DocumentSnapshot,
+): TeacherEligibilityProfile {
   const teacherData = teacherSnap.data() ?? {};
-  const teacher: TeacherEligibilityProfile = {
+  return {
     exists: teacherSnap.exists,
     verificationStatus: (teacherData.verificationStatus as string) ?? "pending",
     gender: parseGender(teacherData.gender) ?? "male",
     allowedStudentGender: parseAllowedStudentGender(teacherData.allowedStudentGender),
     canTeachChildren: (teacherData.canTeachChildren as boolean) ?? true,
   };
+}
 
-  const policyData = platformConfig;
-  const policy: GlobalSafetyPolicy = {
-    childAgeThreshold: (policyData.childAgeThreshold as number) ?? 14,
+function parseGlobalSafetyPolicy(
+  platformConfig: Record<string, unknown>,
+): GlobalSafetyPolicy {
+  return {
+    childAgeThreshold: (platformConfig.childAgeThreshold as number) ?? 14,
     globalAllowMaleTeacherFemaleStudent:
-      (policyData.globalAllowMaleTeacherFemaleStudent as boolean) ?? true,
+      (platformConfig.globalAllowMaleTeacherFemaleStudent as boolean) ?? true,
     globalAllowFemaleTeacherMaleStudent:
-      (policyData.globalAllowFemaleTeacherMaleStudent as boolean) ?? true,
+      (platformConfig.globalAllowFemaleTeacherMaleStudent as boolean) ?? true,
   };
+}
+
+/**
+ * Resolves the student/market/platform context that every teacher in a batch
+ * shares. This is the expensive slice (student + platform config + market/city
+ * reads + policy overlay); resolving it once is what turns a list-load from
+ * O(N) full context loads into O(1) shared + O(N) teacher reads.
+ *
+ * Throws the same typed `lifecycleError`s as the single-teacher loader when the
+ * market/policy is not configured — those blocks are student-market-level, so a
+ * batch caller applies the resulting block to every requested teacher.
+ */
+export async function loadSharedBookingContext(
+  db: Firestore,
+  studentId: string,
+): Promise<SharedBookingContext> {
+  const [studentSnap, policySnap] = await Promise.all([
+    db.collection("users").doc(studentId).get(),
+    db.collection("quran_session_platform_config").doc("global").get(),
+  ]);
+
+  const platformConfig = policySnap.data() ?? {};
+  const platform = parsePlatformFeaturePolicy(platformConfig);
+  const student = parseStudentProfile(studentSnap);
+  const policy = parseGlobalSafetyPolicy(platformConfig);
 
   let marketEnabled = true;
   let market: ResolvedMarketPolicy = {
@@ -432,7 +469,11 @@ export async function loadBookingEligibilityContext(
     effectiveFrom: null,
     paymentProviderEnabled: false,
   };
-  let pricing: ResolvedPricing = { isPaid: false, amount: 0, currencyCode: "USD" };
+  let marketPricing: ResolvedPricing = {
+    isPaid: false,
+    amount: 0,
+    currencyCode: "USD",
+  };
 
   if (student.countryCode != null && student.cityId != null) {
     const marketSnap = await db
@@ -461,32 +502,75 @@ export async function loadBookingEligibilityContext(
       platformConfig,
     );
     marketEnabled = market.marketEnabled;
-    pricing = {
+    marketPricing = {
       isPaid: market.sessionFeeAmount > 0,
       amount: market.sessionFeeAmount,
       currencyCode: market.currencyCode,
     };
   }
 
-  // Admin-configured teacher price override wins over the market default
-  // (0 ⇒ this teacher is free even in a paid market). Applied here so the
-  // quote (getBookingPricingQuote) and the booking (createSessionBooking)
-  // share one resolution and can never disagree.
+  return { platform, student, policy, market, marketEnabled, marketPricing };
+}
+
+/**
+ * Overlays a single teacher (verification, gender rules, price override) onto a
+ * shared context to produce the full per-teacher eligibility context. Pure — no
+ * I/O — so a batch of teacher snapshots joins onto one shared context in memory.
+ *
+ * The admin-configured teacher price override wins over the market default
+ * (0 ⇒ this teacher is free even in a paid market). Applied here so the quote
+ * (getBookingPricingQuote[s]) and the booking (createSessionBooking) share one
+ * resolution and can never disagree.
+ */
+export function buildTeacherBookingContext(
+  shared: SharedBookingContext,
+  teacherSnap: DocumentSnapshot,
+): BookingEligibilityContext {
+  const teacherData = teacherSnap.data() ?? {};
+  const teacher = parseTeacherEligibilityProfile(teacherSnap);
   const teacherOverride = parseTeacherPricingOverride(
     teacherData.sessionPriceOverride,
   );
-  const resolved = resolvePricingWithOverride(pricing, teacherOverride);
+  const resolved = resolvePricingWithOverride(
+    shared.marketPricing,
+    teacherOverride,
+  );
 
   return {
-    platform,
-    student,
+    platform: shared.platform,
+    student: shared.student,
     teacher,
-    policy,
-    market,
-    marketEnabled,
+    policy: shared.policy,
+    market: shared.market,
+    marketEnabled: shared.marketEnabled,
     pricing: resolved.pricing,
     pricingSource: resolved.source,
   };
+}
+
+/** Reads a single teacher doc and overlays it onto [shared]. */
+export async function resolveTeacherBookingContext(
+  db: Firestore,
+  shared: SharedBookingContext,
+  teacherId: string,
+): Promise<BookingEligibilityContext> {
+  const teacherSnap = await db
+    .collection("quran_teacher_profiles")
+    .doc(teacherId)
+    .get();
+  return buildTeacherBookingContext(shared, teacherSnap);
+}
+
+export async function loadBookingEligibilityContext(
+  db: Firestore,
+  studentId: string,
+  teacherId: string,
+): Promise<BookingEligibilityContext> {
+  const [shared, teacherSnap] = await Promise.all([
+    loadSharedBookingContext(db, studentId),
+    db.collection("quran_teacher_profiles").doc(teacherId).get(),
+  ]);
+  return buildTeacherBookingContext(shared, teacherSnap);
 }
 
 /**

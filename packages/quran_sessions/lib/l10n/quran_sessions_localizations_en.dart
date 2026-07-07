@@ -2428,4 +2428,18 @@ class QuranSessionsLocalizationsEn extends QuranSessionsLocalizations {
   String tutorSessionDurationMinutes(int count) {
     return '$count min';
   }
+
+  @override
+  String get noFreeTeachersAvailableTitle => 'No teachers available right now';
+
+  @override
+  String get noFreeTeachersAvailableSubtitle =>
+      'Free teachers are not available at the moment. Please check back later.';
+
+  @override
+  String get videoOnlyCallTypeLabel => 'Video session';
+
+  @override
+  String get teacherNotBookableForStudent =>
+      'This teacher is not available for booking at the moment.';
 }

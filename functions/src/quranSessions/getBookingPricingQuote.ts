@@ -169,6 +169,24 @@ function resolveBlockReasonWithTeacher(
   return "none";
 }
 
+/**
+ * Pure batch assembly: prices every teacher against its own resolved context
+ * while sharing one `paymentProviderEnabled` flag. Unit-tested — the callable
+ * only wires the shared-context load + per-teacher reads around this.
+ */
+export function buildPricingQuotesForTeachers(
+  contexts: Record<string, BookingEligibilityContext>,
+  paymentProviderEnabled: boolean,
+): Record<string, BookingPricingQuote> {
+  const quotes: Record<string, BookingPricingQuote> = {};
+  for (const [teacherId, ctx] of Object.entries(contexts)) {
+    quotes[teacherId] = buildPricingQuote(ctx, paymentProviderEnabled, {
+      teacherId,
+    });
+  }
+  return quotes;
+}
+
 interface GetBookingPricingQuoteRequest {
   teacherId: string;
 }
@@ -188,6 +206,36 @@ function readPlatformFlags(e: unknown): {
   // Best-effort: config-missing throws carry no platform flags, so fail open to
   // `true` — the blockReason itself signals the block, not these flags.
   return { bookingEnabled: true, quranSessionsEnabled: true };
+}
+
+/**
+ * Maps a config-level lifecycle error to the typed blocked quote the client
+ * should render, or null when the error is not a config-level block and must
+ * propagate (auth/epoch/transport). Shared by the single and batch callables so
+ * both surface identical `BookingBlockReason` semantics.
+ */
+export function blockedQuoteForLifecycleError(
+  e: unknown,
+): BookingPricingQuote | null {
+  const code = lifecycleErrorCode(e);
+  if (code === "policy_not_configured") {
+    return buildBlockedPricingQuote("pricingConfigMissing", readPlatformFlags(e));
+  }
+  if (code === "feature_disabled") {
+    // Platform disabled sessions or bookings — report as admin block.
+    const platform = readPlatformFlags(e);
+    return buildBlockedPricingQuote("bookingDisabledByAdmin", {
+      bookingEnabled: false,
+      quranSessionsEnabled: platform.quranSessionsEnabled,
+    });
+  }
+  if (code === "market_not_enabled") {
+    return buildBlockedPricingQuote("marketDisabled", readPlatformFlags(e));
+  }
+  if (code === "teacher_not_whitelisted" || code === "teacher_not_verified") {
+    return buildBlockedPricingQuote("teacherNotBookable", readPlatformFlags(e));
+  }
+  return null;
 }
 
 export const getBookingPricingQuote = onCall(
@@ -210,24 +258,8 @@ export const getBookingPricingQuote = onCall(
       const ctx = await loadBookingEligibilityContext(db, uid, teacherId);
       return buildPricingQuote(ctx, isPaymentProviderEnabled(), { teacherId });
     } catch (e) {
-      const code = lifecycleErrorCode(e);
-      if (code === "policy_not_configured") {
-        return buildBlockedPricingQuote("pricingConfigMissing", readPlatformFlags(e));
-      }
-      if (code === "feature_disabled") {
-        // Platform disabled sessions or bookings — report as admin block.
-        const platform = readPlatformFlags(e);
-        return buildBlockedPricingQuote("bookingDisabledByAdmin", {
-          bookingEnabled: false,
-          quranSessionsEnabled: platform.quranSessionsEnabled,
-        });
-      }
-      if (code === "market_not_enabled") {
-        return buildBlockedPricingQuote("marketDisabled", readPlatformFlags(e));
-      }
-      if (code === "teacher_not_whitelisted" || code === "teacher_not_verified") {
-        return buildBlockedPricingQuote("teacherNotBookable", readPlatformFlags(e));
-      }
+      const blocked = blockedQuoteForLifecycleError(e);
+      if (blocked != null) return blocked;
       throw e;
     }
   },

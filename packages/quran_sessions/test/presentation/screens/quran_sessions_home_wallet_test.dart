@@ -33,9 +33,10 @@ void main() {
         ],
         supportedLocales: QuranSessionsLocalizations.supportedLocales,
         home: BlocProvider(
-          create: (_) =>
-              TeacherListBloc(GetTeachersUseCase(repo), _availabilityUseCase())
-                ..add(const LoadTeachersRequested()),
+          create: (_) => TeacherListBloc(
+            ResolveTeacherListUseCase(GetTeachersUseCase(repo)),
+            _availabilityUseCase(),
+          )..add(const LoadTeachersRequested()),
           child: QuranSessionsHomeScreen(
             featureConfig: const QuranSessionsFeatureConfig(
               walletEnabled: false,
@@ -65,9 +66,10 @@ void main() {
         ],
         supportedLocales: QuranSessionsLocalizations.supportedLocales,
         home: BlocProvider(
-          create: (_) =>
-              TeacherListBloc(GetTeachersUseCase(repo), _availabilityUseCase())
-                ..add(const LoadTeachersRequested()),
+          create: (_) => TeacherListBloc(
+            ResolveTeacherListUseCase(GetTeachersUseCase(repo)),
+            _availabilityUseCase(),
+          )..add(const LoadTeachersRequested()),
           child: QuranSessionsHomeScreen(
             featureConfig: const QuranSessionsFeatureConfig(
               walletEnabled: true,

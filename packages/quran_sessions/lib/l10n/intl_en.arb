@@ -988,5 +988,9 @@
                 "type": "int"
             }
         }
-    }
+    },
+    "noFreeTeachersAvailableTitle": "No teachers available right now",
+    "noFreeTeachersAvailableSubtitle": "Free teachers are not available at the moment. Please check back later.",
+    "videoOnlyCallTypeLabel": "Video session",
+    "teacherNotBookableForStudent": "This teacher is not available for booking at the moment."
 }

@@ -993,5 +993,9 @@
                 "type": "int"
             }
         }
-    }
+    },
+    "noFreeTeachersAvailableTitle": "لا يوجد معلمون متاحون حاليًا",
+    "noFreeTeachersAvailableSubtitle": "المعلمون المجانيون غير متاحين في الوقت الحالي. يرجى المحاولة لاحقًا.",
+    "videoOnlyCallTypeLabel": "جلسة فيديو",
+    "teacherNotBookableForStudent": "هذا المعلم غير متاح للحجز حاليًا."
 }

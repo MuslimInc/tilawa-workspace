@@ -2395,4 +2395,18 @@ class QuranSessionsLocalizationsAr extends QuranSessionsLocalizations {
   String tutorSessionDurationMinutes(int count) {
     return '$count د';
   }
+
+  @override
+  String get noFreeTeachersAvailableTitle => 'لا يوجد معلمون متاحون حاليًا';
+
+  @override
+  String get noFreeTeachersAvailableSubtitle =>
+      'المعلمون المجانيون غير متاحين في الوقت الحالي. يرجى المحاولة لاحقًا.';
+
+  @override
+  String get videoOnlyCallTypeLabel => 'جلسة فيديو';
+
+  @override
+  String get teacherNotBookableForStudent =>
+      'هذا المعلم غير متاح للحجز حاليًا.';
 }

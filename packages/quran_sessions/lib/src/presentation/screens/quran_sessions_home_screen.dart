@@ -97,7 +97,8 @@ class _QuranSessionsHomeScreenState extends State<QuranSessionsHomeScreen> {
             itemCount: 3,
             itemBuilder: (_, _) => const TeacherCardCompactSkeleton(),
           ),
-          TeacherListEmpty() => QuranSessionsStudentEmptyState(
+          TeacherListEmpty() ||
+          TeacherListNoBookableTeachers() => QuranSessionsStudentEmptyState(
             featureConfig: widget.featureConfig,
             showTeacherApplyEntry: widget.showTeacherApplyEntry,
             onNotifyInterest: _onNotifyInterest,

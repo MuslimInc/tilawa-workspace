@@ -4,6 +4,11 @@ import { Functions, httpsCallable } from '@angular/fire/functions';
 import { BehaviorSubject, Observable } from 'rxjs';
 import { catchError, map, tap } from 'rxjs/operators';
 
+export type TeacherApplicationDiscoverability =
+  | 'none'
+  | 'profileOnly'
+  | 'profileAndEmptyState';
+
 export interface PlatformConfig {
   quranSessionsEnabled: boolean;
   studentEntryEnabled: boolean;
@@ -14,6 +19,11 @@ export interface PlatformConfig {
   defaultTutorApprovalSlaMs: number;
   defaultMinBookingNoticeMs: number;
   defaultMaxUpcomingPerStudent: number;
+  // Tutor (teacher application) entry — admin-controlled.
+  teacherApplicationEnabled: boolean;
+  teacherApplicationEntryEnabled: boolean;
+  homeTeacherApplicationCardEnabled: boolean;
+  teacherApplicationDiscoverability: TeacherApplicationDiscoverability;
 }
 
 type LegacyPlatformConfig = PlatformConfig & {
@@ -50,7 +60,15 @@ export class GlobalSettingsFacade {
             config.bookingMode ??
             config.defaultBookingMode ??
             config.quranTutorBookingMode ??
-            'requiresTutorApproval'
+            'requiresTutorApproval',
+          // Tutor-entry fields default off / hidden when absent in Firestore.
+          teacherApplicationEnabled: config.teacherApplicationEnabled ?? false,
+          teacherApplicationEntryEnabled:
+            config.teacherApplicationEntryEnabled ?? false,
+          homeTeacherApplicationCardEnabled:
+            config.homeTeacherApplicationCardEnabled ?? false,
+          teacherApplicationDiscoverability:
+            config.teacherApplicationDiscoverability ?? 'none'
         } satisfies PlatformConfig;
       }),
       tap(() => this.loadingSubject.next(false)),
