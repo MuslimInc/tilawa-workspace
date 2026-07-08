@@ -79,7 +79,7 @@ void main() {
       ),
       BookingBlockReason.paymentProviderUnavailable => (
         title: 'الحجز المدفوع غير متاح حالياً.',
-        subtitle: 'يمكنك اختيار معلم مجاني أو المحاولة لاحقاً.',
+        subtitle: 'الحجوزات المدفوعة غير متاحة مؤقتاً. يرجى المحاولة لاحقاً.',
       ),
       BookingBlockReason.bookingDisabledByAdmin => (
         title: 'الحجز غير متاح حالياً.',
@@ -100,32 +100,33 @@ void main() {
       BookingBlockReason.none => (title: '', subtitle: ''),
     };
 
-({String title, String subtitle}) _expectedEn(BookingBlockReason r) =>
-    switch (r) {
-      BookingBlockReason.pricingQuoteUnavailable => (
-        title: 'We could not verify the session price right now.',
-        subtitle: 'Please check your connection and try again.',
-      ),
-      BookingBlockReason.paymentProviderUnavailable => (
-        title: 'Paid booking is currently unavailable.',
-        subtitle: 'You can choose a free teacher or try again later.',
-      ),
-      BookingBlockReason.bookingDisabledByAdmin => (
-        title: 'Booking is currently unavailable.',
-        subtitle: 'Booking has been temporarily paused by the admin.',
-      ),
-      BookingBlockReason.pricingConfigMissing => (
-        title: 'Booking is unavailable right now.',
-        subtitle:
-            'Pricing configuration is incomplete. Please try again later.',
-      ),
-      BookingBlockReason.marketDisabled => (
-        title: 'Booking is unavailable in your area.',
-        subtitle: 'This market is not open for bookings yet.',
-      ),
-      BookingBlockReason.teacherNotBookable => (
-        title: 'This teacher is not available for booking.',
-        subtitle: 'Please choose a different teacher.',
-      ),
-      BookingBlockReason.none => (title: '', subtitle: ''),
-    };
+({String title, String subtitle}) _expectedEn(
+  BookingBlockReason r,
+) => switch (r) {
+  BookingBlockReason.pricingQuoteUnavailable => (
+    title: 'We could not verify the session price right now.',
+    subtitle: 'Please check your connection and try again.',
+  ),
+  BookingBlockReason.paymentProviderUnavailable => (
+    title: 'Paid booking is currently unavailable.',
+    subtitle:
+        'Paid bookings are temporarily unavailable. Please try again later.',
+  ),
+  BookingBlockReason.bookingDisabledByAdmin => (
+    title: 'Booking is currently unavailable.',
+    subtitle: 'Booking has been temporarily paused by the admin.',
+  ),
+  BookingBlockReason.pricingConfigMissing => (
+    title: 'Booking is unavailable right now.',
+    subtitle: 'Pricing configuration is incomplete. Please try again later.',
+  ),
+  BookingBlockReason.marketDisabled => (
+    title: 'Booking is unavailable in your area.',
+    subtitle: 'This market is not open for bookings yet.',
+  ),
+  BookingBlockReason.teacherNotBookable => (
+    title: 'This teacher is not available for booking.',
+    subtitle: 'Please choose a different teacher.',
+  ),
+  BookingBlockReason.none => (title: '', subtitle: ''),
+};

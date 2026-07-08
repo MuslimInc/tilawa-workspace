@@ -1,6 +1,5 @@
 import 'package:checks/checks.dart';
 import 'package:flutter_test/flutter_test.dart';
-
 import 'package:quran_sessions/src/domain/entities/booking_block_reason.dart';
 import 'package:quran_sessions/src/domain/entities/effective_pricing_source.dart';
 import 'package:quran_sessions/src/domain/entities/session_pricing_quote.dart';
@@ -99,6 +98,10 @@ void main() {
         // Domain bookability rule applied here, not in the BLoC.
         check(page.items.map((i) => i.teacherId).toList()).deepEquals(['t1']);
         check(page.rawTeacherCount).equals(2);
+        check(
+          page.hiddenByBlockReason[BookingBlockReason
+              .paymentProviderUnavailable],
+        ).equals(1);
       },
     );
 

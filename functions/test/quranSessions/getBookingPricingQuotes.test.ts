@@ -148,6 +148,21 @@ test("batch builder allows paid manual market without PSP", () => {
   assert.equal(quotes.t1.blockReason, "none");
 });
 
+test("batch builder keeps free manual-market teachers bookable", () => {
+  const quotes = buildPricingQuotesForTeachers(
+    {
+      t1: context({ sessionFeeAmount: 0, manualPaymentEnabled: true }),
+      t2: context({ sessionFeeAmount: 0, manualPaymentEnabled: true }),
+    },
+    false,
+  );
+
+  assert.equal(quotes.t1.isFree, true);
+  assert.equal(quotes.t1.blockReason, "none");
+  assert.equal(quotes.t2.isFree, true);
+  assert.equal(quotes.t2.blockReason, "none");
+});
+
 test("empty contexts produce an empty quote map", () => {
   assert.deepEqual(buildPricingQuotesForTeachers({}, true), {});
 });

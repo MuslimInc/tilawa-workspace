@@ -511,7 +511,9 @@ void main() {
         findsOneWidget,
       );
       expect(
-        find.text('You can choose a free teacher or try again later.'),
+        find.text(
+          'Paid bookings are temporarily unavailable. Please try again later.',
+        ),
         findsOneWidget,
       );
       // The confirm CTA must be disabled even with a slot selected.

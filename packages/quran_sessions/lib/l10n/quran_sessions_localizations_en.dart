@@ -1629,7 +1629,7 @@ class QuranSessionsLocalizationsEn extends QuranSessionsLocalizations {
 
   @override
   String get completeTeacherProfileFirstMessage =>
-      'Please complete and update your teacher profile before you can continue teaching students.';
+      'Please complete your teacher profile before you can start teaching students.';
 
   @override
   String get teacherDashboard => 'Teacher dashboard';
@@ -1939,7 +1939,7 @@ class QuranSessionsLocalizationsEn extends QuranSessionsLocalizations {
 
   @override
   String get bookingPaidUnavailableSubtitle =>
-      'You can choose a free teacher or try again later.';
+      'Paid bookings are temporarily unavailable. Please try again later.';
 
   @override
   String get bookingDisabledByAdminTitle => 'Booking is currently unavailable.';

@@ -1910,7 +1910,7 @@ class QuranSessionsLocalizationsAr extends QuranSessionsLocalizations {
 
   @override
   String get bookingPaidUnavailableSubtitle =>
-      'يمكنك اختيار معلم مجاني أو المحاولة لاحقاً.';
+      'الحجوزات المدفوعة غير متاحة مؤقتاً. يرجى المحاولة لاحقاً.';
 
   @override
   String get bookingDisabledByAdminTitle => 'الحجز غير متاح حالياً.';

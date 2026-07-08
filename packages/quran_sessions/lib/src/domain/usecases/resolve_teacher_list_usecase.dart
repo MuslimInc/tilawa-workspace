@@ -1,7 +1,8 @@
 import 'package:dartz_plus/dartz_plus.dart';
 
-import '../entities/quran_teacher.dart';
+import '../entities/booking_block_reason.dart';
 import '../entities/manual_payment_price.dart';
+import '../entities/quran_teacher.dart';
 import '../entities/session_pricing_quote.dart';
 import '../entities/session_pricing_type.dart';
 import '../entities/teacher_list_item.dart';
@@ -21,11 +22,15 @@ class TeacherListResult {
     required this.items,
     required this.rawTeacherCount,
     required this.nextCursor,
+    this.hiddenByBlockReason = const {},
   });
 
   final List<TeacherListItem> items;
   final int rawTeacherCount;
   final String? nextCursor;
+
+  /// Durable block reasons for teachers hidden from discovery.
+  final Map<BookingBlockReason, int> hiddenByBlockReason;
 
   bool get hasMore => nextCursor != null;
 }
@@ -84,11 +89,18 @@ class ResolveTeacherListUseCase {
           pricingQuote: quotes[teacher.id],
         ),
     ];
+    final visible = items.where((item) => item.isVisibleInList).toList();
+    final hiddenByBlockReason = <BookingBlockReason, int>{};
+    for (final item in items.where((item) => !item.isVisibleInList)) {
+      final reason = item.blockReason;
+      hiddenByBlockReason[reason] = (hiddenByBlockReason[reason] ?? 0) + 1;
+    }
     return Right(
       TeacherListResult(
-        items: items.where((item) => item.isVisibleInList).toList(),
+        items: visible,
         rawTeacherCount: page.teachers.length,
         nextCursor: page.nextCursor,
+        hiddenByBlockReason: hiddenByBlockReason,
       ),
     );
   }

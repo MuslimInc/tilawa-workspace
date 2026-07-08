@@ -223,6 +223,43 @@ void main() {
       expect(find.byType(QuranSessionsStudentEmptyState), findsOneWidget);
     });
 
+    testWidgets('no-bookable state shows paid-unavailable reason copy', (
+      tester,
+    ) async {
+      await tester.pumpWidget(
+        MaterialApp(
+          theme: AppTheme.getLightTheme(primaryColor: AppColors.defaultPrimary),
+          localizationsDelegates:
+              QuranSessionsLocalizations.localizationsDelegates,
+          supportedLocales: QuranSessionsLocalizations.supportedLocales,
+          home: BlocProvider<TeacherListBloc>(
+            create: (_) => TeacherListTestBloc(
+              const TeacherListNoBookableTeachers(
+                hiddenByBlockReason: {
+                  BookingBlockReason.paymentProviderUnavailable: 2,
+                },
+              ),
+            ),
+            child: TeacherListScreen(
+              featureConfig: const QuranSessionsFeatureConfig(),
+            ),
+          ),
+        ),
+      );
+      await tester.pumpAndSettle();
+
+      expect(
+        find.text('Paid booking is currently unavailable.'),
+        findsOneWidget,
+      );
+      expect(
+        find.text(
+          'Paid bookings are temporarily unavailable. Please try again later.',
+        ),
+        findsOneWidget,
+      );
+    });
+
     testWidgets('invokes onTeacherListViewed once when the screen opens', (
       tester,
     ) async {

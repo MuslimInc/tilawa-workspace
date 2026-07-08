@@ -150,6 +150,20 @@ test("free teacher with provider disabled is still bookable (blockReason none)",
   assert.equal(quote.blockReason, "none");
 });
 
+test("free teacher stays bookable in manual-payment market", () => {
+  const quote = buildPricingQuote(
+    context({
+      sessionFeeAmount: 0,
+      manualPaymentEnabled: true,
+    }),
+    false,
+  );
+  assert.equal(quote.isFree, true);
+  assert.equal(quote.paymentRequired, false);
+  assert.equal(quote.paymentProviderAvailable, true);
+  assert.equal(quote.blockReason, "none");
+});
+
 test("quote and booking resolve the identical price from one context", () => {
   const ctx = context({ sessionFeeAmount: 75, currencyCode: "SAR" });
   const quote = buildPricingQuote(ctx, true);

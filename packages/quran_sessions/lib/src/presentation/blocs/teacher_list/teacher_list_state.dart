@@ -1,5 +1,6 @@
 import 'package:equatable/equatable.dart';
 
+import '../../../domain/entities/booking_block_reason.dart';
 import '../../../domain/entities/quran_teacher.dart';
 import '../../../domain/entities/session_pricing_quote.dart';
 import '../../../domain/entities/teacher_list_item.dart';
@@ -108,13 +109,26 @@ final class TeacherListNoBookableTeachers extends TeacherListState {
   const TeacherListNoBookableTeachers({
     this.activeSpecialization,
     this.activeLanguage,
+    this.hiddenByBlockReason = const {},
   });
 
   final String? activeSpecialization;
   final String? activeLanguage;
+  final Map<BookingBlockReason, int> hiddenByBlockReason;
+
+  BookingBlockReason? get primaryBlockReason {
+    if (hiddenByBlockReason.isEmpty) return null;
+    final sorted = hiddenByBlockReason.entries.toList()
+      ..sort((a, b) => b.value.compareTo(a.value));
+    return sorted.first.key;
+  }
 
   @override
-  List<Object?> get props => [activeSpecialization, activeLanguage];
+  List<Object?> get props => [
+    activeSpecialization,
+    activeLanguage,
+    hiddenByBlockReason,
+  ];
 }
 
 /// No results after applying the current filters.

@@ -182,10 +182,8 @@ function resolveBlockReasonWithTeacher(
   if (ctx.pricing.isPaid && !paymentProviderEnabled) {
     return "paymentProviderUnavailable";
   }
-  // Paid-only release: free bookings blocked while manual payment is on.
-  if (ctx.market.manualPaymentEnabled && !ctx.pricing.isPaid) {
-    return "paymentProviderUnavailable";
-  }
+  // Manual payment mode only affects paid bookings. Free sessions stay
+  // bookable and should remain visible in discovery.
   return "none";
 }
 

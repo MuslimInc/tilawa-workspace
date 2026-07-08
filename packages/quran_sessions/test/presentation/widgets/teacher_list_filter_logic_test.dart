@@ -34,6 +34,36 @@ void main() {
   });
 
   group('applyTeacherListClientFilter', () {
+    test('all filter keeps both paid and free teachers', () {
+      final teachers = [
+        makeTeacher(
+          id: 'free',
+          pricingType: SessionPricingType.free,
+          price: null,
+        ),
+        makeTeacher(
+          id: 'paid',
+          pricingType: SessionPricingType.fixedPerSession,
+          price: const SessionPrice(
+            amount: 800,
+            currencyCode: 'EGP',
+            countryCode: 'EG',
+          ),
+        ),
+      ];
+
+      final filtered = applyTeacherListClientFilter(
+        teachers,
+        TeacherListFilter.all,
+        const {},
+      );
+
+      check(filtered.map((teacher) => teacher.id).toList()).deepEquals([
+        'free',
+        'paid',
+      ]);
+    });
+
     test('paid filter excludes free teachers', () {
       final teachers = [
         makeTeacher(

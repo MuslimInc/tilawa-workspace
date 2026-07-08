@@ -2,27 +2,27 @@ import 'package:bloc_test/bloc_test.dart';
 import 'package:checks/checks.dart';
 import 'package:dartz_plus/dartz_plus.dart';
 import 'package:flutter_test/flutter_test.dart';
-
-import 'package:quran_sessions/src/domain/entities/teacher_availability.dart';
-import 'package:quran_sessions/src/domain/entities/weekly_schedule.dart';
 import 'package:quran_sessions/src/domain/entities/booking_block_reason.dart';
 import 'package:quran_sessions/src/domain/entities/effective_pricing_source.dart';
 import 'package:quran_sessions/src/domain/entities/session_pricing_quote.dart';
 import 'package:quran_sessions/src/domain/entities/session_pricing_type.dart';
+import 'package:quran_sessions/src/domain/entities/teacher_availability.dart';
+import 'package:quran_sessions/src/domain/entities/weekly_schedule.dart';
 import 'package:quran_sessions/src/domain/failures/quran_sessions_failure.dart';
 import 'package:quran_sessions/src/domain/usecases/get_booking_pricing_quote_usecase.dart';
 // GetBookingPricingQuotesUseCase (batch) lives in the same file as the single.
 import 'package:quran_sessions/src/domain/usecases/get_teacher_availability_usecase.dart';
 import 'package:quran_sessions/src/domain/usecases/get_teachers_usecase.dart';
 import 'package:quran_sessions/src/domain/usecases/resolve_teacher_list_usecase.dart';
-import 'package:quran_sessions/src/presentation/models/teacher_availability_summary.dart';
 import 'package:quran_sessions/src/presentation/blocs/teacher_list/teacher_list_bloc.dart';
 import 'package:quran_sessions/src/presentation/blocs/teacher_list/teacher_list_event.dart';
 import 'package:quran_sessions/src/presentation/blocs/teacher_list/teacher_list_state.dart';
+import 'package:quran_sessions/src/presentation/models/teacher_availability_summary.dart';
+
+import '../../helpers/availability_test_helpers.dart';
 import '../../helpers/fakes/fake_booked_slot_lock_repository.dart';
 import '../../helpers/fakes/fake_session_pricing_quote_gateway.dart';
 import '../../helpers/fakes/fake_teacher_repository.dart';
-import '../../helpers/availability_test_helpers.dart';
 import '../../helpers/fixtures.dart';
 
 /// Free, bookable quote — the row stays visible in the teacher list.
@@ -215,6 +215,13 @@ void main() {
         isA<TeacherListLoading>(),
         isA<TeacherListNoBookableTeachers>(),
       ],
+      verify: (b) {
+        final state = b.state as TeacherListNoBookableTeachers;
+        check(
+          state.hiddenByBlockReason[BookingBlockReason
+              .paymentProviderUnavailable],
+        ).equals(2);
+      },
     );
 
     blocTest<TeacherListBloc, TeacherListState>(

@@ -57,6 +57,7 @@ class TeacherListBloc extends Bloc<TeacherListEvent, TeacherListState> {
             TeacherListNoBookableTeachers(
               activeSpecialization: event.specialization,
               activeLanguage: event.language,
+              hiddenByBlockReason: page.hiddenByBlockReason,
             ),
           );
           return;

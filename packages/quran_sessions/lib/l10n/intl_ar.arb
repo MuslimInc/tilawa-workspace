@@ -806,7 +806,7 @@
     "pricingQuoteUnavailableTitle": "تعذر التحقق من سعر الجلسة حالياً.",
     "pricingQuoteUnavailableSubtitle": "تحقق من اتصالك بالإنترنت وحاول مرة أخرى.",
     "bookingPaidUnavailableTitle": "الحجز المدفوع غير متاح حالياً.",
-    "bookingPaidUnavailableSubtitle": "يمكنك اختيار معلم مجاني أو المحاولة لاحقاً.",
+    "bookingPaidUnavailableSubtitle": "الحجوزات المدفوعة غير متاحة مؤقتاً. يرجى المحاولة لاحقاً.",
     "bookingDisabledByAdminTitle": "الحجز غير متاح حالياً.",
     "bookingDisabledByAdminSubtitle": "تم إيقاف الحجز مؤقتاً من الإدارة.",
     "pricingConfigIncompleteTitle": "الحجز غير متاح حالياً.",
