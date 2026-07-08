@@ -22,6 +22,8 @@ class SessionPricingQuote extends Equatable {
     required this.quranSessionsEnabled,
     required this.effectivePricingSource,
     required this.blockReason,
+    this.manualPaymentEnabled = false,
+    this.paymentMode = SessionPaymentMode.none,
     this.countryCode,
     this.cityId,
     this.policyVersion,
@@ -38,6 +40,12 @@ class SessionPricingQuote extends Equatable {
   /// backward compatibility; UI logic should prefer [blockReason].
   final bool paymentProviderAvailable;
 
+  /// True when this paid booking should be collected off-app.
+  final bool manualPaymentEnabled;
+
+  /// Server-selected payment mode for the booking path.
+  final SessionPaymentMode paymentMode;
+
   /// Platform + market feature flags reported by the server.
   final bool bookingEnabled;
   final bool quranSessionsEnabled;
@@ -52,14 +60,19 @@ class SessionPricingQuote extends Equatable {
   final String? cityId;
   final String? policyVersion;
 
-  bool get isFree => pricingType == SessionPricingType.free;
+  bool get isManualOffApp =>
+      manualPaymentEnabled || paymentMode == SessionPaymentMode.manualOffApp;
+
+  bool get isPaid => paymentRequired || amount > 0;
+
+  bool get isFree => !isPaid;
 
   /// True when the booking screen must block submission. Derived from the
   /// server-reported [blockReason] (any value other than [none]).
   bool get isPaymentBlocked => blockReason != BookingBlockReason.none;
 
   /// Display price for the booking price summary; null when free.
-  SessionPrice? get price => isFree
+  SessionPrice? get price => !isPaid
       ? null
       : SessionPrice(
           amount: amount,
@@ -75,6 +88,8 @@ class SessionPricingQuote extends Equatable {
     currencyCode,
     paymentRequired,
     paymentProviderAvailable,
+    manualPaymentEnabled,
+    paymentMode,
     bookingEnabled,
     quranSessionsEnabled,
     effectivePricingSource,
@@ -83,4 +98,18 @@ class SessionPricingQuote extends Equatable {
     cityId,
     policyVersion,
   ];
+}
+
+enum SessionPaymentMode {
+  none,
+  manualOffApp,
+  sandbox;
+
+  static SessionPaymentMode fromString(String? raw) {
+    return switch (raw) {
+      'manual_off_app' || 'manualOffApp' => manualOffApp,
+      'sandbox' => sandbox,
+      _ => none,
+    };
+  }
 }

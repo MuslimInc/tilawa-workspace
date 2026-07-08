@@ -361,6 +361,57 @@ void main() {
     },
   );
 
+  testWidgets('manual paid session shows instructions before confirm', (
+    tester,
+  ) async {
+    final slots = [_slot(1)];
+
+    await tester.pumpWidget(
+      MaterialApp(
+        theme: AppTheme.getLightTheme(primaryColor: AppColors.defaultPrimary),
+        localizationsDelegates: const [
+          QuranSessionsLocalizations.delegate,
+          GlobalMaterialLocalizations.delegate,
+          GlobalWidgetsLocalizations.delegate,
+        ],
+        supportedLocales: QuranSessionsLocalizations.supportedLocales,
+        home: BlocProvider<BookingBloc>(
+          create: (_) => SeededBookingBloc(
+            seed: BookingSelecting(
+              teacherId: 'teacher_1',
+              availableSlots: slots,
+              selectedSlot: slots.first,
+              selectedCallType: SessionCallType.videoCall,
+              pricingType: SessionPricingType.free,
+              sessionPrice: const SessionPrice(
+                amount: 125,
+                currencyCode: 'EGP',
+                countryCode: 'EG',
+                cityId: 'cairo',
+              ),
+              manualPaymentPrice: const ManualPaymentPrice(
+                amountMinor: 12500,
+                currencyCode: 'EGP',
+              ),
+              paymentProviderAvailable: true,
+            ),
+          ),
+          child: const BookingScreen(
+            teacherId: 'teacher_1',
+            studentId: 'student_1',
+          ),
+        ),
+      ),
+    );
+    await tester.pumpAndSettle();
+
+    expect(find.text('This session is paid'), findsOneWidget);
+    expect(find.text('Vodafone Cash'), findsOneWidget);
+    expect(find.text('InstaPay'), findsOneWidget);
+    expect(find.text('+201060099009'), findsOneWidget);
+    expect(find.text('Confirm booking'), findsOneWidget);
+  });
+
   testWidgets(
     'free session with payment provider disabled shows no payment error '
     'and enables submit once a slot is selected',

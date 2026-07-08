@@ -3,6 +3,7 @@ import { getFirestore, FieldValue } from "firebase-admin/firestore";
 
 import { requireAdmin } from "./sessionAuth";
 import { sessionCallableHttpsOptions } from "./sessionCallableOptions";
+import { normalizeMarketCodes } from "./marketGate";
 
 export type TeacherApplicationDiscoverability =
   | "none"
@@ -28,6 +29,10 @@ export interface UpdatePlatformConfigRequest {
   defaultMinBookingNoticeMs: number;
   defaultMaxUpcomingPerStudent: number;
   childAgeThreshold?: number;
+  // Market availability gate — admin-controlled. Optional so legacy callers
+  // keep working; `{ merge: true }` preserves existing values when omitted.
+  enableForAllMarkets?: boolean;
+  enabledMarketCodes?: string[];
   // Tutor (teacher application) entry — admin-controlled. Optional so legacy
   // callers keep working; when omitted, `{ merge: true }` preserves the
   // existing Firestore values instead of clobbering them.
@@ -102,6 +107,7 @@ export function validateUpdatePlatformConfig(data: Partial<UpdatePlatformConfigR
   ) {
     throw new HttpsError("invalid-argument", "childAgeThreshold must be a finite number > 0.");
   }
+  validateMarketGateFields(data);
   validateOptionalBoolean(data.teacherApplicationEnabled, "teacherApplicationEnabled");
   validateOptionalBoolean(data.teacherApplicationEntryEnabled, "teacherApplicationEntryEnabled");
   validateOptionalBoolean(data.homeTeacherApplicationCardEnabled, "homeTeacherApplicationCardEnabled");
@@ -122,6 +128,37 @@ function validateOptionalBoolean(value: unknown, field: string): void {
   }
 }
 
+function validateMarketGateFields(
+  data: Partial<UpdatePlatformConfigRequest>,
+): void {
+  validateOptionalBoolean(data.enableForAllMarkets, "enableForAllMarkets");
+  if (data.enabledMarketCodes == null) return;
+  const codes = data.enabledMarketCodes;
+  const allValid =
+    Array.isArray(codes) &&
+    codes.every((code) => typeof code === "string" && code.trim().length === 2);
+  if (!allValid) {
+    throw new HttpsError(
+      "invalid-argument",
+      "enabledMarketCodes must be an array of 2-letter ISO country codes.",
+    );
+  }
+}
+
+/** Collects only the market-gate fields that were explicitly provided. */
+function pickMarketGateFields(
+  data: Partial<UpdatePlatformConfigRequest>,
+): Record<string, boolean | string[]> {
+  const fields: Record<string, boolean | string[]> = {};
+  if (data.enableForAllMarkets != null) {
+    fields.enableForAllMarkets = data.enableForAllMarkets;
+  }
+  if (data.enabledMarketCodes != null) {
+    fields.enabledMarketCodes = normalizeMarketCodes(data.enabledMarketCodes);
+  }
+  return fields;
+}
+
 export const updatePlatformConfig = onCall(
   sessionCallableHttpsOptions,
   async (request) => {
@@ -131,6 +168,7 @@ export const updatePlatformConfig = onCall(
     validateUpdatePlatformConfig(data);
     const bookingMode = resolveBookingMode(data)!;
     const teacherApplicationFields = pickTeacherApplicationFields(data);
+    const marketGateFields = pickMarketGateFields(data);
 
     const db = getFirestore();
     const batch = db.batch();
@@ -147,6 +185,7 @@ export const updatePlatformConfig = onCall(
       defaultTutorApprovalSlaMs: data.defaultTutorApprovalSlaMs,
       defaultMinBookingNoticeMs: data.defaultMinBookingNoticeMs,
       defaultMaxUpcomingPerStudent: data.defaultMaxUpcomingPerStudent,
+      ...marketGateFields,
       ...teacherApplicationFields,
       updatedBy: adminUid,
       updatedAt: FieldValue.serverTimestamp(),
@@ -169,6 +208,7 @@ export const updatePlatformConfig = onCall(
       defaultTutorApprovalSlaMs: data.defaultTutorApprovalSlaMs,
       defaultMinBookingNoticeMs: data.defaultMinBookingNoticeMs,
       defaultMaxUpcomingPerStudent: data.defaultMaxUpcomingPerStudent,
+      ...marketGateFields,
       ...teacherApplicationFields,
     });
 

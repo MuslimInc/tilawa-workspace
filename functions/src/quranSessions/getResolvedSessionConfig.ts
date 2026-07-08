@@ -3,6 +3,7 @@ import { getFirestore } from "firebase-admin/firestore";
 import { requireAdmin } from "./sessionAuth";
 import { sessionCallableHttpsOptions } from "./sessionCallableOptions";
 import { loadBookingEligibilityContext } from "./bookingEligibilityService";
+import { isMarketEnabled } from "./marketGate";
 
 export interface GetResolvedSessionConfigRequest {
   studentId: string;
@@ -14,8 +15,22 @@ export function resolveSessionConfigWarnings(context: any): string[] {
   if (!context.marketEnabled) {
     warnings.push("market_disabled");
   }
-  if (context.pricing.isPaid && !context.market.paymentProviderEnabled) {
+  if (
+    context.pricing.isPaid &&
+    !context.market.paymentProviderEnabled &&
+    !context.market.manualPaymentEnabled
+  ) {
     warnings.push("paid_but_payment_disabled");
+  }
+  if (context.market.manualPaymentEnabled && !context.pricing.isPaid) {
+    warnings.push("free_blocked_while_manual_payment_enabled");
+  }
+  if (
+    typeof context.student?.countryCode === "string" &&
+    context.platform?.marketGate != null &&
+    !isMarketEnabled(context.platform.marketGate, context.student.countryCode)
+  ) {
+    warnings.push("market_not_supported");
   }
   if (!context.teacher.exists || context.teacher.verificationStatus !== "verified") {
     warnings.push("teacher_not_verified");

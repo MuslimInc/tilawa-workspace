@@ -35,6 +35,11 @@ QuranSessionDto quranSessionDtoFromDocData(
     joinToken: data['joinToken'] as String?,
     participants: data['participants'],
     notes: data['notes'] as String?,
+    paymentReference:
+        (data['paymentReference'] ?? data['payment_reference']) as String?,
+    paymentProvider:
+        (data['paymentProvider'] ?? data['payment_provider']) as String?,
+    paymentStatus: (data['paymentStatus'] ?? data['payment_status']) as String?,
   );
 }
 

@@ -60,6 +60,9 @@ SessionAggregate mapBookingDocToAggregate(
     lastActionReason: data['lastActionReason'] as String?,
     rejectionReason: data['rejectionReason'] as String?,
     paymentReference: data['paymentReference'] as String?,
+    paymentProvider:
+        (data['paymentProvider'] ?? data['payment_provider']) as String?,
+    paymentStatus: (data['paymentStatus'] ?? data['payment_status']) as String?,
     sessionId: data['sessionId'] as String?,
     revisionSurahNumber: data['revisionSurahNumber'] as int?,
     revisionAyahNumber: data['revisionAyahNumber'] as int?,
@@ -112,6 +115,9 @@ SessionAggregate mapSessionDocToAggregate(
         data['cancellationReason'] as String?,
     rejectionReason: data['rejectionReason'] as String?,
     paymentReference: data['paymentReference'] as String?,
+    paymentProvider:
+        (data['paymentProvider'] ?? data['payment_provider']) as String?,
+    paymentStatus: (data['paymentStatus'] ?? data['payment_status']) as String?,
     sessionId: sessionDocId,
     revisionSurahNumber: data['revisionSurahNumber'] as int?,
     revisionAyahNumber: data['revisionAyahNumber'] as int?,

@@ -139,6 +139,15 @@ test("expire reservation syncs from pending_payment", () => {
   assert.equal(result.to, "expired");
 });
 
+test("admin can confirm manual payment from pending_payment", () => {
+  const result = validateTransition({
+    currentStatus: "pending_payment",
+    action: "confirm_booking",
+    actor: "admin",
+  });
+  assert.equal(result.to, "scheduled");
+});
+
 test("system can expire an unattended session from scheduled and confirmed", () => {
   for (const from of ["scheduled", "confirmed"] as const) {
     const result = validateTransition({

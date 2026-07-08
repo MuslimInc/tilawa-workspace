@@ -39,6 +39,9 @@ export class GlobalSettingsComponent implements OnInit {
     quranSessionsEnabled: [false],
     studentEntryEnabled: [false],
     bookingEnabled: [false],
+    enableForAllMarkets: [false],
+    // Comma-separated ISO codes in the form; normalized to string[] on save.
+    enabledMarketCodesText: [''],
     teacherApplicationEnabled: [false],
     teacherApplicationEntryEnabled: [false],
     homeTeacherApplicationCardEnabled: [false],
@@ -54,17 +57,36 @@ export class GlobalSettingsComponent implements OnInit {
   ngOnInit() {
     this.facade.getConfig().subscribe(config => {
       if (config) {
-        this.settingsForm.patchValue(config);
+        this.settingsForm.patchValue({
+          ...config,
+          enabledMarketCodesText: (config.enabledMarketCodes ?? []).join(', ')
+        });
         this.settingsForm.markAsPristine();
       }
     });
   }
 
+  /** Parses the comma/space separated codes input into normalized ISO codes. */
+  private parseMarketCodes(raw: string): string[] {
+    const seen = new Set<string>();
+    for (const part of (raw ?? '').split(/[\s,]+/)) {
+      const code = part.trim().toUpperCase();
+      if (code.length > 0) seen.add(code);
+    }
+    return [...seen];
+  }
+
   async save() {
     if (this.settingsForm.invalid) return;
 
+    const { enabledMarketCodesText, ...rest } = this.settingsForm.value;
+    const payload: PlatformConfig = {
+      ...rest,
+      enabledMarketCodes: this.parseMarketCodes(enabledMarketCodesText)
+    };
+
     try {
-      await this.facade.saveConfig(this.settingsForm.value as PlatformConfig);
+      await this.facade.saveConfig(payload);
       this.settingsForm.markAsPristine();
     } catch (e) {
       // Facade handles the error

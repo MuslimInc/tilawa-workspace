@@ -12,6 +12,7 @@ import {
   runIdempotentOperation,
 } from "./idempotencyService";
 import { lifecycleError } from "./lifecycleErrors";
+import { generateManualPaymentReference } from "./manualPaymentReference";
 import { recordTerminalTransition } from "./metricsAggregationService";
 import { enqueueSessionNotification } from "./notificationOutboxService";
 import { isPaymentProviderEnabled } from "./payment/envGate";
@@ -20,7 +21,7 @@ import {
   computeTeacherAmount,
   resolvePaymentProvider,
 } from "./payment/paymentProviderRegistry";
-import { assertPaidBookingAllowed } from "./paymentProviderStatus";
+import { assertPaidBookingAllowedForMarket } from "./paymentProviderStatus";
 import { requireAuthenticatedUid, requireValidSessionEpoch } from "./sessionAuth";
 import { validateTransition } from "./sessionLifecycleGuard";
 import {
@@ -41,6 +42,7 @@ import { sessionCallableHttpsOptions } from "./sessionCallableOptions";
 import { buildAllowedActionsDenorm } from "./sessionAllowedActionsService";
 import {
   BOOKING_IDEMPOTENCY_DEDUPE_MS,
+  MANUAL_PAYMENT_SLOT_HOLD_MS,
   PENDING_PAYMENT_SLOT_HOLD_MS,
 } from "./platformSchedulingPolicy";
 
@@ -221,8 +223,17 @@ async function handleCreateSessionBooking(
     });
     const serverPricingType = pricing.isPaid ? "fixedPerSession" : "free";
 
+    const paymentProviderEnabled = isPaymentProviderEnabled();
+    const useManualPayment =
+      pricing.isPaid &&
+      eligibility.market.manualPaymentEnabled &&
+      !paymentProviderEnabled;
+
     try {
-      assertPaidBookingAllowed(serverPricingType);
+      assertPaidBookingAllowedForMarket(serverPricingType, {
+        manualPaymentEnabled: eligibility.market.manualPaymentEnabled,
+        paymentProviderEnabled,
+      });
     } catch {
       throw lifecycleError(
         "payment_provider_unavailable",
@@ -231,11 +242,7 @@ async function handleCreateSessionBooking(
       );
     }
 
-    if (
-      pricing.isPaid &&
-      data.paymentReference?.trim() &&
-      !isPaymentProviderEnabled()
-    ) {
+    if (pricing.isPaid && data.paymentReference?.trim() && !paymentProviderEnabled) {
       throw new HttpsError(
         "invalid-argument",
         "paymentReference not accepted when payment provider is disabled.",
@@ -339,7 +346,9 @@ async function handleCreateSessionBooking(
           );
         }
 
-        const paymentHoldMs = PENDING_PAYMENT_SLOT_HOLD_MS;
+        const paymentHoldMs = useManualPayment
+          ? MANUAL_PAYMENT_SLOT_HOLD_MS
+          : PENDING_PAYMENT_SLOT_HOLD_MS;
         const approvalSlaMs = eligibility.market.tutorApprovalSlaMs;
         const teacherUserId = teacherProfileUserIdFromData(
           data.teacherId,
@@ -350,6 +359,9 @@ async function handleCreateSessionBooking(
           studentId,
         );
         const meetingLink = resolvedCall.meetingLink;
+        const manualPaymentReference = useManualPayment
+          ? generateManualPaymentReference(bookingRef.id)
+          : null;
         const allowedActionsDenorm = buildAllowedActionsDenorm({
           studentId,
           teacherUserId,
@@ -409,8 +421,12 @@ async function handleCreateSessionBooking(
           joinWindowLeadMs: eligibility.market.joinWindowLeadMs,
           amountPaidUsd: null,
           paymentStatus,
-          paymentProvider: isFree ? "none" : resolvePaymentProvider().kind,
-          paymentReference: null,
+          paymentProvider: isFree
+            ? "none"
+            : useManualPayment
+              ? "manual_off_app"
+              : resolvePaymentProvider().kind,
+          paymentReference: manualPaymentReference,
           studentNote: data.studentNote ?? null,
           lifecycleStatus,
           status: legacyStatusForLifecycle(lifecycleStatus),
@@ -452,7 +468,7 @@ async function handleCreateSessionBooking(
           lifecycleStatus: sessionLifecycleStatus,
           status: legacyStatusForLifecycle(sessionLifecycleStatus),
           meetingLink,
-          paymentReference: null,
+          paymentReference: manualPaymentReference,
           createdAt: now,
           updatedAt: now,
           feeSnapshot,
@@ -463,7 +479,9 @@ async function handleCreateSessionBooking(
         let clientConfirmToken: string | undefined;
         let paymentIntentId: string | undefined;
 
-        if (!isFree) {
+        if (useManualPayment) {
+          paymentReference = manualPaymentReference ?? undefined;
+        } else if (!isFree) {
           const provider = resolvePaymentProvider();
           const platformFee = computePlatformFee(pricing.amount);
           const tax = 0;

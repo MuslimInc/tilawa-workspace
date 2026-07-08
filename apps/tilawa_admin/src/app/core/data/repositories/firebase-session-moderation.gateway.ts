@@ -60,6 +60,20 @@ export class FirebaseSessionModerationGateway implements SessionModerationGatewa
     });
   }
 
+  async confirmManualBookingPayment(bookingId: string, note?: string): Promise<void> {
+    await this.invokeCallable('confirmManualBookingPayment', {
+      bookingId,
+      ...(note ? { note } : {}),
+    });
+  }
+
+  async rejectManualBookingPayment(bookingId: string, reason?: string): Promise<void> {
+    await this.invokeCallable('rejectManualBookingPayment', {
+      bookingId,
+      ...(reason ? { reason } : {}),
+    });
+  }
+
   async openSessionDispute(
     bookingId: string,
     reason: string,

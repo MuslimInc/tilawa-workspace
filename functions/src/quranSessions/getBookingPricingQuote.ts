@@ -5,6 +5,7 @@ import {
   loadBookingEligibilityContext,
   type BookingEligibilityContext,
 } from "./bookingEligibilityService";
+import { isMarketEnabled } from "./marketGate";
 import { isPaymentProviderEnabled } from "./payment/envGate";
 import {
   requireAuthenticatedUid,
@@ -55,6 +56,8 @@ export interface BookingPricingQuote {
   paymentRequired: boolean;
   /** False while the Paid-v1 gate keeps the payment provider disabled. */
   paymentProviderAvailable: boolean;
+  manualPaymentEnabled: boolean;
+  paymentMode: "none" | "manual_off_app" | "sandbox";
   /** Amount the student pays now (v1: equals `amount`; 0 when free). */
   payableAmount: number;
   countryCode: string | null;
@@ -87,9 +90,11 @@ export function buildPricingQuote(
 ): BookingPricingQuote {
   const { pricing } = ctx;
   const isFree = !pricing.isPaid;
+  const paymentProviderAvailable =
+    paymentProviderEnabled || ctx.market.manualPaymentEnabled;
   const blockReason = resolveBlockReasonWithTeacher(
     ctx,
-    paymentProviderEnabled,
+    paymentProviderAvailable,
     options?.teacherId,
   );
   return {
@@ -98,7 +103,13 @@ export function buildPricingQuote(
     amount: pricing.amount,
     currencyCode: pricing.currencyCode,
     paymentRequired: !isFree,
-    paymentProviderAvailable: paymentProviderEnabled,
+    paymentProviderAvailable,
+    manualPaymentEnabled: ctx.market.manualPaymentEnabled,
+    paymentMode: isFree
+      ? "none"
+      : ctx.market.manualPaymentEnabled && !paymentProviderEnabled
+        ? "manual_off_app"
+        : "sandbox",
     payableAmount: isFree ? 0 : pricing.amount,
     countryCode: ctx.student.countryCode,
     cityId: ctx.student.cityId,
@@ -127,6 +138,8 @@ export function buildBlockedPricingQuote(
     currencyCode: "USD",
     paymentRequired: false,
     paymentProviderAvailable: false,
+    manualPaymentEnabled: false,
+    paymentMode: "none",
     payableAmount: 0,
     countryCode,
     cityId,
@@ -150,6 +163,9 @@ function resolveBlockReasonWithTeacher(
   if (!ctx.marketEnabled || !ctx.market.marketEnabled) {
     return "marketDisabled";
   }
+  if (!isMarketEnabled(ctx.platform.marketGate, ctx.student.countryCode)) {
+    return "marketDisabled";
+  }
   if (
     !ctx.teacher.exists ||
     ctx.teacher.verificationStatus !== "verified"
@@ -164,6 +180,10 @@ function resolveBlockReasonWithTeacher(
     return "teacherNotBookable";
   }
   if (ctx.pricing.isPaid && !paymentProviderEnabled) {
+    return "paymentProviderUnavailable";
+  }
+  // Paid-only release: free bookings blocked while manual payment is on.
+  if (ctx.market.manualPaymentEnabled && !ctx.pricing.isPaid) {
     return "paymentProviderUnavailable";
   }
   return "none";
@@ -229,7 +249,7 @@ export function blockedQuoteForLifecycleError(
       quranSessionsEnabled: platform.quranSessionsEnabled,
     });
   }
-  if (code === "market_not_enabled") {
+  if (code === "market_not_enabled" || code === "market_not_supported") {
     return buildBlockedPricingQuote("marketDisabled", readPlatformFlags(e));
   }
   if (code === "teacher_not_whitelisted" || code === "teacher_not_verified") {

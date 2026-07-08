@@ -19,6 +19,9 @@ export interface PlatformConfig {
   defaultTutorApprovalSlaMs: number;
   defaultMinBookingNoticeMs: number;
   defaultMaxUpcomingPerStudent: number;
+  // Market availability gate — Egypt-only for this release.
+  enableForAllMarkets: boolean;
+  enabledMarketCodes: string[];
   // Tutor (teacher application) entry — admin-controlled.
   teacherApplicationEnabled: boolean;
   teacherApplicationEntryEnabled: boolean;
@@ -61,6 +64,9 @@ export class GlobalSettingsFacade {
             config.defaultBookingMode ??
             config.quranTutorBookingMode ??
             'requiresTutorApproval',
+          // Market gate defaults closed when absent in Firestore.
+          enableForAllMarkets: config.enableForAllMarkets ?? false,
+          enabledMarketCodes: config.enabledMarketCodes ?? [],
           // Tutor-entry fields default off / hidden when absent in Firestore.
           teacherApplicationEnabled: config.teacherApplicationEnabled ?? false,
           teacherApplicationEntryEnabled:

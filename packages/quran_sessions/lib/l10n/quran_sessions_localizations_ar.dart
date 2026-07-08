@@ -1609,7 +1609,7 @@ class QuranSessionsLocalizationsAr extends QuranSessionsLocalizations {
 
   @override
   String get completeTeacherProfileFirstMessage =>
-      'أكمل ملف المحفظ قبل فتح لوحة التحكم.';
+      'يرجى إكمال وتحديث ملف المحفظ قبل أن تتمكن من متابعة تدريس الطلاب.';
 
   @override
   String get teacherDashboard => 'لوحة تحكم المحفظ';
@@ -2175,6 +2175,16 @@ class QuranSessionsLocalizationsAr extends QuranSessionsLocalizations {
 
   @override
   String get manualPaymentCopiedToClipboard => 'تم النسخ إلى الحافظة';
+
+  @override
+  String get bookingAwaitingPaymentVerification =>
+      'الحجز بانتظار مراجعة الدفع.';
+
+  @override
+  String get paymentReferenceLabel => 'مرجع الدفع';
+
+  @override
+  String get sendReceiptOnWhatsapp => 'إرسال الإيصال عبر واتساب';
 
   @override
   String get paymentMethodVodafoneCash => 'Vodafone Cash';

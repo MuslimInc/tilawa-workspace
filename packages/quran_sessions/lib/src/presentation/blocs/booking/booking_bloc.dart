@@ -3,6 +3,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 
 import '../../../boundaries/payment/session_payment_confirmation.dart';
 import '../../../domain/entities/booking_block_reason.dart';
+import '../../../domain/entities/manual_payment_price.dart';
 import '../../../domain/entities/session_lifecycle_status.dart';
 import '../../../domain/entities/session_price.dart';
 import '../../../domain/entities/session_pricing_type.dart';
@@ -108,17 +109,29 @@ class BookingBloc extends Bloc<BookingEvent, BookingState> {
       (_) => null,
       (profile) => profile.externalMeetingUrl,
     );
+    final teacherDisplayName = profileResult.fold(
+      (_) => null,
+      (profile) => profile.displayName,
+    );
 
     SessionPricingType? pricingType;
     SessionPrice? sessionPrice;
     bool? paymentProviderAvailable;
+    ManualPaymentPrice? manualPaymentPrice;
     BookingBlockReason blockReason = BookingBlockReason.none;
 
     final fetched = await _fetchServerQuote(teacherId);
     if (fetched.quote != null) {
-      pricingType = fetched.quote!.pricingType;
-      sessionPrice = fetched.quote!.price;
-      paymentProviderAvailable = fetched.quote!.paymentProviderAvailable;
+      final quote = fetched.quote!;
+      pricingType = quote.pricingType;
+      sessionPrice = quote.price;
+      paymentProviderAvailable = quote.paymentProviderAvailable;
+      manualPaymentPrice = quote.isManualOffApp && quote.isPaid
+          ? ManualPaymentPrice(
+              amountMinor: (quote.amount * 100).round(),
+              currencyCode: quote.currencyCode,
+            )
+          : null;
       blockReason = fetched.failureBlockReason ?? BookingBlockReason.none;
     } else if (fetched.failureBlockReason != null) {
       // The server reported a typed config/admin block (a non-best-effort
@@ -164,10 +177,11 @@ class BookingBloc extends Bloc<BookingEvent, BookingState> {
         teacherId: teacherId,
         availableSlots: available,
         selectedCallType: defaultCallType,
+        teacherDisplayName: teacherDisplayName,
         teacherExternalMeetingUrl: externalMeetingUrl,
         pricingType: pricingType,
         sessionPrice: sessionPrice,
-        manualPaymentPrice: null,
+        manualPaymentPrice: manualPaymentPrice,
         paymentProviderAvailable: paymentProviderAvailable,
         blockReason: blockReason,
       ),
@@ -241,12 +255,16 @@ class BookingBloc extends Bloc<BookingEvent, BookingState> {
     BookingSubmitted event,
     Emitter<BookingState> emit,
   ) async {
+    final selecting = state is BookingSelecting
+        ? state as BookingSelecting
+        : null;
     emit(const BookingSubmitting());
 
     final result = await _submitBooking(
       teacherId: event.teacherId,
       slotId: event.slotId,
       callType: event.callType,
+      pricingType: event.pricingType,
       paymentReference: event.paymentReference,
       studentNote: event.note,
     );
@@ -255,9 +273,6 @@ class BookingBloc extends Bloc<BookingEvent, BookingState> {
       (failure) => emit(BookingFailure(failure)),
       (outcome) {
         if (outcome.requiresPaymentConfirmation) {
-          final selecting = state is BookingSelecting
-              ? state as BookingSelecting
-              : null;
           emit(
             BookingPaymentRequired(
               outcome,
@@ -268,7 +283,29 @@ class BookingBloc extends Bloc<BookingEvent, BookingState> {
           );
           return;
         }
-        emit(BookingSuccess(aggregateToQuranBooking(outcome.aggregate)));
+        final booking = aggregateToQuranBooking(outcome.aggregate);
+        if (outcome.aggregate.lifecycleStatus ==
+            SessionLifecycleStatus.pendingPayment) {
+          final paymentReference =
+              outcome.paymentReference ?? outcome.aggregate.paymentReference;
+          if (paymentReference != null && paymentReference.isNotEmpty) {
+            emit(
+              BookingManualPaymentPending(
+                booking: booking,
+                paymentReference: paymentReference,
+                teacherDisplayName:
+                    selecting?.teacherDisplayName ??
+                    outcome.aggregate.teacherId,
+                startsAt:
+                    selecting?.selectedSlot?.startsAt ??
+                    outcome.aggregate.startsAt,
+                sessionPrice: selecting?.sessionPrice,
+              ),
+            );
+            return;
+          }
+        }
+        emit(BookingSuccess(booking));
       },
     );
   }

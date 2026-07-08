@@ -134,6 +134,63 @@
       {{ 'sessionDetail_paymentNotice' | t }}
     </p>
 
+    <section
+      class="rounded-xl border border-[var(--tilawa-primary)] bg-[var(--tilawa-surface-container-low)] p-4"
+    >
+      <div class="flex flex-wrap items-start justify-between gap-4">
+        <div>
+          <h2 class="text-base font-semibold">{{ 'sessionDetail_manualPaymentReview' | t }}</h2>
+          <p class="mt-1 text-sm opacity-80">{{ 'sessionDetail_manualPaymentReviewMessage' | t }}</p>
+        </div>
+        @if (canModerateManualPayment(session)) {
+          <div class="flex flex-wrap gap-2">
+            <app-tilawa-button
+              variant="primary"
+              size="sm"
+              [loading]="isActionLoading()"
+              [disabled]="isActionLoading()"
+              (click)="onConfirmManualPayment()"
+              >{{ 'sessionDetail_confirmManualPayment' | t }}</app-tilawa-button
+            >
+            <app-tilawa-button
+              variant="danger"
+              size="sm"
+              [loading]="isActionLoading()"
+              [disabled]="isActionLoading()"
+              (click)="openRejectManualPayment()"
+              >{{ 'sessionDetail_rejectManualPayment' | t }}</app-tilawa-button
+            >
+          </div>
+        }
+      </div>
+      <dl class="mt-4 grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-4">
+        <div>
+          <dt class="tilawa-detail-label">{{ 'sessionDetail_paymentReference' | t }}</dt>
+          <dd class="tilawa-detail-value font-mono">
+            {{ session.paymentReference ?? ('common_none' | t) }}
+          </dd>
+        </div>
+        <div>
+          <dt class="tilawa-detail-label">{{ 'sessionDetail_paymentProvider' | t }}</dt>
+          <dd class="tilawa-detail-value">{{ session.paymentProvider ?? ('common_none' | t) }}</dd>
+        </div>
+        <div>
+          <dt class="tilawa-detail-label">{{ 'sessionDetail_priceAmount' | t }}</dt>
+          <dd class="tilawa-detail-value">
+            {{
+              session.priceAmount === null
+                ? ('common_none' | t)
+                : (session.priceAmount | number: '1.2-2')
+            }}
+          </dd>
+        </div>
+        <div>
+          <dt class="tilawa-detail-label">{{ 'sessionDetail_priceCurrency' | t }}</dt>
+          <dd class="tilawa-detail-value">{{ session.priceCurrency ?? ('common_none' | t) }}</dd>
+        </div>
+      </dl>
+    </section>
+
     <div class="grid grid-cols-1 gap-6 lg:grid-cols-3">
       <app-tilawa-card class="lg:col-span-1" [title]="'sessionDetail_summary' | t">
         <app-status-chip
@@ -370,6 +427,34 @@
           <div>
             <dt class="tilawa-detail-label">{{ 'sessionDetail_paymentStatus' | t }}</dt>
             <dd class="tilawa-detail-value">{{ session.paymentStatus }}</dd>
+          </div>
+          <div>
+            <dt class="tilawa-detail-label">{{ 'sessionDetail_paymentReference' | t }}</dt>
+            <dd class="tilawa-detail-value font-mono">
+              {{ session.paymentReference ?? ('common_none' | t) }}
+            </dd>
+          </div>
+          <div>
+            <dt class="tilawa-detail-label">{{ 'sessionDetail_paymentProvider' | t }}</dt>
+            <dd class="tilawa-detail-value">
+              {{ session.paymentProvider ?? ('common_none' | t) }}
+            </dd>
+          </div>
+          <div>
+            <dt class="tilawa-detail-label">{{ 'sessionDetail_priceAmount' | t }}</dt>
+            <dd class="tilawa-detail-value">
+              {{
+                session.priceAmount === null
+                  ? ('common_none' | t)
+                  : (session.priceAmount | number: '1.2-2')
+              }}
+            </dd>
+          </div>
+          <div>
+            <dt class="tilawa-detail-label">{{ 'sessionDetail_priceCurrency' | t }}</dt>
+            <dd class="tilawa-detail-value">
+              {{ session.priceCurrency ?? ('common_none' | t) }}
+            </dd>
           </div>
           <div>
             <dt class="tilawa-detail-label">{{ 'sessionDetail_amountPaidUsd' | t }}</dt>
@@ -709,10 +794,23 @@
 
   <app-reject-reason-dialog
     [isOpen]="reasonOpen()"
-    [title]="'sessionDetail_moderationTitle' | t"
-    [message]="'sessionDetail_moderationMessage' | t"
-    [confirmLabel]="'common_submit' | t"
+    [title]="
+      (pendingAction() === 'manualReject'
+        ? 'sessionDetail_rejectManualPaymentTitle'
+        : 'sessionDetail_moderationTitle'
+      ) | t
+    "
+    [message]="
+      (pendingAction() === 'manualReject'
+        ? 'sessionDetail_rejectManualPaymentMessage'
+        : 'sessionDetail_moderationMessage'
+      ) | t
+    "
+    [confirmLabel]="
+      (pendingAction() === 'manualReject' ? 'sessionDetail_rejectManualPayment' : 'common_submit') | t
+    "
     [loading]="isActionLoading()"
+    [requireReason]="pendingAction() !== 'manualReject'"
     (submit)="onSubmitReason($event)"
     (cancel)="reasonOpen.set(false)"
   />

@@ -83,7 +83,7 @@ const TRANSITIONS: readonly SessionTransition[] = [
     action: "confirm_booking",
     from: new Set(["pending_payment"]),
     to: "scheduled",
-    allowedActors: new Set(["system"]),
+    allowedActors: new Set(["admin", "system"]),
     requiresReason: false,
   },
   {

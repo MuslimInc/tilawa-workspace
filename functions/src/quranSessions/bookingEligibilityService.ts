@@ -2,6 +2,11 @@ import { Firestore, Timestamp, DocumentSnapshot } from "firebase-admin/firestore
 
 import { lifecycleError } from "./lifecycleErrors";
 import {
+  isMarketEnabled,
+  parseMarketGatePolicy,
+  type MarketGatePolicy,
+} from "./marketGate";
+import {
   loadEffectiveMarketPolicy,
   assertBookingPolicyConfigured,
   type ResolvedMarketPolicy,
@@ -55,6 +60,8 @@ export interface PlatformFeaturePolicy {
   quranSessionsEnabled: boolean;
   studentEntryEnabled: boolean;
   bookingEnabled: boolean;
+  /** Config-driven market availability gate (replaces hardcoded Egypt-only). */
+  marketGate: MarketGatePolicy;
 }
 
 /** Where the authoritative price came from — recorded on the fee snapshot. */
@@ -152,6 +159,7 @@ export function parsePlatformFeaturePolicy(
     quranSessionsEnabled: raw.quranSessionsEnabled === true,
     studentEntryEnabled: raw.studentEntryEnabled === true,
     bookingEnabled: raw.bookingEnabled === true,
+    marketGate: parseMarketGatePolicy(raw),
   };
 }
 
@@ -279,11 +287,34 @@ export function assertBookingEligible(
     });
   }
 
-  if (ctx.pricing.isPaid && !market.paymentProviderEnabled) {
+  const studentCountryCode = student.countryCode as string;
+  if (!isMarketEnabled(ctx.platform.marketGate, studentCountryCode)) {
+    throw lifecycleError(
+      "market_not_supported",
+      "Quran Sessions is not available in your region yet.",
+      { countryCode: studentCountryCode },
+    );
+  }
+
+  if (
+    ctx.pricing.isPaid &&
+    !market.manualPaymentEnabled &&
+    !market.paymentProviderEnabled
+  ) {
     throw lifecycleError(
       "payment_provider_unavailable",
       "Paid bookings are not currently available in this market.",
       { countryCode: student.countryCode }
+    );
+  }
+
+  // Egypt manual-payment release is paid-only: free bookings are blocked when
+  // the market has manual off-app payment enabled.
+  if (market.manualPaymentEnabled && !ctx.pricing.isPaid) {
+    throw lifecycleError(
+      "payment_provider_unavailable",
+      "Free bookings are disabled while manual payment is enabled for this market.",
+      { countryCode: student.countryCode },
     );
   }
 
@@ -468,6 +499,7 @@ export async function loadSharedBookingContext(
     policyVersion: null,
     effectiveFrom: null,
     paymentProviderEnabled: false,
+    manualPaymentEnabled: false,
   };
   let marketPricing: ResolvedPricing = {
     isPaid: false,

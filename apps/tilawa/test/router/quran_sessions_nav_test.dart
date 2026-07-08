@@ -133,6 +133,21 @@ class _UnimplementedProfileRepository implements TeacherProfileRepository {
   dynamic noSuchMethod(Invocation invocation) => throw UnimplementedError();
 }
 
+class _FixedCapabilityUseCase extends GetCurrentUserTeacherCapabilityUseCase {
+  _FixedCapabilityUseCase(this._cap)
+    : super(
+        applicationRepository: _UnimplementedApplicationRepository(),
+        profileRepository: _UnimplementedProfileRepository(),
+      );
+
+  final TeacherCapability _cap;
+
+  @override
+  Future<Either<QuranSessionsFailure, TeacherCapability>> call(
+    String userId,
+  ) async => Right(_cap);
+}
+
 GoRoute _teacherDashboardRoute() {
   return quranSessionsRoutes.whereType<GoRoute>().firstWhere(
     (route) => route.path == QuranSessionsRoutes.teacherDashboard,
@@ -299,5 +314,60 @@ void main() {
         expect(find.byType(CircularProgressIndicator), findsOneWidget);
       },
     );
+
+    testWidgets('redirects to profile completion when profile incomplete', (
+      tester,
+    ) async {
+      seedPlatformConfig(
+        studentEntryEnabled: true,
+        bookingEnabled: true,
+      );
+      getIt.registerSingleton<AuthSessionProvider>(
+        const FakeAuthSessionProvider(userId: 'teacher_user'),
+      );
+
+      final capability = TeacherCapability(
+        state: TeacherCapabilityState.approvedIncompleteProfile,
+      );
+
+      getIt.registerSingleton<GetCurrentUserTeacherCapabilityUseCase>(
+        _FixedCapabilityUseCase(capability),
+      );
+
+      final route = _teacherDashboardRoute();
+      final router = GoRouter(
+        initialLocation: QuranSessionsRoutes.teacherDashboard,
+        routes: [
+          route,
+          GoRoute(
+            path: QuranSessionsRoutes.completeTeacherProfile,
+            builder: (context, state) => Text(state.uri.path),
+          ),
+        ],
+      );
+
+      await tester.pumpWidget(
+        MaterialApp.router(
+          builder: (context, child) => TilawaFeedbackHost(child: child!),
+          theme: AppTheme.getLightTheme(
+            primaryColor: AppColors.defaultPrimary,
+          ),
+          localizationsDelegates: const [
+            ...QuranSessionsLocalizations.localizationsDelegates,
+            GlobalMaterialLocalizations.delegate,
+            GlobalWidgetsLocalizations.delegate,
+            GlobalCupertinoLocalizations.delegate,
+          ],
+          supportedLocales: QuranSessionsLocalizations.supportedLocales,
+          routerConfig: router,
+        ),
+      );
+      await tester.pumpAndSettle();
+
+      expect(
+        find.text(QuranSessionsRoutes.completeTeacherProfile),
+        findsOneWidget,
+      );
+    });
   });
 }

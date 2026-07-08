@@ -21,6 +21,8 @@ class SessionAggregate extends Equatable {
     this.lastActionReason,
     this.rejectionReason,
     this.paymentReference,
+    this.paymentProvider,
+    this.paymentStatus,
     this.sessionId,
     this.revisionSurahNumber,
     this.revisionAyahNumber,
@@ -42,6 +44,8 @@ class SessionAggregate extends Equatable {
   final String? lastActionReason;
   final String? rejectionReason;
   final String? paymentReference;
+  final String? paymentProvider;
+  final String? paymentStatus;
 
   /// Linked operational session document id (from booking).
   final String? sessionId;
@@ -58,6 +62,9 @@ class SessionAggregate extends Equatable {
 
   bool get isPaid => pricingType == SessionPricingType.fixedPerSession;
 
+  bool get isManualPayment =>
+      paymentProvider == 'manual_off_app' || paymentStatus == 'manual_pending';
+
   bool get hasRevisionSurahContext =>
       revisionSurahNumber != null && revisionSurahNumber! >= 1;
 
@@ -70,6 +77,8 @@ class SessionAggregate extends Equatable {
     String? lastActionReason,
     String? rejectionReason,
     String? paymentReference,
+    String? paymentProvider,
+    String? paymentStatus,
     String? sessionId,
     int? revisionSurahNumber,
     int? revisionAyahNumber,
@@ -89,6 +98,8 @@ class SessionAggregate extends Equatable {
       lastActionReason: lastActionReason ?? this.lastActionReason,
       rejectionReason: rejectionReason ?? this.rejectionReason,
       paymentReference: paymentReference ?? this.paymentReference,
+      paymentProvider: paymentProvider ?? this.paymentProvider,
+      paymentStatus: paymentStatus ?? this.paymentStatus,
       sessionId: sessionId ?? this.sessionId,
       revisionSurahNumber: revisionSurahNumber ?? this.revisionSurahNumber,
       revisionAyahNumber: revisionAyahNumber ?? this.revisionAyahNumber,
@@ -111,6 +122,8 @@ class SessionAggregate extends Equatable {
     lastActionReason,
     rejectionReason,
     paymentReference,
+    paymentProvider,
+    paymentStatus,
     sessionId,
     revisionSurahNumber,
     revisionAyahNumber,

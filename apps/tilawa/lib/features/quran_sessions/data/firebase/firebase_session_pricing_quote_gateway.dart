@@ -69,6 +69,10 @@ class FirebaseSessionPricingQuoteGateway implements SessionPricingQuoteGateway {
     final paymentRequired = data['paymentRequired'] as bool? ?? false;
     final paymentProviderAvailable =
         data['paymentProviderAvailable'] as bool? ?? false;
+    final manualPaymentEnabled = data['manualPaymentEnabled'] as bool? ?? false;
+    final paymentMode = SessionPaymentMode.fromString(
+      data['paymentMode'] as String?,
+    );
 
     // Backward-compat: a backend that has not yet shipped the typed
     // `blockReason` field returns only the loose booleans. Derive the paid-
@@ -81,7 +85,12 @@ class FirebaseSessionPricingQuoteGateway implements SessionPricingQuoteGateway {
     final rawBlockReason = data['blockReason'] as String?;
     final blockReason = rawBlockReason != null && rawBlockReason != 'none'
         ? BookingBlockReason.fromString(rawBlockReason)
-        : (paymentRequired && !paymentProviderAvailable
+        : (paymentRequired &&
+                  !paymentProviderAvailable &&
+                  !manualPaymentEnabled &&
+                  paymentMode != SessionPaymentMode.manualOffApp
+              // Manual off-app is an available paid path; do not block it as a
+              // missing online provider.
               ? BookingBlockReason.paymentProviderUnavailable
               : BookingBlockReason.none);
 
@@ -93,6 +102,8 @@ class FirebaseSessionPricingQuoteGateway implements SessionPricingQuoteGateway {
       currencyCode: data['currencyCode'] as String? ?? 'USD',
       paymentRequired: paymentRequired,
       paymentProviderAvailable: paymentProviderAvailable,
+      manualPaymentEnabled: manualPaymentEnabled,
+      paymentMode: paymentMode,
       bookingEnabled: data['bookingEnabled'] as bool? ?? true,
       quranSessionsEnabled: data['quranSessionsEnabled'] as bool? ?? true,
       effectivePricingSource: EffectivePricingSource.fromString(

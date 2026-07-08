@@ -9,13 +9,30 @@
 export { isPaymentProviderEnabled } from "./payment/envGate";
 import { isPaymentProviderEnabled } from "./payment/envGate";
 
-export function assertPaidBookingAllowed(pricingType: string): void {
+export interface PaidBookingMarketGate {
+  manualPaymentEnabled?: boolean;
+  paymentProviderEnabled?: boolean;
+}
+
+export function assertPaidBookingAllowedForMarket(
+  pricingType: string,
+  gate: PaidBookingMarketGate = {},
+): void {
   if (pricingType === "free") {
     return;
   }
-  if (!isPaymentProviderEnabled()) {
+  const paymentProviderEnabled =
+    gate.paymentProviderEnabled ?? isPaymentProviderEnabled();
+  if (!gate.manualPaymentEnabled && !paymentProviderEnabled) {
     throw new Error("payment_provider_unavailable");
   }
+}
+
+export function assertPaidBookingAllowed(
+  pricingType: string,
+  gate: PaidBookingMarketGate = {},
+): void {
+  assertPaidBookingAllowedForMarket(pricingType, gate);
 }
 
 export type FinancialExecutionStatus = "manual_pending" | "executed" | "failed";

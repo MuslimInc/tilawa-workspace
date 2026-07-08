@@ -47,6 +47,9 @@ class QuranSession extends Equatable {
     this.joinToken,
     this.participants = const [],
     this.notes,
+    this.paymentReference,
+    this.paymentProvider,
+    this.paymentStatus,
   });
 
   final String id;
@@ -75,9 +78,15 @@ class QuranSession extends Equatable {
 
   final List<SessionParticipant> participants;
   final String? notes;
+  final String? paymentReference;
+  final String? paymentProvider;
+  final String? paymentStatus;
 
   /// External join URL when [callProviderKind] is [SessionCallProviderKind.external].
   String? get joinUrl => meetingLink;
+
+  bool get isManualPayment =>
+      paymentProvider == 'manual_off_app' || paymentStatus == 'manual_pending';
 
   /// Canonical lifecycle status with backwards-compatible fallback.
   SessionLifecycleStatus get effectiveLifecycleStatus =>
@@ -119,5 +128,8 @@ class QuranSession extends Equatable {
     joinToken,
     participants,
     notes,
+    paymentReference,
+    paymentProvider,
+    paymentStatus,
   ];
 }

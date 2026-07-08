@@ -34,6 +34,8 @@ import {
   IssueSessionCompensationUseCase,
   ConfirmSessionRescheduleUseCase,
   ApproveSessionRefundUseCase,
+  ConfirmManualBookingPaymentUseCase,
+  RejectManualBookingPaymentUseCase,
 } from '../../domain/usecases/session-moderation.usecases';
 import { ListSessionReportsUseCase } from '../../domain/usecases/session-report.usecases';
 import { GetSessionReportUseCase } from '../../domain/usecases/session-report.usecases';
@@ -150,6 +152,8 @@ describe('browse list facades sort', () => {
           { provide: IssueSessionCompensationUseCase, useValue: noopUseCase },
           { provide: ConfirmSessionRescheduleUseCase, useValue: noopUseCase },
           { provide: ApproveSessionRefundUseCase, useValue: noopUseCase },
+          { provide: ConfirmManualBookingPaymentUseCase, useValue: noopUseCase },
+          { provide: RejectManualBookingPaymentUseCase, useValue: noopUseCase },
           {
             provide: TEACHER_PROFILE_REPOSITORY,
             useValue: { list: vi.fn(), getById: vi.fn() },

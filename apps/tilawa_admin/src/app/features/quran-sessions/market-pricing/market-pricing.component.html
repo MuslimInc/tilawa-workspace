@@ -57,6 +57,30 @@
         <h3 class="text-lg font-medium mb-4">{{ 'marketPricing_policySettings' | t }}</h3>
         
         <div class="tilawa-form-group mb-4">
+          <label class="tilawa-checkbox-label">
+            <input type="checkbox" formControlName="studentBookingEnabled" class="tilawa-checkbox" />
+            <span>{{ 'marketPricing_studentBookingEnabled' | t }}</span>
+          </label>
+        </div>
+
+        <div class="tilawa-form-group mb-4">
+          <label class="tilawa-checkbox-label">
+            <input type="checkbox" formControlName="teacherDiscoveryEnabled" class="tilawa-checkbox" />
+            <span>{{ 'marketPricing_teacherDiscoveryEnabled' | t }}</span>
+          </label>
+        </div>
+
+        <div class="tilawa-form-group mb-4">
+          <label class="tilawa-checkbox-label font-bold text-[var(--tilawa-primary)]">
+            <input type="checkbox" formControlName="manualPaymentEnabled" class="tilawa-checkbox" />
+            <span>{{ 'marketPricing_manualPaymentEnabled' | t }}</span>
+          </label>
+          <p class="text-sm text-[var(--tilawa-ink-muted)] mt-1">
+            {{ 'marketPricing_manualPaymentHint' | t }}
+          </p>
+        </div>
+
+        <div class="tilawa-form-group mb-4">
           <label class="tilawa-checkbox-label text-red-600 font-bold">
             <input type="checkbox" formControlName="paymentProviderEnabled" class="tilawa-checkbox" (change)="onPaymentToggle($event)" />
             <span>{{ 'marketPricing_paymentProviderEnabled' | t }}</span>
@@ -68,6 +92,32 @@
             <input type="checkbox" formControlName="genderMatchingEnabled" class="tilawa-checkbox" />
             <span>{{ 'marketPricing_genderMatchingEnabled' | t }}</span>
           </label>
+        </div>
+
+        <div class="mb-6">
+          <h3 class="text-lg font-medium mb-4">{{ 'marketPricing_paymentInstructions' | t }}</h3>
+          <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div class="tilawa-form-group">
+              <label class="tilawa-label">{{ 'marketPricing_supportWhatsappNumber' | t }}</label>
+              <input type="text" formControlName="supportWhatsappNumber" class="tilawa-field" />
+            </div>
+            <div class="tilawa-form-group">
+              <label class="tilawa-label">{{ 'marketPricing_vodafoneCashNumber' | t }}</label>
+              <input type="text" formControlName="vodafoneCashNumber" class="tilawa-field" />
+            </div>
+            <div class="tilawa-form-group">
+              <label class="tilawa-label">{{ 'marketPricing_instapayHandle' | t }}</label>
+              <input type="text" formControlName="instapayHandle" class="tilawa-field" />
+            </div>
+            <div class="tilawa-form-group">
+              <label class="tilawa-label">{{ 'marketPricing_instapayPaymentLink' | t }}</label>
+              <input type="text" formControlName="instapayPaymentLink" class="tilawa-field" />
+            </div>
+            <div class="tilawa-form-group md:col-span-2">
+              <label class="tilawa-label">{{ 'marketPricing_recipientMaskedName' | t }}</label>
+              <input type="text" formControlName="recipientMaskedName" class="tilawa-field" />
+            </div>
+          </div>
         </div>
 
         <div class="grid grid-cols-1 md:grid-cols-2 gap-4">

@@ -81,6 +81,8 @@ export async function seedDefaultBookingPolicy(
       enabledCallProviders: ["external", "mock"],
       childAgeThreshold: 14,
       genderMatchingEnabled: true,
+      enableForAllMarkets: false,
+      enabledMarketCodes: [countryCode.toUpperCase()],
     });
 
   await db()

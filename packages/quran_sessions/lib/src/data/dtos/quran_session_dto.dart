@@ -17,6 +17,9 @@ class QuranSessionDto {
     this.joinToken,
     this.participants,
     this.notes,
+    this.paymentReference,
+    this.paymentProvider,
+    this.paymentStatus,
   });
 
   final String id;
@@ -36,6 +39,9 @@ class QuranSessionDto {
   final String? joinToken;
   final Object? participants;
   final String? notes;
+  final String? paymentReference;
+  final String? paymentProvider;
+  final String? paymentStatus;
 
   factory QuranSessionDto.fromJson(Map<String, dynamic> json) =>
       QuranSessionDto(
@@ -56,6 +62,9 @@ class QuranSessionDto {
         joinToken: json['join_token'] as String?,
         participants: json['participants'],
         notes: json['notes'] as String?,
+        paymentReference: json['payment_reference'] as String?,
+        paymentProvider: json['payment_provider'] as String?,
+        paymentStatus: json['payment_status'] as String?,
       );
 
   Map<String, dynamic> toJson() => {
@@ -76,5 +85,8 @@ class QuranSessionDto {
     'join_token': joinToken,
     'participants': participants,
     'notes': notes,
+    'payment_reference': paymentReference,
+    'payment_provider': paymentProvider,
+    'payment_status': paymentStatus,
   };
 }

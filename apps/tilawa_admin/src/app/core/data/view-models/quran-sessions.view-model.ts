@@ -85,6 +85,8 @@ export interface AdminSessionListItemVm {
   readonly lifecycleStatus: string;
   readonly callType: string;
   readonly pricingType: string;
+  readonly paymentReference: string | null;
+  readonly paymentProvider: string | null;
   readonly countryCode: string;
   readonly cityId: string;
   readonly createdAt: Date;
@@ -106,6 +108,10 @@ export interface AdminSessionDetailVm {
   readonly countryCode: string;
   readonly cityId: string;
   readonly paymentStatus: string;
+  readonly paymentReference: string | null;
+  readonly paymentProvider: string | null;
+  readonly priceAmount: number | null;
+  readonly priceCurrency: string | null;
   readonly amountPaidUsd: string;
   readonly cancellationReason: string | null;
   readonly createdAt: Date;
@@ -298,6 +304,8 @@ export class QuranSessionsViewModelMapper {
       lifecycleStatus: session.lifecycleStatus,
       callType: session.callType,
       pricingType: session.pricingType,
+      paymentReference: session.paymentReference,
+      paymentProvider: session.paymentProvider,
       countryCode: session.countryCode ?? '—',
       cityId: session.cityId ?? '—',
       createdAt: session.createdAt,
@@ -321,6 +329,10 @@ export class QuranSessionsViewModelMapper {
       countryCode: session.countryCode ?? '—',
       cityId: session.cityId ?? '—',
       paymentStatus: session.paymentStatus ?? '—',
+      paymentReference: session.paymentReference,
+      paymentProvider: session.paymentProvider,
+      priceAmount: session.priceAmount,
+      priceCurrency: session.priceCurrency,
       amountPaidUsd: session.amountPaidUsd == null ? '—' : session.amountPaidUsd.toFixed(2),
       cancellationReason: session.cancellationReason,
       createdAt: session.createdAt,

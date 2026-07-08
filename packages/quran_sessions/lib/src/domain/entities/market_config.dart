@@ -1,5 +1,7 @@
 import 'package:equatable/equatable.dart';
 
+import 'manual_payment_market_config.dart';
+
 // ── CityConfig ────────────────────────────────────────────────────────────────
 
 /// Configuration for a single city within a country market.
@@ -66,6 +68,7 @@ class MarketConfig extends Equatable {
     required this.minSessionPrice,
     required this.maxSessionPrice,
     required this.platformCommissionPercent,
+    this.manualPayment,
   });
 
   /// ISO 3166-1 alpha-2 code, e.g. 'EG'.
@@ -91,6 +94,10 @@ class MarketConfig extends Equatable {
   /// Platform commission on paid sessions (0–100).
   final double platformCommissionPercent;
 
+  /// Manual / off-app payment details for this market. Null when the market
+  /// doc omits the block (callers fall back to [ManualPaymentMarketConfig]).
+  final ManualPaymentMarketConfig? manualPayment;
+
   CityConfig? cityById(String cityId) =>
       cities.where((c) => c.cityId == cityId).firstOrNull;
 
@@ -109,6 +116,7 @@ class MarketConfig extends Equatable {
     minSessionPrice,
     maxSessionPrice,
     platformCommissionPercent,
+    manualPayment,
   ];
 }
 

@@ -30,6 +30,8 @@ export { finalizeElapsedSessions } from "./quranSessions/finalizeElapsedSessions
 export { deliverSessionNotification } from "./quranSessions/deliverSessionNotification";
 export { getWallet, postWalletCredit } from "./quranSessions/walletCallables";
 export { confirmBookingPayment } from "./quranSessions/confirmBookingPayment";
+export { confirmManualBookingPayment } from "./quranSessions/confirmManualBookingPayment";
+export { rejectManualBookingPayment } from "./quranSessions/rejectManualBookingPayment";
 export { getBookingPricingQuote } from "./quranSessions/getBookingPricingQuote";
 export { getBookingPricingQuotes } from "./quranSessions/getBookingPricingQuotes";
 export { setTeacherSessionPricing } from "./quranSessions/setTeacherSessionPricing";

@@ -19,7 +19,10 @@ export interface MarketConfig {
   minSessionPrice: number;
   currencyCode: string;
   cities?: MarketCity[];
+  studentBookingEnabled?: boolean;
+  teacherDiscoveryEnabled?: boolean;
   paymentProviderEnabled?: boolean;
+  manualPaymentEnabled?: boolean;
   bookingMode?: 'requiresTutorApproval' | 'autoConfirm';
   joinWindowLeadMs?: number;
   tutorApprovalSlaMs?: number;
@@ -27,6 +30,12 @@ export interface MarketConfig {
   maxConcurrentUpcomingPerStudent?: number;
   sessionMode?: 'videoOnly';
   genderMatchingEnabled?: boolean;
+  teacherWhitelist?: string[] | null;
+  supportWhatsappNumber?: string | null;
+  instapayHandle?: string | null;
+  instapayPaymentLink?: string | null;
+  vodafoneCashNumber?: string | null;
+  recipientMaskedName?: string | null;
 }
 
 interface MarketPricingState {
@@ -85,15 +94,25 @@ export class MarketPricingFacade {
                 countryCode: market.countryCode,
                 isEnabled: market.isEnabled ?? true,
                 minSessionPrice: market.minSessionPrice ?? 0,
-                currencyCode: market.currencyCode ?? 'USD',
-                paymentProviderEnabled: market.paymentProviderEnabled,
+                currencyCode: market.currencyCode ?? 'EGP',
+                studentBookingEnabled: market.studentBookingEnabled ?? true,
+                teacherDiscoveryEnabled: market.teacherDiscoveryEnabled ?? true,
+                paymentProviderEnabled: market.paymentProviderEnabled ?? false,
+                manualPaymentEnabled: market.manualPaymentEnabled ?? false,
                 bookingMode: market.bookingMode,
                 joinWindowLeadMs: market.joinWindowLeadMs,
                 tutorApprovalSlaMs: market.tutorApprovalSlaMs,
                 minBookingNoticeMs: market.minBookingNoticeMs,
-                maxConcurrentUpcomingPerStudent: market.maxConcurrentUpcomingPerStudent,
+                maxConcurrentUpcomingPerStudent:
+                  market.maxConcurrentUpcomingPerStudent,
                 sessionMode: market.sessionMode,
                 genderMatchingEnabled: market.genderMatchingEnabled,
+                teacherWhitelist: market.teacherWhitelist ?? null,
+                supportWhatsappNumber: market.supportWhatsappNumber ?? null,
+                instapayHandle: market.instapayHandle ?? null,
+                instapayPaymentLink: market.instapayPaymentLink ?? null,
+                vodafoneCashNumber: market.vodafoneCashNumber ?? null,
+                recipientMaskedName: market.recipientMaskedName ?? null,
                 cities
               } as MarketConfig;
             })
@@ -134,13 +153,30 @@ export class MarketPricingFacade {
         isEnabled: config.isEnabled,
         minSessionPrice: config.minSessionPrice,
         currencyCode: config.currencyCode,
+        studentBookingEnabled: config.studentBookingEnabled ?? true,
+        teacherDiscoveryEnabled: config.teacherDiscoveryEnabled ?? true,
+        bookingMode: config.bookingMode ?? 'requiresTutorApproval',
+        minBookingNoticeMs: config.minBookingNoticeMs ?? 0,
+        maxConcurrentUpcomingPerStudent:
+          config.maxConcurrentUpcomingPerStudent ?? 3,
+        joinWindowLeadMs: config.joinWindowLeadMs ?? 0,
+        tutorApprovalSlaMs: config.tutorApprovalSlaMs ?? 0,
+        genderMatchingEnabled: config.genderMatchingEnabled ?? false,
+        teacherWhitelist: config.teacherWhitelist ?? null,
+        paymentProviderEnabled: config.paymentProviderEnabled ?? false,
+        manualPaymentEnabled: config.manualPaymentEnabled ?? false,
+        supportWhatsappNumber: config.supportWhatsappNumber ?? null,
+        instapayHandle: config.instapayHandle ?? null,
+        instapayPaymentLink: config.instapayPaymentLink ?? null,
+        vodafoneCashNumber: config.vodafoneCashNumber ?? null,
+        recipientMaskedName: config.recipientMaskedName ?? null,
         cities: config.cities?.map(c => ({
           cityId: c.cityId,
           isEnabled: c.isEnabled,
           minSessionPrice: c.minSessionPrice
         })) || []
       };
-      
+
       await callable(payload);
       this.updateState({ saving: false, successMessage: 'marketPricing_updateSuccess' });
       

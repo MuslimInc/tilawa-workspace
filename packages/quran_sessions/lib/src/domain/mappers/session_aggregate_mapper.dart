@@ -16,7 +16,7 @@ QuranBooking aggregateToQuranBooking(SessionAggregate aggregate) {
     createdAt: aggregate.createdAt,
     lifecycleStatus: aggregate.lifecycleStatus,
     paymentReference: aggregate.paymentReference,
-    sessionId: aggregate.id,
+    sessionId: aggregate.sessionId,
   );
 }
 

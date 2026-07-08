@@ -15,6 +15,8 @@ import {
   IssueSessionCompensationUseCase,
   ConfirmSessionRescheduleUseCase,
   ApproveSessionRefundUseCase,
+  ConfirmManualBookingPaymentUseCase,
+  RejectManualBookingPaymentUseCase,
 } from '../../domain/usecases/session-moderation.usecases';
 import {
   TEACHER_PROFILE_REPOSITORY,
@@ -48,6 +50,10 @@ describe('SessionsFacade — participants', () => {
     countryCode: 'EG',
     cityId: 'cairo',
     paymentStatus: 'none',
+    paymentReference: null,
+    paymentProvider: 'none',
+    priceAmount: 0,
+    priceCurrency: 'USD',
     amountPaidUsd: 0,
     cancellationReason: null,
     createdAt: new Date(),
@@ -158,6 +164,14 @@ describe('SessionsFacade — participants', () => {
           useValue: { execute: vi.fn() },
         },
         { provide: ApproveSessionRefundUseCase, useValue: { execute: vi.fn() } },
+        {
+          provide: ConfirmManualBookingPaymentUseCase,
+          useValue: { execute: vi.fn() },
+        },
+        {
+          provide: RejectManualBookingPaymentUseCase,
+          useValue: { execute: vi.fn() },
+        },
         { provide: TEACHER_PROFILE_REPOSITORY, useValue: teacherRepo },
         { provide: QURAN_SESSIONS_USER_REPOSITORY, useValue: userRepo },
       ],

@@ -1,7 +1,9 @@
 import 'package:dartz_plus/dartz_plus.dart';
 
 import '../entities/quran_teacher.dart';
+import '../entities/manual_payment_price.dart';
 import '../entities/session_pricing_quote.dart';
+import '../entities/session_pricing_type.dart';
 import '../entities/teacher_list_item.dart';
 import '../failures/quran_sessions_failure.dart';
 import 'get_booking_pricing_quote_usecase.dart';
@@ -77,7 +79,10 @@ class ResolveTeacherListUseCase {
     final quotes = await _resolveQuotes(page.teachers);
     final items = [
       for (final teacher in page.teachers)
-        TeacherListItem(teacher: teacher, pricingQuote: quotes[teacher.id]),
+        TeacherListItem(
+          teacher: _applyQuoteToTeacher(teacher, quotes[teacher.id]),
+          pricingQuote: quotes[teacher.id],
+        ),
     ];
     return Right(
       TeacherListResult(
@@ -131,4 +136,36 @@ class ResolveTeacherListUseCase {
         if (entry.value != null) entry.key: entry.value!,
     };
   }
+}
+
+QuranTeacher _applyQuoteToTeacher(
+  QuranTeacher teacher,
+  SessionPricingQuote? quote,
+) {
+  if (quote == null || !quote.isPaid) return teacher;
+  return QuranTeacher(
+    id: teacher.id,
+    displayName: teacher.displayName,
+    bio: teacher.bio,
+    avatarUrl: teacher.avatarUrl,
+    gender: teacher.gender,
+    verificationStatus: teacher.verificationStatus,
+    supportedCallTypes: teacher.supportedCallTypes,
+    pricingType: SessionPricingType.fixedPerSession,
+    specializations: teacher.specializations,
+    languages: teacher.languages,
+    averageRating: teacher.averageRating,
+    totalReviews: teacher.totalReviews,
+    totalSessionsCompleted: teacher.totalSessionsCompleted,
+    price: quote.price ?? teacher.price,
+    manualPaymentPrice: quote.isManualOffApp
+        ? ManualPaymentPrice(
+            amountMinor: (quote.amount * 100).round(),
+            currencyCode: quote.currencyCode,
+          )
+        : teacher.manualPaymentPrice,
+    cityName: teacher.cityName,
+    countryName: teacher.countryName,
+    credentials: teacher.credentials,
+  );
 }

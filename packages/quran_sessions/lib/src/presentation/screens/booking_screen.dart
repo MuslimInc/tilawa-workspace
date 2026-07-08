@@ -2,10 +2,12 @@ import 'dart:async';
 
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:flutter/services.dart';
 import 'package:quran_sessions/core/l10n_extensions.dart';
 import 'package:quran_sessions/l10n/quran_sessions_localizations.dart';
 import 'package:tilawa_ui_kit/tilawa_ui_kit.dart';
 
+import '../../boundaries/manual_payment_link_launcher.dart';
 import '../../domain/entities/session_lifecycle_status.dart';
 import '../../domain/entities/quran_booking.dart';
 import '../../domain/entities/session_call_provider_kind.dart';
@@ -16,10 +18,12 @@ import '../../domain/policies/session_mode_policy.dart';
 import '../blocs/booking/booking_bloc.dart';
 import '../blocs/booking/booking_event.dart';
 import '../blocs/booking/booking_state.dart';
+import '../../domain/entities/manual_payment_market_config.dart';
 import '../config/quran_sessions_analytics_callbacks.dart';
 import '../widgets/booking_block_notice.dart';
 import '../failure_ui/quran_sessions_failure_ui.dart';
 import '../widgets/availability_slot_picker.dart';
+import '../widgets/manual_payment_instructions.dart';
 import '../widgets/paid_session_notice.dart';
 import '../widgets/payment_checkout_sheet.dart';
 import '../widgets/quran_sessions_scaffold.dart';
@@ -145,9 +149,19 @@ class _BookingScreenState extends State<BookingScreen> {
             }
           }
 
-          if (state is BookingSuccess) {
-            final booking = state.booking;
-            if (!_loggedBookingCompleted) {
+          if (state is BookingSuccess || state is BookingManualPaymentPending) {
+            final booking = switch (state) {
+              BookingSuccess(:final booking) => booking,
+              BookingManualPaymentPending(:final booking) => booking,
+              _ => throw StateError('unreachable'),
+            };
+            final isPendingTutorApproval =
+                booking.effectiveLifecycleStatus ==
+                SessionLifecycleStatus.pendingTutorApproval;
+            final isPendingPayment =
+                booking.effectiveLifecycleStatus ==
+                SessionLifecycleStatus.pendingPayment;
+            if (!isPendingPayment && !_loggedBookingCompleted) {
               _loggedBookingCompleted = true;
               widget.analytics.onBookingCompleted?.call(
                 teacherId: booking.teacherId,
@@ -157,18 +171,18 @@ class _BookingScreenState extends State<BookingScreen> {
                 callType: booking.requestedCallType.name,
               );
             }
-            final isPending =
-                booking.effectiveLifecycleStatus ==
-                SessionLifecycleStatus.pendingTutorApproval;
             TilawaFeedback.showToast(
               context,
-              message: isPending
+              message: isPendingPayment
+                  ? l10n.bookingAwaitingPaymentVerification
+                  : isPendingTutorApproval
                   ? '${l10n.bookingUnderReviewTitle}\n${l10n.bookingUnderReviewPaymentHint}'
                   : l10n.bookingConfirmed,
               variant: TilawaFeedbackVariant.success,
             );
+            if (isPendingPayment) return;
             if (widget.onBookingSuccess != null) {
-              widget.onBookingSuccess!(state.booking);
+              widget.onBookingSuccess!(booking);
             } else {
               Navigator.of(context).pop();
             }
@@ -232,6 +246,18 @@ class _BookingScreenState extends State<BookingScreen> {
             onRetry: _retryEligibility,
           ),
           BookingSuccess() => const SizedBox.shrink(),
+          BookingManualPaymentPending(
+            :final paymentReference,
+            :final teacherDisplayName,
+            :final startsAt,
+            :final sessionPrice,
+          ) =>
+            _ManualPaymentPendingView(
+              paymentReference: paymentReference,
+              teacherDisplayName: teacherDisplayName,
+              startsAt: startsAt,
+              sessionPrice: sessionPrice,
+            ),
           BookingSelecting(
             :final availableSlots,
             :final selectedSlot,
@@ -244,81 +270,71 @@ class _BookingScreenState extends State<BookingScreen> {
           ) =>
             Padding(
               padding: EdgeInsets.all(tokens.spaceMedium),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.stretch,
-                children: [
-                  if (manualPaymentPrice != null)
-                    Padding(
-                      padding: EdgeInsets.only(bottom: tokens.spaceSmall),
-                      child: PaidSessionNotice(price: manualPaymentPrice),
-                    )
-                  else if (pricingType != null &&
-                      blockReason == BookingBlockReason.none)
-                    Padding(
-                      padding: EdgeInsets.only(bottom: tokens.spaceSmall),
-                      child: _BookingPriceSummary(
-                        pricingType: pricingType,
-                        sessionPrice: sessionPrice,
+              child: SingleChildScrollView(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.stretch,
+                  children: [
+                    if (manualPaymentPrice != null)
+                      Padding(
+                        padding: EdgeInsets.only(bottom: tokens.spaceSmall),
+                        child: PaidSessionNotice(price: manualPaymentPrice),
+                      )
+                    else if (pricingType != null &&
+                        blockReason == BookingBlockReason.none)
+                      Padding(
+                        padding: EdgeInsets.only(bottom: tokens.spaceSmall),
+                        child: _BookingPriceSummary(
+                          pricingType: pricingType,
+                          sessionPrice: sessionPrice,
+                        ),
+                      ),
+                    if (blockReason != BookingBlockReason.none)
+                      Padding(
+                        padding: EdgeInsets.only(bottom: tokens.spaceSmall),
+                        child: BookingBlockNotice(blockReason: blockReason),
+                      ),
+                    Text(
+                      l10n.selectSlot,
+                      style: theme.textTheme.titleMedium?.copyWith(
+                        fontWeight: FontWeight.w700,
+                        color: scheme.onSurface,
                       ),
                     ),
-                  if (blockReason != BookingBlockReason.none)
-                    Padding(
-                      padding: EdgeInsets.only(bottom: tokens.spaceSmall),
-                      child: BookingBlockNotice(blockReason: blockReason),
-                    ),
-                  Text(
-                    l10n.selectSlot,
-                    style: theme.textTheme.titleMedium?.copyWith(
-                      fontWeight: FontWeight.w700,
-                      color: scheme.onSurface,
-                    ),
-                  ),
-                  SizedBox(height: tokens.spaceSmall),
-                  Expanded(
-                    child: SingleChildScrollView(
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.stretch,
-                        children: [
-                          TilawaCard(
-                            padding: EdgeInsets.all(tokens.spaceSmall),
-                            child: AvailabilitySlotPicker(
-                              slots: availableSlots,
-                              selectedSlotId: selectedSlot?.slotId,
-                              initialSlotId: widget.preSelectedSlotId,
-                              onSlotSelected: (slot) => context
-                                  .read<BookingBloc>()
-                                  .add(SlotSelected(slot)),
-                            ),
-                          ),
-                          SizedBox(height: tokens.spaceSmall),
-                          Text(
-                            l10n.sessionType,
-                            style: theme.textTheme.titleMedium?.copyWith(
-                              fontWeight: FontWeight.w700,
-                              color: scheme.onSurface,
-                            ),
-                          ),
-                          SizedBox(height: tokens.spaceExtraSmall),
-                          TilawaCard(
-                            padding: EdgeInsets.all(tokens.spaceSmall),
-                            child: _CallTypePicker(
-                              hostPolicy: widget.sessionModePolicy,
-                              teacherExternalMeetingUrl:
-                                  teacherExternalMeetingUrl,
-                              selected: selectedCallType,
-                              voiceVideoProviderHint:
-                                  widget.voiceVideoProviderHint,
-                              onChanged: (ct) =>
-                                  context.read<BookingBloc>().add(
-                                    CallTypeSelected(ct),
-                                  ),
-                            ),
-                          ),
-                        ],
+                    SizedBox(height: tokens.spaceSmall),
+                    TilawaCard(
+                      padding: EdgeInsets.all(tokens.spaceSmall),
+                      child: AvailabilitySlotPicker(
+                        slots: availableSlots,
+                        selectedSlotId: selectedSlot?.slotId,
+                        initialSlotId: widget.preSelectedSlotId,
+                        onSlotSelected: (slot) =>
+                            context.read<BookingBloc>().add(SlotSelected(slot)),
                       ),
                     ),
-                  ),
-                ],
+                    SizedBox(height: tokens.spaceSmall),
+                    Text(
+                      l10n.sessionType,
+                      style: theme.textTheme.titleMedium?.copyWith(
+                        fontWeight: FontWeight.w700,
+                        color: scheme.onSurface,
+                      ),
+                    ),
+                    SizedBox(height: tokens.spaceExtraSmall),
+                    TilawaCard(
+                      padding: EdgeInsets.all(tokens.spaceSmall),
+                      child: _CallTypePicker(
+                        hostPolicy: widget.sessionModePolicy,
+                        teacherExternalMeetingUrl: teacherExternalMeetingUrl,
+                        selected: selectedCallType,
+                        voiceVideoProviderHint: widget.voiceVideoProviderHint,
+                        onChanged: (ct) => context.read<BookingBloc>().add(
+                          CallTypeSelected(ct),
+                        ),
+                      ),
+                    ),
+                    SizedBox(height: tokens.spaceMedium),
+                  ],
+                ),
               ),
             ),
         },
@@ -337,8 +353,20 @@ class _BookingScreenState extends State<BookingScreen> {
         teacherId: widget.teacherId,
         slotId: slot.slotId,
         callType: state.selectedCallType,
+        pricingType: _pricingTypeForSubmit(state),
       ),
     );
+  }
+
+  SessionPricingType _pricingTypeForSubmit(BookingSelecting state) {
+    if (state.manualPaymentPrice != null) {
+      return SessionPricingType.fixedPerSession;
+    }
+    final price = state.sessionPrice;
+    if (price != null && price.amount > 0) {
+      return SessionPricingType.fixedPerSession;
+    }
+    return state.pricingType ?? SessionPricingType.free;
   }
 
   Future<void> _showPaymentCheckout(
@@ -379,6 +407,109 @@ class _BookingScreenState extends State<BookingScreen> {
 }
 
 // ── Eligibility blocked view ──────────────────────────────────────────────────
+
+class _ManualPaymentPendingView extends StatelessWidget {
+  const _ManualPaymentPendingView({
+    required this.paymentReference,
+    required this.teacherDisplayName,
+    required this.startsAt,
+    required this.sessionPrice,
+  });
+
+  final String paymentReference;
+  final String teacherDisplayName;
+  final DateTime startsAt;
+  final SessionPrice? sessionPrice;
+
+  @override
+  Widget build(BuildContext context) {
+    final l10n = context.quranSessionsL10n;
+    final theme = Theme.of(context);
+    final scheme = theme.colorScheme;
+    final tokens = theme.tokens;
+    final localStart = startsAt.toLocal();
+    final dateTimeLabel =
+        '${MaterialLocalizations.of(context).formatFullDate(localStart)} '
+        '${MaterialLocalizations.of(context).formatTimeOfDay(TimeOfDay.fromDateTime(localStart))}';
+    final amountLabel = sessionPrice == null
+        ? l10n.paymentCheckoutAmountPending
+        : PriceFormatter.format(sessionPrice!, l10n);
+    final paymentMethod = l10n.paymentMethodInstapay;
+    final whatsappUrl = ManualPaymentMarketConfig.egFallback
+        .buildWhatsappPrefillUrl(
+          paymentReference: paymentReference,
+          teacher: teacherDisplayName,
+          dateTime: dateTimeLabel,
+          amount: amountLabel,
+          paymentMethod: paymentMethod,
+        );
+
+    return SingleChildScrollView(
+      padding: EdgeInsets.all(tokens.spaceMedium),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: [
+          TilawaCard(
+            padding: EdgeInsets.all(tokens.spaceMedium),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  l10n.bookingAwaitingPaymentVerification,
+                  style: theme.textTheme.titleMedium?.copyWith(
+                    fontWeight: FontWeight.w700,
+                    color: scheme.onSurface,
+                  ),
+                ),
+                SizedBox(height: tokens.spaceSmall),
+                Text(
+                  l10n.paymentReferenceLabel,
+                  style: theme.textTheme.labelLarge?.copyWith(
+                    color: scheme.onSurfaceVariant,
+                  ),
+                ),
+                SizedBox(height: tokens.spaceExtraSmall),
+                SelectableText(
+                  paymentReference,
+                  style: theme.textTheme.titleLarge?.copyWith(
+                    fontWeight: FontWeight.w700,
+                    color: scheme.primary,
+                  ),
+                ),
+              ],
+            ),
+          ),
+          SizedBox(height: tokens.spaceSmall),
+          TilawaCard(
+            padding: EdgeInsets.all(tokens.spaceMedium),
+            child: ManualPaymentInstructions(whatsappUrl: whatsappUrl),
+          ),
+          SizedBox(height: tokens.spaceSmall),
+          TilawaButton(
+            text: l10n.sendReceiptOnWhatsapp,
+            leadingIcon: const Icon(Icons.chat_outlined),
+            onPressed: () => _openWhatsapp(context, whatsappUrl),
+            isFullWidth: true,
+            size: TilawaButtonSize.large,
+          ),
+        ],
+      ),
+    );
+  }
+
+  Future<void> _openWhatsapp(BuildContext context, String whatsappUrl) async {
+    final launcher = ManualPaymentLinkLauncher.launchUrl;
+    if (launcher != null && await launcher(whatsappUrl)) return;
+    if (!context.mounted) return;
+    await Clipboard.setData(ClipboardData(text: whatsappUrl));
+    if (!context.mounted) return;
+    TilawaFeedback.showToast(
+      context,
+      message: context.quranSessionsL10n.manualPaymentCopiedToClipboard,
+      variant: TilawaFeedbackVariant.info,
+    );
+  }
+}
 
 class _BookingPriceSummary extends StatelessWidget {
   const _BookingPriceSummary({

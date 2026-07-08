@@ -2912,7 +2912,7 @@ abstract class QuranSessionsLocalizations {
   /// No description provided for @completeTeacherProfileFirstMessage.
   ///
   /// In en, this message translates to:
-  /// **'Complete your teacher profile before opening the dashboard.'**
+  /// **'Please complete and update your teacher profile before you can continue teaching students.'**
   String get completeTeacherProfileFirstMessage;
 
   /// No description provided for @teacherDashboard.
@@ -3953,6 +3953,24 @@ abstract class QuranSessionsLocalizations {
   /// **'Copied to clipboard'**
   String get manualPaymentCopiedToClipboard;
 
+  /// No description provided for @bookingAwaitingPaymentVerification.
+  ///
+  /// In en, this message translates to:
+  /// **'Booking is awaiting payment verification.'**
+  String get bookingAwaitingPaymentVerification;
+
+  /// No description provided for @paymentReferenceLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Payment reference'**
+  String get paymentReferenceLabel;
+
+  /// No description provided for @sendReceiptOnWhatsapp.
+  ///
+  /// In en, this message translates to:
+  /// **'Send receipt on WhatsApp'**
+  String get sendReceiptOnWhatsapp;
+
   /// No description provided for @paymentMethodVodafoneCash.
   ///
   /// In en, this message translates to:
@@ -4370,7 +4388,7 @@ abstract class QuranSessionsLocalizations {
   /// No description provided for @videoOnlyCallTypeLabel.
   ///
   /// In en, this message translates to:
-  /// **'Video call'**
+  /// **'Video session'**
   String get videoOnlyCallTypeLabel;
 
   /// No description provided for @teacherNotBookableForStudent.

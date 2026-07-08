@@ -1629,7 +1629,7 @@ class QuranSessionsLocalizationsEn extends QuranSessionsLocalizations {
 
   @override
   String get completeTeacherProfileFirstMessage =>
-      'Complete your teacher profile before opening the dashboard.';
+      'Please complete and update your teacher profile before you can continue teaching students.';
 
   @override
   String get teacherDashboard => 'Teacher dashboard';
@@ -2207,6 +2207,16 @@ class QuranSessionsLocalizationsEn extends QuranSessionsLocalizations {
 
   @override
   String get manualPaymentCopiedToClipboard => 'Copied to clipboard';
+
+  @override
+  String get bookingAwaitingPaymentVerification =>
+      'Booking is awaiting payment verification.';
+
+  @override
+  String get paymentReferenceLabel => 'Payment reference';
+
+  @override
+  String get sendReceiptOnWhatsapp => 'Send receipt on WhatsApp';
 
   @override
   String get paymentMethodVodafoneCash => 'Vodafone Cash';

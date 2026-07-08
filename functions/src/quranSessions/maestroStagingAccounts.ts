@@ -287,6 +287,8 @@ export function buildMaestroPlatformConfig(): Record<string, unknown> {
     globalAllowMaleTeacherFemaleStudent: true,
     globalAllowFemaleTeacherMaleStudent: true,
     requireGuardianApprovalForChildren: false,
+    enableForAllMarkets: false,
+    enabledMarketCodes: ["EG"],
     updatedAt: FieldValue.serverTimestamp(),
   };
 }

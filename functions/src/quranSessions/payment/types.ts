@@ -1,6 +1,11 @@
 import type { Firestore, Timestamp, Transaction } from "firebase-admin/firestore";
 
-export type PaymentProviderKind = "none" | "sandbox" | "tap" | "stripe";
+export type PaymentProviderKind =
+  | "none"
+  | "manual_off_app"
+  | "sandbox"
+  | "tap"
+  | "stripe";
 
 export type PaymentIntentStatus =
   | "requires_payment_method"

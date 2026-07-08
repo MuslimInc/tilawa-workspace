@@ -42,6 +42,10 @@ test("validateUpdateMarketPricingConfig accepts valid config", () => {
     genderMatchingEnabled: true,
     teacherWhitelist: null,
     paymentProviderEnabled: true,
+    manualPaymentEnabled: true,
+    supportWhatsappNumber: "+201000000000",
+    instapayHandle: "tilawa@instapay",
+    recipientMaskedName: "Tilawa Support",
     cities: [],
   };
   
@@ -64,6 +68,7 @@ test("validateUpdateMarketPricingConfig rejects invalid bookingMode", () => {
     genderMatchingEnabled: true,
     teacherWhitelist: null,
     paymentProviderEnabled: true,
+    manualPaymentEnabled: false,
     cities: [],
   };
   
@@ -89,6 +94,7 @@ test("validateUpdateMarketPricingConfig rejects invalid city", () => {
     genderMatchingEnabled: true,
     teacherWhitelist: null,
     paymentProviderEnabled: true,
+    manualPaymentEnabled: false,
     cities: [
       {
         cityId: "cairo",
@@ -101,5 +107,30 @@ test("validateUpdateMarketPricingConfig rejects invalid city", () => {
   assert.throws(
     () => validateUpdateMarketPricingConfig(data),
     /city.minSessionPrice must be a finite number >= 0/
+  );
+});
+
+test("validateUpdateMarketPricingConfig rejects missing manualPaymentEnabled", () => {
+  const data: any = {
+    countryCode: "eg",
+    isEnabled: true,
+    minSessionPrice: 100,
+    currencyCode: "egp",
+    studentBookingEnabled: true,
+    teacherDiscoveryEnabled: true,
+    bookingMode: "autoConfirm",
+    minBookingNoticeMs: 0,
+    maxConcurrentUpcomingPerStudent: 3,
+    joinWindowLeadMs: 0,
+    tutorApprovalSlaMs: 0,
+    genderMatchingEnabled: true,
+    teacherWhitelist: null,
+    paymentProviderEnabled: false,
+    cities: [],
+  };
+
+  assert.throws(
+    () => validateUpdateMarketPricingConfig(data),
+    /manualPaymentEnabled \(boolean\) required/,
   );
 });

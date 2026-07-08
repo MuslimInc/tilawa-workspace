@@ -96,6 +96,7 @@ export 'src/domain/entities/market_city.dart';
 export 'src/domain/entities/market_config.dart';
 export 'src/domain/entities/market_country.dart';
 export 'src/domain/entities/legacy_status_lifecycle_mapper.dart';
+export 'src/domain/entities/manual_payment_market_config.dart';
 export 'src/domain/entities/manual_payment_price.dart';
 export 'src/domain/entities/compensation_record.dart';
 export 'src/domain/entities/quran_booking.dart';
@@ -300,7 +301,6 @@ export 'src/presentation/widgets/quran_sessions_scaffold.dart';
 // ── Presentation: failure UI extension ───────────────────────────────────────
 export 'src/presentation/config/quran_sessions_analytics_callbacks.dart';
 export 'src/presentation/config/quran_sessions_scheduling_analytics_callbacks.dart';
-export 'src/presentation/config/manual_payment_pilot_config.dart';
 export 'src/presentation/config/quran_sessions_feature_config.dart';
 export 'src/presentation/failure_ui/quran_sessions_failure_ui.dart';
 // ── Presentation: router ──────────────────────────────────────────────────────

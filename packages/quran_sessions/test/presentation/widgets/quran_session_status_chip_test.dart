@@ -9,6 +9,7 @@ import '../../helpers/widget_pump.dart';
 void main() {
   group('QuranSessionStatusChip', () {
     const labelByLifecycle = <SessionLifecycleStatus, String>{
+      SessionLifecycleStatus.pendingPayment: 'Pending payment',
       SessionLifecycleStatus.scheduled: 'Scheduled',
       SessionLifecycleStatus.completed: 'Completed',
       SessionLifecycleStatus.cancelledByStudent: 'Cancelled',

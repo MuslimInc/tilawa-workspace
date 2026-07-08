@@ -126,7 +126,9 @@
     "noTeachersForSearchQuery": "No tutors match \"{query}\"",
     "@noTeachersForSearchQuery": {
         "placeholders": {
-            "query": { "type": "String" }
+            "query": {
+                "type": "String"
+            }
         }
     },
     "teacherNewRating": "New",
@@ -137,7 +139,9 @@
     "teacherFilterUnderPrice": "Under {amount}",
     "@teacherFilterUnderPrice": {
         "placeholders": {
-            "amount": { "type": "String" }
+            "amount": {
+                "type": "String"
+            }
         }
     },
     "teacherFilterAvailableToday": "Available today",
@@ -148,7 +152,9 @@
     "teacherAvailabilityNextAt": "Next slot: {when}",
     "@teacherAvailabilityNextAt": {
         "placeholders": {
-            "when": { "type": "String" }
+            "when": {
+                "type": "String"
+            }
         }
     },
     "teacherAvailabilityNoSlots": "No slots",
@@ -157,19 +163,25 @@
     "sessionsSummaryUpcoming": "Upcoming: {count}",
     "@sessionsSummaryUpcoming": {
         "placeholders": {
-            "count": { "type": "int" }
+            "count": {
+                "type": "int"
+            }
         }
     },
     "sessionsSummaryPast": "Past: {count}",
     "@sessionsSummaryPast": {
         "placeholders": {
-            "count": { "type": "int" }
+            "count": {
+                "type": "int"
+            }
         }
     },
     "sessionsSummaryNextSession": "Next session: {when}",
     "@sessionsSummaryNextSession": {
         "placeholders": {
-            "when": { "type": "String" }
+            "when": {
+                "type": "String"
+            }
         }
     },
     "sessionsTabUpcoming": "Upcoming",
@@ -182,7 +194,9 @@
     "sessionStartsInMinutes": "Starts in {minutes} min",
     "@sessionStartsInMinutes": {
         "placeholders": {
-            "minutes": { "type": "int" }
+            "minutes": {
+                "type": "int"
+            }
         }
     },
     "noTeachersForAvailabilityFilter": "No teachers available today right now",
@@ -286,7 +300,9 @@
     "sessionReviewSubtitle": "How was your session with {teacherName}?",
     "@sessionReviewSubtitle": {
         "placeholders": {
-            "teacherName": { "type": "String" }
+            "teacherName": {
+                "type": "String"
+            }
         }
     },
     "sessionReviewSubtitleGeneric": "How was your session?",
@@ -294,7 +310,9 @@
     "sessionReviewStarLabel": "{star} stars",
     "@sessionReviewStarLabel": {
         "placeholders": {
-            "star": { "type": "int" }
+            "star": {
+                "type": "int"
+            }
         }
     },
     "sessionReviewCommentLabel": "Comment (optional)",
@@ -378,8 +396,12 @@
     "sessionLockedAtBookingNote": "Call type ({callType}) and provider ({callProvider}) were set when you booked. To change them, cancel and rebook or contact support.",
     "@sessionLockedAtBookingNote": {
         "placeholders": {
-            "callType": { "type": "String" },
-            "callProvider": { "type": "String" }
+            "callType": {
+                "type": "String"
+            },
+            "callProvider": {
+                "type": "String"
+            }
         }
     },
     "callProviderExternal": "External link",
@@ -389,13 +411,17 @@
     "sessionStatusLabel": "Status: {status}",
     "@sessionStatusLabel": {
         "placeholders": {
-            "status": { "type": "String" }
+            "status": {
+                "type": "String"
+            }
         }
     },
     "sessionStartsAtLabel": "Starts: {when}",
     "@sessionStartsAtLabel": {
         "placeholders": {
-            "when": { "type": "String" }
+            "when": {
+                "type": "String"
+            }
         }
     },
     "viewSessionDetails": "View details",
@@ -689,7 +715,7 @@
     "bookingDisabledNoSupply": "Booking is unavailable until verified teachers exist in your area.",
     "completeTeacherProfileTitle": "Complete teacher profile",
     "completeTeacherProfileSubtitle": "Add the public details students see before opening your dashboard.",
-    "completeTeacherProfileFirstMessage": "Complete your teacher profile before opening the dashboard.",
+    "completeTeacherProfileFirstMessage": "Please complete and update your teacher profile before you can continue teaching students.",
     "teacherDashboard": "Teacher dashboard",
     "openTeacherDashboard": "Open teacher dashboard",
     "completeTeacherProfile": "Complete teacher profile",
@@ -891,6 +917,9 @@
         }
     },
     "manualPaymentCopiedToClipboard": "Copied to clipboard",
+    "bookingAwaitingPaymentVerification": "Booking is awaiting payment verification.",
+    "paymentReferenceLabel": "Payment reference",
+    "sendReceiptOnWhatsapp": "Send receipt on WhatsApp",
     "paymentMethodVodafoneCash": "Vodafone Cash",
     "paymentMethodInstapay": "InstaPay",
     "paymentMethodBankTransfer": "Bank transfer",

@@ -38,6 +38,7 @@ final class BookingSelecting extends BookingState {
     required this.availableSlots,
     this.selectedSlot,
     this.selectedCallType = SessionCallType.voiceCall,
+    this.teacherDisplayName,
     this.teacherExternalMeetingUrl,
     this.pricingType,
     this.sessionPrice,
@@ -50,6 +51,7 @@ final class BookingSelecting extends BookingState {
   final List<TeacherAvailability> availableSlots;
   final TeacherAvailability? selectedSlot;
   final SessionCallType selectedCallType;
+  final String? teacherDisplayName;
   final String? teacherExternalMeetingUrl;
   final SessionPricingType? pricingType;
   final SessionPrice? sessionPrice;
@@ -84,6 +86,7 @@ final class BookingSelecting extends BookingState {
     availableSlots,
     selectedSlot,
     selectedCallType,
+    teacherDisplayName,
     teacherExternalMeetingUrl,
     pricingType,
     sessionPrice,
@@ -96,6 +99,7 @@ final class BookingSelecting extends BookingState {
     List<TeacherAvailability>? availableSlots,
     TeacherAvailability? selectedSlot,
     SessionCallType? selectedCallType,
+    String? teacherDisplayName,
     String? teacherExternalMeetingUrl,
     SessionPricingType? pricingType,
     SessionPrice? sessionPrice,
@@ -107,6 +111,7 @@ final class BookingSelecting extends BookingState {
     availableSlots: availableSlots ?? this.availableSlots,
     selectedSlot: selectedSlot ?? this.selectedSlot,
     selectedCallType: selectedCallType ?? this.selectedCallType,
+    teacherDisplayName: teacherDisplayName ?? this.teacherDisplayName,
     teacherExternalMeetingUrl:
         teacherExternalMeetingUrl ?? this.teacherExternalMeetingUrl,
     pricingType: pricingType ?? this.pricingType,
@@ -130,6 +135,32 @@ final class BookingSuccess extends BookingState {
 
   @override
   List<Object?> get props => [booking];
+}
+
+/// Manual/off-app booking created and awaiting payment review.
+final class BookingManualPaymentPending extends BookingState {
+  const BookingManualPaymentPending({
+    required this.booking,
+    required this.paymentReference,
+    required this.teacherDisplayName,
+    required this.startsAt,
+    this.sessionPrice,
+  });
+
+  final QuranBooking booking;
+  final String paymentReference;
+  final String teacherDisplayName;
+  final DateTime startsAt;
+  final SessionPrice? sessionPrice;
+
+  @override
+  List<Object?> get props => [
+    booking,
+    paymentReference,
+    teacherDisplayName,
+    startsAt,
+    sessionPrice,
+  ];
 }
 
 /// Paid booking created server-side; awaiting sandbox/PSP confirmation.

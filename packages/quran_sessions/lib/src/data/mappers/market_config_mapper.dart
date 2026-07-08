@@ -1,3 +1,4 @@
+import '../../domain/entities/manual_payment_market_config.dart';
 import '../../domain/entities/market_config.dart';
 import '../dtos/market_country_dto.dart';
 import '../dtos/market_config_dto.dart';
@@ -13,7 +14,25 @@ extension MarketConfigDtoMapper on MarketConfigDto {
     minSessionPrice: minSessionPrice,
     maxSessionPrice: maxSessionPrice,
     platformCommissionPercent: platformCommissionPercent,
+    manualPayment: _manualPaymentToDomain(),
   );
+
+  /// Builds the manual-payment value object from the market doc fields.
+  /// Returns null when the market has no manual-payment block configured.
+  ManualPaymentMarketConfig? _manualPaymentToDomain() {
+    final whatsapp = supportWhatsappNumber?.trim();
+    if (!manualPaymentEnabled || whatsapp == null || whatsapp.isEmpty) {
+      return null;
+    }
+    return ManualPaymentMarketConfig(
+      currencyCode: currencyCode,
+      supportWhatsappNumber: whatsapp,
+      instapayHandle: instapayHandle?.trim(),
+      instapayPaymentLink: instapayPaymentLink?.trim(),
+      recipientMaskedName: recipientMaskedName?.trim(),
+      vodafoneCashNumber: vodafoneCashNumber?.trim(),
+    );
+  }
 }
 
 extension CityConfigDtoMapper on CityConfigDto {

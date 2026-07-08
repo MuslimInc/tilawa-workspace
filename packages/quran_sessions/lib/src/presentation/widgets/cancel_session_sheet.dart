@@ -152,7 +152,7 @@ class _ManualPaymentCancellationPolicy extends StatelessWidget {
         SizedBox(height: tokens.spaceSmall),
         Text(
           l10n.manualPaymentCancellationSupportHint(
-            ManualPaymentPilotConfig.supportWhatsappNumber,
+            ManualPaymentMarketConfig.egFallback.supportWhatsappNumber,
           ),
           style: bodyStyle,
         ),

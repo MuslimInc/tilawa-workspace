@@ -3,8 +3,10 @@ import assert from "node:assert/strict";
 
 import { buildOperationKey } from "../../src/quranSessions/idempotencyService";
 import { isPaymentProviderEnabled } from "../../src/quranSessions/payment/envGate";
+import { generateManualPaymentReference } from "../../src/quranSessions/manualPaymentReference";
 import {
   assertPaidBookingAllowed,
+  assertPaidBookingAllowedForMarket,
   financialExecutionStatus,
 } from "../../src/quranSessions/paymentProviderStatus";
 import { resolvePaymentProvider } from "../../src/quranSessions/payment/paymentProviderRegistry";
@@ -33,6 +35,24 @@ test("assertPaidBookingAllowed rejects paid bookings while provider disabled", (
     () => assertPaidBookingAllowed("fixedPerSession"),
     /payment_provider_unavailable/,
   );
+});
+
+test("assertPaidBookingAllowedForMarket permits manual paid bookings", () => {
+  assert.doesNotThrow(() =>
+    assertPaidBookingAllowedForMarket("fixedPerSession", {
+      manualPaymentEnabled: true,
+      paymentProviderEnabled: false,
+    }),
+  );
+});
+
+test("generateManualPaymentReference is deterministic and human-readable", () => {
+  const bookingId = "booking_abc123xyz789";
+  const ref = generateManualPaymentReference(bookingId);
+
+  assert.equal(ref, generateManualPaymentReference(bookingId));
+  assert.match(ref, /^QS-[A-Z0-9-]+$/);
+  assert.equal(generateManualPaymentReference("abc123"), "QS-ABC1-23");
 });
 
 test("assertPaidBookingAllowed permits paid bookings when the gate is on", () => {

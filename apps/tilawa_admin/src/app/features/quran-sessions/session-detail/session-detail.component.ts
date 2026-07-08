@@ -4,6 +4,7 @@ import { FormsModule } from '@angular/forms';
 import { ActivatedRoute, RouterLink } from '@angular/router';
 
 import { SessionsFacade } from '../../../core/application/facades/sessions.facade';
+import { AdminSessionDetailVm } from '../../../core/data/view-models/quran-sessions.view-model';
 import {
   NoShowClassification,
   SessionCompensationType,
@@ -20,7 +21,13 @@ import { TilawaDataTableComponent } from '../../../shared/components/tilawa-data
 import { TilawaLoadingStateComponent } from '../../../shared/components/tilawa-loading-state/tilawa-loading-state.component';
 import { TilawaErrorStateComponent } from '../../../shared/components/tilawa-error-state/tilawa-error-state.component';
 
-type PendingAction = 'cancel' | 'noShow' | 'complete' | 'compensation' | 'refund';
+type PendingAction =
+  | 'cancel'
+  | 'noShow'
+  | 'complete'
+  | 'compensation'
+  | 'refund'
+  | 'manualReject';
 
 @Component({
   selector: 'app-session-detail',
@@ -131,6 +138,24 @@ export class SessionDetailComponent implements OnInit {
     this.reasonOpen.set(true);
   }
 
+  canModerateManualPayment(session: AdminSessionDetailVm): boolean {
+    return (
+      session.lifecycleStatus === 'pending_payment' &&
+      session.paymentProvider === 'manual_off_app'
+    );
+  }
+
+  async onConfirmManualPayment(): Promise<void> {
+    await this.run(async () => {
+      await this.facade.confirmManualPayment(this.bookingId);
+    });
+  }
+
+  openRejectManualPayment(): void {
+    this.pendingAction.set('manualReject');
+    this.reasonOpen.set(true);
+  }
+
   async onConfirmComplete(): Promise<void> {
     const session = this.detail();
     if (!session?.sessionId) {
@@ -180,6 +205,9 @@ export class SessionDetailComponent implements OnInit {
         }
         case 'refund':
           await this.facade.approveRefund(this.bookingId, reason);
+          break;
+        case 'manualReject':
+          await this.facade.rejectManualPayment(this.bookingId, reason);
           break;
       }
     });

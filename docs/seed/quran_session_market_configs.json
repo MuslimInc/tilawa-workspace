@@ -16,6 +16,12 @@
     "platformCommissionPercent": 15,
     "isEnabled": true,
     "sortOrder": 10,
+    "manualPaymentEnabled": true,
+    "supportWhatsappNumber": "+201060099009",
+    "instapayHandle": "muhamadkamel@instapay",
+    "instapayPaymentLink": "https://ipn.eg/S/muhamadkamel/instapay/6hkRRE",
+    "recipientMaskedName": "MOHAMED K**** H***** K****",
+    "vodafoneCashNumber": "+201060099009",
     "__collections__": {
       "cities": {
         "cairo": {
@@ -136,7 +142,7 @@
     "minSessionPrice": 100,
     "maxSessionPrice": 2000,
     "platformCommissionPercent": 15,
-    "isEnabled": true,
+    "isEnabled": false,
     "sortOrder": 20,
     "__collections__": {
       "cities": {
@@ -208,7 +214,7 @@
     "minSessionPrice": 100,
     "maxSessionPrice": 2000,
     "platformCommissionPercent": 15,
-    "isEnabled": true,
+    "isEnabled": false,
     "sortOrder": 30,
     "__collections__": {
       "cities": {

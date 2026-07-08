@@ -17,6 +17,7 @@ function context(overrides: {
   teacherVerified?: boolean;
   teacherWhitelist?: readonly string[] | null;
   platform?: Partial<BookingEligibilityContext["platform"]>;
+  manualPaymentEnabled?: boolean;
   pricingSource?: BookingEligibilityContext["pricingSource"];
 }): BookingEligibilityContext {
   const fee = overrides.sessionFeeAmount ?? 0;
@@ -27,6 +28,10 @@ function context(overrides: {
       quranSessionsEnabled: overrides.platform?.quranSessionsEnabled ?? true,
       studentEntryEnabled: overrides.platform?.studentEntryEnabled ?? true,
       bookingEnabled: overrides.platform?.bookingEnabled ?? true,
+      marketGate: overrides.platform?.marketGate ?? {
+        enableForAllMarkets: false,
+        enabledMarketCodes: ["EG"],
+      },
     },
     student: {
       exists: true,
@@ -60,6 +65,7 @@ function context(overrides: {
       genderMatchingEnabled: true,
       teacherWhitelist: overrides.teacherWhitelist ?? null,
       paymentProviderEnabled: true,
+      manualPaymentEnabled: overrides.manualPaymentEnabled ?? false,
       tutorApprovalSlaMs: 24 * 60 * 60 * 1000,
       minBookingNoticeMs: 60 * 60 * 1000,
       maxConcurrentUpcomingPerStudent: 3,
@@ -127,6 +133,19 @@ test("batch builder applies the shared payment-provider flag uniformly", () => {
   // block the single callable reports, applied to each row.
   assert.equal(disabled.t1.blockReason, "paymentProviderUnavailable");
   assert.equal(disabled.t2.blockReason, "paymentProviderUnavailable");
+});
+
+test("batch builder allows paid manual market without PSP", () => {
+  const quotes = buildPricingQuotesForTeachers(
+    {
+      t1: context({ sessionFeeAmount: 50, manualPaymentEnabled: true }),
+    },
+    false,
+  );
+
+  assert.equal(quotes.t1.paymentProviderAvailable, true);
+  assert.equal(quotes.t1.paymentMode, "manual_off_app");
+  assert.equal(quotes.t1.blockReason, "none");
 });
 
 test("empty contexts produce an empty quote map", () => {

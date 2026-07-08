@@ -35,7 +35,7 @@ import { TranslatePipe } from '../../../core/i18n/translate.pipe';
               <button
                 type="button"
                 (click)="onSubmit()"
-                [disabled]="!reason.trim() || loading"
+                [disabled]="(requireReason && !reason.trim()) || loading"
                 class="rounded-md bg-red-600 px-4 py-2 text-sm font-semibold text-white hover:bg-red-500 disabled:opacity-50"
               >
                 {{ confirmLabel }}
@@ -53,6 +53,7 @@ export class RejectReasonDialogComponent {
   @Input() message = 'This reason is stored for moderation records.';
   @Input() confirmLabel = 'Submit';
   @Input() loading = false;
+  @Input() requireReason = true;
 
   @Output() submit = new EventEmitter<string>();
   @Output() cancel = new EventEmitter<void>();
@@ -60,8 +61,9 @@ export class RejectReasonDialogComponent {
   reason = '';
 
   onSubmit(): void {
-    if (this.reason.trim()) {
-      this.submit.emit(this.reason.trim());
+    const trimmedReason = this.reason.trim();
+    if (!this.requireReason || trimmedReason) {
+      this.submit.emit(trimmedReason);
       this.reason = '';
     }
   }

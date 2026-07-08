@@ -24,6 +24,10 @@ export interface SessionModerationGateway {
 
   approveSessionRefund(bookingId: string, reason: string): Promise<void>;
 
+  confirmManualBookingPayment(bookingId: string, note?: string): Promise<void>;
+
+  rejectManualBookingPayment(bookingId: string, reason?: string): Promise<void>;
+
   openSessionDispute(
     bookingId: string,
     reason: string,

@@ -29,6 +29,10 @@ const SHARED_PLATFORM_CONFIG: Record<string, unknown> = {
   genderMatchingEnabled: true,
   globalAllowMaleTeacherFemaleStudent: true,
   globalAllowFemaleTeacherMaleStudent: true,
+  // Config-driven market gate. Production: Egypt only. Open new markets by
+  // adding codes here (or flip enableForAllMarkets) — no code change needed.
+  enableForAllMarkets: false,
+  enabledMarketCodes: ["EG"],
 };
 
 const MODE_PRESETS: Record<string, Record<string, unknown>> = {

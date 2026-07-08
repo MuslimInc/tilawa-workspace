@@ -33,6 +33,7 @@ export interface ResolvedMarketPolicy {
   policyVersion: string | null;
   effectiveFrom: Date | null;
   paymentProviderEnabled: boolean;
+  manualPaymentEnabled: boolean;
 }
 
 function parseTimestamp(raw: unknown): Date | null {
@@ -194,6 +195,7 @@ export async function loadEffectiveMarketPolicy(
     paymentProviderEnabled: typeof policyData.paymentProviderEnabled === "boolean" 
       ? policyData.paymentProviderEnabled 
       : isPaymentProviderEnabled(),
+    manualPaymentEnabled: policyData.manualPaymentEnabled === true,
   };
 }
 

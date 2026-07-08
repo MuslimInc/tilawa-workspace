@@ -8,7 +8,10 @@ import 'package:quran_sessions/src/domain/entities/teacher_verification_status.d
 import 'package:quran_sessions/src/domain/rules/teacher_profile_completeness.dart';
 import 'package:quran_sessions/src/domain/entities/market_config.dart';
 import 'package:quran_sessions/src/domain/entities/quran_booking.dart';
+import 'package:quran_sessions/src/domain/entities/session_aggregate.dart';
+import 'package:quran_sessions/src/domain/entities/session_booking_outcome.dart';
 import 'package:quran_sessions/src/domain/entities/session_call_type.dart';
+import 'package:quran_sessions/src/domain/entities/session_lifecycle_status.dart';
 import 'package:quran_sessions/src/domain/entities/user_profile.dart';
 import 'package:quran_sessions/src/domain/entities/weekly_schedule.dart';
 import 'package:quran_sessions/src/domain/failures/quran_sessions_failure.dart';
@@ -502,6 +505,88 @@ void main() {
         check(state.sessionPrice!.amount).equals(50);
         check(state.sessionPrice!.currencyCode).equals('EGP');
         check(state.isPaymentBlocked).isFalse();
+      },
+    );
+
+    blocTest<BookingBloc, BookingState>(
+      'manual paid quote shows price and submit awaits payment verification',
+      build: () {
+        mutationGateway.onCreate =
+            ({required teacherId, required studentId, required slotId}) async {
+              return Right(
+                SessionBookingOutcome(
+                  aggregate: SessionAggregate(
+                    id: 'booking_manual_1',
+                    teacherId: teacherId,
+                    studentId: studentId,
+                    slotId: slotId,
+                    startsAt: generatedSlot.startsAt,
+                    pricingType: SessionPricingType.fixedPerSession,
+                    lifecycleStatus: SessionLifecycleStatus.pendingPayment,
+                    createdAt: DateTime.utc(2026, 1, 10),
+                    updatedAt: DateTime.utc(2026, 1, 10),
+                    paymentReference: 'QS-1234',
+                    paymentProvider: 'manual_off_app',
+                    paymentStatus: 'manual_pending',
+                  ),
+                  paymentReference: 'QS-1234',
+                ),
+              );
+            };
+        return buildWithQuote(
+          FakeSessionPricingQuoteGateway(
+            quote: const SessionPricingQuote(
+              pricingType: SessionPricingType.free,
+              amount: 125,
+              currencyCode: 'EGP',
+              paymentRequired: true,
+              paymentProviderAvailable: true,
+              manualPaymentEnabled: true,
+              paymentMode: SessionPaymentMode.manualOffApp,
+              bookingEnabled: true,
+              quranSessionsEnabled: true,
+              effectivePricingSource: EffectivePricingSource.marketConfig,
+              blockReason: BookingBlockReason.none,
+              countryCode: 'EG',
+              cityId: 'cairo',
+            ),
+          ),
+        );
+      },
+      act: (b) async {
+        openScreen(b);
+        final selecting = await b.stream
+            .where((state) => state is BookingSelecting)
+            .cast<BookingSelecting>()
+            .first;
+        b.add(SlotSelected(selecting.availableSlots.first));
+        await b.stream.firstWhere(
+          (state) => state is BookingSelecting && state.selectedSlot != null,
+        );
+        b.add(
+          BookingSubmitted(
+            teacherId: 'teacher_1',
+            slotId: generatedSlot.slotId,
+            callType: SessionCallType.videoCall,
+            pricingType: SessionPricingType.fixedPerSession,
+          ),
+        );
+      },
+      expect: () => [
+        isA<BookingEligibilityChecking>(),
+        isA<BookingSlotsLoading>(),
+        isA<BookingSelecting>(),
+        isA<BookingSelecting>(),
+        isA<BookingSubmitting>(),
+        isA<BookingManualPaymentPending>(),
+      ],
+      verify: (b) {
+        final state = b.state as BookingManualPaymentPending;
+        check(state.paymentReference).equals('QS-1234');
+        check(state.sessionPrice!.amount).equals(125);
+        check(state.booking.effectiveLifecycleStatus).equals(
+          SessionLifecycleStatus.pendingPayment,
+        );
       },
     );
 

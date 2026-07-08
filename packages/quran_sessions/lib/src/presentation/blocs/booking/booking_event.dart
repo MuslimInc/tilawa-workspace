@@ -2,6 +2,7 @@ import 'package:equatable/equatable.dart';
 
 import '../../../domain/entities/session_booking_outcome.dart';
 import '../../../domain/entities/session_call_type.dart';
+import '../../../domain/entities/session_pricing_type.dart';
 import '../../../domain/entities/teacher_availability.dart';
 
 sealed class BookingEvent extends Equatable {
@@ -74,6 +75,7 @@ final class BookingSubmitted extends BookingEvent {
     required this.teacherId,
     required this.slotId,
     required this.callType,
+    this.pricingType,
     this.paymentReference,
     this.note,
   });
@@ -81,6 +83,7 @@ final class BookingSubmitted extends BookingEvent {
   final String teacherId;
   final String slotId;
   final SessionCallType callType;
+  final SessionPricingType? pricingType;
   final String? paymentReference;
   final String? note;
 
@@ -89,6 +92,7 @@ final class BookingSubmitted extends BookingEvent {
     teacherId,
     slotId,
     callType,
+    pricingType,
     paymentReference,
     note,
   ];

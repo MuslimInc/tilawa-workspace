@@ -73,7 +73,10 @@ QuranSessionsFailure _mapLifecycleCode(
     'profile_incomplete' => ProfileIncompleteFailure(
       missingFields: _stringList(details['missingFields']),
     ),
-    'market_not_enabled' => MarketNotEnabledFailure(
+    // `market_not_supported` is the config-driven market gate (the student's
+    // country is not in `enabledMarketCodes`); surface it as the same
+    // region-unavailable state as an explicitly disabled market.
+    'market_not_enabled' || 'market_not_supported' => MarketNotEnabledFailure(
       countryCode: details['countryCode'] as String? ?? '',
       cityId: details['cityId'] as String?,
     ),

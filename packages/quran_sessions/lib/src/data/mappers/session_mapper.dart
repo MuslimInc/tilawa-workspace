@@ -29,6 +29,9 @@ extension QuranSessionDtoMapper on QuranSessionDto {
     joinToken: joinToken,
     participants: _mapParticipants(participants),
     notes: notes,
+    paymentReference: paymentReference,
+    paymentProvider: paymentProvider,
+    paymentStatus: paymentStatus,
   );
 }
 

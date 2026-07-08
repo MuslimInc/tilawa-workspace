@@ -25,7 +25,8 @@ abstract final class DefaultMarketCatalog {
       timezone: 'Asia/Riyadh',
       phoneCode: '+966',
       flagEmoji: '🇸🇦',
-      isEnabled: true,
+      // Disabled for this release — availability is config-gated to EG only.
+      isEnabled: false,
       sortOrder: 20,
     ),
     MarketCountry(
@@ -36,7 +37,8 @@ abstract final class DefaultMarketCatalog {
       timezone: 'Asia/Dubai',
       phoneCode: '+971',
       flagEmoji: '🇦🇪',
-      isEnabled: true,
+      // Disabled for this release — availability is config-gated to EG only.
+      isEnabled: false,
       sortOrder: 30,
     ),
   ];

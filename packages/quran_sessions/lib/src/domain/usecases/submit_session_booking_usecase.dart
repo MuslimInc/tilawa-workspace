@@ -36,6 +36,7 @@ class SubmitSessionBookingUseCase {
     required String teacherId,
     required String slotId,
     required SessionCallType callType,
+    SessionPricingType? pricingType,
     String? paymentReference,
     String? studentNote,
     String? idempotencyKey,
@@ -94,9 +95,11 @@ class SubmitSessionBookingUseCase {
 
     final startsAt = slotStart.toUtc();
     final endsAt = startsAt.add(Duration(minutes: defaultSlotDurationMinutes));
-    final pricingType = paymentReference == null
-        ? SessionPricingType.free
-        : SessionPricingType.fixedPerSession;
+    final resolvedPricingType =
+        pricingType ??
+        (paymentReference == null
+            ? SessionPricingType.free
+            : SessionPricingType.fixedPerSession);
 
     final created = await _mutationGateway.createBooking(
       teacherId: teacherId,
@@ -105,7 +108,7 @@ class SubmitSessionBookingUseCase {
       startsAt: startsAt,
       endsAt: endsAt,
       callType: callType,
-      pricingType: pricingType,
+      pricingType: resolvedPricingType,
       paymentReference: paymentReference,
       studentNote: studentNote,
       idempotencyKey: idempotencyKey ?? BookingIdempotency.generateClientKey(),

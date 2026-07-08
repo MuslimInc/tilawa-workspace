@@ -13,6 +13,7 @@ export type LifecycleErrorCode =
   | "account_blocked"
   | "profile_incomplete"
   | "market_not_enabled"
+  | "market_not_supported"
   | "policy_not_configured"
   | "teacher_not_verified"
   | "teacher_not_whitelisted"

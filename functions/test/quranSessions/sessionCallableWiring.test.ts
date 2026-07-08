@@ -29,6 +29,8 @@ const DEBUG_QA_CALLABLE_FILES = [
 const EXCLUDED_CALLABLE_FILES = [
   "quranSessions/walletCallables.ts",
   "quranSessions/confirmBookingPayment.ts",
+  "quranSessions/confirmManualBookingPayment.ts",
+  "quranSessions/rejectManualBookingPayment.ts",
   "quranSessions/issueSessionCompensation.ts",
   "quranSessions/approveSessionRefund.ts",
 ] as const;

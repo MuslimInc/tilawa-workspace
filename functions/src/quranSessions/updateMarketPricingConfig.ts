@@ -25,8 +25,22 @@ export interface UpdateMarketPricingConfigRequest {
   genderMatchingEnabled: boolean;
   teacherWhitelist: string[] | null;
   paymentProviderEnabled: boolean;
+  manualPaymentEnabled: boolean;
+  supportWhatsappNumber?: string | null;
+  instapayHandle?: string | null;
+  instapayPaymentLink?: string | null;
+  vodafoneCashNumber?: string | null;
+  recipientMaskedName?: string | null;
   cities: CityPricingOverride[];
 }
+
+const OPTIONAL_PAYMENT_INSTRUCTION_FIELDS = [
+  "supportWhatsappNumber",
+  "instapayHandle",
+  "instapayPaymentLink",
+  "vodafoneCashNumber",
+  "recipientMaskedName",
+] as const;
 
 export function validateUpdateMarketPricingConfig(data: Partial<UpdateMarketPricingConfigRequest>): void {
   if (!data.countryCode || typeof data.countryCode !== "string") {
@@ -73,6 +87,15 @@ export function validateUpdateMarketPricingConfig(data: Partial<UpdateMarketPric
   if (typeof data.paymentProviderEnabled !== "boolean") {
     throw new HttpsError("invalid-argument", "paymentProviderEnabled (boolean) required.");
   }
+  if (typeof data.manualPaymentEnabled !== "boolean") {
+    throw new HttpsError("invalid-argument", "manualPaymentEnabled (boolean) required.");
+  }
+  for (const field of OPTIONAL_PAYMENT_INSTRUCTION_FIELDS) {
+    const value = data[field];
+    if (value !== undefined && value !== null && typeof value !== "string") {
+      throw new HttpsError("invalid-argument", `${field} must be a string or null.`);
+    }
+  }
 
   if (data.cities !== undefined) {
     if (!Array.isArray(data.cities)) {
@@ -104,7 +127,7 @@ export const updateMarketPricingConfig = onCall(
 
     validateUpdateMarketPricingConfig(data);
 
-    const marketDataPatch = {
+    const marketDataPatch: Record<string, unknown> = {
       isEnabled: data.isEnabled,
       minSessionPrice: data.minSessionPrice,
       currencyCode: data.currencyCode!.trim().toUpperCase(),
@@ -118,9 +141,16 @@ export const updateMarketPricingConfig = onCall(
       genderMatchingEnabled: data.genderMatchingEnabled,
       teacherWhitelist: data.teacherWhitelist,
       paymentProviderEnabled: data.paymentProviderEnabled,
+      manualPaymentEnabled: data.manualPaymentEnabled,
       updatedBy: adminUid,
       updatedAt: FieldValue.serverTimestamp(),
     };
+    for (const field of OPTIONAL_PAYMENT_INSTRUCTION_FIELDS) {
+      const value = data[field];
+      if (value !== undefined) {
+        marketDataPatch[field] = value == null ? null : value.trim();
+      }
+    }
 
     if (data.cities) {
       for (const city of data.cities) {

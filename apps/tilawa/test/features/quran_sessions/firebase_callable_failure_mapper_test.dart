@@ -42,6 +42,18 @@ void main() {
     check(failure).isA<MeetingLinkUnavailableFailure>();
   });
 
+  test('maps config-gate market_not_supported to region-unavailable', () {
+    final failure = mapQuranSessionsCallableFailure(
+      _callable(
+        code: 'failed-precondition',
+        details: const {'code': 'market_not_supported', 'countryCode': 'SA'},
+      ),
+    );
+
+    check(failure).isA<MarketNotEnabledFailure>();
+    check((failure as MarketNotEnabledFailure).countryCode).equals('SA');
+  });
+
   test('maps lifecycle teacher_not_verified', () {
     final failure = mapQuranSessionsCallableFailure(
       _callable(

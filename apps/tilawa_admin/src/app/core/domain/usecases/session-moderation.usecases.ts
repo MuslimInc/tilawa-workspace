@@ -117,3 +117,41 @@ export class ApproveSessionRefundUseCase {
     await this.gateway.approveSessionRefund(bookingId.trim(), reason.trim());
   }
 }
+
+@Injectable({ providedIn: 'root' })
+export class ConfirmManualBookingPaymentUseCase {
+  constructor(
+    @Inject(SESSION_MODERATION_GATEWAY)
+    private readonly gateway: SessionModerationGateway,
+  ) {}
+
+  async execute(bookingId: string, note?: string): Promise<void> {
+    if (!bookingId.trim()) {
+      throw new Error('Booking id is required.');
+    }
+    const trimmedNote = note?.trim();
+    await this.gateway.confirmManualBookingPayment(
+      bookingId.trim(),
+      trimmedNote ? trimmedNote : undefined,
+    );
+  }
+}
+
+@Injectable({ providedIn: 'root' })
+export class RejectManualBookingPaymentUseCase {
+  constructor(
+    @Inject(SESSION_MODERATION_GATEWAY)
+    private readonly gateway: SessionModerationGateway,
+  ) {}
+
+  async execute(bookingId: string, reason?: string): Promise<void> {
+    if (!bookingId.trim()) {
+      throw new Error('Booking id is required.');
+    }
+    const trimmedReason = reason?.trim();
+    await this.gateway.rejectManualBookingPayment(
+      bookingId.trim(),
+      trimmedReason ? trimmedReason : undefined,
+    );
+  }
+}

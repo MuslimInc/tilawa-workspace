@@ -162,6 +162,12 @@ class FirestoreMarketConfigDataSource implements MarketConfigRemoteDataSource {
             (data['platformCommissionPercent'] as num?)?.toDouble() ?? 0,
         minimumStudentAgeYears: data['minimumStudentAgeYears'] as int?,
         minimumTeacherAgeYears: data['minimumTeacherAgeYears'] as int?,
+        manualPaymentEnabled: data['manualPaymentEnabled'] as bool? ?? false,
+        supportWhatsappNumber: data['supportWhatsappNumber'] as String?,
+        instapayHandle: data['instapayHandle'] as String?,
+        instapayPaymentLink: data['instapayPaymentLink'] as String?,
+        recipientMaskedName: data['recipientMaskedName'] as String?,
+        vodafoneCashNumber: data['vodafoneCashNumber'] as String?,
       );
     } on FirebaseException catch (e) {
       throw mapFirebaseException(e);

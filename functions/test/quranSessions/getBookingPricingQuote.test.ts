@@ -20,6 +20,7 @@ function context(overrides: {
   marketEnabled?: boolean;
   teacherVerified?: boolean;
   teacherWhitelist?: readonly string[] | null;
+  manualPaymentEnabled?: boolean;
   pricingSource?: BookingEligibilityContext["pricingSource"];
 }): BookingEligibilityContext {
   const fee = overrides.sessionFeeAmount ?? 0;
@@ -30,6 +31,10 @@ function context(overrides: {
       quranSessionsEnabled: overrides.platform?.quranSessionsEnabled ?? true,
       studentEntryEnabled: overrides.platform?.studentEntryEnabled ?? true,
       bookingEnabled: overrides.platform?.bookingEnabled ?? true,
+      marketGate: overrides.platform?.marketGate ?? {
+        enableForAllMarkets: false,
+        enabledMarketCodes: ["EG"],
+      },
     },
     student: {
       exists: true,
@@ -63,6 +68,7 @@ function context(overrides: {
       genderMatchingEnabled: true,
       teacherWhitelist: overrides.teacherWhitelist ?? null,
       paymentProviderEnabled: true,
+      manualPaymentEnabled: overrides.manualPaymentEnabled ?? false,
       tutorApprovalSlaMs: 24 * 60 * 60 * 1000,
       minBookingNoticeMs: 60 * 60 * 1000,
       maxConcurrentUpcomingPerStudent: 3,
@@ -103,6 +109,8 @@ test("paid market quotes amount, currency, and payment requirement", () => {
   assert.equal(quote.currencyCode, "EGP");
   assert.equal(quote.paymentRequired, true);
   assert.equal(quote.paymentProviderAvailable, true);
+  assert.equal(quote.manualPaymentEnabled, false);
+  assert.equal(quote.paymentMode, "sandbox");
   assert.equal(quote.payableAmount, 50);
   assert.equal(quote.policyVersion, "v2");
   assert.equal(quote.blockReason, "none");
@@ -116,6 +124,22 @@ test("paid market with provider disabled returns paymentProviderUnavailable bloc
   assert.equal(quote.paymentRequired, true);
   assert.equal(quote.paymentProviderAvailable, false);
   assert.equal(quote.blockReason, "paymentProviderUnavailable");
+});
+
+test("paid manual market is available without PSP and reports manual mode", () => {
+  const quote = buildPricingQuote(
+    context({
+      sessionFeeAmount: 50,
+      currencyCode: "EGP",
+      manualPaymentEnabled: true,
+    }),
+    false,
+  );
+  assert.equal(quote.paymentRequired, true);
+  assert.equal(quote.paymentProviderAvailable, true);
+  assert.equal(quote.manualPaymentEnabled, true);
+  assert.equal(quote.paymentMode, "manual_off_app");
+  assert.equal(quote.blockReason, "none");
 });
 
 test("free teacher with provider disabled is still bookable (blockReason none)", () => {

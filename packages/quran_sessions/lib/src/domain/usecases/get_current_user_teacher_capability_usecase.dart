@@ -5,6 +5,7 @@ import '../entities/teacher_capability.dart';
 import '../failures/quran_sessions_failure.dart';
 import '../repositories/teacher_application_repository.dart';
 import '../repositories/teacher_profile_repository.dart';
+import '../rules/teacher_profile_completeness.dart';
 
 /// Resolves the signed-in user's teacher marketplace capability.
 ///
@@ -44,7 +45,10 @@ class GetCurrentUserTeacherCapabilityUseCase {
     }
 
     final profileResult = await _profiles.getProfileByUserId(userId);
-    final profile = profileResult.fold((_) => null, (p) => p);
+    final profile = profileResult.fold(
+      (_) => null,
+      (p) => TeacherProfileCompleteness.withComputedVisibility(p),
+    );
 
     return Right(
       TeacherCapabilityResolver.resolve(

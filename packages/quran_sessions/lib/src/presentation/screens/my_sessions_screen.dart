@@ -255,9 +255,10 @@ class _MySessionsScreenState extends State<MySessionsScreen> {
     final reason = await showCancelSessionSheet(
       context,
       sessionStartsAt: session.startsAt,
-      pricingType: SessionPricingType.free,
-      // Egypt pilot sessions are manual/off-app paid; suppress free-session copy.
-      isManualPayment: false,
+      pricingType: session.isManualPayment
+          ? SessionPricingType.fixedPerSession
+          : SessionPricingType.free,
+      isManualPayment: session.isManualPayment,
     );
     if (reason != null && mounted) {
       context.read<MySessionsBloc>().add(

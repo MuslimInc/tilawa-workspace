@@ -15,6 +15,10 @@ export interface AdminSessionSummary {
   readonly countryCode: string | null;
   readonly cityId: string | null;
   readonly paymentStatus: string | null;
+  readonly paymentReference: string | null;
+  readonly paymentProvider: string | null;
+  readonly priceAmount: number | null;
+  readonly priceCurrency: string | null;
   readonly amountPaidUsd: number | null;
   readonly cancellationReason: string | null;
   readonly hasActiveCall: boolean;

@@ -35,6 +35,7 @@ function baseContext(
       quranSessionsEnabled: true,
       studentEntryEnabled: true,
       bookingEnabled: true,
+      marketGate: { enableForAllMarkets: false, enabledMarketCodes: ["EG"] },
       ...overrides.platform,
     },
     student: {
@@ -72,6 +73,7 @@ function baseContext(
       genderMatchingEnabled: true,
       teacherWhitelist: null,
       paymentProviderEnabled: true,
+      manualPaymentEnabled: false,
       tutorApprovalSlaMs: 24 * 60 * 60 * 1000,
       minBookingNoticeMs: 60 * 60 * 1000,
       maxConcurrentUpcomingPerStudent: 3,
@@ -111,6 +113,7 @@ test("parsePlatformFeaturePolicy fails closed when config is missing", () => {
     quranSessionsEnabled: false,
     studentEntryEnabled: false,
     bookingEnabled: false,
+    marketGate: { enableForAllMarkets: false, enabledMarketCodes: [] },
   });
 });
 
@@ -121,6 +124,7 @@ test("assertPlatformBookingEnabled rejects disabled quote/booking flow", () => {
         quranSessionsEnabled: false,
         studentEntryEnabled: true,
         bookingEnabled: true,
+        marketGate: { enableForAllMarkets: false, enabledMarketCodes: ["EG"] },
       }),
     "feature_disabled",
   );
@@ -214,6 +218,79 @@ test("assertBookingEligible rejects a disabled market", () => {
   expectCode(
     () => assertBookingEligible(baseContext({ marketEnabled: false }), NOW),
     "market_not_enabled",
+  );
+});
+
+test("assertBookingEligible rejects a student market not in enabledMarketCodes", () => {
+  expectCode(
+    () =>
+      assertBookingEligible(
+        baseContext({
+          student: { countryCode: "SA" },
+          market: { countryCode: "SA", cityId: "riyadh" },
+        }),
+        NOW,
+      ),
+    "market_not_supported",
+  );
+});
+
+test("assertBookingEligible allows the configured enabled market (EG)", () => {
+  // baseContext defaults to an EG student and enabledMarketCodes: ["EG"].
+  assert.doesNotThrow(() => assertBookingEligible(baseContext(), NOW));
+});
+
+test("assertBookingEligible allows any market when enableForAllMarkets is true", () => {
+  assert.doesNotThrow(() =>
+    assertBookingEligible(
+      baseContext({
+        platform: {
+          quranSessionsEnabled: true,
+          studentEntryEnabled: true,
+          bookingEnabled: true,
+          marketGate: { enableForAllMarkets: true, enabledMarketCodes: [] },
+        },
+        student: { countryCode: "SA" },
+        market: { countryCode: "SA", cityId: "riyadh" },
+      }),
+      NOW,
+    ),
+  );
+});
+
+test("assertBookingEligible allows paid manual market without PSP", () => {
+  const pricing = assertBookingEligible(
+    baseContext({
+      pricing: { isPaid: true, amount: 100, currencyCode: "EGP" },
+      market: {
+        countryCode: "EG",
+        cityId: "cairo",
+        paymentProviderEnabled: false,
+        manualPaymentEnabled: true,
+      },
+    }),
+    NOW,
+  );
+
+  assert.equal(pricing.isPaid, true);
+});
+
+test("assertBookingEligible rejects paid market without PSP or manual", () => {
+  expectCode(
+    () =>
+      assertBookingEligible(
+        baseContext({
+          pricing: { isPaid: true, amount: 100, currencyCode: "EGP" },
+          market: {
+            countryCode: "EG",
+            cityId: "cairo",
+            paymentProviderEnabled: false,
+            manualPaymentEnabled: false,
+          },
+        }),
+        NOW,
+      ),
+    "payment_provider_unavailable",
   );
 });
 
