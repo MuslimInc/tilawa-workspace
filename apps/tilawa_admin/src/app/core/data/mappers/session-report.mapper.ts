@@ -12,8 +12,11 @@ export interface SessionReportFirestoreDto {
   reporterUserId?: string;
   reporterRole?: string;
   reportedUserId?: string | null;
+  resolutionReason?: string | null;
+  resolvedByUserId?: string | null;
   createdAt?: unknown;
   updatedAt?: unknown;
+  resolvedAt?: unknown;
 }
 
 export abstract class SessionReportMapper {
@@ -29,8 +32,11 @@ export abstract class SessionReportMapper {
       reporterUserId: data.reporterUserId ?? '',
       reporterRole: data.reporterRole ?? 'user',
       reportedUserId: data.reportedUserId ?? null,
+      resolutionReason: data.resolutionReason ?? null,
+      resolvedByUserId: data.resolvedByUserId ?? null,
       createdAt: readRequiredTimestamp(data.createdAt, new Date(0)),
       updatedAt: readTimestamp(data.updatedAt),
+      resolvedAt: readTimestamp(data.resolvedAt),
     };
   }
 }

@@ -4,6 +4,8 @@ import {
   NoShowClassification,
   SessionCompensationType,
 } from '../entities/session-moderation.types';
+import { DisputeResolution } from '../entities/session-moderation.types';
+import { SessionReportResolution } from '../entities/session-report-summary.entity';
 import {
   SESSION_MODERATION_GATEWAY,
   SessionModerationGateway,
@@ -152,6 +154,64 @@ export class RejectManualBookingPaymentUseCase {
     await this.gateway.rejectManualBookingPayment(
       bookingId.trim(),
       trimmedReason ? trimmedReason : undefined,
+    );
+  }
+}
+
+@Injectable({ providedIn: 'root' })
+export class ResolveSessionReportUseCase {
+  constructor(
+    @Inject(SESSION_MODERATION_GATEWAY)
+    private readonly gateway: SessionModerationGateway,
+  ) {}
+
+  async execute(
+    reportId: string,
+    resolution: SessionReportResolution,
+    reason?: string,
+  ): Promise<void> {
+    const trimmedReportId = reportId.trim();
+    const trimmedReason = reason?.trim();
+    if (!trimmedReportId) {
+      throw new Error('Report id is required.');
+    }
+    if (resolution !== 'under_review' && !trimmedReason) {
+      throw new Error('A resolution reason is required.');
+    }
+    await this.gateway.resolveSessionReport(trimmedReportId, resolution, trimmedReason);
+  }
+}
+
+@Injectable({ providedIn: 'root' })
+export class ResolveSessionDisputeUseCase {
+  constructor(
+    @Inject(SESSION_MODERATION_GATEWAY)
+    private readonly gateway: SessionModerationGateway,
+  ) {}
+
+  async execute(
+    bookingId: string,
+    disputeId: string,
+    resolution: DisputeResolution,
+    reason: string,
+  ): Promise<void> {
+    const trimmedBookingId = bookingId.trim();
+    const trimmedDisputeId = disputeId.trim();
+    const trimmedReason = reason.trim();
+    if (!trimmedBookingId) {
+      throw new Error('Booking id is required.');
+    }
+    if (!trimmedDisputeId) {
+      throw new Error('Dispute id is required.');
+    }
+    if (!trimmedReason) {
+      throw new Error('A dispute resolution reason is required.');
+    }
+    await this.gateway.resolveSessionDispute(
+      trimmedBookingId,
+      trimmedDisputeId,
+      resolution,
+      trimmedReason,
     );
   }
 }
