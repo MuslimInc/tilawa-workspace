@@ -508,16 +508,17 @@ export async function loadSharedBookingContext(
   };
 
   if (student.countryCode != null && student.cityId != null) {
-    const marketSnap = await db
+    // Read market + city once, in parallel, and reuse the snapshots for both
+    // policy-config validation and the effective-policy resolve below. This
+    // previously read the same two docs twice (here + inside
+    // loadEffectiveMarketPolicy) over two sequential round-trips.
+    const marketRef = db
       .collection("quran_session_market_configs")
-      .doc(student.countryCode)
-      .get();
-    const citySnap = await db
-      .collection("quran_session_market_configs")
-      .doc(student.countryCode)
-      .collection("cities")
-      .doc(student.cityId)
-      .get();
+      .doc(student.countryCode);
+    const [marketSnap, citySnap] = await Promise.all([
+      marketRef.get(),
+      marketRef.collection("cities").doc(student.cityId).get(),
+    ]);
     assertBookingPolicyConfigured({
       platformConfig,
       marketData: marketSnap.data(),
@@ -532,6 +533,8 @@ export async function loadSharedBookingContext(
       student.countryCode,
       student.cityId,
       platformConfig,
+      new Date(),
+      { marketSnap, citySnap },
     );
     marketEnabled = market.marketEnabled;
     marketPricing = {

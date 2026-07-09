@@ -1,5 +1,6 @@
 import { onCall, HttpsError } from "firebase-functions/v2/https";
 import { getFirestore } from "firebase-admin/firestore";
+import * as logger from "firebase-functions/logger";
 
 import {
   loadBookingEligibilityContext,
@@ -272,11 +273,28 @@ export const getBookingPricingQuote = onCall(
     // Best-effort preview: convert config-level lifecycle errors into a typed
     // blockReason inside a successful response. Auth/epoch/transport errors
     // still throw (handled by the client failure mapper).
+    const startedAt = Date.now();
     try {
       const ctx = await loadBookingEligibilityContext(db, uid, teacherId);
-      return buildPricingQuote(ctx, isPaymentProviderEnabled(), { teacherId });
+      const contextLoadedAt = Date.now();
+      const quote = buildPricingQuote(ctx, isPaymentProviderEnabled(), {
+        teacherId,
+      });
+      logger.info("getBookingPricingQuote timing", {
+        teacherId,
+        contextLoadMs: contextLoadedAt - startedAt,
+        totalMs: Date.now() - startedAt,
+        blockReason: quote.blockReason,
+      });
+      return quote;
     } catch (e) {
       const blocked = blockedQuoteForLifecycleError(e);
+      logger.info("getBookingPricingQuote timing", {
+        teacherId,
+        totalMs: Date.now() - startedAt,
+        outcome: blocked != null ? "blocked" : "error",
+        blockReason: blocked?.blockReason,
+      });
       if (blocked != null) return blocked;
       throw e;
     }

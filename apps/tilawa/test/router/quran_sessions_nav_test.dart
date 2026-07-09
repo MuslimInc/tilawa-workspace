@@ -154,6 +154,47 @@ GoRoute _teacherDashboardRoute() {
   );
 }
 
+class _UnimplementedTeacherRepository implements TeacherRepository {
+  @override
+  dynamic noSuchMethod(Invocation invocation) => throw UnimplementedError();
+}
+
+class _UnimplementedScheduleRepository implements ScheduleRepository {
+  @override
+  dynamic noSuchMethod(Invocation invocation) => throw UnimplementedError();
+}
+
+class _UnimplementedBookedSlotLockRepository
+    implements BookedSlotLockRepository {
+  @override
+  dynamic noSuchMethod(Invocation invocation) => throw UnimplementedError();
+}
+
+/// Counts how many times the initial [LoadTeachersRequested] is dispatched to
+/// the bloc that a single route build produces. It does NOT forward events, so
+/// no use case runs — the test only measures dispatch count. Guards against the
+/// regression where both the route builder and the screen's initState fired the
+/// load, double-running getTeachers + the pricing-quotes batch on every load.
+class _CountingTeacherListBloc extends TeacherListBloc {
+  _CountingTeacherListBloc()
+    : super(
+        ResolveTeacherListUseCase(
+          GetTeachersUseCase(_UnimplementedTeacherRepository()),
+        ),
+        GetTeacherAvailabilityUseCase(
+          scheduleRepository: _UnimplementedScheduleRepository(),
+          bookedSlotLocks: _UnimplementedBookedSlotLockRepository(),
+        ),
+      );
+
+  int loadCount = 0;
+
+  @override
+  void add(TeacherListEvent event) {
+    if (event is LoadTeachersRequested) loadCount += 1;
+  }
+}
+
 void seedPlatformConfig({
   required bool studentEntryEnabled,
   required bool bookingEnabled,
@@ -258,6 +299,50 @@ void main() {
 
       final result = await redirectProfileCompletionRoute(tester);
       expect(result, const LoginRoute().location);
+    });
+  });
+
+  group('teacher list route initial load', () {
+    tearDown(() async {
+      if (getIt.isRegistered<TeacherListBloc>()) {
+        getIt.unregister<TeacherListBloc>();
+      }
+    });
+
+    testWidgets('dispatches LoadTeachersRequested exactly once per build', (
+      tester,
+    ) async {
+      seedPlatformConfig(studentEntryEnabled: true, bookingEnabled: true);
+      final bloc = _CountingTeacherListBloc();
+      getIt.registerFactory<TeacherListBloc>(() => bloc);
+
+      final route = quranSessionsRoutes.whereType<GoRoute>().firstWhere(
+        (route) => route.path == QuranSessionsRoutes.teacherList,
+      );
+
+      await tester.pumpWidget(
+        MaterialApp(
+          theme: AppTheme.getLightTheme(primaryColor: AppColors.defaultPrimary),
+          localizationsDelegates: const [
+            ...QuranSessionsLocalizations.localizationsDelegates,
+            GlobalMaterialLocalizations.delegate,
+            GlobalWidgetsLocalizations.delegate,
+            GlobalCupertinoLocalizations.delegate,
+          ],
+          supportedLocales: QuranSessionsLocalizations.supportedLocales,
+          home: Builder(
+            builder: (context) => route.builder!(
+              context,
+              FakeGoRouterState(QuranSessionsRoutes.teacherList),
+            ),
+          ),
+        ),
+      );
+      await tester.pump();
+
+      // Only the screen's initState fires the load; the route builder must not
+      // dispatch it a second time.
+      expect(bloc.loadCount, 1);
     });
   });
 

@@ -1,5 +1,6 @@
 import { onCall, HttpsError, type CallableRequest } from "firebase-functions/v2/https";
 import { getFirestore, Timestamp } from "firebase-admin/firestore";
+import * as logger from "firebase-functions/logger";
 
 import { appendAuditEvent } from "./aggregateWriteService";
 import {
@@ -199,11 +200,13 @@ async function handleCreateSessionBooking(
       throw new HttpsError("invalid-argument", "Invalid session timestamps.");
     }
 
+    const startedAt = Date.now();
     const eligibility = await loadBookingEligibilityContext(
       db,
       studentId,
       data.teacherId,
     );
+    const eligibilityLoadedAt = Date.now();
 
     if (eligibility.market.sessionMode === "videoOnly") {
       if (data.callType !== "videoCall") {
@@ -215,7 +218,15 @@ async function handleCreateSessionBooking(
       }
     }
 
-    const upcomingCount = await countStudentUpcomingBookings(db, studentId);
+    // These two reads are independent of each other and of assertBookingEligible
+    // (beyond upcomingCount). Run them in parallel instead of two sequential
+    // round-trips; platformConfig is consumed later inside the transaction.
+    const [upcomingCount, platformSnap] = await Promise.all([
+      countStudentUpcomingBookings(db, studentId),
+      db.collection("quran_session_platform_config").doc("global").get(),
+    ]);
+    const platformConfig = platformSnap.data() ?? {};
+    const preTxReadsAt = Date.now();
     const pricing = assertBookingEligible(eligibility, new Date(), {
       teacherId: data.teacherId,
       startsAt: startsAtDate,
@@ -261,12 +272,6 @@ async function handleCreateSessionBooking(
       `${studentId}:${data.slotId}`,
       idempotencyKey,
     );
-
-    const platformSnap = await db
-      .collection("quran_session_platform_config")
-      .doc("global")
-      .get();
-    const platformConfig = platformSnap.data() ?? {};
 
     const { result, replayed } = await runIdempotentOperation(
       {
@@ -553,6 +558,7 @@ async function handleCreateSessionBooking(
         return bookingResult;
       },
     );
+    const transactionDoneAt = Date.now();
 
     if (
       !replayed &&
@@ -568,5 +574,15 @@ async function handleCreateSessionBooking(
       });
     }
 
+  logger.info("createSessionBooking timing", {
+    teacherId: data.teacherId,
+    lifecycleStatus: result.lifecycleStatus,
+    replayed,
+    eligibilityLoadMs: eligibilityLoadedAt - startedAt,
+    preTxReadsMs: preTxReadsAt - eligibilityLoadedAt,
+    transactionMs: transactionDoneAt - preTxReadsAt,
+    sideEffectsMs: Date.now() - transactionDoneAt,
+    totalMs: Date.now() - startedAt,
+  });
   return result;
 }

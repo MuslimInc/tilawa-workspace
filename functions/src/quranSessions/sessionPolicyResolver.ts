@@ -1,4 +1,4 @@
-import { Firestore, Timestamp } from "firebase-admin/firestore";
+import { Firestore, Timestamp, DocumentSnapshot } from "firebase-admin/firestore";
 
 import { lifecycleError } from "./lifecycleErrors";
 import {
@@ -111,12 +111,21 @@ export async function loadEffectiveMarketPolicy(
   cityId: string,
   platformConfig: Record<string, unknown>,
   now: Date = new Date(),
+  // Optional pre-fetched market/city snapshots. Callers that already read these
+  // docs (e.g. loadSharedBookingContext, for policy-config validation) pass them
+  // in so this resolver does not read the same two docs a second time.
+  prefetched?: {
+    marketSnap: DocumentSnapshot;
+    citySnap: DocumentSnapshot;
+  },
 ): Promise<ResolvedMarketPolicy> {
   const marketRef = db.collection("quran_session_market_configs").doc(countryCode);
-  const [marketSnap, citySnap] = await Promise.all([
-    marketRef.get(),
-    marketRef.collection("cities").doc(cityId).get(),
-  ]);
+  const [marketSnap, citySnap] = prefetched
+    ? [prefetched.marketSnap, prefetched.citySnap]
+    : await Promise.all([
+        marketRef.get(),
+        marketRef.collection("cities").doc(cityId).get(),
+      ]);
   const marketData = marketSnap.data() ?? {};
   const cityData = citySnap.exists ? (citySnap.data() ?? null) : null;
 

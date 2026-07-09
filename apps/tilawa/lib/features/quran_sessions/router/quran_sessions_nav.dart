@@ -117,8 +117,11 @@ List<RouteBase> get quranSessionsRoutes => [
     },
     builder: (context, state) => _QuranSessionsLearnQuranEntryGate(
       child: BlocProvider(
-        create: (_) =>
-            getIt<TeacherListBloc>()..add(const LoadTeachersRequested()),
+        // The screen's initState fires LoadTeachersRequested. Do NOT dispatch
+        // it here too — a second event double-runs getTeachers + the pricing
+        // quotes batch on every load (restartable() cancels only the Dart
+        // continuation, not the already-dispatched network futures).
+        create: (_) => getIt<TeacherListBloc>(),
         child: _withQuranSessionsTheme(
           _QuranSessionsHomeRoute(
             onSeeAllTeachers: () =>
@@ -146,8 +149,9 @@ List<RouteBase> get quranSessionsRoutes => [
       return null;
     },
     builder: (context, state) => BlocProvider(
-      create: (_) =>
-          getIt<TeacherListBloc>()..add(const LoadTeachersRequested()),
+      // TeacherListScreen.initState fires LoadTeachersRequested; dispatching it
+      // here as well double-runs getTeachers + the pricing quotes batch.
+      create: (_) => getIt<TeacherListBloc>(),
       child: _withQuranSessionsTheme(
         TeacherListScreen(
           featureConfig: quranSessionsFeatureConfig(),
@@ -184,16 +188,10 @@ List<RouteBase> get quranSessionsRoutes => [
       final bookingEnabled =
           quranSessionsFeatureConfig().quranSessionsBookingEnabled;
       return BlocProvider(
-        create: (_) {
-          final now = DateTime.now();
-          return getIt<TeacherProfileBloc>()..add(
-            TeacherProfileRequested(
-              teacherId: teacherId,
-              availabilityFrom: now,
-              availabilityTo: now.add(const Duration(days: 14)),
-            ),
-          );
-        },
+        // TeacherProfileScreen.initState fires TeacherProfileRequested;
+        // dispatching it here too double-runs getTeacherProfile,
+        // getAvailability (schedule + overrides) and getBookingPricingQuote.
+        create: (_) => getIt<TeacherProfileBloc>(),
         child: _withQuranSessionsTheme(
           TeacherProfileScreen(
             teacherId: teacherId,
