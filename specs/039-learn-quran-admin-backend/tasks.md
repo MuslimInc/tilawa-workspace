@@ -110,10 +110,10 @@ clear promotion criteria, and a no-data-mutation rollback.
 clients, observe rejected non-attested traffic, and restore the prior setting
 when the gate fails.
 
-- [ ] T037 [P] [US4] Add the Learn Quran App Check evidence table, owner, success criteria, and rollback decision to docs/quran-sessions/production-readiness-checklist.md.
-- [ ] T038 [P] [US4] Add the operator runbook for staged enforcement, observable rejection handling, and rollback to docs/quran_sessions_admin_ops_checklist.md.
-- [ ] T039 [US4] Align callable-option documentation and unit expectations for the deployment-controlled default in functions/src/quranSessions/sessionCallableOptions.ts and functions/test/quranSessions/sessionCallableOptions.test.ts.
-- [ ] T040 [US4] Execute the staging evidence procedure in specs/039-learn-quran-admin-backend/quickstart.md and attach dated results before any production enforcement request.
+- [X] T037 [P] [US4] Add the Learn Quran App Check evidence table, owner, success criteria, and rollback decision to docs/quran-sessions/production-readiness-checklist.md.
+- [X] T038 [P] [US4] Add the operator runbook for staged enforcement, observable rejection handling, and rollback to docs/quran_sessions_admin_ops_checklist.md.
+- [X] T039 [US4] Align callable-option documentation and unit expectations for the deployment-controlled default in functions/src/quranSessions/sessionCallableOptions.ts and functions/test/quranSessions/sessionCallableOptions.test.ts.
+- [ ] T040 [US4] Execute the staging evidence procedure in specs/039-learn-quran-admin-backend/quickstart.md and attach dated results before any production enforcement request. *(Gate prepared 2026-07-10; execution blocked on ops: staging deploy + soak calendar time. See quickstart "Staging evidence status".)*
 
 **Checkpoint**: Production App Check promotion has a named owner, passing staged
 evidence, and a reversible path; it is not enabled by an undocumented toggle.

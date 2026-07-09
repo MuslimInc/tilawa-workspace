@@ -4,6 +4,12 @@
  * App Check enforcement is opt-in via `QURAN_SESSIONS_ENFORCE_APP_CHECK=true`
  * at deploy/runtime. Default remains `false` so staging/dev clients without
  * attestation keep working until ops flips the flag and redeploys.
+ *
+ * The exported option objects capture the env value at module load, so a
+ * change requires a functions redeploy — enforcement is deployment-controlled,
+ * never a runtime or admin-panel setting. Production enforcement additionally
+ * requires the completed staging evidence and rollback rehearsal recorded in
+ * docs/quran-sessions/production-readiness-checklist.md § 3a.
  */
 export function isSessionAppCheckEnforced(): boolean {
   return process.env.QURAN_SESSIONS_ENFORCE_APP_CHECK === "true";
