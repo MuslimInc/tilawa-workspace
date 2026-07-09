@@ -123,12 +123,12 @@ evidence, and a reversible path; it is not enabled by an undocumented toggle.
 **Purpose**: Verify design-system, data-boundary, documentation, and release
 quality across all stories.
 
-- [ ] T041 [P] Update admin configuration ownership and supported-field documentation in docs/quran_sessions_admin_configuration.md.
-- [ ] T042 [P] Verify no admin Quran Sessions component introduces direct Firestore writes in apps/tilawa_admin/src/app/features/quran-sessions/.
-- [ ] T043 [P] Run the admin tests and production build from apps/tilawa_admin/package.json.
-- [ ] T044 [P] Run function build, unit tests, integration tests, and rules tests from functions/package.json.
-- [ ] T045 [P] Perform manual Arabic/English, RTL, narrow-width, loading, failure, retry, and terminal-state QA using specs/039-learn-quran-admin-backend/quickstart.md.
-- [ ] T046 Record performance/read-write impact, test evidence, known risks, and rollback outcome in specs/039-learn-quran-admin-backend/quickstart.md.
+- [X] T041 [P] Update admin configuration ownership and supported-field documentation in docs/quran_sessions_admin_configuration.md.
+- [X] T042 [P] Verify no admin Quran Sessions component introduces direct Firestore writes in apps/tilawa_admin/src/app/features/quran-sessions/.
+- [X] T043 [P] Run the admin tests and production build from apps/tilawa_admin/package.json.
+- [X] T044 [P] Run function build, unit tests, integration tests, and rules tests from functions/package.json.
+- [ ] T045 [P] Perform manual Arabic/English, RTL, narrow-width, loading, failure, retry, and terminal-state QA using specs/039-learn-quran-admin-backend/quickstart.md. *(Requires a human pass on non-production data; the exact steps are listed in the quickstart smoke tests and the batch QA notes.)*
+- [X] T046 Record performance/read-write impact, test evidence, known risks, and rollback outcome in specs/039-learn-quran-admin-backend/quickstart.md.
 
 ## Dependencies and Execution Order
 
