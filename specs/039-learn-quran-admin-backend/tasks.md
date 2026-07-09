@@ -13,8 +13,8 @@ affected admin presentation states.
 **Purpose**: Establish current behavior and protect the verified boundaries
 before adding UI actions.
 
-- [ ] T001 [P] Add baseline round-trip regression cases in apps/tilawa_admin/src/app/features/quran-sessions/global-settings/global-settings.facade.spec.ts.
-- [ ] T002 [P] Add current-contract regression cases in functions/test/quranSessions/updatePlatformConfig.test.ts and functions/test/quranSessions/updateMarketPricingConfig.test.ts.
+- [X] T001 [P] Add baseline round-trip regression cases in apps/tilawa_admin/src/app/features/quran-sessions/global-settings/global-settings.component.spec.ts.
+- [X] T002 [P] Verify the market validator contract and add child-age validation coverage in functions/test/quranSessions/updatePlatformConfig.test.ts and functions/test/quranSessions/updateMarketPricingConfig.test.ts.
 - [ ] T003 [P] Add report/dispute terminal-resolution coverage gaps to functions/test-integration/sessionReports.integration.test.ts and functions/test-integration/resolveSessionDispute.integration.test.ts.
 - [ ] T004 Record initial Admin/Functions test outcomes in specs/039-learn-quran-admin-backend/quickstart.md.
 
@@ -47,16 +47,16 @@ misleading editable control.
 threshold, reload it, and verify that threshold is retained; inspect market
 policy and verify only supported editable values are submitted.
 
-- [ ] T012 [P] [US1] Add childAgeThreshold to the global configuration model and read normalization in apps/tilawa_admin/src/app/features/quran-sessions/global-settings/global-settings.facade.ts.
-- [ ] T013 [US1] Add a validated child-age form control and lossless save payload in apps/tilawa_admin/src/app/features/quran-sessions/global-settings/global-settings.component.ts.
-- [ ] T014 [US1] Render the child-age control with loading/error-safe behavior in apps/tilawa_admin/src/app/features/quran-sessions/global-settings/global-settings.component.html.
-- [ ] T015 [P] [US1] Remove the editable market sessionMode form control and payload mapping in apps/tilawa_admin/src/app/features/quran-sessions/market-pricing/market-pricing.component.ts.
-- [ ] T016 [US1] Replace the market delivery-mode selector with fixed video-only guidance in apps/tilawa_admin/src/app/features/quran-sessions/market-pricing/market-pricing.component.html.
-- [ ] T017 [P] [US1] Add Arabic and English strings for age-policy validation and fixed video-only guidance in apps/tilawa_admin/l10n/app_ar.arb and apps/tilawa_admin/l10n/app_en.arb.
-- [ ] T018 [P] [US1] Test global configuration round-trip, invalid age handling, and unchanged-field preservation in apps/tilawa_admin/src/app/features/quran-sessions/global-settings/global-settings.component.spec.ts.
-- [ ] T019 [P] [US1] Test market payload omission of sessionMode and fixed-mode rendering in apps/tilawa_admin/src/app/features/quran-sessions/market-pricing/market-pricing.component.spec.ts.
-- [ ] T020 [US1] Add backend regression coverage that valid global age values persist and invalid values fail in functions/test/quranSessions/updatePlatformConfig.test.ts.
-- [ ] T021 [US1] Add backend regression coverage that videoOnly remains the only accepted platform session mode in functions/test/quranSessions/updatePlatformConfig.test.ts.
+- [X] T012 [P] [US1] Add childAgeThreshold to the global configuration model and read normalization in apps/tilawa_admin/src/app/features/quran-sessions/global-settings/global-settings.facade.ts.
+- [X] T013 [US1] Add a validated child-age form control and lossless save payload in apps/tilawa_admin/src/app/features/quran-sessions/global-settings/global-settings.component.ts.
+- [X] T014 [US1] Render the child-age control with loading/error-safe behavior in apps/tilawa_admin/src/app/features/quran-sessions/global-settings/global-settings.component.html.
+- [X] T015 [P] [US1] Remove the editable market sessionMode form control and payload mapping in apps/tilawa_admin/src/app/features/quran-sessions/market-pricing/market-pricing.component.ts.
+- [X] T016 [US1] Replace the market delivery-mode selector with fixed video-only guidance in apps/tilawa_admin/src/app/features/quran-sessions/market-pricing/market-pricing.component.html.
+- [X] T017 [P] [US1] Add Arabic and English strings for age-policy validation and fixed video-only guidance in apps/tilawa_admin/l10n/app_ar.arb and apps/tilawa_admin/l10n/app_en.arb.
+- [X] T018 [P] [US1] Test global configuration round-trip, invalid age handling, and unchanged-field preservation in apps/tilawa_admin/src/app/features/quran-sessions/global-settings/global-settings.component.spec.ts.
+- [X] T019 [P] [US1] Test market payload omission of sessionMode and fixed-mode rendering in apps/tilawa_admin/src/app/features/quran-sessions/market-pricing/market-pricing.component.spec.ts.
+- [X] T020 [US1] Add backend regression coverage that valid global age values are accepted and invalid values fail in functions/test/quranSessions/updatePlatformConfig.test.ts.
+- [X] T021 [US1] Verify videoOnly remains the only accepted platform session mode in functions/test/quranSessions/updatePlatformConfig.test.ts.
 
 **Checkpoint**: A save cannot reset a known age threshold and no visible market
 control claims to change a field the backend does not accept.

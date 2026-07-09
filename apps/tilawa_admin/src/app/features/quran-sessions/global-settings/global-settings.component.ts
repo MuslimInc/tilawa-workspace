@@ -46,6 +46,7 @@ export class GlobalSettingsComponent implements OnInit {
     teacherApplicationEntryEnabled: [false],
     homeTeacherApplicationCardEnabled: [false],
     teacherApplicationDiscoverability: ['none', Validators.required],
+    childAgeThreshold: [14, [Validators.required, Validators.min(1)]],
     sessionMode: ['videoOnly', Validators.required],
     bookingMode: ['requiresTutorApproval', Validators.required],
     defaultJoinWindowLeadMs: [0, [Validators.required, Validators.min(0)]],

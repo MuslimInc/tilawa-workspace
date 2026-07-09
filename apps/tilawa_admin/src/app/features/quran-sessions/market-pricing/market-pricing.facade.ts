@@ -28,7 +28,6 @@ export interface MarketConfig {
   tutorApprovalSlaMs?: number;
   minBookingNoticeMs?: number;
   maxConcurrentUpcomingPerStudent?: number;
-  sessionMode?: 'videoOnly';
   genderMatchingEnabled?: boolean;
   teacherWhitelist?: string[] | null;
   supportWhatsappNumber?: string | null;
@@ -105,7 +104,6 @@ export class MarketPricingFacade {
                 minBookingNoticeMs: market.minBookingNoticeMs,
                 maxConcurrentUpcomingPerStudent:
                   market.maxConcurrentUpcomingPerStudent,
-                sessionMode: market.sessionMode,
                 genderMatchingEnabled: market.genderMatchingEnabled,
                 teacherWhitelist: market.teacherWhitelist ?? null,
                 supportWhatsappNumber: market.supportWhatsappNumber ?? null,
