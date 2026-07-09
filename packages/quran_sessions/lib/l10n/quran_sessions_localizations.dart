@@ -2912,7 +2912,7 @@ abstract class QuranSessionsLocalizations {
   /// No description provided for @completeTeacherProfileFirstMessage.
   ///
   /// In en, this message translates to:
-  /// **'Please complete and update your teacher profile before you can continue teaching students.'**
+  /// **'Please complete your teacher profile before you can start teaching students.'**
   String get completeTeacherProfileFirstMessage;
 
   /// No description provided for @teacherDashboard.
@@ -3449,6 +3449,12 @@ abstract class QuranSessionsLocalizations {
   /// **'Please check your connection and try again.'**
   String get pricingQuoteUnavailableSubtitle;
 
+  /// No description provided for @bookingPreparingPaymentDetails.
+  ///
+  /// In en, this message translates to:
+  /// **'Preparing payment details…'**
+  String get bookingPreparingPaymentDetails;
+
   /// No description provided for @bookingPaidUnavailableTitle.
   ///
   /// In en, this message translates to:
@@ -3458,7 +3464,7 @@ abstract class QuranSessionsLocalizations {
   /// No description provided for @bookingPaidUnavailableSubtitle.
   ///
   /// In en, this message translates to:
-  /// **'You can choose a free teacher or try again later.'**
+  /// **'Paid bookings are temporarily unavailable. Please try again later.'**
   String get bookingPaidUnavailableSubtitle;
 
   /// No description provided for @bookingDisabledByAdminTitle.

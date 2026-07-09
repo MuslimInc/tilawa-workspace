@@ -1906,6 +1906,9 @@ class QuranSessionsLocalizationsAr extends QuranSessionsLocalizations {
       'تحقق من اتصالك بالإنترنت وحاول مرة أخرى.';
 
   @override
+  String get bookingPreparingPaymentDetails => 'جارٍ تجهيز تفاصيل الدفع…';
+
+  @override
   String get bookingPaidUnavailableTitle => 'الحجز المدفوع غير متاح حالياً.';
 
   @override

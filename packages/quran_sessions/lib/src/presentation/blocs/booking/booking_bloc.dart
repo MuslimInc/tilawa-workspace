@@ -5,8 +5,6 @@ import '../../../boundaries/payment/session_payment_confirmation.dart';
 import '../../../domain/entities/booking_block_reason.dart';
 import '../../../domain/entities/manual_payment_price.dart';
 import '../../../domain/entities/session_lifecycle_status.dart';
-import '../../../domain/entities/session_price.dart';
-import '../../../domain/entities/session_pricing_type.dart';
 import '../../../domain/entities/teacher_availability.dart';
 import '../../../domain/failures/quran_sessions_failure.dart';
 import '../../../domain/mappers/session_aggregate_mapper.dart';
@@ -41,6 +39,7 @@ class BookingBloc extends Bloc<BookingEvent, BookingState> {
     on<CallTypeSelected>(_onCallTypeSelected, transformer: sequential());
     on<BookingSubmitted>(_onSubmitted, transformer: droppable());
     on<BookingConfirmPayment>(_onConfirmPayment, transformer: droppable());
+    on<BookingQuoteRetried>(_onQuoteRetried, transformer: droppable());
   }
 
   final GetTeacherAvailabilityUseCase _getAvailability;
@@ -104,7 +103,16 @@ class BookingBloc extends Bloc<BookingEvent, BookingState> {
 
     emit(const BookingSlotsLoading());
 
-    final profileResult = await _getTeacherProfile(teacherId);
+    // Kick off the independent loads together. The teacher profile and the
+    // schedule build the first interactive frame; the server pricing quote
+    // (the slow, cold-start-prone callable) resolves in parallel and patches
+    // the price/payment section when it arrives — it never blocks the slots.
+    final hasQuoteUseCase = _getPricingQuote != null;
+    final profileFuture = _getTeacherProfile(teacherId);
+    final availabilityFuture = _getAvailability(teacherId, from: from, to: to);
+    final quoteFuture = hasQuoteUseCase ? _fetchServerQuote(teacherId) : null;
+
+    final profileResult = await profileFuture;
     final externalMeetingUrl = profileResult.fold(
       (_) => null,
       (profile) => profile.externalMeetingUrl,
@@ -114,46 +122,12 @@ class BookingBloc extends Bloc<BookingEvent, BookingState> {
       (profile) => profile.displayName,
     );
 
-    SessionPricingType? pricingType;
-    SessionPrice? sessionPrice;
-    bool? paymentProviderAvailable;
-    ManualPaymentPrice? manualPaymentPrice;
-    BookingBlockReason blockReason = BookingBlockReason.none;
-
-    final fetched = await _fetchServerQuote(teacherId);
-    if (fetched.quote != null) {
-      final quote = fetched.quote!;
-      pricingType = quote.pricingType;
-      sessionPrice = quote.price;
-      paymentProviderAvailable = quote.paymentProviderAvailable;
-      manualPaymentPrice = quote.isManualOffApp && quote.isPaid
-          ? ManualPaymentPrice(
-              amountMinor: (quote.amount * 100).round(),
-              currencyCode: quote.currencyCode,
-            )
-          : null;
-      blockReason = fetched.failureBlockReason ?? BookingBlockReason.none;
-    } else if (fetched.failureBlockReason != null) {
-      // The server reported a typed config/admin block (a non-best-effort
-      // backend that still throws). Surface the typed reason and do NOT fall
-      // back to the client market preview — that would hide the block and
-      // let the student reach submit, only to be rejected server-side.
-      blockReason = fetched.failureBlockReason!;
-    } else {
-      // Transport-level quote failure only (network/App Check/timeout).
-      // The client-side market preview cannot see teacher-level pricing
-      // overrides, so it must not decide whether this session is paid/free or
-      // whether payment is unavailable. Keep the price unknown and block submit
-      // with neutral retry copy until the server quote is available.
-      blockReason = BookingBlockReason.pricingQuoteUnavailable;
-    }
-
     final defaultCallType = SessionModePolicy.defaultCallType(
       policy: _sessionModePolicy,
       externalMeetingUrl: externalMeetingUrl,
     );
 
-    final result = await _getAvailability(teacherId, from: from, to: to);
+    final result = await availabilityFuture;
 
     if (result.isLeft()) {
       result.fold((failure) => emit(BookingFailure(failure)), (_) {});
@@ -172,6 +146,11 @@ class BookingBloc extends Bloc<BookingEvent, BookingState> {
         to: to,
       );
     }
+
+    // Show teacher + slots immediately. Submit stays disabled while the quote
+    // loads (canSubmit gates on isQuoteLoading). With no quote use case wired
+    // the client cannot resolve authoritative pricing, so submit is blocked
+    // with the neutral pricing-unavailable reason rather than a loading state.
     emit(
       BookingSelecting(
         teacherId: teacherId,
@@ -179,13 +158,19 @@ class BookingBloc extends Bloc<BookingEvent, BookingState> {
         selectedCallType: defaultCallType,
         teacherDisplayName: teacherDisplayName,
         teacherExternalMeetingUrl: externalMeetingUrl,
-        pricingType: pricingType,
-        sessionPrice: sessionPrice,
-        manualPaymentPrice: manualPaymentPrice,
-        paymentProviderAvailable: paymentProviderAvailable,
-        blockReason: blockReason,
+        isQuoteLoading: hasQuoteUseCase,
+        blockReason: hasQuoteUseCase
+            ? BookingBlockReason.none
+            : BookingBlockReason.pricingQuoteUnavailable,
       ),
     );
+
+    if (quoteFuture == null) return;
+
+    final fetched = await quoteFuture;
+    final current = state;
+    if (current is! BookingSelecting) return;
+    emit(_applySelectingQuote(current, fetched));
   }
 
   /// Fetches the server quote and splits the outcome so config/admin blocks
@@ -201,6 +186,64 @@ class BookingBloc extends Bloc<BookingEvent, BookingState> {
     return result.fold(
       (f) => (quote: null, failureBlockReason: _blockReasonFromFailure(f)),
       (quote) => (quote: quote, failureBlockReason: quote.blockReason),
+    );
+  }
+
+  /// Re-fetches only the pricing quote, keeping the current [BookingSelecting]
+  /// (slots + selection) so the retry is scoped to the price/payment section.
+  Future<void> _onQuoteRetried(
+    BookingQuoteRetried event,
+    Emitter<BookingState> emit,
+  ) async {
+    final current = state;
+    if (current is! BookingSelecting || _getPricingQuote == null) return;
+    emit(
+      current.copyWith(
+        isQuoteLoading: true,
+        blockReason: BookingBlockReason.none,
+      ),
+    );
+    final fetched = await _fetchServerQuote(event.teacherId);
+    final latest = state;
+    if (latest is! BookingSelecting) return;
+    emit(_applySelectingQuote(latest, fetched));
+  }
+
+  /// Applies a fetched quote onto the current [BookingSelecting] without
+  /// touching slots/selection. Config/admin blocks become typed reasons; a
+  /// transport failure keeps pricing unknown and blocks submit with neutral
+  /// retry copy — Flutter never infers paid/free from a market-only preview.
+  BookingSelecting _applySelectingQuote(
+    BookingSelecting current,
+    ({SessionPricingQuote? quote, BookingBlockReason? failureBlockReason})
+    fetched,
+  ) {
+    if (fetched.quote != null) {
+      final quote = fetched.quote!;
+      final manualPaymentPrice = quote.isManualOffApp && quote.isPaid
+          ? ManualPaymentPrice(
+              amountMinor: (quote.amount * 100).round(),
+              currencyCode: quote.currencyCode,
+            )
+          : null;
+      return current.copyWith(
+        pricingType: quote.pricingType,
+        sessionPrice: quote.price,
+        paymentProviderAvailable: quote.paymentProviderAvailable,
+        manualPaymentPrice: manualPaymentPrice,
+        blockReason: fetched.failureBlockReason ?? BookingBlockReason.none,
+        isQuoteLoading: false,
+      );
+    }
+    if (fetched.failureBlockReason != null) {
+      return current.copyWith(
+        blockReason: fetched.failureBlockReason!,
+        isQuoteLoading: false,
+      );
+    }
+    return current.copyWith(
+      blockReason: BookingBlockReason.pricingQuoteUnavailable,
+      isQuoteLoading: false,
     );
   }
 

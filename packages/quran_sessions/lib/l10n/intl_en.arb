@@ -826,6 +826,7 @@
     "bookingPaymentUnavailableNotice": "This session requires payment, but payment is not available yet. Booking is temporarily unavailable.",
     "pricingQuoteUnavailableTitle": "We could not verify the session price right now.",
     "pricingQuoteUnavailableSubtitle": "Please check your connection and try again.",
+    "bookingPreparingPaymentDetails": "Preparing payment details…",
     "bookingPaidUnavailableTitle": "Paid booking is currently unavailable.",
     "bookingPaidUnavailableSubtitle": "Paid bookings are temporarily unavailable. Please try again later.",
     "bookingDisabledByAdminTitle": "Booking is currently unavailable.",

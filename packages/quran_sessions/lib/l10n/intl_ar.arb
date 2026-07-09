@@ -805,6 +805,7 @@
     "bookingPaymentUnavailableNotice": "هذه الجلسة مدفوعة، والدفع غير متاح حالياً. الحجز غير متاح مؤقتاً.",
     "pricingQuoteUnavailableTitle": "تعذر التحقق من سعر الجلسة حالياً.",
     "pricingQuoteUnavailableSubtitle": "تحقق من اتصالك بالإنترنت وحاول مرة أخرى.",
+    "bookingPreparingPaymentDetails": "جارٍ تجهيز تفاصيل الدفع…",
     "bookingPaidUnavailableTitle": "الحجز المدفوع غير متاح حالياً.",
     "bookingPaidUnavailableSubtitle": "الحجوزات المدفوعة غير متاحة مؤقتاً. يرجى المحاولة لاحقاً.",
     "bookingDisabledByAdminTitle": "الحجز غير متاح حالياً.",

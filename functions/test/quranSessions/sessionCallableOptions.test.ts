@@ -1,7 +1,51 @@
 import test from "node:test";
 import assert from "node:assert/strict";
 
-import { isSessionAppCheckEnforced } from "../../src/quranSessions/sessionCallableOptions";
+import {
+  isSessionAppCheckEnforced,
+  sessionMinInstances,
+} from "../../src/quranSessions/sessionCallableOptions";
+
+function withMinInstancesEnv(value: string | undefined, run: () => void): void {
+  const previous = process.env.QURAN_SESSIONS_MIN_INSTANCES;
+  if (value === undefined) {
+    delete process.env.QURAN_SESSIONS_MIN_INSTANCES;
+  } else {
+    process.env.QURAN_SESSIONS_MIN_INSTANCES = value;
+  }
+  try {
+    run();
+  } finally {
+    if (previous === undefined) {
+      delete process.env.QURAN_SESSIONS_MIN_INSTANCES;
+    } else {
+      process.env.QURAN_SESSIONS_MIN_INSTANCES = previous;
+    }
+  }
+}
+
+test("sessionMinInstances defaults to 0 when env unset (no cost change)", () => {
+  withMinInstancesEnv(undefined, () => {
+    assert.equal(sessionMinInstances(), 0);
+  });
+});
+
+test("sessionMinInstances reads a positive warm-instance floor", () => {
+  withMinInstancesEnv("1", () => assert.equal(sessionMinInstances(), 1));
+  withMinInstancesEnv("3", () => assert.equal(sessionMinInstances(), 3));
+});
+
+test("sessionMinInstances rejects non-positive and non-numeric values", () => {
+  for (const value of ["0", "-2", "abc", "", " "]) {
+    withMinInstancesEnv(value, () =>
+      assert.equal(
+        sessionMinInstances(),
+        0,
+        `expected 0 for ${JSON.stringify(value)}`,
+      ),
+    );
+  }
+});
 
 test("isSessionAppCheckEnforced defaults to false when env unset", () => {
   const previous = process.env.QURAN_SESSIONS_ENFORCE_APP_CHECK;

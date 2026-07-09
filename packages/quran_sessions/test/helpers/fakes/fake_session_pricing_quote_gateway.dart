@@ -15,12 +15,17 @@ class FakeSessionPricingQuoteGateway implements SessionPricingQuoteGateway {
     this.failure,
     this.quotesByTeacher,
     this.batchFailure,
+    this.quoteDelay,
   });
 
   SessionPricingQuote? quote;
   QuranSessionsFailure? failure;
   Map<String, SessionPricingQuote>? quotesByTeacher;
   int callCount = 0;
+
+  /// When set, [getPricingQuote] resolves after this delay so tests can observe
+  /// the booking screen render slots while the quote is still in flight.
+  Duration? quoteDelay;
 
   /// Per-teacher quote calls (the legacy N+1 path). Batch calls increment
   /// [batchCallCount] instead, so tests can assert which path resolved a page.
@@ -38,6 +43,8 @@ class FakeSessionPricingQuoteGateway implements SessionPricingQuoteGateway {
     required String teacherId,
   }) async {
     callCount += 1;
+    final delay = quoteDelay;
+    if (delay != null) await Future<void>.delayed(delay);
     final perTeacher = quotesByTeacher?[teacherId];
     if (perTeacher != null) return Right(perTeacher);
     final f = failure;

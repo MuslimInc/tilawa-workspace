@@ -12,7 +12,17 @@ import {
   requireAuthenticatedUid,
   requireValidSessionEpochUnlessAdmin,
 } from "./sessionAuth";
-import { sessionCallableHttpsOptions } from "./sessionCallableOptions";
+import { sessionPricingQuoteHttpsOptions } from "./sessionCallableOptions";
+
+// Container module-load timestamp + cold-start marker. The first request after
+// a container spin-up runs on a freshly loaded module ("cold start"); warm
+// instances reuse it. The handler timings (auth/epoch/context/pricing/total)
+// only cover *in-handler* work, so a large client-observed latency paired with
+// small in-handler totals is proof the time went to cold-start container init,
+// not this function's logic. Set `minInstances` on the callable to keep an
+// instance warm and eliminate the spin-up penalty on the booking screen.
+const MODULE_LOADED_AT = Date.now();
+let hasServedRequest = false;
 
 /**
  * Authoritative pricing preview for the booking screen.
@@ -258,10 +268,17 @@ export function blockedQuoteForLifecycleError(
 }
 
 export const getBookingPricingQuote = onCall(
-  sessionCallableHttpsOptions,
+  sessionPricingQuoteHttpsOptions,
   async (request) => {
+    const handlerStartedAt = Date.now();
+    const coldStart = !hasServedRequest;
+    hasServedRequest = true;
+
     const uid = requireAuthenticatedUid(request);
+    const authResolvedAt = Date.now();
     await requireValidSessionEpochUnlessAdmin(request, uid);
+    const epochValidatedAt = Date.now();
+
     const data = request.data as GetBookingPricingQuoteRequest;
     if (!data.teacherId) {
       throw new HttpsError("invalid-argument", "teacherId required.");
@@ -273,7 +290,6 @@ export const getBookingPricingQuote = onCall(
     // Best-effort preview: convert config-level lifecycle errors into a typed
     // blockReason inside a successful response. Auth/epoch/transport errors
     // still throw (handled by the client failure mapper).
-    const startedAt = Date.now();
     try {
       const ctx = await loadBookingEligibilityContext(db, uid, teacherId);
       const contextLoadedAt = Date.now();
@@ -282,8 +298,18 @@ export const getBookingPricingQuote = onCall(
       });
       logger.info("getBookingPricingQuote timing", {
         teacherId,
-        contextLoadMs: contextLoadedAt - startedAt,
-        totalMs: Date.now() - startedAt,
+        coldStart,
+        // Time from container module load to this request. On a cold start this
+        // approximates the spin-up latency the client observed *on top of* the
+        // in-handler timings below.
+        sinceModuleLoadMs: handlerStartedAt - MODULE_LOADED_AT,
+        authMs: authResolvedAt - handlerStartedAt,
+        epochMs: epochValidatedAt - authResolvedAt,
+        // One parallel batch: student + platform config + market + city +
+        // teacher reads (see loadBookingEligibilityContext).
+        contextLoadMs: contextLoadedAt - epochValidatedAt,
+        pricingMs: Date.now() - contextLoadedAt,
+        totalMs: Date.now() - handlerStartedAt,
         blockReason: quote.blockReason,
       });
       return quote;
@@ -291,7 +317,11 @@ export const getBookingPricingQuote = onCall(
       const blocked = blockedQuoteForLifecycleError(e);
       logger.info("getBookingPricingQuote timing", {
         teacherId,
-        totalMs: Date.now() - startedAt,
+        coldStart,
+        sinceModuleLoadMs: handlerStartedAt - MODULE_LOADED_AT,
+        authMs: authResolvedAt - handlerStartedAt,
+        epochMs: epochValidatedAt - authResolvedAt,
+        totalMs: Date.now() - handlerStartedAt,
         outcome: blocked != null ? "blocked" : "error",
         blockReason: blocked?.blockReason,
       });

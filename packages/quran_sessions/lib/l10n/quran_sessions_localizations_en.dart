@@ -1934,6 +1934,9 @@ class QuranSessionsLocalizationsEn extends QuranSessionsLocalizations {
       'Please check your connection and try again.';
 
   @override
+  String get bookingPreparingPaymentDetails => 'Preparing payment details…';
+
+  @override
   String get bookingPaidUnavailableTitle =>
       'Paid booking is currently unavailable.';
 

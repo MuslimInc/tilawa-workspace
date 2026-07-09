@@ -744,4 +744,106 @@ void main() {
       expect(button.onPressed, isNull);
     },
   );
+
+  testWidgets(
+    'shows a preparing-payment loading state and blocks submit while quote loads',
+    (tester) async {
+      final slots = [_slot(1)];
+
+      await tester.pumpWidget(
+        MaterialApp(
+          theme: AppTheme.getLightTheme(primaryColor: AppColors.defaultPrimary),
+          localizationsDelegates: const [
+            QuranSessionsLocalizations.delegate,
+            GlobalMaterialLocalizations.delegate,
+            GlobalWidgetsLocalizations.delegate,
+          ],
+          supportedLocales: QuranSessionsLocalizations.supportedLocales,
+          home: BlocProvider<BookingBloc>(
+            create: (_) => SeededBookingBloc(
+              seed: BookingSelecting(
+                teacherId: 'teacher_1',
+                availableSlots: slots,
+                selectedSlot: slots.first,
+                selectedCallType: SessionCallType.videoCall,
+                isQuoteLoading: true,
+              ),
+            ),
+            child: const BookingScreen(
+              teacherId: 'teacher_1',
+              studentId: 'student_1',
+            ),
+          ),
+        ),
+      );
+      // A spinner animates in the price section, so pump once (not settle).
+      await tester.pump();
+
+      // Teacher + slots are visible while the price section still loads.
+      expect(find.text('Preparing payment details…'), findsOneWidget);
+      // Submit stays disabled until the quote resolves, even with a slot picked.
+      final button = tester.widget<TilawaButton>(
+        find.byWidgetPredicate(
+          (w) => w is TilawaButton && w.text == 'Confirm booking',
+        ),
+      );
+      expect(button.onPressed, isNull);
+    },
+  );
+
+  testWidgets(
+    'tapping retry on the price section dispatches a quote-only retry',
+    (tester) async {
+      final slots = [_slot(1)];
+      final bloc = _RecordingBookingBloc(
+        seed: BookingSelecting(
+          teacherId: 'teacher_1',
+          availableSlots: slots,
+          selectedSlot: slots.first,
+          selectedCallType: SessionCallType.videoCall,
+          blockReason: BookingBlockReason.pricingQuoteUnavailable,
+        ),
+      );
+
+      await tester.pumpWidget(
+        MaterialApp(
+          theme: AppTheme.getLightTheme(primaryColor: AppColors.defaultPrimary),
+          localizationsDelegates: const [
+            QuranSessionsLocalizations.delegate,
+            GlobalMaterialLocalizations.delegate,
+            GlobalWidgetsLocalizations.delegate,
+          ],
+          supportedLocales: QuranSessionsLocalizations.supportedLocales,
+          home: BlocProvider<BookingBloc>(
+            create: (_) => bloc,
+            child: const BookingScreen(
+              teacherId: 'teacher_1',
+              studentId: 'student_1',
+            ),
+          ),
+        ),
+      );
+      await tester.pump();
+
+      await tester.tap(find.text('Retry'), warnIfMissed: false);
+      await tester.pump();
+
+      final retries = bloc.added.whereType<BookingQuoteRetried>().toList();
+      expect(retries, hasLength(1));
+      expect(retries.single.teacherId, 'teacher_1');
+    },
+  );
+}
+
+/// Records dispatched events (still ignoring them for state) so widget tests can
+/// assert that the price-section retry emits a quote-only [BookingQuoteRetried].
+class _RecordingBookingBloc extends SeededBookingBloc {
+  _RecordingBookingBloc({required super.seed});
+
+  final List<BookingEvent> added = [];
+
+  @override
+  void add(BookingEvent event) {
+    added.add(event);
+  }
 }

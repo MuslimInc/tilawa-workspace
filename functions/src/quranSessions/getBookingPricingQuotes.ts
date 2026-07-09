@@ -16,7 +16,7 @@ import {
   requireAuthenticatedUid,
   requireValidSessionEpochUnlessAdmin,
 } from "./sessionAuth";
-import { sessionCallableHttpsOptions } from "./sessionCallableOptions";
+import { sessionPricingQuoteHttpsOptions } from "./sessionCallableOptions";
 
 /**
  * Batch pricing preview for the teacher discovery list.
@@ -47,7 +47,7 @@ interface GetBookingPricingQuotesResponse {
 }
 
 export const getBookingPricingQuotes = onCall(
-  sessionCallableHttpsOptions,
+  sessionPricingQuoteHttpsOptions,
   async (request): Promise<GetBookingPricingQuotesResponse> => {
     const uid = requireAuthenticatedUid(request);
     await requireValidSessionEpochUnlessAdmin(request, uid);

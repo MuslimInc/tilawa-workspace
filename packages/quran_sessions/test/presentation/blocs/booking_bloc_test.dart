@@ -411,6 +411,8 @@ void main() {
       ),
     );
 
+    late FakeSessionPricingQuoteGateway gateway;
+
     blocTest<BookingBloc, BookingState>(
       'free quote shows free pricing and allows booking once a slot is picked',
       build: () => buildWithQuote(
@@ -430,7 +432,7 @@ void main() {
       ),
       act: openScreen,
       skip: 2,
-      expect: () => [isA<BookingSelecting>()],
+      expect: () => [isA<BookingSelecting>(), isA<BookingSelecting>()],
       verify: (b) {
         final state = b.state as BookingSelecting;
         check(state.pricingType).equals(SessionPricingType.free);
@@ -460,7 +462,9 @@ void main() {
       ),
       act: (b) async {
         openScreen(b);
-        await b.stream.firstWhere((s) => s is BookingSelecting);
+        await b.stream.firstWhere(
+          (s) => s is BookingSelecting && !s.isQuoteLoading,
+        );
         final selecting = b.state as BookingSelecting;
         b.add(SlotSelected(selecting.availableSlots.first));
       },
@@ -497,7 +501,7 @@ void main() {
       ),
       act: openScreen,
       skip: 2,
-      expect: () => [isA<BookingSelecting>()],
+      expect: () => [isA<BookingSelecting>(), isA<BookingSelecting>()],
       verify: (b) {
         final state = b.state as BookingSelecting;
         check(state.pricingType).equals(SessionPricingType.fixedPerSession);
@@ -555,10 +559,10 @@ void main() {
       },
       act: (b) async {
         openScreen(b);
-        final selecting = await b.stream
-            .where((state) => state is BookingSelecting)
-            .cast<BookingSelecting>()
-            .first;
+        await b.stream.firstWhere(
+          (s) => s is BookingSelecting && !s.isQuoteLoading,
+        );
+        final selecting = b.state as BookingSelecting;
         b.add(SlotSelected(selecting.availableSlots.first));
         await b.stream.firstWhere(
           (state) => state is BookingSelecting && state.selectedSlot != null,
@@ -575,6 +579,7 @@ void main() {
       expect: () => [
         isA<BookingEligibilityChecking>(),
         isA<BookingSlotsLoading>(),
+        isA<BookingSelecting>(),
         isA<BookingSelecting>(),
         isA<BookingSelecting>(),
         isA<BookingSubmitting>(),
@@ -611,7 +616,9 @@ void main() {
       ),
       act: (b) async {
         openScreen(b);
-        await b.stream.firstWhere((s) => s is BookingSelecting);
+        await b.stream.firstWhere(
+          (s) => s is BookingSelecting && !s.isQuoteLoading,
+        );
         final selecting = b.state as BookingSelecting;
         b.add(SlotSelected(selecting.availableSlots.first));
       },
@@ -645,7 +652,9 @@ void main() {
       ),
       act: (b) async {
         openScreen(b);
-        await b.stream.firstWhere((s) => s is BookingSelecting);
+        await b.stream.firstWhere(
+          (s) => s is BookingSelecting && !s.isQuoteLoading,
+        );
         final selecting = b.state as BookingSelecting;
         b.add(SlotSelected(selecting.availableSlots.first));
       },
@@ -680,7 +689,9 @@ void main() {
       ),
       act: (b) async {
         openScreen(b);
-        await b.stream.firstWhere((s) => s is BookingSelecting);
+        await b.stream.firstWhere(
+          (s) => s is BookingSelecting && !s.isQuoteLoading,
+        );
         final selecting = b.state as BookingSelecting;
         b.add(SlotSelected(selecting.availableSlots.first));
       },
@@ -706,7 +717,7 @@ void main() {
       },
       act: openScreen,
       skip: 2,
-      expect: () => [isA<BookingSelecting>()],
+      expect: () => [isA<BookingSelecting>(), isA<BookingSelecting>()],
       verify: (b) {
         final state = b.state as BookingSelecting;
         // Market-only preview cannot see teacher overrides, so transport
@@ -734,7 +745,9 @@ void main() {
       },
       act: (b) async {
         openScreen(b);
-        await b.stream.firstWhere((s) => s is BookingSelecting);
+        await b.stream.firstWhere(
+          (s) => s is BookingSelecting && !s.isQuoteLoading,
+        );
         final selecting = b.state as BookingSelecting;
         b.add(SlotSelected(selecting.availableSlots.first));
       },
@@ -769,7 +782,9 @@ void main() {
       },
       act: (b) async {
         openScreen(b);
-        await b.stream.firstWhere((s) => s is BookingSelecting);
+        await b.stream.firstWhere(
+          (s) => s is BookingSelecting && !s.isQuoteLoading,
+        );
         final selecting = b.state as BookingSelecting;
         b.add(SlotSelected(selecting.availableSlots.first));
       },
@@ -794,7 +809,9 @@ void main() {
       ),
       act: (b) async {
         openScreen(b);
-        await b.stream.firstWhere((s) => s is BookingSelecting);
+        await b.stream.firstWhere(
+          (s) => s is BookingSelecting && !s.isQuoteLoading,
+        );
         final selecting = b.state as BookingSelecting;
         b.add(SlotSelected(selecting.availableSlots.first));
       },
@@ -820,7 +837,9 @@ void main() {
       ),
       act: (b) async {
         openScreen(b);
-        await b.stream.firstWhere((s) => s is BookingSelecting);
+        await b.stream.firstWhere(
+          (s) => s is BookingSelecting && !s.isQuoteLoading,
+        );
         final selecting = b.state as BookingSelecting;
         b.add(SlotSelected(selecting.availableSlots.first));
       },
@@ -848,6 +867,124 @@ void main() {
         final state = b.state as BookingSelecting;
         check(state.blockReason).equals(BookingBlockReason.teacherNotBookable);
         check(state.canSubmit).isFalse();
+      },
+    );
+
+    blocTest<BookingBloc, BookingState>(
+      'shows slots with a loading price section before the quote resolves',
+      build: () => buildWithQuote(
+        FakeSessionPricingQuoteGateway(
+          quote: const SessionPricingQuote(
+            pricingType: SessionPricingType.free,
+            amount: 0,
+            currencyCode: 'USD',
+            paymentRequired: false,
+            paymentProviderAvailable: false,
+            bookingEnabled: true,
+            quranSessionsEnabled: true,
+            effectivePricingSource: EffectivePricingSource.marketConfig,
+            blockReason: BookingBlockReason.none,
+          ),
+          quoteDelay: const Duration(milliseconds: 200),
+        ),
+      ),
+      act: openScreen,
+      wait: const Duration(milliseconds: 400),
+      expect: () => [
+        isA<BookingEligibilityChecking>(),
+        isA<BookingSlotsLoading>(),
+        // Teacher + slots render immediately with the price section still
+        // loading and submit disabled.
+        isA<BookingSelecting>()
+            .having((s) => s.isQuoteLoading, 'isQuoteLoading', isTrue)
+            .having((s) => s.availableSlots, 'availableSlots', isNotEmpty)
+            .having((s) => s.canSubmit, 'canSubmit', isFalse),
+        // Then the quote patches the price section without a full reload.
+        isA<BookingSelecting>()
+            .having((s) => s.isQuoteLoading, 'isQuoteLoading', isFalse)
+            .having(
+              (s) => s.pricingType,
+              'pricingType',
+              SessionPricingType.free,
+            ),
+      ],
+    );
+
+    blocTest<BookingBloc, BookingState>(
+      'a single screen open fetches the quote exactly once',
+      build: () {
+        gateway = FakeSessionPricingQuoteGateway(
+          quote: const SessionPricingQuote(
+            pricingType: SessionPricingType.free,
+            amount: 0,
+            currencyCode: 'USD',
+            paymentRequired: false,
+            paymentProviderAvailable: false,
+            bookingEnabled: true,
+            quranSessionsEnabled: true,
+            effectivePricingSource: EffectivePricingSource.marketConfig,
+            blockReason: BookingBlockReason.none,
+          ),
+        );
+        return buildWithQuote(gateway);
+      },
+      act: (b) async {
+        openScreen(b);
+        await b.stream.firstWhere(
+          (s) => s is BookingSelecting && !s.isQuoteLoading,
+        );
+      },
+      verify: (b) {
+        check(gateway.perTeacherCallCount).equals(1);
+      },
+    );
+
+    blocTest<BookingBloc, BookingState>(
+      'retrying the quote refetches only pricing and keeps slots + selection',
+      build: () {
+        gateway = FakeSessionPricingQuoteGateway(
+          failure: const NetworkFailure(),
+        );
+        return buildWithQuote(gateway);
+      },
+      act: (b) async {
+        openScreen(b);
+        // Transport failure: pricing unavailable, submit blocked.
+        await b.stream.firstWhere(
+          (s) => s is BookingSelecting && !s.isQuoteLoading,
+        );
+        final selecting = b.state as BookingSelecting;
+        b.add(SlotSelected(selecting.availableSlots.first));
+        await b.stream.firstWhere(
+          (s) => s is BookingSelecting && s.selectedSlot != null,
+        );
+        // Recover the backend, then retry ONLY the quote.
+        gateway.failure = null;
+        gateway.quote = const SessionPricingQuote(
+          pricingType: SessionPricingType.free,
+          amount: 0,
+          currencyCode: 'USD',
+          paymentRequired: false,
+          paymentProviderAvailable: false,
+          bookingEnabled: true,
+          quranSessionsEnabled: true,
+          effectivePricingSource: EffectivePricingSource.marketConfig,
+          blockReason: BookingBlockReason.none,
+        );
+        b.add(const BookingQuoteRetried(teacherId: 'teacher_1'));
+        await b.stream.firstWhere(
+          (s) => s is BookingSelecting && !s.isQuoteLoading && s.canSubmit,
+        );
+      },
+      verify: (b) {
+        final state = b.state as BookingSelecting;
+        check(state.blockReason).equals(BookingBlockReason.none);
+        check(state.pricingType).equals(SessionPricingType.free);
+        check(state.selectedSlot).isNotNull();
+        check(state.canSubmit).isTrue();
+        // Only the quote refetched (open + retry); the schedule/profile were
+        // never reloaded.
+        check(gateway.perTeacherCallCount).equals(2);
       },
     );
   });

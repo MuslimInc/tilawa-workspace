@@ -45,6 +45,7 @@ final class BookingSelecting extends BookingState {
     this.manualPaymentPrice,
     this.paymentProviderAvailable,
     this.blockReason = BookingBlockReason.none,
+    this.isQuoteLoading = false,
   });
 
   final String teacherId;
@@ -68,6 +69,11 @@ final class BookingSelecting extends BookingState {
   /// never derives final paid/free state from a market-only preview.
   final BookingBlockReason blockReason;
 
+  /// True while the server pricing quote is still in flight. The screen shows
+  /// the teacher + slots immediately with a dedicated price-section loading
+  /// state; submit stays disabled until the quote resolves.
+  final bool isQuoteLoading;
+
   bool get hasExternalMeetingUrl =>
       SessionModePolicy.hasExternalMeetingUrl(teacherExternalMeetingUrl);
 
@@ -78,7 +84,9 @@ final class BookingSelecting extends BookingState {
   bool get isPaymentBlocked => blockReason != BookingBlockReason.none;
 
   bool get canSubmit =>
-      selectedSlot != null && blockReason == BookingBlockReason.none;
+      selectedSlot != null &&
+      !isQuoteLoading &&
+      blockReason == BookingBlockReason.none;
 
   @override
   List<Object?> get props => [
@@ -93,6 +101,7 @@ final class BookingSelecting extends BookingState {
     manualPaymentPrice,
     paymentProviderAvailable,
     blockReason,
+    isQuoteLoading,
   ];
 
   BookingSelecting copyWith({
@@ -106,6 +115,7 @@ final class BookingSelecting extends BookingState {
     ManualPaymentPrice? manualPaymentPrice,
     bool? paymentProviderAvailable,
     BookingBlockReason? blockReason,
+    bool? isQuoteLoading,
   }) => BookingSelecting(
     teacherId: teacherId,
     availableSlots: availableSlots ?? this.availableSlots,
@@ -120,6 +130,7 @@ final class BookingSelecting extends BookingState {
     paymentProviderAvailable:
         paymentProviderAvailable ?? this.paymentProviderAvailable,
     blockReason: blockReason ?? this.blockReason,
+    isQuoteLoading: isQuoteLoading ?? this.isQuoteLoading,
   );
 }
 

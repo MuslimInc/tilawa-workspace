@@ -28,6 +28,7 @@ import '../widgets/paid_session_notice.dart';
 import '../widgets/payment_checkout_sheet.dart';
 import '../widgets/quran_sessions_scaffold.dart';
 import '../../domain/entities/booking_block_reason.dart';
+import '../../domain/entities/manual_payment_price.dart';
 import '../../domain/entities/session_price.dart';
 import '../../domain/entities/session_pricing_type.dart';
 import '../../utils/price_formatter.dart';
@@ -259,6 +260,7 @@ class _BookingScreenState extends State<BookingScreen> {
               sessionPrice: sessionPrice,
             ),
           BookingSelecting(
+            :final teacherId,
             :final availableSlots,
             :final selectedSlot,
             :final selectedCallType,
@@ -267,6 +269,7 @@ class _BookingScreenState extends State<BookingScreen> {
             :final sessionPrice,
             :final manualPaymentPrice,
             :final blockReason,
+            :final isQuoteLoading,
           ) =>
             Padding(
               padding: EdgeInsets.all(tokens.spaceMedium),
@@ -274,25 +277,14 @@ class _BookingScreenState extends State<BookingScreen> {
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.stretch,
                   children: [
-                    if (manualPaymentPrice != null)
-                      Padding(
-                        padding: EdgeInsets.only(bottom: tokens.spaceSmall),
-                        child: PaidSessionNotice(price: manualPaymentPrice),
-                      )
-                    else if (pricingType != null &&
-                        blockReason == BookingBlockReason.none)
-                      Padding(
-                        padding: EdgeInsets.only(bottom: tokens.spaceSmall),
-                        child: _BookingPriceSummary(
-                          pricingType: pricingType,
-                          sessionPrice: sessionPrice,
-                        ),
-                      ),
-                    if (blockReason != BookingBlockReason.none)
-                      Padding(
-                        padding: EdgeInsets.only(bottom: tokens.spaceSmall),
-                        child: BookingBlockNotice(blockReason: blockReason),
-                      ),
+                    _BookingPriceSection(
+                      teacherId: teacherId,
+                      isQuoteLoading: isQuoteLoading,
+                      blockReason: blockReason,
+                      pricingType: pricingType,
+                      sessionPrice: sessionPrice,
+                      manualPaymentPrice: manualPaymentPrice,
+                    ),
                     Text(
                       l10n.selectSlot,
                       style: theme.textTheme.titleMedium?.copyWith(
@@ -561,6 +553,151 @@ class _BookingPriceSummary extends StatelessWidget {
               ),
             ),
           ],
+        ],
+      ),
+    );
+  }
+}
+
+/// Price / payment section of the booking screen. Renders independently of the
+/// slot picker so the teacher + schedule stay visible while the server pricing
+/// quote is still loading. States, in order:
+///  - quote loading      → a "preparing payment details" card
+///  - quote unavailable  → a scoped retry card (re-fetches only the quote)
+///  - other block reason → the typed [BookingBlockNotice]
+///  - manual / priced    → the paid notice / price summary
+class _BookingPriceSection extends StatelessWidget {
+  const _BookingPriceSection({
+    required this.teacherId,
+    required this.isQuoteLoading,
+    required this.blockReason,
+    required this.pricingType,
+    required this.sessionPrice,
+    required this.manualPaymentPrice,
+  });
+
+  final String teacherId;
+  final bool isQuoteLoading;
+  final BookingBlockReason blockReason;
+  final SessionPricingType? pricingType;
+  final SessionPrice? sessionPrice;
+  final ManualPaymentPrice? manualPaymentPrice;
+
+  @override
+  Widget build(BuildContext context) {
+    final tokens = Theme.of(context).tokens;
+    final content = _content(context);
+    if (content == null) return const SizedBox.shrink();
+    return Padding(
+      padding: EdgeInsets.only(bottom: tokens.spaceSmall),
+      child: content,
+    );
+  }
+
+  Widget? _content(BuildContext context) {
+    if (isQuoteLoading) {
+      return const _PricePreparingCard();
+    }
+    if (blockReason == BookingBlockReason.pricingQuoteUnavailable) {
+      return _PriceRetryCard(
+        onRetry: () => context.read<BookingBloc>().add(
+          BookingQuoteRetried(teacherId: teacherId),
+        ),
+      );
+    }
+    if (blockReason != BookingBlockReason.none) {
+      return BookingBlockNotice(blockReason: blockReason);
+    }
+    final manual = manualPaymentPrice;
+    if (manual != null) {
+      return PaidSessionNotice(price: manual);
+    }
+    final type = pricingType;
+    if (type != null) {
+      return _BookingPriceSummary(
+        pricingType: type,
+        sessionPrice: sessionPrice,
+      );
+    }
+    return null;
+  }
+}
+
+/// Dedicated loading state for the price/payment section while the server quote
+/// is in flight. The teacher + slots above stay interactive.
+class _PricePreparingCard extends StatelessWidget {
+  const _PricePreparingCard();
+
+  @override
+  Widget build(BuildContext context) {
+    final l10n = context.quranSessionsL10n;
+    final theme = Theme.of(context);
+    final scheme = theme.colorScheme;
+    final tokens = theme.tokens;
+    return TilawaCard(
+      padding: EdgeInsets.all(tokens.spaceMedium),
+      child: Row(
+        children: [
+          SizedBox(
+            width: tokens.iconSizeSmall,
+            height: tokens.iconSizeSmall,
+            child: const CircularProgressIndicator(strokeWidth: 2),
+          ),
+          SizedBox(width: tokens.spaceSmall),
+          Expanded(
+            child: Text(
+              l10n.bookingPreparingPaymentDetails,
+              style: theme.textTheme.bodyMedium?.copyWith(
+                color: scheme.onSurfaceVariant,
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+/// Scoped retry for the price/payment section. A transport-level quote failure
+/// shows this instead of a full-screen dead end; the retry re-fetches only the
+/// quote ([BookingQuoteRetried]) so slots and the current selection persist.
+class _PriceRetryCard extends StatelessWidget {
+  const _PriceRetryCard({required this.onRetry});
+
+  final VoidCallback onRetry;
+
+  @override
+  Widget build(BuildContext context) {
+    final l10n = context.quranSessionsL10n;
+    final theme = Theme.of(context);
+    final scheme = theme.colorScheme;
+    final tokens = theme.tokens;
+    return TilawaCard(
+      backgroundColor: scheme.surfaceContainerHighest,
+      padding: EdgeInsets.all(tokens.spaceMedium),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text(
+            l10n.pricingQuoteUnavailableTitle,
+            style: theme.textTheme.titleSmall?.copyWith(
+              fontWeight: FontWeight.w700,
+              color: scheme.onSurfaceVariant,
+            ),
+          ),
+          SizedBox(height: tokens.spaceExtraSmall),
+          Text(
+            l10n.pricingQuoteUnavailableSubtitle,
+            style: theme.textTheme.bodySmall?.copyWith(
+              color: scheme.onSurfaceVariant,
+            ),
+          ),
+          SizedBox(height: tokens.spaceSmall),
+          TilawaButton(
+            text: l10n.retry,
+            onPressed: onRetry,
+            variant: TilawaButtonVariant.secondary,
+          ),
         ],
       ),
     );
