@@ -15,6 +15,20 @@ npm test
 npm run test:emulator
 ```
 
+## Recorded baseline outcomes
+
+**2026-07-10** — after Phase 1–2 and the US1 batch (T001–T003, T005–T021):
+
+| Gate | Command | Result |
+|---|---|---|
+| Admin unit/component tests | `apps/tilawa_admin: npx ng test --watch=false` | PASS — 39 files, 177 tests |
+| Admin production build | `apps/tilawa_admin: npx ng build` | PASS |
+| Functions unit tests | `functions: npm test` | PASS — 427 tests |
+| Functions integration tests | `functions: npm run test:integration` | PASS — 92 tests (Firestore emulator) |
+
+The previously failing `TilawaUsersFacade` admin baseline (missing
+`localStorage` setup in `I18nService`) is fixed; no unrelated failures remain.
+
 ## Admin configuration smoke test
 
 1. Sign in as an administrator and load Global Settings.

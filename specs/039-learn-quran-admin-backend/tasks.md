@@ -16,7 +16,7 @@ before adding UI actions.
 - [X] T001 [P] Add baseline round-trip regression cases in apps/tilawa_admin/src/app/features/quran-sessions/global-settings/global-settings.component.spec.ts.
 - [X] T002 [P] Verify the market validator contract and add child-age validation coverage in functions/test/quranSessions/updatePlatformConfig.test.ts and functions/test/quranSessions/updateMarketPricingConfig.test.ts.
 - [X] T003 [P] Add report/dispute terminal-resolution coverage gaps to functions/test-integration/sessionReports.integration.test.ts and functions/test-integration/resolveSessionDispute.integration.test.ts.
-- [ ] T004 Record initial Admin/Functions test outcomes in specs/039-learn-quran-admin-backend/quickstart.md.
+- [X] T004 Record initial Admin/Functions test outcomes in specs/039-learn-quran-admin-backend/quickstart.md.
 
 **Checkpoint**: Current behavior, including the policy-round-trip risk and
 server-owned terminal effects, is represented by executable tests.
@@ -70,14 +70,14 @@ required rationale and immediately see authoritative state.
 verify the terminal state, reason, resolver, time, and audit record; verify a
 non-admin and missing-reason attempt fail.
 
-- [ ] T022 [US2] Extend report detail view-model mapping for resolution reason, resolver, and resolved time in apps/tilawa_admin/src/app/core/application/facades/session-reports.facade.ts.
-- [ ] T023 [US2] Add pending-action, action-error, and refresh behavior to the report facade in apps/tilawa_admin/src/app/core/application/facades/session-reports.facade.ts.
-- [ ] T024 [US2] Add report-resolution controls, terminal read-only state, confirmation/reason capture, and accessible status feedback in apps/tilawa_admin/src/app/features/quran-sessions/session-report-detail/session-report-detail.component.ts.
-- [ ] T025 [US2] Render the report action panel, terminal metadata, and localized loading/error states in apps/tilawa_admin/src/app/features/quran-sessions/session-report-detail/session-report-detail.component.html.
-- [ ] T026 [P] [US2] Add Arabic and English report action, confirmation, validation, and terminal metadata strings in apps/tilawa_admin/l10n/app_ar.arb and apps/tilawa_admin/l10n/app_en.arb.
-- [ ] T027 [P] [US2] Test facade transitions, failure retention, refresh, and terminal-state behavior in apps/tilawa_admin/src/app/core/application/facades/session-reports.facade.spec.ts.
-- [ ] T028 [P] [US2] Test report detail rendering, required reason, duplicate-submit prevention, RTL, and terminal read-only behavior in apps/tilawa_admin/src/app/features/quran-sessions/session-report-detail/session-report-detail.component.spec.ts.
-- [ ] T029 [US2] Verify admin/non-admin resolution, mandatory terminal reason, idempotency, and audit output in functions/test-integration/sessionReports.integration.test.ts.
+- [X] T022 [US2] Extend report detail view-model mapping for resolution reason, resolver, and resolved time in apps/tilawa_admin/src/app/core/application/facades/session-reports.facade.ts.
+- [X] T023 [US2] Add pending-action, action-error, and refresh behavior to the report facade in apps/tilawa_admin/src/app/core/application/facades/session-reports.facade.ts.
+- [X] T024 [US2] Add report-resolution controls, terminal read-only state, confirmation/reason capture, and accessible status feedback in apps/tilawa_admin/src/app/features/quran-sessions/session-report-detail/session-report-detail.component.ts.
+- [X] T025 [US2] Render the report action panel, terminal metadata, and localized loading/error states in apps/tilawa_admin/src/app/features/quran-sessions/session-report-detail/session-report-detail.component.html.
+- [X] T026 [P] [US2] Add Arabic and English report action, confirmation, validation, and terminal metadata strings in apps/tilawa_admin/l10n/app_ar.arb and apps/tilawa_admin/l10n/app_en.arb.
+- [X] T027 [P] [US2] Test facade transitions, failure retention, refresh, and terminal-state behavior in apps/tilawa_admin/src/app/core/application/facades/session-reports.facade.spec.ts.
+- [X] T028 [P] [US2] Test report detail rendering, required reason, duplicate-submit prevention, RTL, and terminal read-only behavior in apps/tilawa_admin/src/app/features/quran-sessions/session-report-detail/session-report-detail.component.spec.ts.
+- [X] T029 [US2] Verify admin/non-admin resolution, mandatory terminal reason, idempotency, and audit output in functions/test-integration/sessionReports.integration.test.ts.
 
 **Checkpoint**: Report triage is fully operable from the queue without a direct
 data write or an ambiguous terminal result.
