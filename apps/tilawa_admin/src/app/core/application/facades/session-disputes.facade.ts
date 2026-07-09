@@ -4,6 +4,8 @@ import {
   ListSessionDisputesUseCase,
   GetSessionDisputeUseCase,
 } from '../../domain/usecases/session-dispute.usecases';
+import { ResolveSessionDisputeUseCase } from '../../domain/usecases/session-moderation.usecases';
+import { DisputeResolution } from '../../domain/entities/session-moderation.types';
 import { SessionDisputeFilters } from '../../domain/entities/session-dispute-summary.entity';
 import { SESSION_DISPUTE_DEFAULT_SORT } from '../../domain/entities/session-dispute-summary.entity';
 import { DEFAULT_PAGE_SIZE, SortRequest, sortsEqual } from '../../domain/entities/pagination.types';
@@ -47,6 +49,7 @@ export interface SessionDisputeDetailVm extends SessionDisputeListItemVm {
 export class SessionDisputesFacade {
   private readonly listUseCase = inject(ListSessionDisputesUseCase);
   private readonly getUseCase = inject(GetSessionDisputeUseCase);
+  private readonly resolveUseCase = inject(ResolveSessionDisputeUseCase);
   private readonly sessionReadRepository = inject(SESSION_READ_REPOSITORY);
   private readonly userRepository = inject(QURAN_SESSIONS_USER_REPOSITORY);
 
@@ -61,6 +64,9 @@ export class SessionDisputesFacade {
   private readonly detailError = signal<string | null>(null);
   private readonly detailItem = signal<SessionDisputeDetailVm | null>(null);
 
+  private readonly actionLoading = signal(false);
+  private readonly actionError = signal<string | null>(null);
+
   readonly items = this.listItems.asReadonly();
   readonly listLoadState = this.listState.asReadonly();
   readonly listErrorMessage = this.listError.asReadonly();
@@ -70,6 +76,9 @@ export class SessionDisputesFacade {
   readonly detail = this.detailItem.asReadonly();
   readonly detailLoadState = this.detailState.asReadonly();
   readonly detailErrorMessage = this.detailError.asReadonly();
+
+  readonly isActionLoading = this.actionLoading.asReadonly();
+  readonly actionErrorMessage = this.actionError.asReadonly();
 
   async loadList(
     filters: SessionDisputeFilters,
@@ -149,6 +158,38 @@ export class SessionDisputesFacade {
       this.detailState.set('error');
       this.detailError.set(error instanceof Error ? error.message : 'Failed to load dispute.');
     }
+  }
+
+  /**
+   * Resolves the dispute through the server-authorized callable boundary and
+   * refreshes the authoritative detail on success. The server owns lifecycle,
+   * refund/compensation, and audit effects. Returns true on success; on
+   * failure the error is retained in actionErrorMessage and the current
+   * detail is left untouched.
+   */
+  async resolveDispute(
+    bookingId: string,
+    disputeId: string,
+    resolution: DisputeResolution,
+    reason: string,
+  ): Promise<boolean> {
+    this.actionLoading.set(true);
+    this.actionError.set(null);
+
+    try {
+      await this.resolveUseCase.execute(bookingId, disputeId, resolution, reason);
+      await this.loadDetail(disputeId);
+      return true;
+    } catch (error) {
+      this.actionError.set(error instanceof Error ? error.message : 'Failed to resolve dispute.');
+      return false;
+    } finally {
+      this.actionLoading.set(false);
+    }
+  }
+
+  clearActionError(): void {
+    this.actionError.set(null);
   }
 
   private toListItem(

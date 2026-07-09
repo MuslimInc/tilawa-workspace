@@ -36,6 +36,7 @@ import {
   ApproveSessionRefundUseCase,
   ConfirmManualBookingPaymentUseCase,
   RejectManualBookingPaymentUseCase,
+  ResolveSessionDisputeUseCase,
   ResolveSessionReportUseCase,
 } from '../../domain/usecases/session-moderation.usecases';
 import { ListSessionReportsUseCase } from '../../domain/usecases/session-report.usecases';
@@ -235,6 +236,7 @@ describe('browse list facades sort', () => {
           SessionDisputesFacade,
           { provide: ListSessionDisputesUseCase, useValue: listUseCase },
           { provide: GetSessionDisputeUseCase, useValue: noopUseCase },
+          { provide: ResolveSessionDisputeUseCase, useValue: noopUseCase },
           { provide: SESSION_READ_REPOSITORY, useValue: noopUseCase },
           {
             provide: QURAN_SESSIONS_USER_REPOSITORY,
