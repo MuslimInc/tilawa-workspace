@@ -6,16 +6,10 @@ description: "Task list template for feature implementation"
 # Tasks: [FEATURE NAME]
 
 **Input**: Design documents from `/specs/[###-feature-name]/`
+
 **Prerequisites**: plan.md (required), spec.md (required for user stories), research.md, data-model.md, contracts/
 
-**Tests**: Include test tasks required by the Tilawa Workspace Constitution.
-Unit tests are mandatory for domain logic, BLoCs, repositories, mappers,
-validators, error handling, and routing guards. Widget tests are mandatory for
-reusable Tilawa UI Kit components, non-trivial feature widgets, responsive or
-adaptive layouts, RTL behavior, accessibility-relevant states, and BLoC-driven
-presentation states. Performance-sensitive changes require targeted regression
-tests and performance evidence. Omit required tests only when an approved waiver
-is documented with owner and expiry.
+**Tests**: The examples below include test tasks. Tests are OPTIONAL - only include them if explicitly requested in the feature specification.
 
 **Organization**: Tasks are grouped by user story to enable independent implementation and testing of each story.
 
@@ -27,196 +21,125 @@ is documented with owner and expiry.
 
 ## Path Conventions
 
-- **Flutter app feature**: `apps/[app_name]/lib/features/[feature]/`
-  and `apps/[app_name]/test/features/[feature]/`
-- **Domain layer**: `domain/entities/`, `domain/repositories/`,
-  `domain/usecases/`
-- **Data layer**: `data/models/`, `data/mappers/`, `data/datasources/`,
-  `data/repositories/`
-- **Presentation layer**: `presentation/bloc/`, `presentation/pages/`,
-  `presentation/widgets/`
-- **Shared core**: `packages/core/lib/` and `packages/core/test/`
-- **Tilawa UI Kit**: `packages/ui_kit/lib/src/` and `packages/ui_kit/test/`
-- Paths shown below are examples. Generated tasks MUST use concrete paths from
-  `plan.md`.
+- **Single project**: `src/`, `tests/` at repository root
+- **Web app**: `backend/src/`, `frontend/src/`
+- **Mobile**: `api/src/`, `ios/src/` or `android/src/`
+- Paths shown below assume single project - adjust based on plan.md structure
 
-<!-- 
+<!--
   ============================================================================
   IMPORTANT: The tasks below are SAMPLE TASKS for illustration purposes only.
-  
-  The /speckit.tasks command MUST replace these with actual tasks based on:
+
+  The /speckit-tasks command MUST replace these with actual tasks based on:
   - User stories from spec.md (with their priorities P1, P2, P3...)
   - Feature requirements from plan.md
   - Entities from data-model.md
   - Endpoints from contracts/
-  
+
   Tasks MUST be organized by user story so each story can be:
   - Implemented independently
   - Tested independently
   - Delivered as an MVP increment
-  
+
   DO NOT keep these sample tasks in the generated tasks.md file.
   ============================================================================
 -->
 
-## Tech Stack Reference (Tilawa Workspace)
+## Phase 1: Setup (Shared Infrastructure)
 
-**Language/Runtime**: Flutter / Dart 3.x+  
-**State Management**: BLoC, Cubit (flutter_bloc)  
-**Routing**: GoRouter with deep-linking  
-**Storage**: Hydrated BLoC, HydratedStorage, local_preferences, secure_storage  
-**Testing**: `flutter test` (unit + widget), golden tests, benchmark tests  
-**UI Design**: Tilawa UI Kit with atomic design (foundation, atoms, molecules, organisms)  
-**Dart/Flutter Idioms**: Prefer `Row`/`Column`/`Flex.spacing` for simple fixed gaps and Dart dot shorthands where receiver type is obvious  
-**Core Utilities**: packages/core (logging, DI via getIt, error handling, network)  
-**Performance**: 60 fps target, <500ms startup, smooth Quran text rendering  
-**Constraints**: RTL support (Arabic/LTR), offline capability, accessibility (a11y)
+**Purpose**: Project initialization and basic structure
+
+- [ ] T001 Create project structure per implementation plan
+- [ ] T002 Initialize [language] project with [framework] dependencies
+- [ ] T003 [P] Configure linting and formatting tools
 
 ---
 
-## Phase 1: Setup (Tilawa Feature Structure)
+## Phase 2: Foundational (Blocking Prerequisites)
 
-**Purpose**: Initialize Tilawa feature following Clean Architecture boundaries
+**Purpose**: Core infrastructure that MUST be complete before ANY user story can be implemented
 
-**Architecture Checkpoint**:
-- [ ] T001 [P] Verify plan.md has Constitution Check gates passing (clean layers, BLoC, GoRouter, UI Kit)
-- [ ] T002 Create feature folder structure: `apps/tilawa/lib/features/[feature]/`
-  - `domain/entities/`, `domain/repositories/`, `domain/usecases/`
-  - `data/models/`, `data/mappers/`, `data/datasources/`, `data/repositories/`
-  - `presentation/bloc/`, `presentation/pages/`, `presentation/widgets/`
-- [ ] T003 [P] Add feature to pubspec.yaml dependencies (if new package)
-- [ ] T004 [P] Configure BLoC provider setup in `presentation/bloc/[feature]_bloc.dart` or `_cubit.dart`
-- [ ] T005 Create test scaffolding: `apps/tilawa/test/features/[feature]/`
-  - Mirror `lib/features/[feature]` structure for test organization
+**⚠️ CRITICAL**: No user story work can begin until this phase is complete
 
----
+Examples of foundational tasks (adjust based on your project):
 
-## Phase 2: Domain Layer (Foundation - Must Complete Before Data/Presentation)
+- [ ] T004 Setup database schema and migrations framework
+- [ ] T005 [P] Implement authentication/authorization framework
+- [ ] T006 [P] Setup API routing and middleware structure
+- [ ] T007 Create base models/entities that all stories depend on
+- [ ] T008 Configure error handling and logging infrastructure
+- [ ] T009 Setup environment configuration management
 
-**Purpose**: Define domain contracts and business logic independent of Flutter/persistence
-
-**⚠️ CRITICAL**: Domain MUST NOT import Flutter, routing, or data layers. This phase establishes the contracts all other layers depend on.
-
-- [ ] T006 [P] Create domain entities in `domain/entities/[entity].dart` (immutable, no Flutter imports)
-- [ ] T007 [P] Create value objects in `domain/entities/[value_object].dart` if needed for type safety
-- [ ] T008 [P] Define repository contracts in `domain/repositories/[repository].dart` (pure Dart interfaces)
-- [ ] T009 [P] Define use cases in `domain/usecases/[use_case].dart` (call repo contracts, apply business rules)
-- [ ] T010 [P] Create failure/error types in `domain/failures/[failures].dart` if custom error handling needed
-- [ ] T011 [P] **[TEST]** Unit test entities and value objects in `test/features/[feature]/domain/entities/`
-- [ ] T012 [P] **[TEST]** Unit test use cases with mock repositories in `test/features/[feature]/domain/usecases/`
-
-**Checkpoint**: Domain layer complete and independently testable - no dependencies on Flutter or external services
+**Checkpoint**: Foundation ready - user story implementation can now begin in parallel
 
 ---
 
-## Phase 3: Data Layer (Repository Implementations)
+## Phase 3: User Story 1 - [Title] (Priority: P1) 🎯 MVP
 
-**Purpose**: Implement concrete repositories, mappers, and data sources that fulfill domain contracts
+**Goal**: [Brief description of what this story delivers]
 
-- [ ] T013 [P] Create DTOs in `data/models/[dto].dart` (maps to external/internal data format)
-- [ ] T014 [P] Create mappers in `data/mappers/[mapper].dart` (DTO ↔ Domain Entity translation)
-- [ ] T015 [P] Create local data source in `data/datasources/[local_data_source].dart` if using SharedPreferences/Hive
-- [ ] T016 [P] Create remote data source in `data/datasources/[remote_data_source].dart` if using APIs
-- [ ] T017 [P] Implement repository in `data/repositories/[repository]_impl.dart` (orchestrates data sources, applies mappers)
-- [ ] T018 [P] Add dependency injection wiring in DI setup (packages/core or app bootstrap)
-- [ ] T019 [P] **[TEST]** Unit test mappers with realistic DTOs in `test/features/[feature]/data/mappers/`
-- [ ] T020 [P] **[TEST]** Unit test data sources (mocked HTTP/local storage) in `test/features/[feature]/data/datasources/`
-- [ ] T021 **[TEST]** Unit test repository implementations in `test/features/[feature]/data/repositories/`
+**Independent Test**: [How to verify this story works on its own]
 
-**Checkpoint**: Data layer complete - repositories fulfill domain contracts
+### Tests for User Story 1 (OPTIONAL - only if tests requested) ⚠️
 
----
+> **NOTE: Write these tests FIRST, ensure they FAIL before implementation**
 
-## Phase 4: Presentation Layer - BLoC/State Management (User Stories Begin)
+- [ ] T010 [P] [US1] Contract test for [endpoint] in tests/contract/test_[name].py
+- [ ] T011 [P] [US1] Integration test for [user journey] in tests/integration/test_[name].py
 
-**Purpose**: Build state management for each user story using BLoC pattern
+### Implementation for User Story 1
 
-- [ ] T022 [P] Create BLoC events in `presentation/bloc/[feature]_event.dart`
-- [ ] T023 [P] Create BLoC states in `presentation/bloc/[feature]_state.dart` (immutable, sealed/union recommended)
-- [ ] T024 Create BLoC/Cubit implementation in `presentation/bloc/[feature]_bloc.dart` or `_cubit.dart`
-  - Inject use cases, handle events, emit states
-  - Add structured logging for state transitions and errors
-- [ ] T025 **[TEST]** Unit test BLoC event→state mappings in `test/features/[feature]/presentation/bloc/`
-  - Mock repositories/use cases
-  - Verify state changes for success/failure scenarios
+- [ ] T012 [P] [US1] Create [Entity1] model in src/models/[entity1].py
+- [ ] T013 [P] [US1] Create [Entity2] model in src/models/[entity2].py
+- [ ] T014 [US1] Implement [Service] in src/services/[service].py (depends on T012, T013)
+- [ ] T015 [US1] Implement [endpoint/feature] in src/[location]/[file].py
+- [ ] T016 [US1] Add validation and error handling
+- [ ] T017 [US1] Add logging for user story 1 operations
 
-**Checkpoint**: BLoC state machine testable independently of UI
+**Checkpoint**: At this point, User Story 1 should be fully functional and testable independently
 
 ---
 
-## Phase 5: Presentation Layer - UI & Routing
+## Phase 4: User Story 2 - [Title] (Priority: P2)
+
+**Goal**: [Brief description of what this story delivers]
+
+**Independent Test**: [How to verify this story works on its own]
+
+### Tests for User Story 2 (OPTIONAL - only if tests requested) ⚠️
+
+- [ ] T018 [P] [US2] Contract test for [endpoint] in tests/contract/test_[name].py
+- [ ] T019 [P] [US2] Integration test for [user journey] in tests/integration/test_[name].py
+
+### Implementation for User Story 2
+
+- [ ] T020 [P] [US2] Create [Entity] model in src/models/[entity].py
+- [ ] T021 [US2] Implement [Service] in src/services/[service].py
+- [ ] T022 [US2] Implement [endpoint/feature] in src/[location]/[file].py
+- [ ] T023 [US2] Integrate with User Story 1 components (if needed)
+
+**Checkpoint**: At this point, User Stories 1 AND 2 should both work independently
 
 ---
 
-## Phase 5: Presentation Layer - UI & Routing
+## Phase 5: User Story 3 - [Title] (Priority: P3)
 
-**Purpose**: Build user-facing widgets using Tilawa UI Kit, integrate with BLoC and GoRouter
+**Goal**: [Brief description of what this story delivers]
 
-- [ ] T026 [P] Plan Tilawa UI Kit component usage (atoms, molecules, organisms) - reference `packages/ui_kit/lib/src/`
-- [ ] T027 [P] Create pages/screens in `presentation/pages/` - wire BLoC with BlocBuilder/BlocListener
-- [ ] T028 [P] Create reusable widgets in `presentation/widgets/` (extract from pages if shared across features)
-  - Use `Row`/`Column`/`Flex.spacing` instead of separator `SizedBox` widgets for simple fixed gaps
-  - Use Dart dot shorthands for enum-like/static values where the receiver type is obvious
-- [ ] T029 Create routes in GoRouter configuration (`apps/tilawa/lib/routing/` or feature-local routing)
-  - Add route path, builder, guards, deep-linking if applicable
-- [ ] T030 Add structured logging for route transitions, user interactions
-- [ ] T031 **[TEST]** Widget test for page state rendering in `test/features/[feature]/presentation/pages/`
-  - Test BLoC state → UI rendering mapping
-- [ ] T032 **[TEST]** Widget test for responsive/RTL behavior in `test/features/[feature]/presentation/pages/`
-  - Compact, medium, expanded layouts
-  - RTL text/icon mirroring (Arabic)
-  - Safe area and padding
-- [ ] T033 **[TEST]** Widget test for accessibility (a11y) if user-facing state changes
-  - Screen reader semantics
-  - Touch target sizes
+**Independent Test**: [How to verify this story works on its own]
 
-**Checkpoint**: Feature fully renders with BLoC → UI flow working end-to-end
+### Tests for User Story 3 (OPTIONAL - only if tests requested) ⚠️
 
----
-
-## Phase 6: Integration & Performance Validation
-
-**Purpose**: Verify feature works in full app context and meets performance targets
-
-- [ ] T034 Integration test: Feature launched from app root, user flows complete
-- [ ] T035 **[TEST]** Performance regression test for critical path (scroll, tap, load)
-  - Use DevTools profiler or benchmark test
-  - Record baseline in `specs/[###-feature-name]/quickstart.md` or `plan.md`
-  - Target: 60 fps, <500ms critical operations, no jank
-- [ ] T036 Device testing: Feature works on low-end device (e.g., Snapdragon 600 series)
-- [ ] T037 Test offline behavior if feature requires network
-- [ ] T038 Verify RTL rendering on Arabic device/emulator
-- [ ] T039 Golden test snapshots for visual regression (if UI Kit changes)
-
-**Checkpoint**: Feature meets performance, accessibility, and localization requirements
-
----
-
-## Constitution Compliance Checklist (Must Pass Before Merge)
-
-**Reference**: `.specify/memory/constitution.md`
-
-- [ ] **Clean Architecture**: Domain has no Flutter imports, data implements domain contracts, presentation depends on domain
-- [ ] **BLoC State Management**: Feature state driven by BLoC/Cubit, widgets ephemeral state only
-- [ ] **GoRouter**: Routes declared, deep-linking supported, guards in place if needed
-- [ ] **Tilawa UI Kit**: Shared UI from packages/ui_kit, components classified (foundation/atom/molecule/organism)
-- [ ] **Dart/Flutter Idioms**: UI code uses `spacing` properties and Dart dot shorthands where appropriate
-- [ ] **Responsive/Adaptive**: Compact/medium/expanded layouts planned, RTL behavior verified
-- [ ] **Performance**: Hot paths avoid build(), scroll/startup/Quran text rendering measured, jank regression tested
-- [ ] **Structured Logging**: BLoC transitions, route decisions, failures, async durations logged
-- [ ] **Testing**: Unit tests for domain/data, widget tests for presentation, performance tests for critical paths
-- [ ] **Safe Refactoring**: Scope clear, migration plan documented, downstream impact assessed
-
-- [ ] T029 [P] [US3] Unit test for [use case/BLoC/mapper] in apps/[app_name]/test/features/[feature]/[layer]/[name]_test.dart
-- [ ] T030 [P] [US3] Widget test for [page/widget/state] in apps/[app_name]/test/features/[feature]/presentation/[name]_test.dart
+- [ ] T024 [P] [US3] Contract test for [endpoint] in tests/contract/test_[name].py
+- [ ] T025 [P] [US3] Integration test for [user journey] in tests/integration/test_[name].py
 
 ### Implementation for User Story 3
 
-- [ ] T031 [P] [US3] Extend domain behavior in apps/[app_name]/lib/features/[feature]/domain/[path]/[file].dart
-- [ ] T032 [US3] Implement data/persistence behavior in apps/[app_name]/lib/features/[feature]/data/[path]/[file].dart
-- [ ] T033 [US3] Implement BLoC and UI behavior in apps/[app_name]/lib/features/[feature]/presentation/[path]/[file].dart
+- [ ] T026 [P] [US3] Create [Entity] model in src/models/[entity].py
+- [ ] T027 [US3] Implement [Service] in src/services/[service].py
+- [ ] T028 [US3] Implement [endpoint/feature] in src/[location]/[file].py
 
-**Checkpoint**: All user stories MUST now be independently functional
+**Checkpoint**: All user stories should now be independently functional
 
 ---
 
@@ -230,9 +153,8 @@ is documented with owner and expiry.
 
 - [ ] TXXX [P] Documentation updates in docs/
 - [ ] TXXX Code cleanup and refactoring
-- [ ] TXXX Performance profiling/evidence for performance-sensitive paths
-- [ ] TXXX [P] Additional unit/widget tests for critical paths and regressions
-- [ ] TXXX [P] Analyzer and formatter validation
+- [ ] TXXX Performance optimization across all stories
+- [ ] TXXX [P] Additional unit tests (if requested) in tests/unit/
 - [ ] TXXX Security hardening
 - [ ] TXXX Run quickstart.md validation
 
@@ -252,16 +174,14 @@ is documented with owner and expiry.
 ### User Story Dependencies
 
 - **User Story 1 (P1)**: Can start after Foundational (Phase 2) - No dependencies on other stories
-- **User Story 2 (P2)**: Can start after Foundational (Phase 2) - May integrate with US1 but MUST remain independently testable
-- **User Story 3 (P3)**: Can start after Foundational (Phase 2) - May integrate with US1/US2 but MUST remain independently testable
+- **User Story 2 (P2)**: Can start after Foundational (Phase 2) - May integrate with US1 but should be independently testable
+- **User Story 3 (P3)**: Can start after Foundational (Phase 2) - May integrate with US1/US2 but should be independently testable
 
 ### Within Each User Story
 
-- Required tests MUST be written and FAIL before implementation
-- Domain contracts and entities before data implementations
-- Use cases before BLoC behavior
-- BLoC behavior before UI wiring
-- GoRouter integration after routes and guards are defined
+- Tests (if included) MUST be written and FAIL before implementation
+- Models before services
+- Services before endpoints
 - Core implementation before integration
 - Story complete before moving to next priority
 
@@ -279,13 +199,13 @@ is documented with owner and expiry.
 ## Parallel Example: User Story 1
 
 ```bash
-# Launch all tests for User Story 1 together:
-Task: "Unit test for [use case/BLoC/mapper] in apps/[app_name]/test/features/[feature]/..."
-Task: "Widget test for [page/widget/state] in apps/[app_name]/test/features/[feature]/..."
+# Launch all tests for User Story 1 together (if tests requested):
+Task: "Contract test for [endpoint] in tests/contract/test_[name].py"
+Task: "Integration test for [user journey] in tests/integration/test_[name].py"
 
-# Launch independent layer tasks for User Story 1 together:
-Task: "Create domain entity in apps/[app_name]/lib/features/[feature]/domain/entities/..."
-Task: "Create Tilawa UI Kit component test in packages/ui_kit/test/..."
+# Launch all models for User Story 1 together:
+Task: "Create [Entity1] model in src/models/[entity1].py"
+Task: "Create [Entity2] model in src/models/[entity2].py"
 ```
 
 ---
@@ -325,7 +245,7 @@ With multiple developers:
 
 - [P] tasks = different files, no dependencies
 - [Story] label maps task to specific user story for traceability
-- Each user story MUST be independently completable and testable
+- Each user story should be independently completable and testable
 - Verify tests fail before implementing
 - Commit after each task or logical group
 - Stop at any checkpoint to validate story independently
