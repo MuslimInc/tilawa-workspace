@@ -26,7 +26,7 @@ The sections below are the detailed style, architecture, and design guide.
 <!-- SPECKIT START -->
 For additional context about technologies to be used, project structure,
 shell commands, and other important information, read the current plan:
-[specs/019-quran-player-shell-expand/plan.md](file:///Users/mohammadkamel/flutter_projects/tilawa_workspace/specs/019-quran-player-shell-expand/plan.md)
+[specs/039-learn-quran-admin-backend/plan.md](file:///Users/mohammadkamel/flutter_projects/tilawa_workspace/specs/039-learn-quran-admin-backend/plan.md)
 <!-- SPECKIT END -->
 
 ## Agent behavior (required)

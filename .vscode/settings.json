@@ -1,5 +1,5 @@
 {
-  "dart.flutterSdkPath": ".fvm/versions/3.44.5",
+  "dart.flutterSdkPath": ".fvm/versions/3.44.6",
   "dart.analysisExcludedFolders": [
     "build",
     "**/build",
