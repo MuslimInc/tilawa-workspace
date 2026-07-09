@@ -15,7 +15,7 @@ before adding UI actions.
 
 - [X] T001 [P] Add baseline round-trip regression cases in apps/tilawa_admin/src/app/features/quran-sessions/global-settings/global-settings.component.spec.ts.
 - [X] T002 [P] Verify the market validator contract and add child-age validation coverage in functions/test/quranSessions/updatePlatformConfig.test.ts and functions/test/quranSessions/updateMarketPricingConfig.test.ts.
-- [ ] T003 [P] Add report/dispute terminal-resolution coverage gaps to functions/test-integration/sessionReports.integration.test.ts and functions/test-integration/resolveSessionDispute.integration.test.ts.
+- [X] T003 [P] Add report/dispute terminal-resolution coverage gaps to functions/test-integration/sessionReports.integration.test.ts and functions/test-integration/resolveSessionDispute.integration.test.ts.
 - [ ] T004 Record initial Admin/Functions test outcomes in specs/039-learn-quran-admin-backend/quickstart.md.
 
 **Checkpoint**: Current behavior, including the policy-round-trip risk and
@@ -26,13 +26,13 @@ server-owned terminal effects, is represented by executable tests.
 **Purpose**: Give admin report and dispute screens one typed, server-authorized
 write boundary; complete this before either resolution screen.
 
-- [ ] T005 Extend report-resolution types and detail fields in apps/tilawa_admin/src/app/core/domain/entities/session-report-summary.entity.ts.
-- [ ] T006 [P] Extend the moderation contract with report resolution in apps/tilawa_admin/src/app/core/domain/repositories/session-moderation.gateway.ts.
-- [ ] T007 [P] Implement the report-resolution callable adapter and normalized callable errors in apps/tilawa_admin/src/app/core/data/repositories/firebase-session-moderation.gateway.ts.
-- [ ] T008 Add report and dispute resolution use cases with trim/required-input validation in apps/tilawa_admin/src/app/core/domain/usecases/session-moderation.usecases.ts.
-- [ ] T009 [P] Add use-case/gateway success, validation, and callable-error tests in apps/tilawa_admin/src/app/core/domain/usecases/session-moderation.usecases.spec.ts.
-- [ ] T010 [P] Add report resolution mapper/detail regression coverage in apps/tilawa_admin/src/app/core/data/mappers/session-report.mapper.spec.ts.
-- [ ] T011 Verify the existing SESSION_MODERATION_GATEWAY registration remains the only runtime write binding in apps/tilawa_admin/src/app/app.config.ts.
+- [X] T005 Extend report-resolution types and detail fields in apps/tilawa_admin/src/app/core/domain/entities/session-report-summary.entity.ts.
+- [X] T006 [P] Extend the moderation contract with report resolution in apps/tilawa_admin/src/app/core/domain/repositories/session-moderation.gateway.ts.
+- [X] T007 [P] Implement the report-resolution callable adapter and normalized callable errors in apps/tilawa_admin/src/app/core/data/repositories/firebase-session-moderation.gateway.ts.
+- [X] T008 Add report and dispute resolution use cases with trim/required-input validation in apps/tilawa_admin/src/app/core/domain/usecases/session-moderation.usecases.ts.
+- [X] T009 [P] Add use-case/gateway success, validation, and callable-error tests in apps/tilawa_admin/src/app/core/domain/usecases/session-moderation.usecases.spec.ts.
+- [X] T010 [P] Add report resolution mapper/detail regression coverage in apps/tilawa_admin/src/app/core/data/mappers/session-report.mapper.spec.ts.
+- [X] T011 Verify the existing SESSION_MODERATION_GATEWAY registration remains the only runtime write binding in apps/tilawa_admin/src/app/app.config.ts.
 
 **Checkpoint**: Admin mutations traverse typed use cases and a Firebase callable
 adapter; no feature component writes Firestore directly.
