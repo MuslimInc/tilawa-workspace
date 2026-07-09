@@ -60,3 +60,17 @@ The previously failing `TilawaUsersFacade` admin baseline (missing
 5. If a critical flow fails, restore the recorded enforcement state and record
    the rollback result. Do not promote until all evidence is complete.
 
+### Staging evidence status
+
+**2026-07-10** — gate prepared, execution pending ops:
+
+- Evidence table (E1–E7), success criteria, owner field, and rollback
+  rehearsal record live in
+  `docs/quran-sessions/production-readiness-checklist.md` § 3a; the operator
+  runbook is in `docs/quran_sessions_admin_ops_checklist.md`.
+- Current enforcement state verified off by default at module load
+  (`functions/test/quranSessions/sessionCallableOptions.test.ts`).
+- ⬜ Owner assignment, staging soak phases 0–3, E1–E7 results, and the
+  rollback rehearsal require a staging deploy and calendar time — **not
+  executed**; production enforcement remains blocked until § 3a is complete.
+
