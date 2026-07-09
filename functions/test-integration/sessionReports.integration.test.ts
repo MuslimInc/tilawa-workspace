@@ -171,6 +171,41 @@ test("integration: terminal report resolutions require a reason", async () => {
   assert.equal(doc.get("status"), "open");
 });
 
+test("integration: duplicate terminal resolution with one idempotency key writes one audit event", async () => {
+  await clearFirestore();
+  await seedBooking();
+  const filed = await report.run({
+    data: withSessionEpoch({
+      bookingId: "booking1",
+      category: "other",
+      description: "Requires review.",
+    }),
+    auth: { uid: "student1", token: {} },
+  });
+
+  const payload = {
+    data: {
+      reportId: filed.reportId,
+      resolution: "resolved",
+      reason: "Handled by trust & safety.",
+      idempotencyKey: "resolve-report-1",
+    },
+    auth: { uid: "admin1", token: { admin: true } },
+  };
+
+  const first = await resolveReport.run(payload);
+  const second = await resolveReport.run(payload);
+
+  assert.equal(first.status, "resolved");
+  assert.equal(second.status, "resolved");
+  const audit = await db()
+    .collection("quran_session_events")
+    .where("reportId", "==", filed.reportId)
+    .where("action", "==", "resolve_report")
+    .get();
+  assert.equal(audit.size, 1);
+});
+
 test("integration: admin can triage then close a report with audit metadata", async () => {
   await clearFirestore();
   await seedBooking();

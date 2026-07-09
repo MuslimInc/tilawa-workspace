@@ -10,7 +10,75 @@
   } @else if (loadState() === 'error') {
     <app-tilawa-error-state [message]="errorMessage() ?? 'Error'" />
   } @else if (detail(); as item) {
-    <app-page-header [title]="'reports_detailTitle' | t: { id: item.id }" />
+    <app-page-header [title]="'reports_detailTitle' | t: { id: item.id }">
+      <div actions class="flex flex-wrap items-center gap-2">
+        @if (!isTerminal(item.status)) {
+          @if (item.status === 'open') {
+            <app-tilawa-button
+              variant="secondary"
+              size="sm"
+              [loading]="isActionLoading()"
+              [disabled]="isActionLoading()"
+              (click)="openUnderReview()"
+              >{{ 'reports_setUnderReview' | t }}</app-tilawa-button
+            >
+          }
+          <app-tilawa-button
+            variant="primary"
+            size="sm"
+            [loading]="isActionLoading()"
+            [disabled]="isActionLoading()"
+            (click)="openTerminal('resolved')"
+            >{{ 'reports_resolve' | t }}</app-tilawa-button
+          >
+          <app-tilawa-button
+            variant="danger"
+            size="sm"
+            [loading]="isActionLoading()"
+            [disabled]="isActionLoading()"
+            (click)="openTerminal('dismissed')"
+            >{{ 'reports_dismiss' | t }}</app-tilawa-button
+          >
+        }
+      </div>
+    </app-page-header>
+
+    @if (actionError()) {
+      <p role="alert" aria-live="assertive" class="text-sm text-[var(--tilawa-error)]">
+        {{ actionError() }}
+      </p>
+    }
+
+    @if (isTerminal(item.status)) {
+      <div
+        role="status"
+        class="rounded-xl border border-[var(--tilawa-outline-variant)] bg-[var(--tilawa-surface-container-low)] p-4"
+      >
+        <p class="text-sm font-medium text-[var(--tilawa-on-surface)]">
+          {{ 'reports_terminalNotice' | t }}
+        </p>
+        <dl class="mt-3 grid grid-cols-1 gap-3 sm:grid-cols-3">
+          <div>
+            <dt class="tilawa-detail-label">{{ 'reports_resolutionReason' | t }}</dt>
+            <dd class="tilawa-detail-value whitespace-pre-wrap">
+              {{ item.resolutionReason ?? ('common_none' | t) }}
+            </dd>
+          </div>
+          <div>
+            <dt class="tilawa-detail-label">{{ 'reports_resolvedBy' | t }}</dt>
+            <dd class="tilawa-detail-value font-mono">
+              {{ item.resolvedByUserId ?? ('common_none' | t) }}
+            </dd>
+          </div>
+          <div>
+            <dt class="tilawa-detail-label">{{ 'reports_resolvedAt' | t }}</dt>
+            <dd class="tilawa-detail-value">
+              {{ item.resolvedAt ? (item.resolvedAt | date: 'medium') : ('common_none' | t) }}
+            </dd>
+          </div>
+        </dl>
+      </div>
+    }
 
     <app-tilawa-card>
       <dl class="grid grid-cols-1 gap-4 sm:grid-cols-2">
@@ -77,5 +145,33 @@
         </p>
       </div>
     </app-tilawa-card>
+
+    <app-confirm-dialog
+      [isOpen]="confirmUnderReviewOpen()"
+      [title]="'reports_underReviewTitle' | t"
+      [message]="'reports_underReviewMessage' | t"
+      [confirmLabel]="'reports_setUnderReview' | t"
+      [loading]="isActionLoading()"
+      (confirm)="onConfirmUnderReview()"
+      (cancel)="closeDialogs()"
+    />
+
+    <app-reject-reason-dialog
+      [isOpen]="reasonOpen()"
+      [title]="
+        (pendingResolution() === 'dismissed' ? 'reports_dismissTitle' : 'reports_resolveTitle') | t
+      "
+      [message]="
+        (pendingResolution() === 'dismissed' ? 'reports_dismissMessage' : 'reports_resolveMessage')
+          | t
+      "
+      [confirmLabel]="
+        (pendingResolution() === 'dismissed' ? 'reports_dismiss' : 'reports_resolve') | t
+      "
+      [loading]="isActionLoading()"
+      [requireReason]="true"
+      (submit)="onSubmitReason($event)"
+      (cancel)="closeDialogs()"
+    />
   }
 </div>

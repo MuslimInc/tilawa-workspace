@@ -4,7 +4,11 @@ import {
   ListSessionReportsUseCase,
   GetSessionReportUseCase,
 } from '../../domain/usecases/session-report.usecases';
-import { SessionReportFilters } from '../../domain/entities/session-report-summary.entity';
+import { ResolveSessionReportUseCase } from '../../domain/usecases/session-moderation.usecases';
+import {
+  SessionReportFilters,
+  SessionReportResolution,
+} from '../../domain/entities/session-report-summary.entity';
 import { SESSION_REPORT_DEFAULT_SORT } from '../../domain/entities/session-report-summary.entity';
 import { DEFAULT_PAGE_SIZE, SortRequest, sortsEqual } from '../../domain/entities/pagination.types';
 
@@ -28,12 +32,16 @@ export interface SessionReportDetailVm extends SessionReportListItemVm {
   reporterRole: string;
   description: string;
   updatedAt: Date | null;
+  resolutionReason: string | null;
+  resolvedByUserId: string | null;
+  resolvedAt: Date | null;
 }
 
 @Injectable({ providedIn: 'root' })
 export class SessionReportsFacade {
   private readonly listUseCase = inject(ListSessionReportsUseCase);
   private readonly getUseCase = inject(GetSessionReportUseCase);
+  private readonly resolveUseCase = inject(ResolveSessionReportUseCase);
 
   private readonly listState = signal<LoadState>('idle');
   private readonly listError = signal<string | null>(null);
@@ -46,6 +54,9 @@ export class SessionReportsFacade {
   private readonly detailError = signal<string | null>(null);
   private readonly detailItem = signal<SessionReportDetailVm | null>(null);
 
+  private readonly actionLoading = signal(false);
+  private readonly actionError = signal<string | null>(null);
+
   readonly items = this.listItems.asReadonly();
   readonly listLoadState = this.listState.asReadonly();
   readonly listErrorMessage = this.listError.asReadonly();
@@ -55,6 +66,9 @@ export class SessionReportsFacade {
   readonly detail = this.detailItem.asReadonly();
   readonly detailLoadState = this.detailState.asReadonly();
   readonly detailErrorMessage = this.detailError.asReadonly();
+
+  readonly isActionLoading = this.actionLoading.asReadonly();
+  readonly actionErrorMessage = this.actionError.asReadonly();
 
   async loadList(
     filters: SessionReportFilters,
@@ -127,6 +141,36 @@ export class SessionReportsFacade {
     }
   }
 
+  /**
+   * Resolves the report through the server-authorized callable boundary and
+   * refreshes the authoritative detail on success. Returns true on success;
+   * on failure the error is retained in actionErrorMessage and the current
+   * detail is left untouched.
+   */
+  async resolveReport(
+    reportId: string,
+    resolution: SessionReportResolution,
+    reason?: string,
+  ): Promise<boolean> {
+    this.actionLoading.set(true);
+    this.actionError.set(null);
+
+    try {
+      await this.resolveUseCase.execute(reportId, resolution, reason);
+      await this.loadDetail(reportId);
+      return true;
+    } catch (error) {
+      this.actionError.set(error instanceof Error ? error.message : 'Failed to resolve report.');
+      return false;
+    } finally {
+      this.actionLoading.set(false);
+    }
+  }
+
+  clearActionError(): void {
+    this.actionError.set(null);
+  }
+
   private toListItem(
     item: Awaited<ReturnType<ListSessionReportsUseCase['execute']>>['items'][number],
   ): SessionReportListItemVm {
@@ -154,6 +198,9 @@ export class SessionReportsFacade {
       reporterRole: item.reporterRole,
       description: item.description,
       updatedAt: item.updatedAt,
+      resolutionReason: item.resolutionReason,
+      resolvedByUserId: item.resolvedByUserId,
+      resolvedAt: item.resolvedAt,
     };
   }
 }
