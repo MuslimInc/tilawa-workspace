@@ -32,6 +32,45 @@ describe('ResolveSessionReportUseCase', () => {
       'A resolution reason is required.',
     );
   });
+
+  it('rejects a missing report id before invoking the callable boundary', async () => {
+    const gateway = {} as Pick<SessionModerationGateway, 'resolveSessionReport'>;
+    const useCase = new ResolveSessionReportUseCase(gateway as SessionModerationGateway);
+
+    await expect(useCase.execute('  ', 'under_review')).rejects.toThrow('Report id is required.');
+  });
+
+  it('submits a terminal resolution with its trimmed reason', async () => {
+    const resolveSessionReport = vi.fn().mockResolvedValue(undefined);
+    const gateway = { resolveSessionReport } as Pick<
+      SessionModerationGateway,
+      'resolveSessionReport'
+    >;
+    const useCase = new ResolveSessionReportUseCase(gateway as SessionModerationGateway);
+
+    await useCase.execute('report-1', 'dismissed', ' Insufficient evidence. ');
+
+    expect(resolveSessionReport).toHaveBeenCalledWith(
+      'report-1',
+      'dismissed',
+      'Insufficient evidence.',
+    );
+  });
+
+  it('preserves normalized callable errors from the gateway', async () => {
+    const resolveSessionReport = vi
+      .fn()
+      .mockRejectedValue(new Error('resolveSessionReport is not deployed.'));
+    const gateway = { resolveSessionReport } as Pick<
+      SessionModerationGateway,
+      'resolveSessionReport'
+    >;
+    const useCase = new ResolveSessionReportUseCase(gateway as SessionModerationGateway);
+
+    await expect(useCase.execute('report-1', 'resolved', 'Handled.')).rejects.toThrow(
+      'resolveSessionReport is not deployed.',
+    );
+  });
 });
 
 describe('ResolveSessionDisputeUseCase', () => {
