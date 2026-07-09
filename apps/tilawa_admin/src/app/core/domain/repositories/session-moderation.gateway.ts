@@ -4,6 +4,7 @@ import {
   NoShowClassification,
   SessionCompensationType,
 } from '../entities/session-moderation.types';
+import { SessionReportResolution } from '../entities/session-report-summary.entity';
 
 /** Privileged session lifecycle writes — callable Cloud Functions only. */
 export interface SessionModerationGateway {
@@ -32,6 +33,12 @@ export interface SessionModerationGateway {
     bookingId: string,
     reason: string,
     evidenceMetadata?: Record<string, unknown>,
+  ): Promise<void>;
+
+  resolveSessionReport(
+    reportId: string,
+    resolution: SessionReportResolution,
+    reason?: string,
   ): Promise<void>;
 
   resolveSessionDispute(

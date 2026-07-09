@@ -57,7 +57,10 @@ test("integration: a participant can file a booking report (escalated severity)"
   });
 
   assert.equal(res.status, "open");
-  const doc = await db().collection("quran_session_reports").doc(res.reportId).get();
+  const doc = await db()
+    .collection("quran_session_reports")
+    .doc(res.reportId)
+    .get();
   assert.equal(doc.get("reporterRole"), "student");
   assert.equal(doc.get("reportedUserId"), "teacher1"); // counterparty
   assert.equal(doc.get("severity"), "high");
@@ -81,7 +84,6 @@ test("integration: a non-participant cannot file a report on someone else's book
     (e) => codeOf(e) === "not_participant",
   );
 });
-
 
 test("integration: duplicate identical reports dedupe to a single record", async () => {
   await clearFirestore();
@@ -132,7 +134,81 @@ test("integration: admin can resolve a report; non-admin cannot", async () => {
     auth: { uid: "admin1", token: { admin: true } },
   });
   assert.equal(resolved.status, "resolved");
-  const doc = await db().collection("quran_session_reports").doc(filed.reportId).get();
+  const doc = await db()
+    .collection("quran_session_reports")
+    .doc(filed.reportId)
+    .get();
   assert.equal(doc.get("status"), "resolved");
   assert.equal(doc.get("resolvedByUserId"), "admin1");
+});
+
+test("integration: terminal report resolutions require a reason", async () => {
+  await clearFirestore();
+  await seedBooking();
+  const filed = await report.run({
+    data: withSessionEpoch({
+      bookingId: "booking1",
+      category: "other",
+      description: "Requires review.",
+    }),
+    auth: { uid: "student1", token: {} },
+  });
+
+  await assert.rejects(
+    resolveReport.run({
+      data: { reportId: filed.reportId, resolution: "dismissed" },
+      auth: { uid: "admin1", token: { admin: true } },
+    }),
+    (error) =>
+      error instanceof Error &&
+      error.message === "reason is required to resolve or dismiss a report.",
+  );
+
+  const doc = await db()
+    .collection("quran_session_reports")
+    .doc(filed.reportId)
+    .get();
+  assert.equal(doc.get("status"), "open");
+});
+
+test("integration: admin can triage then close a report with audit metadata", async () => {
+  await clearFirestore();
+  await seedBooking();
+  const filed = await report.run({
+    data: withSessionEpoch({
+      bookingId: "booking1",
+      category: "other",
+      description: "Requires review.",
+    }),
+    auth: { uid: "student1", token: {} },
+  });
+
+  await resolveReport.run({
+    data: { reportId: filed.reportId, resolution: "under_review" },
+    auth: { uid: "admin1", token: { admin: true } },
+  });
+  const closed = await resolveReport.run({
+    data: {
+      reportId: filed.reportId,
+      resolution: "dismissed",
+      reason: "Insufficient evidence.",
+    },
+    auth: { uid: "admin1", token: { admin: true } },
+  });
+
+  assert.equal(closed.status, "dismissed");
+  const doc = await db()
+    .collection("quran_session_reports")
+    .doc(filed.reportId)
+    .get();
+  assert.equal(doc.get("resolutionReason"), "Insufficient evidence.");
+  assert.equal(doc.get("resolvedByUserId"), "admin1");
+  assert.ok(doc.get("resolvedAt"));
+
+  const audit = await db()
+    .collection("quran_session_events")
+    .where("reportId", "==", filed.reportId)
+    .where("resolution", "==", "dismissed")
+    .get();
+  assert.equal(audit.size, 1);
 });

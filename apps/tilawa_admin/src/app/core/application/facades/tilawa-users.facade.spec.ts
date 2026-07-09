@@ -7,6 +7,7 @@ import { TILAWA_USER_DEFAULT_SORT } from '../../domain/entities/tilawa-user.enti
 import { AUTH_ADMIN_GATEWAY } from '../../domain/repositories/auth-admin.gateway';
 import { RequestUserDeletionUseCase } from '../../domain/usecases/user-deletion.usecases';
 import { AuthFacade } from './auth.facade';
+import { I18nService } from '../../i18n/i18n.service';
 
 describe('TilawaUsersFacade', () => {
   let facade: TilawaUsersFacade;
@@ -14,11 +15,12 @@ describe('TilawaUsersFacade', () => {
     execute: vi.fn(),
   };
   const requestDeletionUseCase = { execute: vi.fn() };
-  const authAdminGateway = { 
-    revokeTokens: vi.fn(), 
-    lookupUserAuthMetadata: vi.fn().mockResolvedValue({ adminUserIds: [], authBackedUserIds: [] }) 
+  const authAdminGateway = {
+    revokeTokens: vi.fn(),
+    lookupUserAuthMetadata: vi.fn().mockResolvedValue({ adminUserIds: [], authBackedUserIds: [] }),
   };
   const authFacade = { session: vi.fn().mockReturnValue(null) };
+  const i18n = { t: vi.fn() };
 
   beforeEach(() => {
     listUseCase.execute.mockReset();
@@ -29,6 +31,7 @@ describe('TilawaUsersFacade', () => {
         { provide: RequestUserDeletionUseCase, useValue: requestDeletionUseCase },
         { provide: AUTH_ADMIN_GATEWAY, useValue: authAdminGateway },
         { provide: AuthFacade, useValue: authFacade },
+        { provide: I18nService, useValue: i18n },
       ],
     });
     facade = TestBed.inject(TilawaUsersFacade);
