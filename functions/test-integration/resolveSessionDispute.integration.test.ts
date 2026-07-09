@@ -125,6 +125,100 @@ test("integration: resolve with_compensation creates manual_pending compensation
   assert.equal(compensation.get("type"), "manual_review");
 });
 
+test("integration: resolve favor_teacher closes the dispute without a financial record", async () => {
+  await clearFirestore();
+  const disputeId = await seedDisputedBooking();
+
+  const res = await resolveDispute.run({
+    data: {
+      bookingId: "booking1",
+      disputeId,
+      resolution: "favor_teacher",
+      reason: "Evidence supports the teacher.",
+    },
+    auth: { uid: "admin1", token: { admin: true } },
+  });
+
+  assert.equal(res.refundId, null);
+  assert.equal(res.compensationId, null);
+  const dispute = await db()
+    .collection("quran_session_disputes")
+    .doc(disputeId)
+    .get();
+  assert.equal(dispute.get("status"), "resolved_favor_teacher");
+  const refunds = await db().collection("quran_session_refunds").get();
+  const compensations = await db()
+    .collection("quran_session_compensations")
+    .get();
+  assert.equal(refunds.size, 0);
+  assert.equal(compensations.size, 0);
+});
+
+test("integration: resolve rejected closes the dispute without a financial record", async () => {
+  await clearFirestore();
+  const disputeId = await seedDisputedBooking();
+
+  const res = await resolveDispute.run({
+    data: {
+      bookingId: "booking1",
+      disputeId,
+      resolution: "rejected",
+      reason: "Insufficient evidence.",
+    },
+    auth: { uid: "admin1", token: { admin: true } },
+  });
+
+  assert.equal(res.refundId, null);
+  assert.equal(res.compensationId, null);
+  const dispute = await db()
+    .collection("quran_session_disputes")
+    .doc(disputeId)
+    .get();
+  assert.equal(dispute.get("status"), "rejected");
+  const refunds = await db().collection("quran_session_refunds").get();
+  const compensations = await db()
+    .collection("quran_session_compensations")
+    .get();
+  assert.equal(refunds.size, 0);
+  assert.equal(compensations.size, 0);
+});
+
+test("integration: resolution is rejected when the booking is not disputed", async () => {
+  await clearFirestore();
+  await seedUserSession("student1");
+  await db().collection("quran_bookings").doc("booking1").set({
+    bookingId: "booking1",
+    aggregateId: "booking1",
+    sessionId: "session1",
+    studentId: "student1",
+    teacherId: "teacher1",
+    lifecycleStatus: "completed",
+    amountPaidUsd: 25,
+  });
+  await db().collection("quran_session_disputes").doc("dispute1").set({
+    disputeId: "dispute1",
+    bookingId: "booking1",
+    aggregateId: "booking1",
+    status: "opened",
+  });
+
+  await assert.rejects(
+    resolveDispute.run({
+      data: {
+        bookingId: "booking1",
+        disputeId: "dispute1",
+        resolution: "favor_student",
+        reason: "teacher fault",
+      },
+      auth: { uid: "admin1", token: { admin: true } },
+    }),
+    (e) => codeOf(e) === "invalid_transition",
+  );
+
+  const refunds = await db().collection("quran_session_refunds").get();
+  assert.equal(refunds.size, 0);
+});
+
 test("integration: duplicate dispute resolution does not duplicate ledger", async () => {
   await clearFirestore();
   const disputeId = await seedDisputedBooking();

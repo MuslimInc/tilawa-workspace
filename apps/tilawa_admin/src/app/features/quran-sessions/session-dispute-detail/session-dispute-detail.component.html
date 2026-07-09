@@ -12,9 +12,58 @@
   } @else if (detail(); as item) {
     <app-page-header [title]="'disputes_detailTitle' | t: { id: item.id }" />
 
-    <p class="text-sm text-[var(--tilawa-warning)]">
-      {{ 'disputes_detailNotice' | t }}
-    </p>
+    @if (actionError()) {
+      <p role="alert" aria-live="assertive" class="text-sm text-[var(--tilawa-error)]">
+        {{ actionError() }}
+      </p>
+    }
+
+    @if (isOpenForResolution(item.status)) {
+      <div
+        class="rounded-xl border border-[var(--tilawa-outline-variant)] bg-[var(--tilawa-surface-container-low)] p-4"
+      >
+        <h2 class="text-lg font-semibold text-[var(--tilawa-on-surface)]">
+          {{ 'disputes_resolve' | t }}
+        </h2>
+        <div class="mt-3 flex flex-wrap items-end gap-4">
+          <div class="min-w-64">
+            <label class="tilawa-detail-label" for="dispute-outcome">
+              {{ 'disputes_outcomeLabel' | t }}
+            </label>
+            <select
+              id="dispute-outcome"
+              [(ngModel)]="selectedResolution"
+              class="tilawa-field mt-1"
+              [disabled]="isActionLoading()"
+            >
+              @for (option of resolutionOptions; track option) {
+                <option [value]="option">{{ outcomeLabelKey(option) | t }}</option>
+              }
+            </select>
+          </div>
+          <app-tilawa-button
+            variant="primary"
+            size="sm"
+            [loading]="isActionLoading()"
+            [disabled]="isActionLoading()"
+            (click)="openResolve()"
+            >{{ 'disputes_resolve' | t }}</app-tilawa-button
+          >
+        </div>
+        <p class="mt-3 text-sm text-[var(--tilawa-warning)]">
+          {{ effectCopyKey(selectedResolution) | t }}
+        </p>
+      </div>
+    } @else {
+      <div
+        role="status"
+        class="rounded-xl border border-[var(--tilawa-outline-variant)] bg-[var(--tilawa-surface-container-low)] p-4"
+      >
+        <p class="text-sm font-medium text-[var(--tilawa-on-surface)]">
+          {{ 'disputes_terminalNotice' | t }}
+        </p>
+      </div>
+    }
 
     <app-tilawa-card>
       <dl class="grid grid-cols-1 gap-4 sm:grid-cols-2">
@@ -121,5 +170,18 @@
         </div>
       }
     </app-tilawa-card>
+
+    <app-reject-reason-dialog
+      [isOpen]="reasonOpen()"
+      [title]="'disputes_resolveTitle' | t"
+      [message]="
+        ('disputes_resolveMessage' | t) + ' ' + (effectCopyKey(selectedResolution) | t)
+      "
+      [confirmLabel]="'disputes_resolve' | t"
+      [loading]="isActionLoading()"
+      [requireReason]="true"
+      (submit)="onSubmitReason($event)"
+      (cancel)="closeDialog()"
+    />
   }
 </div>

@@ -90,13 +90,13 @@ outcomes, required rationale, and server-owned lifecycle/financial effects.
 **Independent Test**: Resolve each allowed outcome in isolated data and verify
 the dispute/booking terminal state and at most one associated financial record.
 
-- [ ] T030 [US3] Inject the existing resolve-dispute use case and add pending-action, action-error, and refresh behavior in apps/tilawa_admin/src/app/core/application/facades/session-disputes.facade.ts.
-- [ ] T031 [US3] Add dispute-resolution selection, required-reason handling, confirmation, and terminal-state guards in apps/tilawa_admin/src/app/features/quran-sessions/session-dispute-detail/session-dispute-detail.component.ts.
-- [ ] T032 [US3] Render allowed outcome controls, explanatory effect copy, terminal metadata, and accessible errors in apps/tilawa_admin/src/app/features/quran-sessions/session-dispute-detail/session-dispute-detail.component.html.
-- [ ] T033 [P] [US3] Add Arabic and English dispute outcome, confirmation, validation, and effect-warning strings in apps/tilawa_admin/l10n/app_ar.arb and apps/tilawa_admin/l10n/app_en.arb.
-- [ ] T034 [P] [US3] Test facade success, server failure, pending state, and terminal refresh in apps/tilawa_admin/src/app/core/application/facades/session-disputes.facade.spec.ts.
-- [ ] T035 [P] [US3] Test dispute detail required rationale, duplicate-submit prevention, RTL, and resolved read-only behavior in apps/tilawa_admin/src/app/features/quran-sessions/session-dispute-detail/session-dispute-detail.component.spec.ts.
-- [ ] T036 [US3] Verify every permitted dispute outcome, authorization rejection, lifecycle guard, and idempotent financial effect in functions/test-integration/resolveSessionDispute.integration.test.ts.
+- [X] T030 [US3] Inject the existing resolve-dispute use case and add pending-action, action-error, and refresh behavior in apps/tilawa_admin/src/app/core/application/facades/session-disputes.facade.ts.
+- [X] T031 [US3] Add dispute-resolution selection, required-reason handling, confirmation, and terminal-state guards in apps/tilawa_admin/src/app/features/quran-sessions/session-dispute-detail/session-dispute-detail.component.ts.
+- [X] T032 [US3] Render allowed outcome controls, explanatory effect copy, terminal metadata, and accessible errors in apps/tilawa_admin/src/app/features/quran-sessions/session-dispute-detail/session-dispute-detail.component.html.
+- [X] T033 [P] [US3] Add Arabic and English dispute outcome, confirmation, validation, and effect-warning strings in apps/tilawa_admin/l10n/app_ar.arb and apps/tilawa_admin/l10n/app_en.arb.
+- [X] T034 [P] [US3] Test facade success, server failure, pending state, and terminal refresh in apps/tilawa_admin/src/app/core/application/facades/session-disputes.facade.spec.ts.
+- [X] T035 [P] [US3] Test dispute detail required rationale, duplicate-submit prevention, RTL, and resolved read-only behavior in apps/tilawa_admin/src/app/features/quran-sessions/session-dispute-detail/session-dispute-detail.component.spec.ts.
+- [X] T036 [US3] Verify every permitted dispute outcome, authorization rejection, lifecycle guard, and idempotent financial effect in functions/test-integration/resolveSessionDispute.integration.test.ts.
 
 **Checkpoint**: An operator can resolve a dispute safely from its own work item;
 the server remains sole owner of compensation/refund and lifecycle changes.
