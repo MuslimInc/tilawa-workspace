@@ -28,7 +28,10 @@ Future<void> openHomeQuranSessions(BuildContext context) async {
   if (!context.mounted || !ready) {
     return;
   }
-  context.push(QuranSessionsRoutes.home);
+
+  if (ready) {
+    context.push(QuranSessionsRoutes.home);
+  }
 }
 
 /// Resolves the current user id for Quran Sessions entry.
