@@ -41,7 +41,11 @@ import 'package:tilawa_ui_kit/tilawa_ui_kit.dart';
 
 import 'package:dartz_plus/dartz_plus.dart';
 import 'package:quran_sessions/quran_sessions.dart';
+import 'package:tilawa/features/home/presentation/cubit/home_learning_cubit.dart';
+import 'package:tilawa/features/home/presentation/cubit/home_learning_state.dart';
+import 'package:tilawa/features/settings/presentation/cubit/teacher_capability_cubit.dart';
 import 'package:tilawa/features/settings/domain/services/teacher_capability_refresh_notifier.dart';
+import 'package:tilawa/features/home/presentation/widgets/home_learning_cards.dart';
 
 class _TestSharedPreferencesAsync implements SharedPreferencesAsync {
   @override
@@ -58,6 +62,10 @@ class _MockTeacherCapabilityRefreshNotifier extends Mock
     implements TeacherCapabilityRefreshNotifier {}
 
 class _MockAuthSessionProvider extends Mock implements AuthSessionProvider {}
+
+class _MockHomeLearningCubit extends Mock implements HomeLearningCubit {}
+
+class _MockTeacherCapabilityCubit extends Mock implements TeacherCapabilityCubit {}
 
 void main() {
   setUp(() {
@@ -86,6 +94,29 @@ void main() {
       ).thenAnswer((_) => const Stream.empty());
       GetIt.I.registerSingleton<TeacherCapabilityRefreshNotifier>(mock);
     }
+    if (!GetIt.I.isRegistered<HomeLearningCubit>()) {
+      final mock = _MockHomeLearningCubit();
+      when(() => mock.state).thenReturn(
+        const HomeLearningState(status: HomeLearningStatus.none, isInterestSignalNeeded: false),
+      );
+      when(() => mock.stream).thenAnswer((_) => const Stream.empty());
+      when(() => mock.load(force: any(named: 'force'))).thenAnswer((_) async {});
+      when(() => mock.close()).thenAnswer((_) async {});
+      GetIt.I.registerSingleton<HomeLearningCubit>(mock);
+    }
+    if (!GetIt.I.isRegistered<TeacherCapabilityCubit>()) {
+      final mock = _MockTeacherCapabilityCubit();
+      when(() => mock.state).thenReturn(
+        const SettingsTeacherCapabilityLoadState(
+          isLoading: false,
+          hasLoaded: true,
+        ),
+      );
+      when(() => mock.stream).thenAnswer((_) => const Stream.empty());
+      when(() => mock.load()).thenAnswer((_) async {});
+      when(() => mock.close()).thenAnswer((_) async {});
+      GetIt.I.registerSingleton<TeacherCapabilityCubit>(mock);
+    }
   });
 
   tearDown(() async {
@@ -101,6 +132,12 @@ void main() {
     }
     if (GetIt.I.isRegistered<TeacherCapabilityRefreshNotifier>()) {
       await GetIt.I.unregister<TeacherCapabilityRefreshNotifier>();
+    }
+    if (GetIt.I.isRegistered<HomeLearningCubit>()) {
+      await GetIt.I.unregister<HomeLearningCubit>();
+    }
+    if (GetIt.I.isRegistered<TeacherCapabilityCubit>()) {
+      await GetIt.I.unregister<TeacherCapabilityCubit>();
     }
   });
 
@@ -553,6 +590,14 @@ void main() {
         }
       });
 
+      final homeLearningCubit = getIt<HomeLearningCubit>();
+      when(() => homeLearningCubit.state).thenReturn(
+        const HomeLearningState(
+          status: HomeLearningStatus.none,
+          isInterestSignalNeeded: true,
+        ),
+      );
+
       await tester.pumpWidget(
         _HomeScreenHarness(
           bloc: bloc,
@@ -566,7 +611,7 @@ void main() {
       }
 
       expect(find.byType(SliverPersistentHeader), findsNothing);
-      expect(find.text('Learn Quran'), findsOneWidget);
+      expect(find.byType(HomeLearningInterestCard), findsOneWidget);
 
       final double scrollAmount = tester
           .getSize(find.byType(CustomScrollView))
@@ -577,7 +622,7 @@ void main() {
       );
       await tester.pumpAndSettle();
 
-      expect(find.text('Learn Quran'), findsNothing);
+      expect(find.byType(HomeLearningInterestCard), findsNothing);
     },
   );
 }

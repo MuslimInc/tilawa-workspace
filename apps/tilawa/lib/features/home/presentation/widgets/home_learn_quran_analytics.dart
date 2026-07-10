@@ -16,3 +16,19 @@ void logHomeLearnQuranCardViewed() =>
 
 void logHomeLearnQuranCardTapped() =>
     _logHomeLearnQuranEvent(AnalyticsEvents.homeLearnQuranCardTapped);
+
+void logHomeLearnQuranCardAction({
+  required String action,
+  required String status,
+  String? bookingId,
+}) {
+  if (!getIt.isRegistered<AnalyticsService>()) return;
+  getIt<AnalyticsService>().logEvent(
+    'home_learn_quran_card_action',
+    parameters: {
+      'action': action,
+      'status': status,
+      'booking_id': ?bookingId,
+    },
+  );
+}

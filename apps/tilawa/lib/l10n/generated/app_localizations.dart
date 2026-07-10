@@ -584,6 +584,72 @@ abstract class AppLocalizations {
   /// **'My sessions'**
   String get homeFeaturedTutorMySessions;
 
+  /// Title of the tutoring interest card shown on home screen
+  ///
+  /// In en, this message translates to:
+  /// **'Learn Quran with a Qualified Tutor?'**
+  String get homeLearningInterestPromptTitle;
+
+  /// Subtitle of the tutoring interest card shown on home screen
+  ///
+  /// In en, this message translates to:
+  /// **'Master your recitation and Tajweed 1-on-1 with live feedback.'**
+  String get homeLearningInterestPromptSubtitle;
+
+  /// Button to accept tutoring interest
+  ///
+  /// In en, this message translates to:
+  /// **'Yes, interested'**
+  String get homeLearningInterestPromptYes;
+
+  /// Button to dismiss tutoring interest
+  ///
+  /// In en, this message translates to:
+  /// **'Not now'**
+  String get homeLearningInterestPromptNo;
+
+  /// Title of next session card on home screen
+  ///
+  /// In en, this message translates to:
+  /// **'Next Quran Session'**
+  String get homeLearningNextSessionTitle;
+
+  /// Countdown to next session on home screen
+  ///
+  /// In en, this message translates to:
+  /// **'Starts in {minutes}m'**
+  String homeLearningNextSessionStartsIn(int minutes);
+
+  /// Indicator when next session is live
+  ///
+  /// In en, this message translates to:
+  /// **'Live now'**
+  String get homeLearningNextSessionLive;
+
+  /// Title of pending booking card on home screen
+  ///
+  /// In en, this message translates to:
+  /// **'Pending Tutor Booking'**
+  String get homeLearningPendingBookingTitle;
+
+  /// Status text for pending approval booking on home screen
+  ///
+  /// In en, this message translates to:
+  /// **'Awaiting tutor approval'**
+  String get homeLearningPendingBookingApproval;
+
+  /// Status text for pending payment booking on home screen
+  ///
+  /// In en, this message translates to:
+  /// **'Awaiting payment'**
+  String get homeLearningPendingBookingPayment;
+
+  /// Title of the revision card on home screen
+  ///
+  /// In en, this message translates to:
+  /// **'Continue Learning'**
+  String get homeLearningRevisionTitle;
+
   /// Settings tile title for experienced Quran teacher application
   ///
   /// In en, this message translates to:

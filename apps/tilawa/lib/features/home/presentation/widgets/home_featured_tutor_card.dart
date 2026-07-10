@@ -13,6 +13,10 @@ import 'home_dashboard_icon_well.dart';
 import 'home_learn_quran_analytics.dart';
 import 'learn_quran_student_visibility.dart';
 import 'open_home_quran_sessions.dart';
+import 'package:tilawa/core/di/injection.dart';
+import 'package:tilawa/features/home/presentation/cubit/home_learning_cubit.dart';
+import 'package:tilawa/features/home/presentation/cubit/home_learning_state.dart';
+import 'package:tilawa/features/home/presentation/widgets/home_learning_cards.dart';
 
 /// Minimum visible fraction that counts as an impression.
 const double _kImpressionVisibleFraction = 0.5;
@@ -131,8 +135,11 @@ class HomeFeaturedTutorCardScope extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return BlocProvider(
-      create: (_) => TeacherCapabilityCubit()..load(),
+    return MultiBlocProvider(
+      providers: [
+        BlocProvider(create: (_) => TeacherCapabilityCubit()..load()),
+        BlocProvider(create: (_) => getIt<HomeLearningCubit>()..load()),
+      ],
       child: const _HomeFeaturedTutorCardSliverHost(),
     );
   }
@@ -143,15 +150,130 @@ class _HomeFeaturedTutorCardSliverHost extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final SettingsTeacherCapabilityLoadState state = context
+    final SettingsTeacherCapabilityLoadState capabilityState = context
         .watch<TeacherCapabilityCubit>()
         .state;
-    final Widget? sliver = homeFeaturedTutorCardSliver(
-      context,
-      capability: state.capability,
-      capabilityLoaded: state.hasLoaded,
+    final HomeLearningState learningState = context
+        .watch<HomeLearningCubit>()
+        .state;
+
+    final Widget? cardWidget = () {
+      switch (learningState.status) {
+        case HomeLearningStatus.initial:
+        case HomeLearningStatus.loading:
+          return null;
+
+        case HomeLearningStatus.nextSession:
+          final session = learningState.session;
+          if (session == null) return null;
+          final isOngoing =
+              DateTime.now().isAfter(session.startsAt) &&
+              DateTime.now().isBefore(session.endsAt);
+          return HomeLearningCardImpressionListener(
+            cardType: isOngoing ? 'ongoing' : 'imminent',
+            bookingId: session.bookingId,
+            child: HomeLearningNextSessionCard(session: session),
+          );
+
+        case HomeLearningStatus.pendingBooking:
+          final session = learningState.session;
+          if (session == null) return null;
+          return HomeLearningCardImpressionListener(
+            cardType: 'pending',
+            bookingId: session.bookingId,
+            child: HomeLearningPendingBookingCard(session: session),
+          );
+
+        case HomeLearningStatus.continueLearning:
+          final aggregate = learningState.revisionAggregate;
+          if (aggregate == null) return null;
+          return HomeLearningCardImpressionListener(
+            cardType: 'revision',
+            bookingId: aggregate.id,
+            child: HomeLearningRevisionCard(revisionAggregate: aggregate),
+          );
+
+        case HomeLearningStatus.none:
+          if (!learningState.isInterestSignalNeeded) return null;
+          if (!_isHomeFeaturedCardVisible(
+            capability: capabilityState.capability,
+            capabilityLoaded: capabilityState.hasLoaded,
+          )) {
+            return null;
+          }
+          return const HomeLearningCardImpressionListener(
+            cardType: 'interest',
+            child: HomeLearningInterestCard(),
+          );
+      }
+    }();
+
+    if (cardWidget == null) {
+      return const SliverToBoxAdapter(child: SizedBox.shrink());
+    }
+
+    final MeMuslimDesignTokens tokens = context.tokens;
+    final double horizontalInset =
+        TilawaHomeScreenTokens.screenHorizontalPadding(tokens);
+
+    return SliverToBoxAdapter(
+      child: Padding(
+        padding: EdgeInsetsDirectional.fromSTEB(
+          horizontalInset,
+          0,
+          horizontalInset,
+          tokens.spaceMedium,
+        ),
+        child: cardWidget,
+      ),
     );
-    return sliver ?? const SliverToBoxAdapter(child: SizedBox.shrink());
+  }
+}
+
+/// Helper widget to detect when a card is viewed and log the impression.
+class HomeLearningCardImpressionListener extends StatefulWidget {
+  const HomeLearningCardImpressionListener({
+    required this.cardType,
+    required this.child,
+    this.bookingId,
+    super.key,
+  });
+
+  final String cardType;
+  final Widget child;
+  final String? bookingId;
+
+  @override
+  State<HomeLearningCardImpressionListener> createState() =>
+      _HomeLearningCardImpressionListenerState();
+}
+
+class _HomeLearningCardImpressionListenerState
+    extends State<HomeLearningCardImpressionListener> {
+  static const double _kVisibleFraction = 0.5;
+  bool _loggedView = false;
+
+  void _onVisibilityChanged(VisibilityInfo info) {
+    if (_loggedView) return;
+    if (info.visibleFraction >= _kVisibleFraction) {
+      _loggedView = true;
+      logHomeLearnQuranCardAction(
+        action: 'viewed',
+        status: widget.cardType,
+        bookingId: widget.bookingId,
+      );
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return VisibilityDetector(
+      key: Key(
+        'home_learning_card_view_${widget.cardType}_${widget.bookingId ?? ''}',
+      ),
+      onVisibilityChanged: _onVisibilityChanged,
+      child: widget.child,
+    );
   }
 }
 
