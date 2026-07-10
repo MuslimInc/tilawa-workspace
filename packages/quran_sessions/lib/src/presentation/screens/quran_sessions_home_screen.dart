@@ -95,9 +95,12 @@ class _QuranSessionsHomeScreenState extends State<QuranSessionsHomeScreen> {
       ],
       body: BlocBuilder<TeacherListBloc, TeacherListState>(
         builder: (context, state) => switch (state) {
-          TeacherListInitial() || TeacherListLoading() => ListView.builder(
-            itemCount: 3,
-            itemBuilder: (_, _) => const TeacherCardCompactSkeleton(),
+          TeacherListInitial() || TeacherListLoading() => TilawaSkeleton(
+            semanticLabel: l10n.teacherListLoadingLabel,
+            child: ListView.builder(
+              itemCount: 3,
+              itemBuilder: (_, _) => const TeacherCardCompactSkeleton(),
+            ),
           ),
           TeacherListEmpty() => QuranSessionsStudentEmptyState(
             featureConfig: widget.featureConfig,
@@ -134,9 +137,12 @@ class _QuranSessionsHomeScreenState extends State<QuranSessionsHomeScreen> {
               ),
             ),
           ),
+          // "See all teachers" lives in the sticky bottom action bar below —
+          // see [bottomNavigationBar] — so it stays thumb-reachable instead of
+          // trailing off the end of the scroll list.
           TeacherListSuccess(:final teachers, :final pricingQuote) =>
             ListView.builder(
-              itemCount: teachers.take(3).length + 2,
+              itemCount: teachers.take(3).length + 1,
               itemBuilder: (context, i) {
                 final preview = teachers.take(3).toList();
                 if (i == 0) {
@@ -154,26 +160,34 @@ class _QuranSessionsHomeScreenState extends State<QuranSessionsHomeScreen> {
                   );
                 }
                 final teacherIndex = i - 1;
-                if (teacherIndex < preview.length) {
-                  return TeacherCard(
-                    teacher: preview[teacherIndex],
-                    onTap: () =>
-                        widget.onTeacherTapped?.call(preview[teacherIndex].id),
-                    pricing: pricingQuote,
-                  );
-                }
-                return Center(
-                  child: TilawaButton(
-                    text: l10n.seeAllTeachers,
-                    onPressed: widget.onSeeAllTeachers,
-                    variant: TilawaButtonVariant.ghost,
-                    size: TilawaButtonSize.small,
-                  ),
+                return TeacherCard(
+                  teacher: preview[teacherIndex],
+                  onTap: () =>
+                      widget.onTeacherTapped?.call(preview[teacherIndex].id),
+                  pricing: pricingQuote,
                 );
               },
             ),
         },
       ),
+      bottomNavigationBar: widget.onSeeAllTeachers == null
+          ? null
+          : BlocBuilder<TeacherListBloc, TeacherListState>(
+              builder: (context, state) {
+                if (state is! TeacherListSuccess) {
+                  return const SizedBox.shrink();
+                }
+                return TilawaBottomActionArea(
+                  child: TilawaButton(
+                    text: l10n.seeAllTeachers,
+                    onPressed: widget.onSeeAllTeachers,
+                    variant: TilawaButtonVariant.ghost,
+                    size: TilawaButtonSize.large,
+                    isFullWidth: true,
+                  ),
+                );
+              },
+            ),
     );
   }
 }

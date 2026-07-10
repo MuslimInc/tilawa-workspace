@@ -332,7 +332,7 @@ class QuranSessionsLocalizationsEn extends QuranSessionsLocalizations {
   String get noTeachersAvailableYet => 'No teachers available yet';
 
   @override
-  String get seeAllTeachers => 'See all teachers →';
+  String get seeAllTeachers => 'See all teachers';
 
   @override
   String get becomeTeacherCardTitle => 'I want to become a teacher';
@@ -2291,6 +2291,9 @@ class QuranSessionsLocalizationsEn extends QuranSessionsLocalizations {
 
   @override
   String get teacherDashboardLoadingLabel => 'Loading your dashboard';
+
+  @override
+  String get teacherListLoadingLabel => 'Loading teachers';
 
   @override
   String get teacherDashboardRefreshingLabel => 'Refreshing';

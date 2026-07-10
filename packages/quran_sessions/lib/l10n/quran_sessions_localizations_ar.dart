@@ -320,7 +320,7 @@ class QuranSessionsLocalizationsAr extends QuranSessionsLocalizations {
   String get noTeachersAvailableYet => 'لا يوجد معلمون متاحون بعد';
 
   @override
-  String get seeAllTeachers => 'عرض جميع المعلمين ←';
+  String get seeAllTeachers => 'عرض جميع المعلمين';
 
   @override
   String get becomeTeacherCardTitle => 'أريد أن أصبح محفظًا';
@@ -2258,6 +2258,9 @@ class QuranSessionsLocalizationsAr extends QuranSessionsLocalizations {
 
   @override
   String get teacherDashboardLoadingLabel => 'جارٍ تحميل لوحتك';
+
+  @override
+  String get teacherListLoadingLabel => 'جارٍ تحميل المحفظين';
 
   @override
   String get teacherDashboardRefreshingLabel => 'جارٍ التحديث';

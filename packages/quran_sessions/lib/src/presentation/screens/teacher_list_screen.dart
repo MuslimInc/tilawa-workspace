@@ -123,7 +123,15 @@ class _TeacherListScreenState extends State<TeacherListScreen> {
                 onSelected: _onFilterSelected,
               ),
               SizedBox(height: tokens.spaceSmall),
-              for (var i = 0; i < 4; i++) const TeacherCardCompactSkeleton(),
+              TilawaSkeleton(
+                semanticLabel: l10n.teacherListLoadingLabel,
+                child: Column(
+                  children: [
+                    for (var i = 0; i < 4; i++)
+                      const TeacherCardCompactSkeleton(),
+                  ],
+                ),
+              ),
             ],
           ),
           TeacherListEmpty(

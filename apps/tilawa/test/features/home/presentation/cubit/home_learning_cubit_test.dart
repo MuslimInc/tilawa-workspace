@@ -495,23 +495,26 @@ void main() {
       },
     );
 
-    test('answering not-now hides both the prompt and the browse entry', () async {
-      getStudentSessions.result = const Right(
-        StudentSessionsPage(
-          upcoming: [],
-          past: [],
-        ),
-      );
+    test(
+      'answering not-now hides both the prompt and the browse entry',
+      () async {
+        getStudentSessions.result = const Right(
+          StudentSessionsPage(
+            upcoming: [],
+            past: [],
+          ),
+        );
 
-      final cubit = createCubit();
-      await cubit.load();
+        final cubit = createCubit();
+        await cubit.load();
 
-      await cubit.setTutoringInterest(isInterested: false);
+        await cubit.setTutoringInterest(isInterested: false);
 
-      expect(cubit.state.isInterestSignalNeeded, isFalse);
-      expect(cubit.state.isBrowseEntryVisible, isFalse);
-      cubit.close();
-    });
+        expect(cubit.state.isInterestSignalNeeded, isFalse);
+        expect(cubit.state.isBrowseEntryVisible, isFalse);
+        cubit.close();
+      },
+    );
 
     test(
       'active learning states (ongoing/imminent) are shown even if user set isInterested=false',
