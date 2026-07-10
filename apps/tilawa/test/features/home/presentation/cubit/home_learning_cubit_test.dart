@@ -445,9 +445,73 @@ void main() {
 
         expect(cubit.state.status, HomeLearningStatus.none);
         expect(cubit.state.isInterestSignalNeeded, isFalse);
+        expect(cubit.state.isBrowseEntryVisible, isFalse);
         cubit.close();
       },
     );
+
+    test(
+      'interested user keeps the persistent browse entry on the fallback',
+      () async {
+        getStudentSessions.result = const Right(
+          StudentSessionsPage(
+            upcoming: [],
+            past: [],
+          ),
+        );
+
+        preferenceStore.hasSetInterest = true;
+        preferenceStore.isInterested = true; // Said yes
+
+        final cubit = createCubit();
+        await cubit.load();
+
+        expect(cubit.state.status, HomeLearningStatus.none);
+        expect(cubit.state.isInterestSignalNeeded, isFalse);
+        expect(cubit.state.isBrowseEntryVisible, isTrue);
+        cubit.close();
+      },
+    );
+
+    test(
+      'answering yes swaps the prompt for the browse entry without a reload',
+      () async {
+        getStudentSessions.result = const Right(
+          StudentSessionsPage(
+            upcoming: [],
+            past: [],
+          ),
+        );
+
+        final cubit = createCubit();
+        await cubit.load();
+        expect(cubit.state.isInterestSignalNeeded, isTrue);
+
+        await cubit.setTutoringInterest(isInterested: true);
+
+        expect(cubit.state.isInterestSignalNeeded, isFalse);
+        expect(cubit.state.isBrowseEntryVisible, isTrue);
+        cubit.close();
+      },
+    );
+
+    test('answering not-now hides both the prompt and the browse entry', () async {
+      getStudentSessions.result = const Right(
+        StudentSessionsPage(
+          upcoming: [],
+          past: [],
+        ),
+      );
+
+      final cubit = createCubit();
+      await cubit.load();
+
+      await cubit.setTutoringInterest(isInterested: false);
+
+      expect(cubit.state.isInterestSignalNeeded, isFalse);
+      expect(cubit.state.isBrowseEntryVisible, isFalse);
+      cubit.close();
+    });
 
     test(
       'active learning states (ongoing/imminent) are shown even if user set isInterested=false',

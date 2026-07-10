@@ -85,16 +85,26 @@ class _HomeLearningEntrySliverHost extends StatelessWidget {
           );
 
         case HomeLearningStatus.none:
-          if (!learningState.isInterestSignalNeeded) return null;
+          if (!learningState.isInterestSignalNeeded &&
+              !learningState.isBrowseEntryVisible) {
+            return null;
+          }
           if (!_isHomeLearnQuranStudentCardVisible(
             capability: capabilityState.capability,
             capabilityLoaded: capabilityState.hasLoaded,
           )) {
             return null;
           }
+          if (learningState.isInterestSignalNeeded) {
+            return const HomeLearningCardImpressionListener(
+              cardType: 'interest',
+              child: HomeLearningInterestCard(),
+            );
+          }
+          // Answered yes: keep the Learn Quran entry on Home.
           return const HomeLearningCardImpressionListener(
-            cardType: 'interest',
-            child: HomeLearningInterestCard(),
+            cardType: 'browse',
+            child: HomeLearningBrowseCard(),
           );
       }
     }();

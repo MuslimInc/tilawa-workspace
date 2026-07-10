@@ -204,13 +204,19 @@ class HomeLearningCubit extends Cubit<HomeLearningState> {
             }
           }
 
-          // 6. Priority 5: Fallback to None (check interest signal)
+          // 6. Priority 5: Fallback to None (check interest signal).
+          // Unanswered → interest prompt; answered yes → persistent browse
+          // entry so the Learn Quran section never disappears for an
+          // interested student; answered no → nothing (dismissed).
           final hasSetInterest = await _preferenceStore
               .getHasSetLearningInterest();
+          final isInterested =
+              hasSetInterest && await _preferenceStore.getIsInterested();
           emit(
             HomeLearningState(
               status: HomeLearningStatus.none,
               isInterestSignalNeeded: !hasSetInterest,
+              isBrowseEntryVisible: isInterested,
             ),
           );
         },
@@ -223,11 +229,18 @@ class HomeLearningCubit extends Cubit<HomeLearningState> {
     }
   }
 
-  /// Sets the user's tutoring interest preference and updates state accordingly.
+  /// Sets the user's tutoring interest preference and updates state
+  /// accordingly. Answering yes swaps the prompt for the persistent browse
+  /// entry instead of removing the Learn Quran section from Home.
   Future<void> setTutoringInterest({required bool isInterested}) async {
     await _preferenceStore.setIsInterested(isInterested);
     await _preferenceStore.setHasSetLearningInterest(true);
-    emit(state.copyWith(isInterestSignalNeeded: false));
+    emit(
+      state.copyWith(
+        isInterestSignalNeeded: false,
+        isBrowseEntryVisible: isInterested,
+      ),
+    );
   }
 
   /// Marks a completed session's revision context as practiced.

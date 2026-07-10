@@ -276,6 +276,16 @@ class AppLocalizationsEn extends AppLocalizations {
   String get homeQuickToolsTitle => 'Quick tools';
 
   @override
+  String get homeLearningBrowseTitle => 'Learn Quran';
+
+  @override
+  String get homeLearningBrowseSubtitle =>
+      'Choose your hafiz and book a live 1-on-1 session.';
+
+  @override
+  String get homeLearningBrowseCta => 'Start learning';
+
+  @override
   String get homeLearningInterestPromptTitle =>
       'Learn Quran with a Qualified Tutor?';
 

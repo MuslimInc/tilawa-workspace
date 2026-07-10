@@ -226,6 +226,27 @@ void main() {
     );
 
     testWidgets(
+      'HomeLearningBrowseCard renders and routes to Learn Quran home',
+      (tester) async {
+        await tester.pumpWidget(
+          createTestableWidget(const HomeLearningBrowseCard()),
+        );
+        await tester.pumpAndSettle();
+
+        expect(find.text('Learn Quran'), findsOneWidget);
+        expect(
+          find.text('Choose your hafiz and book a live 1-on-1 session.'),
+          findsOneWidget,
+        );
+
+        await tester.tap(find.text('Start learning'));
+        await tester.pumpAndSettle();
+
+        expect(navigatedPaths, contains('/sessions'));
+      },
+    );
+
+    testWidgets(
       'HomeLearningNextSessionCard renders imminent countdown and navigates',
       (tester) async {
         final session = QuranSession(
