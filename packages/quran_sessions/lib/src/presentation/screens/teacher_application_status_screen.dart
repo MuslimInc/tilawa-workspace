@@ -319,9 +319,10 @@ class _MetaRow extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final l10n = context.quranSessionsL10n;
+    final tokens = Theme.of(context).tokens;
 
     return Padding(
-      padding: const EdgeInsets.only(bottom: 8),
+      padding: EdgeInsets.only(bottom: tokens.spaceSmall),
       child: Row(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [

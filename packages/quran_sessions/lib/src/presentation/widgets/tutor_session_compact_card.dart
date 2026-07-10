@@ -59,7 +59,7 @@ class TutorSessionCompactCard extends StatelessWidget {
           Expanded(
             child: TilawaCard(
               surface: TilawaCardSurface.flat,
-              padding: EdgeInsets.all(tokens.spaceSmall + 2),
+              padding: EdgeInsets.all(tokens.spaceSmall + tokens.spaceTiny),
               onTap: onTap,
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.stretch,

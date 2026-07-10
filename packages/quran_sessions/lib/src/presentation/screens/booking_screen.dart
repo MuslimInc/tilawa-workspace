@@ -214,7 +214,7 @@ class _BookingScreenState extends State<BookingScreen> {
               mainAxisSize: MainAxisSize.min,
               children: [
                 const CircularProgressIndicator(),
-                const SizedBox(height: 12),
+                SizedBox(height: tokens.spaceMedium),
                 Text(l10n.checkingEligibility),
               ],
             ),
@@ -227,7 +227,7 @@ class _BookingScreenState extends State<BookingScreen> {
               mainAxisSize: MainAxisSize.min,
               children: [
                 const CircularProgressIndicator(),
-                const SizedBox(height: 12),
+                SizedBox(height: tokens.spaceMedium),
                 Text(l10n.confirmingBooking),
               ],
             ),

@@ -84,6 +84,7 @@ class _TeacherApplicationScreenState extends State<TeacherApplicationScreen> {
   @override
   Widget build(BuildContext context) {
     final l10n = context.quranSessionsL10n;
+    final tokens = Theme.of(context).tokens;
 
     return QuranSessionsScaffold(
       title: l10n.teacherApplicationTitle,
@@ -120,7 +121,7 @@ class _TeacherApplicationScreenState extends State<TeacherApplicationScreen> {
               mainAxisSize: MainAxisSize.min,
               children: [
                 const CircularProgressIndicator(),
-                const SizedBox(height: 12),
+                SizedBox(height: tokens.spaceMedium),
                 Text(l10n.submittingApplication),
               ],
             ),
@@ -150,24 +151,25 @@ class _NotStartedView extends StatelessWidget {
   Widget build(BuildContext context) {
     final l10n = context.quranSessionsL10n;
     final scheme = Theme.of(context).colorScheme;
+    final tokens = Theme.of(context).tokens;
 
     return Padding(
-      padding: const EdgeInsets.all(32),
+      padding: EdgeInsets.all(tokens.spaceXXL),
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
           Icon(
             Icons.menu_book_outlined,
-            size: 80,
+            size: tokens.iconSizeLarge * 3.3,
             color: scheme.primary,
           ),
-          const SizedBox(height: 24),
+          SizedBox(height: tokens.spaceExtraLarge),
           Text(
             l10n.becomeTeacherOnTilawa,
             style: Theme.of(context).textTheme.headlineSmall,
             textAlign: TextAlign.center,
           ),
-          const SizedBox(height: 12),
+          SizedBox(height: tokens.spaceMedium),
           Text(
             l10n.becomeTeacherApplicationIntro,
             style: Theme.of(context).textTheme.bodyMedium?.copyWith(
@@ -175,7 +177,7 @@ class _NotStartedView extends StatelessWidget {
             ),
             textAlign: TextAlign.center,
           ),
-          const SizedBox(height: 40),
+          SizedBox(height: tokens.spaceXXL + tokens.spaceSmall),
           TilawaButton(
             text: l10n.startApplication,
             leadingIcon: const Icon(Icons.arrow_forward),
