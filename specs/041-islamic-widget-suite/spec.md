@@ -4,13 +4,13 @@
 
 **Created**: 2026-07-11
 
-**Status**: Draft
+**Status**: Ready for Planning
 
 **Input**: User description: "Build a premium Arabic-first widget suite (prayer times countdown, Ayah of the Day in authentic Mushaf QCF script, morning/evening adhkar, Hijri date) plus shareable QCF ayah cards, as the app's primary acquisition feature — competing with and differentiating from Glassify (100K+ installs on widgets alone) by owning what no competitor can copy: verses rendered in the authentic King Fahd Complex (QCF V4) Mushaf script."
 
 ## Strategic Context
 
-The app sits at ~50 installs in the most crowded Play Store category (Quran/Prayer apps). Growth requires a wedge feature that (a) creates a visible, daily, on-home-screen presence, (b) is demonstrably better than what incumbents offer, and (c) produces organically shareable artifacts. The Arabic widget market is proven (Glassify: 100K+ installs, 7K+ reviews, paid Pro tier) and its #1 selling point is Arabic typography — a dimension where this app holds an uncopyable asset: the authentic QCF V4 Mushaf glyph set and an existing native Canvas rendering engine (`quran_kmp`). Standard Android widgets cannot use custom fonts directly, so authentic-script widgets require bitmap glyph rendering — a technical moat we already possess and competitors would need months to replicate.
+The app sits at ~50 installs in the crowded Quran and prayer-app category. Growth requires a wedge feature that (a) creates a visible daily home-screen presence, (b) is demonstrably better than incumbent offerings, and (c) produces organically shareable artifacts. The Arabic widget market is proven (Glassify: 100K+ installs and 7K+ reviews), and its primary selling point is Arabic typography. Tilawa can differentiate through its existing authentic QCF V4 Mushaf presentation, giving users verse widgets and share cards that visually match the Madinah Mushaf rather than generic Arabic text.
 
 ## User Scenarios & Testing *(mandatory)*
 
@@ -79,7 +79,7 @@ A user places a Hijri date widget showing today's Hijri and Gregorian dates with
 
 1. **Given** the widget is placed, **When** viewed, **Then** the correct Hijri date (month name in Arabic script) and Gregorian date are shown.
 2. **Given** the user sets a +1 day Hijri adjustment, **When** the widget refreshes, **Then** the displayed Hijri date shifts by +1 day and matches the in-app Hijri display.
-3. **Given** midnight (or Maghrib, per chosen convention) passes, **When** the widget refreshes, **Then** the date advances correctly.
+3. **Given** local midnight passes, **When** the widget refreshes, **Then** both displayed dates advance according to the device's current timezone and the saved Hijri adjustment.
 
 ---
 
@@ -111,7 +111,7 @@ From the Mushaf or the Ayah widget's detail view, a user generates a beautiful s
 - RTL device locale vs LTR locale → layouts mirror correctly in both.
 - QCF glyph rendering failure (missing page font) → fallback to bundled Uthmanic hafs text style, never tofu boxes.
 - Ramadan: prayer widget must correctly reflect Fajr/Maghrib prominence without a special mode in v1 (explicitly out of scope: Imsak row).
-- Storage-constrained bitmap rendering → rendered widget bitmaps are size-bounded and cached; re-render only on content change.
+- Storage-constrained devices → generated widget artwork remains size-bounded and old temporary artwork is removed without blanking placed widgets.
 
 ## Requirements *(mandatory)*
 
@@ -120,7 +120,7 @@ From the Mushaf or the Ayah widget's detail view, a user generates a beautiful s
 - **FR-001**: System MUST provide four home-screen widget types: Prayer Times Countdown, Ayah of the Day, Morning/Evening Adhkar, and Hijri Date, each discoverable in the launcher's widget picker with a preview image.
 - **FR-002**: Prayer widget MUST show all five daily prayers, highlight the next prayer, and show time-remaining at minute granularity, updating on a battery-safe schedule (no per-second background work).
 - **FR-003**: Prayer widget MUST source times from the same calculation pipeline as the in-app prayer screen (single source of truth; no drift between widget and app).
-- **FR-004**: Ayah widget MUST render verses using the authentic QCF V4 glyph set via bitmap rendering; generic-font rendering of the verse body is not acceptable for the primary display path.
+- **FR-004**: Ayah widget MUST present verses using the authentic QCF V4 glyph set; generic-font presentation of the verse body is not acceptable for the primary display path.
 - **FR-005**: Ayah rotation MUST be deterministic per day, work fully offline, and be curated (rotation pool excludes verses that render poorly at widget sizes).
 - **FR-006**: Adhkar widget MUST switch between morning and evening sets based on local time windows and support in-widget advancement through items.
 - **FR-007**: Hijri adjustment (±2 days) MUST be a single user setting honored by the widget, the app, and any notification surface that shows Hijri dates.
@@ -131,6 +131,16 @@ From the Mushaf or the Ayah widget's detail view, a user generates a beautiful s
 - **FR-012**: System MUST emit analytics for: widget added/removed (by type), widget tapped (by type), share card generated, share card shared (by destination where available) — sufficient to compute the Success Criteria below.
 - **FR-013**: All widget text (labels, prayer names, dhikr content) MUST be localized in Arabic and English at launch, following the device or in-app language setting.
 - **FR-014**: Widget refresh scheduling MUST tolerate OEM background restrictions: last-known data is always shown, and a staleness indicator appears when data is older than one day.
+- **FR-015**: Each widget MUST expose meaningful accessibility labels, preserve a logical reading order in Arabic and English, and remain legible at supported system text-scaling settings.
+- **FR-016**: Widget previews and placed widgets MUST not expose precise location coordinates, private reading history, or other sensitive user data; analytics MUST identify widget type and interaction without recording displayed Quran or adhkar content.
+- **FR-017**: The prayer widget MUST visibly distinguish the next prayer without relying on color alone.
+- **FR-018**: The adhkar widget MUST use 04:00–11:59 local time for the morning set and 16:00–23:59 for the evening set; outside those windows it MUST retain the most recently applicable set and label it clearly.
+- **FR-019**: Adhkar progress MUST reset when the applicable morning/evening period changes and MUST persist across launcher or process restarts within the same period.
+- **FR-020**: Share cards MUST support one to five consecutive verses; selections outside that range MUST be rejected before preview with a clear, localized explanation.
+- **FR-021**: Share-card preview MUST allow the user to cancel without creating a share artifact, and generated temporary artifacts MUST be removed after the share flow or during routine cleanup.
+- **FR-022**: All four widgets MUST present a non-blank first-use state when required setup is incomplete, with a localized action that opens the exact in-app setup surface.
+- **FR-023**: A daily Ayah selection MUST remain stable for the entire local calendar day, including after reboot, and MUST not repeat until the available curated rotation pool has been exhausted.
+- **FR-024**: The suite MUST define supported minimum dimensions for every size class and prevent clipped Quranic glyphs, prayer names, dates, or primary controls at those dimensions.
 
 ### Key Entities
 
@@ -140,6 +150,7 @@ From the Mushaf or the Ayah widget's detail view, a user generates a beautiful s
 - **AdhkarSetProgress**: Current set (morning/evening), item index, and last-interaction timestamp for the adhkar widget.
 - **ShareCard**: A generated artifact — verse range, background style, rendered image reference; transient except analytics.
 - **HijriAdjustment**: Single signed day-offset setting shared app-wide.
+- **WidgetThemePreference**: The selected light, dark, or automatic appearance for one widget instance.
 
 ## Success Criteria *(mandatory)*
 
@@ -153,16 +164,33 @@ From the Mushaf or the Ayah widget's detail view, a user generates a beautiful s
 - **SC-006**: At least 10 new Play reviews mentioning widgets within 90 days, with widget-related review sentiment ≥ 4.5 average.
 - **SC-007**: Widget-attributed battery complaints: zero sustained (no review or support pattern attributing battery drain to widgets).
 - **SC-008**: Crash-free sessions remain ≥ 99.5% after release (widgets add no stability regression).
+- **SC-009**: Across the release device matrix, 100% of widgets show usable current or explicitly stale content within 10 seconds of being placed, after reboot, and after launcher restart; no tested state produces a blank widget.
+- **SC-010**: All verses in the launch rotation pool and all supported one-to-five-verse share selections pass visual review with correct glyphs, diacritics, verse markers, RTL order, and no clipping at every supported size.
+- **SC-011**: In moderated Arabic-first usability testing, at least 90% of participants can place any widget, understand its primary state, and reach its corresponding in-app destination without assistance.
+- **SC-012**: Widget content and controls meet WCAG 2.1 AA contrast requirements, remain usable at 200% text scaling where the launcher supports scaling, and convey state without color alone.
 
 ## Assumptions
 
-- The existing QCF V4 glyph rendering engine (`quran_kmp`, Android Canvas) can be reused to rasterize verses to bitmaps for widget and share-card surfaces; no new font technology is required.
+- The existing QCF V4 Quran presentation capability and licensed assets are available for reuse by widget and share-card experiences.
 - Prayer time calculation, adhkar content, and Hijri conversion already exist in the app and expose (or can expose) their outputs to a native widget layer without duplicating business logic.
 - v1 targets Android home-screen widgets only. Samsung lock-screen widgets, iOS widgets, and a paid "Pro designs" tier are explicitly out of scope for v1 (Pro tier is a candidate for v2 monetization, following the competitor's validated model).
 - Huawei devices without Google services are out of scope for v1.
 - Egypt-first launch: Arabic content quality is the bar; English is required but secondary.
 - Group Khatma, memorization path, and teacher marketplace are separate future specs; this spec deliberately excludes them.
 - The rotation pool for Ayah of the Day is editorially curated before launch (initial pool of ~90 verses, enough for a quarter without repetition).
+- Hijri dates roll over at local midnight in v1. Maghrib-based rollover is deferred because a single predictable convention is easier to explain and verify across the app and widgets.
+- Morning adhkar is applicable from 04:00 through 11:59 local time and evening adhkar from 16:00 through 23:59. Between these windows, the widget retains and labels the most recently applicable set.
+- Share cards support one to five consecutive verses in v1; longer or non-consecutive selections remain available through existing text-sharing flows, if present.
+- Users may place multiple instances of each widget type, and theme and size choices are stored per instance; shared religious-content settings remain app-wide.
+- The device timezone is authoritative for daily rotation, date rollover, adhkar windows, and prayer countdown boundaries.
+
+## Dependencies
+
+- Accurate prayer schedules require the user to complete location and prayer-calculation setup in the app.
+- Authentic verse presentation depends on the existing licensed QCF V4 content and its verified Quran-text mapping remaining available for offline use.
+- Adhkar content, translations, and Hijri conversion must be approved and available offline in Arabic and English before release.
+- Launcher capabilities differ by device; supported size classes and automatic appearance behavior are limited to capabilities exposed by the host launcher.
+- Store-listing measurement requires a conversion baseline captured before widget-first screenshots are published.
 
 ## Out of Scope (v1)
 
@@ -170,6 +198,7 @@ From the Mushaf or the Ayah widget's detail view, a user generates a beautiful s
 - Widget customization studio (Glassify-style color/font editors) — v1 ships curated variants only.
 - Paid/Pro widget tier, seasonal packs, lock-screen widgets, weather or non-Islamic utility widgets.
 - Imsak/Ramadan-specific rows, Qibla widget, audio playback from widgets.
+- Editing verse text, removing required attribution, arbitrary user-uploaded backgrounds, and sharing more than five verses in one card.
 
 ## Rollout & Measurement Plan
 
