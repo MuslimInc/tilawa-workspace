@@ -6,7 +6,9 @@ import {
   NoShowClassification,
   SessionCompensationType,
 } from '../../domain/entities/session-moderation.types';
+import { SessionReportResolution } from '../../domain/entities/session-report-summary.entity';
 import { SessionModerationGateway } from '../../domain/repositories/session-moderation.gateway';
+import { mapCallableFunctionError } from './callable-function-error.util';
 
 @Injectable({ providedIn: 'root' })
 export class FirebaseSessionModerationGateway implements SessionModerationGateway {
@@ -86,6 +88,18 @@ export class FirebaseSessionModerationGateway implements SessionModerationGatewa
     });
   }
 
+  async resolveSessionReport(
+    reportId: string,
+    resolution: SessionReportResolution,
+    reason?: string,
+  ): Promise<void> {
+    await this.invokeCallable('resolveSessionReport', {
+      reportId,
+      resolution,
+      ...(reason ? { reason } : {}),
+    });
+  }
+
   async resolveSessionDispute(
     bookingId: string,
     disputeId: string,
@@ -106,38 +120,7 @@ export class FirebaseSessionModerationGateway implements SessionModerationGatewa
     try {
       await callable(data);
     } catch (error) {
-      throw new Error(this.toErrorMessage(error, name));
+      throw new Error(mapCallableFunctionError(error, name));
     }
   }
-
-  private toErrorMessage(error: unknown, functionName: string): string {
-    if (isCallableError(error)) {
-      if (error.code === 'functions/not-found') {
-        return `${functionName} is not deployed. Run firebase deploy --only functions.`;
-      }
-
-      return error.message || `${functionName} failed (${error.code}).`;
-    }
-
-    if (error instanceof Error) {
-      if (error.message === 'internal') {
-        return `${functionName} failed. Deploy Cloud Functions and retry.`;
-      }
-
-      return error.message;
-    }
-
-    return `${functionName} failed.`;
-  }
-}
-
-function isCallableError(error: unknown): error is { code: string; message: string } {
-  return (
-    typeof error === 'object' &&
-    error !== null &&
-    'code' in error &&
-    typeof (error as { code: unknown }).code === 'string' &&
-    'message' in error &&
-    typeof (error as { message: unknown }).message === 'string'
-  );
 }

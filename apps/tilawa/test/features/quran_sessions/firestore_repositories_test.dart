@@ -151,9 +151,9 @@ void main() {
     test('getSupportedCountries returns enabled countries', () async {
       final countries = await dataSource.getSupportedCountries();
 
-      check(countries.map((c) => c.countryCode).toList()).deepEquals(
-        ['EG', 'SA', 'AE'],
-      );
+      // The seeded catalog defines EG/SA/AE, but only EG is enabled for this
+      // release — the data source must filter to enabled markets.
+      check(countries.map((c) => c.countryCode).toList()).deepEquals(['EG']);
     });
 
     test('getCitiesByCountryCode returns enabled cities for EG', () async {

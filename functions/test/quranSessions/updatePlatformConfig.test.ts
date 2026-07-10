@@ -31,6 +31,43 @@ test("validateUpdatePlatformConfig accepts valid config", () => {
   assert.doesNotThrow(() => validateUpdatePlatformConfig(validData));
 });
 
+test("validateUpdatePlatformConfig accepts a non-default child age threshold", () => {
+  const validData: UpdatePlatformConfigRequest = {
+    quranSessionsEnabled: true,
+    studentEntryEnabled: true,
+    bookingEnabled: true,
+    sessionMode: "videoOnly",
+    bookingMode: "autoConfirm",
+    defaultJoinWindowLeadMs: 300000,
+    defaultTutorApprovalSlaMs: 3600000,
+    defaultMinBookingNoticeMs: 1800000,
+    defaultMaxUpcomingPerStudent: 3,
+    childAgeThreshold: 16,
+  };
+
+  assert.doesNotThrow(() => validateUpdatePlatformConfig(validData));
+});
+
+test("validateUpdatePlatformConfig rejects a non-positive child age threshold", () => {
+  const data: UpdatePlatformConfigRequest = {
+    quranSessionsEnabled: true,
+    studentEntryEnabled: true,
+    bookingEnabled: true,
+    sessionMode: "videoOnly",
+    bookingMode: "autoConfirm",
+    defaultJoinWindowLeadMs: 300000,
+    defaultTutorApprovalSlaMs: 3600000,
+    defaultMinBookingNoticeMs: 1800000,
+    defaultMaxUpcomingPerStudent: 3,
+    childAgeThreshold: 0,
+  };
+
+  assert.throws(
+    () => validateUpdatePlatformConfig(data),
+    /childAgeThreshold must be a finite number > 0/,
+  );
+});
+
 test("validateUpdatePlatformConfig accepts legacy booking mode alias", () => {
   const validData: Omit<UpdatePlatformConfigRequest, "bookingMode"> = {
     quranSessionsEnabled: true,

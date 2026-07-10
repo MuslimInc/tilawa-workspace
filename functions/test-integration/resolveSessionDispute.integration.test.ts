@@ -35,6 +35,10 @@ const resolveDispute = resolveSessionDispute as unknown as CallableLike<{
   compensationExecutionStatus: string | null;
 }>;
 
+function codeOf(error: unknown): string | undefined {
+  return (error as { details?: { code?: string } })?.details?.code;
+}
+
 async function seedDisputedBooking(): Promise<string> {
   await seedUserSession("student1");
   await db().collection("quran_bookings").doc("booking1").set({
@@ -121,6 +125,100 @@ test("integration: resolve with_compensation creates manual_pending compensation
   assert.equal(compensation.get("type"), "manual_review");
 });
 
+test("integration: resolve favor_teacher closes the dispute without a financial record", async () => {
+  await clearFirestore();
+  const disputeId = await seedDisputedBooking();
+
+  const res = await resolveDispute.run({
+    data: {
+      bookingId: "booking1",
+      disputeId,
+      resolution: "favor_teacher",
+      reason: "Evidence supports the teacher.",
+    },
+    auth: { uid: "admin1", token: { admin: true } },
+  });
+
+  assert.equal(res.refundId, null);
+  assert.equal(res.compensationId, null);
+  const dispute = await db()
+    .collection("quran_session_disputes")
+    .doc(disputeId)
+    .get();
+  assert.equal(dispute.get("status"), "resolved_favor_teacher");
+  const refunds = await db().collection("quran_session_refunds").get();
+  const compensations = await db()
+    .collection("quran_session_compensations")
+    .get();
+  assert.equal(refunds.size, 0);
+  assert.equal(compensations.size, 0);
+});
+
+test("integration: resolve rejected closes the dispute without a financial record", async () => {
+  await clearFirestore();
+  const disputeId = await seedDisputedBooking();
+
+  const res = await resolveDispute.run({
+    data: {
+      bookingId: "booking1",
+      disputeId,
+      resolution: "rejected",
+      reason: "Insufficient evidence.",
+    },
+    auth: { uid: "admin1", token: { admin: true } },
+  });
+
+  assert.equal(res.refundId, null);
+  assert.equal(res.compensationId, null);
+  const dispute = await db()
+    .collection("quran_session_disputes")
+    .doc(disputeId)
+    .get();
+  assert.equal(dispute.get("status"), "rejected");
+  const refunds = await db().collection("quran_session_refunds").get();
+  const compensations = await db()
+    .collection("quran_session_compensations")
+    .get();
+  assert.equal(refunds.size, 0);
+  assert.equal(compensations.size, 0);
+});
+
+test("integration: resolution is rejected when the booking is not disputed", async () => {
+  await clearFirestore();
+  await seedUserSession("student1");
+  await db().collection("quran_bookings").doc("booking1").set({
+    bookingId: "booking1",
+    aggregateId: "booking1",
+    sessionId: "session1",
+    studentId: "student1",
+    teacherId: "teacher1",
+    lifecycleStatus: "completed",
+    amountPaidUsd: 25,
+  });
+  await db().collection("quran_session_disputes").doc("dispute1").set({
+    disputeId: "dispute1",
+    bookingId: "booking1",
+    aggregateId: "booking1",
+    status: "opened",
+  });
+
+  await assert.rejects(
+    resolveDispute.run({
+      data: {
+        bookingId: "booking1",
+        disputeId: "dispute1",
+        resolution: "favor_student",
+        reason: "teacher fault",
+      },
+      auth: { uid: "admin1", token: { admin: true } },
+    }),
+    (e) => codeOf(e) === "invalid_transition",
+  );
+
+  const refunds = await db().collection("quran_session_refunds").get();
+  assert.equal(refunds.size, 0);
+});
+
 test("integration: duplicate dispute resolution does not duplicate ledger", async () => {
   await clearFirestore();
   const disputeId = await seedDisputedBooking();
@@ -140,4 +238,71 @@ test("integration: duplicate dispute resolution does not duplicate ledger", asyn
   assert.equal(first.refundId, second.refundId);
   const refunds = await db().collection("quran_session_refunds").get();
   assert.equal(refunds.size, 1);
+});
+
+test("integration: dispute resolution requires an administrator and a reason", async () => {
+  await clearFirestore();
+  const disputeId = await seedDisputedBooking();
+  const payload = {
+    bookingId: "booking1",
+    disputeId,
+    resolution: "closed",
+    reason: "Reviewed by operations.",
+  };
+
+  await assert.rejects(
+    resolveDispute.run({
+      data: payload,
+      auth: { uid: "student1", token: {} },
+    }),
+    (e) => codeOf(e) === "unauthorized_actor",
+  );
+  await assert.rejects(
+    resolveDispute.run({
+      data: { ...payload, reason: " " },
+      auth: { uid: "admin1", token: { admin: true } },
+    }),
+    (error) =>
+      error instanceof Error &&
+      error.message ===
+        "bookingId, disputeId, resolution, and reason required.",
+  );
+
+  const dispute = await db()
+    .collection("quran_session_disputes")
+    .doc(disputeId)
+    .get();
+  assert.equal(dispute.get("status"), "opened");
+});
+
+test("integration: closing a dispute records terminal metadata and audit", async () => {
+  await clearFirestore();
+  const disputeId = await seedDisputedBooking();
+
+  const res = await resolveDispute.run({
+    data: {
+      bookingId: "booking1",
+      disputeId,
+      resolution: "closed",
+      reason: "Reviewed by operations.",
+    },
+    auth: { uid: "admin1", token: { admin: true } },
+  });
+
+  assert.equal(res.lifecycleStatus, "disputed");
+  const dispute = await db()
+    .collection("quran_session_disputes")
+    .doc(disputeId)
+    .get();
+  assert.equal(dispute.get("status"), "closed");
+  assert.equal(dispute.get("resolutionReason"), "Reviewed by operations.");
+  assert.equal(dispute.get("resolvedByUserId"), "admin1");
+  assert.ok(dispute.get("resolvedAt"));
+
+  const audit = await db()
+    .collection("quran_session_events")
+    .where("disputeId", "==", disputeId)
+    .where("action", "==", "resolve_dispute")
+    .get();
+  assert.equal(audit.size, 1);
 });

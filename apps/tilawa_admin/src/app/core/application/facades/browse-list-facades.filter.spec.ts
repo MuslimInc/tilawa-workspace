@@ -24,6 +24,7 @@ import {
   ApproveSessionRefundUseCase,
   ConfirmManualBookingPaymentUseCase,
   RejectManualBookingPaymentUseCase,
+  ResolveSessionReportUseCase,
 } from '../../domain/usecases/session-moderation.usecases';
 import { ListSessionReportsUseCase } from '../../domain/usecases/session-report.usecases';
 import { GetSessionReportUseCase } from '../../domain/usecases/session-report.usecases';
@@ -129,6 +130,7 @@ describe('browse list facades — filter change resets cursor', () => {
           SessionReportsFacade,
           { provide: ListSessionReportsUseCase, useValue: listUseCase },
           { provide: GetSessionReportUseCase, useValue: noopUseCase },
+          { provide: ResolveSessionReportUseCase, useValue: noopUseCase },
         ],
       });
       facade = TestBed.inject(SessionReportsFacade);

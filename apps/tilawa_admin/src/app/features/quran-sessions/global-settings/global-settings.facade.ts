@@ -13,6 +13,7 @@ export interface PlatformConfig {
   quranSessionsEnabled: boolean;
   studentEntryEnabled: boolean;
   bookingEnabled: boolean;
+  childAgeThreshold: number;
   sessionMode: 'videoOnly';
   bookingMode: 'requiresTutorApproval' | 'autoConfirm';
   defaultJoinWindowLeadMs: number;
@@ -64,6 +65,7 @@ export class GlobalSettingsFacade {
             config.defaultBookingMode ??
             config.quranTutorBookingMode ??
             'requiresTutorApproval',
+          childAgeThreshold: config.childAgeThreshold ?? 14,
           // Market gate defaults closed when absent in Firestore.
           enableForAllMarkets: config.enableForAllMarkets ?? false,
           enabledMarketCodes: config.enabledMarketCodes ?? [],

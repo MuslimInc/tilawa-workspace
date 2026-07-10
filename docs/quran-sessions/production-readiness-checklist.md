@@ -1,6 +1,7 @@
 # Quran Sessions — Production Readiness Checklist
 
-**Last updated:** 2026-07-03 (launch gate execution)  
+**Last updated:** 2026-07-10 (Spec 039 — App Check release gate added to § 3)
+
 **Scope:** Free / video-only limited rollout — **not** paid booking or reschedule product work.
 
 ---
@@ -55,6 +56,51 @@
 | Error rate < 0.1% for 7 days | ⬜ | **Blocker:** ops monitoring |
 
 **Local readiness:** set `QURAN_SESSIONS_ENFORCE_APP_CHECK=true` on staging functions deploy only after Phase 0 monitor window.
+
+### 3a. Learn Quran App Check release gate (Spec 039 / US4)
+
+**Owner:** ⬜ *unassigned — a named owner must be recorded here before any
+staging enforcement begins.*
+
+**Current enforcement state:** `QURAN_SESSIONS_ENFORCE_APP_CHECK` unset →
+`enforceAppCheck: false` in every environment (verified by
+`functions/test/quranSessions/sessionCallableOptions.test.ts`). It is a
+deployment-time environment value, **not** an admin setting.
+
+**Evidence table** — every row needs a dated PASS from attested clients in
+staging (phases per `app-check-staging-plan.md`) before a production
+enforcement request:
+
+| # | Critical flow (attested client) | Callable(s) | Evidence date | Result |
+|---|---|---|---|---|
+| E1 | Pricing quote on booking screen | `getBookingPricingQuote` / `getBookingPricingQuotes` | ⬜ | ⬜ |
+| E2 | Create + cancel booking | `createSessionBooking`, `cancelSessionBooking` | ⬜ | ⬜ |
+| E3 | Join session (RTC token) | `issueSessionRtcToken` | ⬜ | ⬜ |
+| E4 | File a session report | `reportSessionConcern` | ⬜ | ⬜ |
+| E5 | Open a dispute | `openSessionDispute` | ⬜ | ⬜ |
+| E6 | Admin report + dispute resolution | `resolveSessionReport`, `resolveSessionDispute` | ⬜ | ⬜ |
+| E7 | Non-attested request is rejected | any session callable | ⬜ | ⬜ |
+
+For E7, record the observable rejection (callable error surfaced to the
+client and the corresponding Functions log entry) **without** logging request
+payloads or report/dispute text.
+
+**Success criteria (all required to promote):**
+
+1. E1–E6 pass from attested clients in staging with the flag on.
+2. E7 shows non-attested traffic rejected with an observable error.
+3. Staging callable error rate < 0.1% for 7 consecutive days (per
+   `app-check-staging-plan.md`).
+4. Rollback rehearsed once in staging and its result recorded below.
+
+**Rollback decision (no data mutation):** redeploy functions with
+`QURAN_SESSIONS_ENFORCE_APP_CHECK` removed/`false` — enforcement is read at
+deploy time, so this is config-only; booking/session data is never touched.
+If any critical flow fails during the soak, roll back first, then diagnose.
+
+| Rollback rehearsal | Date | Result |
+|---|---|---|
+| Staging: disable flag, redeploy, verify unattested booking succeeds | ⬜ | ⬜ |
 
 ---
 

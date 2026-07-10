@@ -1,5 +1,7 @@
 export type SessionReportStatus = 'open' | 'under_review' | 'resolved' | 'dismissed';
 
+export type SessionReportResolution = Exclude<SessionReportStatus, 'open'>;
+
 export type SessionReportSeverity = 'high' | 'normal';
 
 export interface SessionReportSummary {
@@ -13,8 +15,11 @@ export interface SessionReportSummary {
   reporterUserId: string;
   reporterRole: string;
   reportedUserId: string | null;
+  resolutionReason: string | null;
+  resolvedByUserId: string | null;
   createdAt: Date;
   updatedAt: Date | null;
+  resolvedAt: Date | null;
 }
 
 export interface SessionReportFilters {

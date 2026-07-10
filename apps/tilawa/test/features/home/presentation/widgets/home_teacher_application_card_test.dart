@@ -3,6 +3,8 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:tilawa/core/bootstrap/app_launch_config.dart';
 import 'package:tilawa/core/di/injection.dart';
 import 'package:tilawa/features/home/presentation/widgets/home_featured_tutor_card.dart';
+import 'package:tilawa/features/quran_sessions/domain/entities/quran_sessions_platform_config.dart';
+import 'package:tilawa/features/quran_sessions/quran_sessions_platform_config_store.dart';
 import 'package:tilawa/l10n/generated/app_localizations.dart';
 import 'package:tilawa_ui_kit/tilawa_ui_kit.dart';
 
@@ -11,10 +13,16 @@ import '../../../../support/screen_scope_test_support.dart';
 Future<void> _pumpHomeCard(
   WidgetTester tester, {
   required AppLaunchConfig config,
+  QuranSessionsPlatformConfig? platformConfig,
   Locale locale = const Locale('ar'),
 }) async {
   await resetScopeGetIt();
   getIt.registerSingleton<AppLaunchConfig>(config);
+  if (platformConfig != null) {
+    getIt.registerSingleton<QuranSessionsPlatformConfigStore>(
+      QuranSessionsPlatformConfigStore()..setConfig(platformConfig),
+    );
+  }
 
   await tester.pumpWidget(
     MaterialApp(
@@ -32,6 +40,9 @@ void main() {
   tearDown(() async {
     if (getIt.isRegistered<AppLaunchConfig>()) {
       await getIt.unregister<AppLaunchConfig>();
+    }
+    if (getIt.isRegistered<QuranSessionsPlatformConfigStore>()) {
+      await getIt.unregister<QuranSessionsPlatformConfigStore>();
     }
   });
 
@@ -53,6 +64,20 @@ void main() {
     await _pumpHomeCard(
       tester,
       config: const AppLaunchConfig(),
+      // Student entry on and every teacher-application flag on — the home
+      // card must still never advertise the teacher application.
+      platformConfig: const QuranSessionsPlatformConfig(
+        quranSessionsEnabled: true,
+        studentEntryEnabled: true,
+        bookingEnabled: true,
+        bookingMode: 'requiresTutorApproval',
+        sessionMode: 'videoOnly',
+        enabledCallProviders: {'mock'},
+        teacherApplicationEnabled: true,
+        teacherApplicationEntryEnabled: true,
+        homeTeacherApplicationCardEnabled: true,
+        teacherApplicationDiscoverability: 'profileAndEmptyState',
+      ),
     );
 
     expect(find.text('التقديم كمعلّم قرآن'), findsNothing);

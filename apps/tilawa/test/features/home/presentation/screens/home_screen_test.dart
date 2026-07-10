@@ -23,6 +23,8 @@ import 'package:tilawa/features/home/presentation/bloc/home_dashboard_event.dart
 import 'package:tilawa/features/home/presentation/cubit/home_listening_resume_cubit.dart';
 import 'package:tilawa/features/home/presentation/screens/home_screen.dart';
 import 'package:tilawa/features/home/presentation/widgets/home_next_prayer_time.dart';
+import 'package:tilawa/features/quran_sessions/domain/entities/quran_sessions_platform_config.dart';
+import 'package:tilawa/features/quran_sessions/quran_sessions_platform_config_store.dart';
 import 'package:tilawa/features/home/presentation/widgets/home_daily_inspiration_section.dart';
 import 'package:tilawa/features/home/presentation/widgets/home_dashboard_body_skeleton.dart';
 import 'package:tilawa/features/home/presentation/widgets/home_dashboard_card.dart';
@@ -524,9 +526,30 @@ void main() {
           const AppLaunchConfig(),
         );
       }
+      // Feature flags fail closed without the runtime platform-config store —
+      // register an enabled config so the featured tutor card renders.
+      getIt.registerSingleton<QuranSessionsPlatformConfigStore>(
+        QuranSessionsPlatformConfigStore()..setConfig(
+          const QuranSessionsPlatformConfig(
+            quranSessionsEnabled: true,
+            studentEntryEnabled: true,
+            bookingEnabled: true,
+            bookingMode: 'requiresTutorApproval',
+            sessionMode: 'videoOnly',
+            enabledCallProviders: {'mock'},
+            teacherApplicationEnabled: false,
+            teacherApplicationEntryEnabled: false,
+            homeTeacherApplicationCardEnabled: false,
+            teacherApplicationDiscoverability: 'none',
+          ),
+        ),
+      );
       addTearDown(() async {
         if (getIt.isRegistered<AppLaunchConfig>()) {
           await getIt.unregister<AppLaunchConfig>();
+        }
+        if (getIt.isRegistered<QuranSessionsPlatformConfigStore>()) {
+          await getIt.unregister<QuranSessionsPlatformConfigStore>();
         }
       });
 
