@@ -66,6 +66,27 @@ class AdhanReceiverTest {
     }
 
     @Test
+    fun `onReceive posts audible fallback and does not crash when foreground start is blocked`() {
+        val base = ApplicationProvider.getApplicationContext<Context>()
+        val context = spyk(base)
+        every { context.startForegroundService(any()) } throws
+            android.app.ForegroundServiceStartNotAllowedException("blocked")
+        val receiver = AdhanReceiver()
+        val intent = Intent("com.tilawa.app.prayer.ACTION_FIRE_ADHAN").apply {
+            putExtra(AdhanScheduler.EXTRA_NOTIFICATION_ID, 123)
+            putExtra(AdhanScheduler.EXTRA_PRAYER_NAME, "fajr")
+            putExtra(AdhanScheduler.EXTRA_PRAYER_KEY, "fajr")
+        }
+
+        // Must not throw — the crash we are fixing surfaced here.
+        receiver.onReceive(context, intent)
+
+        val nm = base.getSystemService(Context.NOTIFICATION_SERVICE) as android.app.NotificationManager
+        val posted = Shadows.shadowOf(nm).allNotifications
+        assertEquals(1, posted.size)
+    }
+
+    @Test
     fun `onReceive ignores unknown actions`() {
         val context = ApplicationProvider.getApplicationContext<Context>()
         val receiver = AdhanReceiver()

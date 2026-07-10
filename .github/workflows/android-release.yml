@@ -39,7 +39,7 @@ on:
         required: true
       build_number:
         description: "Version code, e.g. 40 (must be higher than the last upload)"
-        default: "74"
+        default: "76"
         required: true
       rollout:
         description: "Production staged-rollout fraction (0.0-1.0). 1.0 = full."

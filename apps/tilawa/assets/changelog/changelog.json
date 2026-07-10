@@ -3,6 +3,19 @@
   "lastUpdatedAt": "2026-06-14T12:00:00Z",
   "releases": [
     {
+      "id": "2.1.2+76",
+      "version": "2.1.2",
+      "buildNumber": 76,
+      "highlights": {
+        "en": [
+          "Fixed a crash that could silence the adhan when exact-alarm permission was not granted; the adhan now sounds reliably in the background"
+        ],
+        "ar": [
+          "إصلاح عطل قد يُسكت الأذان عندما لا يكون إذن المنبّهات الدقيقة ممنوحًا؛ الأذان الآن يعمل بشكل موثوق في الخلفية"
+        ]
+      }
+    },
+    {
       "id": "2.1.1+72",
       "version": "2.1.1",
       "buildNumber": 72,
