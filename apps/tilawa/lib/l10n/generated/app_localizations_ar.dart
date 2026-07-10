@@ -287,6 +287,43 @@ class AppLocalizationsAr extends AppLocalizations {
   String get homeFeaturedTutorMySessions => 'جلساتي';
 
   @override
+  String get homeLearningInterestPromptTitle =>
+      'هل ترغب في تعلّم القرآن مع محفظ؟';
+
+  @override
+  String get homeLearningInterestPromptSubtitle =>
+      'أتقن التلاوة والتجويد بشكل فردي (1-على-1) مع توجيه مباشر.';
+
+  @override
+  String get homeLearningInterestPromptYes => 'نعم، مهتم';
+
+  @override
+  String get homeLearningInterestPromptNo => 'ليس الآن';
+
+  @override
+  String get homeLearningNextSessionTitle => 'جلسة القرآن القادمة';
+
+  @override
+  String homeLearningNextSessionStartsIn(int minutes) {
+    return 'تبدأ خلال $minutes دقيقة';
+  }
+
+  @override
+  String get homeLearningNextSessionLive => 'مباشر الآن';
+
+  @override
+  String get homeLearningPendingBookingTitle => 'حجز معلم معلق';
+
+  @override
+  String get homeLearningPendingBookingApproval => 'بانتظار موافقة المعلم';
+
+  @override
+  String get homeLearningPendingBookingPayment => 'بانتظار الدفع';
+
+  @override
+  String get homeLearningRevisionTitle => 'مواصلة التعلم';
+
+  @override
   String get settingsTeacherApplicationEntryTitle => 'التقديم كمعلّم قرآن';
 
   @override

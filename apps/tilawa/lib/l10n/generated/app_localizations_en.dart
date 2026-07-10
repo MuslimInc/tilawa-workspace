@@ -289,6 +289,43 @@ class AppLocalizationsEn extends AppLocalizations {
   String get homeFeaturedTutorMySessions => 'My sessions';
 
   @override
+  String get homeLearningInterestPromptTitle =>
+      'Learn Quran with a Qualified Tutor?';
+
+  @override
+  String get homeLearningInterestPromptSubtitle =>
+      'Master your recitation and Tajweed 1-on-1 with live feedback.';
+
+  @override
+  String get homeLearningInterestPromptYes => 'Yes, interested';
+
+  @override
+  String get homeLearningInterestPromptNo => 'Not now';
+
+  @override
+  String get homeLearningNextSessionTitle => 'Next Quran Session';
+
+  @override
+  String homeLearningNextSessionStartsIn(int minutes) {
+    return 'Starts in ${minutes}m';
+  }
+
+  @override
+  String get homeLearningNextSessionLive => 'Live now';
+
+  @override
+  String get homeLearningPendingBookingTitle => 'Pending Tutor Booking';
+
+  @override
+  String get homeLearningPendingBookingApproval => 'Awaiting tutor approval';
+
+  @override
+  String get homeLearningPendingBookingPayment => 'Awaiting payment';
+
+  @override
+  String get homeLearningRevisionTitle => 'Continue Learning';
+
+  @override
   String get settingsTeacherApplicationEntryTitle => 'Apply as a Quran teacher';
 
   @override

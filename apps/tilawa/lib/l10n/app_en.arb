@@ -368,6 +368,55 @@
     "@homeFeaturedTutorMySessions": {
         "description": "Secondary link on featured tutor card to open booked sessions"
     },
+    "homeLearningInterestPromptTitle": "Learn Quran with a Qualified Tutor?",
+    "@homeLearningInterestPromptTitle": {
+        "description": "Title of the tutoring interest card shown on home screen"
+    },
+    "homeLearningInterestPromptSubtitle": "Master your recitation and Tajweed 1-on-1 with live feedback.",
+    "@homeLearningInterestPromptSubtitle": {
+        "description": "Subtitle of the tutoring interest card shown on home screen"
+    },
+    "homeLearningInterestPromptYes": "Yes, interested",
+    "@homeLearningInterestPromptYes": {
+        "description": "Button to accept tutoring interest"
+    },
+    "homeLearningInterestPromptNo": "Not now",
+    "@homeLearningInterestPromptNo": {
+        "description": "Button to dismiss tutoring interest"
+    },
+    "homeLearningNextSessionTitle": "Next Quran Session",
+    "@homeLearningNextSessionTitle": {
+        "description": "Title of next session card on home screen"
+    },
+    "homeLearningNextSessionStartsIn": "Starts in {minutes}m",
+    "@homeLearningNextSessionStartsIn": {
+        "description": "Countdown to next session on home screen",
+        "placeholders": {
+            "minutes": {
+                "type": "int"
+            }
+        }
+    },
+    "homeLearningNextSessionLive": "Live now",
+    "@homeLearningNextSessionLive": {
+        "description": "Indicator when next session is live"
+    },
+    "homeLearningPendingBookingTitle": "Pending Tutor Booking",
+    "@homeLearningPendingBookingTitle": {
+        "description": "Title of pending booking card on home screen"
+    },
+    "homeLearningPendingBookingApproval": "Awaiting tutor approval",
+    "@homeLearningPendingBookingApproval": {
+        "description": "Status text for pending approval booking on home screen"
+    },
+    "homeLearningPendingBookingPayment": "Awaiting payment",
+    "@homeLearningPendingBookingPayment": {
+        "description": "Status text for pending payment booking on home screen"
+    },
+    "homeLearningRevisionTitle": "Continue Learning",
+    "@homeLearningRevisionTitle": {
+        "description": "Title of the revision card on home screen"
+    },
     "settingsTeacherApplicationEntryTitle": "Apply as a Quran teacher",
     "@settingsTeacherApplicationEntryTitle": {
         "description": "Settings tile title for experienced Quran teacher application"

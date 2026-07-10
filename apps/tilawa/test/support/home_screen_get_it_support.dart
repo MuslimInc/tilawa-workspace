@@ -35,6 +35,9 @@ import 'package:tilawa/features/prayer_times/domain/usecases/notify_prayer_locat
 import 'package:tilawa/features/prayer_times/domain/usecases/save_prayer_settings_use_case.dart';
 import 'package:tilawa/features/qibla/presentation/bloc/qibla_bloc.dart';
 import 'package:tilawa/features/quran_reader/domain/usecases/get_last_read_position_use_case.dart';
+import 'package:tilawa/features/home/presentation/cubit/home_learning_cubit.dart';
+import 'package:tilawa/features/home/presentation/cubit/home_learning_state.dart';
+import 'package:tilawa/features/settings/presentation/cubit/teacher_capability_cubit.dart';
 import 'package:tilawa/features/settings/domain/services/teacher_capability_refresh_notifier.dart';
 import 'package:tilawa_core/core.dart';
 
@@ -47,6 +50,10 @@ class _MockTeacherCapabilityRefreshNotifier extends Mock
     implements TeacherCapabilityRefreshNotifier {}
 
 class _MockAuthSessionProvider extends Mock implements AuthSessionProvider {}
+
+class _MockHomeLearningCubit extends Mock implements HomeLearningCubit {}
+
+class _MockTeacherCapabilityCubit extends Mock implements TeacherCapabilityCubit {}
 
 class _MockSharedPreferencesAsync extends Mock
     implements SharedPreferencesAsync {}
@@ -271,6 +278,29 @@ void registerHomeScreenScopeGetIt(GetIt getIt) {
       () => mock.onApplicationReviewed,
     ).thenAnswer((_) => const Stream.empty());
     getIt.registerSingleton<TeacherCapabilityRefreshNotifier>(mock);
+  }
+  if (!getIt.isRegistered<HomeLearningCubit>()) {
+    final mock = _MockHomeLearningCubit();
+    when(() => mock.state).thenReturn(
+      const HomeLearningState(status: HomeLearningStatus.none, isInterestSignalNeeded: false),
+    );
+    when(() => mock.stream).thenAnswer((_) => const Stream.empty());
+    when(() => mock.load(force: any(named: 'force'))).thenAnswer((_) async {});
+    when(() => mock.close()).thenAnswer((_) async {});
+    getIt.registerSingleton<HomeLearningCubit>(mock);
+  }
+  if (!getIt.isRegistered<TeacherCapabilityCubit>()) {
+    final mock = _MockTeacherCapabilityCubit();
+    when(() => mock.state).thenReturn(
+      const SettingsTeacherCapabilityLoadState(
+        isLoading: false,
+        hasLoaded: true,
+      ),
+    );
+    when(() => mock.stream).thenAnswer((_) => const Stream.empty());
+    when(() => mock.load()).thenAnswer((_) async {});
+    when(() => mock.close()).thenAnswer((_) async {});
+    getIt.registerSingleton<TeacherCapabilityCubit>(mock);
   }
 }
 
