@@ -53,7 +53,8 @@ class _MockAuthSessionProvider extends Mock implements AuthSessionProvider {}
 
 class _MockHomeLearningCubit extends Mock implements HomeLearningCubit {}
 
-class _MockTeacherCapabilityCubit extends Mock implements TeacherCapabilityCubit {}
+class _MockTeacherCapabilityCubit extends Mock
+    implements TeacherCapabilityCubit {}
 
 class _MockSharedPreferencesAsync extends Mock
     implements SharedPreferencesAsync {}
@@ -282,7 +283,10 @@ void registerHomeScreenScopeGetIt(GetIt getIt) {
   if (!getIt.isRegistered<HomeLearningCubit>()) {
     final mock = _MockHomeLearningCubit();
     when(() => mock.state).thenReturn(
-      const HomeLearningState(status: HomeLearningStatus.none, isInterestSignalNeeded: false),
+      const HomeLearningState(
+        status: HomeLearningStatus.none,
+        isInterestSignalNeeded: false,
+      ),
     );
     when(() => mock.stream).thenAnswer((_) => const Stream.empty());
     when(() => mock.load(force: any(named: 'force'))).thenAnswer((_) async {});

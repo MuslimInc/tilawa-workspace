@@ -21,8 +21,8 @@ bool _isHomeLearnQuranStudentCardVisible({
 );
 
 /// Loads [TeacherCapability] and builds the home Learn Quran sliver when allowed.
-class HomeFeaturedTutorCardScope extends StatelessWidget {
-  const HomeFeaturedTutorCardScope({super.key});
+class HomeLearningEntryScope extends StatelessWidget {
+  const HomeLearningEntryScope({super.key});
 
   @override
   Widget build(BuildContext context) {
@@ -31,13 +31,13 @@ class HomeFeaturedTutorCardScope extends StatelessWidget {
         BlocProvider(create: (_) => TeacherCapabilityCubit()..load()),
         BlocProvider(create: (_) => getIt<HomeLearningCubit>()..load()),
       ],
-      child: const _HomeFeaturedTutorCardSliverHost(),
+      child: const _HomeLearningEntrySliverHost(),
     );
   }
 }
 
-class _HomeFeaturedTutorCardSliverHost extends StatelessWidget {
-  const _HomeFeaturedTutorCardSliverHost();
+class _HomeLearningEntrySliverHost extends StatelessWidget {
+  const _HomeLearningEntrySliverHost();
 
   @override
   Widget build(BuildContext context) {
