@@ -16,4 +16,13 @@ abstract class DeviceRegistryRepository {
   /// One-shot read of the caller's registered devices, most recently seen
   /// first. Returns a [Failure] on read error; never throws across the boundary.
   Future<Either<Failure, List<RegisteredDevice>>> getDevices(String userId);
+
+  /// Signs out one device the caller owns (server sets `revokedAt`; the device
+  /// discovers it on next resume / `device_revoked` push). Cloud-Functions-only
+  /// write. Idempotent.
+  Future<Either<Failure, void>> revokeDevice(String deviceId);
+
+  /// Signs out every device the caller owns *except* [currentDeviceId]. Never
+  /// affects the current device's session (no Firebase refresh-token revoke).
+  Future<Either<Failure, void>> signOutOtherDevices(String currentDeviceId);
 }

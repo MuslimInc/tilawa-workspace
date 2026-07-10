@@ -24,6 +24,7 @@ import 'core/debug/device_preview_app_builder.dart';
 import 'core/di/injection.dart';
 import 'core/services/notification_startup_service.dart';
 import 'features/auth/presentation/cubit/session_validity_cubit.dart';
+import 'features/auth/presentation/widgets/session_verification_banner.dart';
 import 'features/auth/data/services/google_sign_in_session_tracker.dart';
 import 'features/downloads/data/services/batch_download_manager.dart';
 import 'features/downloads/data/services/download_queue_manager.dart';
@@ -352,7 +353,9 @@ class _ThemedMaterialApp extends StatelessWidget {
                   maxScaleFactor: textScaleClampMax,
                 ),
           ),
-          child: TilawaFeedbackHost(child: routedChild),
+          child: TilawaFeedbackHost(
+            child: SessionVerificationBanner(child: routedChild),
+          ),
         );
       },
       theme: AppTheme.getLightTheme(

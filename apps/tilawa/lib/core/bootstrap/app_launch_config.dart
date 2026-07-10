@@ -170,6 +170,10 @@ abstract final class _LaunchEnvironment {
     'TILAWA_LAUNCH_MULTI_DEVICE_LOGIN_ENABLED',
     defaultValue: stagingFlagsOn,
   );
+  static const bool authLifecycleHardeningEnabled = bool.fromEnvironment(
+    'TILAWA_LAUNCH_AUTH_LIFECYCLE_HARDENING_ENABLED',
+    defaultValue: stagingFlagsOn,
+  );
   static const String teacherApplicationFormUrl = String.fromEnvironment(
     'TILAWA_LAUNCH_TEACHER_APPLICATION_FORM_URL',
     defaultValue: kDefaultTeacherApplicationFormUrl,
@@ -223,6 +227,7 @@ class AppLaunchConfig extends Equatable {
     this.teacherDashboardSummaryReadEnabled = false,
     this.deviceRegistryWriteEnabled = false,
     this.multiDeviceLoginEnabled = false,
+    this.authLifecycleHardeningEnabled = false,
     this.teacherApplicationFormUrl = kDefaultTeacherApplicationFormUrl,
     this.agoraAppId = '',
     this.livekitServerUrl = '',
@@ -266,6 +271,8 @@ class AppLaunchConfig extends Equatable {
           _LaunchEnvironment.teacherDashboardSummaryReadEnabled,
       deviceRegistryWriteEnabled: _LaunchEnvironment.deviceRegistryWriteEnabled,
       multiDeviceLoginEnabled: _LaunchEnvironment.multiDeviceLoginEnabled,
+      authLifecycleHardeningEnabled:
+          _LaunchEnvironment.authLifecycleHardeningEnabled,
       teacherApplicationFormUrl: _LaunchEnvironment.teacherApplicationFormUrl,
       agoraAppId: _LaunchEnvironment.agoraAppId,
       livekitServerUrl: _LaunchEnvironment.livekitServerUrl,
@@ -322,6 +329,14 @@ class AppLaunchConfig extends Equatable {
   /// Functions env var. Default off in production, on for staging/local builds.
   final bool multiDeviceLoginEnabled;
 
+  /// Gates the auth/App Check lifecycle hardening: a transient verification
+  /// failure (App Check attestation, token-refresh network/internal errors)
+  /// surfaces a non-blocking "verifying your session" state instead of a
+  /// destructive logout/redirect. Only a definitive invalidation
+  /// (revoked/expired token, disabled/deleted account) ends the session.
+  /// Default off in production, on for staging/local builds.
+  final bool authLifecycleHardeningEnabled;
+
   /// External Google Form URL opened from teacher application entry points.
   final String teacherApplicationFormUrl;
 
@@ -373,6 +388,7 @@ class AppLaunchConfig extends Equatable {
     teacherDashboardSummaryReadEnabled,
     deviceRegistryWriteEnabled,
     multiDeviceLoginEnabled,
+    authLifecycleHardeningEnabled,
     teacherApplicationFormUrl,
     agoraAppId,
     livekitServerUrl,

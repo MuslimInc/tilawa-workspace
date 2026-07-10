@@ -10,9 +10,11 @@ import 'package:tilawa_core/services/interfaces/notification_dispatcher_interfac
 import '../../domain/repositories/notifications_repository.dart';
 import '../../presentation/services/fcm_notification_handler_service.dart';
 import '../../../settings/domain/services/teacher_capability_refresh_notifier.dart';
+import '../../../auth/domain/services/device_revoked_notifier.dart';
 import '../../../auth/domain/services/session_revoked_notifier.dart';
 import '../../../quran_sessions/domain/services/session_taken_over_notifier.dart';
 import '../datasources/notifications_remote_data_source.dart';
+import '../fcm_device_revoked_message.dart';
 import '../fcm_session_revoked_message.dart';
 import '../fcm_session_taken_over_message.dart';
 
@@ -26,6 +28,7 @@ class NotificationsRepositoryImpl implements NotificationsRepository {
     this._teacherCapabilityRefreshNotifier,
     this._sessionRevokedNotifier,
     this._sessionTakenOverNotifier,
+    this._deviceRevokedNotifier,
   );
 
   final NotificationsRemoteDataSource _remoteDataSource;
@@ -35,6 +38,7 @@ class NotificationsRepositoryImpl implements NotificationsRepository {
   final TeacherCapabilityRefreshNotifier _teacherCapabilityRefreshNotifier;
   final SessionRevokedNotifier _sessionRevokedNotifier;
   final SessionTakenOverNotifier _sessionTakenOverNotifier;
+  final DeviceRevokedNotifier _deviceRevokedNotifier;
   bool _listenersInitialized = false;
 
   @override
@@ -111,6 +115,9 @@ class NotificationsRepositoryImpl implements NotificationsRepository {
     }
     if (isSessionRevokedFcmMessage(message.data)) {
       _sessionRevokedNotifier.notifySessionRevoked();
+    }
+    if (isDeviceRevokedFcmMessage(message.data)) {
+      _deviceRevokedNotifier.notifyDeviceRevoked();
     }
     if (isSessionTakenOverFcmMessage(message.data)) {
       final sessionId = sessionTakenOverSessionId(message.data);

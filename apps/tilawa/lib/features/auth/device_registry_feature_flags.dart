@@ -33,3 +33,20 @@ bool isMultiDeviceLoginEnabled() {
   }
   return getIt<AppLaunchConfig>().multiDeviceLoginEnabled;
 }
+
+/// Predicate type for the auth lifecycle hardening flag (injectable-friendly).
+typedef AuthLifecycleHardeningEnabledPredicate = bool Function();
+
+/// Whether the auth/App Check lifecycle hardening is enabled: transient
+/// verification failures show a non-blocking "verifying your session" banner
+/// instead of a destructive logout/redirect. See
+/// [AppLaunchConfig.authLifecycleHardeningEnabled].
+///
+/// Default off in production, on for staging/local builds. Override with:
+/// `--dart-define=TILAWA_LAUNCH_AUTH_LIFECYCLE_HARDENING_ENABLED=true`
+bool isAuthLifecycleHardeningEnabled() {
+  if (!getIt.isRegistered<AppLaunchConfig>()) {
+    return AppLaunchConfig.fromEnvironment().authLifecycleHardeningEnabled;
+  }
+  return getIt<AppLaunchConfig>().authLifecycleHardeningEnabled;
+}

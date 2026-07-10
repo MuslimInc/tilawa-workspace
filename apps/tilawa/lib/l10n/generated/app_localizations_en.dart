@@ -3826,5 +3826,55 @@ class AppLocalizationsEn extends AppLocalizations {
       'Sign-in could not be completed because this device could not be verified. Update the app and try again later.';
 
   @override
+  String get authSessionVerifying => 'Verifying your session…';
+
+  @override
+  String get manageDevicesTitle => 'Devices';
+
+  @override
+  String get manageDevicesSubtitle =>
+      'You\'re signed in on these devices. Sign out any you don\'t recognize.';
+
+  @override
+  String get manageDevicesThisDevice => 'This device';
+
+  @override
+  String get manageDevicesSignedOutBadge => 'Signed out';
+
+  @override
+  String get manageDevicesSignOutDevice => 'Sign out';
+
+  @override
+  String get manageDevicesSignOutOthers => 'Sign out all other devices';
+
+  @override
+  String get manageDevicesSignOutOthersConfirm =>
+      'Sign out of every device except this one? You\'ll stay signed in here.';
+
+  @override
+  String get manageDevicesEmpty => 'No other devices are signed in.';
+
+  @override
+  String get manageDevicesError => 'Couldn\'t load your devices.';
+
+  @override
+  String get manageDevicesSignOutFailed =>
+      'Couldn\'t sign out that device. Please try again.';
+
+  @override
+  String manageDevicesLastActive(String when) {
+    return 'Last active $when';
+  }
+
+  @override
+  String get manageDevicesSignedOutMessage => 'This device was signed out.';
+
+  @override
+  String get settingsManageDevicesTile => 'Devices';
+
+  @override
+  String get settingsSecuritySection => 'Security';
+
+  @override
   String get settingsAdminUserBadge => 'Admin User';
 }

@@ -6716,6 +6716,96 @@ abstract class AppLocalizations {
   /// **'Sign-in could not be completed because this device could not be verified. Update the app and try again later.'**
   String get authAppCheckFailedRelease;
 
+  /// Non-blocking banner shown while re-verifying the session after a transient auth/App Check hiccup
+  ///
+  /// In en, this message translates to:
+  /// **'Verifying your session…'**
+  String get authSessionVerifying;
+
+  /// Manage Devices screen title
+  ///
+  /// In en, this message translates to:
+  /// **'Devices'**
+  String get manageDevicesTitle;
+
+  /// Manage Devices screen subtitle
+  ///
+  /// In en, this message translates to:
+  /// **'You\'re signed in on these devices. Sign out any you don\'t recognize.'**
+  String get manageDevicesSubtitle;
+
+  /// Badge on the current device row
+  ///
+  /// In en, this message translates to:
+  /// **'This device'**
+  String get manageDevicesThisDevice;
+
+  /// Badge on a revoked device row
+  ///
+  /// In en, this message translates to:
+  /// **'Signed out'**
+  String get manageDevicesSignedOutBadge;
+
+  /// Per-device sign out action
+  ///
+  /// In en, this message translates to:
+  /// **'Sign out'**
+  String get manageDevicesSignOutDevice;
+
+  /// Bottom action to sign out every other device
+  ///
+  /// In en, this message translates to:
+  /// **'Sign out all other devices'**
+  String get manageDevicesSignOutOthers;
+
+  /// Confirm dialog body for sign out others
+  ///
+  /// In en, this message translates to:
+  /// **'Sign out of every device except this one? You\'ll stay signed in here.'**
+  String get manageDevicesSignOutOthersConfirm;
+
+  /// Empty state when only the current device is present
+  ///
+  /// In en, this message translates to:
+  /// **'No other devices are signed in.'**
+  String get manageDevicesEmpty;
+
+  /// Error state for the devices list
+  ///
+  /// In en, this message translates to:
+  /// **'Couldn\'t load your devices.'**
+  String get manageDevicesError;
+
+  /// Toast when a device sign-out write fails
+  ///
+  /// In en, this message translates to:
+  /// **'Couldn\'t sign out that device. Please try again.'**
+  String get manageDevicesSignOutFailed;
+
+  /// Relative last-active line on a device row
+  ///
+  /// In en, this message translates to:
+  /// **'Last active {when}'**
+  String manageDevicesLastActive(String when);
+
+  /// Message shown on a device that was remotely signed out
+  ///
+  /// In en, this message translates to:
+  /// **'This device was signed out.'**
+  String get manageDevicesSignedOutMessage;
+
+  /// Settings entry that opens Manage Devices
+  ///
+  /// In en, this message translates to:
+  /// **'Devices'**
+  String get settingsManageDevicesTile;
+
+  /// Settings group title for security/session options
+  ///
+  /// In en, this message translates to:
+  /// **'Security'**
+  String get settingsSecuritySection;
+
   /// Badge on Settings profile when the signed-in user has the Firebase admin custom claim
   ///
   /// In en, this message translates to:

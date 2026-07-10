@@ -4181,6 +4181,41 @@
     "@authAppCheckFailedRelease": {
         "description": "Sign-in device registration blocked by App Check in release builds"
     },
+    "authSessionVerifying": "جارٍ التحقق من جلستك…",
+    "@authSessionVerifying": {
+        "description": "Non-blocking banner shown while re-verifying the session after a transient auth/App Check hiccup"
+    },
+    "manageDevicesTitle": "الأجهزة",
+    "@manageDevicesTitle": { "description": "Manage Devices screen title" },
+    "manageDevicesSubtitle": "أنت مُسجَّل الدخول على هذه الأجهزة. سجّل الخروج من أي جهاز لا تعرفه.",
+    "@manageDevicesSubtitle": { "description": "Manage Devices screen subtitle" },
+    "manageDevicesThisDevice": "هذا الجهاز",
+    "@manageDevicesThisDevice": { "description": "Badge on the current device row" },
+    "manageDevicesSignedOutBadge": "تم تسجيل الخروج",
+    "@manageDevicesSignedOutBadge": { "description": "Badge on a revoked device row" },
+    "manageDevicesSignOutDevice": "تسجيل الخروج",
+    "@manageDevicesSignOutDevice": { "description": "Per-device sign out action" },
+    "manageDevicesSignOutOthers": "تسجيل الخروج من جميع الأجهزة الأخرى",
+    "@manageDevicesSignOutOthers": { "description": "Bottom action to sign out every other device" },
+    "manageDevicesSignOutOthersConfirm": "تسجيل الخروج من كل الأجهزة عدا هذا الجهاز؟ ستبقى مُسجَّلاً هنا.",
+    "@manageDevicesSignOutOthersConfirm": { "description": "Confirm dialog body for sign out others" },
+    "manageDevicesEmpty": "لا توجد أجهزة أخرى مُسجَّلة الدخول.",
+    "@manageDevicesEmpty": { "description": "Empty state when only the current device is present" },
+    "manageDevicesError": "تعذّر تحميل أجهزتك.",
+    "@manageDevicesError": { "description": "Error state for the devices list" },
+    "manageDevicesSignOutFailed": "تعذّر تسجيل الخروج من هذا الجهاز. حاول مرة أخرى.",
+    "@manageDevicesSignOutFailed": { "description": "Toast when a device sign-out write fails" },
+    "manageDevicesLastActive": "آخر نشاط {when}",
+    "@manageDevicesLastActive": {
+        "description": "Relative last-active line on a device row",
+        "placeholders": { "when": { "type": "String" } }
+    },
+    "manageDevicesSignedOutMessage": "تم تسجيل الخروج من هذا الجهاز.",
+    "@manageDevicesSignedOutMessage": { "description": "Message shown on a device that was remotely signed out" },
+    "settingsManageDevicesTile": "الأجهزة",
+    "@settingsManageDevicesTile": { "description": "Settings entry that opens Manage Devices" },
+    "settingsSecuritySection": "الأمان",
+    "@settingsSecuritySection": { "description": "Settings group title for security/session options" },
     "settingsAdminUserBadge": "مستخدم إداري",
     "@settingsAdminUserBadge": {
         "description": "Badge on Settings profile when the signed-in user has the Firebase admin custom claim"

@@ -1,4 +1,5 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:cloud_functions/cloud_functions.dart';
 import 'package:dartz_plus/dartz_plus.dart';
 import 'package:injectable/injectable.dart';
 import 'package:tilawa_core/errors/failures.dart';
@@ -10,19 +11,55 @@ import '../services/device_identity_service.dart';
 /// Firestore-backed [DeviceRegistryRepository]. Reads only
 /// `users/{uid}/devices` with a single `get()` (no snapshot listener). The
 /// stable device id is delegated to [DeviceIdentityService] so it matches the
-/// id used during active-device registration.
+/// id used during active-device registration. Management writes go through the
+/// `revokeDevice` / `signOutOtherDevices` Cloud Functions (registry docs are
+/// never client-writable).
 @LazySingleton(as: DeviceRegistryRepository)
 class FirebaseDeviceRegistryRepository implements DeviceRegistryRepository {
   FirebaseDeviceRegistryRepository(
     this._firestore,
     this._deviceIdentityService,
+    this._functions,
   );
 
   final FirebaseFirestore _firestore;
   final DeviceIdentityService _deviceIdentityService;
+  final FirebaseFunctions _functions;
 
   @override
   Future<String> currentDeviceId() => _deviceIdentityService.getDeviceId();
+
+  @override
+  Future<Either<Failure, void>> revokeDevice(String deviceId) async {
+    return _callManagement(
+      'revokeDevice',
+      <String, dynamic>{'deviceId': deviceId},
+    );
+  }
+
+  @override
+  Future<Either<Failure, void>> signOutOtherDevices(
+    String currentDeviceId,
+  ) async {
+    return _callManagement(
+      'signOutOtherDevices',
+      <String, dynamic>{'currentDeviceId': currentDeviceId},
+    );
+  }
+
+  Future<Either<Failure, void>> _callManagement(
+    String name,
+    Map<String, dynamic> payload,
+  ) async {
+    try {
+      await _functions.httpsCallable(name).call<Map<String, dynamic>>(payload);
+      return const Right(null);
+    } on FirebaseFunctionsException catch (error) {
+      return Left(Failure.serverError(error.message ?? error.code));
+    } catch (error) {
+      return Left(Failure.unexpectedError(error.toString()));
+    }
+  }
 
   @override
   Future<Either<Failure, List<RegisteredDevice>>> getDevices(

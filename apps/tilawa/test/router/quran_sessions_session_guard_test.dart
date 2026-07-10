@@ -325,31 +325,69 @@ void main() {
       expect(result, const LoginRoute().location);
     });
 
-    testWidgets('redirects verification-unknown sessions to login', (
-      tester,
-    ) async {
-      whenListen(
-        mockSessionCubit,
-        Stream<SessionValidityState>.empty(),
-        initialState: const SessionValidityState(verificationUnknown: true),
-      );
-      when(() => mockAuthBloc.state).thenReturn(
-        AuthState.authenticated(
-          user: UserEntity(
-            id: 'user_1',
-            email: 'user@example.com',
-            displayName: 'User',
-            createdAt: DateTime.utc(2024),
+    testWidgets(
+      'does NOT redirect on transient verification-unknown (stays on screen)',
+      (tester) async {
+        // Transient App Check / token-refresh hiccup: verificationUnknown is
+        // set but the session is not confirmed revoked. The user must stay
+        // put, not get bounced to login.
+        whenListen(
+          mockSessionCubit,
+          Stream<SessionValidityState>.empty(),
+          initialState: const SessionValidityState(verificationUnknown: true),
+        );
+        when(() => mockAuthBloc.state).thenReturn(
+          AuthState.authenticated(
+            user: UserEntity(
+              id: 'user_1',
+              email: 'user@example.com',
+              displayName: 'User',
+              createdAt: DateTime.utc(2024),
+            ),
           ),
-        ),
-      );
+        );
 
-      final result = await redirectForPath(
-        tester,
-        QuranSessionsRoutes.mySessions,
-      );
-      expect(result, const LoginRoute().location);
-    });
+        final result = await redirectForPath(
+          tester,
+          QuranSessionsRoutes.mySessions,
+        );
+        expect(result, isNull);
+      },
+    );
+
+    testWidgets(
+      'does NOT redirect a bloc-authenticated user when Firebase currentUser '
+      'momentarily reads null (App Check / refresh blip)',
+      (tester) async {
+        // Reproduces the reported bug: tapping "See all teachers" during a
+        // transient App Check sign-out bounced /sessions/teachers to /login.
+        whenListen(
+          mockSessionCubit,
+          Stream<SessionValidityState>.empty(),
+          initialState: const SessionValidityState(),
+        );
+        when(() => mockAuthBloc.state).thenReturn(
+          AuthState.authenticated(
+            user: UserEntity(
+              id: 'user_1',
+              email: 'user@example.com',
+              displayName: 'User',
+              createdAt: DateTime.utc(2024),
+            ),
+          ),
+        );
+        // Firebase currentUser transiently null → empty userId.
+        getIt.registerSingleton<AuthSessionProvider>(
+          const FakeAuthSessionProvider(userId: ''),
+        );
+
+        final result = await redirectForPath(
+          tester,
+          QuranSessionsRoutes.teacherList,
+        );
+        expect(result, isNull);
+      },
+    );
 
     testWidgets('redirects unauthenticated users to login', (tester) async {
       whenListen(

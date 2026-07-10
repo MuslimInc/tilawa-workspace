@@ -3,6 +3,7 @@ export { crashlyticsToGithubIssue } from "./crashlyticsToGithubIssue";
 export { verifyRecitationAudio } from "./verifyRecitationAudio";
 export { reviewTeacherApplication } from "./reviewTeacherApplication";
 export { registerActiveDevice } from "./registerActiveDevice";
+export { revokeDevice, signOutOtherDevices } from "./deviceManagement";
 export { moderateTeacherProfile } from "./moderateTeacherProfile";
 export { moderateQuranSessionsUser } from "./moderateQuranSessionsUser";
 export { setTeacherApplicationAccess } from "./setTeacherApplicationAccess";

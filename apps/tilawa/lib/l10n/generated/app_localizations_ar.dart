@@ -3794,5 +3794,56 @@ class AppLocalizationsAr extends AppLocalizations {
       'تعذّر إكمال تسجيل الدخول لأن هذا الجهاز لم يُتحقق منه. حدّث التطبيق وأعد المحاولة لاحقًا.';
 
   @override
+  String get authSessionVerifying => 'جارٍ التحقق من جلستك…';
+
+  @override
+  String get manageDevicesTitle => 'الأجهزة';
+
+  @override
+  String get manageDevicesSubtitle =>
+      'أنت مُسجَّل الدخول على هذه الأجهزة. سجّل الخروج من أي جهاز لا تعرفه.';
+
+  @override
+  String get manageDevicesThisDevice => 'هذا الجهاز';
+
+  @override
+  String get manageDevicesSignedOutBadge => 'تم تسجيل الخروج';
+
+  @override
+  String get manageDevicesSignOutDevice => 'تسجيل الخروج';
+
+  @override
+  String get manageDevicesSignOutOthers =>
+      'تسجيل الخروج من جميع الأجهزة الأخرى';
+
+  @override
+  String get manageDevicesSignOutOthersConfirm =>
+      'تسجيل الخروج من كل الأجهزة عدا هذا الجهاز؟ ستبقى مُسجَّلاً هنا.';
+
+  @override
+  String get manageDevicesEmpty => 'لا توجد أجهزة أخرى مُسجَّلة الدخول.';
+
+  @override
+  String get manageDevicesError => 'تعذّر تحميل أجهزتك.';
+
+  @override
+  String get manageDevicesSignOutFailed =>
+      'تعذّر تسجيل الخروج من هذا الجهاز. حاول مرة أخرى.';
+
+  @override
+  String manageDevicesLastActive(String when) {
+    return 'آخر نشاط $when';
+  }
+
+  @override
+  String get manageDevicesSignedOutMessage => 'تم تسجيل الخروج من هذا الجهاز.';
+
+  @override
+  String get settingsManageDevicesTile => 'الأجهزة';
+
+  @override
+  String get settingsSecuritySection => 'الأمان';
+
+  @override
   String get settingsAdminUserBadge => 'مستخدم إداري';
 }

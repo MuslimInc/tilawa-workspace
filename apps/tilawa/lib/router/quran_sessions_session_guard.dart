@@ -153,11 +153,22 @@ String? _quranSessionsLoginRedirect(
 }) {
   try {
     final sessionState = context.read<SessionValidityCubit>().state;
-    if (sessionState.revoked || sessionState.verificationUnknown) {
+    // Only a *confirmed* revocation is destructive. `verificationUnknown` is a
+    // transient verification hiccup (App Check attestation / token-refresh
+    // blip) — never a reason to eject the user. Keep them on-screen and let the
+    // auth lifecycle retry; the guard re-runs once the state settles.
+    if (sessionState.revoked) {
       return const LoginRoute().location;
     }
 
     final authState = context.read<AuthBloc>().state;
+    if (authState is AuthAuthenticated) {
+      // Trust the bloc's confirmed session as the source of truth. Do NOT fall
+      // through to the transient `AuthSessionProvider`/Firebase `currentUser`
+      // snapshot below, which can momentarily read null during an App Check or
+      // token-refresh blip and would spuriously redirect an authenticated user.
+      return null;
+    }
     if (authState is AuthInitial || authState is AuthLoading) {
       logger.d(
         '[DebugNotificationAuthFlow] session guard deferred '
@@ -165,17 +176,19 @@ String? _quranSessionsLoginRedirect(
       );
       return null;
     }
-    if (authState is! AuthAuthenticated) {
-      return const LoginRoute().location;
-    }
+    // Confirmed unauthenticated.
+    return const LoginRoute().location;
   } catch (_) {
-    // BlocProvider not mounted yet — fall through to AuthSessionProvider.
+    // BlocProvider not mounted yet (cold-start deep link) — fall through to the
+    // AuthSessionProvider snapshot below.
   }
 
   if (getIt.isRegistered<AuthSessionProvider>()) {
     final userId = quranSessionsCurrentUserId(getIt);
     if (userId == null || userId.isEmpty) {
-      return const LoginRoute().location;
+      // A momentary null here (App Check / refresh) must not eject a browsing
+      // user. Only hard-gate routes that genuinely require a signed-in user.
+      return redirectWhenAuthUnknown ? const LoginRoute().location : null;
     }
     return null;
   }

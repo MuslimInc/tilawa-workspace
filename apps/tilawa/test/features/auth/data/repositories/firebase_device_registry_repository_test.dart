@@ -1,6 +1,8 @@
 import 'package:checks/checks.dart';
+import 'package:cloud_functions/cloud_functions.dart';
 import 'package:fake_cloud_firestore/fake_cloud_firestore.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:mocktail/mocktail.dart';
 import 'package:tilawa/features/auth/data/repositories/firebase_device_registry_repository.dart';
 import 'package:tilawa/features/auth/data/services/device_identity_service.dart';
 
@@ -16,17 +18,30 @@ class _FakeDeviceIdentityService implements DeviceIdentityService {
   String get platform => 'android';
 }
 
+class _MockFunctions extends Mock implements FirebaseFunctions {}
+
+class _MockCallable extends Mock implements HttpsCallable {}
+
+class _MockCallableResult extends Mock
+    implements HttpsCallableResult<Map<String, dynamic>> {}
+
 void main() {
   late FakeFirebaseFirestore firestore;
+  late _MockFunctions functions;
+  late _MockCallable callable;
   late FirebaseDeviceRegistryRepository repository;
 
   const userId = 'user_1';
 
   setUp(() {
     firestore = FakeFirebaseFirestore();
+    functions = _MockFunctions();
+    callable = _MockCallable();
+    when(() => functions.httpsCallable(any())).thenReturn(callable);
     repository = FirebaseDeviceRegistryRepository(
       firestore,
       _FakeDeviceIdentityService('device-current'),
+      functions,
     );
   });
 
@@ -99,5 +114,51 @@ void main() {
 
     check(devices).length.equals(1);
     check(devices.single.isRevoked).isTrue();
+  });
+
+  group('management writes', () {
+    test(
+      'revokeDevice calls the callable and returns Right on success',
+      () async {
+        when(
+          () => callable.call<Map<String, dynamic>>(any()),
+        ).thenAnswer((_) async => _MockCallableResult());
+
+        final result = await repository.revokeDevice('device-old');
+
+        check(result.isRight()).isTrue();
+        final captured = verify(
+          () => functions.httpsCallable(captureAny()),
+        ).captured;
+        check(captured.single).equals('revokeDevice');
+        verify(
+          () => callable.call<Map<String, dynamic>>({'deviceId': 'device-old'}),
+        ).called(1);
+      },
+    );
+
+    test('signOutOtherDevices passes the current device id', () async {
+      when(
+        () => callable.call<Map<String, dynamic>>(any()),
+      ).thenAnswer((_) async => _MockCallableResult());
+
+      final result = await repository.signOutOtherDevices('device-current');
+
+      check(result.isRight()).isTrue();
+      verify(
+        () => callable.call<Map<String, dynamic>>(
+          {'currentDeviceId': 'device-current'},
+        ),
+      ).called(1);
+    });
+
+    test('maps a FirebaseFunctionsException to a Failure', () async {
+      when(() => callable.call<Map<String, dynamic>>(any())).thenThrow(
+        FirebaseFunctionsException(message: 'nope', code: 'internal'),
+      );
+
+      final result = await repository.revokeDevice('device-old');
+      check(result.isLeft()).isTrue();
+    });
   });
 }

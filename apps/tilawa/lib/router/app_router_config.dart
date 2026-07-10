@@ -21,6 +21,7 @@ import '../features/athkar/presentation/screens/tasbeeh_screen.dart';
 import '../features/athkar/presentation/widgets/athkar_categories_screen_scope.dart';
 import '../features/auth/presentation/screens/email_auth_screens.dart';
 import '../features/auth/presentation/screens/login_screen.dart';
+import '../features/auth/presentation/screens/manage_devices_screen.dart';
 import '../features/bookmarks/presentation/bloc/bookmarks_bloc.dart';
 import '../features/bookmarks/presentation/screens/bookmarks_screen.dart';
 import '../features/downloads/presentation/widgets/downloads_screen_scope.dart';
@@ -70,6 +71,7 @@ part 'app_router_config.g.dart';
     TypedGoRoute<SupportRoute>(path: '/support'),
     TypedGoRoute<PremiumRoute>(path: '/premium'),
     TypedGoRoute<SettingsRoute>(path: '/settings'),
+    TypedGoRoute<ManageDevicesRoute>(path: '/settings/devices'),
     TypedGoRoute<DownloadsRoute>(path: '/downloads'),
     TypedGoRoute<ErrorRoute>(path: '/error'),
     TypedGoRoute<FavoritesRoute>(path: '/favorites'),
@@ -298,6 +300,16 @@ class SettingsRoute extends GoRouteData with $SettingsRoute, TilawaRouteData {
   @override
   Widget build(BuildContext context, GoRouterState state) {
     return const SettingsScreenScope();
+  }
+}
+
+class ManageDevicesRoute extends GoRouteData
+    with $ManageDevicesRoute, TilawaRouteData {
+  const ManageDevicesRoute();
+
+  @override
+  Widget build(BuildContext context, GoRouterState state) {
+    return const ManageDevicesScreen();
   }
 }
 

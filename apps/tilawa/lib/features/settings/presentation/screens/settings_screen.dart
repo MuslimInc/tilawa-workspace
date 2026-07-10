@@ -194,6 +194,18 @@ class _SettingsScreenState extends State<SettingsScreen> {
                       ),
                     ],
                   ),
+                  if (!isGuest)
+                    TilawaSettingsGroup(
+                      title: l10n.settingsSecuritySection,
+                      leadingIcon: FluentIcons.phone_24_regular,
+                      children: [
+                        TilawaSettingsTile(
+                          title: l10n.settingsManageDevicesTile,
+                          onTap: () => const ManageDevicesRoute().push(context),
+                          showDivider: false,
+                        ),
+                      ],
+                    ),
                   TilawaSettingsGroup(
                     title: l10n.settingsRecitersSection,
                     leadingIcon: Icons.record_voice_over_rounded,

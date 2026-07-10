@@ -9,7 +9,9 @@ import '../features/audio_player/presentation/cubit/player_background_cubit.dart
 import '../features/auth/data/services/pending_session_revoke_store.dart';
 import '../features/auth/presentation/bloc/auth_bloc.dart';
 import '../features/auth/presentation/cubit/session_validity_cubit.dart';
+import '../features/auth/presentation/cubit/session_verification_cubit.dart';
 import '../features/auth/presentation/widgets/account_deletion_navigation_listener.dart';
+import '../features/auth/presentation/widgets/device_revoked_sign_out_listener.dart';
 import '../features/auth/presentation/widgets/session_revoked_navigation_listener.dart';
 import '../features/localization/presentation/bloc/localization_bloc.dart';
 import '../features/quran_sessions/quran_sessions_platform_config_store.dart';
@@ -45,6 +47,12 @@ class AppProviders {
     BlocProvider<SessionValidityCubit>(
       create: (_) => getIt<SessionValidityCubit>(),
     ),
+    // Non-lazy: must subscribe to authStateChanges at launch so a transient
+    // sign-out is caught. Inert unless the hardening flag is on.
+    BlocProvider<SessionVerificationCubit>(
+      create: (_) => getIt<SessionVerificationCubit>(),
+      lazy: false,
+    ),
   ];
 
   static Widget create({required Widget child}) {
@@ -61,14 +69,25 @@ class AppProviders {
           },
           child: BlocListener<AuthBloc, AuthState>(
             listenWhen: (previous, current) =>
-                previous is! AuthAuthenticated && current is AuthAuthenticated,
+                (previous is! AuthAuthenticated &&
+                    current is AuthAuthenticated) ||
+                (previous is AuthAuthenticated &&
+                    current is AuthUnauthenticated),
             listener: (context, state) {
+              if (state is AuthUnauthenticated) {
+                // Confirmed/intentional sign-out — suppress the transient
+                // "verifying" banner for the null that follows.
+                context.read<SessionVerificationCubit>().noteSessionEnded();
+                return;
+              }
               context.read<SessionValidityCubit>().resetRevocation();
               unawaited(PendingSessionRevokeStore.clear());
             },
-            child: SessionRevokedNavigationListener(
-              child: SessionTakenOverListener(
-                child: AccountDeletionNavigationListener(child: child),
+            child: DeviceRevokedSignOutListener(
+              child: SessionRevokedNavigationListener(
+                child: SessionTakenOverListener(
+                  child: AccountDeletionNavigationListener(child: child),
+                ),
               ),
             ),
           ),

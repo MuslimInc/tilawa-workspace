@@ -8,6 +8,7 @@ import 'package:mocktail/mocktail.dart';
 import 'package:tilawa/features/notifications/data/datasources/notifications_remote_data_source.dart';
 import 'package:tilawa/features/notifications/data/repositories/notifications_repository_impl.dart';
 import 'package:tilawa/features/notifications/presentation/services/fcm_notification_handler_service.dart';
+import 'package:tilawa/features/auth/domain/services/device_revoked_notifier.dart';
 import 'package:tilawa/features/auth/domain/services/session_revoked_notifier.dart';
 import 'package:tilawa/features/quran_sessions/domain/services/session_taken_over_notifier.dart';
 import 'package:tilawa/features/settings/domain/services/teacher_capability_refresh_notifier.dart';
@@ -35,6 +36,8 @@ class MockSessionRevokedNotifier extends Mock
 class MockSessionTakenOverNotifier extends Mock
     implements SessionTakenOverNotifier {}
 
+class MockDeviceRevokedNotifier extends Mock implements DeviceRevokedNotifier {}
+
 class _FallbackRemoteMessage extends Fake implements RemoteMessage {}
 
 void main() {
@@ -47,6 +50,7 @@ void main() {
   mockTeacherCapabilityRefreshNotifier;
   late MockSessionRevokedNotifier mockSessionRevokedNotifier;
   late MockSessionTakenOverNotifier mockSessionTakenOverNotifier;
+  late MockDeviceRevokedNotifier mockDeviceRevokedNotifier;
 
   setUpAll(() {
     registerFallbackValue(_FallbackRemoteMessage());
@@ -61,6 +65,7 @@ void main() {
         MockTeacherCapabilityRefreshNotifier();
     mockSessionRevokedNotifier = MockSessionRevokedNotifier();
     mockSessionTakenOverNotifier = MockSessionTakenOverNotifier();
+    mockDeviceRevokedNotifier = MockDeviceRevokedNotifier();
 
     when(
       () => mockLogger.d(
@@ -83,6 +88,7 @@ void main() {
       mockTeacherCapabilityRefreshNotifier,
       mockSessionRevokedNotifier,
       mockSessionTakenOverNotifier,
+      mockDeviceRevokedNotifier,
     );
   });
 
@@ -401,6 +407,36 @@ void main() {
           () => mockSessionTakenOverNotifier.notifySessionTakenOver(
             'session_42',
           ),
+        ).called(1);
+        await messageController.close();
+      },
+    );
+
+    test(
+      'device_revoked foreground message notifies device revocation',
+      () async {
+        final messageController = StreamController<RemoteMessage>.broadcast();
+        when(
+          () => mockRemoteDataSource.onMessage,
+        ).thenAnswer((_) => messageController.stream);
+        when(
+          () => mockRemoteDataSource.onMessageOpenedApp,
+        ).thenAnswer((_) => const Stream.empty());
+        when(
+          () => mockFcmHandlerService.showForegroundNotification(any()),
+        ).thenAnswer((_) async {});
+
+        await repository.initializeListeners();
+
+        messageController.add(
+          RemoteMessage(
+            data: const {'actionType': 'device_revoked'},
+          ),
+        );
+        await Future<void>.delayed(Duration.zero);
+
+        verify(
+          () => mockDeviceRevokedNotifier.notifyDeviceRevoked(),
         ).called(1);
         await messageController.close();
       },

@@ -4815,6 +4815,41 @@
     "@authAppCheckFailedRelease": {
         "description": "Sign-in device registration blocked by App Check in release builds"
     },
+    "authSessionVerifying": "Verifying your session…",
+    "@authSessionVerifying": {
+        "description": "Non-blocking banner shown while re-verifying the session after a transient auth/App Check hiccup"
+    },
+    "manageDevicesTitle": "Devices",
+    "@manageDevicesTitle": { "description": "Manage Devices screen title" },
+    "manageDevicesSubtitle": "You're signed in on these devices. Sign out any you don't recognize.",
+    "@manageDevicesSubtitle": { "description": "Manage Devices screen subtitle" },
+    "manageDevicesThisDevice": "This device",
+    "@manageDevicesThisDevice": { "description": "Badge on the current device row" },
+    "manageDevicesSignedOutBadge": "Signed out",
+    "@manageDevicesSignedOutBadge": { "description": "Badge on a revoked device row" },
+    "manageDevicesSignOutDevice": "Sign out",
+    "@manageDevicesSignOutDevice": { "description": "Per-device sign out action" },
+    "manageDevicesSignOutOthers": "Sign out all other devices",
+    "@manageDevicesSignOutOthers": { "description": "Bottom action to sign out every other device" },
+    "manageDevicesSignOutOthersConfirm": "Sign out of every device except this one? You'll stay signed in here.",
+    "@manageDevicesSignOutOthersConfirm": { "description": "Confirm dialog body for sign out others" },
+    "manageDevicesEmpty": "No other devices are signed in.",
+    "@manageDevicesEmpty": { "description": "Empty state when only the current device is present" },
+    "manageDevicesError": "Couldn't load your devices.",
+    "@manageDevicesError": { "description": "Error state for the devices list" },
+    "manageDevicesSignOutFailed": "Couldn't sign out that device. Please try again.",
+    "@manageDevicesSignOutFailed": { "description": "Toast when a device sign-out write fails" },
+    "manageDevicesLastActive": "Last active {when}",
+    "@manageDevicesLastActive": {
+        "description": "Relative last-active line on a device row",
+        "placeholders": { "when": { "type": "String" } }
+    },
+    "manageDevicesSignedOutMessage": "This device was signed out.",
+    "@manageDevicesSignedOutMessage": { "description": "Message shown on a device that was remotely signed out" },
+    "settingsManageDevicesTile": "Devices",
+    "@settingsManageDevicesTile": { "description": "Settings entry that opens Manage Devices" },
+    "settingsSecuritySection": "Security",
+    "@settingsSecuritySection": { "description": "Settings group title for security/session options" },
     "settingsAdminUserBadge": "Admin User",
     "@settingsAdminUserBadge": {
         "description": "Badge on Settings profile when the signed-in user has the Firebase admin custom claim"
