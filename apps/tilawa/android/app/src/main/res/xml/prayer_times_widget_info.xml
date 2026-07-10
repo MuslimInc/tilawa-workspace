@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Prayer times widget metadata (spec 041, P1).
+     updatePeriodMillis = 30 min: the OS-managed backstop refresh; the live
+     countdown is a Chronometer and prayer-boundary flips use one inexact
+     alarm, so no tighter period is needed (battery-safe by design). -->
+<appwidget-provider xmlns:android="http://schemas.android.com/apk/res/android"
+    android:description="@string/widget_prayer_description"
+    android:initialLayout="@layout/widget_prayer_times"
+    android:minWidth="250dp"
+    android:minHeight="70dp"
+    android:minResizeWidth="180dp"
+    android:minResizeHeight="70dp"
+    android:targetCellWidth="4"
+    android:targetCellHeight="2"
+    android:previewLayout="@layout/widget_prayer_times"
+    android:resizeMode="horizontal|vertical"
+    android:updatePeriodMillis="1800000"
+    android:widgetCategory="home_screen" />

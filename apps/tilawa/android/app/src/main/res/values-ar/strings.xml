@@ -12,4 +12,10 @@
     <string name="prayer_maghrib">المغرب</string>
     <string name="prayer_isha">العشاء</string>
     <string name="prayer_sunrise">الشروق</string>
+    <string name="widget_prayer_label">مواقيت الصلاة</string>
+    <string name="widget_prayer_description">الصلوات الخمس اليوم مع عدّ تنازلي للصلاة القادمة</string>
+    <string name="widget_prayer_title">مواقيت الصلاة</string>
+    <string name="widget_next_prayer">%1$s بعد</string>
+    <string name="widget_empty_hint">افتح التطبيق لتحميل مواقيت الصلاة</string>
+    <string name="widget_stale_hint">افتح التطبيق للتحديث</string>
 </resources>

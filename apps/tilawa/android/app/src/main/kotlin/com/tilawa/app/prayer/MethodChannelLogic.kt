@@ -251,6 +251,24 @@ internal class MethodChannelLogic(
                     result.error("STOP_ADHAN_FAILED", t.message, null)
                 }
             }
+            "updatePrayerWidgetSchedule" -> {
+                val json = arguments?.get("json") as? String
+                if (json.isNullOrBlank()) {
+                    result.error("BAD_ARGS", "json required", null)
+                } else {
+                    try {
+                        val context = scheduler.getContext()
+                        com.tilawa.app.prayer.widget.PrayerWidgetStore(context)
+                            .writeSnapshotJson(json)
+                        com.tilawa.app.prayer.widget.PrayerTimesWidgetProvider
+                            .notifySnapshotUpdated(context)
+                        result.success(true)
+                    } catch (t: Throwable) {
+                        Log.e("MethodChannelLogic", "updatePrayerWidgetSchedule failed", t)
+                        result.error("WIDGET_UPDATE_FAILED", t.message, null)
+                    }
+                }
+            }
             "isAdhanPlaying" -> {
                 result.success(AdhanPlaybackService.isRunning)
             }

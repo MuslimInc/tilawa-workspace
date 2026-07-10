@@ -12,4 +12,10 @@
     <string name="prayer_maghrib">Maghrib</string>
     <string name="prayer_isha">Isha</string>
     <string name="prayer_sunrise">Sunrise</string>
+    <string name="widget_prayer_label">Prayer Times</string>
+    <string name="widget_prayer_description">Today\'s five prayers with a live countdown to the next one</string>
+    <string name="widget_prayer_title">Prayer Times</string>
+    <string name="widget_next_prayer">%1$s in</string>
+    <string name="widget_empty_hint">Open the app to load prayer times</string>
+    <string name="widget_stale_hint">Open the app to refresh</string>
 </resources>

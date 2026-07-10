@@ -9,4 +9,11 @@
     <!-- Matches AppColors.notificationAccent (#1DAB61) for FCM / system metadata. -->
     <color name="notification_accent">#FF1DAB61</color>
     <color name="ic_launcher_background">#1DAB61</color>
+
+    <!-- Prayer widget (spec 041). Light theme; dark overrides in values-night. -->
+    <color name="widget_surface">#F2FFFFFF</color>
+    <color name="widget_text_primary">#DE000000</color>
+    <color name="widget_text_secondary">#8A000000</color>
+    <color name="widget_accent">#1DAB61</color>
+    <color name="widget_highlight">#331DAB61</color>
 </resources>
