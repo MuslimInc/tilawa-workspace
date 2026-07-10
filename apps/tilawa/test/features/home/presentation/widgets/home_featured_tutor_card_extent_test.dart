@@ -3,6 +3,8 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:tilawa/core/bootstrap/app_launch_config.dart';
 import 'package:tilawa/core/di/injection.dart';
 import 'package:tilawa/features/home/presentation/widgets/home_featured_tutor_card.dart';
+import 'package:tilawa/features/quran_sessions/domain/entities/quran_sessions_platform_config.dart';
+import 'package:tilawa/features/quran_sessions/quran_sessions_platform_config_store.dart';
 import 'package:tilawa/l10n/generated/app_localizations.dart';
 import 'package:tilawa_ui_kit/tilawa_ui_kit.dart';
 
@@ -11,9 +13,30 @@ void main() {
     getIt.registerSingleton<AppLaunchConfig>(
       const AppLaunchConfig(),
     );
+    // Feature flags fail closed without the runtime platform-config store —
+    // register an enabled config so the featured tutor card renders.
+    getIt.registerSingleton<QuranSessionsPlatformConfigStore>(
+      QuranSessionsPlatformConfigStore()..setConfig(
+        const QuranSessionsPlatformConfig(
+          quranSessionsEnabled: true,
+          studentEntryEnabled: true,
+          bookingEnabled: true,
+          bookingMode: 'requiresTutorApproval',
+          sessionMode: 'videoOnly',
+          enabledCallProviders: {'mock'},
+          teacherApplicationEnabled: false,
+          teacherApplicationEntryEnabled: false,
+          homeTeacherApplicationCardEnabled: false,
+          teacherApplicationDiscoverability: 'none',
+        ),
+      ),
+    );
     addTearDown(() async {
       if (getIt.isRegistered<AppLaunchConfig>()) {
         await getIt.unregister<AppLaunchConfig>();
+      }
+      if (getIt.isRegistered<QuranSessionsPlatformConfigStore>()) {
+        await getIt.unregister<QuranSessionsPlatformConfigStore>();
       }
     });
 

@@ -83,12 +83,23 @@ ProfileCompletionEditing _loadedEditing({
 void main() {
   group('load', () {
     blocTest<ProfileCompletionBloc, ProfileCompletionState>(
-      'emits [Loading, Editing] on success',
+      // With a single enabled country in the catalog (EG-only release), load
+      // auto-selects it and then loads its cities, so Editing is emitted twice.
+      'emits [Loading, Editing (auto-selected), Editing (cities)] on success',
       build: _makeBloc,
       act: (b) => b.add(const ProfileLoadRequested(userId: _userId)),
       expect: () => [
         isA<ProfileCompletionLoading>(),
-        isA<ProfileCompletionEditing>(),
+        isA<ProfileCompletionEditing>().having(
+          (s) => s.selectedCountry?.countryCode,
+          'auto-selected country',
+          'EG',
+        ),
+        isA<ProfileCompletionEditing>().having(
+          (s) => s.availableCities,
+          'availableCities',
+          isNotEmpty,
+        ),
       ],
     );
 
@@ -102,14 +113,10 @@ void main() {
         return _makeBloc(policyRepo: plr);
       },
       act: (b) => b.add(const ProfileLoadRequested(userId: _userId)),
-      expect: () => [
-        isA<ProfileCompletionLoading>(),
-        isA<ProfileCompletionEditing>().having(
-          (s) => s.minimumStudentAgeYears,
-          'minimumStudentAgeYears',
-          5,
-        ),
-      ],
+      verify: (b) {
+        final s = b.state as ProfileCompletionEditing;
+        check(s.minimumStudentAgeYears).equals(5);
+      },
     );
 
     blocTest<ProfileCompletionBloc, ProfileCompletionState>(
@@ -127,12 +134,15 @@ void main() {
     );
 
     blocTest<ProfileCompletionBloc, ProfileCompletionState>(
-      'loaded state includes countries from repository',
+      // The catalog defines EG/SA/AE but only EG is enabled for this release;
+      // the repository must surface enabled countries only.
+      'loaded state includes only enabled countries from the repository',
       build: _makeBloc,
       act: (b) => b.add(const ProfileLoadRequested(userId: _userId)),
       verify: (b) {
         final s = b.state as ProfileCompletionEditing;
-        check(s.availableCountries.length).equals(3);
+        check(s.availableCountries.length).equals(1);
+        check(s.availableCountries.single.countryCode).equals('EG');
       },
     );
 
