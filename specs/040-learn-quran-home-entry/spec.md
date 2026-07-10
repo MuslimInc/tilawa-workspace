@@ -55,6 +55,7 @@ As a student user, I want the ability to dismiss promotional cards without losin
 - **FR-004**: Tapping "Practice" on a revision card MUST mark that session revision as practiced immediately so it does not reappear, then route the student to `QuranReaderRoute` at the correct surah/ayah.
 - **FR-005**: Tapping "Join" on live/imminent session cards MUST navigate to the Session Detail screen using `QuranSessionsRoutes.sessionDetail` for secure token authorization.
 - **FR-006**: When session loading or aggregate loading fails, the Home screen MUST degrade gracefully to the calm fallback state and must not crash or display an error message to the user.
+- **FR-007**: Tapping "Yes, interested" on the Interest Prompt MUST NOT remove the Learn Quran section from Home: on the fallback state (`isInterested = true`, no active learning state), the system MUST render a persistent **Learn Quran Browse Card** routing to the tutor list, until a real learning state (FR-001 items 1–4) takes over. Only "Not Now" hides the section (FR-002).
 
 ---
 

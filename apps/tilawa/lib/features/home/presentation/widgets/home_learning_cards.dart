@@ -107,6 +107,81 @@ class HomeLearningInterestCard extends StatelessWidget {
   }
 }
 
+/// Persistent Learn Quran entry for students who answered the interest
+/// prompt with yes — keeps the section reachable from Home until a real
+/// learning state takes over.
+class HomeLearningBrowseCard extends StatelessWidget {
+  const HomeLearningBrowseCard({super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final tokens = theme.tokens;
+    final accent = theme.colorScheme.primary;
+
+    void openLearnQuran() {
+      logHomeLearnQuranCardAction(action: 'open_learn_quran', status: 'browse');
+      context.push(QuranSessionsRoutes.home);
+    }
+
+    return HomeDashboardCard(
+      surface: TilawaCardSurface.raised,
+      padding: EdgeInsets.all(tokens.spaceMedium),
+      onTap: openLearnQuran,
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Row(
+            spacing: tokens.spaceSmall,
+            children: [
+              HomeDashboardIconWell(
+                accent: accent,
+                child: Icon(
+                  TilawaIcons.teacherCapability,
+                  size: tokens.iconSizeLarge,
+                  color: accent,
+                ),
+              ),
+              Expanded(
+                child: Text(
+                  context.l10n.homeLearningBrowseTitle,
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                  style: theme.textTheme.titleMedium?.copyWith(
+                    color: theme.colorScheme.onSurface,
+                    fontWeight: FontWeight.w700,
+                    height: 1.15,
+                  ),
+                ),
+              ),
+            ],
+          ),
+          SizedBox(height: tokens.spaceExtraSmall),
+          Text(
+            context.l10n.homeLearningBrowseSubtitle,
+            maxLines: 2,
+            overflow: TextOverflow.ellipsis,
+            style: theme.textTheme.bodySmall?.copyWith(
+              color: theme.colorScheme.onSurfaceVariant,
+              height: 1.3,
+            ),
+          ),
+          SizedBox(height: tokens.spaceMedium),
+          SizedBox(
+            width: double.infinity,
+            child: TilawaButton(
+              text: context.l10n.homeLearningBrowseCta,
+              variant: TilawaButtonVariant.primary,
+              onPressed: openLearnQuran,
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
 /// Card representing an imminent or ongoing live Quran tutoring session.
 class HomeLearningNextSessionCard extends StatefulWidget {
   const HomeLearningNextSessionCard({

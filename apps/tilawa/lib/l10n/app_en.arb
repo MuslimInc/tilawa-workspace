@@ -352,6 +352,18 @@
     "@homeQuickToolsTitle": {
         "description": "Home section title for the compact secondary tools row"
     },
+    "homeLearningBrowseTitle": "Learn Quran",
+    "@homeLearningBrowseTitle": {
+        "description": "Title of the persistent Learn Quran entry card for interested students"
+    },
+    "homeLearningBrowseSubtitle": "Choose your hafiz and book a live 1-on-1 session.",
+    "@homeLearningBrowseSubtitle": {
+        "description": "Subtitle of the persistent Learn Quran entry card for interested students"
+    },
+    "homeLearningBrowseCta": "Start learning",
+    "@homeLearningBrowseCta": {
+        "description": "Call to action on the persistent Learn Quran entry card"
+    },
     "homeLearningInterestPromptTitle": "Learn Quran with a Qualified Tutor?",
     "@homeLearningInterestPromptTitle": {
         "description": "Title of the tutoring interest card shown on home screen"

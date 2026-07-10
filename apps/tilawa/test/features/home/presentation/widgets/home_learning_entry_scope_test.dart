@@ -170,6 +170,37 @@ void main() {
     expect(find.byType(HomeLearningInterestCard), findsNothing);
   });
 
+  testWidgets('renders browse entry when the user answered yes', (
+    tester,
+  ) async {
+    when(mockHomeLearningCubit.state).thenReturn(
+      const HomeLearningState(
+        status: HomeLearningStatus.none,
+        isBrowseEntryVisible: true,
+      ),
+    );
+
+    await tester.pumpWidget(createWidgetUnderTest());
+    await tester.pumpAndSettle();
+
+    expect(find.byType(HomeLearningBrowseCard), findsOneWidget);
+    expect(find.byType(HomeLearningInterestCard), findsNothing);
+  });
+
+  testWidgets('renders nothing when the user answered not-now', (
+    tester,
+  ) async {
+    when(mockHomeLearningCubit.state).thenReturn(
+      const HomeLearningState(status: HomeLearningStatus.none),
+    );
+
+    await tester.pumpWidget(createWidgetUnderTest());
+    await tester.pumpAndSettle();
+
+    expect(find.byType(HomeLearningBrowseCard), findsNothing);
+    expect(find.byType(HomeLearningInterestCard), findsNothing);
+  });
+
   testWidgets('renders next session card when status is nextSession', (
     tester,
   ) async {

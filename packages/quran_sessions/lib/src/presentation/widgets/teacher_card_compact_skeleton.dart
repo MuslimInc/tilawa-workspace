@@ -2,14 +2,22 @@ import 'package:flutter/material.dart';
 import 'package:tilawa_ui_kit/tilawa_ui_kit.dart';
 
 /// Loading placeholder matching [QuranSessionTeacherCompactCard] layout.
+///
+/// Renders bones under the nearest ancestor [TilawaSkeleton] scope so the
+/// shimmer sweep and base/highlight colours match every other skeleton in the
+/// app (e.g. the home dashboard). Wrap the group of skeletons in a single
+/// [TilawaSkeleton] at the call site — see [QuranSessionsHomeScreen] and
+/// [TeacherListScreen] — so one sweep and one loading announcement cover the
+/// whole placeholder region.
 class TeacherCardCompactSkeleton extends StatelessWidget {
   const TeacherCardCompactSkeleton({super.key});
 
   @override
   Widget build(BuildContext context) {
-    final tokens = Theme.of(context).tokens;
-    final scheme = Theme.of(context).colorScheme;
-    final avatarRadius = tokens.iconSizeSmall + 2;
+    final theme = Theme.of(context);
+    final tokens = theme.tokens;
+    final double avatarDimension =
+        (tokens.iconSizeSmall + tokens.spaceTiny) * 2;
 
     return Padding(
       padding: EdgeInsets.symmetric(
@@ -24,33 +32,22 @@ class TeacherCardCompactSkeleton extends StatelessWidget {
             Row(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                _Bone(
-                  width: avatarRadius * 2,
-                  height: avatarRadius * 2,
-                  radius: avatarRadius,
-                  color: scheme.surfaceContainerHighest,
-                ),
+                TilawaSkeletonBone.circle(dimension: avatarDimension),
                 SizedBox(width: tokens.spaceSmall),
                 Expanded(
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      _Bone(
-                        width: double.infinity,
-                        height: tokens.spaceMedium,
-                        color: scheme.surfaceContainerHighest,
-                      ),
+                      TilawaSkeletonLine(style: theme.textTheme.titleSmall),
                       SizedBox(height: tokens.spaceExtraSmall),
-                      _Bone(
+                      TilawaSkeletonLine(
                         width: tokens.spaceXXL * 2,
-                        height: tokens.spaceSmall,
-                        color: scheme.surfaceContainerHigh,
+                        style: theme.textTheme.bodySmall,
                       ),
                       SizedBox(height: tokens.spaceExtraSmall),
-                      _Bone(
+                      TilawaSkeletonLine(
                         width: tokens.spaceXXL,
-                        height: tokens.spaceSmall,
-                        color: scheme.surfaceContainerHigh,
+                        style: theme.textTheme.bodySmall,
                       ),
                     ],
                   ),
@@ -58,47 +55,13 @@ class TeacherCardCompactSkeleton extends StatelessWidget {
               ],
             ),
             SizedBox(height: tokens.spaceSmall),
-            _Bone(
-              width: double.infinity,
-              height: tokens.spaceLarge,
-              color: scheme.surfaceContainerHigh,
-            ),
+            TilawaSkeletonLine(style: theme.textTheme.titleMedium),
             SizedBox(height: tokens.spaceExtraSmall),
-            _Bone(
+            TilawaSkeletonLine(
               width: tokens.spaceXXL * 2,
-              height: tokens.spaceMedium,
-              color: scheme.surfaceContainerHighest,
+              style: theme.textTheme.bodyMedium,
             ),
           ],
-        ),
-      ),
-    );
-  }
-}
-
-class _Bone extends StatelessWidget {
-  const _Bone({
-    required this.width,
-    required this.height,
-    required this.color,
-    this.radius,
-  });
-
-  final double width;
-  final double height;
-  final Color color;
-  final double? radius;
-
-  @override
-  Widget build(BuildContext context) {
-    final tokens = Theme.of(context).tokens;
-    return Container(
-      width: width,
-      height: height,
-      decoration: BoxDecoration(
-        color: color,
-        borderRadius: BorderRadius.circular(
-          radius ?? tokens.resolveRadius(family: TilawaRadiusFamily.chip),
         ),
       ),
     );

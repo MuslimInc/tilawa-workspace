@@ -632,7 +632,7 @@ abstract class QuranSessionsLocalizations {
   /// No description provided for @seeAllTeachers.
   ///
   /// In en, this message translates to:
-  /// **'See all teachers →'**
+  /// **'See all teachers'**
   String get seeAllTeachers;
 
   /// No description provided for @becomeTeacherCardTitle.
@@ -4102,6 +4102,12 @@ abstract class QuranSessionsLocalizations {
   /// In en, this message translates to:
   /// **'Loading your dashboard'**
   String get teacherDashboardLoadingLabel;
+
+  /// No description provided for @teacherListLoadingLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Loading teachers'**
+  String get teacherListLoadingLabel;
 
   /// No description provided for @teacherDashboardRefreshingLabel.
   ///

@@ -17,6 +17,7 @@ class HomeLearningState extends Equatable {
     this.session,
     this.revisionAggregate,
     this.isInterestSignalNeeded = false,
+    this.isBrowseEntryVisible = false,
   });
 
   const HomeLearningState.initial() : this(status: HomeLearningStatus.initial);
@@ -28,11 +29,17 @@ class HomeLearningState extends Equatable {
   final SessionAggregate? revisionAggregate;
   final bool isInterestSignalNeeded;
 
+  /// Whether the persistent Learn Quran browse entry is shown in the [none]
+  /// fallback — true once the user answered the interest prompt with yes, so
+  /// saying yes never removes the Learn Quran section from Home.
+  final bool isBrowseEntryVisible;
+
   HomeLearningState copyWith({
     HomeLearningStatus? status,
     QuranSession? session,
     SessionAggregate? revisionAggregate,
     bool? isInterestSignalNeeded,
+    bool? isBrowseEntryVisible,
   }) {
     return HomeLearningState(
       status: status ?? this.status,
@@ -40,6 +47,7 @@ class HomeLearningState extends Equatable {
       revisionAggregate: revisionAggregate ?? this.revisionAggregate,
       isInterestSignalNeeded:
           isInterestSignalNeeded ?? this.isInterestSignalNeeded,
+      isBrowseEntryVisible: isBrowseEntryVisible ?? this.isBrowseEntryVisible,
     );
   }
 
@@ -49,5 +57,6 @@ class HomeLearningState extends Equatable {
     session,
     revisionAggregate,
     isInterestSignalNeeded,
+    isBrowseEntryVisible,
   ];
 }
