@@ -26,17 +26,22 @@
         <item name="android:paddingBottom">6dp</item>
     </style>
 
+    <!-- Name and time both span the pill width with centered text so they
+         share one center axis (parent-gravity centering is unreliable across
+         RemoteViews hosts). -->
     <style name="PrayerWidgetCellName">
-        <item name="android:layout_width">wrap_content</item>
+        <item name="android:layout_width">match_parent</item>
         <item name="android:layout_height">wrap_content</item>
+        <item name="android:gravity">center_horizontal</item>
         <item name="android:textSize">10sp</item>
         <item name="android:maxLines">1</item>
         <item name="android:textColor">@color/widget_text_secondary</item>
     </style>
 
     <style name="PrayerWidgetCellTime">
-        <item name="android:layout_width">wrap_content</item>
+        <item name="android:layout_width">match_parent</item>
         <item name="android:layout_height">wrap_content</item>
+        <item name="android:gravity">center_horizontal</item>
         <item name="android:layout_marginTop">2dp</item>
         <item name="android:textSize">14sp</item>
         <item name="android:maxLines">1</item>
