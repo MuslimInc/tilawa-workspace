@@ -1,21 +1,35 @@
 <?xml version="1.0" encoding="utf-8"?>
 <!-- Prayer widget cell styles (spec 041). Kept in a dedicated file so the
-     existing styles.xml (splash/launch theming) stays untouched. -->
+     existing styles.xml (splash/launch theming) stays untouched.
+
+     Column centers a compact Pill (wrap_content) so the next-prayer
+     highlight hugs the name+time instead of stretching to the cell. -->
 <resources>
-    <style name="PrayerWidgetCell">
+    <style name="PrayerWidgetCellColumn">
         <item name="android:layout_width">0dp</item>
-        <item name="android:layout_height">match_parent</item>
+        <item name="android:layout_height">wrap_content</item>
         <item name="android:layout_weight">1</item>
         <item name="android:orientation">vertical</item>
-        <item name="android:gravity">center</item>
+        <item name="android:gravity">center_horizontal</item>
+    </style>
+
+    <style name="PrayerWidgetCellPill">
+        <item name="android:layout_width">match_parent</item>
+        <item name="android:layout_height">wrap_content</item>
+        <item name="android:orientation">vertical</item>
+        <item name="android:gravity">center_horizontal</item>
         <item name="android:layout_marginStart">2dp</item>
         <item name="android:layout_marginEnd">2dp</item>
+        <item name="android:paddingStart">2dp</item>
+        <item name="android:paddingEnd">2dp</item>
+        <item name="android:paddingTop">6dp</item>
+        <item name="android:paddingBottom">6dp</item>
     </style>
 
     <style name="PrayerWidgetCellName">
         <item name="android:layout_width">wrap_content</item>
         <item name="android:layout_height">wrap_content</item>
-        <item name="android:textSize">11sp</item>
+        <item name="android:textSize">10sp</item>
         <item name="android:maxLines">1</item>
         <item name="android:textColor">@color/widget_text_secondary</item>
     </style>
@@ -23,7 +37,8 @@
     <style name="PrayerWidgetCellTime">
         <item name="android:layout_width">wrap_content</item>
         <item name="android:layout_height">wrap_content</item>
-        <item name="android:textSize">13sp</item>
+        <item name="android:layout_marginTop">2dp</item>
+        <item name="android:textSize">14sp</item>
         <item name="android:maxLines">1</item>
         <item name="android:textStyle">bold</item>
         <item name="android:textColor">@color/widget_text_primary</item>
