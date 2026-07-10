@@ -560,30 +560,6 @@ abstract class AppLocalizations {
   /// **'Quick tools'**
   String get homeQuickToolsTitle;
 
-  /// Title on the featured Learn Quran with Tutor card
-  ///
-  /// In en, this message translates to:
-  /// **'Learn Quran'**
-  String get homeFeaturedTutorTitle;
-
-  /// Subtitle on the featured Learn Quran with Tutor card
-  ///
-  /// In en, this message translates to:
-  /// **'Choose your hafiz to master your recitation'**
-  String get homeFeaturedTutorSubtitle;
-
-  /// Call to action button on the featured Learn Quran with Tutor card
-  ///
-  /// In en, this message translates to:
-  /// **'Start learning'**
-  String get homeFeaturedTutorCta;
-
-  /// Secondary link on featured tutor card to open booked sessions
-  ///
-  /// In en, this message translates to:
-  /// **'My sessions'**
-  String get homeFeaturedTutorMySessions;
-
   /// Title of the tutoring interest card shown on home screen
   ///
   /// In en, this message translates to:

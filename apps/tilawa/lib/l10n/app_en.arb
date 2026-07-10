@@ -352,22 +352,6 @@
     "@homeQuickToolsTitle": {
         "description": "Home section title for the compact secondary tools row"
     },
-    "homeFeaturedTutorTitle": "Learn Quran",
-    "@homeFeaturedTutorTitle": {
-        "description": "Title on the featured Learn Quran with Tutor card"
-    },
-    "homeFeaturedTutorSubtitle": "Choose your hafiz to master your recitation",
-    "@homeFeaturedTutorSubtitle": {
-        "description": "Subtitle on the featured Learn Quran with Tutor card"
-    },
-    "homeFeaturedTutorCta": "Start learning",
-    "@homeFeaturedTutorCta": {
-        "description": "Call to action button on the featured Learn Quran with Tutor card"
-    },
-    "homeFeaturedTutorMySessions": "My sessions",
-    "@homeFeaturedTutorMySessions": {
-        "description": "Secondary link on featured tutor card to open booked sessions"
-    },
     "homeLearningInterestPromptTitle": "Learn Quran with a Qualified Tutor?",
     "@homeLearningInterestPromptTitle": {
         "description": "Title of the tutoring interest card shown on home screen"
