@@ -11,14 +11,14 @@ import 'package:tilawa/features/quran_sessions/domain/entities/quran_sessions_pl
 import 'package:tilawa/features/quran_sessions/quran_sessions_platform_config_store.dart';
 import 'package:tilawa/features/home/presentation/cubit/home_learning_cubit.dart';
 import 'package:tilawa/features/home/presentation/cubit/home_learning_state.dart';
-import 'package:tilawa/features/home/presentation/widgets/home_featured_tutor_card.dart';
+import 'package:tilawa/features/home/presentation/widgets/home_learning_entry.dart';
 import 'package:tilawa/features/home/presentation/widgets/home_learning_cards.dart';
 import 'package:tilawa/features/settings/presentation/cubit/teacher_capability_cubit.dart';
 import 'package:tilawa/features/settings/domain/services/teacher_capability_refresh_notifier.dart';
 import 'package:tilawa/l10n/generated/app_localizations.dart';
 import 'package:visibility_detector/visibility_detector.dart';
 
-import 'home_featured_tutor_card_scope_test.mocks.dart';
+import 'home_learning_entry_scope_test.mocks.dart';
 
 class FakeGetCurrentUserTeacherCapabilityUseCase extends Mock
     implements GetCurrentUserTeacherCapabilityUseCase {
@@ -152,7 +152,7 @@ void main() {
       home: const Scaffold(
         body: CustomScrollView(
           slivers: [
-            HomeFeaturedTutorCardScope(),
+            HomeLearningEntryScope(),
           ],
         ),
       ),

@@ -18,7 +18,7 @@ import '../models/home_dashboard_ui_state.dart';
 import '../services/home_dashboard_refresh_error_message.dart';
 import '../widgets/home_dashboard_body.dart';
 import '../widgets/home_dashboard_content_sliver.dart';
-import '../widgets/home_featured_tutor_card.dart';
+import '../widgets/home_learning_entry.dart';
 import '../widgets/home_next_prayer_time.dart';
 import '../widgets/home_screen_background.dart';
 
@@ -163,12 +163,12 @@ class _HomeScreenState extends State<HomeScreen> {
                                     : blocState;
                                 final HomeDashboardUiState ui =
                                     HomeDashboardUiState.from(state);
-                                final Widget tutorHeaderSliver =
+                                final Widget learningEntrySliver =
                                     ui.showFullSkeleton
                                     ? const SliverToBoxAdapter(
                                         child: SizedBox.shrink(),
                                       )
-                                    : const HomeFeaturedTutorCardScope();
+                                    : const HomeLearningEntryScope();
 
                                 return CustomScrollView(
                                   controller: _scrollController,
@@ -181,7 +181,7 @@ class _HomeScreenState extends State<HomeScreen> {
                                       state: state,
                                       onOpenPrayer: widget.onOpenPrayer,
                                     ),
-                                    tutorHeaderSliver,
+                                    learningEntrySliver,
                                     HomeDashboardContentSliver(
                                       child: AnimatedSwitcher(
                                         duration: context.tokens.durationMedium,

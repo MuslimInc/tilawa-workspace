@@ -65,7 +65,8 @@ class _MockAuthSessionProvider extends Mock implements AuthSessionProvider {}
 
 class _MockHomeLearningCubit extends Mock implements HomeLearningCubit {}
 
-class _MockTeacherCapabilityCubit extends Mock implements TeacherCapabilityCubit {}
+class _MockTeacherCapabilityCubit extends Mock
+    implements TeacherCapabilityCubit {}
 
 void main() {
   setUp(() {
@@ -97,10 +98,15 @@ void main() {
     if (!GetIt.I.isRegistered<HomeLearningCubit>()) {
       final mock = _MockHomeLearningCubit();
       when(() => mock.state).thenReturn(
-        const HomeLearningState(status: HomeLearningStatus.none, isInterestSignalNeeded: false),
+        const HomeLearningState(
+          status: HomeLearningStatus.none,
+          isInterestSignalNeeded: false,
+        ),
       );
       when(() => mock.stream).thenAnswer((_) => const Stream.empty());
-      when(() => mock.load(force: any(named: 'force'))).thenAnswer((_) async {});
+      when(
+        () => mock.load(force: any(named: 'force')),
+      ).thenAnswer((_) async {});
       when(() => mock.close()).thenAnswer((_) async {});
       GetIt.I.registerSingleton<HomeLearningCubit>(mock);
     }
