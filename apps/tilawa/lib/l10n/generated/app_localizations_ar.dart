@@ -275,18 +275,6 @@ class AppLocalizationsAr extends AppLocalizations {
   String get homeQuickToolsTitle => 'أدوات سريعة';
 
   @override
-  String get homeFeaturedTutorTitle => 'تعلّم القرآن مع محفظك';
-
-  @override
-  String get homeFeaturedTutorSubtitle => 'اختر محفظك المفضل لتتقن التلاوة';
-
-  @override
-  String get homeFeaturedTutorCta => 'ابدأ التعلّم';
-
-  @override
-  String get homeFeaturedTutorMySessions => 'جلساتي';
-
-  @override
   String get homeLearningInterestPromptTitle =>
       'هل ترغب في تعلّم القرآن مع محفظ؟';
 
