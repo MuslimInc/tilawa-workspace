@@ -167,12 +167,24 @@ void main() {
       'SessionJoinRequested invokes SessionCallProvider',
       build: () {
         sessionRepo.sessions = [
-          makeSession(id: 'session_join', studentId: 'student_1'),
+          makeSession(
+            id: 'session_join',
+            studentId: 'student_1',
+            startsAt: DateTime.now().add(const Duration(minutes: 10)),
+            endsAt: DateTime.now().add(const Duration(hours: 1)),
+          ),
         ];
         return bloc;
       },
       seed: () => MySessionsSuccess(
-        upcoming: [makeSession(id: 'session_join', studentId: 'student_1')],
+        upcoming: [
+          makeSession(
+            id: 'session_join',
+            studentId: 'student_1',
+            startsAt: DateTime.now().add(const Duration(minutes: 10)),
+            endsAt: DateTime.now().add(const Duration(hours: 1)),
+          ),
+        ],
         past: const [],
       ),
       act: (b) => b.add(const SessionJoinRequested(sessionId: 'session_join')),
@@ -185,12 +197,24 @@ void main() {
       'successful join sets joinCompletedSessionId and clears progress',
       build: () {
         sessionRepo.sessions = [
-          makeSession(id: 'session_join', studentId: 'student_1'),
+          makeSession(
+            id: 'session_join',
+            studentId: 'student_1',
+            startsAt: DateTime.now().add(const Duration(minutes: 10)),
+            endsAt: DateTime.now().add(const Duration(hours: 1)),
+          ),
         ];
         return bloc;
       },
       seed: () => MySessionsSuccess(
-        upcoming: [makeSession(id: 'session_join', studentId: 'student_1')],
+        upcoming: [
+          makeSession(
+            id: 'session_join',
+            studentId: 'student_1',
+            startsAt: DateTime.now().add(const Duration(minutes: 10)),
+            endsAt: DateTime.now().add(const Duration(hours: 1)),
+          ),
+        ],
         past: const [],
       ),
       act: (b) => b.add(const SessionJoinRequested(sessionId: 'session_join')),
@@ -214,7 +238,12 @@ void main() {
       'failed join surfaces joinFailure without joinCompletedSessionId',
       build: () {
         sessionRepo.sessions = [
-          makeSession(id: 'session_join', studentId: 'student_1'),
+          makeSession(
+            id: 'session_join',
+            studentId: 'student_1',
+            startsAt: DateTime.now().add(const Duration(minutes: 10)),
+            endsAt: DateTime.now().add(const Duration(hours: 1)),
+          ),
         ];
         mockProvider = MockSessionCallProvider(
           onJoin: (_) =>
@@ -238,7 +267,14 @@ void main() {
         return bloc;
       },
       seed: () => MySessionsSuccess(
-        upcoming: [makeSession(id: 'session_join', studentId: 'student_1')],
+        upcoming: [
+          makeSession(
+            id: 'session_join',
+            studentId: 'student_1',
+            startsAt: DateTime.now().add(const Duration(minutes: 10)),
+            endsAt: DateTime.now().add(const Duration(hours: 1)),
+          ),
+        ],
         past: const [],
       ),
       act: (b) => b.add(const SessionJoinRequested(sessionId: 'session_join')),

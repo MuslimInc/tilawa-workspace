@@ -80,6 +80,14 @@ void main() {
     await tester.pumpAndSettle();
   }
 
+  Future<void> openUpcomingSessionsCategory(WidgetTester tester) async {
+    final l10n = QuranSessionsLocalizations.of(
+      tester.element(find.byType(TeacherDashboardScreen)),
+    );
+    await tester.tap(find.text(l10n.upcomingSessionsSectionTitle).last);
+    await tester.pumpAndSettle();
+  }
+
   group('teacher dashboard tutor cancel reflection', () {
     testWidgets('missing aggregate keeps upcoming card after confirm', (
       tester,
@@ -118,6 +126,7 @@ void main() {
       );
 
       await pumpDashboard(tester, bloc: bloc);
+      await openUpcomingSessionsCategory(tester);
       expect(find.byType(TutorSessionCompactCard), findsOneWidget);
 
       await confirmCardCancel(tester);
@@ -177,6 +186,7 @@ void main() {
         bloc: bloc,
         locale: const Locale('ar'),
       );
+      await openUpcomingSessionsCategory(tester);
       expect(find.byType(TutorSessionCompactCard), findsOneWidget);
 
       await confirmArabicCardCancel(tester);
@@ -273,6 +283,7 @@ void main() {
         );
 
         await pumpDashboard(tester, bloc: bloc);
+        await openUpcomingSessionsCategory(tester);
         await confirmCardCancel(tester);
         expect(find.byType(TutorSessionCompactCard), findsNothing);
 

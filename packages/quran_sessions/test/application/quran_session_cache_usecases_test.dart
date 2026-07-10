@@ -71,7 +71,9 @@ void main() {
         check(result.isRight()).isTrue();
         check(teacherProfiles.getProfileByIdCallCount).equals(1);
         check(users.getProfileCallCount).equals(1);
-        check(schedules.getScheduleCallCount).equals(2);
+        // Availability generation reuses the dashboard's schedule read
+        // instead of fetching the schedule a second time.
+        check(schedules.getScheduleCallCount).equals(1);
         check(sessions.getTeacherUpcomingSessionsCallCount).equals(1);
       },
     );
@@ -84,7 +86,7 @@ void main() {
 
         check(teacherProfiles.getProfileByIdCallCount).equals(1);
         check(users.getProfileCallCount).equals(1);
-        check(schedules.getScheduleCallCount).equals(2);
+        check(schedules.getScheduleCallCount).equals(1);
         check(sessions.getTeacherUpcomingSessionsCallCount).equals(1);
       },
     );
@@ -98,7 +100,7 @@ void main() {
       );
 
       check(teacherProfiles.getProfileByIdCallCount).equals(2);
-      check(schedules.getScheduleCallCount).equals(4);
+      check(schedules.getScheduleCallCount).equals(2);
       check(sessions.getTeacherUpcomingSessionsCallCount).equals(2);
     });
 
@@ -117,7 +119,7 @@ void main() {
 
       check(first.isLeft()).isTrue();
       check(second.isRight()).isTrue();
-      check(schedules.getScheduleCallCount).equals(3);
+      check(schedules.getScheduleCallCount).equals(2);
     });
 
     test(

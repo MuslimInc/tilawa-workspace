@@ -48,6 +48,13 @@ class TeacherCapability extends Equatable {
       state == TeacherCapabilityState.approvedActive ||
       routesApprovedInactiveToTeacherFlows;
 
+  /// Approved or former teacher — not a normal student for Learn Quran entry.
+  bool get hasTeacherMarketplaceRole =>
+      canAccessTeacherDashboard ||
+      shouldCompleteTeacherProfile ||
+      state == TeacherCapabilityState.suspended ||
+      state == TeacherCapabilityState.revoked;
+
   bool get shouldCompleteTeacherProfile =>
       state == TeacherCapabilityState.approvedIncompleteProfile;
 

@@ -3,6 +3,7 @@ import 'package:quran_sessions/quran_sessions.dart';
 import 'package:tilawa/core/bootstrap/app_launch_config.dart';
 import 'package:tilawa/core/di/injection.dart';
 import 'package:tilawa/features/quran_sessions/debug/quran_sessions_debug_tools.dart';
+import 'package:tilawa/features/quran_sessions/quran_sessions_feature_flags.dart';
 import 'package:tilawa/features/quran_sessions/quran_sessions_launch_policy.dart';
 import 'package:tilawa/features/quran_sessions/router/quran_sessions_nav.dart';
 
@@ -15,11 +16,13 @@ Future<void> joinDebugLiveKitVideoCall(BuildContext context) async {
     throw StateError('Debug LiveKit join is disabled for this build.');
   }
 
-  final rtc = resolveRtcLaunchConfig(getIt<AppLaunchConfig>());
+  final rtc = resolveRtcLaunchConfigFromPlatformConfig(
+    quranSessionsEffectivePlatformConfig(),
+    getIt<AppLaunchConfig>(),
+  );
   if (!rtc.isLiveKitEnabled) {
     throw StateError(
-      'LiveKit is not enabled. Set TILAWA_LAUNCH_ENABLED_CALL_PROVIDERS '
-      'to include livekit and configure TILAWA_LAUNCH_LIVEKIT_URL.',
+      'LiveKit is not enabled in platform config or LiveKit URL is missing.',
     );
   }
 
@@ -49,7 +52,6 @@ Future<void> joinDebugLiveKitVideoCall(BuildContext context) async {
     callProviderKind: SessionCallProviderKind.livekit,
     participantName: 'Debug LiveKit',
     participantSubtitle: 'QA smoke test',
-    buildCallSurface: buildQuranSessionsInAppCallSurface(),
     createCallControlGateway: createQuranSessionsCallControlGateway,
     createCallTelemetry: createQuranSessionsCallTelemetry,
   );

@@ -15,8 +15,4 @@ export const TILAWA_USER_DEFAULT_SORT = {
   direction: 'desc',
 } as const;
 
-export const TILAWA_USER_SORT_FIELDS = [
-  'createdAt',
-  'displayName',
-  'email',
-] as const;
+export const TILAWA_USER_SORT_FIELDS = ['createdAt', 'displayName', 'email'] as const;

@@ -1,39 +1,17 @@
 .tilawa-admin-shell {
-  display: flex;
-  height: 100dvh;
-  overflow: hidden;
   background-color: var(--tilawa-canvas);
   color: var(--tilawa-on-surface);
 }
 
-.tilawa-admin-main {
-  display: flex;
-  flex: 1;
-  flex-direction: column;
-  min-width: 0;
-}
-
 .tilawa-admin-header {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 1rem;
   height: var(--tilawa-header-height);
-  padding: 0 1.5rem;
   background-color: var(--tilawa-surface);
   border-bottom: 1px solid var(--tilawa-outline-variant);
   box-shadow: var(--tilawa-shadow-sm);
 }
 
-.tilawa-admin-header-start {
-  flex: 1;
-  min-width: 0;
-}
-
 .tilawa-admin-search {
-  position: relative;
-  display: block;
-  max-width: 28rem;
+  /* Let tailwind handle sizing now */
 }
 
 .tilawa-admin-search-icon {
@@ -55,23 +33,6 @@
 
 .tilawa-admin-search-input:focus {
   background-color: var(--tilawa-surface);
-}
-
-.tilawa-admin-header-end {
-  display: flex;
-  align-items: center;
-  gap: 0.75rem;
-}
-
-.tilawa-admin-content {
-  flex: 1;
-  overflow-y: auto;
-}
-
-.tilawa-admin-content-inner {
-  max-width: var(--tilawa-content-max);
-  margin: 0 auto;
-  padding: 1.5rem;
 }
 
 .sr-only {

@@ -21,11 +21,7 @@ import {
   QuranSessionsUserListItemVm,
   QuranSessionsViewModelMapper,
 } from '../../data/view-models/quran-sessions.view-model';
-import {
-  DEFAULT_PAGE_SIZE,
-  SortRequest,
-  sortsEqual,
-} from '../../domain/entities/pagination.types';
+import { DEFAULT_PAGE_SIZE, SortRequest, sortsEqual } from '../../domain/entities/pagination.types';
 
 type LoadState = 'idle' | 'loading' | 'success' | 'error';
 
@@ -47,14 +43,10 @@ function countEmailsByNormalizedAddress(
 export class QuranSessionsUsersFacade {
   private readonly listUseCase = inject(ListQuranSessionsUsersUseCase);
   private readonly moderateUseCase = inject(ModerateQuranSessionsUserUseCase);
-  private readonly teacherAccessUseCase = inject(
-    SetUserTeacherApplicationAccessUseCase,
-  );
+  private readonly teacherAccessUseCase = inject(SetUserTeacherApplicationAccessUseCase);
   private readonly requestDeletionUseCase = inject(RequestUserDeletionUseCase);
   private readonly cancelDeletionUseCase = inject(CancelUserDeletionUseCase);
-  private readonly listDeletionAuditUseCase = inject(
-    ListUserDeletionAuditUseCase,
-  );
+  private readonly listDeletionAuditUseCase = inject(ListUserDeletionAuditUseCase);
 
   private readonly listState = signal<LoadState>('idle');
   private readonly listError = signal<string | null>(null);
@@ -64,9 +56,7 @@ export class QuranSessionsUsersFacade {
   private readonly actionLoading = signal(false);
   private readonly actionError = signal<string | null>(null);
   private readonly listSort = signal<SortRequest>(QS_USER_DEFAULT_SORT);
-  private readonly deletionAudit = signal<readonly UserDeletionAuditEvent[]>(
-    [],
-  );
+  private readonly deletionAudit = signal<readonly UserDeletionAuditEvent[]>([]);
 
   readonly items = this.listItems.asReadonly();
   readonly listLoadState = this.listState.asReadonly();
@@ -105,12 +95,8 @@ export class QuranSessionsUsersFacade {
       const mapped = page.items.map((user) => {
         const normalizedEmail = user.email?.trim().toLowerCase() ?? '';
         const hasDuplicateEmail =
-          normalizedEmail.length > 0 &&
-          (emailCounts.get(normalizedEmail) ?? 0) > 1;
-        return QuranSessionsViewModelMapper.toUserListItem(
-          user,
-          hasDuplicateEmail,
-        );
+          normalizedEmail.length > 0 && (emailCounts.get(normalizedEmail) ?? 0) > 1;
+        return QuranSessionsViewModelMapper.toUserListItem(user, hasDuplicateEmail);
       });
 
       this.listItems.set(append ? [...this.listItems(), ...mapped] : mapped);
@@ -119,9 +105,7 @@ export class QuranSessionsUsersFacade {
       this.listState.set('success');
     } catch (error) {
       this.listState.set('error');
-      this.listError.set(
-        error instanceof Error ? error.message : 'Failed to load users.',
-      );
+      this.listError.set(error instanceof Error ? error.message : 'Failed to load users.');
     }
   }
 
@@ -136,21 +120,14 @@ export class QuranSessionsUsersFacade {
     });
   }
 
-  async changeSort(
-    filters: QuranSessionsUserFilters,
-    sort: SortRequest,
-  ): Promise<void> {
+  async changeSort(filters: QuranSessionsUserFilters, sort: SortRequest): Promise<void> {
     await this.loadList(filters, { sort, append: false, cursor: null });
   }
 
   async suspendUser(userId: string, reason: string): Promise<void> {
     this.actionLoading.set(true);
     try {
-      await this.moderateUseCase.execute(
-        userId,
-        UserModerationAction.Suspend,
-        reason,
-      );
+      await this.moderateUseCase.execute(userId, UserModerationAction.Suspend, reason);
     } finally {
       this.actionLoading.set(false);
     }
@@ -159,10 +136,7 @@ export class QuranSessionsUsersFacade {
   async reactivateUser(userId: string): Promise<void> {
     this.actionLoading.set(true);
     try {
-      await this.moderateUseCase.execute(
-        userId,
-        UserModerationAction.Reactivate,
-      );
+      await this.moderateUseCase.execute(userId, UserModerationAction.Reactivate);
     } finally {
       this.actionLoading.set(false);
     }
@@ -177,16 +151,10 @@ export class QuranSessionsUsersFacade {
     try {
       await this.teacherAccessUseCase.execute(userId, canApplyAsTeacher);
       this.listItems.update((items) =>
-        items.map((item) =>
-          item.userId === userId
-            ? { ...item, canApplyAsTeacher }
-            : item,
-        ),
+        items.map((item) => (item.userId === userId ? { ...item, canApplyAsTeacher } : item)),
       );
     } catch (error) {
-      this.actionError.set(
-        error instanceof Error ? error.message : 'Action failed.',
-      );
+      this.actionError.set(error instanceof Error ? error.message : 'Action failed.');
       throw error;
     } finally {
       this.actionLoading.set(false);
@@ -197,19 +165,13 @@ export class QuranSessionsUsersFacade {
     this.actionError.set(null);
   }
 
-  async requestUserDeletion(
-    userId: string,
-    reason: string,
-    confirmEmail: string,
-  ): Promise<void> {
+  async requestUserDeletion(userId: string, reason: string, confirmEmail: string): Promise<void> {
     this.actionLoading.set(true);
     this.actionError.set(null);
     try {
       await this.requestDeletionUseCase.execute(userId, reason, confirmEmail);
     } catch (error) {
-      this.actionError.set(
-        error instanceof Error ? error.message : 'Deletion request failed.',
-      );
+      this.actionError.set(error instanceof Error ? error.message : 'Deletion request failed.');
       throw error;
     } finally {
       this.actionLoading.set(false);
@@ -222,9 +184,7 @@ export class QuranSessionsUsersFacade {
     try {
       await this.cancelDeletionUseCase.execute(userId, reason);
     } catch (error) {
-      this.actionError.set(
-        error instanceof Error ? error.message : 'Cancel deletion failed.',
-      );
+      this.actionError.set(error instanceof Error ? error.message : 'Cancel deletion failed.');
       throw error;
     } finally {
       this.actionLoading.set(false);
@@ -244,4 +204,3 @@ export class QuranSessionsUsersFacade {
     return accountStatus === QuranSessionsAccountStatus.PendingDeletion;
   }
 }
-

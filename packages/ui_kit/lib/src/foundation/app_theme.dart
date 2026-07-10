@@ -219,7 +219,10 @@ class AppTheme {
     return (lighter + 0.05) / (darker + 0.05);
   }
 
-  static ColorScheme _refineLightColorScheme(ColorScheme scheme) {
+  static ColorScheme _refineLightColorScheme(
+    ColorScheme scheme,
+    MeMuslimDesignTokens designTokens,
+  ) {
     final Color primary = scheme.primary;
     final isBrandPrimary = AppBrandProbe.usesBrandLockedSchemeRoles(
       primary.toARGB32(),
@@ -262,13 +265,16 @@ class AppTheme {
       onTertiaryContainer: AppColors.tripGlideInk,
       outline: AppColors.lightOutline,
       outlineVariant: AppColors.lightOutlineVariant,
-      shadow: AppColors.lightShadow.withValues(alpha: 0.06),
+      shadow: AppColors.lightShadow.withValues(
+        alpha: designTokens.opacityShadow,
+      ),
       scrim: AppColors.lightShadow.withValues(alpha: 0.18),
     );
   }
 
   static ColorScheme _refineDarkColorScheme(
-    ColorScheme scheme, {
+    ColorScheme scheme,
+    MeMuslimDesignTokens designTokens, {
     required bool trueBlack,
   }) {
     if (trueBlack) {
@@ -281,7 +287,7 @@ class AppTheme {
         surfaceContainerHighest: AppColors.darkTrueBlackSurfaceContainerHighest,
         outline: AppColors.darkOutline,
         outlineVariant: AppColors.darkTrueBlackOutlineVariant,
-        shadow: Colors.black,
+        shadow: Colors.black.withValues(alpha: designTokens.opacityShadow),
         scrim: Colors.black,
       );
     }
@@ -295,7 +301,7 @@ class AppTheme {
       surfaceContainerHighest: AppColors.darkSurfaceContainerHighestBase,
       outline: AppColors.darkOutline,
       outlineVariant: AppColors.darkOutlineVariant,
-      shadow: Colors.black,
+      shadow: Colors.black.withValues(alpha: designTokens.opacityShadow),
       scrim: Colors.black,
     );
   }
@@ -409,6 +415,7 @@ class AppTheme {
       cardTheme: theme.cardTheme.copyWith(
         color: colorScheme.surface,
         surfaceTintColor: componentSurfaceTint,
+        elevation: (theme.cardTheme.elevation ?? 1.0) * kElevationMultiplier,
         shape: RoundedRectangleBorder(
           borderRadius: BorderRadius.circular(cardRadius),
         ),
@@ -416,6 +423,7 @@ class AppTheme {
       dialogTheme: theme.dialogTheme.copyWith(
         backgroundColor: colorScheme.surface,
         surfaceTintColor: componentSurfaceTint,
+        elevation: (theme.dialogTheme.elevation ?? 6.0) * kElevationMultiplier,
         shape: RoundedRectangleBorder(
           borderRadius: BorderRadius.circular(cardRadius),
         ),
@@ -424,11 +432,32 @@ class AppTheme {
         backgroundColor: colorScheme.surface,
         modalBackgroundColor: colorScheme.surface,
         surfaceTintColor: componentSurfaceTint,
+        elevation:
+            (theme.bottomSheetTheme.elevation ?? 1.0) * kElevationMultiplier,
+        modalElevation:
+            (theme.bottomSheetTheme.modalElevation ?? 1.0) *
+            kElevationMultiplier,
         shape: RoundedRectangleBorder(
           borderRadius: BorderRadius.vertical(
             top: Radius.circular(cardRadius),
           ),
         ),
+      ),
+      popupMenuTheme: theme.popupMenuTheme.copyWith(
+        elevation:
+            (theme.popupMenuTheme.elevation ?? 3.0) * kElevationMultiplier,
+      ),
+      navigationBarTheme: theme.navigationBarTheme.copyWith(
+        elevation:
+            (theme.navigationBarTheme.elevation ?? 3.0) * kElevationMultiplier,
+      ),
+      bottomNavigationBarTheme: theme.bottomNavigationBarTheme.copyWith(
+        elevation:
+            (theme.bottomNavigationBarTheme.elevation ?? 3.0) *
+            kElevationMultiplier,
+      ),
+      progressIndicatorTheme: theme.progressIndicatorTheme.copyWith(
+        refreshBackgroundColor: colorScheme.surface,
       ),
       inputDecorationTheme: const InputDecorationTheme(
         border: InputBorder.none,
@@ -440,10 +469,27 @@ class AppTheme {
         filled: false,
       ),
       elevatedButtonTheme: ElevatedButtonThemeData(
-        style: _buttonStyleWithKitShape(
-          theme.elevatedButtonTheme.style,
-          designTokens,
-        ),
+        style:
+            _buttonStyleWithKitShape(
+              theme.elevatedButtonTheme.style,
+              designTokens,
+            )?.copyWith(
+              elevation: WidgetStateProperty.resolveWith((states) {
+                final baseElevation = theme.elevatedButtonTheme.style?.elevation
+                    ?.resolve(states);
+                if (baseElevation != null) {
+                  return baseElevation * kElevationMultiplier;
+                }
+                if (states.contains(WidgetState.disabled)) return 0.0;
+                if (states.contains(WidgetState.hovered)) {
+                  return 3.0 * kElevationMultiplier;
+                }
+                if (states.contains(WidgetState.pressed)) {
+                  return 1.0 * kElevationMultiplier;
+                }
+                return 1.0 * kElevationMultiplier;
+              }),
+            ),
       ),
       filledButtonTheme: FilledButtonThemeData(
         style:
@@ -498,6 +544,7 @@ class AppTheme {
     List<ThemeExtension<dynamic>> extensions = const [],
   }) {
     final scheme = _lightScheme(primaryColor);
+    final designTokens = MeMuslimDesignTokens.light();
 
     final theme = FlexThemeData.light(
       colors: scheme,
@@ -512,7 +559,10 @@ class AppTheme {
       useMaterial3ErrorColors: _useMaterial3ErrorColors,
       textTheme: _getTextTheme(Brightness.light),
     );
-    final colorScheme = _refineLightColorScheme(theme.colorScheme);
+    final colorScheme = _refineLightColorScheme(
+      theme.colorScheme,
+      designTokens,
+    );
     final themedSurfaces = _applySurfaceScale(
       theme: theme,
       colorScheme: colorScheme,
@@ -521,7 +571,7 @@ class AppTheme {
 
     return themedSurfaces.copyWith(
       extensions: [
-        MeMuslimDesignTokens.light(),
+        designTokens,
         MeMuslimComponentTokens.light(colorScheme: colorScheme),
         MeMuslimProductColors.light(colorScheme),
         ...extensions,
@@ -538,6 +588,7 @@ class AppTheme {
     List<ThemeExtension<dynamic>> extensions = const [],
   }) {
     final scheme = _darkScheme(primaryColor, isDefaultPreset: isDefaultPreset);
+    final designTokens = MeMuslimDesignTokens.dark();
 
     final theme = FlexThemeData.dark(
       colors: scheme,
@@ -554,6 +605,7 @@ class AppTheme {
     );
     final colorScheme = _refineDarkColorScheme(
       theme.colorScheme,
+      designTokens,
       trueBlack: darkIsTrueBlack,
     );
     final scaffoldBackgroundColor = darkIsTrueBlack
@@ -567,7 +619,7 @@ class AppTheme {
 
     return themedSurfaces.copyWith(
       extensions: [
-        MeMuslimDesignTokens.dark(),
+        designTokens,
         MeMuslimComponentTokens.dark(colorScheme: colorScheme),
         MeMuslimProductColors.dark(colorScheme),
         ...extensions,

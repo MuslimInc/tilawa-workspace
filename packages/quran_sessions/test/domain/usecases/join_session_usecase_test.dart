@@ -6,6 +6,10 @@ import '../../helpers/fakes/fake_session_repository.dart';
 import '../../helpers/fakes/fake_teacher_profile_repository.dart';
 import '../../helpers/fixtures.dart' show makeSession, makeTeacherProfile;
 
+/// Start time inside the Q-VC-03 join window (15m lead) so joins are allowed.
+DateTime withinJoinWindowStart() =>
+    DateTime.now().toUtc().add(const Duration(minutes: 10));
+
 void main() {
   late FakeSessionRepository sessionRepo;
   late FakeTeacherProfileRepository teacherProfiles;
@@ -37,7 +41,11 @@ void main() {
 
   test('student joins external session via routing metadata', () async {
     sessionRepo.sessions = [
-      makeSession(id: 'session_1', studentId: 'student_1'),
+      makeSession(
+        id: 'session_1',
+        studentId: 'student_1',
+        startsAt: withinJoinWindowStart(),
+      ),
     ];
 
     final result = await joinSession(sessionId: 'session_1');
@@ -53,8 +61,8 @@ void main() {
         bookingId: 'booking_1',
         teacherId: 'teacher_1',
         studentId: 'student_1',
-        startsAt: DateTime.now().add(const Duration(hours: 1)),
-        endsAt: DateTime.now().add(const Duration(hours: 2)),
+        startsAt: withinJoinWindowStart(),
+        endsAt: withinJoinWindowStart().add(const Duration(hours: 1)),
         callType: SessionCallType.voiceCall,
         status: QuranSessionStatus.scheduled,
         callProviderKind: SessionCallProviderKind.mock,
@@ -104,7 +112,11 @@ void main() {
 
   test('teacher joins with teacher role metadata', () async {
     sessionRepo.sessions = [
-      makeSession(id: 'session_1', studentId: 'student_1'),
+      makeSession(
+        id: 'session_1',
+        studentId: 'student_1',
+        startsAt: withinJoinWindowStart(),
+      ),
     ];
     joinSession = JoinSessionUseCase(
       sessionRepository: sessionRepo,
@@ -127,11 +139,14 @@ void main() {
       teacherProfiles.seed(
         makeTeacherProfile(id: profileDocId, userId: authUid),
       );
+      final startsAt = DateTime.now().toUtc().add(const Duration(minutes: 10));
       sessionRepo.sessions = [
         makeSession(
           id: 'session_1',
           studentId: 'student_1',
           teacherId: profileDocId,
+          startsAt: startsAt,
+          endsAt: startsAt.add(const Duration(hours: 1)),
         ),
       ];
       joinSession = JoinSessionUseCase(
@@ -155,8 +170,8 @@ void main() {
         bookingId: 'booking_1',
         teacherId: 'teacher_1',
         studentId: 'student_1',
-        startsAt: DateTime.now().add(const Duration(hours: 1)),
-        endsAt: DateTime.now().add(const Duration(hours: 2)),
+        startsAt: withinJoinWindowStart(),
+        endsAt: withinJoinWindowStart().add(const Duration(hours: 1)),
         callType: SessionCallType.externalMeeting,
         status: QuranSessionStatus.scheduled,
         callProviderKind: SessionCallProviderKind.external,
@@ -215,8 +230,8 @@ void main() {
         bookingId: 'booking_1',
         teacherId: 'teacher_1',
         studentId: 'student_1',
-        startsAt: DateTime.now().add(const Duration(hours: 1)),
-        endsAt: DateTime.now().add(const Duration(hours: 2)),
+        startsAt: withinJoinWindowStart(),
+        endsAt: withinJoinWindowStart().add(const Duration(hours: 1)),
         callType: SessionCallType.voiceCall,
         status: QuranSessionStatus.scheduled,
         callProviderKind: SessionCallProviderKind.mock,
@@ -237,6 +252,38 @@ void main() {
     });
     telemetry.dispose();
     hub.dispose();
+  });
+
+  test('maps unhandled provider exceptions to UnknownFailure', () async {
+    routingProvider = RoutingSessionCallProvider(
+      external: ExternalMeetingCallProvider(
+        getMeetingUrl: (_) async => 'https://meet.example.com/r',
+        urlLauncher: (_) async => throw Exception('Crash'),
+      ),
+      mock: MockSessionCallProvider(onJoin: (_) {}),
+    );
+    joinSession = JoinSessionUseCase(
+      sessionRepository: sessionRepo,
+      callProvider: routingProvider,
+      authSession: _FakeAuthSession('student_1'),
+      teacherProfileRepository: teacherProfiles,
+    );
+
+    sessionRepo.sessions = [
+      makeSession(
+        id: 'session_1',
+        studentId: 'student_1',
+        startsAt: withinJoinWindowStart(),
+      ),
+    ];
+
+    final result = await joinSession(sessionId: 'session_1');
+
+    check(result.isLeft()).isTrue();
+    result.fold(
+      (f) => check(f).isA<UnknownFailure>(),
+      (_) => fail('expected Left'),
+    );
   });
 }
 

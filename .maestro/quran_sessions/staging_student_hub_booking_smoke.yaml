@@ -1,0 +1,30 @@
+# Staging Device QA — student hub → teachers list (D1–D2 entry).
+# Prerequisites:
+#   - Student account with completed Quran Sessions profile (EG/cairo)
+#   - Build MUST include:
+#       --dart-define=TILAWA_DISTRIBUTION=staging
+#       --dart-define=TILAWA_LAUNCH_LEARN_QURAN_STUDENT_FEATURE_ENABLED=true
+#       --dart-define=TILAWA_LAUNCH_QURAN_SESSIONS_BOOKING_ENABLED=true
+appId: com.tilawa.app
+---
+- launchApp:
+    clearState: false
+- runFlow:
+    file: subflows/staging_dismiss_blockers.yaml
+- extendedWaitUntil:
+    visible:
+      id: home_tab
+    timeout: 30000
+- extendedWaitUntil:
+    visible:
+      text: ".*تعلّم القرآن.*"
+    timeout: 15000
+- tapOn:
+    text: ".*ابدأ التعلّم.*"
+- waitForAnimationToEnd
+- extendedWaitUntil:
+    visible:
+      text: ".*المحفظون.*"
+    timeout: 20000
+- assertVisible:
+    text: ".*تعلّم القرآن.*"

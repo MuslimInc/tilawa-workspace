@@ -26,7 +26,7 @@ into feature code.
 ## 1. Architecture (scalable atomic design)
 
 ```
-foundation/     AppColors, AppTheme, TilawaDesignTokens, TilawaInputStyle, …
+foundation/     AppColors, AppTheme, MeMuslimDesignTokens, TilawaInputStyle, …
 atoms/          TilawaButton, TilawaCard, TilawaTextField, TilawaReadOnlyField, …
 molecules/      TilawaSearchField, TilawaSelectionPill, TilawaCatalogAppBar, …
 organisms/      TilawaMediaPlayerBar, TilawaSettingsGroup, …
@@ -35,7 +35,7 @@ organisms/      TilawaMediaPlayerBar, TilawaSettingsGroup, …
 **Rules for growth**
 
 1. **One source of hex** — `AppColors` only; widgets use `ColorScheme` +
-   `TilawaComponentTokens`.
+   `MeMuslimComponentTokens`.
 2. **Token factories** — light/dark component colours live in
    `component_tokens/*_tokens.dart`, not in widgets.
 3. **Public API surface** — export through `tilawa_ui_kit.dart` / feature
@@ -48,12 +48,14 @@ organisms/      TilawaMediaPlayerBar, TilawaSettingsGroup, …
 
 ## 2. Theme freeze — calm catalog chrome (light)
 
-Default primary: **Reference teal** `#00897B` (`AppColors.defaultPrimary`), **brand-locked**
-for production per `PrimaryColorPreset.brandLocked` / `Env.kShowColorPicker`.
-Legacy presets (coral, sage, brown, purple) remain only for the dev/QA
-color picker and persisted user choices.
+Default primary: **brand green** `#1DAB61` (`AppColors.brandActionGreen` /
+`AppColors.defaultPrimary`), **brand-locked** for production per
+`PrimaryColorPreset.brandGreen` / `Env.kShowColorPicker`.
+Legacy presets (coral, teal, sage, brown, purple) remain only for the dev/QA
+color picker and persisted user choices — **do not reintroduce purple** or ship
+new UI assuming a user-picked primary other than green.
 
-**Accent usage (one-accent rule):** Teal primary for **one** emphasis per screen
+**Accent usage (one-accent rule):** Green primary for **one** emphasis per screen
 — primary CTA, active bottom nav, selected pills/segments, progress fill,
 switch ON. **Not** for scaffold fills (use the neutral canvas).
 
@@ -65,14 +67,16 @@ switch ON. **Not** for scaffold fills (use the neutral canvas).
 |-------------|-----|------------------------|
 | `lightCanvas` / `lightBackground` | `#F4F2EE` | Scaffold, `surfaceContainerLowest` |
 | `lightSurface` | `#FFFFFF` | Cards, sheets, dialogs |
-| `lightInk` | `#212121` | `onSurface` |
-| `lightMute` | `#757575` | Muted labels (`onSurfaceVariant`) |
-| `lightSurfaceContainerHighBase` | `#F5F5F5` | Idle chips, `surfaceContainerHigh` |
+| `lightInk` | `#1A2E24` | `onSurface` |
+| `lightMute` | `#6B7F74` | Muted labels (`onSurfaceVariant`) |
+| `lightSurfaceContainerHighBase` | `#F0F7F2` | Idle chips, `surfaceContainerHigh` |
 | `featuredGradientStart` / `End` | `#FFD28E` / `#FF9E44` | Last Read / hero gold cards (via `productColors`) |
+| `brandActionGreen` / `defaultPrimary` | `#1DAB61` | `primary` — CTAs, active nav, selected controls |
+| `lightSchemeOnPrimary` | `#003317` | `onPrimary` on green fills |
 
 ### Product semantics
 
-`TilawaProductColors` (`Theme.of(context).productColors`) exposes prayer, Quran, player, hub, and brand-lock roles. Feature code should prefer this over `AppColors`.
+`MeMuslimProductColors` (`Theme.of(context).productColors`) exposes prayer, Quran, player, hub, and brand-lock roles. Feature code should prefer this over `AppColors`.
 
 `AppTheme` sets **`surfaceTint` → transparent** on cards, dialogs, sheets, and
 app bars so Material 3 does not wash neutrals with the user primary.
@@ -91,6 +95,19 @@ Deep green-tinted neutral stack (`darkBackground` …); idle chips use
 
 Light-mode success/warning stay at `#43A047` / `#C2410C`; dark tones are
 lifted in the same hue family for WCAG 3:1 on green-tinted surfaces.
+
+### Depth and touch (`MeMuslimDesignTokens`)
+
+| Token | Value | Use |
+|-------|-------|-----|
+| `opacityShadow` | 0.04 | Raised cards, chips |
+| `opacityShadowStrong` | 0.08 | Floating chrome (nav, player) |
+| `shadowOffsetSmall` / `shadowOffsetMedium` | `(0, 1)` / `(0, 2)` | Shadow offsets |
+| `blurShadow` | 8 | Shadow blur |
+| `borderWidthThin` | 0.5 | Hairlines |
+| `minInteractiveDimension` | 48 dp | Minimum hit target (`kMeMuslimMinInteractiveDimension`) |
+
+Access tokens via `Theme.of(context).tokens` or `context.tokens`.
 
 ---
 
@@ -182,6 +199,22 @@ bones matching loaded copy heights).
 
 ---
 
+## 4.3 Call to Action (CTA) Guidelines
+
+**Rule:** Primary CTAs must feel substantial but should never stretch arbitrarily to unbounded screen edges on tablets. Use the appropriate design-system constraints for the context.
+
+| Context | Recommended Pattern | Constraints & Behaviors |
+|---------|---------------------|--------------------------|
+| **Empty states** | `TilawaIllustratedState` / `TilawaEmptyState` | Handled natively. Buttons use `actionMinWidth` (240dp) and `actionMaxWidth` (320dp). Hugs content organically while preventing overstretch on tablets. |
+| **Pinned bottom** | `TilawaBottomActionInset` | Wrap the bottom area in `TilawaBottomActionInset(maxWidthKind: TilawaContentKind.form)`. This expands cleanly on phones but restricts stretch on large tablets, keeping thumb reach safe. |
+| **Inline (cards/dialogs)** | `TilawaButton(isFullWidth: true)` | Relies on the parent container (e.g. Card padding or Dialog width). Do **not** wrap in `SizedBox(width: double.infinity)` which forcefully breaks out of responsive constraints. |
+
+**Important notes:**
+- Avoid manual safe area logic or arbitrary `double.infinity` wrappers.
+- `TilawaButton` scales nicely for text wrapping and RTL alignment inherently. Let the button hug or fill its parent constraint.
+
+---
+
 ## 5. Testing contract
 
 | Suite | Path | Purpose |
@@ -208,7 +241,7 @@ Previews and goldens set `AppTheme.useGoogleFonts = false` and
 
 - [ ] `dart analyze` clean on `packages/ui_kit`
 - [ ] `flutter test test/theme/` and `flutter test test/goldens/`
-- [ ] `DESIGN.md` §2 neutrals and § catalog chrome match `AppColors`
+- [ ] `DESIGN.md` frontmatter and § catalog chrome match `AppColors` / `MeMuslimDesignTokens`
 - [ ] `docs/design/colors.md` policy unchanged or updated in same PR
 - [ ] No new raw `Color(0x…)` in `apps/tilawa/lib/features/` chrome
 - [ ] Accent still sparse: search/chips/app bars remain neutral in light mode

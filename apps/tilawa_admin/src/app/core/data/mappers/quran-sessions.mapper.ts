@@ -3,6 +3,7 @@ import { TeacherApplication } from '../../domain/entities/teacher-application.en
 import {
   ProfileCompleteness,
   TeacherProfile,
+  TeacherSessionPriceOverride,
   TeacherVerificationStatus,
 } from '../../domain/entities/teacher-profile.entity';
 import { QuranSessionsUser, UserGender } from '../../domain/entities/quran-sessions-user.entity';
@@ -80,15 +81,9 @@ export function computeMissingPublicProfileFields(profile: {
 }
 
 export function resolveApplicationPublicDisplayName(
-  application: Pick<
-    TeacherApplication,
-    'publicDisplayName' | 'teacherDisplayName'
-  >,
+  application: Pick<TeacherApplication, 'publicDisplayName' | 'teacherDisplayName'>,
 ): string | null {
-  for (const candidate of [
-    application.publicDisplayName,
-    application.teacherDisplayName,
-  ]) {
+  for (const candidate of [application.publicDisplayName, application.teacherDisplayName]) {
     const trimmed = trimString(candidate);
     if (trimmed.length > 0) {
       return trimmed;
@@ -131,6 +126,11 @@ export interface TeacherProfileFirestoreDto {
   isActive?: boolean;
   profileCompleteness?: string;
   isPubliclyVisible?: boolean;
+  sessionPriceOverride?: {
+    enabled?: boolean;
+    amount?: number;
+    currencyCode?: string | null;
+  };
   createdAt?: unknown;
   updatedAt?: unknown;
 }
@@ -178,19 +178,13 @@ export function parseApplicationStatus(raw: string): TeacherApplicationStatus {
 }
 
 export class TeacherApplicationMapper {
-  static fromFirestore(
-    id: string,
-    dto: TeacherApplicationFirestoreDto,
-  ): TeacherApplication {
+  static fromFirestore(id: string, dto: TeacherApplicationFirestoreDto): TeacherApplication {
     const now = new Date();
     return {
       id,
       userId: dto.userId ?? '',
       status: parseApplicationStatus(dto.status ?? 'none'),
-      publicDisplayName:
-        trimString(dto.publicDisplayName) ||
-        trimString(dto.displayName) ||
-        null,
+      publicDisplayName: trimString(dto.publicDisplayName) || trimString(dto.displayName) || null,
       teacherDisplayName: trimString(dto.teacherDisplayName) || null,
       phoneNumber: dto.phoneNumber ?? null,
       phoneCountryCode: dto.phoneCountryCode ?? null,
@@ -209,10 +203,7 @@ export class TeacherApplicationMapper {
 }
 
 export class TeacherProfileMapper {
-  static fromFirestore(
-    id: string,
-    dto: TeacherProfileFirestoreDto,
-  ): TeacherProfile {
+  static fromFirestore(id: string, dto: TeacherProfileFirestoreDto): TeacherProfile {
     const now = new Date();
     const rawStatus = dto.verificationStatus ?? 'pending';
     const verificationStatus = rawStatus as TeacherVerificationStatus;
@@ -255,17 +246,37 @@ export class TeacherProfileMapper {
       isActive,
       profileCompleteness,
       isPubliclyVisible,
+      sessionPriceOverride: parseSessionPriceOverride(dto.sessionPriceOverride),
       createdAt: readRequiredTimestamp(dto.createdAt, now),
       updatedAt: readRequiredTimestamp(dto.updatedAt, now),
     };
   }
 }
 
+/**
+ * Reads the admin price override. Returns null (⇒ inherit market) unless it is
+ * explicitly enabled with a valid non-negative amount — mirrors the server's
+ * `parseTeacherPricingOverride` so the admin UI and booking engine agree.
+ */
+export function parseSessionPriceOverride(
+  raw: TeacherProfileFirestoreDto['sessionPriceOverride'],
+): TeacherSessionPriceOverride | null {
+  if (!raw || raw.enabled !== true) {
+    return null;
+  }
+  const amount = raw.amount;
+  if (typeof amount !== 'number' || !Number.isFinite(amount) || amount < 0) {
+    return null;
+  }
+  const currencyCode =
+    typeof raw.currencyCode === 'string' && raw.currencyCode.trim().length > 0
+      ? raw.currencyCode
+      : null;
+  return { enabled: true, amount, currencyCode };
+}
+
 export class QuranSessionsUserMapper {
-  static fromUserDoc(
-    userId: string,
-    dto: TilawaUserFirestoreDto,
-  ): QuranSessionsUser | null {
+  static fromUserDoc(userId: string, dto: TilawaUserFirestoreDto): QuranSessionsUser | null {
     const profile = dto.quranSessionsProfile;
     if (!profile) {
       return null;
@@ -280,10 +291,7 @@ export class QuranSessionsUserMapper {
       email: dto.email ?? null,
       displayName: dto.displayName ?? null,
       avatarUrl: dto.photoUrl ?? null,
-      gender:
-        genderRaw === UserGender.Male || genderRaw === UserGender.Female
-          ? genderRaw
-          : null,
+      gender: genderRaw === UserGender.Male || genderRaw === UserGender.Female ? genderRaw : null,
       countryCode: (profile['countryCode'] as string | undefined) ?? null,
       countryName: (profile['countryName'] as string | undefined) ?? null,
       cityId: (profile['cityId'] as string | undefined) ?? null,

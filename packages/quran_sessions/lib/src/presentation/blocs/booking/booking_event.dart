@@ -2,6 +2,7 @@ import 'package:equatable/equatable.dart';
 
 import '../../../domain/entities/session_booking_outcome.dart';
 import '../../../domain/entities/session_call_type.dart';
+import '../../../domain/entities/session_pricing_type.dart';
 import '../../../domain/entities/teacher_availability.dart';
 
 sealed class BookingEvent extends Equatable {
@@ -47,6 +48,19 @@ final class BookingEligibilityRetried extends BookingEvent {
   List<Object?> get props => [teacherId, studentId, from, to];
 }
 
+/// Re-fetch only the server pricing quote (e.g. after a transport failure)
+/// without reloading eligibility, the teacher profile, or the schedule. Keeps
+/// the current [BookingSelecting] slots/selection intact so the retry is scoped
+/// to the price/payment section.
+final class BookingQuoteRetried extends BookingEvent {
+  const BookingQuoteRetried({required this.teacherId});
+
+  final String teacherId;
+
+  @override
+  List<Object?> get props => [teacherId];
+}
+
 /// User taps a time slot in the picker.
 final class SlotSelected extends BookingEvent {
   const SlotSelected(this.slot);
@@ -74,6 +88,7 @@ final class BookingSubmitted extends BookingEvent {
     required this.teacherId,
     required this.slotId,
     required this.callType,
+    this.pricingType,
     this.paymentReference,
     this.note,
   });
@@ -81,6 +96,7 @@ final class BookingSubmitted extends BookingEvent {
   final String teacherId;
   final String slotId;
   final SessionCallType callType;
+  final SessionPricingType? pricingType;
   final String? paymentReference;
   final String? note;
 
@@ -89,6 +105,7 @@ final class BookingSubmitted extends BookingEvent {
     teacherId,
     slotId,
     callType,
+    pricingType,
     paymentReference,
     note,
   ];

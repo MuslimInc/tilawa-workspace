@@ -42,6 +42,18 @@ void main() {
     check(failure).isA<MeetingLinkUnavailableFailure>();
   });
 
+  test('maps config-gate market_not_supported to region-unavailable', () {
+    final failure = mapQuranSessionsCallableFailure(
+      _callable(
+        code: 'failed-precondition',
+        details: const {'code': 'market_not_supported', 'countryCode': 'SA'},
+      ),
+    );
+
+    check(failure).isA<MarketNotEnabledFailure>();
+    check((failure as MarketNotEnabledFailure).countryCode).equals('SA');
+  });
+
   test('maps lifecycle teacher_not_verified', () {
     final failure = mapQuranSessionsCallableFailure(
       _callable(
@@ -57,6 +69,30 @@ void main() {
     check(failure).isA<TeacherNotVerifiedFailure>();
     check((failure as TeacherNotVerifiedFailure).teacherId).equals('profile_1');
   });
+
+  test(
+    'maps already_active_on_other_device to LiveSessionAlreadyActiveFailure',
+    () {
+      final failure = mapQuranSessionsCallableFailure(
+        _callable(
+          code: 'already-exists',
+          details: const {
+            'code': 'already_active_on_other_device',
+            'activeDeviceId': 'device_A',
+            'sinceTs': 1700000000000,
+            'activeIdentity': 'uid_1#device_A',
+          },
+        ),
+        sessionId: 'session_42',
+      );
+
+      check(failure).isA<LiveSessionAlreadyActiveFailure>();
+      final takeover = failure as LiveSessionAlreadyActiveFailure;
+      check(takeover.sessionId).equals('session_42');
+      check(takeover.activeDeviceId).equals('device_A');
+      check(takeover.sinceMs).equals(1700000000000);
+    },
+  );
 
   test('maps lifecycle session_epoch_stale', () {
     final failure = mapQuranSessionsCallableFailure(

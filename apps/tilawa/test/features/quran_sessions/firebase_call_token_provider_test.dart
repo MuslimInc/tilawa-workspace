@@ -3,6 +3,7 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:mocktail/mocktail.dart';
 import 'package:quran_sessions/quran_sessions.dart';
+import 'package:tilawa/features/auth/data/services/device_identity_service.dart';
 import 'package:tilawa/features/auth/domain/services/callable_session_payload_builder.dart';
 import 'package:tilawa/features/auth/domain/services/session_epoch_provider.dart';
 import 'package:tilawa/features/quran_sessions/data/firebase/firebase_call_token_provider.dart';
@@ -17,14 +18,24 @@ class _FakeEpochProvider implements SessionEpochProvider {
   Future<int> getSessionEpoch() async => 7;
 }
 
+class _FakeDeviceIdentity implements DeviceIdentityService {
+  @override
+  Future<String> getDeviceId() async => 'device_test';
+
+  @override
+  String get platform => 'android';
+}
+
 class _MockFirebaseAuth extends Mock implements FirebaseAuth {}
 
 FirebaseCallTokenProvider _provider({
   required Future<Map<String, dynamic>> Function(Map<String, dynamic> payload)
   invoke,
+  DeviceIdentityService? deviceIdentity,
 }) {
   return FirebaseCallTokenProvider(
     _FakePayloadBuilder(),
+    deviceIdentity ?? _FakeDeviceIdentity(),
     issueSessionRtcTokenInvoker: invoke,
   );
 }
@@ -36,6 +47,8 @@ void main() {
         invoke: (payload) async {
           check(payload['sessionId']).equals('session_1');
           check(payload['sessionEpoch']).equals(7);
+          check(payload['deviceId']).equals('device_test');
+          check(payload['forceTakeover']).equals(false);
           return {
             'token': ' rtc-token ',
             'channelId': ' channel-1 ',
@@ -54,6 +67,28 @@ void main() {
       check(credentials.channelId).equals('channel-1');
       check(credentials.uid).equals(918273);
       check(credentials.appId).equals('app-id');
+    });
+
+    test('forwards forceTakeover=true in the callable payload', () async {
+      final provider = _provider(
+        invoke: (payload) async {
+          check(payload['forceTakeover']).equals(true);
+          return {
+            'token': 'rtc-token',
+            'channelId': 'channel-1',
+            'uid': 1,
+            'appId': 'app-id',
+          };
+        },
+      );
+
+      final credentials = await provider.fetchCredentials(
+        sessionId: 'session_1',
+        userId: 'user_1',
+        forceTakeover: true,
+      );
+
+      check(credentials.token).equals('rtc-token');
     });
 
     test('debug LiveKit join uses empty payload', () async {
@@ -87,6 +122,7 @@ void main() {
         when(() => auth.currentUser).thenReturn(null);
         final provider = FirebaseCallTokenProvider(
           _FakePayloadBuilder(),
+          _FakeDeviceIdentity(),
           auth: auth,
         );
 
@@ -111,6 +147,7 @@ void main() {
       () async {
         final provider = FirebaseCallTokenProvider(
           _FakePayloadBuilder(),
+          _FakeDeviceIdentity(),
           debugLiveKitCallableAllowed: () => false,
           issueSessionRtcTokenInvoker: (_) async => {
             'token': 'livekit-token',

@@ -11,11 +11,7 @@ import { TilawaButtonComponent } from '../tilawa-button/tilawa-button.component'
     @if (isOpen) {
       <div class="fixed inset-0 z-50 overflow-y-auto" role="dialog" aria-modal="true">
         <div class="flex min-h-screen items-center justify-center p-4">
-          <div
-            class="fixed inset-0 bg-black/40"
-            (click)="cancel.emit()"
-            aria-hidden="true"
-          ></div>
+          <div class="fixed inset-0 bg-black/40" (click)="cancel.emit()" aria-hidden="true"></div>
           <div
             class="relative w-full max-w-md rounded-[var(--tilawa-radius-lg)] bg-[var(--tilawa-surface)] p-6 shadow-[var(--tilawa-shadow-md)] border border-[var(--tilawa-outline-variant)]"
           >

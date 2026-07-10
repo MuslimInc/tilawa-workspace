@@ -123,12 +123,6 @@ class _TasbeehView extends StatelessWidget {
 
         return Scaffold(
           appBar: TilawaCatalogAppBar(
-            preferredHeight: TilawaCatalogAppBar.resolvePreferredHeight(
-              context,
-              title: appBarTitle,
-              leading: appBarLeading,
-              actions: appBarActions,
-            ),
             title: appBarTitle,
             leading: appBarLeading,
             actions: appBarActions,
@@ -137,6 +131,10 @@ class _TasbeehView extends StatelessWidget {
             children: [
               const Positioned.fill(child: AthkarAmbientBackground()),
               SafeArea(
+                // The pinned TilawaBottomActionInset owns the bottom clearance
+                // (floatingBottomPadding + extraBottom); a bottom SafeArea here
+                // would double-count the device inset. Matches the auth screens.
+                bottom: false,
                 child: Column(
                   children: [
                     Expanded(
@@ -151,6 +149,7 @@ class _TasbeehView extends StatelessWidget {
                       TilawaBottomActionInset(
                         top: Theme.of(context).tokens.spaceSmall,
                         extraBottom: bottomActionExtraInset(context),
+                        maxWidthKind: TilawaContentKind.form,
                         child: bottomActions,
                       ),
                   ],

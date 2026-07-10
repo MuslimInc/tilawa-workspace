@@ -1,8 +1,23 @@
 # Quran Sessions — Production Readiness Gate Status
 
-**Last updated:** 2026-06-25 (engineering gates)  
-**Milestone:** `038-quran-session-stable-production-release`  
-**Overall verdict:** **Conditional Go** — engineering gates closed; manual + ops gates remain.
+**Last updated:** 2026-07-09 (manual off-app payment / Egypt-only)  
+**Milestone:** Paid manual payment (Egypt) — no wallet/PSP  
+**Overall verdict:** **Conditional Go** — engineering for manual payment landed; manual QA + ops + legal remain.
+
+---
+
+## Product scope (locked)
+
+| Item | Status |
+|------|--------|
+| Egypt-only (`countryCode === EG`) | ✅ CF `assertBookingEligible` |
+| Paid only when `manualPaymentEnabled` | ✅ free blocked when manual on |
+| No wallet / PSP / checkout | ✅ keep `QURAN_SESSIONS_PAYMENT_PROVIDER_ENABLED` unset/false |
+| `paymentProvider: manual_off_app` | ✅ create booking path |
+| `pending_payment` until admin confirms | ✅ confirm/reject callables + admin UI |
+| Unique `paymentReference` (`QS-…`) | ✅ student + admin |
+| WhatsApp `+201060099009` + prefill | ✅ mobile pilot config + booking/pending UI |
+| Admin market pricing SoT | ✅ save payload fixed + `manualPaymentEnabled` |
 
 ---
 
@@ -10,48 +25,36 @@
 
 | Gate | Status | Evidence |
 |------|--------|----------|
-| `scripts/quran_sessions_preflight.sh` | ✅ Wired | CI job `quran-sessions-preflight` in `.github/workflows/pr-checks.yml` (hard gate, JDK 21) |
-| `functions-emulator-tests` | ✅ Wired | Unit + integration + rules (JDK 21) |
-| Provider scope default `external,mock` | ✅ | `AppLaunchConfig.enabledCallProvidersCsv`; test in `quran_sessions_launch_policy_test.dart` |
-| Paid/group CF rejection | ✅ | Existing integration tests (`createSessionBooking.integration.test.ts`) |
-| Wallet UI hidden (production scope) | ✅ | `QuranSessionsFeatureConfig.walletEnabled` ← `quranSessionsPaidBookingSandboxEnabled` (default false) |
-| Kill switches (`quranSessionsEnabled`, booking) | ✅ | Router guards + tests in `quran_sessions_session_guard_test.dart` |
-| Admin wallet nav hidden (prod) | ✅ | `environment.quranSessionsWalletEnabled: false` |
+| CF unit tests | ✅ | `functions` `npm test` — 408/408 |
+| Mobile booking/status/list tests | ✅ | focused `packages/quran_sessions` flutter tests |
+| Admin build + unit tests | ✅ | `tilawa_admin` build + 164 tests (confirm/reject path) |
+| Wallet/PSP sandbox default off | ✅ | env gate + admin wallet flag false |
+| Kill switches | ✅ | router + booking flags |
 
 ---
 
-## CI note (P0 investigation)
-
-PR Checks jobs failing in ~3s with **empty steps** are caused by **GitHub account billing / spending limit**, not workflow YAML:
-
-> *The job was not started because recent account payments have failed or your spending limit needs to be increased.*
-
-**Action (repo owner):** GitHub → Settings → Billing & plans → resolve payment or raise spending limit.  
-Workflow improvements still landed: dedicated preflight job, JDK 21 for emulator paths, checkout/setup-java pinned to stable v4.
-
----
-
-## Documentation gates
-
-| Gate | Status | Doc |
-|------|--------|-----|
-| Manual QA checklist (10 sections) | ✅ | [docs/qa/quran_sessions_production_manual_qa.md](../qa/quran_sessions_production_manual_qa.md) |
-| Sign-off table link | ✅ | [docs/qa/quran_sessions_free_beta_signoff.md](../qa/quran_sessions_free_beta_signoff.md) |
-| App Check staging runbook | ✅ | [app_check_staging_verification.md](./app_check_staging_verification.md) |
-| Kill switch / rollback reference | ✅ | [MORNING-HANDOFF.md](../../specs/038-quran-session-stable-production-release/MORNING-HANDOFF.md) § Feature flags |
-
----
-
-## Manual-only gates (user / ops)
+## Manual-only gates (still open)
 
 | Gate | Owner | Status |
 |------|-------|--------|
-| B1–B5 student booking sign-off | QA | ⬜ |
-| T2/T5/T6/T7/T8 two-device sign-off | QA | ⬜ |
-| App Check flip on staging Firebase | Ops | ⬜ |
-| Deploy remaining CF batch (`deploy_quran_session_callables.sh`) | Ops | ⬜ |
-| Privacy policy — external meeting links | Legal | ⬜ |
-| Play production wide rollout | Release | ⬜ **No-Go** until above pass |
+| Manual payment E2E (price → WhatsApp → admin confirm) | QA | ⬜ |
+| Non-Egypt student blocked on booking | QA | ⬜ |
+| B1–B5 / T2–T8 (adapt for paid pending) | QA | ⬜ |
+| App Check flip on staging | Ops | ⬜ |
+| Deploy CFs (`deploy_quran_session_callables.sh`) | Ops | ⬜ — includes confirm/reject + pricing callables |
+| Legal/privacy — off-app payment + WhatsApp handoff | Legal | ⬜ |
+| Privacy — external meeting links | Legal | ⬜ |
+| Play flags: booking on only when ops ready; PSP/wallet stay off | Release | ⬜ |
+
+---
+
+## Ops checklist (Egypt paid launch)
+
+1. Admin → Market Pricing **EG**: enable market, set EGP price `> 0`, enable **manual payment**, set WhatsApp/InstaPay fields, keep PSP toggle **off**.
+2. Teacher pricing override (optional) via teacher panel.
+3. Deploy: `./scripts/deploy_quran_session_callables.sh <project>`
+4. Staging smoke: student books → `pending_payment` + `QS-` ref → WhatsApp → admin confirm → `scheduled`.
+5. Reject + TTL expire (24h manual hold) release slot.
 
 ---
 
@@ -59,20 +62,21 @@ Workflow improvements still landed: dedicated preflight job, JDK 21 for emulator
 
 | Flag | Layer | Effect |
 |------|-------|--------|
-| `TILAWA_LAUNCH_QURAN_SESSIONS_ENABLED=false` | App | Router redirect from `/sessions/*`; home entry hidden |
+| `TILAWA_LAUNCH_QURAN_SESSIONS_ENABLED=false` | App | Router redirect; home entry hidden |
 | `TILAWA_LAUNCH_QURAN_SESSIONS_BOOKING_ENABLED=false` | App | Booking route redirect; CTAs off |
-| `TILAWA_LAUNCH_QURAN_SESSIONS_PAID_BOOKING_SANDBOX_ENABLED` | App | Wallet nav + paid sandbox (default **false**) |
-| `TILAWA_LAUNCH_ENABLED_CALL_PROVIDERS` | App + Firestore | Client registration; prod default `external,mock` |
-| `QURAN_SESSIONS_ENFORCE_APP_CHECK` | CF env | Callable App Check enforcement (default **off**) |
+| Market `isEnabled` / `manualPaymentEnabled` | Firestore | Server blocks booking/quote |
+| `TILAWA_LAUNCH_QURAN_SESSIONS_PAID_BOOKING_SANDBOX_ENABLED` | App | Wallet/PSP sandbox (keep **false**) |
+| `QURAN_SESSIONS_PAYMENT_PROVIDER_ENABLED` | CF env | Keep **unset/false** for this release |
+| `QURAN_SESSIONS_ENFORCE_APP_CHECK` | CF env | Callable App Check (ops flip) |
 
 ---
 
 ## Go / No-Go matrix
 
-| Automated preflight | Manual B+T | App Check staging | Verdict |
-|--------------------|------------|-------------------|---------|
-| ✅ | ✅ | ✅ | **Stable Production Go** |
-| ✅ | ❌ | — | **Conditional Go** (internal/closed only) |
-| ❌ | — | — | **No-Go** |
+| Eng (manual payment) | Manual QA | App Check + deploy | Legal | Verdict |
+|----------------------|-----------|--------------------|-------|---------|
+| ✅ | ✅ | ✅ | ✅ | **Production Go (Egypt paid)** |
+| ✅ | ❌ | — | — | **Conditional Go** (internal only) |
+| ❌ | — | — | — | **No-Go** |
 
-**Current:** Conditional Go for internal/closed track engineering upload; manual + ops gates open.
+**Current:** Conditional Go — ship staging/closed after ops deploy + QA sign-off; **No-Go** for unrestricted Play until gates above pass.

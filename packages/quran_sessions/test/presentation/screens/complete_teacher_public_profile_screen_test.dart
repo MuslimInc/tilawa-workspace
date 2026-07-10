@@ -40,6 +40,7 @@ Future<void> _pumpScreen(
   WidgetTester tester, {
   Locale locale = const Locale('en'),
   EdgeInsets viewInsets = EdgeInsets.zero,
+  SessionModePolicy sessionModePolicy = SessionModePolicy.freeBeta,
 }) async {
   final profileRepo = FakeTeacherProfileRepository(
     profile: _incompleteTeacherProfile(),
@@ -66,6 +67,7 @@ Future<void> _pumpScreen(
             profileRepository: profileRepo,
           ),
           saveProfile: SaveTeacherPublicProfileUseCase(profileRepo),
+          sessionModePolicy: sessionModePolicy,
         ),
       ),
     ),
@@ -76,6 +78,22 @@ Future<void> _pumpScreen(
 }
 
 void main() {
+  testWidgets(
+    'hides external meeting link when session mode is videoOnly',
+    (tester) async {
+      await _pumpScreen(
+        tester,
+        sessionModePolicy: SessionModePolicy.videoOnly,
+      );
+
+      final l10n = await QuranSessionsLocalizations.delegate.load(
+        const Locale('en'),
+      );
+
+      expect(find.text(l10n.teacherExternalMeetingUrlLabel), findsNothing);
+    },
+  );
+
   testWidgets(
     'shows exactly one external meeting link field after load',
     (tester) async {

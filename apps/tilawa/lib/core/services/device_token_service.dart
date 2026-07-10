@@ -14,7 +14,12 @@ class DeviceTokenServiceImpl implements DeviceTokenService {
 
   @override
   Future<String?> getToken() async {
-    return _firebaseMessaging.getToken();
+    try {
+      return await _firebaseMessaging.getToken();
+    } catch (_) {
+      // Gracefully handle simulator environments where APNS token is not available
+      return null;
+    }
   }
 
   @override

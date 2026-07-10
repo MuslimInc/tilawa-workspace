@@ -59,8 +59,6 @@ class _QiblaScreenState extends State<QiblaScreen> {
   Widget build(BuildContext context) {
     final isLandscape =
         MediaQuery.orientationOf(context) == Orientation.landscape;
-    final theme = Theme.of(context);
-    final colorScheme = theme.colorScheme;
 
     return Stack(
       children: [

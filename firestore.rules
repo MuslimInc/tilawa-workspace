@@ -54,6 +54,9 @@ service cloud.firestore {
         && incomingUnchanged('totalSessionsCompleted')
         && incomingUnchanged('teacherStatus')
         && incomingUnchanged('manualPaymentPrice')
+        // Pricing is admin-controlled (setTeacherSessionPricing CF) — a teacher
+        // must never set their own session price override.
+        && incomingUnchanged('sessionPriceOverride')
         && incomingUnchanged('createdAt');
     }
 
@@ -116,23 +119,23 @@ service cloud.firestore {
       allow write: if false;
     }
 
-    // Quran Sessions market config — read-only for authenticated clients;
-    // seed via admin tools (see FirestoreMarketConfigDataSource). Includes the
-    // per-country `cities` subcollection loaded by _loadCities().
+    // Quran Sessions market config — public read (country/city pickers run
+    // during email registration before Auth exists); seed via admin tools.
+    // Includes the per-country `cities` subcollection loaded by _loadCities().
     match /quran_session_market_configs/{countryCode} {
-      allow read: if isSignedIn();
+      allow read: if true;
       allow write: if false;
 
       match /cities/{cityId} {
-        allow read: if isSignedIn();
+        allow read: if true;
         allow write: if false;
       }
     }
 
-    // Quran Sessions platform policy — read-only for authenticated clients;
-    // seed via admin tools (see FirestoreSessionPolicyDataSource, global doc).
+    // Quran Sessions platform policy — public read (age thresholds for
+    // registration wizard); seed via admin tools (global doc).
     match /quran_session_platform_config/{configId} {
-      allow read: if isSignedIn();
+      allow read: if true;
       allow write: if false;
     }
 
@@ -200,6 +203,15 @@ service cloud.firestore {
       match /availability_overrides/{dateKey} {
         allow read: if isSignedIn();
         allow write: if canEditTeacherAvailability(teacherId);
+      }
+
+      // Teacher dashboard read model (one-read dashboard). Contains the
+      // owner's booking/student data, so reads are owner/admin only — unlike
+      // the sibling availability collections. Written exclusively by the
+      // dashboard projection Cloud Functions (admin SDK bypasses rules).
+      match /dashboard/{docId} {
+        allow read: if isAdmin() || ownsTeacherProfile(teacherId);
+        allow write: if false;
       }
 
       // Legacy published slots — teacher-scoped direct delete (no collectionGroup).
@@ -365,7 +377,6 @@ service cloud.firestore {
         && quranSessionsProfileEligibilityFieldUnchanged('dateOfBirth')
         && quranSessionsProfileEligibilityFieldUnchanged('countryCode')
         && quranSessionsProfileEligibilityFieldUnchanged('cityId')
-        && quranSessionsProfileEligibilityFieldUnchanged('guardianId')
         && quranSessionsProfileEligibilityFieldUnchanged('role')
         && quranSessionsProfileEligibilityFieldUnchanged('canApplyAsTeacher');
     }
@@ -425,6 +436,14 @@ service cloud.firestore {
       allow delete: if false;
 
       match /fcm_tokens/{tokenId} {
+        allow read: if isOwner(userId);
+        allow write: if false;
+      }
+
+      // Non-exclusive device registry (ADR-008). Owner may read their own
+      // devices; all writes are Cloud-Functions-only (registerActiveDevice,
+      // and future Manage Devices callables). Clients never write directly.
+      match /devices/{deviceId} {
         allow read: if isOwner(userId);
         allow write: if false;
       }

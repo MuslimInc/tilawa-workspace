@@ -2,38 +2,46 @@ import 'package:quran_sessions/quran_sessions.dart';
 import 'package:tilawa/core/bootstrap/app_launch_config.dart';
 import 'package:tilawa/core/di/injection.dart';
 
-/// Resolves [QuranSessionsFeatureConfig] from [AppLaunchConfig].
+import 'domain/entities/quran_sessions_platform_config.dart';
+import 'quran_sessions_platform_config_store.dart';
+
+/// Resolves [QuranSessionsFeatureConfig] from Admin/Firestore runtime config.
 ///
-/// Defaults (production const / `play_production` distribution):
-/// - [quranSessionsEnabled]: true
-/// - [learnQuranStudentFeatureEnabled]: **false** — student hub hidden in prod
-/// - [teacherApplicationEntryEnabled]: **false** — Google Form entry opt-in
-/// - [homeTeacherApplicationCardEnabled]: **false**
-/// - [teacherApplicationEnabled]: false until MVO ops ready
-/// - [teacherApplicationDiscoverability]: profileAndEmptyState when apply enabled
-/// - [quranSessionsBookingEnabled]: **false** — production kill switch; do not
-///   flip via ops. Enable per build with
-///   `--dart-define=TILAWA_LAUNCH_QURAN_SESSIONS_BOOKING_ENABLED=true` or use a
-///   non-`play_production` [TILAWA_DISTRIBUTION] (local/staging default ON via
-///   [AppLaunchConfig.fromEnvironment]). Widget tests register
-///   [AppLaunchConfig(quranSessionsBookingEnabled: true)] in get_it.
+/// Admin config wins over [AppLaunchConfig]. When no cached/admin config
+/// exists, the app fails closed with [QuranSessionsPlatformConfig.safeFallback].
 QuranSessionsFeatureConfig quranSessionsFeatureConfig() {
   final AppLaunchConfig config = getIt.isRegistered<AppLaunchConfig>()
       ? getIt<AppLaunchConfig>()
       : AppLaunchConfig.fromEnvironment();
+  final platformConfig = quranSessionsEffectivePlatformConfig();
   return QuranSessionsFeatureConfig(
-    quranSessionsEnabled: config.quranSessionsEnabled,
-    learnQuranStudentFeatureEnabled: config.learnQuranStudentFeatureEnabled,
-    teacherApplicationEntryEnabled: config.teacherApplicationEntryEnabled,
-    homeTeacherApplicationCardEnabled: config.homeTeacherApplicationCardEnabled,
+    quranSessionsEnabled: platformConfig.quranSessionsEnabled,
+    learnQuranStudentFeatureEnabled: platformConfig.studentEntryEnabled,
+    teacherApplicationEntryEnabled:
+        platformConfig.teacherApplicationEntryEnabled,
+    homeTeacherApplicationCardEnabled:
+        platformConfig.homeTeacherApplicationCardEnabled,
     teacherApplicationFormUrl: config.teacherApplicationFormUrl,
-    teacherApplicationEnabled: config.teacherApplicationEnabled,
+    teacherApplicationEnabled: platformConfig.teacherApplicationEnabled,
     teacherApplicationDiscoverability: _discoverabilityFromString(
-      config.teacherApplicationDiscoverability,
+      platformConfig.teacherApplicationDiscoverability,
     ),
-    quranSessionsBookingEnabled: config.quranSessionsBookingEnabled,
-    walletEnabled: config.quranSessionsPaidBookingSandboxEnabled,
+    quranSessionsBookingEnabled: platformConfig.bookingEnabled,
+    walletEnabled: platformConfig.walletEnabled,
   );
+}
+
+QuranSessionsPlatformConfig quranSessionsEffectivePlatformConfig({
+  QuranSessionsPlatformConfig? fallback,
+}) {
+  final cachedConfig = getIt.isRegistered<QuranSessionsPlatformConfigStore>()
+      ? getIt<QuranSessionsPlatformConfigStore>().config
+      : null;
+  if (cachedConfig != null) {
+    return cachedConfig;
+  }
+
+  return fallback ?? QuranSessionsPlatformConfig.safeFallback;
 }
 
 TeacherApplicationDiscoverability _discoverabilityFromString(String value) {

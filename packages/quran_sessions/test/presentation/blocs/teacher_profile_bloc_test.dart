@@ -2,12 +2,18 @@ import 'package:bloc_test/bloc_test.dart';
 import 'package:checks/checks.dart';
 import 'package:flutter_test/flutter_test.dart';
 
+import 'package:quran_sessions/src/domain/entities/booking_block_reason.dart';
+import 'package:quran_sessions/src/domain/entities/effective_pricing_source.dart';
+import 'package:quran_sessions/src/domain/entities/session_pricing_quote.dart';
+import 'package:quran_sessions/src/domain/entities/session_pricing_type.dart';
 import 'package:quran_sessions/src/domain/failures/quran_sessions_failure.dart';
+import 'package:quran_sessions/src/domain/usecases/get_booking_pricing_quote_usecase.dart';
 import 'package:quran_sessions/src/domain/usecases/get_teacher_profile_usecase.dart';
 import 'package:quran_sessions/src/presentation/blocs/teacher_profile/teacher_profile_bloc.dart';
 import 'package:quran_sessions/src/presentation/blocs/teacher_profile/teacher_profile_event.dart';
 import 'package:quran_sessions/src/presentation/blocs/teacher_profile/teacher_profile_state.dart';
 import '../../helpers/availability_test_helpers.dart';
+import '../../helpers/fakes/fake_session_pricing_quote_gateway.dart';
 import '../../helpers/fakes/fake_session_repository.dart';
 import '../../helpers/fakes/fake_teacher_repository.dart';
 import '../../helpers/fixtures.dart';
@@ -111,6 +117,84 @@ void main() {
       verify: (b) {
         final state = b.state as TeacherProfileSuccess;
         check(state.isLoadingAvailability).isFalse();
+      },
+    );
+
+    blocTest<TeacherProfileBloc, TeacherProfileState>(
+      'exposes the paid server pricing quote so the badge cannot show free',
+      build: () {
+        repo.teachers = [makeTeacher()];
+        scheduleRepo.schedule = makeWeeklySchedule();
+        return TeacherProfileBloc(
+          getProfile: GetTeacherProfileUseCase(repo),
+          getAvailability: buildGetTeacherAvailabilityUseCase(
+            scheduleRepository: scheduleRepo,
+            sessionRepository: sessionRepo,
+            now: () => fixedNow,
+          ),
+          getPricingQuote: GetBookingPricingQuoteUseCase(
+            FakeSessionPricingQuoteGateway(
+              quote: const SessionPricingQuote(
+                pricingType: SessionPricingType.fixedPerSession,
+                amount: 100,
+                currencyCode: 'EGP',
+                paymentRequired: true,
+                paymentProviderAvailable: false,
+                bookingEnabled: true,
+                quranSessionsEnabled: true,
+                effectivePricingSource: EffectivePricingSource.marketConfig,
+                blockReason: BookingBlockReason.paymentProviderUnavailable,
+              ),
+            ),
+          ),
+        );
+      },
+      act: (b) => b.add(
+        TeacherProfileRequested(
+          teacherId: 'teacher_1',
+          availabilityFrom: now,
+          availabilityTo: now.add(const Duration(days: 14)),
+        ),
+      ),
+      wait: const Duration(milliseconds: 50),
+      verify: (b) {
+        final state = b.state as TeacherProfileSuccess;
+        final quote = state.pricingQuote;
+        check(quote).isNotNull();
+        check(quote!.isFree).isFalse();
+        check(quote.amount).equals(100);
+        check(quote.currencyCode).equals('EGP');
+      },
+    );
+
+    blocTest<TeacherProfileBloc, TeacherProfileState>(
+      'leaves pricing unresolved (null) when the quote fails — never free',
+      build: () {
+        repo.teachers = [makeTeacher()];
+        scheduleRepo.schedule = makeWeeklySchedule();
+        return TeacherProfileBloc(
+          getProfile: GetTeacherProfileUseCase(repo),
+          getAvailability: buildGetTeacherAvailabilityUseCase(
+            scheduleRepository: scheduleRepo,
+            sessionRepository: sessionRepo,
+            now: () => fixedNow,
+          ),
+          getPricingQuote: GetBookingPricingQuoteUseCase(
+            FakeSessionPricingQuoteGateway(failure: const NetworkFailure()),
+          ),
+        );
+      },
+      act: (b) => b.add(
+        TeacherProfileRequested(
+          teacherId: 'teacher_1',
+          availabilityFrom: now,
+          availabilityTo: now.add(const Duration(days: 14)),
+        ),
+      ),
+      wait: const Duration(milliseconds: 50),
+      verify: (b) {
+        final state = b.state as TeacherProfileSuccess;
+        check(state.pricingQuote).isNull();
       },
     );
   });

@@ -74,6 +74,21 @@ CompleteSessionViaServerUseCase buildCompleteSessionViaServerUseCase({
   );
 }
 
+JoinSessionUseCase buildJoinSessionUseCase({
+  required SessionRepository sessionRepository,
+  FakeTeacherProfileRepository? teacherProfileRepository,
+  String userId = 'student_1',
+  SessionCallProvider? callProvider,
+}) {
+  return JoinSessionUseCase(
+    sessionRepository: sessionRepository,
+    callProvider: callProvider ?? const MockSessionCallProvider(),
+    authSession: _FakeAuthSession(userId),
+    teacherProfileRepository:
+        teacherProfileRepository ?? FakeTeacherProfileRepository(),
+  );
+}
+
 class _FakeAuthSession implements AuthSessionProvider {
   _FakeAuthSession(this.userId);
   final String userId;

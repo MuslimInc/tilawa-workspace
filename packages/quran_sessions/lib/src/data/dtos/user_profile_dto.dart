@@ -12,8 +12,6 @@ class UserProfileDto {
     this.cityName,
     this.currencyCode,
     this.timezone,
-    this.guardianId,
-    this.guardianChildBookingApprovedAt,
     this.restrictionReason,
     this.learningGoals = const [],
   });
@@ -30,8 +28,6 @@ class UserProfileDto {
   final String? cityName;
   final String? currencyCode;
   final String? timezone;
-  final String? guardianId;
-  final DateTime? guardianChildBookingApprovedAt;
   final String? restrictionReason;
   final List<String> learningGoals;
 }

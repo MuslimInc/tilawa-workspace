@@ -1,5 +1,6 @@
 import 'package:flutter/foundation.dart';
 
+import 'session_call_camera_facing.dart';
 import 'session_call_control_capabilities.dart';
 
 /// Immutable in-call control state for [QuranSessionCallControlCubit].
@@ -17,6 +18,7 @@ class QuranSessionCallControlState {
     this.isSwitchCameraLoading = false,
     this.isEndCallLoading = false,
     this.hasEndedCall = false,
+    this.cameraFacing = SessionCallCameraFacing.front,
     this.feedback,
   });
 
@@ -31,6 +33,7 @@ class QuranSessionCallControlState {
   final bool isSwitchCameraLoading;
   final bool isEndCallLoading;
   final bool hasEndedCall;
+  final SessionCallCameraFacing cameraFacing;
   final CallControlFeedback? feedback;
 
   bool get isMuted => !isMicrophoneEnabled;
@@ -55,6 +58,8 @@ class QuranSessionCallControlState {
 
   bool get canSwitchCamera =>
       capabilities.switchCamera &&
+      capabilities.hasMultipleCameras &&
+      isCameraEnabled &&
       !isSwitchCameraLoading &&
       !isEndCallLoading &&
       !hasEndedCall;
@@ -71,6 +76,7 @@ class QuranSessionCallControlState {
     bool? isSwitchCameraLoading,
     bool? isEndCallLoading,
     bool? hasEndedCall,
+    SessionCallCameraFacing? cameraFacing,
     CallControlFeedback? feedback,
     bool clearFeedback = false,
   }) {
@@ -87,6 +93,7 @@ class QuranSessionCallControlState {
           isSwitchCameraLoading ?? this.isSwitchCameraLoading,
       isEndCallLoading: isEndCallLoading ?? this.isEndCallLoading,
       hasEndedCall: hasEndedCall ?? this.hasEndedCall,
+      cameraFacing: cameraFacing ?? this.cameraFacing,
       feedback: clearFeedback ? null : feedback ?? this.feedback,
     );
   }

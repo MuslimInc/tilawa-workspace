@@ -48,9 +48,7 @@ describe('avatar.util', () => {
 
   describe('resolveDetailAvatarDisplayName', () => {
     it('falls back to account name when public name is placeholder', () => {
-      expect(resolveDetailAvatarDisplayName('—', 'Ahmad Ali', 'a@b.com')).toBe(
-        'Ahmad Ali',
-      );
+      expect(resolveDetailAvatarDisplayName('—', 'Ahmad Ali', 'a@b.com')).toBe('Ahmad Ali');
     });
 
     it('falls back to email when names are placeholders', () => {

@@ -194,6 +194,7 @@ export const confirmBookingPayment = onCall(
           {
             paymentReference: data.paymentReference.trim(),
           },
+          booking,
         );
 
         tx.set(lockRef, {

@@ -2,6 +2,7 @@ import 'package:cloud_functions/cloud_functions.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/foundation.dart';
 import 'package:quran_sessions/quran_sessions.dart';
+import 'package:tilawa/features/auth/data/services/device_identity_service.dart';
 import 'package:tilawa/features/auth/domain/services/callable_session_payload_builder.dart';
 import 'package:tilawa/features/quran_sessions/data/firebase/firebase_callable_failure_mapper.dart';
 import 'package:tilawa/features/quran_sessions/debug/quran_sessions_debug_tools.dart';
@@ -9,7 +10,8 @@ import 'package:tilawa/features/quran_sessions/debug/quran_sessions_debug_tools.
 /// Fetches short-lived Agora RTC tokens from [issueSessionRtcToken] CF.
 class FirebaseCallTokenProvider implements CallTokenProvider {
   FirebaseCallTokenProvider(
-    this._payloadBuilder, {
+    this._payloadBuilder,
+    this._deviceIdentityService, {
     this._functions,
     FirebaseAuth? auth,
     @visibleForTesting this._issueSessionRtcTokenInvoker,
@@ -19,6 +21,7 @@ class FirebaseCallTokenProvider implements CallTokenProvider {
   final FirebaseFunctions? _functions;
   final FirebaseAuth? _authOverride;
   final CallableSessionPayloadBuilder _payloadBuilder;
+  final DeviceIdentityService _deviceIdentityService;
   final Future<Map<String, dynamic>> Function(Map<String, dynamic> payload)?
   _issueSessionRtcTokenInvoker;
   final bool Function()? _debugLiveKitCallableAllowed;
@@ -29,6 +32,7 @@ class FirebaseCallTokenProvider implements CallTokenProvider {
   Future<RtcJoinCredentials> fetchCredentials({
     required String sessionId,
     required String userId,
+    bool forceTakeover = false,
   }) async {
     final isDebugLiveKitJoin = sessionId == kDebugLiveKitSessionId;
     if (isDebugLiveKitJoin &&
@@ -39,10 +43,16 @@ class FirebaseCallTokenProvider implements CallTokenProvider {
     final callableName = isDebugLiveKitJoin
         ? 'issueDebugLiveKitToken'
         : 'issueSessionRtcToken';
+    // ADR-008 Phase 2: the stable device id keys the per-session live lock;
+    // forceTakeover is the user-initiated "Switch to this device" intent. Both
+    // are ignored by the server when the live-lock flag is off, so legacy
+    // behavior is unchanged. The debug LiveKit path sends an empty payload.
     final payload = isDebugLiveKitJoin
         ? <String, dynamic>{}
         : await _payloadBuilder.withSessionEpoch({
             'sessionId': sessionId,
+            'deviceId': await _deviceIdentityService.getDeviceId(),
+            'forceTakeover': forceTakeover,
           });
     final Map<String, dynamic> data;
     final invoker = _issueSessionRtcTokenInvoker;
@@ -70,7 +80,7 @@ class FirebaseCallTokenProvider implements CallTokenProvider {
       if (isDebugLiveKitJoin) {
         throw mapDebugLiveKitTokenCallableFailure(error);
       }
-      throw mapQuranSessionsCallableFailure(error);
+      throw mapQuranSessionsCallableFailure(error, sessionId: sessionId);
     }
 
     final token = data['token'];

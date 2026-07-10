@@ -4,6 +4,7 @@ import { FormsModule } from '@angular/forms';
 import { ActivatedRoute, RouterLink } from '@angular/router';
 
 import { SessionsFacade } from '../../../core/application/facades/sessions.facade';
+import { AdminSessionDetailVm } from '../../../core/data/view-models/quran-sessions.view-model';
 import {
   NoShowClassification,
   SessionCompensationType,
@@ -25,7 +26,8 @@ type PendingAction =
   | 'noShow'
   | 'complete'
   | 'compensation'
-  | 'refund';
+  | 'refund'
+  | 'manualReject';
 
 @Component({
   selector: 'app-session-detail',
@@ -136,6 +138,24 @@ export class SessionDetailComponent implements OnInit {
     this.reasonOpen.set(true);
   }
 
+  canModerateManualPayment(session: AdminSessionDetailVm): boolean {
+    return (
+      session.lifecycleStatus === 'pending_payment' &&
+      session.paymentProvider === 'manual_off_app'
+    );
+  }
+
+  async onConfirmManualPayment(): Promise<void> {
+    await this.run(async () => {
+      await this.facade.confirmManualPayment(this.bookingId);
+    });
+  }
+
+  openRejectManualPayment(): void {
+    this.pendingAction.set('manualReject');
+    this.reasonOpen.set(true);
+  }
+
   async onConfirmComplete(): Promise<void> {
     const session = this.detail();
     if (!session?.sessionId) {
@@ -186,6 +206,9 @@ export class SessionDetailComponent implements OnInit {
         case 'refund':
           await this.facade.approveRefund(this.bookingId, reason);
           break;
+        case 'manualReject':
+          await this.facade.rejectManualPayment(this.bookingId, reason);
+          break;
       }
     });
     this.reasonOpen.set(false);
@@ -197,11 +220,7 @@ export class SessionDetailComponent implements OnInit {
       return;
     }
     await this.run(async () => {
-      await this.facade.confirmReschedule(
-        this.rescheduleRequestId.trim(),
-        this.bookingId,
-        accept,
-      );
+      await this.facade.confirmReschedule(this.rescheduleRequestId.trim(), this.bookingId, accept);
     });
   }
 
@@ -210,9 +229,7 @@ export class SessionDetailComponent implements OnInit {
     try {
       await action();
     } catch (error) {
-      this.actionError.set(
-        error instanceof Error ? error.message : 'Action failed.',
-      );
+      this.actionError.set(error instanceof Error ? error.message : 'Action failed.');
     }
   }
 }

@@ -29,8 +29,6 @@ extension UserProfileDtoMapper on UserProfileDto {
     cityName: cityName,
     currencyCode: currencyCode,
     timezone: timezone,
-    guardianId: guardianId,
-    guardianChildBookingApprovedAt: guardianChildBookingApprovedAt,
     restrictionReason: restrictionReason == null
         ? null
         : _mapRestrictionReason(restrictionReason!),
@@ -52,8 +50,6 @@ extension UserProfileDomainMapper on UserProfile {
     cityName: cityName,
     currencyCode: currencyCode,
     timezone: timezone,
-    guardianId: guardianId,
-    guardianChildBookingApprovedAt: guardianChildBookingApprovedAt,
     restrictionReason: restrictionReason?.name,
     learningGoals: learningGoals.map(_learningGoalCode).toList(),
   );

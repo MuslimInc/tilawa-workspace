@@ -175,10 +175,7 @@ void main() {
     when(() => _mockAuthBloc.stream).thenAnswer((_) => const Stream.empty());
 
     scopeGetIt().registerSingleton<AppLaunchConfig>(
-      const AppLaunchConfig(
-        teacherApplicationEnabled: true,
-        teacherApplicationDiscoverability: 'profileOnly',
-      ),
+      const AppLaunchConfig(),
     );
     scopeGetIt().registerSingleton<AuthSessionProvider>(
       const FakeAuthSessionProvider(userId: 'user_1'),
@@ -261,7 +258,7 @@ void main() {
     },
   );
 
-  testWidgets('none state shows apply tile not premium dashboard card', (
+  testWidgets('none state hides teaching section for students', (
     tester,
   ) async {
     await _pumpSettingsTeachingSection(
@@ -274,52 +271,60 @@ void main() {
       const Locale('en'),
     );
     check(find.byType(TilawaCapabilityActionCard).evaluate().isEmpty).isTrue();
-    check(find.text(en.teachingOnMemuslimApply).evaluate().isNotEmpty).isTrue();
+    check(find.text(en.teachingOnMemuslimApply).evaluate().isEmpty).isTrue();
     check(find.text(en.teacherDashboard).evaluate().length).equals(0);
     check(
       find.text(en.teachingOnMemuslimViewStatus).evaluate().length,
     ).equals(0);
   });
 
-  testWidgets(
-    'google form apply-only mode hides duplicate teaching apply tile',
-    (tester) async {
-      await resetScopeGetIt();
-      scopeGetIt().registerSingleton<AppLaunchConfig>(
-        const AppLaunchConfig(
-          quranSessionsEnabled: true,
-          teacherApplicationEntryEnabled: true,
-          teacherApplicationEnabled: false,
-        ),
-      );
-      scopeGetIt().registerSingleton<AuthSessionProvider>(
-        const FakeAuthSessionProvider(userId: 'user_1'),
-      );
-      scopeGetIt().registerSingleton<TeacherCapabilityRefreshNotifier>(
-        TeacherCapabilityRefreshNotifier(),
-      );
-
-      await _pumpSettingsTeachingSection(
-        tester,
-        _mockAuthBloc,
+  testWidgets('student settings hide Become a Teacher entry', (
+    tester,
+  ) async {
+    await resetScopeGetIt();
+    scopeGetIt().registerSingleton<AppLaunchConfig>(
+      const AppLaunchConfig(),
+    );
+    scopeGetIt().registerSingleton<AuthSessionProvider>(
+      const FakeAuthSessionProvider(userId: 'user_1'),
+    );
+    scopeGetIt().registerSingleton<TeacherCapabilityRefreshNotifier>(
+      TeacherCapabilityRefreshNotifier(),
+    );
+    scopeGetIt().registerSingleton<GetCurrentUserTeacherCapabilityUseCase>(
+      _StubTeacherCapabilityUseCase(
         const TeacherCapability(state: TeacherCapabilityState.none),
-      );
+      ),
+    );
+    scopeGetIt().registerSingleton<ResolveTeacherApplicationAccessUseCase>(
+      _StubAccessUseCase(canApply: true),
+    );
 
-      final en = await QuranSessionsLocalizations.delegate.load(
-        const Locale('en'),
-      );
-      check(
-        find.text(en.teachingOnMemuslimApply).evaluate().isEmpty,
-      ).isTrue();
-      check(
-        find.byType(SettingsTeachingOnMemuslimSection).evaluate().length,
-      ).equals(1);
-    },
-  );
+    await tester.pumpWidget(
+      MaterialApp(
+        theme: AppTheme.getLightTheme(primaryColor: AppColors.defaultPrimary),
+        locale: const Locale('ar'),
+        localizationsDelegates: AppLocalizations.localizationsDelegates,
+        supportedLocales: AppLocalizations.supportedLocales,
+        home: BlocProvider<AuthBloc>.value(
+          value: _mockAuthBloc,
+          child: const SettingsTeacherCapabilityScope(
+            child: SettingsTeachingOnMemuslimSection(),
+          ),
+        ),
+      ),
+    );
+    await tester.pumpAndSettle();
+
+    expect(find.text('التقديم كمعلّم قرآن'), findsNothing);
+    expect(find.byType(SettingsTeachingOnMemuslimSection), findsOneWidget);
+    expect(find.byType(TilawaCapabilityActionCard), findsNothing);
+  });
 
   testWidgets('approved active card tap opens teacher dashboard route', (
     tester,
   ) async {
+    TeacherCapability? capturedRouteExtra;
     final router = GoRouter(
       initialLocation: '/',
       routes: [
@@ -334,16 +339,29 @@ void main() {
         ),
         GoRoute(
           path: QuranSessionsRoutes.teacherDashboard,
-          builder: (context, state) =>
-              const Scaffold(key: Key('teacher_dashboard_screen')),
+          builder: (context, state) {
+            capturedRouteExtra = state.extra as TeacherCapability?;
+            return const Scaffold(key: Key('teacher_dashboard_screen'));
+          },
         ),
       ],
+    );
+
+    final capability = TeacherCapability(
+      state: TeacherCapabilityState.approvedActive,
+      application: TeacherApplication(
+        id: 'teacher_profile_1',
+        userId: 'user_1',
+        status: TeacherApplicationStatus.approved,
+        createdAt: DateTime(2024),
+        updatedAt: DateTime(2024),
+      ),
     );
 
     await _pumpSettingsTeachingSection(
       tester,
       _mockAuthBloc,
-      const TeacherCapability(state: TeacherCapabilityState.approvedActive),
+      capability,
       router: router,
     );
 
@@ -353,6 +371,8 @@ void main() {
     check(
       find.byKey(const Key('teacher_dashboard_screen')).evaluate().length,
     ).equals(1);
+    check(capturedRouteExtra).isNotNull();
+    check(capturedRouteExtra!.teacherProfileId).equals('teacher_profile_1');
   });
 
   testWidgets(
@@ -464,9 +484,9 @@ void main() {
     );
     await tester.pumpAndSettle();
 
-    check(find.text(en.teachingOnMemuslimViewStatus).evaluate().length).equals(
-      1,
-    );
+    check(
+      find.text(en.teachingOnMemuslimViewStatus).evaluate().isEmpty,
+    ).isTrue();
     check(useCase.callCount).equals(1);
 
     SettingsTeacherCapabilityScope.refreshOf(

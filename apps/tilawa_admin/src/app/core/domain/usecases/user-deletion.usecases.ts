@@ -1,9 +1,6 @@
 import { Inject, Injectable } from '@angular/core';
 
-import {
-  USER_DELETION_GATEWAY,
-  UserDeletionGateway,
-} from '../repositories/user-deletion.gateway';
+import { USER_DELETION_GATEWAY, UserDeletionGateway } from '../repositories/user-deletion.gateway';
 
 @Injectable({ providedIn: 'root' })
 export class RequestUserDeletionUseCase {
@@ -12,11 +9,7 @@ export class RequestUserDeletionUseCase {
     private readonly gateway: UserDeletionGateway,
   ) {}
 
-  execute(
-    targetUserId: string,
-    reason: string,
-    confirmEmail: string,
-  ): Promise<void> {
+  execute(targetUserId: string, reason: string, confirmEmail: string): Promise<void> {
     return this.gateway.requestUserDeletion(targetUserId, reason, confirmEmail);
   }
 }
@@ -75,4 +68,3 @@ export class RequestDuplicateAccountsDeletionUseCase {
     return this.gateway.requestDuplicateAccountsDeletion(input);
   }
 }
-

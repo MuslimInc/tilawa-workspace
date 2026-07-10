@@ -20,7 +20,14 @@ const defaultLogin = loadAdminLoginPreferences() ?? environment.devAdminLogin;
 @Component({
   selector: 'app-login',
   standalone: true,
-  imports: [CommonModule, FormsModule, TranslatePipe, LanguageSwitcherComponent, TilawaButtonComponent, TilawaCardComponent],
+  imports: [
+    CommonModule,
+    FormsModule,
+    TranslatePipe,
+    LanguageSwitcherComponent,
+    TilawaButtonComponent,
+    TilawaCardComponent,
+  ],
   templateUrl: './login.component.html',
 })
 export class LoginComponent {

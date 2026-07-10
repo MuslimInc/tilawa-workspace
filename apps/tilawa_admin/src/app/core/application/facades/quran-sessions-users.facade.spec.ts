@@ -7,6 +7,11 @@ import {
   ModerateQuranSessionsUserUseCase,
   SetUserTeacherApplicationAccessUseCase,
 } from '../../domain/usecases/quran-sessions-user.usecases';
+import {
+  CancelUserDeletionUseCase,
+  RequestUserDeletionUseCase,
+  ListUserDeletionAuditUseCase,
+} from '../../domain/usecases/user-deletion.usecases';
 import { QS_USER_DEFAULT_SORT } from '../../domain/entities/quran-sessions-user.entity';
 import { QuranSessionsAccountStatus } from '../../domain/entities/quran-sessions-user.entity';
 
@@ -15,6 +20,9 @@ describe('QuranSessionsUsersFacade', () => {
   const listUseCase = { execute: vi.fn() };
   const moderateUseCase = { execute: vi.fn() };
   const teacherApplyUseCase = { execute: vi.fn() };
+  const requestDeletionUseCase = { execute: vi.fn() };
+  const cancelDeletionUseCase = { execute: vi.fn() };
+  const listDeletionAuditUseCase = { execute: vi.fn() };
 
   beforeEach(() => {
     listUseCase.execute.mockReset();
@@ -27,6 +35,9 @@ describe('QuranSessionsUsersFacade', () => {
           provide: SetUserTeacherApplicationAccessUseCase,
           useValue: teacherApplyUseCase,
         },
+        { provide: RequestUserDeletionUseCase, useValue: requestDeletionUseCase },
+        { provide: CancelUserDeletionUseCase, useValue: cancelDeletionUseCase },
+        { provide: ListUserDeletionAuditUseCase, useValue: listDeletionAuditUseCase },
       ],
     });
     facade = TestBed.inject(QuranSessionsUsersFacade);
@@ -80,10 +91,13 @@ describe('QuranSessionsUsersFacade', () => {
     });
 
     await facade.loadList({});
-    await facade.changeSort({}, {
-      field: 'quranSessionsProfile.createdAt',
-      direction: 'asc',
-    });
+    await facade.changeSort(
+      {},
+      {
+        field: 'quranSessionsProfile.createdAt',
+        direction: 'asc',
+      },
+    );
 
     expect(listUseCase.execute).toHaveBeenLastCalledWith(
       {},

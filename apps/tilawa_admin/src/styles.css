@@ -1,5 +1,5 @@
-@import "tailwindcss";
-@import "./styles/tokens.css";
+@import 'tailwindcss';
+@import './styles/tokens.css';
 
 @theme {
   --color-tilawa-primary: var(--tilawa-primary);
@@ -20,7 +20,7 @@
   --radius-tilawa-lg: var(--tilawa-radius-lg);
   --radius-tilawa-xl: var(--tilawa-radius-xl);
 
-  --font-sans: "IBM Plex Sans Arabic", "Alexandria", system-ui, sans-serif;
+  --font-sans: 'IBM Plex Sans Arabic', 'Alexandria', system-ui, sans-serif;
 }
 
 html,
@@ -57,14 +57,20 @@ body {
 .tilawa-field:focus {
   outline: none;
   border-color: var(--tilawa-primary);
-  box-shadow: 0 0 0 2px rgb(139 94 60 / 0.2);
+  box-shadow: 0 0 0 2px rgb(29 171 97 / 0.2);
 }
 
 /* Page vertical rhythm — flex gap works with Angular @if/@else blocks */
 .tilawa-page-stack {
   display: flex;
   flex-direction: column;
-  gap: var(--tilawa-space-6);
+  gap: var(--tilawa-space-4); /* Default for mobile */
+}
+
+@media (min-width: 768px) {
+  .tilawa-page-stack {
+    gap: var(--tilawa-space-6);
+  }
 }
 
 /* Data table */
@@ -87,7 +93,7 @@ body {
 }
 
 .tilawa-table th {
-  padding: var(--tilawa-space-4) var(--tilawa-space-5);
+  padding: 0.75rem 1rem;
   text-align: start;
   font-weight: 600;
   font-size: 0.875rem;
@@ -99,13 +105,13 @@ body {
 }
 
 .tilawa-table td {
-  padding: 0.875rem 0.75rem;
+  padding: 0.75rem 1rem;
   color: var(--tilawa-on-surface);
   border-bottom: 1px solid var(--tilawa-outline-variant);
 }
 
 .tilawa-table tbody tr:hover {
-  background-color: rgb(139 94 60 / 0.04);
+  background-color: rgb(29 171 97 / 0.04);
 }
 
 .tilawa-table-wrap {
@@ -155,11 +161,11 @@ body {
 }
 
 .tilawa-table tbody tr:hover .tilawa-table-pin {
-  background-color: rgb(139 94 60 / 0.04);
+  background-color: rgb(29 171 97 / 0.04);
 }
 
 .tilawa-table tbody tr.is-selected .tilawa-table-pin {
-  background-color: rgb(139 94 60 / 0.08);
+  background-color: rgb(29 171 97 / 0.08);
 }
 
 .tilawa-table-pin-edge {
@@ -241,8 +247,14 @@ body {
   accent-color: var(--tilawa-primary);
 }
 
+.tilawa-checkbox-label {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
 .tilawa-table tbody tr.is-selected {
-  background-color: rgb(139 94 60 / 0.08);
+  background-color: rgb(29 171 97 / 0.08);
 }
 
 .tilawa-detail-label {

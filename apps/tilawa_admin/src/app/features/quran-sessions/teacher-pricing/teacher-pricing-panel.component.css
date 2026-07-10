@@ -1,0 +1,31 @@
+.tilawa-pricing-panel__status {
+  background: var(--surface-variant, #f4f5f7);
+  border-radius: var(--radius-sm, 6px);
+  padding: var(--space-md, 16px);
+  margin-bottom: var(--space-md, 16px);
+}
+
+.tilawa-pricing-panel__status-grid {
+  display: grid;
+  grid-template-columns: max-content 1fr;
+  gap: 8px 16px;
+  margin: 0;
+}
+
+.tilawa-pricing-panel__status-grid dt {
+  font-weight: 600;
+  color: var(--on-surface-variant, #5c6b7a);
+  margin: 0;
+}
+
+.tilawa-pricing-panel__status-grid dd {
+  margin: 0;
+  color: var(--on-surface, #1e293b);
+}
+
+.tilawa-pricing-panel__bookability-note {
+  margin: var(--space-sm, 8px) 0 0;
+  font-size: 0.8125rem;
+  line-height: 1.4;
+  color: var(--on-surface-variant, #5c6b7a);
+}

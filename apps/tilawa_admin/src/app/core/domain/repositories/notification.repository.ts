@@ -5,4 +5,6 @@ export interface NotificationRepository {
   sendNotification(notification: NotificationEntity): Promise<void>;
 }
 
-export const NOTIFICATION_REPOSITORY = new InjectionToken<NotificationRepository>('NotificationRepository');
+export const NOTIFICATION_REPOSITORY = new InjectionToken<NotificationRepository>(
+  'NotificationRepository',
+);

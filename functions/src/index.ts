@@ -26,14 +26,30 @@ export {
   resolveSessionReport,
 } from "./quranSessions/sessionReportCallables";
 export { expirePendingReservations } from "./quranSessions/expirePendingReservations";
+export { finalizeElapsedSessions } from "./quranSessions/finalizeElapsedSessions";
 export { deliverSessionNotification } from "./quranSessions/deliverSessionNotification";
 export { getWallet, postWalletCredit } from "./quranSessions/walletCallables";
 export { confirmBookingPayment } from "./quranSessions/confirmBookingPayment";
+export { confirmManualBookingPayment } from "./quranSessions/confirmManualBookingPayment";
+export { rejectManualBookingPayment } from "./quranSessions/rejectManualBookingPayment";
+export { getBookingPricingQuote } from "./quranSessions/getBookingPricingQuote";
+export { getBookingPricingQuotes } from "./quranSessions/getBookingPricingQuotes";
+export { setTeacherSessionPricing } from "./quranSessions/setTeacherSessionPricing";
+export { updateMarketPricingConfig } from "./quranSessions/updateMarketPricingConfig";
 export { issueSessionRtcToken } from "./quranSessions/issueSessionRtcToken";
 export { issueDebugLiveKitToken } from "./quranSessions/issueDebugLiveKitToken";
 export { recordCallTelemetryEvent } from "./quranSessions/recordCallTelemetryEvent";
+export { updatePlatformConfig } from "./quranSessions/updatePlatformConfig";
+export { getResolvedSessionConfig } from "./quranSessions/getResolvedSessionConfig";
 export { sessionReminders } from "./quranSessions/sessionReminders";
-export { approveChildGuardianBooking } from "./quranSessions/approveChildGuardianBooking";
+export {
+  projectDashboardOnSessionWrite,
+  projectDashboardOnScheduleWrite,
+  projectDashboardOnOverrideWrite,
+  projectDashboardOnTeacherProfileWrite,
+  projectDashboardOnUserCountryChange,
+  pruneDashboardSummaries,
+} from "./quranSessions/dashboardProjection/projectTeacherDashboard";
 export { requestUserDeletion } from "./userDeletion/requestUserDeletion";
 export { requestSelfAccountDeletion } from "./userDeletion/requestSelfAccountDeletion";
 export { cancelUserDeletion } from "./userDeletion/cancelUserDeletion";

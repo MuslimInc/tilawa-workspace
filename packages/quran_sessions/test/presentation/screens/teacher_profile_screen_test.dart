@@ -4,28 +4,11 @@ import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:quran_sessions/l10n/quran_sessions_localizations.dart';
 import 'package:quran_sessions/quran_sessions.dart';
+import 'package:quran_sessions/src/presentation/widgets/booking_block_notice.dart';
 import 'package:tilawa_ui_kit/tilawa_ui_kit.dart';
 
-import '../../helpers/availability_test_helpers.dart';
-import '../../helpers/fakes/fake_session_repository.dart';
-import '../../helpers/fakes/fake_teacher_repository.dart';
 import '../../helpers/fixtures.dart';
-
-class _TeacherProfileTestBloc extends TeacherProfileBloc {
-  _TeacherProfileTestBloc(TeacherProfileSuccess seed)
-    : super(
-        getProfile: GetTeacherProfileUseCase(FakeTeacherRepository()),
-        getAvailability: buildGetTeacherAvailabilityUseCase(
-          scheduleRepository: FakeScheduleRepository(),
-          sessionRepository: FakeSessionRepository(),
-        ),
-      ) {
-    emit(seed);
-  }
-
-  @override
-  void add(TeacherProfileEvent event) {}
-}
+import 'teacher_profile_test_bloc.dart';
 
 Future<void> _pumpProfile(
   WidgetTester tester,
@@ -33,6 +16,7 @@ Future<void> _pumpProfile(
   double textScaleFactor = 1.0,
   QuranSessionsAnalyticsCallbacks analytics =
       const QuranSessionsAnalyticsCallbacks(),
+  SessionModePolicy sessionModePolicy = SessionModePolicy.freeBeta,
 }) async {
   tester.view.physicalSize = const Size(360, 800);
   tester.view.devicePixelRatio = 1;
@@ -60,10 +44,11 @@ Future<void> _pumpProfile(
               textScaler: TextScaler.linear(textScaleFactor),
             ),
             child: BlocProvider<TeacherProfileBloc>.value(
-              value: _TeacherProfileTestBloc(seed),
+              value: TeacherProfileTestBloc(seed),
               child: TeacherProfileScreen(
                 teacherId: seed.teacher.id,
                 analytics: analytics,
+                sessionModePolicy: sessionModePolicy,
                 onBookTapped: (_, _) {},
               ),
             ),
@@ -151,7 +136,7 @@ void main() {
           child: Directionality(
             textDirection: TextDirection.rtl,
             child: BlocProvider<TeacherProfileBloc>.value(
-              value: _TeacherProfileTestBloc(seed),
+              value: TeacherProfileTestBloc(seed),
               child: TeacherProfileScreen(
                 teacherId: seed.teacher.id,
                 onBookTapped: (teacherId, slotId) {
@@ -174,7 +159,71 @@ void main() {
     expect(selectedSlotId, isNull);
   });
 
-  testWidgets('shows report tutor action in app bar for visible profile', (
+  testWidgets(
+    'paid teacher without payment provider shows disabled booking and block notice',
+    (
+      tester,
+    ) async {
+      final slot = makeSlot(
+        startsAt: DateTime.now().add(const Duration(days: 1)),
+      );
+
+      tester.view.physicalSize = const Size(360, 1200);
+      tester.view.devicePixelRatio = 1;
+      addTearDown(() {
+        tester.view.resetPhysicalSize();
+        tester.view.resetDevicePixelRatio();
+      });
+
+      final seed = TeacherProfileSuccess(
+        teacher: makeTeacher(avatarUrl: ''),
+        availability: [slot],
+        reviews: const [],
+        pricingQuote: const SessionPricingQuote(
+          pricingType: SessionPricingType.fixedPerSession,
+          amount: 50,
+          currencyCode: 'USD',
+          paymentRequired: true,
+          paymentProviderAvailable: false,
+          bookingEnabled: true,
+          quranSessionsEnabled: true,
+          effectivePricingSource: EffectivePricingSource.teacherOverride,
+          blockReason: BookingBlockReason.paymentProviderUnavailable,
+        ),
+      );
+
+      await tester.pumpWidget(
+        MaterialApp(
+          theme: AppTheme.getLightTheme(primaryColor: AppColors.defaultPrimary),
+          locale: const Locale('en'),
+          localizationsDelegates:
+              QuranSessionsLocalizations.localizationsDelegates,
+          supportedLocales: QuranSessionsLocalizations.supportedLocales,
+          home: QuranSessionsThemeScope(
+            child: Directionality(
+              textDirection: TextDirection.ltr,
+              child: BlocProvider<TeacherProfileBloc>.value(
+                value: TeacherProfileTestBloc(seed),
+                child: TeacherProfileScreen(
+                  teacherId: seed.teacher.id,
+                  onBookTapped: (teacherId, slotId) {},
+                ),
+              ),
+            ),
+          ),
+        ),
+      );
+      await tester.pump();
+      await tester.pump(const Duration(milliseconds: 500));
+
+      expect(find.byType(BookingBlockNotice), findsOneWidget);
+
+      final bookButton = tester.widget<TilawaButton>(find.byType(TilawaButton));
+      expect(bookButton.onPressed, isNull);
+    },
+  );
+
+  testWidgets('hides report tutor action for launch rollout', (
     tester,
   ) async {
     await _pumpProfile(
@@ -186,8 +235,8 @@ void main() {
       ),
     );
 
-    expect(find.byIcon(Icons.flag_outlined), findsOneWidget);
-    expect(find.byTooltip('الإبلاغ عن المحفظ'), findsOneWidget);
+    expect(find.byIcon(Icons.flag_outlined), findsNothing);
+    expect(find.byTooltip('الإبلاغ عن المحفظ'), findsNothing);
   });
 
   testWidgets('expands credentials section when teacher has credentials', (
@@ -219,6 +268,26 @@ void main() {
 
     expect(find.text('Ijazah in Hafs'), findsOneWidget);
     expect(find.text('موثّقة من تلاوة'), findsOneWidget);
+  });
+
+  testWidgets('hides external sessions chip when session mode is videoOnly', (
+    tester,
+  ) async {
+    final l10n = await QuranSessionsLocalizations.delegate.load(
+      const Locale('ar'),
+    );
+
+    await _pumpProfile(
+      tester,
+      TeacherProfileSuccess(
+        teacher: makeTeacher(id: 't_ext', avatarUrl: ''),
+        availability: const [],
+        reviews: const [],
+      ),
+      sessionModePolicy: SessionModePolicy.videoOnly,
+    );
+
+    expect(find.text(l10n.teacherOffersExternalSessions), findsNothing);
   });
 }
 

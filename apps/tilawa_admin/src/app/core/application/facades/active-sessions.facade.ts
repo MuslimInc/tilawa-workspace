@@ -48,13 +48,11 @@ export class ActiveSessionsFacade {
   readonly canLoadMore = this.hasMore.asReadonly();
   readonly filter = this.operationalFilter.asReadonly();
 
-  async loadList(
-    options?: {
-      filter?: ActiveSessionOperationalFilter;
-      cursor?: string | null;
-      append?: boolean;
-    },
-  ): Promise<void> {
+  async loadList(options?: {
+    filter?: ActiveSessionOperationalFilter;
+    cursor?: string | null;
+    append?: boolean;
+  }): Promise<void> {
     const filter = options?.filter ?? this.operationalFilter();
     const append = options?.append === true;
     const cursor = append ? (options?.cursor ?? this.nextCursor()) : null;
@@ -81,26 +79,17 @@ export class ActiveSessionsFacade {
         this.teacherRepository.getByIds(teacherIds),
       ]);
 
-      const userIds = [
-        ...studentIds,
-        ...[...teachers.values()].map((profile) => profile.userId),
-      ];
-      const users = userIds.length
-        ? await this.userRepository.getByIds(userIds)
-        : new Map();
+      const userIds = [...studentIds, ...[...teachers.values()].map((profile) => profile.userId)];
+      const users = userIds.length ? await this.userRepository.getByIds(userIds) : new Map();
 
       const mapped = page.items
         .map((session) => {
           const teacher = teachers.get(session.teacherId) ?? null;
           return ActiveSessionsViewModelMapper.toListItem({
             session,
-            summary: session.sessionId
-              ? (summaries.get(session.sessionId) ?? null)
-              : null,
+            summary: session.sessionId ? (summaries.get(session.sessionId) ?? null) : null,
             teacher,
-            teacherUser: teacher
-              ? (users.get(teacher.userId) ?? null)
-              : null,
+            teacherUser: teacher ? (users.get(teacher.userId) ?? null) : null,
             student: users.get(session.studentId) ?? null,
             now,
           });
@@ -119,9 +108,7 @@ export class ActiveSessionsFacade {
     } catch (error) {
       this.listState.set('error');
       this.listError.set(
-        error instanceof Error
-          ? error.message
-          : 'Failed to load active sessions.',
+        error instanceof Error ? error.message : 'Failed to load active sessions.',
       );
     }
   }

@@ -10,7 +10,7 @@ class HomeDashboardCard extends StatelessWidget {
     this.useFeaturedGradient = false,
     this.backgroundColor,
     this.borderRadius,
-    this.surface = TilawaCardSurface.flat,
+    this.surface = TilawaCardSurface.raised,
     this.onTap,
     this.splashColor,
     this.highlightColor,

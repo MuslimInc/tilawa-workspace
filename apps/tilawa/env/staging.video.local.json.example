@@ -1,0 +1,5 @@
+{
+  "APP_ENV": "staging",
+  "TILAWA_DISTRIBUTION": "staging",
+  "TILAWA_LAUNCH_AGORA_APP_ID": "YOUR_AGORA_APP_ID"
+}

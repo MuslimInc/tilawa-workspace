@@ -1,16 +1,10 @@
 import { InjectionToken } from '@angular/core';
 
-import {
-  TeacherProfile,
-  TeacherProfileFilters,
-} from '../entities/teacher-profile.entity';
+import { TeacherProfile, TeacherProfileFilters } from '../entities/teacher-profile.entity';
 import { PageRequest, PageResult } from '../entities/pagination.types';
 
 export interface TeacherProfileRepository {
-  list(
-    filters: TeacherProfileFilters,
-    page: PageRequest,
-  ): Promise<PageResult<TeacherProfile>>;
+  list(filters: TeacherProfileFilters, page: PageRequest): Promise<PageResult<TeacherProfile>>;
 
   getById(id: string): Promise<TeacherProfile | null>;
 

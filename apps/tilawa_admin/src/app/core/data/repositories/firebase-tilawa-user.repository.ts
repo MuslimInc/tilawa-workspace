@@ -18,11 +18,7 @@ import {
   TilawaUser,
   TilawaUserFilters,
 } from '../../domain/entities/tilawa-user.entity';
-import {
-  DEFAULT_PAGE_SIZE,
-  PageRequest,
-  PageResult,
-} from '../../domain/entities/pagination.types';
+import { DEFAULT_PAGE_SIZE, PageRequest, PageResult } from '../../domain/entities/pagination.types';
 import { TilawaUserRepository } from '../../domain/repositories/tilawa-user.repository';
 import { fetchPaginatedList } from '../firestore/firestore-list-query.util';
 
@@ -38,10 +34,7 @@ interface TilawaUserFirestoreDto {
 export class FirebaseTilawaUserRepository implements TilawaUserRepository {
   private readonly firestore = inject(Firestore);
 
-  async list(
-    filters: TilawaUserFilters,
-    page: PageRequest,
-  ): Promise<PageResult<TilawaUser>> {
+  async list(filters: TilawaUserFilters, page: PageRequest): Promise<PageResult<TilawaUser>> {
     const pageSize = page.pageSize || DEFAULT_PAGE_SIZE;
     const result = await fetchPaginatedList({
       firestore: this.firestore,
@@ -58,9 +51,7 @@ export class FirebaseTilawaUserRepository implements TilawaUserRepository {
   }
 
   async count(): Promise<number> {
-    return firstValueFrom(
-      collectionCount(collection(this.firestore, QuranSessionsPaths.users)),
-    );
+    return firstValueFrom(collectionCount(collection(this.firestore, QuranSessionsPaths.users)));
   }
 
   private mapUser(id: string, dto: TilawaUserFirestoreDto): TilawaUser {
@@ -101,7 +92,7 @@ export class FirebaseTilawaUserRepository implements TilawaUserRepository {
     const usersCol = collection(this.firestore, QuranSessionsPaths.users);
 
     const emailQuery = getDocs(
-      query(usersCol, where('email', '>=', normalized), where('email', '<=', endBound), limit(10))
+      query(usersCol, where('email', '>=', normalized), where('email', '<=', endBound), limit(10)),
     );
 
     // Wait, the standard users collection doesn't have a lowercase display name field natively indexed.
@@ -109,7 +100,12 @@ export class FirebaseTilawaUserRepository implements TilawaUserRepository {
     // For an admin test tool, matching by email is extremely precise and safe.
     // However, I'll attempt both just in case, but rely heavily on email.
     const nameQuery = getDocs(
-      query(usersCol, where('displayName', '>=', normalized), where('displayName', '<=', endBound), limit(10))
+      query(
+        usersCol,
+        where('displayName', '>=', normalized),
+        where('displayName', '<=', endBound),
+        limit(10),
+      ),
     );
 
     const [emailSnap, nameSnap] = await Promise.all([emailQuery, nameQuery]);

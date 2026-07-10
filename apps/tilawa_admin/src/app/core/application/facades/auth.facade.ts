@@ -36,8 +36,7 @@ export class AuthFacade {
       const session = await this.authRepository.signIn(email, password);
       this.sessionSignal.set(session);
     } catch (error) {
-      const message =
-        error instanceof Error ? error.message : 'Sign in failed.';
+      const message = error instanceof Error ? error.message : 'Sign in failed.';
       this.errorSignal.set(message);
       throw error;
     } finally {

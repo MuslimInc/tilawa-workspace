@@ -3,18 +3,23 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:quran_sessions/core/l10n_extensions.dart';
 import 'package:tilawa_ui_kit/tilawa_ui_kit.dart';
 
+import '../../domain/entities/booking_block_reason.dart';
 import '../../domain/entities/quran_teacher.dart';
 import '../../domain/entities/session_call_type.dart';
+import '../../domain/policies/session_mode_policy.dart';
+import '../../domain/entities/session_pricing_quote.dart';
 import '../../domain/entities/session_review.dart';
 import '../../domain/entities/teacher_availability.dart';
 import '../../domain/value_objects/teacher_public_name.dart';
 import '../config/quran_sessions_analytics_callbacks.dart';
 import '../failure_ui/quran_sessions_failure_ui.dart';
+import '../launch_scope.dart';
 import '../blocs/teacher_profile/teacher_profile_bloc.dart';
 import '../blocs/teacher_profile/teacher_profile_event.dart';
 import '../blocs/teacher_profile/teacher_profile_state.dart';
 import '../theme/quran_sessions_status_colors.dart';
 import '../widgets/availability_slot_picker.dart';
+import '../widgets/booking_block_notice.dart';
 import '../widgets/paid_session_notice.dart';
 import '../widgets/quran_session_price_chip.dart';
 import '../widgets/quran_sessions_scaffold.dart';
@@ -31,10 +36,12 @@ class TeacherProfileScreen extends StatefulWidget {
     this.analytics = const QuranSessionsAnalyticsCallbacks(),
     this.onBookTapped,
     this.bookingEnabled = true,
+    this.sessionModePolicy = SessionModePolicy.freeBeta,
   });
 
   final String teacherId;
   final QuranSessionsAnalyticsCallbacks analytics;
+  final SessionModePolicy sessionModePolicy;
 
   /// Called when the user initiates a booking. The host app navigates to
   /// [BookingScreen] with [teacherId] and the optional pre-selected [slotId].
@@ -71,21 +78,22 @@ class _TeacherProfileScreenState extends State<TeacherProfileScreen> {
     return QuranSessionsScaffold(
       title: l10n.teacherProfileTitle,
       actions: [
-        BlocBuilder<TeacherProfileBloc, TeacherProfileState>(
-          builder: (context, state) {
-            if (state is! TeacherProfileSuccess ||
-                !_isTeacherMarketplaceVisible(state.teacher)) {
-              return const SizedBox.shrink();
-            }
-            return IconButton(
-              tooltip: l10n.reportTutorAction,
-              onPressed: state.reportInProgress
-                  ? null
-                  : () => _submitReport(context),
-              icon: const Icon(Icons.flag_outlined),
-            );
-          },
-        ),
+        if (QuranSessionsLaunchScope.reportDisputeUiEnabled)
+          BlocBuilder<TeacherProfileBloc, TeacherProfileState>(
+            builder: (context, state) {
+              if (state is! TeacherProfileSuccess ||
+                  !_isTeacherMarketplaceVisible(state.teacher)) {
+                return const SizedBox.shrink();
+              }
+              return IconButton(
+                tooltip: l10n.reportTutorAction,
+                onPressed: state.reportInProgress
+                    ? null
+                    : () => _submitReport(context),
+                icon: const Icon(Icons.flag_outlined),
+              );
+            },
+          ),
       ],
       bottomNavigationBar: widget.bookingEnabled && widget.onBookTapped != null
           ? BlocBuilder<TeacherProfileBloc, TeacherProfileState>(
@@ -94,7 +102,11 @@ class _TeacherProfileScreenState extends State<TeacherProfileScreen> {
                     !_isTeacherMarketplaceVisible(state.teacher)) {
                   return const SizedBox.shrink();
                 }
+                final blocked = _isNonTransientBlock(
+                  state.pricingQuote?.blockReason,
+                );
                 final canBook =
+                    !blocked &&
                     !state.isLoadingAvailability &&
                     state.availability.isNotEmpty;
                 return TilawaBottomActionArea(
@@ -156,6 +168,7 @@ class _TeacherProfileScreenState extends State<TeacherProfileScreen> {
               :final availability,
               :final reviews,
               :final isLoadingAvailability,
+              :final pricingQuote,
             ) =>
               _isTeacherMarketplaceVisible(teacher)
                   ? _TeacherProfileBody(
@@ -163,7 +176,9 @@ class _TeacherProfileScreenState extends State<TeacherProfileScreen> {
                       availability: availability,
                       reviews: reviews,
                       isLoadingAvailability: isLoadingAvailability,
+                      pricingQuote: pricingQuote,
                       bookingEnabled: widget.bookingEnabled,
+                      sessionModePolicy: widget.sessionModePolicy,
                       onBookTapped: widget.onBookTapped == null
                           ? null
                           : (slotId) => _onBookTapped(slotId),
@@ -201,6 +216,14 @@ bool _isTeacherMarketplaceVisible(QuranTeacher teacher) {
       teacher.isVerified;
 }
 
+/// True when the block reason is server-authoritative and non-transient.
+/// Transient = `none` (bookable) or `pricingQuoteUnavailable` (retry).
+bool _isNonTransientBlock(BookingBlockReason? reason) {
+  if (reason == null) return false;
+  return reason != BookingBlockReason.none &&
+      reason != BookingBlockReason.pricingQuoteUnavailable;
+}
+
 class _TeacherProfileUnavailableBody extends StatelessWidget {
   const _TeacherProfileUnavailableBody();
 
@@ -229,10 +252,12 @@ class _TeacherProfileBody extends StatefulWidget {
     required this.reviews,
     required this.isLoadingAvailability,
     required this.bookingEnabled,
+    required this.sessionModePolicy,
     required this.teacherId,
     this.onBookTapped,
     this.onSlotSelected,
     this.selectedSlotId,
+    this.pricingQuote,
   });
 
   final QuranTeacher teacher;
@@ -240,10 +265,14 @@ class _TeacherProfileBody extends StatefulWidget {
   final List<SessionReview> reviews;
   final bool isLoadingAvailability;
   final bool bookingEnabled;
+  final SessionModePolicy sessionModePolicy;
   final String teacherId;
   final void Function(String? slotId)? onBookTapped;
   final ValueChanged<String>? onSlotSelected;
   final String? selectedSlotId;
+
+  /// Server-resolved pricing (same source as booking); null hides the badge.
+  final SessionPricingQuote? pricingQuote;
 
   @override
   State<_TeacherProfileBody> createState() => _TeacherProfileBodyState();
@@ -307,16 +336,22 @@ class _TeacherProfileBodyState extends State<_TeacherProfileBody> {
                 child: Row(
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: [
-                    QuranSessionPriceChip(teacher: widget.teacher),
+                    QuranSessionPriceChip(
+                      teacher: widget.teacher,
+                      pricing: widget.pricingQuote,
+                    ),
                     for (final code in widget.teacher.specializations) ...[
                       SizedBox(width: tokens.spaceExtraSmall),
                       TilawaMetadataChip(
                         label: l10n.specializationLabel(code),
                       ),
                     ],
-                    if (widget.teacher.supportedCallTypes.contains(
-                      SessionCallType.externalMeeting,
-                    )) ...[
+                    if (widget.sessionModePolicy.isEnabled(
+                          SessionCallType.externalMeeting,
+                        ) &&
+                        widget.teacher.supportedCallTypes.contains(
+                          SessionCallType.externalMeeting,
+                        )) ...[
                       SizedBox(width: tokens.spaceExtraSmall),
                       TilawaMetadataChip(
                         label: l10n.teacherOffersExternalSessions,
@@ -331,6 +366,15 @@ class _TeacherProfileBodyState extends State<_TeacherProfileBody> {
         if (widget.teacher.manualPaymentPrice case final manualPrice?) ...[
           SizedBox(height: tokens.spaceSmall),
           PaidSessionNotice(price: manualPrice),
+        ],
+        if (widget.pricingQuote != null &&
+            _isNonTransientBlock(
+              widget.pricingQuote!.blockReason,
+            )) ...[
+          SizedBox(height: tokens.spaceSmall),
+          BookingBlockNotice(
+            blockReason: widget.pricingQuote!.blockReason,
+          ),
         ],
         if (bio.isNotEmpty) ...[
           SizedBox(height: tokens.spaceSmall),

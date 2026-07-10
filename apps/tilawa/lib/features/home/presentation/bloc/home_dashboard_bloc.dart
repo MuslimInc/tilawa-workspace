@@ -4,10 +4,10 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:tilawa/core/logging/app_logger.dart';
 import 'package:tilawa/core/network/network_error_message.dart';
 
-import '../../domain/entities/home_dashboard.dart';
-import '../../domain/usecases/get_home_dashboard_use_case.dart';
 import '../../../prayer_times/application/prayer_location_update_notifier.dart';
 import '../../../prayer_times/domain/usecases/notify_prayer_location_updated_use_case.dart';
+import '../../domain/entities/home_dashboard.dart';
+import '../../domain/usecases/get_home_dashboard_use_case.dart';
 import 'home_dashboard_event.dart';
 import 'home_dashboard_state.dart';
 
@@ -32,6 +32,10 @@ final class HomeDashboardBloc
   ///
   /// When a refresh is already pending, returns its future without queueing
   /// a duplicate refresh event.
+  ///
+  /// Deliberate await-handle for [RefreshIndicator]: silent refreshes emit no
+  /// distinct state, so completion cannot be observed via the state stream.
+  // ignore: avoid_public_bloc_methods
   Future<void> refreshAndWait({String? localeIdentifier}) {
     _localeIdentifier = localeIdentifier ?? _localeIdentifier;
     final Completer<void>? pending = _refreshCompleter;

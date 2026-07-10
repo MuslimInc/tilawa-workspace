@@ -19,6 +19,7 @@ import '../features/app_review/presentation/widgets/app_review_sacred_flow_scope
 import '../features/athkar/presentation/screens/athkar_details_screen.dart';
 import '../features/athkar/presentation/screens/tasbeeh_screen.dart';
 import '../features/athkar/presentation/widgets/athkar_categories_screen_scope.dart';
+import '../features/auth/presentation/screens/email_auth_screens.dart';
 import '../features/auth/presentation/screens/login_screen.dart';
 import '../features/bookmarks/presentation/bloc/bookmarks_bloc.dart';
 import '../features/bookmarks/presentation/screens/bookmarks_screen.dart';
@@ -300,7 +301,14 @@ class SettingsRoute extends GoRouteData with $SettingsRoute, TilawaRouteData {
   }
 }
 
-@TypedGoRoute<LoginRoute>(path: '/login')
+@TypedGoRoute<LoginRoute>(
+  path: '/login',
+  routes: <TypedGoRoute<GoRouteData>>[
+    TypedGoRoute<EmailLoginRoute>(path: 'email'),
+    TypedGoRoute<RegisterRoute>(path: 'register'),
+    TypedGoRoute<ForgotPasswordRoute>(path: 'forgot-password'),
+  ],
+)
 class LoginRoute extends GoRouteData with $LoginRoute {
   const LoginRoute();
 
@@ -315,6 +323,33 @@ class LoginRoute extends GoRouteData with $LoginRoute {
   @override
   Widget build(BuildContext context, GoRouterState state) {
     return const LoginScreen();
+  }
+}
+
+class EmailLoginRoute extends GoRouteData with $EmailLoginRoute {
+  const EmailLoginRoute();
+
+  @override
+  Widget build(BuildContext context, GoRouterState state) {
+    return const EmailLoginScreen();
+  }
+}
+
+class RegisterRoute extends GoRouteData with $RegisterRoute {
+  const RegisterRoute();
+
+  @override
+  Widget build(BuildContext context, GoRouterState state) {
+    return const RegisterScreen();
+  }
+}
+
+class ForgotPasswordRoute extends GoRouteData with $ForgotPasswordRoute {
+  const ForgotPasswordRoute();
+
+  @override
+  Widget build(BuildContext context, GoRouterState state) {
+    return const ForgotPasswordScreen();
   }
 }
 

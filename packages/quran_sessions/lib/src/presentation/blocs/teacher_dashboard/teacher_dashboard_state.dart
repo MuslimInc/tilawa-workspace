@@ -67,6 +67,9 @@ final class TeacherDashboardSuccess extends TeacherDashboardState {
     this.sessionCancelInProgress,
     this.sessionCancelFailure,
     this.sessionCancelSucceeded = false,
+    this.joinInProgress,
+    this.joinFailure,
+    this.joinCompletedSessionId,
   });
 
   final List<QuranSession> pendingBookingRequests;
@@ -123,6 +126,15 @@ final class TeacherDashboardSuccess extends TeacherDashboardState {
   /// One-shot success signal after tutor cancel completes.
   final bool sessionCancelSucceeded;
 
+  /// Session id currently launching the call.
+  final String? joinInProgress;
+
+  /// Set when join fails so UI can show feedback.
+  final QuranSessionsFailure? joinFailure;
+
+  /// Set after a successful join so UI can navigate to the call shell.
+  final String? joinCompletedSessionId;
+
   bool get weekScopedDashboard => schedulingConfig.weekScopedDashboardEnabled;
 
   @override
@@ -149,6 +161,9 @@ final class TeacherDashboardSuccess extends TeacherDashboardState {
     sessionCancelInProgress,
     sessionCancelFailure,
     sessionCancelSucceeded,
+    joinInProgress,
+    joinFailure,
+    joinCompletedSessionId,
   ];
 
   TeacherDashboardSuccess copyWith({
@@ -174,6 +189,9 @@ final class TeacherDashboardSuccess extends TeacherDashboardState {
     String? sessionCancelInProgress,
     QuranSessionsFailure? sessionCancelFailure,
     bool? sessionCancelSucceeded,
+    String? joinInProgress,
+    QuranSessionsFailure? joinFailure,
+    String? joinCompletedSessionId,
     bool clearSlotFailure = false,
     bool clearUndoableSlotId = false,
     bool clearRefreshDiscardedPendingCount = false,
@@ -184,6 +202,9 @@ final class TeacherDashboardSuccess extends TeacherDashboardState {
     bool clearSessionCancelInProgress = false,
     bool clearSessionCancelFailure = false,
     bool clearSessionCancelSucceeded = false,
+    bool clearJoinInProgress = false,
+    bool clearJoinFailure = false,
+    bool clearJoinCompletedSessionId = false,
   }) => TeacherDashboardSuccess(
     pendingBookingRequests:
         pendingBookingRequests ?? this.pendingBookingRequests,
@@ -230,6 +251,13 @@ final class TeacherDashboardSuccess extends TeacherDashboardState {
     sessionCancelSucceeded: clearSessionCancelSucceeded
         ? false
         : (sessionCancelSucceeded ?? this.sessionCancelSucceeded),
+    joinInProgress: clearJoinInProgress
+        ? null
+        : (joinInProgress ?? this.joinInProgress),
+    joinFailure: clearJoinFailure ? null : (joinFailure ?? this.joinFailure),
+    joinCompletedSessionId: clearJoinCompletedSessionId
+        ? null
+        : (joinCompletedSessionId ?? this.joinCompletedSessionId),
   );
 }
 

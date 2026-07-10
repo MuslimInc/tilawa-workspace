@@ -17,10 +17,7 @@ export interface SessionReportFirestoreDto {
 }
 
 export abstract class SessionReportMapper {
-  static fromFirestore(
-    id: string,
-    data: SessionReportFirestoreDto,
-  ): SessionReportSummary {
+  static fromFirestore(id: string, data: SessionReportFirestoreDto): SessionReportSummary {
     return {
       id,
       bookingId: data.bookingId ?? null,

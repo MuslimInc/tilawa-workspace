@@ -13,6 +13,12 @@ import {
   readServerSessionEpoch,
 } from "./quranSessions/sessionRegistration";
 import { buildSessionRevokedNotificationCopy } from "./quranSessions/sessionRevokedNotification";
+import {
+  buildDeviceRegistryDoc,
+  DEVICES_SUBCOLLECTION,
+  isDeviceCapExceeded,
+} from "./deviceRegistry";
+import { isMultiDeviceLoginEnabled } from "./multiDeviceLogin";
 
 export const SESSION_REVOKED_ACTION = "session_revoked";
 
@@ -51,6 +57,7 @@ interface RegisterActiveDeviceRequest {
   registrationMode?: unknown;
   deviceInfo?: unknown;
   signOut?: unknown;
+  writeDeviceRegistry?: unknown;
 }
 
 interface RegisterActiveDeviceResponse {
@@ -58,6 +65,14 @@ interface RegisterActiveDeviceResponse {
   sessionEpoch?: number;
   epoch?: number;
   activeDeviceId?: string;
+  // ADR-008 Phase 0 — populated only when device-registry write was requested.
+  deviceCapExceeded?: boolean;
+  registeredDeviceCount?: number;
+}
+
+interface DeviceRegistryOutcome {
+  deviceCapExceeded: boolean;
+  registeredDeviceCount: number;
 }
 
 interface TransactionResult extends RegisterActiveDeviceResponse {
@@ -247,6 +262,16 @@ function activeSessionClearWrite(
   };
 }
 
+function revokedDeviceRegistryWrite(
+  now: FirebaseFirestore.FieldValue,
+): Record<string, unknown> {
+  return {
+    fcmToken: FieldValue.delete(),
+    revokedAt: now,
+    lastSeenAt: now,
+  };
+}
+
 function responseFor(
   status: DeviceRegistrationStatus,
   sessionEpoch: number,
@@ -282,6 +307,13 @@ export const registerActiveDevice = onCall(
     const appVersion = optionalString(data.appVersion, "appVersion");
     const deviceInfo = sanitizeDeviceInfo(data.deviceInfo);
     const signOut = data.signOut === true;
+    const multiDeviceLoginEnabled = isMultiDeviceLoginEnabled();
+    // ADR-008 Phase 0: client (gated by `deviceRegistryWriteEnabled`) opts into
+    // the additive, non-exclusive device registry. Phase 1's server flag also
+    // forces the registry write so older clients have a fan-out target.
+    const writeDeviceRegistry =
+      !signOut && (data.writeDeviceRegistry === true || multiDeviceLoginEnabled);
+    const revokeRegistryDevice = signOut && multiDeviceLoginEnabled;
 
     if (!platform) {
       throw new HttpsError("invalid-argument", "platform is required.");
@@ -298,10 +330,47 @@ export const registerActiveDevice = onCall(
     const now = FieldValue.serverTimestamp();
 
     let supersededUserData: Record<string, unknown> | undefined;
+    let deviceRegistryOutcome: DeviceRegistryOutcome | undefined;
     const result = await db.runTransaction(async (tx) => {
       const userSnap = await tx.get(userRef);
       const userData = userSnap.data() ?? {};
       supersededUserData = userData;
+
+      // All transaction reads must precede all writes: read the registry (if
+      // requested) here, then stage its write below alongside the session write.
+      const devicesCol = userRef.collection(DEVICES_SUBCOLLECTION);
+      let deviceExists = false;
+      if (writeDeviceRegistry) {
+        const devicesSnap = await tx.get(devicesCol);
+        const activeDeviceIds: string[] = [];
+        for (const doc of devicesSnap.docs) {
+          if (doc.id === deviceId) {
+            deviceExists = true;
+          }
+          if (doc.get("revokedAt") == null) {
+            activeDeviceIds.push(doc.id);
+          }
+        }
+        const alreadyActive = activeDeviceIds.includes(deviceId);
+        deviceRegistryOutcome = {
+          deviceCapExceeded: isDeviceCapExceeded(activeDeviceIds, deviceId),
+          registeredDeviceCount: alreadyActive
+            ? activeDeviceIds.length
+            : activeDeviceIds.length + 1,
+        };
+        // Additive: never blocks or logs out; the write proceeds even past the
+        // legacy session cap. Runs on every plan branch (incl. noOp) so a real
+        // second device is still recorded.
+        tx.set(
+          devicesCol.doc(deviceId),
+          buildDeviceRegistryDoc(
+            { platform, fcmToken, appVersion, deviceInfo, existing: deviceExists },
+            now,
+          ),
+          { merge: true },
+        );
+      }
+
       const currentSession = userData.session as
         | { epoch?: number; activeDeviceId?: string }
         | undefined;
@@ -330,6 +399,27 @@ export const registerActiveDevice = onCall(
         typeof currentNotifications?.activeFcmToken === "string"
           ? currentNotifications.activeFcmToken
           : null;
+
+      if (multiDeviceLoginEnabled) {
+        const sessionEpoch = readServerSessionEpoch(userData);
+        if (revokeRegistryDevice) {
+          tx.set(
+            devicesCol.doc(deviceId),
+            revokedDeviceRegistryWrite(now),
+            { merge: true },
+          );
+        }
+        return {
+          ...responseFor(
+            signOut || deviceExists ? "updated_same_device" : "registered",
+            sessionEpoch,
+            deviceId,
+          ),
+          previousToken: null,
+          deviceChanged: false,
+          noOp: false,
+        } satisfies TransactionResult;
+      }
 
       if (plan.noOp) {
         return {
@@ -400,6 +490,7 @@ export const registerActiveDevice = onCall(
       sessionEpoch: result.sessionEpoch,
       epoch: result.epoch,
       activeDeviceId: result.activeDeviceId,
+      ...(deviceRegistryOutcome ?? {}),
     };
   },
 );

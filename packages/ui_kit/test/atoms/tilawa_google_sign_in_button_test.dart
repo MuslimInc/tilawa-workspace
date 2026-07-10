@@ -72,7 +72,7 @@ void main() {
         );
     expect(label.style?.fontFamily, expectedLabelStyle.fontFamily);
     expect(label.style?.fontWeight, FontWeight.w500);
-    expect(label.style?.fontSize, expectedLabelStyle.fontSize);
+    expect(label.style?.fontSize, expectedLabelStyle.fontSize ?? 14.0);
     expect(label.style?.color, GoogleSignInButtonBrand.lightLabel);
   });
 

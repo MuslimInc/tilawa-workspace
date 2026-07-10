@@ -71,8 +71,6 @@ class TilawaStateVisual extends StatelessWidget {
     final accent = accentColor ?? _resolveAccent(colorScheme);
     final dimension = size ?? resolveDefaultSize(tokens);
     final iconSize = tokens.iconSizeExtraLarge;
-    final midHalo = dimension - tokens.spaceLarge;
-    final innerHalo = dimension - tokens.spaceLarge * 2;
     final haloStrength = _haloStrengthForTone(tone);
 
     final visual = SizedBox.square(
@@ -83,25 +81,7 @@ class TilawaStateVisual extends StatelessWidget {
           _StateHalo(
             diameter: dimension,
             color: accent.withValues(
-              alpha: tokens.opacitySubtle * haloStrength.outer,
-            ),
-          ),
-          _StateHalo(
-            diameter: midHalo,
-            color: Color.alphaBlend(
-              accent.withValues(
-                alpha: tokens.opacitySubtle * haloStrength.mid,
-              ),
-              colorScheme.surface,
-            ),
-          ),
-          _StateHalo(
-            diameter: innerHalo,
-            color: Color.alphaBlend(
-              accent.withValues(
-                alpha: tokens.opacitySubtle * haloStrength.inner,
-              ),
-              colorScheme.surface,
+              alpha: tokens.opacitySubtle * haloStrength,
             ),
           ),
           Icon(
@@ -131,13 +111,11 @@ class TilawaStateVisual extends StatelessWidget {
   }
 }
 
-({double outer, double mid, double inner}) _haloStrengthForTone(
-  TilawaStateVisualTone tone,
-) {
+double _haloStrengthForTone(TilawaStateVisualTone tone) {
   return switch (tone) {
-    TilawaStateVisualTone.error => (outer: 0.45, mid: 0.9, inner: 1.4),
-    TilawaStateVisualTone.neutral => (outer: 0.35, mid: 0.7, inner: 1.1),
-    _ => (outer: 0.55, mid: 1.0, inner: 1.75),
+    TilawaStateVisualTone.error => 1.4,
+    TilawaStateVisualTone.neutral => 1.1,
+    _ => 1.75,
   };
 }
 

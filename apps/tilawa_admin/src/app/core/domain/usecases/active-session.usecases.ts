@@ -1,8 +1,6 @@
 import { Inject, Injectable } from '@angular/core';
 
-import {
-  ActiveSessionFilters,
-} from '../entities/active-session.entity';
+import { ActiveSessionFilters } from '../entities/active-session.entity';
 import { AdminSessionSummary } from '../entities/admin-session-summary.entity';
 import { PageRequest, PageResult } from '../entities/pagination.types';
 import {

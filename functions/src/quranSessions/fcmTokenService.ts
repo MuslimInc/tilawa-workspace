@@ -1,8 +1,12 @@
 import { FieldValue } from "firebase-admin/firestore";
 import { getMessaging, MulticastMessage } from "firebase-admin/messaging";
 
+import { DEVICES_SUBCOLLECTION } from "../deviceRegistry";
+import { isMultiDeviceLoginEnabled } from "../multiDeviceLogin";
+
 export interface UserFcmToken {
   userId: string;
+  deviceId?: string;
   token: string;
 }
 
@@ -10,6 +14,10 @@ export async function getActiveFcmToken(
   db: FirebaseFirestore.Firestore,
   userId: string,
 ): Promise<string | null> {
+  if (isMultiDeviceLoginEnabled()) {
+    const tokens = await collectDeviceRegistryFcmTokens(db, userId);
+    return tokens[0]?.token ?? null;
+  }
   const snap = await db.collection("users").doc(userId).get();
   const token = snap.data()?.notifications?.activeFcmToken;
   return typeof token === "string" && token.length > 0 ? token : null;
@@ -19,6 +27,9 @@ export async function collectActiveFcmTokens(
   db: FirebaseFirestore.Firestore,
   userIds: string[],
 ): Promise<UserFcmToken[]> {
+  if (isMultiDeviceLoginEnabled()) {
+    return collectDeviceRegistryFcmTokensForUsers(db, userIds);
+  }
   const tokens: UserFcmToken[] = [];
   const batchSize = 10;
 
@@ -39,6 +50,50 @@ export async function collectActiveFcmTokens(
   return tokens;
 }
 
+async function collectDeviceRegistryFcmTokensForUsers(
+  db: FirebaseFirestore.Firestore,
+  userIds: string[],
+): Promise<UserFcmToken[]> {
+  const tokens: UserFcmToken[] = [];
+  const batchSize = 10;
+
+  for (let i = 0; i < userIds.length; i += batchSize) {
+    const batch = userIds.slice(i, i + batchSize);
+    const entries = await Promise.all(
+      batch.map((userId) => collectDeviceRegistryFcmTokens(db, userId)),
+    );
+    for (const userEntries of entries) {
+      tokens.push(...userEntries);
+    }
+  }
+
+  return tokens;
+}
+
+async function collectDeviceRegistryFcmTokens(
+  db: FirebaseFirestore.Firestore,
+  userId: string,
+): Promise<UserFcmToken[]> {
+  const devicesSnap = await db
+    .collection("users")
+    .doc(userId)
+    .collection(DEVICES_SUBCOLLECTION)
+    .get();
+  const tokens: UserFcmToken[] = [];
+
+  for (const doc of devicesSnap.docs) {
+    if (doc.get("revokedAt") != null) {
+      continue;
+    }
+    const token = doc.get("fcmToken");
+    if (typeof token === "string" && token.length > 0) {
+      tokens.push({ userId, deviceId: doc.id, token });
+    }
+  }
+
+  return tokens;
+}
+
 /** @deprecated Use [collectActiveFcmTokens]. */
 export async function collectFcmTokens(
   db: FirebaseFirestore.Firestore,
@@ -53,7 +108,7 @@ export async function clearInvalidActiveFcmTokens(
   entries: UserFcmToken[],
   response: { responses: Array<{ success: boolean; error?: { code: string } }> },
 ): Promise<void> {
-  const invalidByUser = new Map<string, string>();
+  const invalidEntries = new Map<string, UserFcmToken>();
 
   response.responses.forEach((resp, index) => {
     if (
@@ -64,30 +119,44 @@ export async function clearInvalidActiveFcmTokens(
     ) {
       const entry = entries[index];
       if (entry) {
-        invalidByUser.set(entry.userId, entry.token);
+        invalidEntries.set(
+          `${entry.userId}/${entry.deviceId ?? "legacy"}`,
+          entry,
+        );
       }
     }
   });
 
-  if (invalidByUser.size === 0) {
+  if (invalidEntries.size === 0) {
     return;
   }
 
   const batch = db.batch();
-  for (const [userId, token] of invalidByUser) {
-    const userRef = db.collection("users").doc(userId);
-    batch.set(
-      userRef,
-      {
-        notifications: {
-          activeFcmToken: FieldValue.delete(),
-          tokenUpdatedAt: FieldValue.delete(),
+  for (const entry of invalidEntries.values()) {
+    const userRef = db.collection("users").doc(entry.userId);
+    if (entry.deviceId) {
+      batch.set(
+        userRef.collection(DEVICES_SUBCOLLECTION).doc(entry.deviceId),
+        {
+          fcmToken: FieldValue.delete(),
+          revokedAt: FieldValue.serverTimestamp(),
         },
-      },
-      { merge: true },
-    );
+        { merge: true },
+      );
+    } else {
+      batch.set(
+        userRef,
+        {
+          notifications: {
+            activeFcmToken: FieldValue.delete(),
+            tokenUpdatedAt: FieldValue.delete(),
+          },
+        },
+        { merge: true },
+      );
+    }
     // Legacy cleanup if token doc still exists.
-    batch.delete(userRef.collection("fcm_tokens").doc(token));
+    batch.delete(userRef.collection("fcm_tokens").doc(entry.token));
   }
   await batch.commit();
 }

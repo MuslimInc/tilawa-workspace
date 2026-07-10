@@ -6,6 +6,7 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:mockito/annotations.dart';
 import 'package:mockito/mockito.dart';
 import 'package:tilawa/features/auth/data/repositories/user_repository_impl.dart';
+import 'package:tilawa/features/auth/domain/entities/email_registration_draft.dart';
 import 'package:tilawa/features/auth/domain/entities/user_entity.dart';
 
 import 'user_repository_impl_test.mocks.dart';
@@ -71,6 +72,56 @@ void main() {
       expect(docSnapshot.data()!['email'], tUser.email);
       expect(docSnapshot.data()!['existingField'], 'value');
     });
+
+    test(
+      'saveCompleteEmailRegistration writes general profile and incomplete quran shell',
+      () async {
+        final EmailRegistrationDraft draft = EmailRegistrationDraft(
+          displayName: 'Complete User',
+          preferredLanguageCode: 'ar',
+        );
+
+        await userRepository.saveCompleteEmailRegistration(
+          user: tUser,
+          draft: draft,
+        );
+
+        final DocumentSnapshot<Map<String, dynamic>> docSnapshot =
+            await fakeFirestore.collection('users').doc(tUser.id).get();
+        final Map<String, dynamic>? quranProfile =
+            docSnapshot.data()?['quranSessionsProfile']
+                as Map<String, dynamic>?;
+
+        expect(docSnapshot.data()?['authProvider'], 'emailPassword');
+        expect(docSnapshot.data()?['profileCompleted'], true);
+        expect(docSnapshot.data()?['languageCode'], 'ar');
+        expect(quranProfile?['profileCompleted'], false);
+        expect(quranProfile?.containsKey('gender'), isFalse);
+        expect(quranProfile?.containsKey('cityId'), isFalse);
+      },
+    );
+
+    test(
+      'ensureQuranSessionsProfileShell creates incomplete shell once',
+      () async {
+        await userRepository.ensureQuranSessionsProfileShell(tUser.id);
+
+        final DocumentSnapshot<Map<String, dynamic>> docSnapshot =
+            await fakeFirestore.collection('users').doc(tUser.id).get();
+        final Map<String, dynamic>? profile =
+            docSnapshot.data()?['quranSessionsProfile']
+                as Map<String, dynamic>?;
+        expect(profile?['profileCompleted'], false);
+        expect(profile?['role'], 'student');
+
+        await userRepository.ensureQuranSessionsProfileShell(tUser.id);
+        final DocumentSnapshot<Map<String, dynamic>> again = await fakeFirestore
+            .collection('users')
+            .doc(tUser.id)
+            .get();
+        expect(again.data()?['quranSessionsProfile'], profile);
+      },
+    );
 
     test(
       'syncLanguagePreference writes languageCode for signed-in user',

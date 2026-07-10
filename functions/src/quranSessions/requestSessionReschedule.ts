@@ -86,7 +86,7 @@ export const requestSessionReschedule = onCall(
         });
 
         const sessionRef = sessionRefForBooking(db, fresh);
-        writeAggregateLifecycle(tx, { bookingRef, sessionRef }, guard.to);
+        writeAggregateLifecycle(tx, { bookingRef, sessionRef }, guard.to, {}, {}, fresh);
 
         tx.set(requestRef, {
           requestId: requestRef.id,

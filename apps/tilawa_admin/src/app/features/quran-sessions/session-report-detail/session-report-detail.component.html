@@ -24,15 +24,25 @@
         </div>
         <div>
           <dt class="tilawa-detail-label">{{ 'common_severity' | t }}</dt>
-          <dd><app-status-chip [label]="item.severity | statusLabel" [status]="item.severity" [scholar]="true" /></dd>
+          <dd>
+            <app-status-chip
+              [label]="item.severity | statusLabel"
+              [status]="item.severity"
+              [scholar]="true"
+            />
+          </dd>
         </div>
         <div>
           <dt class="tilawa-detail-label">{{ 'common_reporter' | t }}</dt>
-          <dd class="tilawa-detail-value font-mono">{{ item.reporterUserId }} ({{ item.reporterRole }})</dd>
+          <dd class="tilawa-detail-value font-mono">
+            {{ item.reporterUserId }} ({{ item.reporterRole }})
+          </dd>
         </div>
         <div>
           <dt class="tilawa-detail-label">{{ 'common_reportedUser' | t }}</dt>
-          <dd class="tilawa-detail-value font-mono">{{ item.reportedUserId ?? ('common_none' | t) }}</dd>
+          <dd class="tilawa-detail-value font-mono">
+            {{ item.reportedUserId ?? ('common_none' | t) }}
+          </dd>
         </div>
         <div>
           <dt class="tilawa-detail-label">{{ 'common_booking' | t }}</dt>
@@ -48,17 +58,23 @@
         </div>
         <div>
           <dt class="tilawa-detail-label">{{ 'common_filed' | t }}</dt>
-          <dd class="tilawa-detail-value">{{ item.createdAt | date:'medium' }}</dd>
+          <dd class="tilawa-detail-value">{{ item.createdAt | date: 'medium' }}</dd>
         </div>
         <div>
           <dt class="tilawa-detail-label">{{ 'common_updated' | t }}</dt>
-          <dd class="tilawa-detail-value">{{ item.updatedAt ? (item.updatedAt | date:'medium') : ('common_none' | t) }}</dd>
+          <dd class="tilawa-detail-value">
+            {{ item.updatedAt ? (item.updatedAt | date: 'medium') : ('common_none' | t) }}
+          </dd>
         </div>
       </dl>
 
       <div class="mt-6 border-t border-[var(--tilawa-outline-variant)] pt-6">
-        <h2 class="text-lg font-semibold text-[var(--tilawa-on-surface)]">{{ 'common_description' | t }}</h2>
-        <p class="mt-2 whitespace-pre-wrap text-sm text-[var(--tilawa-on-surface)]">{{ item.description }}</p>
+        <h2 class="text-lg font-semibold text-[var(--tilawa-on-surface)]">
+          {{ 'common_description' | t }}
+        </h2>
+        <p class="mt-2 whitespace-pre-wrap text-sm text-[var(--tilawa-on-surface)]">
+          {{ item.description }}
+        </p>
       </div>
     </app-tilawa-card>
   }

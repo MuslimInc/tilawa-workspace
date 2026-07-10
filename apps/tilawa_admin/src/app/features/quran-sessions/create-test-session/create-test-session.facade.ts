@@ -33,7 +33,7 @@ export class CreateTestSessionFacade {
 
   readonly studentResults = signal<TilawaUser[]>([]);
   readonly teacherResults = signal<TeacherProfile[]>([]);
-  
+
   readonly isSearchingStudents = signal(false);
   readonly isSearchingTeachers = signal(false);
   readonly isSubmitting = signal(false);
@@ -90,7 +90,7 @@ export class CreateTestSessionFacade {
         throw new Error('Invalid start date/time selected');
       }
       const startsAt = startDateTime.toISOString();
-      
+
       const endDateTime = new Date(`${data.date}T${data.endTime}:00`);
       if (isNaN(endDateTime.getTime())) {
         throw new Error('Invalid end date/time selected');
@@ -103,9 +103,7 @@ export class CreateTestSessionFacade {
 
       // Enforce allowed durations client-side for clear UX. The Cloud Function
       // re-validates server-side (source of truth).
-      const durationMinutes = Math.round(
-        (endDateTime.getTime() - startDateTime.getTime()) / 60000,
-      );
+      const durationMinutes = Math.round((endDateTime.getTime() - startDateTime.getTime()) / 60000);
       const allowedDurations = new Set([15, 30, 45, 60]);
       if (!allowedDurations.has(durationMinutes)) {
         throw new Error(
@@ -117,7 +115,7 @@ export class CreateTestSessionFacade {
 
       const callable = httpsCallable<CreateAdminTestSessionRequest, CreateBookingResult>(
         this.functions,
-        'createAdminTestQuranSession'
+        'createAdminTestQuranSession',
       );
 
       const result = await callable({

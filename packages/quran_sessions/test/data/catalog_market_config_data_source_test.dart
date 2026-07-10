@@ -11,9 +11,8 @@ void main() {
     test('getSupportedCountries returns enabled countries sorted', () async {
       final countries = await dataSource.getSupportedCountries();
 
-      check(countries.map((c) => c.countryCode).toList()).deepEquals(
-        ['EG', 'SA', 'AE'],
-      );
+      // Egypt is the only enabled market for this release (SA/AE disabled).
+      check(countries.map((c) => c.countryCode).toList()).deepEquals(['EG']);
       check(countries.every((c) => c.isEnabled)).isTrue();
     });
 

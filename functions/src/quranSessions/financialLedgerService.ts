@@ -211,6 +211,7 @@ export async function issueRefundRecord(
       refundId: refundRef.id,
       refundExecutionStatus: executionStatus,
     },
+    input.booking,
   );
 
   input.tx.set(refundRef, {
@@ -299,6 +300,7 @@ export async function issueCompensationRecord(
       compensationExecutionStatus: executionStatus,
     },
     { compensationExecutionStatus: executionStatus },
+    input.booking,
   );
 
   input.tx.set(compensationRef, {

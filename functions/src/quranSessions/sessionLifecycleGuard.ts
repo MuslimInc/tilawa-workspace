@@ -25,6 +25,8 @@ export type SessionAction =
   | "mark_student_no_show"
   | "mark_both_no_show"
   | "mark_incomplete"
+  | "expire_unattended_session"
+  | "finalize_completed_session"
   | "open_dispute"
   | "issue_compensation"
   | "issue_refund"
@@ -81,7 +83,7 @@ const TRANSITIONS: readonly SessionTransition[] = [
     action: "confirm_booking",
     from: new Set(["pending_payment"]),
     to: "scheduled",
-    allowedActors: new Set(["system"]),
+    allowedActors: new Set(["admin", "system"]),
     requiresReason: false,
   },
   {
@@ -217,9 +219,32 @@ const TRANSITIONS: readonly SessionTransition[] = [
     requiresReason: false,
   },
   {
+    // System-only: also reachable from scheduled/confirmed for the elapsed-
+    // session finalizer, when telemetry shows both parties connected but the
+    // call was too short to count as completed and `start_session` never ran.
     action: "mark_incomplete",
-    from: new Set(["in_progress"]),
+    from: new Set(["scheduled", "confirmed", "in_progress"]),
     to: "incomplete",
+    allowedActors: new Set(["system"]),
+    requiresReason: false,
+  },
+  {
+    // Elapsed-session finalizer: the session ended with no call telemetry at
+    // all — no attendance evidence, so neither party is penalized.
+    action: "expire_unattended_session",
+    from: new Set(["scheduled", "confirmed"]),
+    to: "expired",
+    allowedActors: new Set(["system"]),
+    requiresReason: false,
+  },
+  {
+    // Elapsed-session finalizer: telemetry proves the call happened for long
+    // enough, but nobody invoked complete_session (which requires
+    // in_progress and would let students/teachers complete unstarted
+    // sessions if its `from` set were widened instead).
+    action: "finalize_completed_session",
+    from: new Set(["scheduled", "confirmed"]),
+    to: "completed",
     allowedActors: new Set(["system"]),
     requiresReason: false,
   },

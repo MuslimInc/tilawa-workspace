@@ -442,9 +442,11 @@ void main() {
 
   group('TilawaSettingsGroupTokens', () {
     test('defaults creates expected values', () {
-      final tokens = TilawaSettingsGroupTokens.defaults();
+      final tokens = TilawaSettingsGroupTokens.defaults(
+        MeMuslimDesignTokens.light(),
+      );
       expect(tokens.groupHorizontalPadding, 20.0);
-      expect(tokens.groupShadowOpacity, 0);
+      expect(tokens.groupShadowOpacity, 0.04);
       expect(tokens.tileTitleTextRole, TilawaTextRole.bodyLarge);
       expect(tokens.tileSubtitleOpacity, 0.6);
       expect(tokens.switchActiveTrackOpacity, 1);
@@ -456,7 +458,10 @@ void main() {
         primary: Color(0xFF006A60),
         surface: Color(0xFFFFEEDD),
       );
-      final tokens = TilawaSettingsGroupTokens.fromColorScheme(scheme);
+      final tokens = TilawaSettingsGroupTokens.fromColorScheme(
+        scheme,
+        MeMuslimDesignTokens.light(),
+      );
       expect(
         tokens.selectionTileSelectedBackgroundColor,
         Colors.transparent,
@@ -476,7 +481,9 @@ void main() {
     });
 
     test('copyWith updates nested EdgeInsets and numeric values', () {
-      final original = TilawaSettingsGroupTokens.defaults();
+      final original = TilawaSettingsGroupTokens.defaults(
+        MeMuslimDesignTokens.light(),
+      );
       final updated = original.copyWith(
         tileTitleTextRole: TilawaTextRole.titleMedium,
         tileSubtitleOpacity: 0.6,
@@ -660,7 +667,9 @@ void main() {
 
   group('TilawaAdaptiveShellTokens', () {
     test('defaults creates expected values', () {
-      final tokens = TilawaAdaptiveShellTokens.defaults();
+      final tokens = TilawaAdaptiveShellTokens.defaults(
+        MeMuslimDesignTokens.light(),
+      );
       expect(tokens.phoneBottomNavBarBaseHeight, closeTo(48.0, 0.1));
       expect(tokens.navButtonSelectionContainerVerticalPadding, 4.0);
       expect(tokens.navButtonIconOnlyMinHeight, 28.0);
@@ -687,7 +696,9 @@ void main() {
     });
 
     test('phoneBottomNavLayoutHeight grows with text scale', () {
-      final tokens = TilawaAdaptiveShellTokens.defaults();
+      final tokens = TilawaAdaptiveShellTokens.defaults(
+        MeMuslimDesignTokens.light(),
+      );
       final unit = tokens.phoneBottomNavLayoutHeight(TextScaler.linear(1));
       final scaled = tokens.phoneBottomNavLayoutHeight(
         TextScaler.linear(2),
@@ -697,7 +708,9 @@ void main() {
     });
 
     test('phoneBottomNavPaintedHeight adds system bottom view padding', () {
-      final tokens = TilawaAdaptiveShellTokens.defaults();
+      final tokens = TilawaAdaptiveShellTokens.defaults(
+        MeMuslimDesignTokens.light(),
+      );
       const textScaler = TextScaler.linear(1);
       const systemInset = 48.0;
       expect(
@@ -712,7 +725,9 @@ void main() {
     });
 
     test('phoneBottomNavIconOnlyLayoutHeight grows with text scale', () {
-      final tokens = TilawaAdaptiveShellTokens.defaults();
+      final tokens = TilawaAdaptiveShellTokens.defaults(
+        MeMuslimDesignTokens.light(),
+      );
       final unit = tokens.phoneBottomNavIconOnlyLayoutHeight(
         TextScaler.linear(1),
       );
@@ -730,12 +745,15 @@ void main() {
         surfaceContainerHigh: Color(0xFFFF0000),
         surfaceContainerHighest: Color(0xFF00FF00),
       );
-      final tokens = TilawaAdaptiveShellTokens.fromColorScheme(scheme);
+      final tokens = TilawaAdaptiveShellTokens.fromColorScheme(
+        scheme,
+        MeMuslimDesignTokens.light(),
+      );
 
       expect(tokens.bottomNavBackgroundColor, isA<Color>());
-      expect(tokens.bottomNavShadowOpacity, 0);
-      expect(tokens.bottomNavShadowBlur, 0);
-      expect(tokens.bottomNavShadowOffset, Offset.zero);
+      expect(tokens.bottomNavShadowOpacity, 0.08);
+      expect(tokens.bottomNavShadowBlur, 12.0);
+      expect(tokens.bottomNavShadowOffset, const Offset(0, -1.5));
       expect(tokens.bottomNavBackgroundColor, scheme.surface);
       expect(
         tokens.navButtonSelectedBackgroundColor,
@@ -783,14 +801,17 @@ void main() {
         expect(
           TilawaAdaptiveShellTokens.fromColorScheme(
             tealScheme,
+            MeMuslimDesignTokens.light(),
           ).bottomNavBackgroundColor,
           TilawaAdaptiveShellTokens.fromColorScheme(
             purpleScheme,
+            MeMuslimDesignTokens.light(),
           ).bottomNavBackgroundColor,
         );
         expect(
           TilawaAdaptiveShellTokens.fromColorScheme(
             tealScheme,
+            MeMuslimDesignTokens.light(),
           ).bottomNavBackgroundColor,
           isNot(AppColors.bottomNavBackground),
         );
@@ -804,15 +825,18 @@ void main() {
         surfaceContainerHigh: Color(0xFFFF0000),
         surfaceContainerHighest: Color(0xFF00FF00),
       );
-      final tokens = TilawaAdaptiveShellTokens.fromColorScheme(scheme);
+      final tokens = TilawaAdaptiveShellTokens.fromColorScheme(
+        scheme,
+        MeMuslimDesignTokens.light(),
+      );
 
       expect(
         tokens.bottomNavBackgroundColor,
         isA<Color>(),
       );
-      expect(tokens.bottomNavShadowOpacity, 0);
-      expect(tokens.bottomNavShadowBlur, 0);
-      expect(tokens.bottomNavShadowOffset, Offset.zero);
+      expect(tokens.bottomNavShadowOpacity, 0.08);
+      expect(tokens.bottomNavShadowBlur, 12.0);
+      expect(tokens.bottomNavShadowOffset, const Offset(0, -1.5));
       expect(tokens.bottomNavBackgroundColor, scheme.surface);
       expect(
         tokens.bottomNavOutlineColor,
@@ -828,7 +852,9 @@ void main() {
     });
 
     test('copyWith updates phone bottom nav bar base height', () {
-      final original = TilawaAdaptiveShellTokens.defaults();
+      final original = TilawaAdaptiveShellTokens.defaults(
+        MeMuslimDesignTokens.light(),
+      );
       const backgroundColor = Color(0xFFEEE5D2);
       const selectedBackgroundColor = Color(0xFFD8EFEA);
       final updated = original.copyWith(
@@ -1405,6 +1431,7 @@ void main() {
                 final accessed = Theme.of(context).componentTokens;
                 final fromScheme = TilawaAdaptiveShellTokens.fromColorScheme(
                   colorScheme,
+                  MeMuslimDesignTokens.light(),
                 );
                 expect(
                   accessed.adaptiveShell.bottomNavBackgroundColor,

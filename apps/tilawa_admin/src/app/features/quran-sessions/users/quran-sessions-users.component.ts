@@ -101,9 +101,7 @@ export class QuranSessionsUsersComponent implements OnInit {
           : this.profileCompletedFilter === 'false'
             ? false
             : null,
-      accountStatus: this.statusFilter
-        ? (this.statusFilter as QuranSessionsAccountStatus)
-        : null,
+      accountStatus: this.statusFilter ? (this.statusFilter as QuranSessionsAccountStatus) : null,
     };
   }
 
@@ -143,8 +141,7 @@ export class QuranSessionsUsersComponent implements OnInit {
 
   async cycleTeacherApplyAccess(userId: string, current: boolean | null): Promise<void> {
     this.pendingUserId = userId;
-    const next =
-      current === null ? true : current === true ? false : null;
+    const next = current === null ? true : current === true ? false : null;
     await this.facade.setTeacherApplicationAccess(userId, next);
   }
 
@@ -219,4 +216,3 @@ export class QuranSessionsUsersComponent implements OnInit {
     return 'quranSessionsUsers_teacherApplyPolicy';
   }
 }
-

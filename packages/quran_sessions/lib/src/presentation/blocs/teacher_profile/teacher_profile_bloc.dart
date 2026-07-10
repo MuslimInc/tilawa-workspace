@@ -1,6 +1,8 @@
 import 'package:bloc_concurrency/bloc_concurrency.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
+import '../../../domain/entities/session_pricing_quote.dart';
+import '../../../domain/usecases/get_booking_pricing_quote_usecase.dart';
 import '../../../domain/usecases/get_teacher_availability_usecase.dart';
 import '../../../domain/usecases/get_teacher_profile_usecase.dart';
 import '../../../domain/usecases/report_session_concern_usecase.dart';
@@ -13,6 +15,7 @@ class TeacherProfileBloc
     required this._getProfile,
     required this._getAvailability,
     this._reportConcern,
+    this._getPricingQuote,
   }) : super(const TeacherProfileInitial()) {
     on<TeacherProfileRequested>(
       _onProfileRequested,
@@ -34,12 +37,17 @@ class TeacherProfileBloc
   final GetTeacherAvailabilityUseCase _getAvailability;
   final ReportSessionConcernUseCase? _reportConcern;
 
+  /// Same server-authoritative pricing source the booking screen uses, so the
+  /// profile price badge can never contradict the booking price.
+  final GetBookingPricingQuoteUseCase? _getPricingQuote;
+
   Future<void> _onProfileRequested(
     TeacherProfileRequested event,
     Emitter<TeacherProfileState> emit,
   ) async {
     emit(const TeacherProfileLoading());
 
+    final quoteFuture = _fetchPricingQuote(event.teacherId);
     final profileResult = await _getProfile(event.teacherId);
 
     await profileResult.fold(
@@ -50,6 +58,7 @@ class TeacherProfileBloc
           from: event.availabilityFrom,
           to: event.availabilityTo,
         );
+        final pricingQuote = await quoteFuture;
 
         availResult.fold(
           (failure) => emit(TeacherProfileFailure(failure)),
@@ -58,11 +67,19 @@ class TeacherProfileBloc
               teacher: teacher,
               availability: slots,
               reviews: const [],
+              pricingQuote: pricingQuote,
             ),
           ),
         );
       },
     );
+  }
+
+  Future<SessionPricingQuote?> _fetchPricingQuote(String teacherId) async {
+    final getPricingQuote = _getPricingQuote;
+    if (getPricingQuote == null) return null;
+    final result = await getPricingQuote(teacherId: teacherId);
+    return result.fold((_) => null, (quote) => quote);
   }
 
   Future<void> _onWeekChanged(

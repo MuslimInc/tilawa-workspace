@@ -17,10 +17,7 @@ export function loadAdminLoginPreferences(): AdminLoginPreferences | null {
     }
 
     const parsed = JSON.parse(raw) as Partial<AdminLoginPreferences>;
-    if (
-      typeof parsed.email === 'string' &&
-      typeof parsed.password === 'string'
-    ) {
+    if (typeof parsed.email === 'string' && typeof parsed.password === 'string') {
       return { email: parsed.email, password: parsed.password };
     }
   } catch {
@@ -30,10 +27,7 @@ export function loadAdminLoginPreferences(): AdminLoginPreferences | null {
   return null;
 }
 
-export function saveAdminLoginPreferences(
-  email: string,
-  password: string,
-): void {
+export function saveAdminLoginPreferences(email: string, password: string): void {
   if (typeof localStorage === 'undefined') {
     return;
   }

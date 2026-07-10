@@ -41,11 +41,7 @@ abstract final class MoleculesDemos {
   static Widget catalogAppBar(BuildContext context) {
     return Scaffold(
       appBar: TilawaCatalogAppBar(
-        preferredHeight: TilawaAppBarConfig.catalogTitleAndSearchHeight(
-          context,
-        ),
         title: 'Reciters',
-        automaticallyImplyLeading: true,
         bottomContent: TilawaSearchField(
           hintText: 'Search reciters',
           variant: TilawaSearchFieldVariant.catalog,
@@ -326,6 +322,52 @@ abstract final class MoleculesDemos {
       child: TilawaStatusChip(
         label: 'Live',
         icon: Icons.wifi_tethering_rounded,
+      ),
+    );
+  }
+
+  static Widget metricTile(BuildContext context) {
+    return const GalleryDemoFrame(
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        spacing: 16,
+        children: [
+          SizedBox(
+            width: 220,
+            child: TilawaMetricTile(
+              data: TilawaMetricData(
+                value: '12',
+                label: 'Pending requests',
+                icon: Icons.inbox_outlined,
+                tint: TilawaSemanticTint.ink,
+                helperText: '+3 this week',
+              ),
+            ),
+          ),
+          TilawaMetricTileStrip(
+            metrics: [
+              TilawaMetricData(
+                value: '2',
+                label: 'Pending requests',
+                icon: Icons.inbox_outlined,
+                tint: TilawaSemanticTint.ink,
+              ),
+              TilawaMetricData(
+                value: '5',
+                label: 'Upcoming sessions',
+                icon: Icons.event_outlined,
+                tint: TilawaSemanticTint.scholar,
+              ),
+              TilawaMetricData(
+                value: '48',
+                label: 'Bookable slots',
+                icon: Icons.schedule_outlined,
+                tint: TilawaSemanticTint.neutral,
+              ),
+            ],
+          ),
+        ],
       ),
     );
   }

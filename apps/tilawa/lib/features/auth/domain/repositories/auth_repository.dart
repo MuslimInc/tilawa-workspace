@@ -6,6 +6,16 @@ abstract class AuthRepository {
 
   Future<AuthResult> signInWithGoogle();
 
+  Future<AuthResult> signInWithEmailPassword({
+    required String email,
+    required String password,
+  });
+
+  Future<AuthResult> registerWithEmailPassword({
+    required String email,
+    required String password,
+  });
+
   /// Pre-warms Google account UI (Credential Manager on Android).
   Future<void> prepareGoogleSignIn();
 

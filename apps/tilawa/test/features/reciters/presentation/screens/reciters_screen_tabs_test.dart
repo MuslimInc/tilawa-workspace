@@ -751,7 +751,7 @@ void main() {
       await tester.pump();
 
       await tester.fling(
-        find.byType(RefreshIndicator),
+        find.byType(CustomScrollView).first,
         const Offset(0, 300),
         1000,
       );

@@ -195,9 +195,7 @@ class _DateGroupedDayTabBarState extends State<DateGroupedDayTabBar> {
                 duration: tokens.durationFast,
                 width: chipWidth,
                 decoration: BoxDecoration(
-                  color: isSelected
-                      ? scheme.primary
-                      : scheme.surfaceContainerHighest,
+                  color: isSelected ? scheme.primary : scheme.surface,
                   borderRadius: BorderRadius.circular(dayRadius),
                 ),
                 child: Column(

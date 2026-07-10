@@ -7,10 +7,13 @@ import '../../../domain/entities/pending_reschedule_request.dart';
 import '../../../domain/entities/session_call_type.dart';
 import '../../../domain/entities/session_lifecycle_status.dart';
 import '../../../domain/failures/quran_sessions_failure.dart';
+import '../../../domain/entities/session_allowed_action.dart';
+import '../../../domain/policies/platform_scheduling_policy.dart';
 import '../../../domain/policies/session_join_window_policy.dart';
 import '../../../domain/value_objects/actor_role.dart';
 import '../../../domain/policies/session_cancel_eligibility_policy.dart';
 import '../../../domain/policies/session_action_policy.dart';
+import '../../launch_scope.dart';
 import '../../session_join/session_join_ui_state.dart';
 
 sealed class SessionDetailState extends Equatable {
@@ -61,6 +64,7 @@ final class SessionDetailSuccess extends SessionDetailState {
     this.reviewCompleted = false,
     this.joinWindowPolicy = const SessionJoinWindowPolicy(),
     this.viewerRole,
+    this.viewerUserId,
   });
 
   final SessionAggregate aggregate;
@@ -96,41 +100,78 @@ final class SessionDetailSuccess extends SessionDetailState {
   final bool reviewCompleted;
   final SessionJoinWindowPolicy joinWindowPolicy;
   final ActorRole? viewerRole;
+  final String? viewerUserId;
 
   SessionJoinUiState get joinUiState => resolveSessionJoinUiState(
     lifecycleStatus: aggregate.lifecycleStatus,
     startsAt: aggregate.startsAt,
+    endsAt: aggregate.startsAt.add(
+      const Duration(
+        minutes: PlatformSchedulingPolicy.defaultSlotDurationMinutes,
+      ),
+    ),
     now: DateTime.now(),
     joinInProgress: joinInProgress,
     joinFailure: joinFailure,
     hasOpenedMeeting: hasOpenedExternalMeeting,
     joinWindowPolicy: joinWindowPolicy,
+    qaBypassUserId: viewerUserId,
   );
 
   bool get isTeacherViewer => viewerRole == ActorRole.teacher;
 
-  bool get canCancel => canViewerCancelSession(aggregate, viewerRole);
+  SessionAllowedActions? get _serverAllowedActions => isTeacherViewer
+      ? aggregate.allowedActionsForTeacher
+      : aggregate.allowedActionsForStudent;
 
-  bool get canJoin =>
-      aggregate.sessionId != null &&
-      joinUiState == SessionJoinUiState.joinAvailable;
+  bool get canCancel {
+    final server = _serverAllowedActions;
+    if (server != null) return server.can(SessionAllowedAction.cancel);
+    return canViewerCancelSession(aggregate, viewerRole);
+  }
 
-  bool get canOpenDispute =>
-      SessionActionPolicy.canOpenDispute(aggregate.lifecycleStatus);
+  bool get canJoin {
+    if (aggregate.sessionId == null) return false;
+    if (joinInProgress) return true;
+    if (joinUiState == SessionJoinUiState.joinAvailable) return true;
+    final server = _serverAllowedActions;
+    if (server != null) return server.can(SessionAllowedAction.join);
+    return false;
+  }
 
-  bool get canReportConcern =>
-      SessionActionPolicy.canReportConcern(aggregate.lifecycleStatus);
+  bool get canOpenDispute {
+    if (!QuranSessionsLaunchScope.reportDisputeUiEnabled) return false;
+    final server = _serverAllowedActions;
+    if (server != null) return server.can(SessionAllowedAction.openDispute);
+    return SessionActionPolicy.canOpenDispute(aggregate.lifecycleStatus);
+  }
 
-  bool get showCancelledDisputeHelper =>
-      SessionActionPolicy.showCancelledDisputeHelper(aggregate.lifecycleStatus);
+  bool get canReportConcern {
+    if (!QuranSessionsLaunchScope.reportDisputeUiEnabled) return false;
+    final server = _serverAllowedActions;
+    if (server != null) return server.can(SessionAllowedAction.reportConcern);
+    return SessionActionPolicy.canReportConcern(aggregate.lifecycleStatus);
+  }
+
+  bool get showCancelledDisputeHelper {
+    if (!QuranSessionsLaunchScope.reportDisputeUiEnabled) return false;
+    return SessionActionPolicy.showCancelledDisputeHelper(
+      aggregate.lifecycleStatus,
+    );
+  }
 
   bool get canOpenMeetingAgain =>
       externalMeetingJoinUrl != null && hasOpenedExternalMeeting;
 
-  bool get canReview =>
-      !isTeacherViewer &&
-      aggregate.lifecycleStatus == SessionLifecycleStatus.completed &&
-      !reviewCompleted;
+  bool get canReview {
+    if (isTeacherViewer) return false;
+    final server = _serverAllowedActions;
+    if (server != null) {
+      return server.can(SessionAllowedAction.submitReview) && !reviewCompleted;
+    }
+    return aggregate.lifecycleStatus == SessionLifecycleStatus.completed &&
+        !reviewCompleted;
+  }
 
   bool get isExternalMeeting => externalMeetingJoinUrl != null;
 
@@ -198,6 +239,8 @@ final class SessionDetailSuccess extends SessionDetailState {
     bool? reviewCompleted,
     ActorRole? viewerRole,
     bool clearViewerRole = false,
+    String? viewerUserId,
+    bool clearViewerUserId = false,
   }) {
     return SessionDetailSuccess(
       aggregate: aggregate ?? this.aggregate,
@@ -276,6 +319,9 @@ final class SessionDetailSuccess extends SessionDetailState {
           : reviewSubmitted ?? this.reviewSubmitted,
       reviewCompleted: reviewCompleted ?? this.reviewCompleted,
       viewerRole: clearViewerRole ? null : viewerRole ?? this.viewerRole,
+      viewerUserId: clearViewerUserId
+          ? null
+          : viewerUserId ?? this.viewerUserId,
     );
   }
 
@@ -312,6 +358,7 @@ final class SessionDetailSuccess extends SessionDetailState {
     reviewCompleted,
     joinWindowPolicy,
     viewerRole,
+    viewerUserId,
   ];
 }
 

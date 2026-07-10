@@ -31,6 +31,8 @@ import { FirebaseSessionAuditRepository } from './core/data/repositories/firebas
 import { CALL_TRACKING_REPOSITORY } from './core/domain/repositories/call-tracking.repository';
 import { FirebaseCallTrackingRepository } from './core/data/repositories/firebase-call-tracking.repository';
 import { SESSION_MODERATION_GATEWAY } from './core/domain/repositories/session-moderation.gateway';
+import { TEACHER_PRICING_GATEWAY } from './core/domain/repositories/teacher-pricing.gateway';
+import { FirebaseTeacherPricingGateway } from './core/data/repositories/firebase-teacher-pricing.gateway';
 import { FirebaseSessionModerationGateway } from './core/data/repositories/firebase-session-moderation.gateway';
 import { SESSION_REPORT_READ_REPOSITORY } from './core/domain/repositories/session-report-read.repository';
 import { FirebaseSessionReportReadRepository } from './core/data/repositories/firebase-session-report-read.repository';
@@ -99,6 +101,10 @@ export const appConfig: ApplicationConfig = {
       useClass: FirebaseSessionModerationGateway,
     },
     {
+      provide: TEACHER_PRICING_GATEWAY,
+      useClass: FirebaseTeacherPricingGateway,
+    },
+    {
       provide: SESSION_REPORT_READ_REPOSITORY,
       useClass: FirebaseSessionReportReadRepository,
     },
@@ -117,4 +123,3 @@ export const appConfig: ApplicationConfig = {
     { provide: AUTH_ADMIN_GATEWAY, useClass: FirebaseAuthAdminGateway },
   ],
 };
-

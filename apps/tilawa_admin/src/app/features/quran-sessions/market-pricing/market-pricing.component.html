@@ -1,0 +1,213 @@
+<div class="market-pricing-container">
+  <app-page-header [title]="'marketPricing_title' | t" />
+
+  @if (loading$ | async) {
+  <app-tilawa-loading-state [message]="'marketPricing_loading' | t" />
+  } @else {
+  @if (error$ | async; as error) {
+  <app-tilawa-error-state [message]="error" (retry)="facade.loadMarkets()" />
+  }
+
+  @if (successMessage$ | async; as msg) {
+  <div class="tilawa-alert tilawa-alert-success mb-4" role="alert">
+    {{ msg | t }}
+  </div>
+  }
+
+  @if (markets$ | async; as markets) {
+  @if (markets.length > 0) {
+  <div class="tilawa-form-group mb-6 max-w-sm">
+    <label class="tilawa-label">{{ 'marketPricing_selectMarket' | t }}</label>
+    <select class="tilawa-field" (change)="onMarketSelect($event)">
+      @for (market of markets; track market.countryCode) {
+      <option [value]="market.countryCode" [selected]="market.countryCode === (selectedCountryCode$ | async)">{{
+        market.countryCode }}</option>
+      }
+    </select>
+  </div>
+
+  @if (currentMarketConfig) {
+  <app-tilawa-card [title]="('marketPricing_marketPrefix' | t) + currentMarketConfig.countryCode">
+    <form [formGroup]="pricingForm" (ngSubmit)="save()">
+
+      <div class="mb-6">
+        <h3 class="text-lg font-medium mb-4">{{ 'marketPricing_globalSettings' | t }}</h3>
+
+        <div class="tilawa-form-group mb-4">
+          <label class="tilawa-checkbox-label">
+            <input type="checkbox" formControlName="isEnabled" class="tilawa-checkbox" />
+            <span>{{ 'marketPricing_marketEnabled' | t }}</span>
+          </label>
+        </div>
+
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <div class="tilawa-form-group">
+            <label class="tilawa-label">{{ 'marketPricing_baseSessionPrice' | t }}</label>
+            <input type="number" formControlName="minSessionPrice" class="tilawa-field" min="0" step="1" />
+          </div>
+
+          <div class="tilawa-form-group">
+            <label class="tilawa-label">{{ 'marketPricing_currencyCode' | t }}</label>
+            <input type="text" formControlName="currencyCode" class="tilawa-field" placeholder="USD" />
+          </div>
+        </div>
+      </div>
+
+      <div class="mb-6">
+        <h3 class="text-lg font-medium mb-4">{{ 'marketPricing_policySettings' | t }}</h3>
+        
+        <div class="tilawa-form-group mb-4">
+          <label class="tilawa-checkbox-label">
+            <input type="checkbox" formControlName="studentBookingEnabled" class="tilawa-checkbox" />
+            <span>{{ 'marketPricing_studentBookingEnabled' | t }}</span>
+          </label>
+        </div>
+
+        <div class="tilawa-form-group mb-4">
+          <label class="tilawa-checkbox-label">
+            <input type="checkbox" formControlName="teacherDiscoveryEnabled" class="tilawa-checkbox" />
+            <span>{{ 'marketPricing_teacherDiscoveryEnabled' | t }}</span>
+          </label>
+        </div>
+
+        <div class="tilawa-form-group mb-4">
+          <label class="tilawa-checkbox-label font-bold text-[var(--tilawa-primary)]">
+            <input type="checkbox" formControlName="manualPaymentEnabled" class="tilawa-checkbox" />
+            <span>{{ 'marketPricing_manualPaymentEnabled' | t }}</span>
+          </label>
+          <p class="text-sm text-[var(--tilawa-ink-muted)] mt-1">
+            {{ 'marketPricing_manualPaymentHint' | t }}
+          </p>
+        </div>
+
+        <div class="tilawa-form-group mb-4">
+          <label class="tilawa-checkbox-label text-red-600 font-bold">
+            <input type="checkbox" formControlName="paymentProviderEnabled" class="tilawa-checkbox" (change)="onPaymentToggle($event)" />
+            <span>{{ 'marketPricing_paymentProviderEnabled' | t }}</span>
+          </label>
+        </div>
+
+        <div class="tilawa-form-group mb-4">
+          <label class="tilawa-checkbox-label">
+            <input type="checkbox" formControlName="genderMatchingEnabled" class="tilawa-checkbox" />
+            <span>{{ 'marketPricing_genderMatchingEnabled' | t }}</span>
+          </label>
+        </div>
+
+        <div class="mb-6">
+          <h3 class="text-lg font-medium mb-4">{{ 'marketPricing_paymentInstructions' | t }}</h3>
+          <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div class="tilawa-form-group">
+              <label class="tilawa-label">{{ 'marketPricing_supportWhatsappNumber' | t }}</label>
+              <input type="text" formControlName="supportWhatsappNumber" class="tilawa-field" />
+            </div>
+            <div class="tilawa-form-group">
+              <label class="tilawa-label">{{ 'marketPricing_vodafoneCashNumber' | t }}</label>
+              <input type="text" formControlName="vodafoneCashNumber" class="tilawa-field" />
+            </div>
+            <div class="tilawa-form-group">
+              <label class="tilawa-label">{{ 'marketPricing_instapayHandle' | t }}</label>
+              <input type="text" formControlName="instapayHandle" class="tilawa-field" />
+            </div>
+            <div class="tilawa-form-group">
+              <label class="tilawa-label">{{ 'marketPricing_instapayPaymentLink' | t }}</label>
+              <input type="text" formControlName="instapayPaymentLink" class="tilawa-field" />
+            </div>
+            <div class="tilawa-form-group md:col-span-2">
+              <label class="tilawa-label">{{ 'marketPricing_recipientMaskedName' | t }}</label>
+              <input type="text" formControlName="recipientMaskedName" class="tilawa-field" />
+            </div>
+          </div>
+        </div>
+
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <div class="tilawa-form-group">
+            <label class="tilawa-label">{{ 'globalSettings_sessionMode' | t }}</label>
+            <select formControlName="sessionMode" class="tilawa-field">
+              <option value="videoOnly">{{ 'globalSettings_sessionModeVideo' | t }}</option>
+            </select>
+          </div>
+
+          <div class="tilawa-form-group">
+            <label class="tilawa-label">{{ 'globalSettings_defaultBookingMode' | t }}</label>
+            <select formControlName="bookingMode" class="tilawa-field">
+              <option value="requiresTutorApproval">{{ 'globalSettings_bookingModeApproval' | t }}</option>
+              <option value="autoConfirm">{{ 'globalSettings_bookingModeAuto' | t }}</option>
+            </select>
+          </div>
+
+          <div class="tilawa-form-group">
+            <label class="tilawa-label">{{ 'globalSettings_defaultJoinWindowLeadMs' | t }}</label>
+            <input type="number" formControlName="joinWindowLeadMs" class="tilawa-field" />
+          </div>
+
+          <div class="tilawa-form-group">
+            <label class="tilawa-label">{{ 'globalSettings_defaultTutorApprovalSlaMs' | t }}</label>
+            <input type="number" formControlName="tutorApprovalSlaMs" class="tilawa-field" />
+          </div>
+
+          <div class="tilawa-form-group">
+            <label class="tilawa-label">{{ 'globalSettings_defaultMinBookingNoticeMs' | t }}</label>
+            <input type="number" formControlName="minBookingNoticeMs" class="tilawa-field" />
+          </div>
+
+          <div class="tilawa-form-group">
+            <label class="tilawa-label">{{ 'globalSettings_defaultMaxUpcomingPerStudent' | t }}</label>
+            <input type="number" formControlName="maxConcurrentUpcomingPerStudent" class="tilawa-field" />
+          </div>
+        </div>
+      </div>
+
+      <hr class="my-6 border-t border-[var(--tilawa-outline-variant)]" />
+
+      <div formArrayName="cities">
+        <h3 class="text-lg font-medium mb-2">{{ 'marketPricing_cityOverrides' | t }}</h3>
+        <p class="text-sm text-[var(--tilawa-ink-muted)] mb-4">{{ 'marketPricing_cityOverrideHint' | t }}</p>
+
+        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+          @for (cityGroup of citiesFormArray.controls; track $index) {
+          <div [formGroupName]="$index"
+            class="p-4 border border-[var(--tilawa-outline)] rounded-lg bg-[var(--tilawa-surface-high)]">
+            <div class="flex items-baseline gap-2 mb-4">
+              <span class="font-medium text-base">
+                {{ cityGroup.get('cityName')?.value || cityGroup.get('cityNameEn')?.value ||
+                cityGroup.get('cityId')?.value }}
+              </span>
+              <span class="text-sm text-[var(--tilawa-ink-muted)]">({{ cityGroup.get('cityId')?.value }})</span>
+            </div>
+
+            <div class="tilawa-form-group mb-3">
+              <label class="tilawa-checkbox-label">
+                <input type="checkbox" formControlName="isEnabled" class="tilawa-checkbox" />
+                <span>{{ 'marketPricing_enabled' | t }}</span>
+              </label>
+            </div>
+
+            <div class="tilawa-form-group mb-0">
+              <label class="tilawa-label text-sm">{{ 'marketPricing_priceOverride' | t }}</label>
+              <div class="flex items-center gap-2">
+                <input type="number" formControlName="minSessionPrice" class="tilawa-field" min="0" step="1" />
+                <span class="text-[var(--tilawa-ink-muted)]">{{ pricingForm.get('currencyCode')?.value }}</span>
+              </div>
+            </div>
+          </div>
+          }
+        </div>
+      </div>
+
+      <div class="mt-8 flex justify-end">
+        <app-tilawa-button type="submit" variant="primary"
+          [disabled]="pricingForm.invalid || pricingForm.pristine || (saving$ | async) === true"
+          [loading]="(saving$ | async) === true" [label]="'marketPricing_saveChanges' | t">
+        </app-tilawa-button>
+      </div>
+
+    </form>
+  </app-tilawa-card>
+  }
+  } @else {
+  <app-tilawa-empty-state [title]="'marketPricing_noMarkets' | t" [description]="'marketPricing_noMarketsDesc' | t" />
+  }
+  }
+  }
+</div>

@@ -9,10 +9,7 @@ import {
 export interface SessionModerationGateway {
   cancelSessionBooking(bookingId: string, reason: string): Promise<void>;
 
-  markSessionNoShow(
-    sessionId: string,
-    classification: NoShowClassification,
-  ): Promise<void>;
+  markSessionNoShow(sessionId: string, classification: NoShowClassification): Promise<void>;
 
   completeSession(sessionId: string): Promise<void>;
 
@@ -26,6 +23,10 @@ export interface SessionModerationGateway {
   confirmSessionReschedule(requestId: string, accept: boolean): Promise<void>;
 
   approveSessionRefund(bookingId: string, reason: string): Promise<void>;
+
+  confirmManualBookingPayment(bookingId: string, note?: string): Promise<void>;
+
+  rejectManualBookingPayment(bookingId: string, reason?: string): Promise<void>;
 
   openSessionDispute(
     bookingId: string,

@@ -20,6 +20,10 @@ export interface BookingFirestoreDto {
   countryCode?: string;
   cityId?: string;
   paymentStatus?: string;
+  paymentReference?: string | null;
+  paymentProvider?: string | null;
+  priceAmount?: number | null;
+  priceCurrency?: string | null;
   amountPaidUsd?: number;
   cancellationReason?: string;
   hasActiveCall?: boolean;
@@ -88,6 +92,10 @@ export class AdminSessionMapper {
       countryCode: dto.countryCode ?? null,
       cityId: dto.cityId ?? null,
       paymentStatus: dto.paymentStatus ?? null,
+      paymentReference: dto.paymentReference ?? null,
+      paymentProvider: dto.paymentProvider ?? null,
+      priceAmount: dto.priceAmount ?? null,
+      priceCurrency: dto.priceCurrency ?? null,
       amountPaidUsd: dto.amountPaidUsd ?? null,
       cancellationReason: dto.cancellationReason ?? null,
       hasActiveCall: dto.hasActiveCall === true,

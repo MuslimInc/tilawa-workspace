@@ -1,5 +1,4 @@
 import 'package:agora_rtc_engine/agora_rtc_engine.dart';
-import 'package:quran_sessions_rtc/quran_sessions_rtc.dart';
 import 'package:quran_sessions_rtc_sdk/quran_sessions_rtc_sdk.dart';
 
 /// Minimal [RtcEngine] fake for widget and boundary tests.
@@ -9,6 +8,7 @@ class FakeRtcEngine implements RtcEngine {
   bool released = false;
   bool? microphoneMuted;
   bool? videoMuted;
+  bool? localVideoEnabled;
   bool? speakerEnabled;
   bool switchedCamera = false;
 
@@ -42,6 +42,16 @@ class FakeRtcEngine implements RtcEngine {
   @override
   Future<void> muteLocalVideoStream(bool mute) async {
     videoMuted = mute;
+  }
+
+  @override
+  Future<void> enableLocalVideo(bool enabled) async {
+    localVideoEnabled = enabled;
+    simulateLocalVideoState(
+      enabled
+          ? LocalVideoStreamState.localVideoStreamStateCapturing
+          : LocalVideoStreamState.localVideoStreamStateStopped,
+    );
   }
 
   @override
@@ -91,6 +101,18 @@ class FakeRtcEngine implements RtcEngine {
       state,
       RemoteVideoStateReason.remoteVideoStateReasonLocalMuted,
       0,
+    );
+  }
+
+  void simulateUserMuteVideo({
+    required int remoteUid,
+    required bool muted,
+    String channelId = 'channel-1',
+  }) {
+    handler?.onUserMuteVideo?.call(
+      RtcConnection(channelId: channelId),
+      remoteUid,
+      muted,
     );
   }
 
@@ -159,6 +181,7 @@ class FakeAgoraRtcSessionHandle implements AgoraRtcSessionHandle {
 
   @override
   Future<void> setCameraEnabled(bool enabled) async {
+    await _engine.enableLocalVideo(enabled);
     await _engine.muteLocalVideoStream(!enabled);
   }
 
@@ -172,10 +195,3 @@ class FakeAgoraRtcSessionHandle implements AgoraRtcSessionHandle {
     await _engine.setEnableSpeakerphone(enabled);
   }
 }
-
-const testAgoraCallSurfaceLabels = AgoraCallSurfaceLabels(
-  connecting: 'Connecting',
-  connected: 'Connected',
-  waitingForParticipant: 'Waiting for participant',
-  voiceCallTitle: 'Voice call',
-);

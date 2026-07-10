@@ -10,7 +10,7 @@ environment:
 dependencies:
   archive: ^4.0.9
   dio: ^5.9.1
-  equatable: ^2.0.8
+  equatable: ^2.1.0
   flutter:
     sdk: flutter
   get_it: ^9.2.1

@@ -22,6 +22,8 @@ final class MySessionsLoading extends MySessionsState {
 final class MySessionsSuccess extends MySessionsState {
   const MySessionsSuccess({
     required this.upcoming,
+    this.pending = const [],
+    this.cancelled = const [],
     required this.past,
     this.pastNextCursor,
     this.isLoadingMorePast = false,
@@ -36,6 +38,8 @@ final class MySessionsSuccess extends MySessionsState {
   });
 
   final List<QuranSession> upcoming;
+  final List<QuranSession> pending;
+  final List<QuranSession> cancelled;
   final List<QuranSession> past;
   final String? pastNextCursor;
   final bool isLoadingMorePast;
@@ -65,6 +69,8 @@ final class MySessionsSuccess extends MySessionsState {
   @override
   List<Object?> get props => [
     upcoming,
+    pending,
+    cancelled,
     past,
     pastNextCursor,
     isLoadingMorePast,
@@ -80,6 +86,8 @@ final class MySessionsSuccess extends MySessionsState {
 
   MySessionsSuccess copyWith({
     List<QuranSession>? upcoming,
+    List<QuranSession>? pending,
+    List<QuranSession>? cancelled,
     List<QuranSession>? past,
     String? pastNextCursor,
     bool clearPastNextCursor = false,
@@ -100,6 +108,8 @@ final class MySessionsSuccess extends MySessionsState {
     bool clearJoinCompletedSessionId = false,
   }) => MySessionsSuccess(
     upcoming: upcoming ?? this.upcoming,
+    pending: pending ?? this.pending,
+    cancelled: cancelled ?? this.cancelled,
     past: past ?? this.past,
     pastNextCursor: clearPastNextCursor
         ? null
@@ -129,6 +139,8 @@ final class MySessionsSuccess extends MySessionsState {
   /// Returns a copy with cancellation fields cleared.
   MySessionsSuccess clearCancellation() => MySessionsSuccess(
     upcoming: upcoming,
+    pending: pending,
+    cancelled: cancelled,
     past: past,
     lastSubmittedReview: lastSubmittedReview,
     joinInProgress: joinInProgress,
@@ -139,6 +151,8 @@ final class MySessionsSuccess extends MySessionsState {
   /// Returns a copy with join progress/failure cleared.
   MySessionsSuccess clearJoin() => MySessionsSuccess(
     upcoming: upcoming,
+    pending: pending,
+    cancelled: cancelled,
     past: past,
     cancellationInProgress: cancellationInProgress,
     cancellationFailure: cancellationFailure,

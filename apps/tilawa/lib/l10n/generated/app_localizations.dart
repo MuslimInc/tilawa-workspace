@@ -2180,6 +2180,30 @@ abstract class AppLocalizations {
   /// **'Update Google Play Services'**
   String get googleSignInUpdatePlayServices;
 
+  /// Shown when Google sign-in exceeds the time limit
+  ///
+  /// In en, this message translates to:
+  /// **'Sign-in timed out. Please try again.'**
+  String get googleSignInTimeout;
+
+  /// Shown when Google sign-in times out without showing UI on problematic devices
+  ///
+  /// In en, this message translates to:
+  /// **'Sign-in timed out. If the account picker did not appear, go back and try again, or use the options below.'**
+  String get googleSignInTimeoutUiHidden;
+
+  /// Shown when Google sign-in returns a different account than expected
+  ///
+  /// In en, this message translates to:
+  /// **'This Google account does not match the signed-in account. Please try again.'**
+  String get googleSignInUserMismatch;
+
+  /// Shown when the user dismisses the Google account picker during sign-in
+  ///
+  /// In en, this message translates to:
+  /// **'Sign-in cancelled.'**
+  String get googleSignInCancelled;
+
   /// Network error message
   ///
   /// In en, this message translates to:
@@ -2197,6 +2221,288 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Something went wrong. Please try again.'**
   String get authErrorGenericMessage;
+
+  /// Subtitle on email login screen
+  ///
+  /// In en, this message translates to:
+  /// **'Sign in with your email and password'**
+  String get signInWithEmailDescription;
+
+  /// Subtitle on registration screen
+  ///
+  /// In en, this message translates to:
+  /// **'Create an account with email and password'**
+  String get createAccountDescription;
+
+  /// Email field label
+  ///
+  /// In en, this message translates to:
+  /// **'Email address'**
+  String get emailAddress;
+
+  /// Password field label
+  ///
+  /// In en, this message translates to:
+  /// **'Password'**
+  String get password;
+
+  /// Confirm password field label
+  ///
+  /// In en, this message translates to:
+  /// **'Confirm password'**
+  String get confirmPassword;
+
+  /// Email sign-in button and navigation label
+  ///
+  /// In en, this message translates to:
+  /// **'Sign in with email'**
+  String get signInWithEmail;
+
+  /// Registration button and navigation label
+  ///
+  /// In en, this message translates to:
+  /// **'Create account'**
+  String get createAccount;
+
+  /// Registration wizard step progress label
+  ///
+  /// In en, this message translates to:
+  /// **'Step {current} of {total}: {title}'**
+  String registrationStepProgress(int current, int total, String title);
+
+  /// Registration step 1 title
+  ///
+  /// In en, this message translates to:
+  /// **'Account'**
+  String get registrationStepAccountTitle;
+
+  /// Registration step 1 subtitle
+  ///
+  /// In en, this message translates to:
+  /// **'Choose your email and password'**
+  String get registrationStepAccountDescription;
+
+  /// Registration step 2 title
+  ///
+  /// In en, this message translates to:
+  /// **'Personal details'**
+  String get registrationStepPersonalTitle;
+
+  /// Registration step 2 subtitle
+  ///
+  /// In en, this message translates to:
+  /// **'Tell us about yourself'**
+  String get registrationStepPersonalDescription;
+
+  /// Registration step 3 title
+  ///
+  /// In en, this message translates to:
+  /// **'Quran learning'**
+  String get registrationStepLearningTitle;
+
+  /// Registration step 3 subtitle
+  ///
+  /// In en, this message translates to:
+  /// **'What would you like to learn?'**
+  String get registrationStepLearningDescription;
+
+  /// Registration step 5 title
+  ///
+  /// In en, this message translates to:
+  /// **'Review'**
+  String get registrationStepReviewTitle;
+
+  /// Registration step 5 subtitle
+  ///
+  /// In en, this message translates to:
+  /// **'Review your details, then create your account'**
+  String get registrationStepReviewDescription;
+
+  /// Preferred language field on registration
+  ///
+  /// In en, this message translates to:
+  /// **'Preferred app language'**
+  String get registrationPreferredLanguageLabel;
+
+  /// Validation when display name missing
+  ///
+  /// In en, this message translates to:
+  /// **'Enter your full name'**
+  String get registrationDisplayNameRequired;
+
+  /// Validation when gender missing
+  ///
+  /// In en, this message translates to:
+  /// **'Select your gender'**
+  String get registrationGenderRequired;
+
+  /// Validation when DOB missing
+  ///
+  /// In en, this message translates to:
+  /// **'Select your date of birth'**
+  String get registrationDateOfBirthRequired;
+
+  /// Validation when country missing
+  ///
+  /// In en, this message translates to:
+  /// **'Select your country'**
+  String get registrationCountryRequired;
+
+  /// Validation when city missing
+  ///
+  /// In en, this message translates to:
+  /// **'Select your city'**
+  String get registrationCityRequired;
+
+  /// Validation when language missing
+  ///
+  /// In en, this message translates to:
+  /// **'Select your preferred language'**
+  String get registrationPreferredLanguageRequired;
+
+  /// Validation when learning goals missing
+  ///
+  /// In en, this message translates to:
+  /// **'Select at least one learning goal'**
+  String get registrationLearningGoalsRequired;
+
+  /// Shown when Firebase auth succeeds but Firestore profile write fails
+  ///
+  /// In en, this message translates to:
+  /// **'Account created but saving your profile failed. Tap retry or complete your profile after sign-in.'**
+  String get registrationProfilePersistenceFailed;
+
+  /// Retry button after profile persistence failure
+  ///
+  /// In en, this message translates to:
+  /// **'Retry saving profile'**
+  String get registrationRetryProfileSave;
+
+  /// Forgot password link
+  ///
+  /// In en, this message translates to:
+  /// **'Forgot password?'**
+  String get forgotPassword;
+
+  /// Forgot password screen subtitle
+  ///
+  /// In en, this message translates to:
+  /// **'Enter your email and we will send a reset link'**
+  String get forgotPasswordDescription;
+
+  /// Forgot password submit button
+  ///
+  /// In en, this message translates to:
+  /// **'Send reset link'**
+  String get sendResetLink;
+
+  /// Divider label between auth methods on login screen
+  ///
+  /// In en, this message translates to:
+  /// **'Or continue with'**
+  String get orContinueWith;
+
+  /// Link from register to login
+  ///
+  /// In en, this message translates to:
+  /// **'Already have an account? Sign in'**
+  String get alreadyHaveAccount;
+
+  /// Link from login to register
+  ///
+  /// In en, this message translates to:
+  /// **'No account yet? Create one'**
+  String get noAccountYet;
+
+  /// Email validation error
+  ///
+  /// In en, this message translates to:
+  /// **'Enter a valid email address'**
+  String get authInvalidEmail;
+
+  /// Password length validation error
+  ///
+  /// In en, this message translates to:
+  /// **'Password must be at least 6 characters'**
+  String get authWeakPassword;
+
+  /// Confirm password mismatch error
+  ///
+  /// In en, this message translates to:
+  /// **'Passwords do not match'**
+  String get authPasswordsDoNotMatch;
+
+  /// Login user-not-found error
+  ///
+  /// In en, this message translates to:
+  /// **'No account found for this email'**
+  String get authUserNotFound;
+
+  /// Login wrong-password error
+  ///
+  /// In en, this message translates to:
+  /// **'Incorrect password'**
+  String get authWrongPassword;
+
+  /// Registration email-already-in-use error
+  ///
+  /// In en, this message translates to:
+  /// **'An account already exists with this email. Sign in instead.'**
+  String get authEmailAlreadyInUse;
+
+  /// Registration when Google account exists for email
+  ///
+  /// In en, this message translates to:
+  /// **'This email is registered with Google. Sign in with Google instead.'**
+  String get authEmailAlreadyInUseWithGoogle;
+
+  /// Provider conflict generic message
+  ///
+  /// In en, this message translates to:
+  /// **'This email uses a different sign-in method. Use the original method.'**
+  String get authAccountExistsWithDifferentCredential;
+
+  /// Google sign-in when email/password account exists
+  ///
+  /// In en, this message translates to:
+  /// **'This email is registered with a password. Sign in with email instead.'**
+  String get authAccountExistsUseEmailPassword;
+
+  /// Firebase rate limit error
+  ///
+  /// In en, this message translates to:
+  /// **'Too many attempts. Please wait and try again.'**
+  String get authTooManyRequests;
+
+  /// Email provider disabled in Firebase
+  ///
+  /// In en, this message translates to:
+  /// **'Email sign-in is not enabled. Contact support.'**
+  String get authOperationNotAllowed;
+
+  /// Disabled Firebase user
+  ///
+  /// In en, this message translates to:
+  /// **'This account has been disabled. Contact support.'**
+  String get authUserDisabled;
+
+  /// Invalid credential on login
+  ///
+  /// In en, this message translates to:
+  /// **'Invalid email or password'**
+  String get authInvalidCredential;
+
+  /// Password reset email success message
+  ///
+  /// In en, this message translates to:
+  /// **'If an account exists, a reset link was sent to your email.'**
+  String get authResetEmailSent;
+
+  /// Shown when redirecting new registrants to profile completion
+  ///
+  /// In en, this message translates to:
+  /// **'Complete your profile to book Quran sessions'**
+  String get completeProfilePrompt;
 
   /// Toast shown when device free storage is likely below the estimated download size
   ///
@@ -5779,6 +6085,48 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Product tours reset'**
   String get tourDebugResetDone;
+
+  /// Debug-only settings tile that schedules a manual Adhan test
+  ///
+  /// In en, this message translates to:
+  /// **'Test Adhan in 10 seconds'**
+  String get adhanDebugTestTitle;
+
+  /// Supporting text for the debug-only Adhan test settings tile
+  ///
+  /// In en, this message translates to:
+  /// **'Requests notification permission, then schedules the native Adhan alarm.'**
+  String get adhanDebugTestSubtitle;
+
+  /// Confirmation shown after scheduling the debug Adhan test
+  ///
+  /// In en, this message translates to:
+  /// **'Adhan test scheduled for 10 seconds from now'**
+  String get adhanDebugScheduled;
+
+  /// Warning shown when the debug Adhan test used native inexact alarm fallback because exact alarm permission is unavailable
+  ///
+  /// In en, this message translates to:
+  /// **'Native Adhan test scheduled with inexact timing. Enable Alarms & reminders for exact timing.'**
+  String get adhanDebugNativeInexactScheduled;
+
+  /// Warning shown when the debug Adhan test used local-notification fallback because native exact alarm scheduling was unavailable
+  ///
+  /// In en, this message translates to:
+  /// **'Fallback Adhan test scheduled. Enable Alarms & reminders for native playback.'**
+  String get adhanDebugFallbackScheduled;
+
+  /// Error shown when notification permission is missing for the debug Adhan test
+  ///
+  /// In en, this message translates to:
+  /// **'Notification permission is required before scheduling the Adhan test'**
+  String get adhanDebugPermissionMissing;
+
+  /// Error shown when the debug Adhan test cannot be scheduled
+  ///
+  /// In en, this message translates to:
+  /// **'Could not schedule Adhan test'**
+  String get adhanDebugFailed;
 
   /// Developer settings entry and screen title for notification routing tests
   ///

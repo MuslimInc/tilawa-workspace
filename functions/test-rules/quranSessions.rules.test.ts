@@ -197,6 +197,87 @@ test("rules: unauthenticated user cannot read quran_slot_locks", async () => {
   await assertFails(getDoc(doc(guestDb, "quran_slot_locks/lock1")));
 });
 
+async function seedPublicSessionConfig(): Promise<void> {
+  await testEnv.withSecurityRulesDisabled(async (context) => {
+    const adminDb = context.firestore();
+    await setDoc(doc(adminDb, "quran_session_platform_config/global"), {
+      childAgeThreshold: 13,
+      minimumStudentAgeYears: 5,
+      requireGuardianApprovalForChildren: true,
+      updatedAt: new Date(),
+    });
+    await setDoc(doc(adminDb, "quran_session_market_configs/EG"), {
+      countryCode: "EG",
+      countryName: "Egypt",
+      currencyCode: "EGP",
+      timezone: "Africa/Cairo",
+      isEnabled: true,
+      sortOrder: 0,
+      updatedAt: new Date(),
+    });
+    await setDoc(doc(adminDb, "quran_session_market_configs/EG/cities/cairo"), {
+      cityId: "cairo",
+      cityName: "Cairo",
+      countryCode: "EG",
+      timezone: "Africa/Cairo",
+      currencyCode: "EGP",
+      isEnabled: true,
+      sortOrder: 0,
+      updatedAt: new Date(),
+    });
+  });
+}
+
+test("rules: unauthenticated user can read public session config", async () => {
+  await testEnv.clearFirestore();
+  await seedPublicSessionConfig();
+
+  const guestDb = testEnv.unauthenticatedContext().firestore();
+  await assertSucceeds(
+    getDoc(doc(guestDb, "quran_session_platform_config/global")),
+  );
+  await assertSucceeds(getDoc(doc(guestDb, "quran_session_market_configs/EG")));
+  await assertSucceeds(
+    getDoc(doc(guestDb, "quran_session_market_configs/EG/cities/cairo")),
+  );
+  await assertSucceeds(
+    getDocs(
+      query(
+        collection(guestDb, "quran_session_market_configs"),
+        where("isEnabled", "==", true),
+        orderBy("sortOrder"),
+      ),
+    ),
+  );
+  await assertSucceeds(
+    getDocs(
+      query(
+        collection(guestDb, "quran_session_market_configs/EG/cities"),
+        where("isEnabled", "==", true),
+        orderBy("sortOrder"),
+      ),
+    ),
+  );
+});
+
+test("rules: unauthenticated user cannot write public session config", async () => {
+  await testEnv.clearFirestore();
+  await seedPublicSessionConfig();
+
+  const guestDb = testEnv.unauthenticatedContext().firestore();
+  await assertFails(
+    setDoc(doc(guestDb, "quran_session_platform_config/global"), {
+      childAgeThreshold: 99,
+    }),
+  );
+  await assertFails(
+    setDoc(doc(guestDb, "quran_session_market_configs/EG"), {
+      countryCode: "EG",
+      isEnabled: false,
+    }),
+  );
+});
+
 test("rules: verified teacher owner can update externalMeetingUrl", async () => {
   await testEnv.clearFirestore();
   await testEnv.withSecurityRulesDisabled(async (context) => {
@@ -232,6 +313,41 @@ test("rules: verified teacher owner can update externalMeetingUrl", async () => 
 
   const snap = await getDoc(doc(teacherDb, "quran_teacher_profiles/teacher1"));
   assert.equal(snap.data()?.externalMeetingUrl, "https://meet.google.com/teacher-room");
+});
+
+test("rules: verified teacher owner cannot self-set sessionPriceOverride", async () => {
+  await testEnv.clearFirestore();
+  await testEnv.withSecurityRulesDisabled(async (context) => {
+    const adminDb = context.firestore();
+    await setDoc(doc(adminDb, "quran_teacher_profiles/teacher1"), {
+      userId: "uid_teacher",
+      displayName: "Teacher",
+      publicBio: "Bio",
+      verificationStatus: "verified",
+      teachingLanguages: ["ar"],
+      specializations: ["tajweed"],
+      averageRating: 0,
+      reviewCount: 0,
+      isActive: true,
+      profileCompleteness: "complete",
+      isPubliclyVisible: true,
+      createdAt: new Date(),
+      updatedAt: new Date(),
+    });
+  });
+
+  const teacherDb = testEnv.authenticatedContext("uid_teacher").firestore();
+  // Pricing is admin-controlled — a teacher must not set their own price.
+  await assertFails(
+    setDoc(
+      doc(teacherDb, "quran_teacher_profiles/teacher1"),
+      {
+        sessionPriceOverride: { enabled: true, amount: 0 },
+        updatedAt: new Date(),
+      },
+      { merge: true },
+    ),
+  );
 });
 
 test("rules: client cannot create or mutate quran_bookings", async () => {
@@ -286,6 +402,25 @@ test("rules: client cannot create or mutate quran_sessions", async () => {
     setDoc(
       doc(studentDb, "quran_sessions/session1"),
       { callProvider: "agora" },
+      { merge: true },
+    ),
+  );
+  // ADR-008 Phase 2: liveLocks is a Cloud-Functions-only field on the session
+  // doc. A client must not be able to forge or overwrite a lease.
+  await assertFails(
+    setDoc(
+      doc(studentDb, "quran_sessions/session1"),
+      {
+        liveLocks: {
+          student2: {
+            deviceId: "attacker_device",
+            identity: "student2#attacker_device",
+            leaseUntil: new Date("2099-01-01T00:00:00.000Z"),
+            lockEpoch: 99,
+            updatedAt: new Date(),
+          },
+        },
+      },
       { merge: true },
     ),
   );

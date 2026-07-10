@@ -48,9 +48,7 @@ describe('TilawaButtonComponent', () => {
 
   it('navigates when link is set', () => {
     const router = TestBed.inject(Router);
-    const navigateSpy = vi
-      .spyOn(router, 'navigate')
-      .mockResolvedValue(true);
+    const navigateSpy = vi.spyOn(router, 'navigate').mockResolvedValue(true);
     fixture.componentRef.setInput('label', 'View');
     fixture.componentRef.setInput('link', ['/reports', '1']);
     fixture.detectChanges();

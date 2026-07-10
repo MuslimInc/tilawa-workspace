@@ -6,6 +6,17 @@ export enum TeacherVerificationStatus {
 
 export type ProfileCompleteness = 'complete' | 'incomplete';
 
+/**
+ * Admin-controlled per-teacher session price. When [enabled] it overrides the
+ * market default: [amount] 0 = free even in a paid market; a positive amount
+ * sets a fixed fee. Disabled/absent ⇒ the market price applies.
+ */
+export interface TeacherSessionPriceOverride {
+  readonly enabled: boolean;
+  readonly amount: number | null;
+  readonly currencyCode: string | null;
+}
+
 /** Public teacher projection — never includes phone or moderation notes. */
 export interface TeacherProfile {
   readonly id: string;
@@ -21,6 +32,8 @@ export interface TeacherProfile {
   readonly isActive: boolean;
   readonly profileCompleteness: ProfileCompleteness;
   readonly isPubliclyVisible: boolean;
+  /** Admin price override; null ⇒ inherits the market price. */
+  readonly sessionPriceOverride: TeacherSessionPriceOverride | null;
   readonly createdAt: Date;
   readonly updatedAt: Date;
 }
@@ -40,8 +53,4 @@ export const TEACHER_PROFILE_DEFAULT_SORT = {
   direction: 'desc',
 } as const;
 
-export const TEACHER_PROFILE_SORT_FIELDS = [
-  'updatedAt',
-  'createdAt',
-  'displayName',
-] as const;
+export const TEACHER_PROFILE_SORT_FIELDS = ['updatedAt', 'createdAt', 'displayName'] as const;

@@ -43,12 +43,19 @@ final class SessionCancelled extends MySessionsEvent {
 
 /// User taps the "Join" button on an upcoming session.
 final class SessionJoinRequested extends MySessionsEvent {
-  const SessionJoinRequested({required this.sessionId});
+  const SessionJoinRequested({
+    required this.sessionId,
+    this.forceTakeover = false,
+  });
 
   final String sessionId;
 
+  /// ADR-008 Phase 2: true when retrying after a "Switch to this device"
+  /// prompt (the live lock denied a second device).
+  final bool forceTakeover;
+
   @override
-  List<Object?> get props => [sessionId];
+  List<Object?> get props => [sessionId, forceTakeover];
 }
 
 /// UI handled post-join navigation; clears [MySessionsSuccess.joinCompletedSessionId].

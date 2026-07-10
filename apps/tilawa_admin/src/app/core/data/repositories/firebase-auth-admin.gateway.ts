@@ -14,24 +14,18 @@ const MAX_USER_IDS_PER_REQUEST = 100;
 export class FirebaseAuthAdminGateway implements AuthAdminGateway {
   private readonly functions = inject(Functions);
 
-  async lookupUserAuthMetadata(
-    userIds: readonly string[],
-  ): Promise<{
+  async lookupUserAuthMetadata(userIds: readonly string[]): Promise<{
     adminUserIds: string[];
     authBackedUserIds: string[];
   }> {
     return this.lookupUserClaims(userIds);
   }
 
-  async lookupAdminUserIds(
-    userIds: readonly string[],
-  ): Promise<readonly string[]> {
+  async lookupAdminUserIds(userIds: readonly string[]): Promise<readonly string[]> {
     return (await this.lookupUserClaims(userIds)).adminUserIds;
   }
 
-  async lookupAuthBackedUserIds(
-    userIds: readonly string[],
-  ): Promise<readonly string[]> {
+  async lookupAuthBackedUserIds(userIds: readonly string[]): Promise<readonly string[]> {
     return (await this.lookupUserClaims(userIds)).authBackedUserIds;
   }
 
@@ -65,10 +59,10 @@ export class FirebaseAuthAdminGateway implements AuthAdminGateway {
   private async lookupUserClaimsChunk(
     userIds: readonly string[],
   ): Promise<{ adminUserIds: string[]; authBackedUserIds: string[] }> {
-    const callable = httpsCallable<
-      { userIds: string[] },
-      LookupUserAdminClaimsResult
-    >(this.functions, 'lookupUserAdminClaims');
+    const callable = httpsCallable<{ userIds: string[] }, LookupUserAdminClaimsResult>(
+      this.functions,
+      'lookupUserAdminClaims',
+    );
 
     try {
       const result = await callable({ userIds: [...userIds] });
@@ -98,4 +92,3 @@ export class FirebaseAuthAdminGateway implements AuthAdminGateway {
     return 'Failed to resolve admin users.';
   }
 }
-

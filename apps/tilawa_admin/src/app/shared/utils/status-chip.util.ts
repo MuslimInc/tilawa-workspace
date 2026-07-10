@@ -1,11 +1,5 @@
 /** Visual variant for admin status chips — maps domain status strings. */
-export type StatusChipVariant =
-  | 'success'
-  | 'warning'
-  | 'danger'
-  | 'neutral'
-  | 'scholar'
-  | 'info';
+export type StatusChipVariant = 'success' | 'warning' | 'danger' | 'neutral' | 'scholar' | 'info';
 
 const SUCCESS = new Set([
   'approved',

@@ -40,49 +40,4 @@ void main() {
       ).isTrue();
     });
   });
-
-  group('loginShouldDispatchAutoSignIn', () {
-    test('dispatches for initial, unauthenticated, and error only', () {
-      check(loginShouldDispatchAutoSignIn(const AuthState.initial())).isTrue();
-      check(
-        loginShouldDispatchAutoSignIn(const AuthState.unauthenticated()),
-      ).isTrue();
-      check(
-        loginShouldDispatchAutoSignIn(const AuthState.error(message: 'x')),
-      ).isTrue();
-      check(loginShouldDispatchAutoSignIn(const AuthState.loading())).isFalse();
-      check(
-        loginShouldDispatchAutoSignIn(AuthState.authenticated(user: user)),
-      ).isFalse();
-      check(
-        loginShouldDispatchAutoSignIn(const AuthState.noGoogleAccounts()),
-      ).isFalse();
-    });
-  });
-
-  group('loginShouldAttemptAutoSignIn', () {
-    test('blocks when account deletion suppresses auto sign-in', () {
-      check(
-        loginShouldAttemptAutoSignIn(
-          suppressForAccountDeletion: true,
-          authState: const AuthState.initial(),
-        ),
-      ).isFalse();
-    });
-
-    test('delegates to dispatch rules when not suppressed', () {
-      check(
-        loginShouldAttemptAutoSignIn(
-          suppressForAccountDeletion: false,
-          authState: const AuthState.initial(),
-        ),
-      ).isTrue();
-      check(
-        loginShouldAttemptAutoSignIn(
-          suppressForAccountDeletion: false,
-          authState: const AuthState.loading(),
-        ),
-      ).isFalse();
-    });
-  });
 }

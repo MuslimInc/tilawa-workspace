@@ -138,3 +138,84 @@ test("expire reservation syncs from pending_payment", () => {
   });
   assert.equal(result.to, "expired");
 });
+
+test("admin can confirm manual payment from pending_payment", () => {
+  const result = validateTransition({
+    currentStatus: "pending_payment",
+    action: "confirm_booking",
+    actor: "admin",
+  });
+  assert.equal(result.to, "scheduled");
+});
+
+test("system can expire an unattended session from scheduled and confirmed", () => {
+  for (const from of ["scheduled", "confirmed"] as const) {
+    const result = validateTransition({
+      currentStatus: from,
+      action: "expire_unattended_session",
+      actor: "system",
+    });
+    assert.equal(result.to, "expired");
+  }
+});
+
+test("participants cannot expire an unattended session", () => {
+  for (const actor of ["student", "teacher"] as const) {
+    assert.throws(
+      () =>
+        validateTransition({
+          currentStatus: "scheduled",
+          action: "expire_unattended_session",
+          actor,
+        }),
+      (error: { details?: { code?: string } }) =>
+        error.details?.code != null,
+    );
+  }
+});
+
+test("expire_unattended_session is rejected from in_progress", () => {
+  assert.throws(
+    () =>
+      validateTransition({
+        currentStatus: "in_progress",
+        action: "expire_unattended_session",
+        actor: "system",
+      }),
+    (error: { details?: { code?: string } }) => error.details?.code != null,
+  );
+});
+
+test("system can finalize a completed session from scheduled and confirmed", () => {
+  for (const from of ["scheduled", "confirmed"] as const) {
+    const result = validateTransition({
+      currentStatus: from,
+      action: "finalize_completed_session",
+      actor: "system",
+    });
+    assert.equal(result.to, "completed");
+  }
+});
+
+test("teacher cannot use finalize_completed_session", () => {
+  assert.throws(
+    () =>
+      validateTransition({
+        currentStatus: "scheduled",
+        action: "finalize_completed_session",
+        actor: "teacher",
+      }),
+    (error: { details?: { code?: string } }) => error.details?.code != null,
+  );
+});
+
+test("system can mark_incomplete from scheduled and confirmed (finalizer path)", () => {
+  for (const from of ["scheduled", "confirmed", "in_progress"] as const) {
+    const result = validateTransition({
+      currentStatus: from,
+      action: "mark_incomplete",
+      actor: "system",
+    });
+    assert.equal(result.to, "incomplete");
+  }
+});

@@ -1,4 +1,7 @@
-import { NotificationEntity, NotificationTargetType } from '../../domain/entities/notification.entity';
+import {
+  NotificationEntity,
+  NotificationTargetType,
+} from '../../domain/entities/notification.entity';
 
 export interface NotificationFirestoreDto {
   title: string;
@@ -21,13 +24,13 @@ export class NotificationModelMapper {
       targetUserIds: entity.targetUserIds,
       createdAt: entity.createdAt.getTime(),
       status: 'pending',
-      actionType: entity.actionType
+      actionType: entity.actionType,
     };
-    
+
     if (entity.actionData !== undefined) {
       dto.actionData = entity.actionData;
     }
-    
+
     return dto;
   }
 }

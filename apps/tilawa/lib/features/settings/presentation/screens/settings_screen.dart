@@ -28,6 +28,7 @@ import '../../../theme/presentation/theme_state_material.dart';
 import '../../../home/presentation/widgets/home_hero_phase_debug_tile.dart';
 import '../../../home/presentation/widgets/home_skeleton_debug_tile.dart';
 import '../../../notifications/debug/notification_debug_lab_tile.dart';
+import '../../../prayer_times/presentation/widgets/adhan_debug_test_tile.dart';
 import '../../../ui_kit_debug/tilawa_card_nested_tap_demo_tile.dart';
 import '../../../tour_guide/presentation/widgets/tour_guide_debug_reset_tile.dart';
 import '../../../quran_sessions/debug/quran_sessions_debug_tools.dart';
@@ -36,7 +37,6 @@ import '../cubit/settings_cubit.dart';
 import '../formatters/settings_share_text_formatter.dart';
 import '../../../quran_sessions/quran_sessions_feature_flags.dart';
 import '../widgets/settings_teacher_capability_scope.dart';
-import '../widgets/settings_teacher_application_entry_tile.dart';
 import '../widgets/settings_teaching_on_memuslim_tile.dart';
 import '../widgets/settings_picker_sheets.dart';
 import '../widgets/settings_widgets.dart';
@@ -133,9 +133,6 @@ class _SettingsScreenState extends State<SettingsScreen> {
                 children: [
                   const SettingsProfileHeader(),
                   const SettingsGuestAccountGroup(),
-                  if (!isGuest &&
-                      quranSessionsFeatureConfig().showTeacherApplicationEntry)
-                    const SettingsTeacherApplicationEntrySection(),
                   if (!isGuest &&
                       quranSessionsFeatureConfig().quranSessionsEnabled)
                     const SettingsTeachingOnMemuslimSection(),
@@ -320,6 +317,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
                         const SentryDebugVerifyTile(),
                         const HomeHeroPhaseDebugTile(),
                         const HomeSkeletonDebugTile(),
+                        const AdhanDebugTestTile(),
                         const NotificationDebugLabTile(),
                         const TilawaCardNestedTapDemoTile(),
                         const TourGuideDebugResetTile(isLast: true),

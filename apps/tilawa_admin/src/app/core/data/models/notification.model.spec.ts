@@ -13,7 +13,7 @@ describe('NotificationModelMapper', () => {
       ['user-1', 'user-2'],
       new Date(1774188547356),
       'reciter',
-      'mishary_rashid'
+      'mishary_rashid',
     );
 
     // Act
@@ -32,14 +32,7 @@ describe('NotificationModelMapper', () => {
 
   it('should use default actionType if not provided', () => {
     // Arrange
-    const entity = new NotificationEntity(
-      null,
-      'Title',
-      'Body',
-      'all',
-      [],
-      new Date()
-    );
+    const entity = new NotificationEntity(null, 'Title', 'Body', 'all', [], new Date());
 
     // Act
     const dto = NotificationModelMapper.toFirestore(entity);

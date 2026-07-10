@@ -4,17 +4,19 @@ import 'package:quran_sessions/core/l10n_extensions.dart';
 import 'package:quran_sessions/l10n/quran_sessions_localizations.dart';
 import 'package:tilawa_ui_kit/tilawa_ui_kit.dart';
 
-import '../failure_ui/quran_sessions_failure_body.dart';
+import '../../domain/entities/booking_block_reason.dart';
 import '../../domain/entities/quran_teacher.dart';
+import '../../domain/entities/session_pricing_quote.dart';
 import '../blocs/teacher_list/teacher_list_bloc.dart';
 import '../blocs/teacher_list/teacher_list_event.dart';
 import '../blocs/teacher_list/teacher_list_state.dart';
 import '../config/quran_sessions_analytics_callbacks.dart';
 import '../config/quran_sessions_feature_config.dart';
+import '../failure_ui/quran_sessions_failure_body.dart';
 import '../models/teacher_availability_summary.dart';
-import '../widgets/quran_sessions_student_empty_state.dart';
 import '../widgets/quran_sessions_page_header.dart';
 import '../widgets/quran_sessions_scaffold.dart';
+import '../widgets/quran_sessions_student_empty_state.dart';
 import '../widgets/teacher_card.dart';
 import '../widgets/teacher_card_compact_skeleton.dart';
 import '../widgets/teacher_list_filter_bar.dart';
@@ -147,6 +149,11 @@ class _TeacherListScreenState extends State<TeacherListScreen> {
                     onTeacherApplyEntry: widget.onTeacherApplyEntry,
                     onEmptyStateSeen: widget.onEmptyStateSeen,
                   ),
+          TeacherListNoBookableTeachers(:final primaryBlockReason) =>
+            _NoBookableTeachersEmptyView(
+              onRetry: _retry,
+              blockReason: primaryBlockReason,
+            ),
           TeacherListFailure(:final failure) => buildQuranSessionsFailureBody(
             context,
             failure: failure,
@@ -156,12 +163,14 @@ class _TeacherListScreenState extends State<TeacherListScreen> {
             :final teachers,
             :final availabilitySummaries,
             :final isLoadingMore,
+            :final pricingQuotes,
           ) =>
             _buildSuccessList(
               context,
               teachers: teachers,
               availabilitySummaries: availabilitySummaries,
               isLoadingMore: isLoadingMore,
+              pricingQuotes: pricingQuotes,
             ),
         },
       ),
@@ -173,6 +182,7 @@ class _TeacherListScreenState extends State<TeacherListScreen> {
     required List<QuranTeacher> teachers,
     required Map<String, TeacherAvailabilitySummary> availabilitySummaries,
     required bool isLoadingMore,
+    required Map<String, SessionPricingQuote> pricingQuotes,
   }) {
     final l10n = context.quranSessionsL10n;
     final tokens = Theme.of(context).tokens;
@@ -192,7 +202,7 @@ class _TeacherListScreenState extends State<TeacherListScreen> {
         (_selectedFilter.isClientSideOnly && filtered.isEmpty) ||
         (_searchQuery.trim().isNotEmpty && visible.isEmpty);
 
-    return RefreshIndicator(
+    return TilawaRefreshIndicator(
       onRefresh: () async => _retry(),
       child: ListView.builder(
         controller: _scrollController,
@@ -239,6 +249,7 @@ class _TeacherListScreenState extends State<TeacherListScreen> {
             teacher: teacher,
             onTap: () => _onTeacherTapped(teacher.id),
             availabilitySummary: availabilitySummaries[teacher.id],
+            pricing: pricingQuotes[teacher.id],
           );
         },
       ),
@@ -305,6 +316,69 @@ class _TeacherListHeader extends StatelessWidget {
           ),
         ),
       ],
+    );
+  }
+}
+
+class _NoBookableTeachersEmptyView extends StatelessWidget {
+  const _NoBookableTeachersEmptyView({
+    required this.onRetry,
+    this.blockReason,
+  });
+
+  final VoidCallback onRetry;
+  final BookingBlockReason? blockReason;
+
+  ({String title, String subtitle}) _resolveCopy(
+    QuranSessionsLocalizations l10n,
+  ) {
+    return switch (blockReason) {
+      BookingBlockReason.paymentProviderUnavailable => (
+        title: l10n.bookingPaidUnavailableTitle,
+        subtitle: l10n.bookingPaidUnavailableSubtitle,
+      ),
+      BookingBlockReason.bookingDisabledByAdmin => (
+        title: l10n.bookingDisabledByAdminTitle,
+        subtitle: l10n.bookingDisabledByAdminSubtitle,
+      ),
+      BookingBlockReason.pricingConfigMissing => (
+        title: l10n.pricingConfigIncompleteTitle,
+        subtitle: l10n.pricingConfigIncompleteSubtitle,
+      ),
+      BookingBlockReason.marketDisabled => (
+        title: l10n.marketDisabledBookingTitle,
+        subtitle: l10n.marketDisabledBookingSubtitle,
+      ),
+      BookingBlockReason.teacherNotBookable => (
+        title: l10n.teacherNotBookableTitle,
+        subtitle: l10n.teacherNotBookableSubtitle,
+      ),
+      _ => (
+        title: l10n.noTeachersAvailableRightNow,
+        subtitle: l10n.sessionsEmptySubtitle,
+      ),
+    };
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final l10n = context.quranSessionsL10n;
+    final copy = _resolveCopy(l10n);
+    return Center(
+      child: Padding(
+        padding: EdgeInsets.all(Theme.of(context).tokens.spaceLarge),
+        child: TilawaIllustratedState(
+          icon: Icons.hourglass_disabled_outlined,
+          title: copy.title,
+          subtitle: copy.subtitle,
+          semanticLabel: copy.title,
+          primaryAction: TilawaButton(
+            text: l10n.retry,
+            variant: TilawaButtonVariant.secondary,
+            onPressed: onRetry,
+          ),
+        ),
+      ),
     );
   }
 }

@@ -8,6 +8,7 @@ import 'package:quran_sessions/quran_sessions.dart';
 import 'package:tilawa_ui_kit/tilawa_ui_kit.dart';
 
 import '../../helpers/fixtures/session_aggregate_fixtures.dart';
+import 'join_loading_hold_bloc.dart';
 import 'join_navigation_test_bloc.dart';
 import 'recording_session_detail_bloc.dart';
 import 'review_emit_bloc.dart';
@@ -213,6 +214,87 @@ void main() {
     expect(find.byType(TilawaBottomActionArea), findsOneWidget);
     expect(find.text('Join'), findsOneWidget);
   });
+
+  testWidgets(
+    'bottom action area is not rendered when no actions are available',
+    (tester) async {
+      final aggregate = makeAggregate(
+        status: SessionLifecycleStatus.incomplete,
+        startsAt: DateTime.now().toUtc().subtract(const Duration(hours: 2)),
+      ).copyWith(sessionId: 'session_1');
+
+      await tester.pumpWidget(
+        MaterialApp(
+          theme: AppTheme.getLightTheme(
+            primaryColor: AppColors.defaultPrimary,
+          ),
+          localizationsDelegates: const [
+            QuranSessionsLocalizations.delegate,
+            GlobalMaterialLocalizations.delegate,
+            GlobalWidgetsLocalizations.delegate,
+          ],
+          supportedLocales: QuranSessionsLocalizations.supportedLocales,
+          home: BlocProvider<SessionDetailBloc>(
+            create: (_) => RecordingSessionDetailBloc(
+              seed: SessionDetailSuccess(
+                aggregate: aggregate,
+                timeline: const [],
+              ),
+            ),
+            child: const SessionDetailScreen(bookingId: 'session_1'),
+          ),
+        ),
+      );
+      await tester.pumpAndSettle();
+
+      expect(find.byType(TilawaBottomActionArea), findsNothing);
+    },
+  );
+
+  testWidgets('join button stays visible with loading while preparing', (
+    tester,
+  ) async {
+    final bloc = JoinLoadingHoldBloc(seed: _inAppJoinSeed());
+
+    await _pumpSessionDetailScreen(tester, bloc: bloc);
+
+    await tester.tap(find.text('Join'));
+    await tester.pump();
+
+    final joinButton = tester.widget<TilawaButton>(
+      find.byWidgetPredicate(
+        (widget) => widget is TilawaButton && widget.text == 'Join',
+      ),
+    );
+    check(joinButton.isLoading).isTrue();
+    check(joinButton.onPressed).isNull();
+    expect(find.bySemanticsLabel('Join, Loading'), findsOneWidget);
+  });
+
+  testWidgets(
+    'teacher join button stays visible with loading while preparing',
+    (
+      tester,
+    ) async {
+      final bloc = JoinLoadingHoldBloc(
+        seed: _inAppJoinSeed().copyWith(viewerRole: ActorRole.teacher),
+      );
+
+      await _pumpSessionDetailScreen(tester, bloc: bloc);
+
+      await tester.tap(find.text('Join'));
+      await tester.pump();
+
+      final joinButton = tester.widget<TilawaButton>(
+        find.byWidgetPredicate(
+          (widget) => widget is TilawaButton && widget.text == 'Join',
+        ),
+      );
+      check(joinButton.isLoading).isTrue();
+      check(joinButton.onPressed).isNull();
+      expect(find.bySemanticsLabel('Join, Loading'), findsOneWidget);
+    },
+  );
 
   testWidgets('open meeting again shows after external join opened', (
     tester,
@@ -925,7 +1007,7 @@ void main() {
       },
     );
 
-    testWidgets('cancelled session keeps report and dispute with helper', (
+    testWidgets('hides report and dispute actions for launch rollout', (
       tester,
     ) async {
       final bloc = RecordingSessionDetailBloc(
@@ -940,11 +1022,11 @@ void main() {
 
       await _pumpSessionDetailScreen(tester, bloc: bloc);
 
-      expect(find.text('Report a concern'), findsOneWidget);
-      expect(find.text('Open a dispute'), findsOneWidget);
+      expect(find.text('Report a concern'), findsNothing);
+      expect(find.text('Open a dispute'), findsNothing);
       expect(
         find.textContaining('review this cancellation'),
-        findsOneWidget,
+        findsNothing,
       );
     });
 

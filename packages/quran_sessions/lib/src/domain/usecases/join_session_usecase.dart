@@ -9,6 +9,7 @@ import '../providers/auth_session_provider.dart';
 import '../repositories/session_repository.dart';
 import '../repositories/teacher_profile_repository.dart';
 import '../../boundaries/call/session_call_provider.dart';
+import '../policies/session_join_policy.dart';
 import '../services/quran_session_call_telemetry_coordinator.dart';
 
 /// Joins a session through the injected [SessionCallProvider] gateway.
@@ -22,6 +23,7 @@ class JoinSessionUseCase {
     required this.authSession,
     required this.teacherProfileRepository,
     this.callTelemetry,
+    this.joinPolicy = const SessionJoinPolicy(),
   });
 
   final SessionRepository sessionRepository;
@@ -29,10 +31,12 @@ class JoinSessionUseCase {
   final AuthSessionProvider authSession;
   final TeacherProfileRepository teacherProfileRepository;
   final QuranSessionCallTelemetryCoordinator? callTelemetry;
+  final SessionJoinPolicy joinPolicy;
 
   Future<Either<QuranSessionsFailure, void>> call({
     required String sessionId,
     SessionParticipantRole? role,
+    bool forceTakeover = false,
   }) async {
     final userId = authSession.currentUserId;
     if (userId == null || userId.isEmpty) {
@@ -66,6 +70,25 @@ class JoinSessionUseCase {
       return const Left(UnauthorizedFailure());
     }
 
+    final teacherAuthUserId = participantRole == SessionParticipantRole.teacher
+        ? userId
+        : null;
+
+    if (!joinPolicy.canJoin(
+      session: session,
+      userId: userId,
+      now: DateTime.now().toUtc(),
+      teacherAuthUserId: teacherAuthUserId,
+    )) {
+      return const Left(
+        InvalidTransitionFailure(
+          action: 'join_session',
+          actorRole: 'participant',
+          reasonCode: 'join_window_closed',
+        ),
+      );
+    }
+
     final request = CallJoinRequest(
       sessionId: session.id,
       role: participantRole,
@@ -74,6 +97,7 @@ class JoinSessionUseCase {
       joinUrl: session.joinUrl,
       providerSessionId: session.providerSessionId,
       joinToken: session.joinToken,
+      forceTakeover: forceTakeover,
     );
 
     callTelemetry?.recordJoinRequested(
@@ -138,9 +162,20 @@ class JoinSessionUseCase {
         'external_meeting_launch_failed',
       );
       return Left(e);
+    } on QuranSessionsFailure catch (e) {
+      _recordJoinFailed(
+        session,
+        userId,
+        participantRole,
+        e.runtimeType.toString(),
+      );
+      return Left(e);
     } on Object {
-      _recordJoinFailed(session, userId, participantRole, 'network_failure');
-      return const Left(NetworkFailure());
+      _recordJoinFailed(session, userId, participantRole, 'unknown_failure');
+      // We cannot log easily without injecting a logger here, but mapping to
+      // UnknownFailure ensures we don't present a false "No internet connection"
+      // to the user when the problem is an SDK crash or permission error.
+      return const Left(UnknownFailure());
     }
   }
 

@@ -25,6 +25,13 @@ import 'package:flutter/material.dart';
 /// declare `behavior: HitTestBehavior.opaque` and update the allow-list,
 /// or use a Material primitive (`InkWell`, `IconButton`, `ListTile`)
 /// which already provides the hit-slop and ripple.
+/// Global multiplier for shadow and elevation values across the app.
+///
+/// Use this to tune the overall depth of the UI kit from a single place.
+/// Values > 1.0 increase elevation (deeper shadow, wider blur),
+/// while values < 1.0 flatten the UI. All surface elevations scale proportionally.
+const double kElevationMultiplier = 1.0;
+
 const double kMeMuslimMinInteractiveDimension = 48.0;
 
 /// Compact icon-container extent — default ramp
@@ -177,11 +184,12 @@ class MeMuslimDesignTokens extends ThemeExtension<MeMuslimDesignTokens> {
   /// calibrated for visible depth on real-device DPIs.
   final double opacitySubtle;
 
-  /// 0.05 — default alpha for `BoxShadow.color` on raised cards and chips.
-  /// Calibrated for a soft Moneyloop-style lift (wide blur, low opacity).
+  /// Base value 0.04 — default alpha for `BoxShadow.color` on raised cards and chips.
+  /// Scaled by [kElevationMultiplier].
   final double opacityShadow;
 
-  /// 0.08 — alpha for `BoxShadow.color` on floating chrome (nav, FAB-adjacent).
+  /// Base value 0.08 — alpha for `BoxShadow.color` on floating chrome (nav, FAB-adjacent).
+  /// Scaled by [kElevationMultiplier].
   final double opacityShadowStrong;
 
   /// 0.3
@@ -196,13 +204,13 @@ class MeMuslimDesignTokens extends ThemeExtension<MeMuslimDesignTokens> {
   /// 12.0
   final double blurGlass;
 
-  /// 16.0
+  /// Base value 12.0. Scaled by [kElevationMultiplier].
   final double blurShadow;
 
-  /// Offset(0, 2)
+  /// Base value Offset(0, 1.5). Scaled by [kElevationMultiplier].
   final Offset shadowOffsetSmall;
 
-  /// Offset(0, 4)
+  /// Base value Offset(0, 3). Scaled by [kElevationMultiplier].
   final Offset shadowOffsetMedium;
 
   /// 0.5
@@ -393,15 +401,15 @@ class MeMuslimDesignTokens extends ThemeExtension<MeMuslimDesignTokens> {
       radiusExtraLarge: 24.0,
       radiusHero: 28.0,
       opacitySubtle: 0.1,
-      opacityShadow: 0.04,
-      opacityShadowStrong: 0.08,
+      opacityShadow: 0.04 * kElevationMultiplier,
+      opacityShadowStrong: 0.08 * kElevationMultiplier,
       opacityMedium: 0.3,
       opacityEmphasis: 0.7,
       opacityGlass: 0.8,
       blurGlass: 12.0,
-      blurShadow: 8.0,
-      shadowOffsetSmall: const Offset(0, 1),
-      shadowOffsetMedium: const Offset(0, 2),
+      blurShadow: 12.0 * kElevationMultiplier,
+      shadowOffsetSmall: Offset(0, 1.5 * kElevationMultiplier),
+      shadowOffsetMedium: Offset(0, 3.0 * kElevationMultiplier),
       borderWidthThin: 0.5,
       progressHeight: 3.0,
       iconSizeExtraSmall: 12.0,
@@ -897,13 +905,13 @@ extension MeMuslimRadiusResolverX on MeMuslimDesignTokens {
     double width = 0,
   }) {
     return switch (family) {
-      TilawaRadiusFamily.card => radiusMedium,
+      TilawaRadiusFamily.card => radiusCard,
       TilawaRadiusFamily.pill =>
         height > 0
             ? radiusPill(height)
             : radiusPill(kMeMuslimMinInteractiveDimension),
       TilawaRadiusFamily.chrome => radiusMedium,
-      TilawaRadiusFamily.section => radiusMedium,
+      TilawaRadiusFamily.section => radiusSection,
       TilawaRadiusFamily.hero => radiusLarge,
       TilawaRadiusFamily.decorative => radiusMedium,
       TilawaRadiusFamily.icon => radiusIcon(

@@ -410,14 +410,17 @@ class _RecordingTokenProvider implements CallTokenProvider {
 
   String? lastSessionId;
   String? lastUserId;
+  bool? lastForceTakeover;
 
   @override
   Future<RtcJoinCredentials> fetchCredentials({
     required String sessionId,
     required String userId,
+    bool forceTakeover = false,
   }) async {
     lastSessionId = sessionId;
     lastUserId = userId;
+    lastForceTakeover = forceTakeover;
     return credentials;
   }
 }

@@ -23,6 +23,7 @@ abstract interface class SessionMutationGateway {
     required SessionPricingType pricingType,
     String? paymentReference,
     String? studentNote,
+    String? idempotencyKey,
   });
 
   Future<Either<QuranSessionsFailure, SessionAggregate>> cancelSession({

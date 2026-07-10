@@ -62,9 +62,11 @@ void main() {
   group('ExpirePendingReservationsUseCase', () {
     test('expires pending rows and releases slot', () async {
       final repo = FakeSessionAggregateRepository()
+        // Expiry sweeps pendingPayment rows whose start passed the slot-hold
+        // TTL (15m); use a start comfortably beyond it.
         ..store['session_1'] = makeAggregate(
           status: SessionLifecycleStatus.pendingPayment,
-          startsAt: now.add(const Duration(minutes: 5)),
+          startsAt: now.subtract(const Duration(minutes: 30)),
         );
       final command = FakeSessionCommandGateway();
       final audit = FakeAuditRepository();

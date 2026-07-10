@@ -21,6 +21,12 @@ class SessionModePolicy {
     enabledCallTypes: {SessionCallType.externalMeeting},
   );
 
+  /// In-app video call only — no voice or external meeting links.
+  static const videoOnly = SessionModePolicy(
+    enabledCallTypes: {SessionCallType.videoCall},
+    voiceVideoUseMockProvider: false,
+  );
+
   final Set<SessionCallType> enabledCallTypes;
 
   /// When true, voice/video bookings are allowed but join uses mock provider.

@@ -18,10 +18,10 @@ import '../../../surah/domain/entities/surah_entity.dart';
 import '../../../tour_guide/presentation/widgets/tour_target.dart';
 import '../bloc/reciter_details_bloc.dart';
 import '../bloc/reciter_download_bloc.dart';
-import '../tour/reciters_tour_launcher.dart';
-import '../tour/reciters_tour_targets.dart';
 import '../layout/reciter_details_fab_layout.dart';
 import '../models/reciter_surah_list_item.dart';
+import '../tour/reciters_tour_launcher.dart';
+import '../tour/reciters_tour_targets.dart';
 import '../widgets/download_all_button.dart';
 import '../widgets/moshaf_selector.dart';
 import '../widgets/reciter_details_app_bar.dart';
@@ -329,7 +329,7 @@ class _ReciterDetailsScreenState extends State<ReciterDetailsScreen> {
                 }
               },
               builder: (context, state) {
-                return RefreshIndicator(
+                return TilawaRefreshIndicator(
                   onRefresh: _onRefresh,
                   edgeOffset: reciterDetailsRefreshIndicatorEdgeOffset(
                     context,

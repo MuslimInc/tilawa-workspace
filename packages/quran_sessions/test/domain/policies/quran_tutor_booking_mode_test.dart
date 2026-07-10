@@ -4,14 +4,17 @@ import 'package:quran_sessions/quran_sessions.dart';
 
 void main() {
   group('QuranTutorBookingMode', () {
-    test('distribution default is autoConfirm outside play_production', () {
+    test('distribution default is requiresTutorApproval', () {
       check(
         distributionDefaultQuranTutorBookingMode(distribution: 'staging'),
-      ).equals(QuranTutorBookingMode.autoConfirm);
+      ).equals(QuranTutorBookingMode.requiresTutorApproval);
+      check(
+        distributionDefaultQuranTutorBookingMode(distribution: 'local'),
+      ).equals(QuranTutorBookingMode.requiresTutorApproval);
     });
 
     test(
-      'distribution default is requiresTutorApproval on play_production',
+      'distribution default stays requiresTutorApproval on play_production',
       () {
         check(
           distributionDefaultQuranTutorBookingMode(

@@ -22,10 +22,13 @@ void main() {
         final MeMuslimDesignTokens? design = theme
             .extension<MeMuslimDesignTokens>();
         expect(design, isNotNull);
-        expect(design!.opacityShadow, 0.04);
-        expect(design.opacityShadowStrong, 0.08);
-        expect(design.shadowOffsetSmall, const Offset(0, 1));
-        expect(design.shadowOffsetMedium, const Offset(0, 2));
+        expect(design!.opacityShadow, 0.04 * kElevationMultiplier);
+        expect(design.opacityShadowStrong, 0.08 * kElevationMultiplier);
+        expect(design.shadowOffsetSmall, Offset(0, 1.5 * kElevationMultiplier));
+        expect(
+          design.shadowOffsetMedium,
+          Offset(0, 3.0 * kElevationMultiplier),
+        );
 
         expect(theme.extension<MeMuslimComponentTokens>(), isNotNull);
 

@@ -79,14 +79,8 @@ class _QuranIndexScreenState extends State<QuranIndexScreen> {
     );
     return Scaffold(
       appBar: TilawaCatalogAppBar(
-        preferredHeight: TilawaCatalogAppBar.resolvePreferredHeight(
-          context,
-          title: context.l10n.quranHubTitle,
-          automaticallyImplyLeading: false,
-          bottomContentHeight: segmentBarHeight + tokens.spaceSmall,
-        ),
         title: context.l10n.quranHubTitle,
-        automaticallyImplyLeading: false,
+        bottomContentHeight: segmentBarHeight + tokens.spaceSmall,
         bottomContent: Padding(
           padding: EdgeInsetsDirectional.fromSTEB(
             groupTokens.groupHorizontalPadding,

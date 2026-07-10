@@ -397,6 +397,8 @@ class TilawaEmptyStateTokens {
     required this.subtitleSpacing,
     required this.actionSpacing,
     required this.padding,
+    required this.actionMinWidth,
+    required this.actionMaxWidth,
   });
 
   /// Size of the empty-state icon.
@@ -417,6 +419,12 @@ class TilawaEmptyStateTokens {
   /// Outer padding around the whole empty-state layout.
   final EdgeInsets padding;
 
+  /// Minimum width of the primary action.
+  final double actionMinWidth;
+
+  /// Maximum width of the primary and secondary actions.
+  final double actionMaxWidth;
+
   factory TilawaEmptyStateTokens.defaults() {
     return const TilawaEmptyStateTokens(
       iconSize: kMeMuslimMinInteractiveDimension,
@@ -425,6 +433,8 @@ class TilawaEmptyStateTokens {
       subtitleSpacing: 10.0,
       actionSpacing: 28.0,
       padding: EdgeInsets.symmetric(horizontal: 28.0, vertical: 32.0),
+      actionMinWidth: 240.0,
+      actionMaxWidth: 320.0,
     );
   }
 
@@ -435,6 +445,8 @@ class TilawaEmptyStateTokens {
     double? subtitleSpacing,
     double? actionSpacing,
     EdgeInsets? padding,
+    double? actionMinWidth,
+    double? actionMaxWidth,
   }) {
     return TilawaEmptyStateTokens(
       iconSize: iconSize ?? this.iconSize,
@@ -443,6 +455,8 @@ class TilawaEmptyStateTokens {
       subtitleSpacing: subtitleSpacing ?? this.subtitleSpacing,
       actionSpacing: actionSpacing ?? this.actionSpacing,
       padding: padding ?? this.padding,
+      actionMinWidth: actionMinWidth ?? this.actionMinWidth,
+      actionMaxWidth: actionMaxWidth ?? this.actionMaxWidth,
     );
   }
 
@@ -458,6 +472,8 @@ class TilawaEmptyStateTokens {
       subtitleSpacing: lerpTokenDouble(a.subtitleSpacing, b.subtitleSpacing, t),
       actionSpacing: lerpTokenDouble(a.actionSpacing, b.actionSpacing, t),
       padding: EdgeInsets.lerp(a.padding, b.padding, t)!,
+      actionMinWidth: lerpTokenDouble(a.actionMinWidth, b.actionMinWidth, t),
+      actionMaxWidth: lerpTokenDouble(a.actionMaxWidth, b.actionMaxWidth, t),
     );
   }
 }

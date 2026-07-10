@@ -106,13 +106,35 @@ class DefaultPrayerAlarmManager(private val context: Context) : PrayerAlarmManag
             },
             piFlags(),
         )
-        
+
         alarmManager.setAlarmClock(
             AlarmManager.AlarmClockInfo(triggerMs, showIntent),
-            pi
+            pi,
         )
         logDebug(
             "ADHAN_AUDIT source=alarm_scheduler event=schedule prayerKey=$key prayerName=$name " +
+                "scheduledMs=$triggerMs notificationId=$id requestCode=$id sound=$sound"
+        )
+        return true
+    }
+
+    override fun scheduleInexact(
+        id: Int,
+        name: String,
+        key: String,
+        triggerMs: Long,
+        sound: String,
+        locationName: String,
+        languageCode: String,
+    ): Boolean {
+        val pi = pendingIntent(id, name, key, triggerMs, sound, locationName, languageCode)
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
+            alarmManager.setAndAllowWhileIdle(AlarmManager.RTC_WAKEUP, triggerMs, pi)
+        } else {
+            alarmManager.set(AlarmManager.RTC_WAKEUP, triggerMs, pi)
+        }
+        logDebug(
+            "ADHAN_AUDIT source=alarm_scheduler event=schedule_inexact prayerKey=$key prayerName=$name " +
                 "scheduledMs=$triggerMs notificationId=$id requestCode=$id sound=$sound"
         )
         return true

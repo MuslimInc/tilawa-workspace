@@ -123,8 +123,6 @@ extension QuranSessionsFailureUi on QuranSessionsFailure {
             ? loc.accountBlockedWithReason(restrictionReasonLabel(loc, r))
             : loc.accountBlocked,
 
-      GuardianApprovalRequiredFailure() => loc.guardianApprovalRequired,
-
       PolicyViolationFailure(policyName: final p, detail: final d) =>
         loc.policyViolation(d, p),
 
@@ -132,6 +130,12 @@ extension QuranSessionsFailureUi on QuranSessionsFailure {
       MarketCatalogEmptyFailure() => loc.marketCatalogEmpty,
       MarketNotEnabledFailure(cityId: final c) =>
         c != null ? loc.marketNotEnabledWithCity : loc.marketNotEnabled,
+
+      TeacherNotWhitelistedFailure() => loc.teacherNotWhitelisted,
+      MinBookingNoticeViolationFailure(minNoticeMinutes: final m) =>
+        loc.minNoticeViolation(m),
+      MaxUpcomingSessionsExceededFailure(maxUpcoming: final m) =>
+        loc.maxUpcomingExceeded(m),
 
       TeacherNotInMarketFailure() => loc.teacherNotInMarket,
 
@@ -167,10 +171,15 @@ extension QuranSessionsFailureUi on QuranSessionsFailure {
       PaymentCancelledFailure() => loc.paymentCancelled,
       PaymentProviderFailure() => loc.paymentProviderFailure,
 
+      // ── Admin / config blocks (booking submit path) ────────────────────────
+      PlatformBookingDisabledFailure() => loc.bookingDisabledByAdminTitle,
+      PricingConfigMissingFailure() => loc.pricingConfigIncompleteTitle,
+
       // ── Storage ─────────────────────────────────────────────────────────────
       CacheFailure() => loc.cacheFailure,
 
       // ── Catch-all ───────────────────────────────────────────────────────────
+      LiveSessionAlreadyActiveFailure() => loc.liveSessionAlreadyActiveMessage,
       UnknownFailure() => loc.unknownFailure,
     };
   }

@@ -23,5 +23,8 @@ QuranSession mapAcceptedBookingToScheduledSession(QuranSession pending) {
     joinToken: pending.joinToken,
     participants: pending.participants,
     notes: pending.notes,
+    paymentReference: pending.paymentReference,
+    paymentProvider: pending.paymentProvider,
+    paymentStatus: pending.paymentStatus,
   );
 }

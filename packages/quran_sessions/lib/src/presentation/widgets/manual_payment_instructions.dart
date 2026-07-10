@@ -5,11 +5,20 @@ import 'package:quran_sessions/l10n/quran_sessions_localizations.dart';
 import 'package:tilawa_ui_kit/tilawa_ui_kit.dart';
 
 import '../../boundaries/manual_payment_link_launcher.dart';
-import '../config/manual_payment_pilot_config.dart';
+import '../../domain/entities/manual_payment_market_config.dart';
 
 /// Structured manual/off-app payment instructions (InstaPay + WhatsApp receipt).
 class ManualPaymentInstructions extends StatelessWidget {
-  const ManualPaymentInstructions({super.key});
+  const ManualPaymentInstructions({
+    super.key,
+    this.whatsappUrl,
+    this.config = ManualPaymentMarketConfig.egFallback,
+  });
+
+  final String? whatsappUrl;
+
+  /// Per-market manual payment details (resolved from the market config).
+  final ManualPaymentMarketConfig config;
 
   @override
   Widget build(BuildContext context) {
@@ -39,30 +48,21 @@ class ManualPaymentInstructions extends StatelessWidget {
         Text(l10n.manualPaymentInstructionsBody, style: bodyStyle),
         SizedBox(height: tokens.spaceSmall),
         Text(l10n.manualPaymentInstapayHandle, style: bodyStyle),
-        SelectableText(
-          ManualPaymentPilotConfig.instapayHandle,
-          style: monoStyle,
-        ),
+        SelectableText(config.instapayHandle ?? '', style: monoStyle),
         SizedBox(height: tokens.spaceExtraSmall),
         Text(l10n.manualPaymentInstapayLink, style: bodyStyle),
         _ManualPaymentLinkText(
-          label: ManualPaymentPilotConfig.instapayPaymentLink,
-          onTap: () => _openUrl(
-            context,
-            ManualPaymentPilotConfig.instapayPaymentLink,
-          ),
+          label: config.instapayPaymentLink ?? '',
+          onTap: () => _openUrl(context, config.instapayPaymentLink ?? ''),
           style: linkStyle,
         ),
         SizedBox(height: tokens.spaceSmall),
         Text(l10n.manualPaymentRecipientMaskedName, style: bodyStyle),
-        SelectableText(
-          ManualPaymentPilotConfig.recipientMaskedName,
-          style: monoStyle,
-        ),
+        SelectableText(config.recipientMaskedName ?? '', style: monoStyle),
         SizedBox(height: tokens.spaceSmall),
         Text(l10n.manualPaymentReceiptWhatsappInstruction, style: bodyStyle),
         _ManualPaymentLinkText(
-          label: ManualPaymentPilotConfig.supportWhatsappNumber,
+          label: config.supportWhatsappNumber,
           onTap: () => _openWhatsApp(context),
           style: linkStyle,
         ),
@@ -84,18 +84,25 @@ class ManualPaymentInstructions extends StatelessWidget {
 
   Future<void> _openWhatsApp(BuildContext context) async {
     final l10n = context.quranSessionsL10n;
-    final phone = ManualPaymentPilotConfig.supportWhatsappNumber;
-    final launcher = ManualPaymentLinkLauncher.launchWhatsApp;
-    if (launcher != null && await launcher(phone)) {
-      return;
+    final url = whatsappUrl;
+    if (url == null || url.isEmpty) {
+      final phone = config.supportWhatsappNumber;
+      final launcher = ManualPaymentLinkLauncher.launchWhatsApp;
+      if (launcher != null && await launcher(phone)) {
+        return;
+      }
     }
     final urlLauncher = ManualPaymentLinkLauncher.launchUrl;
-    final waLink = ManualPaymentPilotConfig.supportWhatsappWaMeLink;
+    final waLink = url ?? config.supportWhatsappWaMeLink;
     if (urlLauncher != null && await urlLauncher(waLink)) {
       return;
     }
     if (!context.mounted) return;
-    await _copyFallback(context, l10n, phone);
+    await _copyFallback(
+      context,
+      l10n,
+      url == null ? config.supportWhatsappNumber : waLink,
+    );
   }
 
   Future<void> _copyFallback(

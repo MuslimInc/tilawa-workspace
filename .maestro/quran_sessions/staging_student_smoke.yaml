@@ -1,0 +1,130 @@
+# Staging Device QA — full student smoke (D1–D8 subset).
+# Role: student ONLY. Run separately from teacher flow; sign out between roles.
+#
+# Prerequisites:
+#   - Staging build with dart-defines (see docs/quran-sessions/maestro-device-qa-setup.md)
+#   - Student account: quranSessionsProfile complete, EG/cairo market
+#   - Teacher with open bookable slot on staging Firebase
+#
+# Env (never commit real passwords):
+#   MAESTRO_TILAWA_STUDENT_EMAIL — required for login subflow
+#   MAESTRO_TILAWA_STUDENT_PASSWORD — unused (Google OAuth); vault placeholder
+#   MAESTRO_SKIP_LOGIN=true — skip login when already signed in as student
+appId: com.tilawa.app
+tags:
+  - staging
+  - smoke
+  - student
+  - quran_sessions
+---
+- runFlow:
+    when:
+      true: ${MAESTRO_SKIP_LOGIN != 'true'}
+    commands:
+      - runFlow:
+          file: subflows/staging_google_sign_in.yaml
+          env:
+            MAESTRO_TILAWA_ACCOUNT_EMAIL: ${MAESTRO_TILAWA_STUDENT_EMAIL}
+- launchApp:
+    clearState: false
+- runFlow:
+    file: subflows/staging_dismiss_blockers.yaml
+# D1 — Learn Quran hub entry
+- extendedWaitUntil:
+    visible:
+      id: home_tab
+    timeout: 30000
+- extendedWaitUntil:
+    visible:
+      text: ".*تعلّم القرآن.*"
+    timeout: 20000
+- tapOn:
+    text: ".*ابدأ التعلّم.*"
+- waitForAnimationToEnd
+- extendedWaitUntil:
+    visible:
+      text: ".*المحفظون.*"
+    timeout: 20000
+# D1 — browse teachers → open first bookable teacher
+- tapOn:
+    text: ".*احجز.*"
+    index: 0
+- waitForAnimationToEnd
+- extendedWaitUntil:
+    visible:
+      text: ".*احجز جلسة.*"
+    timeout: 20000
+- tapOn:
+    text: ".*احجز جلسة.*"
+- waitForAnimationToEnd
+- extendedWaitUntil:
+    visible:
+      text: ".*احجز جلسة.*"
+    timeout: 20000
+# Video-only booking UI — no voice / external call types
+- assertNotVisible:
+    text: ".*رابط خارجي.*"
+- assertNotVisible:
+    text: ".*صوتي.*"
+- assertVisible:
+    text: ".*مرئي.*"
+# Select first available slot
+- tapOn:
+    text: ".*[0-9]{1,2}:[0-9]{2}.*"
+    index: 0
+- waitForAnimationToEnd
+# Book — tutor approval → request; instant mode → confirm
+- tapOn:
+    text: ".*(إرسال طلب الحجز|تأكيد الحجز).*"
+- waitForAnimationToEnd
+- extendedWaitUntil:
+    visible:
+      text: ".*(تم إرسال طلب الحجز|تم تأكيد الحجز).*"
+    timeout: 45000
+# My sessions — Pending (requiresTutorApproval) or Upcoming
+- tapOn:
+    text: ".*جلساتي.*"
+    optional: true
+- runFlow:
+    when:
+      notVisible:
+        text: ".*جلساتي.*"
+    commands:
+      - tapOn:
+          id: home_tab
+      - tapOn:
+          text: ".*جلساتي.*"
+- waitForAnimationToEnd
+- extendedWaitUntil:
+    visible:
+      text: ".*(قيد الانتظار|القادمة).*"
+    timeout: 20000
+- tapOn:
+    text: ".*قيد الانتظار.*"
+- waitForAnimationToEnd
+# Open first pending session → cancel
+- tapOn:
+    point: "50%,45%"
+- waitForAnimationToEnd
+- tapOn:
+    text: ".*إلغاء الجلسة.*"
+- waitForAnimationToEnd
+- tapOn:
+    text: ".*لماذا.*"
+    optional: true
+- inputText: "Maestro staging smoke cancel"
+- hideKeyboard
+- tapOn:
+    text: ".*إلغاء الجلسة.*"
+    index: 1
+- extendedWaitUntil:
+    visible:
+      text: ".*(تم إلغاء الجلسة|تم إلغاء).*"
+    timeout: 30000
+# D8 — canceled session not listed under Upcoming
+- tapOn:
+    text: ".*القادمة.*"
+- waitForAnimationToEnd
+- assertNotVisible:
+    text: ".*Maestro staging smoke.*"
+    optional: true

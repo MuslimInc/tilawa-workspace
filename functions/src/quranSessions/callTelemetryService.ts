@@ -1,5 +1,11 @@
 import { FieldValue, Firestore, Timestamp } from "firebase-admin/firestore";
 import { enqueueSessionNotificationInTransaction } from "./notificationOutboxService";
+import {
+  writeAggregateLifecycle,
+} from "./aggregateWriteService";
+import { shouldTransitionToInProgress } from "./sessionInProgressTransitionPolicy";
+import { validateTransition } from "./sessionLifecycleGuard";
+import type { LifecycleStatus } from "./sessionLifecycleService";
 
 export const CALL_TRACKING_LATE_GRACE_MINUTES = 5;
 export const CALL_TRACKING_NO_SHOW_WINDOW_MINUTES = 15;
@@ -37,6 +43,8 @@ export interface RecordCallTelemetryEventInput {
   prefetchedSession?: {
     bookingId?: string;
     startsAt?: Timestamp;
+    endsAt?: Timestamp;
+    lifecycleStatus?: LifecycleStatus | string;
   };
 }
 
@@ -388,6 +396,7 @@ export async function recordCallTelemetryEventInTransaction(
       }
       const session = sessionSnap.data() ?? {};
       const fetchedStartsAt = asTimestamp(session.startsAt);
+      const fetchedEndsAt = asTimestamp(session.endsAt);
       const fetchedBookingId = (session.bookingId as string | undefined) ?? "";
       const trackingSnap = await tx.get(trackingRef);
       const state = loadMutableTrackingState(
@@ -404,6 +413,13 @@ export async function recordCallTelemetryEventInTransaction(
         eventRef,
         trackingRef,
         fetchedBookingId,
+        sessionRef,
+        {
+          bookingId: fetchedBookingId,
+          startsAt: fetchedStartsAt ?? undefined,
+          endsAt: fetchedEndsAt ?? undefined,
+          lifecycleStatus: session.lifecycleStatus as string | undefined,
+        },
       );
     }
 
@@ -424,6 +440,8 @@ export async function recordCallTelemetryEventInTransaction(
       eventRef,
       trackingRef,
       bookingId,
+      sessionRef,
+      input.prefetchedSession,
     );
   });
 }
@@ -439,6 +457,8 @@ function writeTelemetryDocs(
   eventRef: FirebaseFirestore.DocumentReference,
   trackingRef: FirebaseFirestore.DocumentReference,
   bookingId: string,
+  sessionRef: FirebaseFirestore.DocumentReference,
+  prefetched?: RecordCallTelemetryEventInput["prefetchedSession"],
 ): { replayed: boolean } {
   tx.set(eventRef, {
     eventId: input.eventId,
@@ -518,6 +538,38 @@ function writeTelemetryDocs(
     toCallTrackingAggregate(input.sessionId, state, serverNowMs),
     { merge: true },
   );
+
+  if (
+    input.eventType === "joinSucceeded" &&
+    bookingId &&
+    prefetched?.startsAt != null
+  ) {
+    const currentStatus = prefetched.lifecycleStatus;
+    const joinAtMs = input.clientTimestampMs ?? serverNowMs;
+    if (
+      (currentStatus === "scheduled" || currentStatus === "confirmed") &&
+      shouldTransitionToInProgress({
+        startsAt: prefetched.startsAt.toDate(),
+        now: new Date(serverNowMs),
+        joinEventAtMs: joinAtMs,
+      })
+    ) {
+      const guard = validateTransition({
+        currentStatus: currentStatus as LifecycleStatus,
+        action: "start_session",
+        actor: "system",
+      });
+      const bookingRef = db.collection("quran_bookings").doc(bookingId);
+      writeAggregateLifecycle(
+        tx,
+        { bookingRef, sessionRef },
+        guard.to,
+        {},
+        {},
+        prefetched ?? {},
+      );
+    }
+  }
 
   return { replayed: false };
 }

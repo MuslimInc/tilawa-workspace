@@ -25,11 +25,12 @@ export const expirePendingReservations = onSchedule(
 async function expirePaymentPending(
   db: FirebaseFirestore.Firestore,
 ): Promise<void> {
+  const now = Timestamp.now();
   const pending = await db
     .collection("quran_bookings")
     .where("lifecycleStatus", "==", "pending_payment")
-    .where("startsAt", "<=", Timestamp.fromMillis(Date.now() + 10 * 60 * 1000))
-    .orderBy("startsAt")
+    .where("paymentExpiresAt", "<=", now)
+    .orderBy("paymentExpiresAt")
     .limit(EXPIRE_QUERY_LIMIT)
     .get();
 
@@ -116,7 +117,7 @@ async function expireBooking(
         });
 
         const sessionRef = sessionRefForBooking(db, booking);
-        writeAggregateLifecycle(tx, { bookingRef: doc.ref, sessionRef }, guard.to);
+        writeAggregateLifecycle(tx, { bookingRef: doc.ref, sessionRef }, guard.to, {}, {}, booking);
 
         const slotId = booking.slotId as string | undefined;
         if (slotId) {

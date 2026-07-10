@@ -32,6 +32,15 @@ void main() {
         parseSessionActionFromRaw('tutor_cancelled'),
       ).equals(SessionAction.cancelByTeacher);
     });
+
+    test('maps finalizer sweep audit actions to timeline-safe actions', () {
+      check(
+        parseSessionActionFromRaw('expire_unattended_session'),
+      ).equals(SessionAction.expireReservation);
+      check(
+        parseSessionActionFromRaw('finalize_completed_session'),
+      ).equals(SessionAction.completeSession);
+    });
   });
 
   group('tryParseLifecycleStatusFromRaw', () {

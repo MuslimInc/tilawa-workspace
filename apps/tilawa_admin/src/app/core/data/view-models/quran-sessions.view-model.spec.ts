@@ -42,9 +42,7 @@ function callTracking(
 
 describe('resolveSessionCallPhase', () => {
   it('returns not_started when no call tracking exists', () => {
-    expect(
-      resolveSessionCallPhase(SessionLifecycleStatus.Scheduled, null),
-    ).toBe('not_started');
+    expect(resolveSessionCallPhase(SessionLifecycleStatus.Scheduled, null)).toBe('not_started');
   });
 
   it('returns waiting when one participant joined', () => {
@@ -81,20 +79,14 @@ describe('resolveParticipantJoinStatus', () => {
   });
 
   it('surfaces teacher no-show', () => {
-    expect(
-      resolveParticipantJoinStatus(
-        callTracking({ teacherNoShow: true }),
-        'teacher',
-      ),
-    ).toBe('no_show');
+    expect(resolveParticipantJoinStatus(callTracking({ teacherNoShow: true }), 'teacher')).toBe(
+      'no_show',
+    );
   });
 
   it('surfaces student blocked path via joined state', () => {
     expect(
-      resolveParticipantJoinStatus(
-        callTracking({ studentJoinedAt: new Date() }),
-        'student',
-      ),
+      resolveParticipantJoinStatus(callTracking({ studentJoinedAt: new Date() }), 'student'),
     ).toBe('joined');
   });
 });
@@ -121,6 +113,7 @@ describe('QuranSessionsViewModelMapper.toSessionParticipants', () => {
         isActive: true,
         profileCompleteness: 'complete',
         isPubliclyVisible: true,
+        sessionPriceOverride: null,
         createdAt: new Date(),
         updatedAt: new Date(),
       },
@@ -137,6 +130,7 @@ describe('QuranSessionsViewModelMapper.toSessionParticipants', () => {
         profileCompleted: true,
         accountStatus: QuranSessionsAccountStatus.Active,
         canApplyAsTeacher: false,
+        deletionPurgeAfter: null,
         createdAt: new Date(),
         updatedAt: new Date(),
       },
@@ -153,6 +147,7 @@ describe('QuranSessionsViewModelMapper.toSessionParticipants', () => {
         profileCompleted: true,
         accountStatus: QuranSessionsAccountStatus.Blocked,
         canApplyAsTeacher: true,
+        deletionPurgeAfter: null,
         createdAt: new Date(),
         updatedAt: new Date(),
       },
@@ -212,6 +207,7 @@ describe('QuranSessionsViewModelMapper.toSessionParticipants', () => {
         isActive: false,
         profileCompleteness: 'complete',
         isPubliclyVisible: false,
+        sessionPriceOverride: null,
         createdAt: new Date(),
         updatedAt: new Date(),
       },
@@ -228,6 +224,7 @@ describe('QuranSessionsViewModelMapper.toSessionParticipants', () => {
         profileCompleted: true,
         accountStatus: QuranSessionsAccountStatus.Suspended,
         canApplyAsTeacher: false,
+        deletionPurgeAfter: null,
         createdAt: new Date(),
         updatedAt: new Date(),
       },

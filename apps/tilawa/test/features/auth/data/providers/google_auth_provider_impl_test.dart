@@ -10,6 +10,7 @@ import 'package:tilawa/features/auth/data/providers/google_auth_provider_impl.da
 import 'package:tilawa/features/auth/data/services/android_sign_in_platform_policy.dart';
 import 'package:tilawa/features/auth/data/services/google_sign_in_session_tracker.dart';
 import 'package:tilawa/features/auth/domain/entities/auth_result.dart';
+import 'package:tilawa/features/auth/domain/entities/google_sign_in_failure_key.dart';
 
 import 'google_auth_provider_impl_test.mocks.dart';
 
@@ -310,7 +311,7 @@ void main() {
           isA<AuthFailure>().having(
             (AuthFailure f) => f.code,
             'code',
-            'ui-unavailable',
+            'uiUnavailable',
           ),
         );
         verifyNever(
@@ -683,7 +684,7 @@ void main() {
           isA<AuthFailure>().having(
             (AuthFailure f) => f.code,
             'code',
-            'ui-unavailable',
+            'uiUnavailable',
           ),
         );
         verify(
@@ -715,7 +716,7 @@ void main() {
           isA<AuthFailure>().having(
             (AuthFailure f) => f.code,
             'code',
-            'ui-unavailable',
+            'uiUnavailable',
           ),
         );
         verifyNever(
@@ -844,7 +845,7 @@ void main() {
         isA<AuthFailure>().having(
           (AuthFailure f) => f.code,
           'code',
-          'ui-unavailable',
+          'uiUnavailable',
         ),
       );
     });
@@ -868,9 +869,9 @@ void main() {
 
         result.maybeWhen(
           failure: (message, code, details) {
-            expect(message, 'Missing SHA-1 fingerprint');
+            expect(message, GoogleSignInFailureKey.notConfigured);
             expect(code, 'providerConfigurationError');
-            expect(details, 'native context');
+            expect(details, 'Missing SHA-1 fingerprint\nnative context');
           },
           orElse: () => fail('Expected failure'),
         );
@@ -910,7 +911,8 @@ void main() {
       final AuthResult result = await googleAuthProvider.signIn();
 
       result.maybeWhen(
-        failure: (message, code, details) => expect(message, contains('boom')),
+        failure: (message, code, details) =>
+            expect(message, GoogleSignInFailureKey.generic),
         orElse: () => fail('Expected failure'),
       );
     });

@@ -25,6 +25,32 @@ void main() {
       check(engine.microphoneMuted).equals(true);
     });
 
+    test(
+      'setCameraEnabled disables capture and mutes publish stream',
+      () async {
+        final engine = FakeRtcEngine();
+        final handle = LiveAgoraRtcSessionHandle(engine, appId: 'app_test');
+
+        await handle.setCameraEnabled(false);
+
+        check(engine.localVideoEnabled).equals(false);
+        check(engine.videoMuted).equals(true);
+      },
+    );
+
+    test(
+      'setCameraEnabled enables capture and unmutes publish stream',
+      () async {
+        final engine = FakeRtcEngine();
+        final handle = LiveAgoraRtcSessionHandle(engine, appId: 'app_test');
+
+        await handle.setCameraEnabled(true);
+
+        check(engine.localVideoEnabled).equals(true);
+        check(engine.videoMuted).equals(false);
+      },
+    );
+
     test('exposes native engine for in-call rendering', () {
       final engine = FakeRtcEngine();
       final handle = LiveAgoraRtcSessionHandle(engine, appId: 'app_test');

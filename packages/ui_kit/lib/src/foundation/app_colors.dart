@@ -3,13 +3,13 @@ import 'package:flutter/material.dart';
 /// Centralized app color constants.
 ///
 /// The Tilawa palette is intentionally **small and calm**:
-/// white canvas ([tripGlideCanvas] `#FFFFFF`), green global accent
-/// ([defaultPrimary] `#1DAB61`), neutral text ink ([tripGlideInk] `#212121`),
+/// warm scaffold canvas ([lightCanvas] `#F4F2EE`), green global accent
+/// ([defaultPrimary] `#1DAB61`), neutral text ink ([tripGlideInk] `#1A2E24`),
 /// and restrained category accent hues for hub tiles.
 ///
 /// Some `tripGlide*` names remain as compatibility aliases for the current
-/// travel-inspired Home layout. Their values now resolve to Tilawa's warm
-/// brand palette.
+/// travel-inspired Home layout (e.g. [tripGlideCanvas] `#FFFFFF` for elevated
+/// card surfaces — not the scaffold). Scaffold assembly uses [lightCanvas].
 ///
 /// All hex values used by `AppTheme` to assemble `ColorScheme` live here
 /// so there is exactly one source of truth. Product widgets should read
@@ -49,9 +49,9 @@ abstract final class AppColors {
   /// Retained for migration compatibility only.
   static const Color primaryGold = Color(0xFF2D6B47);
 
-  /// Brand splash canvas — flat launch / native splash green (`#2A9C64`).
-  /// Restricted to splash and launch screens only. Do not use in UI components.
-  static const Color brandSplashGreen = Color(0xFF2A9C64);
+  /// @Deprecated('Use brandActionGreen instead for a unified brand experience')
+  /// Brand splash canvas alias (`#1DAB61`).
+  static const Color brandSplashGreen = brandActionGreen;
 
   /// Global accent — nav, switches, selected states, CTAs (`#1DAB61`).
   static const Color brandActionGreen = Color(0xFF1DAB61);
@@ -367,15 +367,21 @@ abstract final class AppColors {
   /// Action tile fill — dark theme.
   static const Color homeQuickActionTileBackgroundDark = Color(0xFF1C2422);
 
-  /// Launch / splash canvas — brand splash green (`#2A9C64`).
+  /// Launch / splash canvas — brand primary green (`#1DAB61`).
   static const Color launchSplashBackground = brandSplashGreen;
 
   /// Wordmark and progress on launch surfaces (`#FFFFFF`).
   static const Color launchSplashForeground = Color(0xFFFFFFFF);
 
-  /// Logo box on Flutter launch surfaces — must match Android
-  /// `@dimen/splash_logo_size` (288dp) and `splash_icon` drawable.
-  static const double launchSplashLogoSize = 288;
+  /// Full-frame launch logo box used by Flutter. Android 12 keeps its native
+  /// splash icon transparent because the OS scales/masks animated icons; Flutter
+  /// renders the padded asset after the first launch frame is ready.
+  static const double launchSplashLogoFrameSize = 288;
+
+  /// Android 12+ masked visible circle diameter (2/3 of the icon frame,
+  /// `@dimen/splash_logo_display_size`). The mark's bounding-box diagonal
+  /// must stay inside this circle or the mask clips it.
+  static const double launchSplashLogoSize = 192;
 
   // ---------------------------------------------------------------------------
   // Light neutral ramp — warm near-white canvas + white cards
@@ -439,7 +445,8 @@ abstract final class AppColors {
   static const Color lightSurfaceContainer = lightCanvas;
 
   /// Light top container tier — quiet neutral hairline (`#E5E5E2`).
-  static const Color lightSurfaceContainerHighestBase = tripGlideCanvasDusk;
+  static const Color lightSurfaceContainerHighestBase =
+      lightSurfaceContainerHighBase;
 
   /// Hairline dividers — warm neutral.
   static const Color lightHairline = tripGlideCanvasDusk;
@@ -458,9 +465,9 @@ abstract final class AppColors {
   /// Dark upper container tier (neutral; no primary harmonization in [AppTheme]).
   static const Color darkSurfaceContainerHighBase = catalogFilterUnselectedDark;
 
-  /// Dark top container tier **base** before optional primary harmonization
-  /// in [AppTheme].
-  static const Color darkSurfaceContainerHighestBase = Color(0xFF2E3F3B);
+  /// Dark top container tier (`#2E3F3B`).
+  static const Color darkSurfaceContainerHighestBase =
+      darkSurfaceContainerHighBase;
 
   /// Dark [ColorScheme] error tone for Material dark scheme.
   static const Color darkSchemeError = Color(0xFFFFB4AB);

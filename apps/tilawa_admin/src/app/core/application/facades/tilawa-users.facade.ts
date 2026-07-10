@@ -2,20 +2,14 @@ import { Injectable, inject, signal } from '@angular/core';
 
 import { AuthFacade } from './auth.facade';
 import { ListTilawaUsersUseCase } from '../../domain/usecases/tilawa-user.usecases';
-import {
-  AUTH_ADMIN_GATEWAY,
-} from '../../domain/repositories/auth-admin.gateway';
+import { AUTH_ADMIN_GATEWAY } from '../../domain/repositories/auth-admin.gateway';
 import { RequestUserDeletionUseCase } from '../../domain/usecases/user-deletion.usecases';
 import { I18nService } from '../../i18n/i18n.service';
 import {
   TILAWA_USER_DEFAULT_SORT,
   TilawaUserFilters,
 } from '../../domain/entities/tilawa-user.entity';
-import {
-  DEFAULT_PAGE_SIZE,
-  SortRequest,
-  sortsEqual,
-} from '../../domain/entities/pagination.types';
+import { DEFAULT_PAGE_SIZE, SortRequest, sortsEqual } from '../../domain/entities/pagination.types';
 
 type LoadState = 'idle' | 'loading' | 'success' | 'error';
 
@@ -95,18 +89,14 @@ export class TilawaUsersFacade {
 
       const mapped = page.items.map((user) => this.toListItem(user));
       const combined = append ? [...this.listItems(), ...mapped] : mapped;
-      const enriched = this.markDuplicateEmails(
-        await this.enrichWithAdminClaims(combined),
-      );
+      const enriched = this.markDuplicateEmails(await this.enrichWithAdminClaims(combined));
       this.listItems.set(enriched);
       this.nextCursor.set(page.nextCursor);
       this.hasMore.set(page.hasMore);
       this.listState.set('success');
     } catch (error) {
       this.listState.set('error');
-      this.listError.set(
-        error instanceof Error ? error.message : 'Failed to load users.',
-      );
+      this.listError.set(error instanceof Error ? error.message : 'Failed to load users.');
     }
   }
 
@@ -121,10 +111,7 @@ export class TilawaUsersFacade {
     });
   }
 
-  async changeSort(
-    filters: TilawaUserFilters,
-    sort: SortRequest,
-  ): Promise<void> {
+  async changeSort(filters: TilawaUserFilters, sort: SortRequest): Promise<void> {
     await this.loadList(filters, { sort, append: false, cursor: null });
   }
 
@@ -132,11 +119,7 @@ export class TilawaUsersFacade {
     this.actionError.set(null);
   }
 
-  async requestUserDeletion(
-    userId: string,
-    reason: string,
-    confirmEmail: string,
-  ): Promise<void> {
+  async requestUserDeletion(userId: string, reason: string, confirmEmail: string): Promise<void> {
     this.actionLoading.set(true);
     this.actionError.set(null);
     try {
@@ -168,15 +151,12 @@ export class TilawaUsersFacade {
     };
   }
 
-  private markDuplicateEmails(
-    items: TilawaUserListItemVm[],
-  ): TilawaUserListItemVm[] {
+  private markDuplicateEmails(items: TilawaUserListItemVm[]): TilawaUserListItemVm[] {
     const emailCounts = countEmailsByNormalizedAddress(items);
     return items.map((user) => {
       const normalizedEmail = user.email.trim().toLowerCase();
       const hasDuplicateEmail =
-        normalizedEmail.length > 0 &&
-        (emailCounts.get(normalizedEmail) ?? 0) > 1;
+        normalizedEmail.length > 0 && (emailCounts.get(normalizedEmail) ?? 0) > 1;
       return { ...user, hasDuplicateEmail };
     });
   }
@@ -235,5 +215,3 @@ export class TilawaUsersFacade {
     }));
   }
 }
-
-

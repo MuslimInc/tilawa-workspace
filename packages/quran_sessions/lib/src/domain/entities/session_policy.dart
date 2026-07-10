@@ -26,29 +26,19 @@ class TeacherEligibilityPolicy extends Equatable {
   const TeacherEligibilityPolicy({
     required this.allowedStudentGender,
     required this.canTeachChildren,
-    this.requiresGuardianApprovalForChildren = false,
   });
 
   final TeacherAllowedStudentGender allowedStudentGender;
   final bool canTeachChildren;
 
-  /// When true, a booking for a child student emits
-  /// [GuardianApprovalRequiredFailure] instead of proceeding directly.
-  final bool requiresGuardianApprovalForChildren;
-
   /// Fully unrestricted — accepts all genders and ages.
   static const unrestricted = TeacherEligibilityPolicy(
     allowedStudentGender: TeacherAllowedStudentGender.both,
     canTeachChildren: true,
-    requiresGuardianApprovalForChildren: false,
   );
 
   @override
-  List<Object?> get props => [
-    allowedStudentGender,
-    canTeachChildren,
-    requiresGuardianApprovalForChildren,
-  ];
+  List<Object?> get props => [allowedStudentGender, canTeachChildren];
 }
 
 // ── QuranSessionSafetyPolicy ──────────────────────────────────────────────────
@@ -66,7 +56,6 @@ class QuranSessionSafetyPolicy extends Equatable {
     this.globalAllowFemaleTeacherMaleStudent = true,
     this.videoCallAllowedForChildren = false,
     this.recordingEnabled = false,
-    this.requireGuardianApprovalForChildren = false,
   });
 
   /// Age (years) below which a student is considered a child.
@@ -96,7 +85,6 @@ class QuranSessionSafetyPolicy extends Equatable {
 
   final bool videoCallAllowedForChildren;
   final bool recordingEnabled;
-  final bool requireGuardianApprovalForChildren;
 
   static const defaultPolicy = QuranSessionSafetyPolicy();
 
@@ -139,6 +127,5 @@ class QuranSessionSafetyPolicy extends Equatable {
     globalAllowFemaleTeacherMaleStudent,
     videoCallAllowedForChildren,
     recordingEnabled,
-    requireGuardianApprovalForChildren,
   ];
 }

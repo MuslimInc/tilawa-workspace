@@ -6,6 +6,8 @@ import '../entities/session_call_type.dart';
 import '../entities/session_pricing_type.dart';
 import '../failures/quran_sessions_failure.dart';
 import '../gateways/session_mutation_gateway.dart';
+import '../policies/booking_idempotency.dart';
+import '../policies/platform_scheduling_policy.dart';
 import '../policies/session_mode_policy.dart';
 import '../providers/auth_session_provider.dart';
 import '../repositories/teacher_profile_repository.dart';
@@ -18,7 +20,8 @@ class SubmitSessionBookingUseCase {
     required this._getAvailability,
     required this._authSession,
     required this._teacherProfiles,
-    this.defaultSlotDurationMinutes = 30,
+    this.defaultSlotDurationMinutes =
+        PlatformSchedulingPolicy.defaultSlotDurationMinutes,
     this.sessionModePolicy = SessionModePolicy.freeBeta,
   });
 
@@ -33,8 +36,10 @@ class SubmitSessionBookingUseCase {
     required String teacherId,
     required String slotId,
     required SessionCallType callType,
+    SessionPricingType? pricingType,
     String? paymentReference,
     String? studentNote,
+    String? idempotencyKey,
   }) async {
     final studentId = _authSession.currentUserId;
     if (studentId == null || studentId.isEmpty) {
@@ -90,9 +95,11 @@ class SubmitSessionBookingUseCase {
 
     final startsAt = slotStart.toUtc();
     final endsAt = startsAt.add(Duration(minutes: defaultSlotDurationMinutes));
-    final pricingType = paymentReference == null
-        ? SessionPricingType.free
-        : SessionPricingType.fixedPerSession;
+    final resolvedPricingType =
+        pricingType ??
+        (paymentReference == null
+            ? SessionPricingType.free
+            : SessionPricingType.fixedPerSession);
 
     final created = await _mutationGateway.createBooking(
       teacherId: teacherId,
@@ -101,9 +108,10 @@ class SubmitSessionBookingUseCase {
       startsAt: startsAt,
       endsAt: endsAt,
       callType: callType,
-      pricingType: pricingType,
+      pricingType: resolvedPricingType,
       paymentReference: paymentReference,
       studentNote: studentNote,
+      idempotencyKey: idempotencyKey ?? BookingIdempotency.generateClientKey(),
     );
     return created.map(
       (outcome) => SessionBookingOutcome(

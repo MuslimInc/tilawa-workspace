@@ -98,10 +98,6 @@ void main() {
                 builder: (context) {
                   return Scaffold(
                     appBar: TilawaCatalogAppBar(
-                      preferredHeight:
-                          TilawaAppBarConfig.catalogTitleAndSearchHeight(
-                            context,
-                          ),
                       title: 'Favorites',
                       bottomContent: TilawaSearchField(
                         hintText: 'Search',

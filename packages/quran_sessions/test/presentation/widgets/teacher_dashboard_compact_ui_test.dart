@@ -88,6 +88,61 @@ void main() {
       expect(find.byIcon(Icons.more_vert), findsOneWidget);
     });
 
+    testWidgets('overflow cancel menu uses colorScheme.surface background', (
+      tester,
+    ) async {
+      final theme = AppTheme.getLightTheme(
+        primaryColor: AppColors.defaultPrimary,
+      );
+      final scheme = theme.colorScheme;
+      final session = makeSession(
+        lifecycleStatus: SessionLifecycleStatus.scheduled,
+        startsAt: DateTime.now().add(const Duration(minutes: 20)),
+      );
+
+      await tester.pumpWidget(
+        MaterialApp(
+          theme: theme,
+          locale: const Locale('ar'),
+          localizationsDelegates: const [
+            ...QuranSessionsLocalizations.localizationsDelegates,
+            GlobalMaterialLocalizations.delegate,
+            GlobalWidgetsLocalizations.delegate,
+            GlobalCupertinoLocalizations.delegate,
+          ],
+          supportedLocales: QuranSessionsLocalizations.supportedLocales,
+          home: Scaffold(
+            body: TutorSessionCompactCard(
+              session: session,
+              studentDisplayName: 'Omar Hassan',
+              now: DateTime.now(),
+              onJoin: () {},
+              onCancel: () {},
+              showCancelInOverflowMenu: true,
+            ),
+          ),
+        ),
+      );
+      await tester.pumpAndSettle();
+
+      await tester.tap(find.byIcon(Icons.more_vert));
+      await tester.pumpAndSettle();
+
+      final cancelLabel = find.text('إلغاء');
+      expect(cancelLabel, findsOneWidget);
+      final menuMaterial = tester.widget<Material>(
+        find
+            .ancestor(
+              of: cancelLabel,
+              matching: find.byWidgetPredicate(
+                (widget) => widget is Material && widget.color != null,
+              ),
+            )
+            .first,
+      );
+      expect(menuMaterial.color, scheme.surface);
+    });
+
     testWidgets('join disabled before window with not-yet hint', (
       tester,
     ) async {
@@ -112,6 +167,34 @@ void main() {
       final joinFinder = find.widgetWithText(TilawaButton, 'Join');
       expect(joinFinder, findsOneWidget);
       final joinButton = tester.widget<TilawaButton>(joinFinder);
+      check(joinButton.onPressed).isNull();
+    });
+
+    testWidgets('join button shows loading while preparing', (tester) async {
+      final session = makeSession(
+        lifecycleStatus: SessionLifecycleStatus.scheduled,
+        startsAt: DateTime.now().add(const Duration(minutes: 20)),
+      );
+
+      await tester.pumpWidget(
+        wrap(
+          TutorSessionCompactCard(
+            session: session,
+            studentDisplayName: 'Omar Hassan',
+            now: DateTime.now(),
+            onJoin: () {},
+            isJoinLoading: true,
+          ),
+        ),
+      );
+      await tester.pump();
+
+      final joinButton = tester.widget<TilawaButton>(
+        find.byWidgetPredicate(
+          (widget) => widget is TilawaButton && widget.isLoading,
+        ),
+      );
+      check(joinButton.isLoading).isTrue();
       check(joinButton.onPressed).isNull();
     });
 

@@ -38,6 +38,9 @@ class LiveAgoraRtcSessionHandle implements AgoraRtcSessionHandle {
 
   @override
   Future<void> setCameraEnabled(bool enabled) async {
+    // muteLocalVideoStream alone stops remote publish but keeps local preview
+    // active; enableLocalVideo keeps capture/preview aligned with UI toggle.
+    await _engine.enableLocalVideo(enabled);
     await _engine.muteLocalVideoStream(!enabled);
   }
 

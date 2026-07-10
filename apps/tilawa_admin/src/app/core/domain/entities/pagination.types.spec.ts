@@ -1,9 +1,6 @@
 import { describe, expect, it } from 'vitest';
 
-import {
-  resolveSort,
-  sortsEqual,
-} from '../../domain/entities/pagination.types';
+import { resolveSort, sortsEqual } from '../../domain/entities/pagination.types';
 import { TILAWA_USER_DEFAULT_SORT } from '../../domain/entities/tilawa-user.entity';
 import { QS_USER_DEFAULT_SORT } from '../../domain/entities/quran-sessions-user.entity';
 
@@ -26,11 +23,10 @@ describe('pagination.types', () => {
 
   it('resolveSort falls back when field unsupported', () => {
     expect(
-      resolveSort(
-        { field: 'unknown', direction: 'asc' },
-        TILAWA_USER_DEFAULT_SORT,
-        ['createdAt', 'email'],
-      ),
+      resolveSort({ field: 'unknown', direction: 'asc' }, TILAWA_USER_DEFAULT_SORT, [
+        'createdAt',
+        'email',
+      ]),
     ).toEqual(TILAWA_USER_DEFAULT_SORT);
   });
 

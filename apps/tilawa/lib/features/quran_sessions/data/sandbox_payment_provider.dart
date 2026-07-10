@@ -5,9 +5,9 @@ import 'package:tilawa/features/auth/domain/services/callable_session_payload_bu
 
 /// Staging sandbox payment — no real PSP SDK.
 ///
-/// Registered only when [AppLaunchConfig.quranSessionsPaidBookingSandboxEnabled]
-/// is true. Implements [PaymentProvider] for DI symmetry; use
-/// [confirmBookingPayment] for the paid booking flow.
+/// Registered only when Admin platform config enables wallet support.
+/// Implements [PaymentProvider] for DI symmetry; use [confirmBookingPayment]
+/// for the paid booking flow.
 class SandboxPaymentProvider
     implements PaymentProvider, SessionPaymentConfirmation {
   SandboxPaymentProvider(

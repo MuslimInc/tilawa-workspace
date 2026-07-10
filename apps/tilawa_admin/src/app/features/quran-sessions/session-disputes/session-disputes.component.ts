@@ -67,9 +67,7 @@ export class SessionDisputesComponent implements OnInit {
 
   buildFilters(): SessionDisputeFilters {
     return {
-      status: this.statusFilter
-        ? (this.statusFilter as SessionDisputeFilters['status'])
-        : null,
+      status: this.statusFilter ? (this.statusFilter as SessionDisputeFilters['status']) : null,
       search: this.searchQuery || null,
     };
   }

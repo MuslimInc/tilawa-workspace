@@ -58,7 +58,13 @@ void main() {
       expect(result, AuthResult.success(user: tUser));
       await Future<void>.delayed(Duration.zero);
       verify(mockAuthRepository.signInWithGoogle()).called(1);
-      verify(mockUserRepository.saveUserData(tUser)).called(1);
+      verify(
+        mockUserRepository.saveUserData(
+          tUser,
+          authProvider: 'google',
+          profileCompleted: true,
+        ),
+      ).called(1);
     },
   );
 
@@ -76,7 +82,13 @@ void main() {
 
       expect(result, AuthResult.success(user: tUser));
       await Future<void>.delayed(Duration.zero);
-      verify(mockUserRepository.saveUserData(tUser)).called(1);
+      verify(
+        mockUserRepository.saveUserData(
+          tUser,
+          authProvider: 'google',
+          profileCompleted: true,
+        ),
+      ).called(1);
     },
   );
 

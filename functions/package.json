@@ -9,6 +9,8 @@
     "deploy": "firebase deploy --only functions",
     "seed:market-configs": "ts-node --project tsconfig.scripts.json scripts/seedMarketConfigs.ts",
     "seed:market-configs:apply": "ts-node --project tsconfig.scripts.json scripts/seedMarketConfigs.ts --apply",
+    "seed:platform-config": "ts-node --project tsconfig.scripts.json scripts/seedPlatformConfig.ts",
+    "seed:platform-config:apply": "ts-node --project tsconfig.scripts.json scripts/seedPlatformConfig.ts --apply",
     "seed:staging-teachers": "ts-node --project tsconfig.scripts.json scripts/seedStagingTeachers.ts",
     "seed:staging-teachers:apply": "ts-node --project tsconfig.scripts.json scripts/seedStagingTeachers.ts --apply",
     "admin:list-pending-applications": "ts-node --project tsconfig.scripts.json scripts/listPendingTeacherApplications.ts",
@@ -21,14 +23,19 @@
     "quran-sessions:staging-smoke": "ts-node --project tsconfig.scripts.json scripts/stagingFreeBetaSmoke.ts",
     "quran-sessions:verify-teacher-activation": "ts-node --project tsconfig.scripts.json scripts/verifyTeacherActivation.ts",
     "quran-sessions:backfill-approved-activation": "ts-node --project tsconfig.scripts.json scripts/backfillApprovedTeacherActivation.ts",
+    "quran-sessions:set-teacher-pricing": "ts-node --project tsconfig.scripts.json scripts/setTeacherPricingAdmin.ts",
+    "quran-sessions:set-teacher-pricing:apply": "ts-node --project tsconfig.scripts.json scripts/setTeacherPricingAdmin.ts --apply",
     "migrate:fcm-tokens": "ts-node --project tsconfig.scripts.json scripts/migrateFcmTokensToActiveField.ts",
     "migrate:fcm-tokens:apply": "ts-node --project tsconfig.scripts.json scripts/migrateFcmTokensToActiveField.ts --apply",
-    "test": "node -r ts-node/register --test test/**/*.test.ts",
+    "test": "node -r ts-node/register --test test/*.test.ts test/**/*.test.ts",
     "test:integration": "firebase emulators:exec --only firestore --project demo-tilawa \"$(command -v node) -r ts-node/register --test --test-concurrency=1 test-integration/*.test.ts\"",
     "test:rules": "firebase emulators:exec --only firestore --project demo-tilawa-rules \"$(command -v node) -r ts-node/register --test --test-concurrency=1 test-rules/*.test.ts\"",
     "test:emulator": "npm run test:integration && npm run test:rules",
     "admin:backfill-teacher-profiles": "ts-node --project tsconfig.scripts.json scripts/backfillTeacherProfiles.ts",
-    "admin:audit-duplicate-users": "ts-node --project tsconfig.scripts.json scripts/auditDuplicateUsers.ts"
+    "admin:audit-duplicate-users": "ts-node --project tsconfig.scripts.json scripts/auditDuplicateUsers.ts",
+    "verify:quran-staging-existing-auth-accounts": "ts-node --project tsconfig.scripts.json scripts/verifyQuranStagingExistingAuthAccounts.ts",
+    "seed:quran-staging-existing-maestro-accounts": "ts-node --project tsconfig.scripts.json scripts/seedQuranStagingExistingMaestroAccounts.ts",
+    "seed:quran-staging-existing-maestro-accounts:apply": "ts-node --project tsconfig.scripts.json scripts/seedQuranStagingExistingMaestroAccounts.ts --apply"
   },
   "engines": {
     "node": "22"

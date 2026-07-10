@@ -4,6 +4,8 @@ import 'package:bloc_test/bloc_test.dart';
 import 'package:checks/checks.dart';
 import 'package:dartz_plus/dartz_plus.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:tilawa/features/quran_sessions/quran_sessions_platform_config_store.dart';
+import 'package:tilawa/features/quran_sessions/domain/entities/quran_sessions_platform_config.dart';
 import 'package:quran_sessions/quran_sessions.dart';
 import 'package:tilawa/core/bootstrap/app_launch_config.dart';
 import 'package:tilawa/features/quran_sessions/data/fake_auth_session_provider.dart';
@@ -105,9 +107,22 @@ void main() {
       const FakeAuthSessionProvider(userId: 'user_1'),
     );
     scopeGetIt().registerSingleton<AppLaunchConfig>(
-      const AppLaunchConfig(
-        teacherApplicationEnabled: true,
-        teacherApplicationDiscoverability: 'profileOnly',
+      const AppLaunchConfig(),
+    );
+    scopeGetIt().registerSingleton<QuranSessionsPlatformConfigStore>(
+      QuranSessionsPlatformConfigStore()..setConfig(
+        QuranSessionsPlatformConfig(
+          quranSessionsEnabled: true,
+          studentEntryEnabled: false,
+          bookingEnabled: true,
+          bookingMode: 'requiresTutorApproval',
+          sessionMode: 'videoOnly',
+          enabledCallProviders: {'mock'},
+          teacherApplicationEnabled: true,
+          teacherApplicationEntryEnabled: true,
+          homeTeacherApplicationCardEnabled: false,
+          teacherApplicationDiscoverability: 'profileOnly',
+        ),
       ),
     );
   });
@@ -154,9 +169,22 @@ void main() {
     'still loads capability when teacher application feature disabled',
     build: () {
       scopeGetIt().registerSingleton<AppLaunchConfig>(
-        const AppLaunchConfig(
-          teacherApplicationEnabled: false,
-          teacherApplicationDiscoverability: 'profileOnly',
+        const AppLaunchConfig(),
+      );
+      scopeGetIt().registerSingleton<QuranSessionsPlatformConfigStore>(
+        QuranSessionsPlatformConfigStore()..setConfig(
+          QuranSessionsPlatformConfig(
+            quranSessionsEnabled: true,
+            studentEntryEnabled: false,
+            bookingEnabled: true,
+            bookingMode: 'requiresTutorApproval',
+            sessionMode: 'videoOnly',
+            enabledCallProviders: {'mock'},
+            teacherApplicationEnabled: false,
+            teacherApplicationEntryEnabled: false,
+            homeTeacherApplicationCardEnabled: false,
+            teacherApplicationDiscoverability: 'profileOnly',
+          ),
         ),
       );
       scopeGetIt().registerSingleton<GetCurrentUserTeacherCapabilityUseCase>(

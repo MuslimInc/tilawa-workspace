@@ -6,11 +6,7 @@ import {
 } from '../../domain/usecases/session-report.usecases';
 import { SessionReportFilters } from '../../domain/entities/session-report-summary.entity';
 import { SESSION_REPORT_DEFAULT_SORT } from '../../domain/entities/session-report-summary.entity';
-import {
-  DEFAULT_PAGE_SIZE,
-  SortRequest,
-  sortsEqual,
-} from '../../domain/entities/pagination.types';
+import { DEFAULT_PAGE_SIZE, SortRequest, sortsEqual } from '../../domain/entities/pagination.types';
 
 type LoadState = 'idle' | 'loading' | 'success' | 'error';
 
@@ -91,9 +87,7 @@ export class SessionReportsFacade {
       this.listState.set('success');
     } catch (error) {
       this.listState.set('error');
-      this.listError.set(
-        error instanceof Error ? error.message : 'Failed to load reports.',
-      );
+      this.listError.set(error instanceof Error ? error.message : 'Failed to load reports.');
     }
   }
 
@@ -108,10 +102,7 @@ export class SessionReportsFacade {
     });
   }
 
-  async changeSort(
-    filters: SessionReportFilters,
-    sort: SortRequest,
-  ): Promise<void> {
+  async changeSort(filters: SessionReportFilters, sort: SortRequest): Promise<void> {
     await this.loadList(filters, { sort, append: false, cursor: null });
   }
 
@@ -132,9 +123,7 @@ export class SessionReportsFacade {
       this.detailState.set('success');
     } catch (error) {
       this.detailState.set('error');
-      this.detailError.set(
-        error instanceof Error ? error.message : 'Failed to load report.',
-      );
+      this.detailError.set(error instanceof Error ? error.message : 'Failed to load report.');
     }
   }
 
@@ -152,9 +141,7 @@ export class SessionReportsFacade {
       createdAt: item.createdAt,
       updatedAt: item.updatedAt,
       descriptionPreview:
-        item.description.length > 80
-          ? `${item.description.slice(0, 80)}…`
-          : item.description,
+        item.description.length > 80 ? `${item.description.slice(0, 80)}…` : item.description,
     };
   }
 

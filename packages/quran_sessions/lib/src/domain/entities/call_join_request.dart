@@ -15,6 +15,7 @@ class CallJoinRequest {
     this.joinUrl,
     this.providerSessionId,
     this.joinToken,
+    this.forceTakeover = false,
   });
 
   final String sessionId;
@@ -30,4 +31,8 @@ class CallJoinRequest {
 
   /// Short-lived join token (server-issued only).
   final String? joinToken;
+
+  /// ADR-008 Phase 2: user-initiated takeover of the caller's own other
+  /// device for a live session. False for normal joins.
+  final bool forceTakeover;
 }

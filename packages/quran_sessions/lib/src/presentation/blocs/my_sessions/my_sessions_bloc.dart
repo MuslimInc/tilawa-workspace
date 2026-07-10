@@ -48,13 +48,18 @@ class MySessionsBloc extends Bloc<MySessionsEvent, MySessionsState> {
     result.fold(
       (failure) => emit(MySessionsFailure(failure)),
       (page) {
-        if (page.upcoming.isEmpty && page.past.isEmpty) {
+        if (page.upcoming.isEmpty &&
+            page.pending.isEmpty &&
+            page.cancelled.isEmpty &&
+            page.past.isEmpty) {
           emit(const MySessionsEmpty());
           return;
         }
         emit(
           MySessionsSuccess(
             upcoming: page.upcoming,
+            pending: page.pending,
+            cancelled: page.cancelled,
             past: page.past,
             pastNextCursor: page.pastNextCursor,
           ),
@@ -136,6 +141,9 @@ class MySessionsBloc extends Bloc<MySessionsEvent, MySessionsState> {
                 upcoming: current.upcoming
                     .where((s) => s.bookingId != event.bookingId)
                     .toList(),
+                pending: current.pending
+                    .where((s) => s.bookingId != event.bookingId)
+                    .toList(),
               )
               .clearCancellation(),
         );
@@ -154,7 +162,10 @@ class MySessionsBloc extends Bloc<MySessionsEvent, MySessionsState> {
       current.copyWith(clearJoinFailure: true, joinInProgress: event.sessionId),
     );
 
-    final result = await _joinSession(sessionId: event.sessionId);
+    final result = await _joinSession(
+      sessionId: event.sessionId,
+      forceTakeover: event.forceTakeover,
+    );
 
     final after = state;
     if (after is! MySessionsSuccess) return;

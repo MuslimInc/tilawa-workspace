@@ -3,6 +3,7 @@ import 'package:checks/checks.dart';
 import 'package:dartz_plus/dartz_plus.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:quran_sessions/src/domain/entities/teacher_availability.dart';
+import 'package:quran_sessions/src/domain/entities/weekly_schedule.dart';
 import 'package:quran_sessions/src/domain/failures/quran_sessions_failure.dart';
 import 'package:quran_sessions/src/domain/usecases/get_teacher_availability_usecase.dart';
 import 'package:quran_sessions/src/domain/usecases/request_session_reschedule_via_server_usecase.dart';
@@ -26,6 +27,7 @@ class _FakeGetAvailability implements GetTeacherAvailabilityUseCase {
     String teacherId, {
     required DateTime from,
     required DateTime to,
+    WeeklySchedule? preloadedSchedule,
   }) async {
     if (nextResult != null) return nextResult!;
     return Right(_slots);

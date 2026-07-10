@@ -14,8 +14,8 @@ describe('ReviewTeacherApplicationUseCase', () => {
 
     const useCase = new ReviewTeacherApplicationUseCase(gateway);
 
-    await expect(
-      useCase.execute('app-1', ApplicationModerationAction.Reject),
-    ).rejects.toThrow('A reason is required');
+    await expect(useCase.execute('app-1', ApplicationModerationAction.Reject)).rejects.toThrow(
+      'A reason is required',
+    );
   });
 });

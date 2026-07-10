@@ -20,10 +20,7 @@ export interface CallTrackingRepository {
   ): Promise<Map<string, CallTrackingSummary>>;
 
   /** Bounded, paginated read of raw events ordered by recordedAt desc. */
-  listEvents(
-    sessionId: string,
-    page: PageRequest,
-  ): Promise<PageResult<CallEvent>>;
+  listEvents(sessionId: string, page: PageRequest): Promise<PageResult<CallEvent>>;
 }
 
 export const CALL_TRACKING_REPOSITORY = new InjectionToken<CallTrackingRepository>(

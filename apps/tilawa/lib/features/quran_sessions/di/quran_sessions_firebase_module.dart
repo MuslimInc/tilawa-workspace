@@ -7,6 +7,7 @@ import 'package:shared_preferences/shared_preferences.dart';
 import 'package:tilawa/core/bootstrap/app_launch_config.dart';
 import 'package:tilawa/core/di/get_it_idempotent.dart';
 import 'package:tilawa/features/auth/domain/services/callable_session_payload_builder.dart';
+import 'package:tilawa/features/quran_sessions/quran_sessions_feature_flags.dart';
 import 'package:tilawa_core/services/performance_monitoring_service.dart';
 
 import '../data/firebase/firebase_auth_session_provider.dart';
@@ -15,6 +16,7 @@ import '../data/firebase/firebase_reschedule_request_repository.dart';
 import '../data/firebase/firebase_session_aggregate_repository.dart';
 import '../data/firebase/firebase_session_command_gateway.dart';
 import '../data/firebase/firebase_session_mutation_gateway.dart';
+import '../data/firebase/firebase_session_pricing_quote_gateway.dart';
 import '../data/firebase/firebase_session_notification_gateway.dart';
 import '../data/firebase/firestore_availability_repository.dart';
 import '../data/firebase/firestore_booked_slot_lock_data_source.dart';
@@ -25,12 +27,12 @@ import '../data/firebase/firestore_schedule_repository.dart';
 import '../data/firebase/firestore_session_policy_repository.dart';
 import '../data/firebase/firestore_session_repository.dart';
 import '../data/firebase/firestore_teacher_application_access_data_source.dart';
+import '../data/firebase/firestore_teacher_dashboard_summary_data_source.dart';
 import '../data/firebase/firestore_teacher_application_repository.dart';
 import '../data/firebase/firestore_teacher_profile_repository.dart';
 import '../data/firebase/firestore_teacher_repository.dart';
 import '../data/manual_payment_link_launcher.dart';
 import '../data/firebase/firestore_user_profile_repository.dart';
-import '../data/firebase/firebase_guardian_approval_repository.dart';
 import '../data/firebase/firestore_wallet_data_source.dart';
 import '../data/shared_preferences_friday_review_reminder_store.dart';
 import '../data/firebase/firebase_call_telemetry_gateway.dart';
@@ -73,6 +75,14 @@ class QuranSessionsFirebaseModule {
     );
     sl.registerLazySingletonIfAbsent<SessionMutationGateway>(
       () => mutationGateway,
+    );
+
+    sl.registerLazySingletonIfAbsent<SessionPricingQuoteGateway>(
+      () => FirebaseSessionPricingQuoteGateway(
+        functions,
+        sl<CallableSessionPayloadBuilder>(),
+        sl<PerformanceMonitoringService>(),
+      ),
     );
 
     final aggregateRepository = FirebaseSessionAggregateRepository(
@@ -146,7 +156,7 @@ class QuranSessionsFirebaseModule {
       ),
     );
 
-    if (config.quranSessionsPaidBookingSandboxEnabled) {
+    if (quranSessionsEffectivePlatformConfig().walletEnabled) {
       final sandbox = SandboxPaymentProvider(
         functions,
         sl<CallableSessionPayloadBuilder>(),
@@ -162,6 +172,9 @@ class QuranSessionsFirebaseModule {
     }
 
     QuranSessionsRtcModule.register(sl, config);
+    configureInAppCallShellCallSurface(
+      QuranSessionsRtcModule.buildInAppCallSurfaceBuilder(sl),
+    );
 
     sl.registerLazySingletonIfAbsent<SessionCallProviderEventHub>(
       () => SessionCallProviderEventHub(),
@@ -187,18 +200,6 @@ class QuranSessionsFirebaseModule {
       () => CallProviderAdapter(sl<SessionCallProvider>()),
     );
 
-    sl.registerLazySingletonIfAbsent<GuardianApprovalRepository>(
-      () => FirebaseGuardianApprovalRepository(
-        functions,
-        sl<CallableSessionPayloadBuilder>(),
-      ),
-    );
-    sl.registerLazySingletonIfAbsent<ApproveChildGuardianBookingUseCase>(
-      () => ApproveChildGuardianBookingUseCase(
-        sl<GuardianApprovalRepository>(),
-      ),
-    );
-
     sl.registerLazySingletonIfAbsent<JoinSessionUseCase>(
       () => JoinSessionUseCase(
         sessionRepository: sl<SessionRepository>(),
@@ -208,6 +209,20 @@ class QuranSessionsFirebaseModule {
         callTelemetry: sl<QuranSessionCallTelemetryCoordinator>(),
       ),
     );
+
+    // One-read dashboard summary source. Registered only when the launch
+    // flag is on; GetTeacherDashboardUseCase treats an absent registration as
+    // "summary path disabled" and uses the legacy multi-fetch path.
+    if (config.teacherDashboardSummaryReadEnabled) {
+      sl.registerLazySingletonIfAbsent<TeacherDashboardSummarySource>(
+        () => TeacherDashboardSummarySourceImpl(
+          FirestoreTeacherDashboardSummaryDataSource(
+            firestore,
+            sl<PerformanceMonitoringService>(),
+          ),
+        ),
+      );
+    }
 
     // Application-layer caching use cases (GetTeacherDashboardUseCase,
     // InvalidateQuranSessionCacheUseCase, QuranSessionCacheStore, …) are only

@@ -153,19 +153,10 @@ class ValidateBookingEligibilityUseCase {
       );
     }
 
-    // ── 8. Age check ───────────────────────────────────────────────────────
+    // ── 8. Age (child students need a teacher who accepts children) ─────────
     if (ageGroup == UserAgeGroup.child) {
       if (!teacherPolicy.canTeachChildren) {
         return Left(AgeNotAllowedFailure(studentAgeGroup: ageGroup.name));
-      }
-      if (teacherPolicy.requiresGuardianApprovalForChildren ||
-          policy.requireGuardianApprovalForChildren) {
-        final hasGuardian =
-            student.guardianId != null && student.guardianId!.isNotEmpty;
-        final hasApproval = student.guardianChildBookingApprovedAt != null;
-        if (!hasGuardian || !hasApproval) {
-          return Left(GuardianApprovalRequiredFailure(studentId: studentId));
-        }
       }
     }
 

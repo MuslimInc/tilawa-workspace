@@ -3,8 +3,10 @@ import 'package:intl/intl.dart';
 import 'package:quran_sessions/core/l10n_extensions.dart';
 import 'package:tilawa_ui_kit/tilawa_ui_kit.dart';
 
+import '../../boundaries/manual_payment_link_launcher.dart';
 import '../../domain/entities/quran_session.dart';
 import '../../domain/entities/session_call_type.dart';
+import '../../domain/entities/manual_payment_market_config.dart';
 import '../../domain/entities/session_lifecycle_status.dart';
 import '../session_join/session_join_ui_state.dart';
 import 'quran_session_action_menu.dart';
@@ -27,6 +29,7 @@ class QuranSessionCard extends StatelessWidget {
     this.onReview,
     this.isJoinLoading = false,
     this.variant = QuranSessionCardVariant.upcoming,
+    this.viewerUserId,
   });
 
   final QuranSession session;
@@ -42,6 +45,9 @@ class QuranSessionCard extends StatelessWidget {
   final VoidCallback? onReview;
   final bool isJoinLoading;
   final QuranSessionCardVariant variant;
+
+  /// Signed-in viewer auth uid — enables staging QA join-window bypass in UI.
+  final String? viewerUserId;
 
   @override
   Widget build(BuildContext context) {
@@ -73,6 +79,13 @@ class QuranSessionCard extends StatelessWidget {
                 session.effectiveLifecycleStatus ==
                     SessionLifecycleStatus.pendingTutorApproval)
               _PendingTutorApprovalBanner(session: session),
+            if (variant == QuranSessionCardVariant.upcoming &&
+                session.effectiveLifecycleStatus ==
+                    SessionLifecycleStatus.pendingPayment)
+              _PendingPaymentBanner(
+                session: session,
+                teacherName: teacherName,
+              ),
             if (variant == QuranSessionCardVariant.upcoming)
               _UpcomingActionsRow(
                 session: session,
@@ -82,6 +95,7 @@ class QuranSessionCard extends StatelessWidget {
                 onViewDetails: onViewDetails,
                 onReschedule: onReschedule,
                 onCancel: onCancel,
+                viewerUserId: viewerUserId,
               )
             else
               _PastActionsRow(
@@ -97,6 +111,74 @@ class QuranSessionCard extends StatelessWidget {
 }
 
 enum QuranSessionCardVariant { upcoming, past, cancelled }
+
+class _PendingPaymentBanner extends StatelessWidget {
+  const _PendingPaymentBanner({
+    required this.session,
+    required this.teacherName,
+  });
+
+  final QuranSession session;
+  final String? teacherName;
+
+  @override
+  Widget build(BuildContext context) {
+    final l10n = context.quranSessionsL10n;
+    final theme = Theme.of(context);
+    final scheme = theme.colorScheme;
+    final tokens = theme.tokens;
+    final localStart = session.startsAt.toLocal();
+    final dateTimeLabel =
+        '${MaterialLocalizations.of(context).formatFullDate(localStart)} '
+        '${MaterialLocalizations.of(context).formatTimeOfDay(TimeOfDay.fromDateTime(localStart))}';
+    final whatsappUrl = ManualPaymentMarketConfig.egFallback
+        .buildWhatsappPrefillUrl(
+          paymentReference: session.paymentReference ?? session.bookingId,
+          teacher: teacherName ?? session.teacherId,
+          dateTime: dateTimeLabel,
+          amount: l10n.paymentCheckoutAmountPending,
+          paymentMethod: l10n.paymentMethodInstapay,
+        );
+
+    return Padding(
+      padding: EdgeInsets.only(top: tokens.spaceSmall),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          TilawaFeedbackStrip(
+            icon: Icons.hourglass_top_rounded,
+            message: l10n.bookingAwaitingPaymentVerification,
+            backgroundColor: scheme.primaryContainer,
+            foregroundColor: scheme.onPrimaryContainer,
+            variant: TilawaFeedbackVariant.info,
+          ),
+          if (session.paymentReference != null) ...[
+            SizedBox(height: tokens.spaceExtraSmall),
+            Text(
+              '${l10n.paymentReferenceLabel}: ${session.paymentReference}',
+              style: theme.textTheme.bodySmall?.copyWith(
+                color: scheme.onSurfaceVariant,
+              ),
+            ),
+          ],
+          SizedBox(height: tokens.spaceExtraSmall),
+          TilawaButton(
+            text: l10n.sendReceiptOnWhatsapp,
+            leadingIcon: const Icon(Icons.chat_outlined),
+            onPressed: () => _openWhatsapp(whatsappUrl),
+            size: TilawaButtonSize.small,
+            variant: TilawaButtonVariant.secondary,
+          ),
+        ],
+      ),
+    );
+  }
+
+  Future<void> _openWhatsapp(String whatsappUrl) async {
+    final launcher = ManualPaymentLinkLauncher.launchUrl;
+    await launcher?.call(whatsappUrl);
+  }
+}
 
 class _SessionHeaderRow extends StatelessWidget {
   const _SessionHeaderRow({
@@ -275,7 +357,7 @@ class _PendingTutorApprovalBanner extends StatelessWidget {
       padding: EdgeInsets.only(top: tokens.spaceSmall),
       child: TilawaFeedbackStrip(
         icon: Icons.hourglass_top_rounded,
-        message: l10n.sessionAwaitingReviewNextSteps,
+        message: l10n.sessionAwaitingTeacherApprovalHint,
         backgroundColor: scheme.primaryContainer,
         foregroundColor: scheme.onPrimaryContainer,
         variant: TilawaFeedbackVariant.info,
@@ -293,6 +375,7 @@ class _UpcomingActionsRow extends StatelessWidget {
     required this.onViewDetails,
     required this.onReschedule,
     required this.onCancel,
+    this.viewerUserId,
   });
 
   final QuranSession session;
@@ -302,6 +385,7 @@ class _UpcomingActionsRow extends StatelessWidget {
   final VoidCallback? onViewDetails;
   final VoidCallback? onReschedule;
   final VoidCallback? onCancel;
+  final String? viewerUserId;
 
   @override
   Widget build(BuildContext context) {
@@ -313,10 +397,12 @@ class _UpcomingActionsRow extends StatelessWidget {
     final joinUiState = resolveSessionJoinUiState(
       lifecycleStatus: session.effectiveLifecycleStatus,
       startsAt: session.startsAt,
+      endsAt: session.endsAt,
       now: now,
       joinInProgress: isJoinLoading,
       joinFailure: null,
       hasOpenedMeeting: false,
+      qaBypassUserId: viewerUserId,
     );
 
     if (joinUiState == SessionJoinUiState.awaitingTutorApproval) {

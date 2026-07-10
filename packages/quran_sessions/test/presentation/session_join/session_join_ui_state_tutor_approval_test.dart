@@ -5,12 +5,14 @@ import 'package:quran_sessions/src/presentation/session_join/session_join_ui_sta
 
 void main() {
   final startsAt = DateTime.utc(2026, 6, 26, 14);
+  final endsAt = startsAt.add(const Duration(hours: 1));
 
   test('pending tutor approval maps to awaitingTutorApproval', () {
     check(
       resolveSessionJoinUiState(
         lifecycleStatus: SessionLifecycleStatus.pendingTutorApproval,
         startsAt: startsAt,
+        endsAt: endsAt,
         now: startsAt.subtract(const Duration(hours: 1)),
         joinInProgress: false,
         joinFailure: null,
@@ -24,6 +26,7 @@ void main() {
       resolveSessionJoinUiState(
         lifecycleStatus: SessionLifecycleStatus.rejectedByTutor,
         startsAt: startsAt,
+        endsAt: endsAt,
         now: startsAt.subtract(const Duration(hours: 1)),
         joinInProgress: false,
         joinFailure: null,

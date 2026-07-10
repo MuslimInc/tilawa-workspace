@@ -170,6 +170,7 @@ TeacherDashboardBloc buildTestTeacherDashboardBloc({
   required CancelSessionViaServerUseCase cancelSession,
   RespondToBookingRequestUseCase? respondToBookingRequest,
   required CompleteSessionViaServerUseCase completeSession,
+  JoinSessionUseCase? joinSession,
   required FakeScheduleRepository scheduleRepo,
   FakeMarketSchedulingConfigRepository? schedulingConfigRepo,
   FakeUserProfileRepository? userProfileRepo,
@@ -213,6 +214,13 @@ TeacherDashboardBloc buildTestTeacherDashboardBloc({
     respondToBookingRequestUseCase:
         respondToBookingRequest ?? buildRespondToBookingRequestUseCase(),
     completeSessionUseCase: completeSession,
+    joinSessionUseCase:
+        joinSession ??
+        buildJoinSessionUseCase(
+          sessionRepository: sessionRepo,
+          teacherProfileRepository: teacherProfiles,
+          userId: teacherId,
+        ),
     fridayReminderStore: reminders,
     teacherUserId: teacherId,
     commitTimerFactory: commitTimerFactory,
@@ -260,9 +268,15 @@ class SpyGetTeacherAvailabilityUseCase extends GetTeacherAvailabilityUseCase {
     String teacherId, {
     required DateTime from,
     required DateTime to,
+    WeeklySchedule? preloadedSchedule,
   }) async {
     callCount++;
-    return super.call(teacherId, from: from, to: to);
+    return super.call(
+      teacherId,
+      from: from,
+      to: to,
+      preloadedSchedule: preloadedSchedule,
+    );
   }
 }
 

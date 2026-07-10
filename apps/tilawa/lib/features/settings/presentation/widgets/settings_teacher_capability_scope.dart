@@ -40,30 +40,16 @@ class SettingsTeacherCapabilityScope extends StatelessWidget {
 
   static bool shouldShowTeachingSectionOf(BuildContext context) {
     final capabilityState = context.watch<TeacherCapabilityCubit>().state;
-    final accessState = context.watch<TeacherApplicationAccessCubit>().state;
     return SettingsTeachingVisibility.shouldShowSection(
       capabilityLoaded: capabilityState.hasLoaded,
       capability: capabilityState.capability,
-      accessResolved: accessState.hasResolved,
-      canApplyAsTeacher: accessState.canApplyAsTeacher,
     );
   }
 
   static bool isTeachingSectionLoadingOf(BuildContext context) {
     final capabilityState = context.watch<TeacherCapabilityCubit>().state;
-    final accessState = context.watch<TeacherApplicationAccessCubit>().state;
-    if (!shouldShowTeachingSectionOf(context) &&
-        !SettingsTeachingVisibility.isLoading(
-          capabilityLoaded: capabilityState.hasLoaded,
-          capability: capabilityState.capability,
-          accessResolved: accessState.hasResolved,
-        )) {
-      return false;
-    }
     return SettingsTeachingVisibility.isLoading(
       capabilityLoaded: capabilityState.hasLoaded,
-      capability: capabilityState.capability,
-      accessResolved: accessState.hasResolved,
     );
   }
 

@@ -9,5 +9,10 @@ abstract interface class CallTokenProvider {
   Future<RtcJoinCredentials> fetchCredentials({
     required String sessionId,
     required String userId,
+
+    /// ADR-008 Phase 2: user-initiated takeover of the caller's own other
+    /// device. The host-app impl also resolves the stable device id and sends
+    /// it alongside this flag so the server can key the live lock.
+    bool forceTakeover = false,
   });
 }

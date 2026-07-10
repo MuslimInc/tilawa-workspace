@@ -44,8 +44,6 @@ enum AccountRestrictionReason {
 /// [gender] and [dateOfBirth] are nullable until the user completes setup.
 /// - [countryCode] + [cityId] are required before booking; they drive
 ///   market config resolution (pricing, teacher availability, currency).
-/// - [guardianId] is set when a parent/guardian account manages this profile
-///   (applies to child students).
 class UserProfile extends Equatable {
   const UserProfile({
     required this.userId,
@@ -60,8 +58,6 @@ class UserProfile extends Equatable {
     this.cityName,
     this.currencyCode,
     this.timezone,
-    this.guardianId,
-    this.guardianChildBookingApprovedAt,
     this.restrictionReason,
     this.learningGoals = const [],
   });
@@ -92,12 +88,6 @@ class UserProfile extends Equatable {
 
   /// IANA timezone resolved from the city config, e.g. 'Africa/Cairo'.
   final String? timezone;
-
-  /// ID of the guardian/parent user, if this is a child's profile.
-  final String? guardianId;
-
-  /// Set when a linked guardian approves Quran Sessions bookings for a child.
-  final DateTime? guardianChildBookingApprovedAt;
 
   /// Populated when [accountStatus] is [AccountStatus.suspended] or
   /// [AccountStatus.blocked].
@@ -163,8 +153,6 @@ class UserProfile extends Equatable {
     String? cityName,
     String? currencyCode,
     String? timezone,
-    String? guardianId,
-    DateTime? guardianChildBookingApprovedAt,
     AccountRestrictionReason? restrictionReason,
     List<StudentLearningGoal>? learningGoals,
   }) => UserProfile(
@@ -180,9 +168,6 @@ class UserProfile extends Equatable {
     cityName: cityName ?? this.cityName,
     currencyCode: currencyCode ?? this.currencyCode,
     timezone: timezone ?? this.timezone,
-    guardianId: guardianId ?? this.guardianId,
-    guardianChildBookingApprovedAt:
-        guardianChildBookingApprovedAt ?? this.guardianChildBookingApprovedAt,
     restrictionReason: restrictionReason ?? this.restrictionReason,
     learningGoals: learningGoals ?? this.learningGoals,
   );
@@ -201,8 +186,6 @@ class UserProfile extends Equatable {
     cityName,
     currencyCode,
     timezone,
-    guardianId,
-    guardianChildBookingApprovedAt,
     restrictionReason,
     learningGoals,
   ];

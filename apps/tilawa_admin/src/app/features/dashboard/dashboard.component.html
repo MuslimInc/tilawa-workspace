@@ -1,8 +1,5 @@
-<div class="space-y-6">
-  <app-page-header
-    [title]="'dashboard_title' | t"
-    [subtitle]="'dashboard_subtitle' | t"
-  >
+<div class="tilawa-page-stack">
+  <app-page-header [title]="'dashboard_title' | t" [subtitle]="'dashboard_subtitle' | t">
     <div actions class="flex flex-wrap gap-2">
       <app-tilawa-button variant="secondary" size="sm">
         {{ 'dashboard_export' | t }}
@@ -36,7 +33,9 @@
         @if (usersCount$ | async; as count) {
           {{ count | number }}
         } @else {
-          <span class="inline-block h-7 w-16 animate-pulse rounded bg-[var(--tilawa-surface-high)]"></span>
+          <span
+            class="inline-block h-7 w-16 animate-pulse rounded bg-[var(--tilawa-surface-high)]"
+          ></span>
         }
       </p>
     </app-tilawa-card>

@@ -3,32 +3,31 @@ import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:tilawa/core/app_legal_urls.dart';
 import 'package:tilawa/core/bootstrap/splash_launch_handoff.dart';
 import 'package:tilawa/core/widgets/deferred_after_first_frame.dart';
 import 'package:tilawa/core/di/injection.dart';
 import 'package:tilawa/core/extensions.dart';
 import 'package:tilawa/core/logging/app_logger.dart';
-import 'package:tilawa/core/utils/legal_url_launcher.dart';
 import 'package:tilawa_core/errors/failures.dart';
 import 'package:tilawa_core/services/app_system_chrome_style.dart';
 import 'package:tilawa_ui_kit/tilawa_ui_kit.dart';
 
+import 'package:go_router/go_router.dart';
 import '../../../../router/app_router.dart';
 import '../../../../router/app_router_config.dart';
 import '../../../localization/presentation/widgets/app_language_switcher.dart';
-import '../../application/account_deletion_flow_tracker.dart';
 import '../../data/services/android_sign_in_platform_policy.dart';
 import '../../data/services/google_sign_in_session_tracker.dart';
 import '../../domain/entities/google_sign_in_launch_readiness.dart';
+import '../../domain/entities/user_entity.dart';
 import '../../domain/gateways/google_sign_in_launch_gateway.dart';
 import '../../domain/usecases/resolve_google_sign_in_launch_use_case.dart';
 import '../bloc/auth_bloc.dart';
 import '../cubit/login_google_sign_in_cubit.dart';
+import '../services/auth_post_sign_in_navigation.dart';
+import '../services/login_auth_bloc_transition_handler.dart';
 import '../services/login_auth_state_diagnostics.dart';
-import '../services/login_auto_sign_in_scheduler.dart';
 import '../services/login_navigate_to_home_scheduler.dart';
-import '../services/login_sign_in_policy_warm_up.dart';
 import '../widgets/login_auth_bloc_listener.dart';
 
 /// Reference teal login canvas aligned with the brand-locked primary.
@@ -66,8 +65,6 @@ class _LoginScreenBody extends StatefulWidget {
 
 class _LoginScreenBodyState extends State<_LoginScreenBody>
     with WidgetsBindingObserver {
-  final LoginAutoSignInScheduler _autoSignInScheduler =
-      LoginAutoSignInScheduler();
   String? _lastLoggedAuthStateLabel;
   bool? _lastLoggedButtonEnabled;
 
@@ -81,8 +78,8 @@ class _LoginScreenBodyState extends State<_LoginScreenBody>
         return;
       }
       unawaited(_recoverLoginSurface(reason: 'initState'));
+      _maybeNavigateIfAlreadyAuthenticated();
     });
-    _scheduleAutoSignInWhenReady();
   }
 
   @override
@@ -98,7 +95,6 @@ class _LoginScreenBodyState extends State<_LoginScreenBody>
     if (state == AppLifecycleState.resumed) {
       unawaited(_recoverLoginSurface(reason: 'lifecycleResumed'));
       _recoverStalledSignIn();
-      _scheduleAutoSignInWhenReady();
     }
   }
 
@@ -128,6 +124,23 @@ class _LoginScreenBodyState extends State<_LoginScreenBody>
     authBloc.add(const CheckAuthStatusEvent());
   }
 
+  void _maybeNavigateIfAlreadyAuthenticated() {
+    final GoRouter? router = GoRouter.maybeOf(context);
+    handleExistingAuthenticatedLoginSession(
+      state: context.read<AuthBloc>().state,
+      routeLocation: router?.state.uri.path ?? const LoginRoute().location,
+      onNavigateAfterAuth: (UserEntity user) {
+        unawaited(
+          schedulePostAuthNavigation(
+            isMounted: () => mounted,
+            userId: user.id,
+            navigate: _navigateAfterAuth,
+          ),
+        );
+      },
+    );
+  }
+
   Future<void> _recoverLoginSurface({required String reason}) async {
     final bool splashPainted = SplashLaunchHandoff.splashRouteHasPainted.value;
     _logGoogleSignInButton(
@@ -144,38 +157,6 @@ class _LoginScreenBodyState extends State<_LoginScreenBody>
     }
   }
 
-  void _scheduleAutoSignInWhenReady() {
-    if (_shouldSuppressLoginAutoSignInForAccountDeletion()) {
-      _logGoogleSignInButton(
-        'scheduleAutoSignIn skipped: account deletion flow',
-      );
-      return;
-    }
-    _autoSignInScheduler.scheduleWhenReady(
-      warmUpPolicy: _warmUpSignInPolicy,
-      shouldSkipAutoSignIn: _shouldSkipAutoSignIn,
-      isMounted: () => mounted,
-      isRouteCurrent: () => ModalRoute.of(context)?.isCurrent ?? false,
-      lifecycleState: () => WidgetsBinding.instance.lifecycleState,
-      onAutoSignIn: _maybeAutoSignIn,
-      log: _logGoogleSignInButton,
-    );
-  }
-
-  Future<void> _warmUpSignInPolicy() {
-    return warmUpLoginSignInPolicy(
-      isPolicyRegistered: getIt.isRegistered<AndroidSignInPlatformPolicy>(),
-      warmUp: () => getIt<AndroidSignInPlatformPolicy>().warmUp(),
-    );
-  }
-
-  bool _shouldSuppressLoginAutoSignInForAccountDeletion() {
-    if (!getIt.isRegistered<AccountDeletionFlowTracker>()) {
-      return false;
-    }
-    return getIt<AccountDeletionFlowTracker>().suppressLoginAutoSignIn;
-  }
-
   bool _shouldSkipAutoSignIn() {
     if (!getIt.isRegistered<AndroidSignInPlatformPolicy>()) {
       return false;
@@ -188,31 +169,6 @@ class _LoginScreenBodyState extends State<_LoginScreenBody>
       return false;
     }
     return getIt<GoogleSignInSessionTracker>().inFlight;
-  }
-
-  void _maybeAutoSignIn() {
-    final bool suppressForAccountDeletion =
-        _shouldSuppressLoginAutoSignInForAccountDeletion();
-    final AuthState authState = context.read<AuthBloc>().state;
-    final bool willDispatch = loginShouldAttemptAutoSignIn(
-      suppressForAccountDeletion: suppressForAccountDeletion,
-      authState: authState,
-    );
-    if (!willDispatch) {
-      if (suppressForAccountDeletion) {
-        _logGoogleSignInButton(
-          'maybeAutoSignIn skipped: account deletion flow',
-        );
-      }
-      return;
-    }
-    _logGoogleSignInButton(
-      'maybeAutoSignIn authState=${loginAuthStateLabel(authState)} '
-      'willDispatch=$willDispatch',
-    );
-    unawaited(
-      _launchInteractiveSignIn(trigger: GoogleSignInLaunchTrigger.auto),
-    );
   }
 
   Future<void> _onGoogleSignInPressed() async {
@@ -288,13 +244,14 @@ class _LoginScreenBodyState extends State<_LoginScreenBody>
           message: context.l10n.googleSignInFallbackBody,
           variant: TilawaFeedbackVariant.error,
         );
-      case GoogleSignInLaunchPlatformError(:final message):
+      case GoogleSignInLaunchPlatformError(:final code, :final message):
         _logGoogleSignInButton(
-          'launchInteractiveSignIn platformError reason=$trigger',
+          'launchInteractiveSignIn platformError reason=$trigger '
+          'code=$code detail=$message',
         );
         TilawaFeedback.showToast(
           context,
-          message: message ?? context.l10n.unableToSignInWithThirdPartyAccount,
+          message: context.l10n.authErrorGenericMessage,
           variant: TilawaFeedbackVariant.error,
         );
     }
@@ -333,6 +290,7 @@ class _LoginScreenBodyState extends State<_LoginScreenBody>
   @override
   Widget build(BuildContext context) {
     final ThemeData theme = Theme.of(context);
+    final MeMuslimDesignTokens tokens = theme.tokens;
     final ColorScheme colorScheme = theme.colorScheme;
     final MeMuslimProductColors product = theme.productColors;
     final ColorScheme loginScheme = colorScheme.copyWith(
@@ -355,20 +313,35 @@ class _LoginScreenBodyState extends State<_LoginScreenBody>
             children: <Widget>[
               LoginAuthBlocListener(
                 shouldSkipAutoSignIn: _shouldSkipAutoSignIn,
-                onNavigateToHome: () => _navigateToHome(context),
-                child: TilawaThumbReachLayout(
-                  useSafeArea: true,
-                  content: RepaintBoundary(
-                    child: _LoginHeroContent(loginScheme: loginScheme),
-                  ),
-                  actions: DeferredAfterFirstFrame(
-                    perfEvent: 'login_actions',
-                    child: _LoginGoogleSignInActions(
-                      onPressed: _onGoogleSignInPressed,
-                      logButtonStateIfChanged: _logButtonStateIfChanged,
-                      logAuthStateIfChanged: _logAuthStateIfChanged,
+                navigateAfterAuth: _navigateAfterAuth,
+                routeLocation: () {
+                  final GoRouter? router = GoRouter.maybeOf(context);
+                  return router?.state.uri.path ?? const LoginRoute().location;
+                },
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.stretch,
+                  children: <Widget>[
+                    Expanded(
+                      child: SafeArea(
+                        bottom: false,
+                        child: RepaintBoundary(
+                          child: _LoginHeroContent(loginScheme: loginScheme),
+                        ),
+                      ),
                     ),
-                  ),
+                    TilawaBottomActionInset(
+                      top: tokens.spaceLarge,
+                      maxWidthKind: TilawaContentKind.form,
+                      child: DeferredAfterFirstFrame(
+                        perfEvent: 'login_actions',
+                        child: _LoginGoogleSignInActions(
+                          onPressed: _onGoogleSignInPressed,
+                          logButtonStateIfChanged: _logButtonStateIfChanged,
+                          logAuthStateIfChanged: _logAuthStateIfChanged,
+                        ),
+                      ),
+                    ),
+                  ],
                 ),
               ),
               const _LoginLanguageSwitcherBar(),
@@ -379,12 +352,12 @@ class _LoginScreenBodyState extends State<_LoginScreenBody>
     );
   }
 
-  void _navigateToHome(BuildContext context) {
+  void _navigateAfterAuth(String location) {
     scheduleLoginNavigateToHome(
-      isMounted: () => context.mounted,
+      isMounted: () => mounted,
       navigate: () {
         AppRouter.disableStateRestoration = false;
-        AppRouter.router.go(const HomeRoute().location);
+        AppRouter.router.go(location);
       },
     );
   }
@@ -409,11 +382,11 @@ class _LoginHeroContent extends StatelessWidget {
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           crossAxisAlignment: CrossAxisAlignment.stretch,
+          spacing: tokens.spaceMedium,
           children: <Widget>[
             Center(
               child: TilawaAppBrandBadge(accentColor: loginScheme.primary),
             ),
-            SizedBox(height: tokens.spaceExtraLarge),
             Text(
               context.l10n.welcomeToApp,
               style: theme.textTheme.headlineLarge?.copyWith(
@@ -422,10 +395,9 @@ class _LoginHeroContent extends StatelessWidget {
               ),
               textAlign: TextAlign.center,
             ),
-            SizedBox(height: tokens.spaceMedium),
             Text(
               context.l10n.signInWithGoogleDescription,
-              style: theme.textTheme.bodyLarge?.copyWith(
+              style: theme.textTheme.bodyMedium?.copyWith(
                 color: colorScheme.onSurfaceVariant,
               ),
               textAlign: TextAlign.center,
@@ -507,7 +479,7 @@ class _LoginGoogleSignInActionsState extends State<_LoginGoogleSignInActions>
     return Column(
       mainAxisSize: MainAxisSize.min,
       crossAxisAlignment: CrossAxisAlignment.stretch,
-      spacing: tokens.spaceMedium,
+      spacing: tokens.spaceSmall,
       children: <Widget>[
         RepaintBoundary(
           child: BlocBuilder<AuthBloc, AuthState>(
@@ -550,38 +522,61 @@ class _LoginGoogleSignInActionsState extends State<_LoginGoogleSignInActions>
             },
           ),
         ),
-        const _LoginLegalFooter(),
+        _LoginEmailAuthLinks(isGoogleLoading: _isGoogleSignInSessionInFlight()),
       ],
     );
   }
 }
 
-class _LoginLegalFooter extends StatelessWidget {
-  const _LoginLegalFooter();
+class _LoginEmailAuthLinks extends StatelessWidget {
+  const _LoginEmailAuthLinks({required this.isGoogleLoading});
+
+  final bool isGoogleLoading;
 
   @override
   Widget build(BuildContext context) {
     final ThemeData theme = Theme.of(context);
     final MeMuslimDesignTokens tokens = theme.tokens;
 
-    final ColorScheme colorScheme = theme.colorScheme;
-
-    return TextButton(
-      onPressed: () => openLegalUrl(AppLegalUrls.privacyPolicy),
-      style: TextButton.styleFrom(
-        foregroundColor: colorScheme.primary,
-      ),
-      child: Text(
-        context.l10n.privacyPolicy,
-        style: theme.textTheme.bodyMedium?.copyWith(
-          color: colorScheme.primary,
-          decoration: TextDecoration.underline,
-          decorationColor: colorScheme.primary.withValues(
-            alpha: tokens.opacityEmphasis,
-          ),
-        ),
-        textAlign: TextAlign.center,
-      ),
+    return BlocBuilder<AuthBloc, AuthState>(
+      builder: (BuildContext context, AuthState authState) {
+        final bool isLoading = authState is AuthLoading || isGoogleLoading;
+        return Column(
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          spacing: tokens.spaceSmall,
+          children: <Widget>[
+            Row(
+              children: <Widget>[
+                Expanded(child: Divider(color: theme.dividerColor)),
+                Padding(
+                  padding: EdgeInsets.symmetric(horizontal: tokens.spaceSmall),
+                  child: Text(
+                    context.l10n.orContinueWith,
+                    style: theme.textTheme.bodySmall?.copyWith(
+                      color: theme.colorScheme.onSurfaceVariant,
+                    ),
+                  ),
+                ),
+                Expanded(child: Divider(color: theme.dividerColor)),
+              ],
+            ),
+            TilawaButton(
+              text: context.l10n.signInWithEmail,
+              variant: TilawaButtonVariant.outline,
+              isFullWidth: true,
+              onPressed: isLoading
+                  ? null
+                  : () => context.push(const EmailLoginRoute().location),
+            ),
+            TextButton(
+              onPressed: isLoading
+                  ? null
+                  : () => context.push(const RegisterRoute().location),
+              child: Text(context.l10n.noAccountYet),
+            ),
+          ],
+        );
+      },
     );
   }
 }

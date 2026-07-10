@@ -7,6 +7,7 @@ import {
   readServerSessionEpoch,
 } from "./sessionRegistration";
 import type { ActorRole } from "./sessionLifecycleGuard";
+import { isMultiDeviceLoginEnabled } from "../multiDeviceLogin";
 
 export interface BookingParticipants {
   studentId: string;
@@ -28,6 +29,9 @@ export async function requireValidSessionEpoch(
   uid: string,
   db: FirebaseFirestore.Firestore = getFirestore(),
 ): Promise<void> {
+  if (isMultiDeviceLoginEnabled()) {
+    return;
+  }
   const data = request.data as Record<string, unknown> | undefined;
   const userSnap = await db.collection("users").doc(uid).get();
   const serverEpoch = readServerSessionEpoch(userSnap.data());
@@ -99,10 +103,6 @@ export function resolveActorRole(
   const uid = requireAuthenticatedUid(request);
   const teacherUid = teacherAuthUid(participants, teacherUserId);
 
-  if (isAdmin(request)) {
-    return claimedRole === "system" ? "system" : "admin";
-  }
-
   if (uid === participants.studentId) {
     if (claimedRole != null && claimedRole !== "student") {
       throw lifecycleError("unauthorized_actor", "Student cannot act as another role.", {
@@ -121,6 +121,10 @@ export function resolveActorRole(
     return "teacher";
   }
 
+  if (isAdmin(request)) {
+    return claimedRole === "system" ? "system" : "admin";
+  }
+
   throw lifecycleError("not_participant", "Caller is not a session participant.", {
     actorId: uid,
   });
@@ -133,14 +137,14 @@ export function requireParticipantOrAdmin(
 ): { uid: string; actor: ActorRole } {
   const uid = requireAuthenticatedUid(request);
   const teacherUid = teacherAuthUid(participants, teacherUserId);
-  if (isAdmin(request)) {
-    return { uid, actor: "admin" };
-  }
   if (uid === participants.studentId) {
     return { uid, actor: "student" };
   }
   if (uid === teacherUid) {
     return { uid, actor: "teacher" };
+  }
+  if (isAdmin(request)) {
+    return { uid, actor: "admin" };
   }
   throw lifecycleError("not_participant", "Caller is not a session participant.", {
     actorId: uid,

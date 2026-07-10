@@ -4,11 +4,11 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:tilawa/core/telemetry/tilawa_sentry_route_display.dart';
 import 'package:tilawa/features/home/debug/home_skeleton_debug.dart';
-import 'package:tilawa/screens/cubit/main_screen_cubit.dart';
-import 'package:tilawa/screens/cubit/main_screen_state.dart';
 import 'package:tilawa/features/home/presentation/cubit/home_listening_resume_cubit.dart';
 import 'package:tilawa/features/shell/application/shell_tab_reselect.dart';
 import 'package:tilawa/features/shell/presentation/shell_tab_reselect_listener.dart';
+import 'package:tilawa/screens/cubit/main_screen_cubit.dart';
+import 'package:tilawa/screens/cubit/main_screen_state.dart';
 import 'package:tilawa_ui_kit/tilawa_ui_kit.dart';
 
 import '../bloc/home_dashboard_bloc.dart';
@@ -142,7 +142,7 @@ class _HomeScreenState extends State<HomeScreen> {
                   left: 0,
                   right: 0,
                   bottom: 0,
-                  child: RefreshIndicator.adaptive(
+                  child: TilawaRefreshIndicator.adaptive(
                     edgeOffset: 0,
                     displacement: context.tokens.spaceExtraLarge,
                     onRefresh: _refreshHome,
@@ -163,10 +163,12 @@ class _HomeScreenState extends State<HomeScreen> {
                                     : blocState;
                                 final HomeDashboardUiState ui =
                                     HomeDashboardUiState.from(state);
-                                final Widget? tutorHeaderSliver =
+                                final Widget tutorHeaderSliver =
                                     ui.showFullSkeleton
-                                    ? null
-                                    : homeFeaturedTutorCardSliver(context);
+                                    ? const SliverToBoxAdapter(
+                                        child: SizedBox.shrink(),
+                                      )
+                                    : const HomeFeaturedTutorCardScope();
 
                                 return CustomScrollView(
                                   controller: _scrollController,
@@ -179,7 +181,7 @@ class _HomeScreenState extends State<HomeScreen> {
                                       state: state,
                                       onOpenPrayer: widget.onOpenPrayer,
                                     ),
-                                    ?tutorHeaderSliver,
+                                    tutorHeaderSliver,
                                     HomeDashboardContentSliver(
                                       child: AnimatedSwitcher(
                                         duration: context.tokens.durationMedium,

@@ -3,6 +3,7 @@ import 'package:quran_sessions/core/l10n_extensions.dart';
 import 'package:tilawa_ui_kit/tilawa_ui_kit.dart';
 
 import '../../domain/entities/quran_teacher.dart';
+import '../../domain/entities/session_pricing_quote.dart';
 import '../models/teacher_availability_summary.dart';
 import '../theme/quran_sessions_status_colors.dart';
 import 'quran_session_price_chip.dart';
@@ -18,11 +19,15 @@ class QuranSessionTeacherCompactCard extends StatelessWidget {
     required this.teacher,
     required this.onTap,
     this.availabilitySummary,
+    this.pricing,
   });
 
   final QuranTeacher teacher;
   final VoidCallback onTap;
   final TeacherAvailabilitySummary? availabilitySummary;
+
+  /// Market-resolved pricing for the viewer; null hides the price badge.
+  final SessionPricingQuote? pricing;
 
   @override
   Widget build(BuildContext context) {
@@ -50,6 +55,7 @@ class QuranSessionTeacherCompactCard extends StatelessWidget {
               child: _TeacherIdentityBlock(
                 teacher: teacher,
                 availabilitySummary: availabilitySummary,
+                pricing: pricing,
               ),
             ),
             SizedBox(width: tokens.spaceTiny),
@@ -70,10 +76,12 @@ class _TeacherIdentityBlock extends StatelessWidget {
   const _TeacherIdentityBlock({
     required this.teacher,
     required this.availabilitySummary,
+    this.pricing,
   });
 
   final QuranTeacher teacher;
   final TeacherAvailabilitySummary? availabilitySummary;
+  final SessionPricingQuote? pricing;
 
   @override
   Widget build(BuildContext context) {
@@ -118,7 +126,7 @@ class _TeacherIdentityBlock extends StatelessWidget {
               TilawaMetadataChip(
                 label: l10n.specializationLabel(teacher.specializations.first),
               ),
-            QuranSessionPriceChip(teacher: teacher),
+            QuranSessionPriceChip(teacher: teacher, pricing: pricing),
           ],
         ),
         SizedBox(height: denseGap),

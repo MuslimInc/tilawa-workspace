@@ -7,7 +7,9 @@ import {
   SandboxPaymentProvider,
 } from "../../src/quranSessions/payment/sandboxPaymentProvider";
 import { confirmBookingPayment } from "../../src/quranSessions/confirmBookingPayment";
+import { confirmManualBookingPayment } from "../../src/quranSessions/confirmManualBookingPayment";
 import { createSessionBooking } from "../../src/quranSessions/createSessionBooking";
+import { rejectManualBookingPayment } from "../../src/quranSessions/rejectManualBookingPayment";
 
 class ReadAfterWriteError extends Error {
   constructor() {
@@ -203,4 +205,6 @@ test("sandbox confirm precheck is idempotent when intent already succeeded", asy
 test("createSessionBooking and confirmBookingPayment export as callables", () => {
   assert.equal(typeof createSessionBooking, "function");
   assert.equal(typeof confirmBookingPayment, "function");
+  assert.equal(typeof confirmManualBookingPayment, "function");
+  assert.equal(typeof rejectManualBookingPayment, "function");
 });

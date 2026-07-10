@@ -71,6 +71,26 @@ TeacherProfile _activeProfile() =>
       ),
     );
 
+TeacherProfile _incompleteProfile() =>
+    TeacherProfileCompleteness.withComputedVisibility(
+      TeacherProfile(
+        id: 'app_1',
+        userId: 'user_1',
+        displayName: 'Teacher One',
+        publicBio: '',
+        verificationStatus: TeacherVerificationStatus.verified,
+        teachingLanguages: const ['ar'],
+        specializations: const ['tajweed'],
+        averageRating: 0,
+        reviewCount: 0,
+        isActive: true,
+        profileCompleteness: TeacherProfileCompletenessStatus.complete,
+        isPubliclyVisible: true,
+        createdAt: DateTime(2024),
+        updatedAt: DateTime(2024),
+      ),
+    );
+
 void main() {
   group('GetCurrentUserTeacherCapabilityUseCase', () {
     late FakeTeacherApplicationRepository applicationRepo;
@@ -128,6 +148,36 @@ void main() {
           (capability) => check(
             capability.state,
           ).equals(TeacherCapabilityState.approvedActive),
+        );
+      },
+    );
+
+    test(
+      'returns approvedIncompleteProfile and blocks dashboard when profile '
+      'fields are incomplete',
+      () async {
+        applicationRepo.application = _pendingApplication().copyWith(
+          status: TeacherApplicationStatus.approved,
+        );
+        profileRepo = _ConfigurableTeacherProfileRepository(
+          _incompleteProfile(),
+        );
+        useCase = GetCurrentUserTeacherCapabilityUseCase(
+          applicationRepository: applicationRepo,
+          profileRepository: profileRepo,
+        );
+
+        final result = await useCase('user_1');
+
+        result.fold(
+          (_) => fail('expected success'),
+          (capability) {
+            check(
+              capability.state,
+            ).equals(TeacherCapabilityState.approvedIncompleteProfile);
+            check(capability.canAccessTeacherDashboard).isFalse();
+            check(capability.shouldCompleteTeacherProfile).isTrue();
+          },
         );
       },
     );

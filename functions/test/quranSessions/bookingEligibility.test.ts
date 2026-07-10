@@ -3,9 +3,13 @@ import assert from "node:assert/strict";
 
 import {
   assertBookingEligible,
-  assertGuardianCanApproveChildBooking,
+  assertPlatformBookingEnabled,
   calendarAge,
   isChild,
+  isBookingStillUpcoming,
+  parseTeacherPricingOverride,
+  parsePlatformFeaturePolicy,
+  resolvePricingWithOverride,
   isGenderCombinationAllowed,
   type BookingEligibilityContext,
 } from "../../src/quranSessions/bookingEligibilityService";
@@ -14,14 +18,26 @@ const NOW = new Date("2024-06-01T00:00:00.000Z");
 
 function baseContext(
   overrides: {
+    platform?: Partial<BookingEligibilityContext["platform"]>;
     student?: Partial<BookingEligibilityContext["student"]>;
     teacher?: Partial<BookingEligibilityContext["teacher"]>;
     policy?: Partial<BookingEligibilityContext["policy"]>;
+    market?: Partial<BookingEligibilityContext["market"]> & Pick<
+      BookingEligibilityContext["market"],
+      "countryCode" | "cityId"
+    >;
     marketEnabled?: boolean;
     pricing?: BookingEligibilityContext["pricing"];
   } = {},
 ): BookingEligibilityContext {
   return {
+    platform: {
+      quranSessionsEnabled: true,
+      studentEntryEnabled: true,
+      bookingEnabled: true,
+      marketGate: { enableForAllMarkets: false, enabledMarketCodes: ["EG"] },
+      ...overrides.platform,
+    },
     student: {
       exists: true,
       accountStatus: "active",
@@ -29,8 +45,6 @@ function baseContext(
       dateOfBirth: new Date("1990-01-01T00:00:00.000Z"),
       countryCode: "EG",
       cityId: "cairo",
-      guardianId: null,
-      guardianChildBookingApprovedAt: null,
       restrictionReason: null,
       ...overrides.student,
     },
@@ -40,18 +54,38 @@ function baseContext(
       gender: "male",
       allowedStudentGender: "both",
       canTeachChildren: true,
-      requiresGuardianApprovalForChildren: false,
       ...overrides.teacher,
     },
     policy: {
       childAgeThreshold: 14,
       globalAllowMaleTeacherFemaleStudent: true,
       globalAllowFemaleTeacherMaleStudent: true,
-      requireGuardianApprovalForChildren: false,
       ...overrides.policy,
+    },
+    market: {
+      countryCode: "EG",
+      cityId: "cairo",
+      marketEnabled: true,
+      cityEnabled: true,
+      sessionFeeAmount: 0,
+      currencyCode: "USD",
+      bookingMode: "autoConfirm",
+      genderMatchingEnabled: true,
+      teacherWhitelist: null,
+      paymentProviderEnabled: true,
+      manualPaymentEnabled: false,
+      tutorApprovalSlaMs: 24 * 60 * 60 * 1000,
+      minBookingNoticeMs: 60 * 60 * 1000,
+      maxConcurrentUpcomingPerStudent: 3,
+      joinWindowLeadMs: 15 * 60 * 1000,
+      sessionMode: "videoOnly",
+      policyVersion: null,
+      effectiveFrom: null,
+      ...overrides.market,
     },
     marketEnabled: overrides.marketEnabled ?? true,
     pricing: overrides.pricing ?? { isPaid: false, amount: 0, currencyCode: "USD" },
+    pricingSource: "market",
   };
 }
 
@@ -72,6 +106,28 @@ test("isChild treats a null DOB as adult (safe default)", () => {
   assert.equal(isChild(null, 14, NOW), false);
   assert.equal(isChild(new Date("2015-01-01Z"), 14, NOW), true); // age 9
   assert.equal(isChild(new Date("2008-01-01Z"), 14, NOW), false); // age 16
+});
+
+test("parsePlatformFeaturePolicy fails closed when config is missing", () => {
+  assert.deepEqual(parsePlatformFeaturePolicy({}), {
+    quranSessionsEnabled: false,
+    studentEntryEnabled: false,
+    bookingEnabled: false,
+    marketGate: { enableForAllMarkets: false, enabledMarketCodes: [] },
+  });
+});
+
+test("assertPlatformBookingEnabled rejects disabled quote/booking flow", () => {
+  expectCode(
+    () =>
+      assertPlatformBookingEnabled({
+        quranSessionsEnabled: false,
+        studentEntryEnabled: true,
+        bookingEnabled: true,
+        marketGate: { enableForAllMarkets: false, enabledMarketCodes: ["EG"] },
+      }),
+    "feature_disabled",
+  );
 });
 
 test("gender matrix: teacher maleOnly rejects female student", () => {
@@ -122,6 +178,28 @@ test("assertBookingEligible passes the happy path and returns pricing", () => {
   assert.equal(pricing.amount, 12);
 });
 
+test("assertBookingEligible rejects when global Quran Sessions are disabled", () => {
+  expectCode(
+    () =>
+      assertBookingEligible(
+        baseContext({ platform: { quranSessionsEnabled: false } }),
+        NOW,
+      ),
+    "feature_disabled",
+  );
+});
+
+test("assertBookingEligible rejects when booking is disabled", () => {
+  expectCode(
+    () =>
+      assertBookingEligible(
+        baseContext({ platform: { bookingEnabled: false } }),
+        NOW,
+      ),
+    "feature_disabled",
+  );
+});
+
 test("assertBookingEligible rejects a blocked student account", () => {
   expectCode(
     () => assertBookingEligible(baseContext({ student: { accountStatus: "blocked" } }), NOW),
@@ -140,6 +218,79 @@ test("assertBookingEligible rejects a disabled market", () => {
   expectCode(
     () => assertBookingEligible(baseContext({ marketEnabled: false }), NOW),
     "market_not_enabled",
+  );
+});
+
+test("assertBookingEligible rejects a student market not in enabledMarketCodes", () => {
+  expectCode(
+    () =>
+      assertBookingEligible(
+        baseContext({
+          student: { countryCode: "SA" },
+          market: { countryCode: "SA", cityId: "riyadh" },
+        }),
+        NOW,
+      ),
+    "market_not_supported",
+  );
+});
+
+test("assertBookingEligible allows the configured enabled market (EG)", () => {
+  // baseContext defaults to an EG student and enabledMarketCodes: ["EG"].
+  assert.doesNotThrow(() => assertBookingEligible(baseContext(), NOW));
+});
+
+test("assertBookingEligible allows any market when enableForAllMarkets is true", () => {
+  assert.doesNotThrow(() =>
+    assertBookingEligible(
+      baseContext({
+        platform: {
+          quranSessionsEnabled: true,
+          studentEntryEnabled: true,
+          bookingEnabled: true,
+          marketGate: { enableForAllMarkets: true, enabledMarketCodes: [] },
+        },
+        student: { countryCode: "SA" },
+        market: { countryCode: "SA", cityId: "riyadh" },
+      }),
+      NOW,
+    ),
+  );
+});
+
+test("assertBookingEligible allows paid manual market without PSP", () => {
+  const pricing = assertBookingEligible(
+    baseContext({
+      pricing: { isPaid: true, amount: 100, currencyCode: "EGP" },
+      market: {
+        countryCode: "EG",
+        cityId: "cairo",
+        paymentProviderEnabled: false,
+        manualPaymentEnabled: true,
+      },
+    }),
+    NOW,
+  );
+
+  assert.equal(pricing.isPaid, true);
+});
+
+test("assertBookingEligible rejects paid market without PSP or manual", () => {
+  expectCode(
+    () =>
+      assertBookingEligible(
+        baseContext({
+          pricing: { isPaid: true, amount: 100, currencyCode: "EGP" },
+          market: {
+            countryCode: "EG",
+            cityId: "cairo",
+            paymentProviderEnabled: false,
+            manualPaymentEnabled: false,
+          },
+        }),
+        NOW,
+      ),
+    "payment_provider_unavailable",
   );
 });
 
@@ -178,68 +329,97 @@ test("assertBookingEligible rejects a child when teacher cannot teach children",
   );
 });
 
-test("assertBookingEligible blocks a child when guardian approval is required", () => {
-  expectCode(
-    () =>
-      assertBookingEligible(
-        baseContext({
-          student: { dateOfBirth: new Date("2015-01-01Z") },
-          policy: { requireGuardianApprovalForChildren: true },
-        }),
-        NOW,
-      ),
-    "guardian_approval_required",
-  );
-});
-
-test("assertBookingEligible allows a child when guardian approval is recorded", () => {
+test("assertBookingEligible allows a child when teacher accepts children", () => {
   const pricing = assertBookingEligible(
     baseContext({
-      student: {
-        dateOfBirth: new Date("2015-01-01Z"),
-        guardianId: "guardian_uid",
-        guardianChildBookingApprovedAt: new Date("2024-01-01Z"),
-      },
-      policy: { requireGuardianApprovalForChildren: true },
+      student: { dateOfBirth: new Date("2015-01-01Z") },
+      teacher: { canTeachChildren: true },
     }),
     NOW,
   );
   assert.equal(pricing.isPaid, false);
 });
 
-test("assertBookingEligible allows an eligible child (teacher teaches children, no guardian gate)", () => {
-  const pricing = assertBookingEligible(
-    baseContext({ student: { dateOfBirth: new Date("2015-01-01Z") } }),
-    NOW,
+test("assertBookingEligible rejects when upcoming count reaches the market cap", () => {
+  expectCode(
+    () =>
+      assertBookingEligible(baseContext(), NOW, { upcomingCount: 3 }),
+    "max_upcoming_exceeded",
   );
+});
+
+test("assertBookingEligible allows booking below the upcoming cap", () => {
+  const pricing = assertBookingEligible(baseContext(), NOW, {
+    upcomingCount: 2,
+  });
   assert.equal(pricing.isPaid, false);
 });
 
-test("assertGuardianCanApproveChildBooking rejects missing guardian DOB", () => {
-  expectCode(
-    () => assertGuardianCanApproveChildBooking(null, 14, NOW),
-    "guardian_approval_invalid",
+test("isBookingStillUpcoming counts only sessions that have not ended", () => {
+  const past = new Date(NOW.getTime() - 60 * 60 * 1000);
+  const future = new Date(NOW.getTime() + 60 * 60 * 1000);
+  assert.equal(isBookingStillUpcoming(future, NOW), true);
+  assert.equal(isBookingStillUpcoming(past, NOW), false);
+  // Timestamp-like objects (Admin SDK) resolve via toDate().
+  assert.equal(isBookingStillUpcoming({ toDate: () => past }, NOW), false);
+  // Missing endsAt fails closed: still counts against the cap.
+  assert.equal(isBookingStillUpcoming(null, NOW), true);
+  assert.equal(isBookingStillUpcoming("not-a-date", NOW), true);
+});
+
+test("parseTeacherPricingOverride ignores disabled or invalid overrides", () => {
+  assert.equal(parseTeacherPricingOverride(undefined), null);
+  assert.equal(parseTeacherPricingOverride({ amount: 50 }), null); // not enabled
+  assert.equal(parseTeacherPricingOverride({ enabled: true }), null); // no amount
+  assert.equal(
+    parseTeacherPricingOverride({ enabled: true, amount: -5 }),
+    null,
   );
 });
 
-test("assertGuardianCanApproveChildBooking rejects child guardian DOB", () => {
-  expectCode(
-    () =>
-      assertGuardianCanApproveChildBooking(
-        new Date("2015-01-01Z"),
-        14,
-        NOW,
-      ),
-    "guardian_approval_invalid",
+test("parseTeacherPricingOverride accepts amount 0 (free) and a positive fee", () => {
+  assert.deepEqual(parseTeacherPricingOverride({ enabled: true, amount: 0 }), {
+    amount: 0,
+    currencyCode: null,
+  });
+  assert.deepEqual(
+    parseTeacherPricingOverride({
+      enabled: true,
+      amount: 30,
+      currencyCode: "EGP",
+    }),
+    { amount: 30, currencyCode: "EGP" },
   );
 });
 
-test("assertGuardianCanApproveChildBooking accepts adult guardian DOB", () => {
-  assert.doesNotThrow(() =>
-    assertGuardianCanApproveChildBooking(
-      new Date("1990-01-01Z"),
-      14,
-      NOW,
-    ),
-  );
+test("resolvePricingWithOverride falls back to market when no override", () => {
+  const market = { isPaid: true, amount: 100, currencyCode: "EGP" };
+  const resolved = resolvePricingWithOverride(market, null);
+  assert.equal(resolved.source, "market");
+  assert.deepEqual(resolved.pricing, market);
+});
+
+test("resolvePricingWithOverride: teacher override of 0 makes a paid market free", () => {
+  const market = { isPaid: true, amount: 100, currencyCode: "EGP" };
+  const resolved = resolvePricingWithOverride(market, {
+    amount: 0,
+    currencyCode: null,
+  });
+  assert.equal(resolved.source, "teacher_override");
+  assert.equal(resolved.pricing.isPaid, false);
+  assert.equal(resolved.pricing.amount, 0);
+  // Currency falls back to the market currency.
+  assert.equal(resolved.pricing.currencyCode, "EGP");
+});
+
+test("resolvePricingWithOverride: positive override wins over the market price", () => {
+  const market = { isPaid: true, amount: 100, currencyCode: "EGP" };
+  const resolved = resolvePricingWithOverride(market, {
+    amount: 40,
+    currencyCode: "SAR",
+  });
+  assert.equal(resolved.source, "teacher_override");
+  assert.equal(resolved.pricing.isPaid, true);
+  assert.equal(resolved.pricing.amount, 40);
+  assert.equal(resolved.pricing.currencyCode, "SAR");
 });

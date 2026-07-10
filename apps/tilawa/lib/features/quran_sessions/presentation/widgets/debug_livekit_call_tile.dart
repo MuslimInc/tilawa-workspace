@@ -10,6 +10,7 @@ import 'package:tilawa/core/extensions.dart';
 import 'package:tilawa/features/auth/presentation/bloc/auth_bloc.dart';
 import 'package:tilawa/features/quran_sessions/debug/join_debug_livekit_call.dart';
 import 'package:tilawa/features/quran_sessions/debug/quran_sessions_debug_tools.dart';
+import 'package:tilawa/features/quran_sessions/quran_sessions_feature_flags.dart';
 import 'package:tilawa/features/quran_sessions/quran_sessions_launch_policy.dart';
 import 'package:tilawa_core/errors/failures.dart';
 import 'package:tilawa_ui_kit/tilawa_ui_kit.dart';
@@ -30,7 +31,7 @@ class DebugLiveKitCallTile extends StatefulWidget {
   @visibleForTesting
   final bool Function()? visibilityGate;
 
-  /// Overrides LiveKit launch-config lookup in tests.
+  /// Overrides LiveKit platform-config lookup in tests.
   @visibleForTesting
   final bool? liveKitEnabled;
 
@@ -55,7 +56,10 @@ class _DebugLiveKitCallTileState extends State<DebugLiveKitCallTile> {
 
     final liveKitEnabled =
         widget.liveKitEnabled ??
-        resolveRtcLaunchConfig(getIt<AppLaunchConfig>()).isLiveKitEnabled;
+        resolveRtcLaunchConfigFromPlatformConfig(
+          quranSessionsEffectivePlatformConfig(),
+          getIt<AppLaunchConfig>(),
+        ).isLiveKitEnabled;
     if (!liveKitEnabled) {
       return const SizedBox.shrink();
     }

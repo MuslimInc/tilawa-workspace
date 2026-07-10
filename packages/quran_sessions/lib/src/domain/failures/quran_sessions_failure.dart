@@ -152,6 +152,30 @@ final class RtcCallJoinFailure extends QuranSessionsFailure {
   List<Object?> get props => [reasonCode];
 }
 
+/// The same user is already live in this session from another device
+/// (ADR-008 Phase 2). The UI offers an explicit "Switch to this device" action,
+/// which retries the join with `forceTakeover: true`. Never a whole-app
+/// sign-out — distinct from the legacy `session_revoked` path.
+final class LiveSessionAlreadyActiveFailure extends QuranSessionsFailure {
+  const LiveSessionAlreadyActiveFailure({
+    required this.sessionId,
+    required this.activeDeviceId,
+    required this.sinceMs,
+  });
+
+  /// The session the caller tried to join.
+  final String sessionId;
+
+  /// Device id of the current lock holder.
+  final String activeDeviceId;
+
+  /// Epoch milliseconds when the current lease was acquired/last renewed.
+  final int sinceMs;
+
+  @override
+  List<Object?> get props => [sessionId, activeDeviceId, sinceMs];
+}
+
 /// WebRTC signaling/TURN infrastructure is not deployed yet.
 final class WebRtcSignalingUnavailableFailure extends QuranSessionsFailure {
   const WebRtcSignalingUnavailableFailure();
@@ -279,17 +303,6 @@ final class AccountBlockedFailure extends QuranSessionsFailure {
   List<Object?> get props => [accountId, reason];
 }
 
-/// A session involving a child student requires guardian approval before
-/// the booking can be confirmed.
-final class GuardianApprovalRequiredFailure extends QuranSessionsFailure {
-  const GuardianApprovalRequiredFailure({required this.studentId});
-
-  final String studentId;
-
-  @override
-  List<Object?> get props => [studentId];
-}
-
 /// No enabled countries or cities were returned from the market catalog.
 ///
 /// Usually means Firestore was not seeded or every market is disabled.
@@ -311,6 +324,31 @@ final class MarketNotEnabledFailure extends QuranSessionsFailure {
 
   @override
   List<Object?> get props => [countryCode, cityId];
+}
+
+/// The student has reached the maximum number of upcoming sessions.
+final class MaxUpcomingSessionsExceededFailure extends QuranSessionsFailure {
+  const MaxUpcomingSessionsExceededFailure({required this.maxUpcoming});
+
+  final int maxUpcoming;
+
+  @override
+  List<Object?> get props => [maxUpcoming];
+}
+
+/// The session start time is too close to the current time.
+final class MinBookingNoticeViolationFailure extends QuranSessionsFailure {
+  const MinBookingNoticeViolationFailure({required this.minNoticeMinutes});
+
+  final int minNoticeMinutes;
+
+  @override
+  List<Object?> get props => [minNoticeMinutes];
+}
+
+/// The teacher is not enabled in this market.
+final class TeacherNotWhitelistedFailure extends QuranSessionsFailure {
+  const TeacherNotWhitelistedFailure();
 }
 
 /// The selected teacher does not have pricing configured for the student's
@@ -399,6 +437,39 @@ final class InvalidDateOfBirthFailure extends QuranSessionsFailure {
 }
 
 // ── Teacher application ───────────────────────────────────────────────────────
+
+/// Admin disabled bookings (platform `bookingEnabled`/`quranSessionsEnabled`
+/// flag). Bookings are blocked for all teachers regardless of price. Distinct
+/// from [PaymentProviderFailure] so the UI can render admin-specific copy.
+final class PlatformBookingDisabledFailure extends QuranSessionsFailure {
+  const PlatformBookingDisabledFailure({this.scope});
+
+  /// 'quranSessionsEnabled' or 'bookingEnabled'; null when unspecified.
+  final String? scope;
+
+  @override
+  List<Object?> get props => [scope];
+}
+
+/// Pricing/booking config is incomplete or missing — the market/platform doc
+/// has not been seeded or required fields are absent. Fail-closed: bookings
+/// are blocked until an admin completes the config. Distinct from
+/// [PlatformBookingDisabledFailure] so the UI can point the user to retry.
+final class PricingConfigMissingFailure extends QuranSessionsFailure {
+  const PricingConfigMissingFailure({
+    this.scope,
+    this.countryCode,
+    this.missingFields = const [],
+  });
+
+  /// 'platform' or 'market'; null when unspecified.
+  final String? scope;
+  final String? countryCode;
+  final List<String> missingFields;
+
+  @override
+  List<Object?> get props => [scope, countryCode, missingFields];
+}
 
 /// No [TeacherApplication] exists for the given user.
 /// Callers should treat this as [TeacherApplicationStatus.none].

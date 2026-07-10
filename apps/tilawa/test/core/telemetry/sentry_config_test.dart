@@ -44,6 +44,35 @@ void main() {
       expect(options.replay.sessionSampleRate, kReleaseMode ? 0.1 : 1.0);
       expect(options.privacy.maskAllText, isTrue);
       expect(options.privacy.maskAllImages, isTrue);
+      final maskingRules =
+          options.privacy.toJson()['maskingRules'] as List<dynamic>;
+      expect(maskingRules, contains('ShrinkWrapInputShell: mask'));
+      expect(
+        maskingRules,
+        contains(
+          'AgoraCallVideoPlaceholder: Quran Sessions video-call placeholder.',
+        ),
+      );
+      expect(
+        maskingRules,
+        contains(
+          'AgoraVideoView: Agora RTC camera/participant video renderer.',
+        ),
+      );
+      expect(
+        maskingRules,
+        contains(
+          'PrivateRtcVideoLayouts: '
+          'Mask private Quran Sessions video layout shells in replays.',
+        ),
+      );
+      expect(
+        maskingRules,
+        contains(
+          'SessionCallShellControls: '
+          'Unmask call-shell controls falsely matched by the camera regex.',
+        ),
+      );
     });
 
     test('wrapRootWidget wraps child in SentryWidget', () {

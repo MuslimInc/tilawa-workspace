@@ -1,3 +1,28 @@
+<!-- AI-OS START (kept above SpecKit markers so regeneration won't clobber it) -->
+## ⚑ AI Agent Operating System — read first
+
+Before any task, read **[`.ai/OPERATING_SYSTEM.md`](.ai/OPERATING_SYSTEM.md)** —
+the canonical rules for AI agents in this repo (golden rules, mandatory
+workflow, forbidden behavior, modes, risk levels, verification, report format).
+
+**Golden rules (summary):** do only the task • think before editing • smallest
+diff • no new regressions • respect the architecture (bloc / get_it / GoRouter /
+`Either`) • use design tokens + `context.l10n`, never hard-code • verify with the
+project's own commands • ask on High risk or ambiguity • report honestly.
+
+Workflow files:
+- Paste-in task spec → [`.ai/TASK_TEMPLATE.md`](.ai/TASK_TEMPLATE.md)
+- Human review gate → [`.ai/REVIEW_CHECKLIST.md`](.ai/REVIEW_CHECKLIST.md)
+- Job prompts → [`.ai/prompts/`](.ai/prompts/): `bug-fix`, `ui-ux`, `refactor`,
+  `test-coverage`, `release-build`, `diff-review`.
+
+**Verify (workspace root):** `melos run fix:format` · `melos run analyze` ·
+`melos run test` (or `flutter test test/features/<feature>`) · functions:
+`npm run build` / `npm run test:emulator`. Full command list in the OS file §5.
+
+The sections below are the detailed style, architecture, and design guide.
+<!-- AI-OS END -->
+
 <!-- SPECKIT START -->
 For additional context about technologies to be used, project structure,
 shell commands, and other important information, read the current plan:

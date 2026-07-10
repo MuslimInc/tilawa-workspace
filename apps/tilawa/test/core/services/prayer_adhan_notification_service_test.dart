@@ -713,6 +713,7 @@ void main() {
             prayerName: anyNamed('prayerName'),
             prayerKey: anyNamed('prayerKey'),
             locationName: anyNamed('locationName'),
+            sound: anyNamed('sound'),
             languageCode: anyNamed('languageCode'),
           ),
         ).thenAnswer((_) async => true);
@@ -754,13 +755,72 @@ void main() {
             prayerName: anyNamed('prayerName'),
             prayerKey: anyNamed('prayerKey'),
             locationName: anyNamed('locationName'),
+            sound: anyNamed('sound'),
             languageCode: anyNamed('languageCode'),
           ),
         ).called(5);
       });
 
       test(
-        'falls back to adhan channel (with sound) when native adhan scheduling fails',
+        'does not schedule FLN when exact alarms are denied but native fallback succeeds',
+        () async {
+          await initialize();
+          when(mockAndroidPlugin.canScheduleExactNotifications()).thenAnswer(
+            (_) async => false,
+          );
+          when(mockAdhanPlayer.isSupported).thenReturn(true);
+          when(
+            mockAdhanPlayer.scheduleAdhan(
+              id: anyNamed('id'),
+              scheduledTime: anyNamed('scheduledTime'),
+              prayerName: anyNamed('prayerName'),
+              prayerKey: anyNamed('prayerKey'),
+              locationName: anyNamed('locationName'),
+              sound: anyNamed('sound'),
+              languageCode: anyNamed('languageCode'),
+            ),
+          ).thenAnswer((_) async => true);
+
+          final PrayerSettingsEntity playAdhan = allEnabled.copyWith(
+            fajrNotification: allEnabled.fajrNotification.copyWith(
+              mode: PrayerAlertMode.adhan,
+            ),
+          );
+
+          await service.schedulePrayerNotifications(
+            settings: playAdhan,
+            prayerTimesForDays: [buildFutureDay(0)],
+            forceReschedule: true,
+          );
+
+          verify(
+            mockAdhanPlayer.scheduleAdhan(
+              id: anyNamed('id'),
+              scheduledTime: anyNamed('scheduledTime'),
+              prayerName: anyNamed('prayerName'),
+              prayerKey: anyNamed('prayerKey'),
+              locationName: anyNamed('locationName'),
+              sound: anyNamed('sound'),
+              languageCode: anyNamed('languageCode'),
+            ),
+          ).called(5);
+          verifyNever(
+            mockPlugin.zonedSchedule(
+              id: anyNamed('id'),
+              title: anyNamed('title'),
+              body: anyNamed('body'),
+              scheduledDate: anyNamed('scheduledDate'),
+              notificationDetails: anyNamed('notificationDetails'),
+              androidScheduleMode: anyNamed('androidScheduleMode'),
+              matchDateTimeComponents: anyNamed('matchDateTimeComponents'),
+              payload: anyNamed('payload'),
+            ),
+          );
+        },
+      );
+
+      test(
+        'falls back to adhan channel when native exact and inexact scheduling fail',
         () async {
           await initialize();
           when(mockAdhanPlayer.isSupported).thenReturn(true);
@@ -771,6 +831,7 @@ void main() {
               prayerName: anyNamed('prayerName'),
               prayerKey: anyNamed('prayerKey'),
               locationName: anyNamed('locationName'),
+              sound: anyNamed('sound'),
               languageCode: anyNamed('languageCode'),
             ),
           ).thenAnswer((_) async => false);
@@ -1118,7 +1179,7 @@ void main() {
     group('native adhan single playback regression', () {
       /// Mirrors native [AdhanPlaybackService] silent foreground channel id.
       const String nativeForegroundChannelId =
-          'com.tilawa.app.prayer_adhan_silent';
+          'com.tilawa.app.prayer_adhan_silent_v5';
 
       test(
         'native foreground notification uses silent adhan channel not audible channel',
@@ -1149,6 +1210,7 @@ void main() {
               prayerName: anyNamed('prayerName'),
               prayerKey: anyNamed('prayerKey'),
               locationName: anyNamed('locationName'),
+              sound: anyNamed('sound'),
               languageCode: anyNamed('languageCode'),
             ),
           ).thenAnswer((_) async => true);
@@ -1172,6 +1234,7 @@ void main() {
               prayerName: anyNamed('prayerName'),
               prayerKey: anyNamed('prayerKey'),
               locationName: 'Al Isaweyah',
+              sound: anyNamed('sound'),
               languageCode: anyNamed('languageCode'),
             ),
           ).called(1);
@@ -1190,6 +1253,7 @@ void main() {
               prayerName: anyNamed('prayerName'),
               prayerKey: anyNamed('prayerKey'),
               locationName: anyNamed('locationName'),
+              sound: anyNamed('sound'),
               languageCode: anyNamed('languageCode'),
             ),
           ).thenAnswer((_) async => true);
@@ -1206,6 +1270,7 @@ void main() {
               prayerName: anyNamed('prayerName'),
               prayerKey: anyNamed('prayerKey'),
               locationName: anyNamed('locationName'),
+              sound: anyNamed('sound'),
               languageCode: anyNamed('languageCode'),
             ),
           ).called(1);
@@ -1215,6 +1280,7 @@ void main() {
               prayerName: anyNamed('prayerName'),
               prayerKey: anyNamed('prayerKey'),
               locationName: anyNamed('locationName'),
+              sound: anyNamed('sound'),
               languageCode: anyNamed('languageCode'),
             ),
           );
@@ -1242,6 +1308,7 @@ void main() {
               prayerName: anyNamed('prayerName'),
               prayerKey: anyNamed('prayerKey'),
               locationName: anyNamed('locationName'),
+              sound: anyNamed('sound'),
               languageCode: anyNamed('languageCode'),
             ),
           ).thenAnswer((_) async => false);
@@ -1251,6 +1318,7 @@ void main() {
               prayerName: anyNamed('prayerName'),
               prayerKey: anyNamed('prayerKey'),
               locationName: anyNamed('locationName'),
+              sound: anyNamed('sound'),
               languageCode: anyNamed('languageCode'),
             ),
           ).thenAnswer((_) async => true);
@@ -1266,6 +1334,7 @@ void main() {
               prayerName: anyNamed('prayerName'),
               prayerKey: anyNamed('prayerKey'),
               locationName: anyNamed('locationName'),
+              sound: anyNamed('sound'),
               languageCode: anyNamed('languageCode'),
             ),
           ).called(1);
@@ -1293,6 +1362,7 @@ void main() {
               prayerName: anyNamed('prayerName'),
               prayerKey: anyNamed('prayerKey'),
               locationName: anyNamed('locationName'),
+              sound: anyNamed('sound'),
               languageCode: anyNamed('languageCode'),
             ),
           ).thenAnswer((_) async => true);
@@ -1353,6 +1423,7 @@ void main() {
               prayerName: anyNamed('prayerName'),
               prayerKey: anyNamed('prayerKey'),
               locationName: anyNamed('locationName'),
+              sound: anyNamed('sound'),
               languageCode: anyNamed('languageCode'),
             ),
           ).thenAnswer((_) async => true);
@@ -1376,6 +1447,7 @@ void main() {
               prayerName: anyNamed('prayerName'),
               prayerKey: anyNamed('prayerKey'),
               locationName: anyNamed('locationName'),
+              sound: anyNamed('sound'),
               languageCode: 'ar',
             ),
           ).called(5);
@@ -1394,6 +1466,7 @@ void main() {
               prayerName: anyNamed('prayerName'),
               prayerKey: anyNamed('prayerKey'),
               locationName: anyNamed('locationName'),
+              sound: anyNamed('sound'),
               languageCode: anyNamed('languageCode'),
             ),
           ).thenAnswer((_) async => true);
@@ -1420,6 +1493,7 @@ void main() {
               prayerName: anyNamed('prayerName'),
               prayerKey: anyNamed('prayerKey'),
               locationName: 'Al Isaweyah',
+              sound: anyNamed('sound'),
               languageCode: anyNamed('languageCode'),
             ),
           ).called(5);
@@ -1532,19 +1606,66 @@ void main() {
         ).called(1);
       });
 
-      test('initialize upgrades adhan channel when version is stale', () async {
-        when(
-          mockPrefs.getInt(PrayerNotificationConfig.adhanChannelVersionKey),
-        ).thenAnswer((_) async => 0);
+      test(
+        'adhan channels are created without vibration so the vibrator never '
+        'buzzes over the start of adhan playback',
+        () async {
+          when(
+            mockPrefs.getInt(PrayerNotificationConfig.adhanChannelVersionKey),
+          ).thenAnswer((_) async => null);
 
-        await service.initialize();
+          await service.initialize();
 
-        verify(
-          mockAndroidPlugin.deleteNotificationChannel(
-            channelId: PrayerNotificationConfig.adhanChannelId,
-          ),
-        ).called(1);
-      });
+          final List<AndroidNotificationChannel> channels = verify(
+            mockAndroidPlugin.createNotificationChannel(captureAny),
+          ).captured.cast<AndroidNotificationChannel>();
+          final AndroidNotificationChannel adhanChannel = channels.singleWhere(
+            (AndroidNotificationChannel c) =>
+                c.id == PrayerNotificationConfig.adhanChannelId,
+          );
+          final AndroidNotificationChannel silentChannel = channels.singleWhere(
+            (AndroidNotificationChannel c) =>
+                c.id == PrayerNotificationConfig.silentAdhanChannelId,
+          );
+
+          expect(adhanChannel.enableVibration, isFalse);
+          expect(silentChannel.enableVibration, isFalse);
+          expect(silentChannel.playSound, isFalse);
+        },
+      );
+
+      test(
+        'initialize deletes legacy adhan channels when version is stale',
+        () async {
+          when(
+            mockPrefs.getInt(PrayerNotificationConfig.adhanChannelVersionKey),
+          ).thenAnswer((_) async => 0);
+
+          await service.initialize();
+
+          // Android resurrects deleted channels recreated under the same ID,
+          // so upgrades ship new channel IDs and only the retired IDs are
+          // deleted. Current channel IDs must never be deleted here.
+          for (final String legacyChannelId
+              in PrayerNotificationConfig.legacyAdhanChannelIds) {
+            verify(
+              mockAndroidPlugin.deleteNotificationChannel(
+                channelId: legacyChannelId,
+              ),
+            ).called(1);
+          }
+          verifyNever(
+            mockAndroidPlugin.deleteNotificationChannel(
+              channelId: PrayerNotificationConfig.adhanChannelId,
+            ),
+          );
+          verifyNever(
+            mockAndroidPlugin.deleteNotificationChannel(
+              channelId: PrayerNotificationConfig.silentAdhanChannelId,
+            ),
+          );
+        },
+      );
 
       test('canScheduleExactAlarms delegates to android plugin', () async {
         when(mockAndroidPlugin.canScheduleExactNotifications()).thenAnswer(
@@ -1745,6 +1866,7 @@ void main() {
             prayerName: anyNamed('prayerName'),
             prayerKey: anyNamed('prayerKey'),
             locationName: anyNamed('locationName'),
+            sound: anyNamed('sound'),
             languageCode: anyNamed('languageCode'),
           ),
         ).thenThrow(Exception('native boom'));
@@ -1785,6 +1907,7 @@ void main() {
             prayerName: anyNamed('prayerName'),
             prayerKey: anyNamed('prayerKey'),
             locationName: anyNamed('locationName'),
+            sound: anyNamed('sound'),
             languageCode: anyNamed('languageCode'),
           ),
         ).thenAnswer((_) async => true);
@@ -1833,11 +1956,15 @@ void main() {
             prayerName: anyNamed('prayerName'),
             prayerKey: anyNamed('prayerKey'),
             locationName: anyNamed('locationName'),
+            sound: anyNamed('sound'),
             languageCode: anyNamed('languageCode'),
           ),
         ).thenAnswer((_) async => false);
 
-        await service.debugScheduleTestAdhan();
+        final result = await service.debugScheduleTestAdhan();
+
+        expect(result.nativeScheduleSuccess, isFalse);
+        expect(result.fallbackScheduled, isTrue);
 
         verify(
           mockPlugin.zonedSchedule(
@@ -1868,11 +1995,59 @@ void main() {
               prayerName: anyNamed('prayerName'),
               prayerKey: anyNamed('prayerKey'),
               locationName: anyNamed('locationName'),
+              sound: anyNamed('sound'),
               languageCode: anyNamed('languageCode'),
             ),
           ).thenAnswer((_) async => true);
 
-          await service.debugScheduleTestAdhan();
+          final result = await service.debugScheduleTestAdhan();
+
+          expect(result.nativeScheduleSuccess, isTrue);
+          expect(result.fallbackScheduled, isFalse);
+
+          verifyNever(
+            mockPlugin.zonedSchedule(
+              id: anyNamed('id'),
+              title: anyNamed('title'),
+              body: anyNamed('body'),
+              scheduledDate: anyNamed('scheduledDate'),
+              notificationDetails: anyNamed('notificationDetails'),
+              androidScheduleMode: anyNamed('androidScheduleMode'),
+              matchDateTimeComponents: anyNamed('matchDateTimeComponents'),
+              payload: anyNamed('payload'),
+            ),
+          );
+        },
+      );
+
+      test(
+        'debugScheduleTestAdhan reports native inexact when exact permission is denied',
+        () async {
+          await initialize();
+          when(mockAndroidPlugin.canScheduleExactNotifications()).thenAnswer(
+            (_) async => false,
+          );
+          when(mockAdhanPlayer.isSupported).thenReturn(true);
+          when(mockAdhanPlayer.isIgnoringBatteryOptimizations()).thenAnswer(
+            (_) async => true,
+          );
+          when(
+            mockAdhanPlayer.scheduleAdhan(
+              id: anyNamed('id'),
+              scheduledTime: anyNamed('scheduledTime'),
+              prayerName: anyNamed('prayerName'),
+              prayerKey: anyNamed('prayerKey'),
+              locationName: anyNamed('locationName'),
+              sound: anyNamed('sound'),
+              languageCode: anyNamed('languageCode'),
+            ),
+          ).thenAnswer((_) async => true);
+
+          final result = await service.debugScheduleTestAdhan();
+
+          expect(result.nativeScheduleSuccess, isTrue);
+          expect(result.exactAlarmAvailable, isFalse);
+          expect(result.fallbackScheduled, isFalse);
 
           verifyNever(
             mockPlugin.zonedSchedule(
@@ -1895,7 +2070,10 @@ void main() {
           mockNotificationPermissions.isPermissionGranted(),
         ).thenAnswer((_) async => false);
 
-        await service.debugScheduleTestAdhan();
+        final result = await service.debugScheduleTestAdhan();
+
+        expect(result.notificationPermissionGranted, isFalse);
+        expect(result.scheduled, isFalse);
 
         verifyNever(
           mockPlugin.zonedSchedule(
@@ -1925,6 +2103,7 @@ void main() {
               prayerName: anyNamed('prayerName'),
               prayerKey: anyNamed('prayerKey'),
               locationName: anyNamed('locationName'),
+              sound: anyNamed('sound'),
               languageCode: anyNamed('languageCode'),
             ),
           ).thenAnswer((_) async => false);
@@ -1934,6 +2113,7 @@ void main() {
               prayerName: anyNamed('prayerName'),
               prayerKey: anyNamed('prayerKey'),
               locationName: anyNamed('locationName'),
+              sound: anyNamed('sound'),
               languageCode: anyNamed('languageCode'),
             ),
           ).thenAnswer((_) async => false);
@@ -1993,6 +2173,7 @@ void main() {
             prayerName: anyNamed('prayerName'),
             prayerKey: anyNamed('prayerKey'),
             locationName: anyNamed('locationName'),
+            sound: anyNamed('sound'),
             languageCode: anyNamed('languageCode'),
           ),
         ).thenAnswer((_) async => true);
@@ -2009,6 +2190,7 @@ void main() {
             prayerName: anyNamed('prayerName'),
             prayerKey: anyNamed('prayerKey'),
             locationName: anyNamed('locationName'),
+            sound: anyNamed('sound'),
             languageCode: LanguageConfig.defaultLanguageCode,
           ),
         ).called(1);

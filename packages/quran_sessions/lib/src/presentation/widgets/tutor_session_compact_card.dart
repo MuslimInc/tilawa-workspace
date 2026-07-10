@@ -22,7 +22,9 @@ class TutorSessionCompactCard extends StatelessWidget {
     this.onJoin,
     this.onCancel,
     this.isLoading = false,
+    this.isJoinLoading = false,
     this.showCancelInOverflowMenu = false,
+    this.viewerUserId,
   });
 
   final QuranSession session;
@@ -34,7 +36,11 @@ class TutorSessionCompactCard extends StatelessWidget {
   final VoidCallback? onJoin;
   final VoidCallback? onCancel;
   final bool isLoading;
+  final bool isJoinLoading;
   final bool showCancelInOverflowMenu;
+
+  /// Signed-in viewer auth uid — enables staging QA join-window bypass in UI.
+  final String? viewerUserId;
 
   bool get _isPendingRequest => onAccept != null || onReject != null;
 
@@ -91,10 +97,12 @@ class TutorSessionCompactCard extends StatelessWidget {
     final joinUiState = resolveSessionJoinUiState(
       lifecycleStatus: session.effectiveLifecycleStatus,
       startsAt: session.startsAt,
+      endsAt: session.endsAt,
       now: now,
-      joinInProgress: false,
+      joinInProgress: isJoinLoading,
       joinFailure: null,
       hasOpenedMeeting: false,
+      qaBypassUserId: viewerUserId,
     );
 
     final showJoin =
@@ -110,6 +118,7 @@ class TutorSessionCompactCard extends StatelessWidget {
     return _TutorUpcomingActionsRow(
       onJoin: showJoin ? onJoin : null,
       joinEnabled: joinEnabled,
+      isJoinLoading: isJoinLoading,
       showNotYetHint: showNotYetHint,
       onCancel: onCancel,
       showCancelInOverflowMenu: showCancelInOverflowMenu,
@@ -255,6 +264,7 @@ class _TutorUpcomingActionsRow extends StatelessWidget {
   const _TutorUpcomingActionsRow({
     required this.onJoin,
     required this.joinEnabled,
+    required this.isJoinLoading,
     required this.showNotYetHint,
     required this.onCancel,
     required this.showCancelInOverflowMenu,
@@ -262,6 +272,7 @@ class _TutorUpcomingActionsRow extends StatelessWidget {
 
   final VoidCallback? onJoin;
   final bool joinEnabled;
+  final bool isJoinLoading;
   final bool showNotYetHint;
   final VoidCallback? onCancel;
   final bool showCancelInOverflowMenu;
@@ -303,7 +314,8 @@ class _TutorUpcomingActionsRow extends StatelessWidget {
             text: l10n.joinSession,
             variant: TilawaButtonVariant.primary,
             size: TilawaButtonSize.small,
-            onPressed: joinEnabled ? onJoin : null,
+            isLoading: isJoinLoading,
+            onPressed: joinEnabled && !isJoinLoading ? onJoin : null,
           ),
       ],
     );
@@ -337,6 +349,7 @@ class _TutorCancelOverflowButton extends StatelessWidget {
 
   Future<void> _showCancelMenu(BuildContext context) async {
     final l10n = context.quranSessionsL10n;
+    final scheme = Theme.of(context).colorScheme;
     final box = context.findRenderObject()! as RenderBox;
     final overlay =
         Overlay.of(context).context.findRenderObject()! as RenderBox;
@@ -347,6 +360,8 @@ class _TutorCancelOverflowButton extends StatelessWidget {
     );
     final selected = await showMenu<String>(
       context: context,
+      color: scheme.surface,
+      surfaceTintColor: scheme.surfaceTint,
       position: RelativeRect.fromRect(
         Rect.fromPoints(topLeft, bottomRight),
         Offset.zero & overlay.size,

@@ -55,6 +55,7 @@ import 'package:tilawa/features/prayer_times/domain/services/adhan_alarm_player_
 import 'package:tilawa/features/prayer_times/domain/services/prayer_adhan_notification_service_interface.dart';
 import 'package:tilawa/features/prayer_times/domain/services/prayer_notification_watchdog_scheduler.dart';
 import 'package:tilawa/features/prayer_times/domain/usecases/usecases.dart';
+import 'package:tilawa/features/quran_sessions/data/quran_sessions_platform_config_repository.dart';
 import 'package:tilawa/firebase_options.dart';
 import 'package:tilawa/router/app_router_config.dart';
 import 'package:tilawa/router/notification_navigation_resolver.dart';
@@ -90,6 +91,11 @@ class AppStartupTasks {
   @visibleForTesting
   static const String legacyAudioPlayerBlocHydrationCleanupKey =
       'audio_player_bloc_hydration_removed_v1';
+
+  /// SharedPreferences key marking legacy [AuthBloc] hydration cleanup.
+  @visibleForTesting
+  static const String legacyAuthBlocHydrationCleanupKey =
+      'auth_bloc_hydration_removed_v1';
 
   @visibleForTesting
   SharedPreferencesAsync? sharedPreferencesAsyncOverride;
@@ -341,6 +347,8 @@ class AppStartupTasks {
     } else {
       _logDisabled('PRAYER_NOTIFICATION_WATCHDOG');
     }
+
+    unawaited(refreshQuranSessionsPlatformConfig());
   }
 
   Future<void> _ensurePrayerNotificationWatchdogScheduled() async {
@@ -357,6 +365,23 @@ class AppStartupTasks {
     } catch (e) {
       logger.d(
         '[AppLaunch] source=AppStartupTasks._ensurePrayerNotificationWatchdogScheduled: Warning: Could not schedule watchdog at (${DateTime.now()}): $e',
+      );
+    }
+  }
+
+  Future<void> refreshQuranSessionsPlatformConfig() async {
+    logger.d(
+      '[AppLaunch] source=AppStartupTasks.refreshQuranSessionsPlatformConfig: Start in (${DateTime.now()})',
+    );
+    try {
+      if (!getIt.isRegistered<QuranSessionsPlatformConfigRepository>()) {
+        return;
+      }
+      await getIt<QuranSessionsPlatformConfigRepository>()
+          .refreshRemoteConfig();
+    } catch (e) {
+      logger.d(
+        '[AppLaunch] source=AppStartupTasks.refreshQuranSessionsPlatformConfig: Warning: Could not refresh config at (${DateTime.now()}): $e',
       );
     }
   }
@@ -530,6 +555,7 @@ class AppStartupTasks {
       );
 
       await cleanupLegacyAudioPlayerBlocHydration();
+      await cleanupLegacyAuthBlocHydration();
 
       logger.d(
         '[AppLaunch] source=AppStartupTasks.initializeHydratedStorage: HydratedStorage initialized successfully at (${DateTime.now()})',
@@ -561,6 +587,29 @@ class AppStartupTasks {
     } catch (e) {
       logger.d(
         '[AppLaunch] source=AppStartupTasks.cleanupLegacyAudioPlayerBlocHydration: '
+        'Warning: cleanup failed at (${DateTime.now()}): $e',
+      );
+    }
+  }
+
+  /// Deletes persisted [AuthBloc] hydration once per install upgrade.
+  Future<void> cleanupLegacyAuthBlocHydration() async {
+    try {
+      final SharedPreferencesAsync prefs =
+          sharedPreferencesAsyncOverride ??
+          SharedPreferencesAsync(options: tilawaSharedPreferencesOptions);
+      if (await prefs.getBool(legacyAuthBlocHydrationCleanupKey) ?? false) {
+        return;
+      }
+      await HydratedBloc.storage.delete('AuthBloc');
+      await prefs.setBool(legacyAuthBlocHydrationCleanupKey, true);
+      logger.d(
+        '[AppLaunch] source=AppStartupTasks.cleanupLegacyAuthBlocHydration: '
+        'Removed legacy AuthBloc hydration at (${DateTime.now()})',
+      );
+    } catch (e) {
+      logger.d(
+        '[AppLaunch] source=AppStartupTasks.cleanupLegacyAuthBlocHydration: '
         'Warning: cleanup failed at (${DateTime.now()}): $e',
       );
     }
@@ -642,16 +691,38 @@ class AppStartupTasks {
       try {
         final NotificationPermissionService notificationPermissionService =
             getIt<NotificationPermissionService>();
-        await notificationPermissionService
-            .requestPermissionIfNecessary()
-            .timeout(
-              notificationPermissionSoftTimeout,
-              onTimeout: () {
-                logger.d(
-                  'Notification permission request still pending (deferred)',
-                );
-              },
+        final Future<void> permissionRequest = notificationPermissionService
+            .requestPermissionIfNecessary();
+        bool completedWithinSoftTimeout = true;
+        await permissionRequest.timeout(
+          notificationPermissionSoftTimeout,
+          onTimeout: () {
+            completedWithinSoftTimeout = false;
+            logger.d(
+              'Notification permission request still pending (deferred)',
             );
+          },
+        );
+        if (completedWithinSoftTimeout) {
+          await _refreshPrayerNotificationsWhenPermissionGranted(
+            notificationPermissionService,
+          );
+        } else {
+          unawaited(
+            permissionRequest
+                .then(
+                  (_) => _refreshPrayerNotificationsWhenPermissionGranted(
+                    notificationPermissionService,
+                  ),
+                )
+                .catchError((Object e) {
+                  logger.d(
+                    '[AppLaunch] source=AppStartupTasks.requestNotificationPermission: '
+                    'Deferred permission completion failed at (${DateTime.now()}): $e',
+                  );
+                }),
+          );
+        }
         logger.d(
           '[AppLaunch] source=AppStartupTasks.requestNotificationPermission: Notification permission request completed at (${DateTime.now()})',
         );
@@ -661,6 +732,27 @@ class AppStartupTasks {
         );
       }
     }();
+  }
+
+  Future<void> _refreshPrayerNotificationsWhenPermissionGranted(
+    NotificationPermissionService notificationPermissionService,
+  ) async {
+    if (!launchConfig.prayerNotificationsInit) {
+      return;
+    }
+    try {
+      final bool isGranted = await notificationPermissionService
+          .isPermissionGranted();
+      if (!isGranted) {
+        return;
+      }
+      await initializePrayerNotifications();
+    } catch (e) {
+      logger.d(
+        '[AppLaunch] source=AppStartupTasks._refreshPrayerNotificationsWhenPermissionGranted: '
+        'Warning: Could not refresh prayer notifications at (${DateTime.now()}): $e',
+      );
+    }
   }
 
   Future<void> initializeFirebaseDataAsync() async {

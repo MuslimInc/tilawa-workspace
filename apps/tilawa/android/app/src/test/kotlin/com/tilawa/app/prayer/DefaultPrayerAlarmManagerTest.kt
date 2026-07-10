@@ -50,6 +50,35 @@ class DefaultPrayerAlarmManagerTest {
     }
 
     @Test
+    fun `scheduleInexact stores location and language extras on alarm intent`() {
+        val manager = DefaultPrayerAlarmManager(context)
+        val alarmManager =
+            context.getSystemService(Context.ALARM_SERVICE) as AlarmManager
+        val shadowAlarmManager = Shadows.shadowOf(alarmManager)
+
+        val ok = manager.scheduleInexact(
+            id = 43,
+            name = "isha",
+            key = "isha",
+            triggerMs = 1_700_000_100_000L,
+            sound = "adhan",
+            locationName = "Cairo",
+            languageCode = "ar",
+        )
+
+        assertTrue(ok)
+        val scheduled = shadowAlarmManager.scheduledAlarms.single()
+        val pendingIntent = scheduled.operation
+        assertNotNull(pendingIntent)
+        val broadcastIntent = Shadows.shadowOf(pendingIntent!!).savedIntent
+        assertEquals("com.tilawa.app.prayer.ACTION_FIRE_ADHAN", broadcastIntent.action)
+        assertEquals("Cairo", broadcastIntent.getStringExtra(AdhanScheduler.EXTRA_LOCATION_NAME))
+        assertEquals("ar", broadcastIntent.getStringExtra(AdhanScheduler.EXTRA_LANGUAGE_CODE))
+        assertEquals("isha", broadcastIntent.getStringExtra(AdhanScheduler.EXTRA_PRAYER_NAME))
+        assertEquals("adhan", broadcastIntent.getStringExtra(AdhanScheduler.EXTRA_SOUND))
+    }
+
+    @Test
     fun `canScheduleExact returns true on Android 11`() {
         val manager = DefaultPrayerAlarmManager(context)
         assertTrue(manager.canScheduleExact())

@@ -105,21 +105,27 @@ void main() {
       expect(
         find.textContaining(
           l10n.manualPaymentCancellationSupportHint(
-            ManualPaymentPilotConfig.supportWhatsappNumber,
+            ManualPaymentMarketConfig.egFallback.supportWhatsappNumber,
           ),
         ),
         findsOneWidget,
       );
       expect(
-        find.textContaining(ManualPaymentPilotConfig.instapayHandle),
+        find.textContaining(
+          ManualPaymentMarketConfig.egFallback.instapayHandle!,
+        ),
         findsNothing,
       );
       expect(
-        find.textContaining(ManualPaymentPilotConfig.instapayPaymentLink),
+        find.textContaining(
+          ManualPaymentMarketConfig.egFallback.instapayPaymentLink!,
+        ),
         findsNothing,
       );
       expect(
-        find.textContaining(ManualPaymentPilotConfig.recipientMaskedName),
+        find.textContaining(
+          ManualPaymentMarketConfig.egFallback.recipientMaskedName!,
+        ),
         findsNothing,
       );
       expect(
@@ -149,13 +155,15 @@ void main() {
       expect(
         find.textContaining(
           l10n.manualPaymentCancellationSupportHint(
-            ManualPaymentPilotConfig.supportWhatsappNumber,
+            ManualPaymentMarketConfig.egFallback.supportWhatsappNumber,
           ),
         ),
         findsOneWidget,
       );
       expect(
-        find.textContaining(ManualPaymentPilotConfig.instapayHandle),
+        find.textContaining(
+          ManualPaymentMarketConfig.egFallback.instapayHandle!,
+        ),
         findsNothing,
       );
     },

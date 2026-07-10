@@ -243,7 +243,17 @@ void main() {
   group('join', () {
     blocTest<SessionDetailBloc, SessionDetailState>(
       'student join clears in-progress and marks external meeting opened',
-      build: () => buildBloc(joinSession: buildJoinUseCase(uid: 'student_1')),
+      build: () {
+        // Join window (Q-VC-03) opens 15m before start.
+        sessionRepository.sessions = [
+          makeSession(
+            id: 'session_1',
+            studentId: 'student_1',
+            startsAt: DateTime.now().toUtc().add(const Duration(minutes: 10)),
+          ),
+        ];
+        return buildBloc(joinSession: buildJoinUseCase(uid: 'student_1'));
+      },
       act: (bloc) async {
         bloc.add(const SessionDetailLoadRequested(bookingId: 'booking_1'));
         await bloc.stream.firstWhere((s) => s is SessionDetailSuccess);

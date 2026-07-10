@@ -1,6 +1,16 @@
-import { Firestore, Timestamp } from "firebase-admin/firestore";
+import { Firestore, Timestamp, DocumentSnapshot } from "firebase-admin/firestore";
 
 import { lifecycleError } from "./lifecycleErrors";
+import {
+  isMarketEnabled,
+  parseMarketGatePolicy,
+  type MarketGatePolicy,
+} from "./marketGate";
+import {
+  loadEffectiveMarketPolicy,
+  assertBookingPolicyConfigured,
+  type ResolvedMarketPolicy,
+} from "./sessionPolicyResolver";
 
 /**
  * Server-side parity with the domain `ValidateBookingEligibilityUseCase`
@@ -8,14 +18,8 @@ import { lifecycleError } from "./lifecycleErrors";
  *
  * The mobile client runs the same rules, but client checks are advisory only —
  * a modified client can skip them. These checks are authoritative: child-safety
- * (gender / age / guardian), teacher verification, and pricing are enforced
- * here before any booking document is written.
- *
- * NOTE: this intentionally does NOT re-validate that startsAt/endsAt/slotId is a
- * real offered availability slot (availability is generated from a weekly
- * schedule, not stored per-slot). Slot collisions are still prevented by the
- * `quran_slot_locks` hard lock in createSessionBooking. Full slot regeneration
- * is tracked as a follow-up.
+ * (gender / age), teacher verification, and pricing are enforced here before
+ * any booking document is written.
  */
 
 export type Gender = "male" | "female";
@@ -28,8 +32,6 @@ export interface StudentEligibilityProfile {
   dateOfBirth: Date | null;
   countryCode: string | null;
   cityId: string | null;
-  guardianId: string | null;
-  guardianChildBookingApprovedAt: Date | null;
   restrictionReason: string | null;
 }
 
@@ -39,14 +41,12 @@ export interface TeacherEligibilityProfile {
   gender: Gender;
   allowedStudentGender: AllowedStudentGender;
   canTeachChildren: boolean;
-  requiresGuardianApprovalForChildren: boolean;
 }
 
 export interface GlobalSafetyPolicy {
   childAgeThreshold: number;
   globalAllowMaleTeacherFemaleStudent: boolean;
   globalAllowFemaleTeacherMaleStudent: boolean;
-  requireGuardianApprovalForChildren: boolean;
 }
 
 export interface ResolvedPricing {
@@ -56,16 +56,131 @@ export interface ResolvedPricing {
   currencyCode: string;
 }
 
+export interface PlatformFeaturePolicy {
+  quranSessionsEnabled: boolean;
+  studentEntryEnabled: boolean;
+  bookingEnabled: boolean;
+  /** Config-driven market availability gate (replaces hardcoded Egypt-only). */
+  marketGate: MarketGatePolicy;
+}
+
+/** Where the authoritative price came from — recorded on the fee snapshot. */
+export type PricingSource = "teacher_override" | "market";
+
+/**
+ * Admin-configured teacher-level price. When enabled it overrides the market
+ * default for this teacher (amount 0 = the teacher teaches for free even in a
+ * paid market). Stored on `quran_teacher_profiles/{id}.sessionPriceOverride`.
+ */
+export interface TeacherPricingOverride {
+  amount: number;
+  currencyCode: string | null;
+}
+
 export interface BookingEligibilityContext {
+  platform: PlatformFeaturePolicy;
   student: StudentEligibilityProfile;
   teacher: TeacherEligibilityProfile;
   policy: GlobalSafetyPolicy;
+  market: ResolvedMarketPolicy;
   /** Only blocking when the market doc explicitly disables the country. */
   marketEnabled: boolean;
   pricing: ResolvedPricing;
+  /** Provenance of [pricing] — teacher override vs market default. */
+  pricingSource: PricingSource;
+}
+
+/**
+ * The student/market/platform slice of a booking context — everything that does
+ * NOT depend on which teacher is being priced. Resolved once and shared across a
+ * batch of teachers so a list-load prices N teachers with 1 student+market read
+ * plus N teacher reads, instead of re-reading the shared context N times.
+ */
+export interface SharedBookingContext {
+  platform: PlatformFeaturePolicy;
+  student: StudentEligibilityProfile;
+  policy: GlobalSafetyPolicy;
+  market: ResolvedMarketPolicy;
+  marketEnabled: boolean;
+  /** Market-default pricing before any per-teacher override is applied. */
+  marketPricing: ResolvedPricing;
 }
 
 // ── Pure helpers (unit-tested, no I/O) ──────────────────────────────────────
+
+/**
+ * Parses an admin-configured teacher price override. Returns null (fall back
+ * to market) unless the override is explicitly enabled with a valid,
+ * non-negative amount. An amount of 0 is valid and means "free".
+ */
+export function parseTeacherPricingOverride(
+  raw: unknown,
+): TeacherPricingOverride | null {
+  if (raw == null || typeof raw !== "object") return null;
+  const o = raw as Record<string, unknown>;
+  if (o.enabled !== true) return null;
+  const amount = o.amount;
+  if (typeof amount !== "number" || !Number.isFinite(amount) || amount < 0) {
+    return null;
+  }
+  const currencyCode =
+    typeof o.currencyCode === "string" && o.currencyCode.trim().length > 0
+      ? o.currencyCode
+      : null;
+  return { amount, currencyCode };
+}
+
+/**
+ * Resolves the authoritative price: an enabled teacher override wins over the
+ * market default (0 ⇒ free). Currency falls back to the market currency when
+ * the override does not specify one. Returns the source for the fee snapshot.
+ */
+export function resolvePricingWithOverride(
+  marketPricing: ResolvedPricing,
+  override: TeacherPricingOverride | null,
+): { pricing: ResolvedPricing; source: PricingSource } {
+  if (override == null) {
+    return { pricing: marketPricing, source: "market" };
+  }
+  return {
+    pricing: {
+      isPaid: override.amount > 0,
+      amount: override.amount,
+      currencyCode: override.currencyCode ?? marketPricing.currencyCode,
+    },
+    source: "teacher_override",
+  };
+}
+
+export function parsePlatformFeaturePolicy(
+  raw: Record<string, unknown>,
+): PlatformFeaturePolicy {
+  return {
+    quranSessionsEnabled: raw.quranSessionsEnabled === true,
+    studentEntryEnabled: raw.studentEntryEnabled === true,
+    bookingEnabled: raw.bookingEnabled === true,
+    marketGate: parseMarketGatePolicy(raw),
+  };
+}
+
+export function assertPlatformBookingEnabled(
+  platform: PlatformFeaturePolicy,
+): void {
+  if (!platform.quranSessionsEnabled) {
+    throw lifecycleError(
+      "feature_disabled",
+      "Quran Sessions are disabled by platform configuration.",
+      { field: "quranSessionsEnabled" },
+    );
+  }
+  if (!platform.bookingEnabled) {
+    throw lifecycleError(
+      "feature_disabled",
+      "Quran Sessions booking is disabled by platform configuration.",
+      { field: "bookingEnabled" },
+    );
+  }
+}
 
 /** Calendar age in whole years, matching the domain `_calendarAge`. */
 export function calendarAge(dob: Date, now: Date): number {
@@ -85,26 +200,6 @@ export function isChild(
 ): boolean {
   if (dob == null) return false;
   return calendarAge(dob, now) < childAgeThreshold;
-}
-
-/** Guardian approvers must have a verified adult DOB (unlike generic isChild). */
-export function assertGuardianCanApproveChildBooking(
-  guardianDateOfBirth: Date | null,
-  childAgeThreshold: number,
-  now: Date,
-): void {
-  if (guardianDateOfBirth == null) {
-    throw lifecycleError(
-      "guardian_approval_invalid",
-      "Guardian profile must have a valid date of birth.",
-    );
-  }
-  if (isChild(guardianDateOfBirth, childAgeThreshold, now)) {
-    throw lifecycleError(
-      "guardian_approval_invalid",
-      "Guardian must be an adult account.",
-    );
-  }
 }
 
 /** Mirrors `QuranSessionSafetyPolicy.isGenderCombinationAllowed`. */
@@ -153,8 +248,15 @@ export function isGenderCombinationAllowed(args: {
 export function assertBookingEligible(
   ctx: BookingEligibilityContext,
   now: Date,
+  options?: {
+    teacherId?: string;
+    startsAt?: Date;
+    upcomingCount?: number;
+  },
 ): ResolvedPricing {
-  const { student, teacher, policy } = ctx;
+  assertPlatformBookingEnabled(ctx.platform);
+
+  const { student, teacher, policy, market } = ctx;
 
   if (!student.exists) {
     throw lifecycleError("profile_incomplete", "Student profile not found.", {
@@ -178,8 +280,52 @@ export function assertBookingEligible(
     });
   }
 
-  if (!ctx.marketEnabled) {
+  if (!ctx.marketEnabled || !market.marketEnabled) {
     throw lifecycleError("market_not_enabled", "Market is not enabled.", {
+      countryCode: student.countryCode,
+      cityId: student.cityId,
+    });
+  }
+
+  const studentCountryCode = student.countryCode as string;
+  if (!isMarketEnabled(ctx.platform.marketGate, studentCountryCode)) {
+    throw lifecycleError(
+      "market_not_supported",
+      "Quran Sessions is not available in your region yet.",
+      { countryCode: studentCountryCode },
+    );
+  }
+
+  if (
+    ctx.pricing.isPaid &&
+    !market.manualPaymentEnabled &&
+    !market.paymentProviderEnabled
+  ) {
+    throw lifecycleError(
+      "payment_provider_unavailable",
+      "Paid bookings are not currently available in this market.",
+      { countryCode: student.countryCode }
+    );
+  }
+
+  // Egypt manual-payment release is paid-only: free bookings are blocked when
+  // the market has manual off-app payment enabled.
+  if (market.manualPaymentEnabled && !ctx.pricing.isPaid) {
+    throw lifecycleError(
+      "payment_provider_unavailable",
+      "Free bookings are disabled while manual payment is enabled for this market.",
+      { countryCode: student.countryCode },
+    );
+  }
+
+  const teacherId = options?.teacherId;
+  if (
+    teacherId != null &&
+    market.teacherWhitelist != null &&
+    !market.teacherWhitelist.includes(teacherId)
+  ) {
+    throw lifecycleError("teacher_not_whitelisted", "Teacher is not enabled in this market.", {
+      teacherId,
       countryCode: student.countryCode,
     });
   }
@@ -191,6 +337,7 @@ export function assertBookingEligible(
   }
 
   if (
+    market.genderMatchingEnabled &&
     !isGenderCombinationAllowed({
       teacherGender: teacher.gender,
       studentGender: student.gender as Gender,
@@ -213,21 +360,28 @@ export function assertBookingEligible(
         studentAgeGroup: "child",
       });
     }
-    if (
-      teacher.requiresGuardianApprovalForChildren ||
-      policy.requireGuardianApprovalForChildren
-    ) {
-      const hasGuardian =
-        student.guardianId != null && student.guardianId.trim() !== "";
-      const hasApproval = student.guardianChildBookingApprovedAt != null;
-      if (!hasGuardian || !hasApproval) {
-        throw lifecycleError(
-          "guardian_approval_required",
-          "Guardian approval is required for this child's booking.",
-          { guardianId: student.guardianId },
-        );
-      }
+  }
+
+  if (options?.startsAt != null) {
+    const noticeMs = options.startsAt.getTime() - now.getTime();
+    if (noticeMs < market.minBookingNoticeMs) {
+      throw lifecycleError(
+        "min_notice_violation",
+        "Booking is too close to session start.",
+        { minNoticeMinutes: market.minBookingNoticeMs / (60 * 1000) },
+      );
     }
+  }
+
+  if (
+    options?.upcomingCount != null &&
+    options.upcomingCount >= market.maxConcurrentUpcomingPerStudent
+  ) {
+    throw lifecycleError(
+      "max_upcoming_exceeded",
+      "Student has reached the maximum upcoming sessions.",
+      { maxUpcoming: market.maxConcurrentUpcomingPerStudent },
+    );
   }
 
   return ctx.pricing;
@@ -243,6 +397,7 @@ function parseGender(raw: unknown): Gender | null {
 
 function parseDate(raw: unknown): Date | null {
   if (raw instanceof Timestamp) return raw.toDate();
+  if (raw instanceof Date) return Number.isNaN(raw.getTime()) ? null : raw;
   if (typeof raw === "string" && raw.length > 0) {
     const d = new Date(raw);
     return Number.isNaN(d.getTime()) ? null : d;
@@ -260,83 +415,233 @@ function parseAllowedStudentGender(raw: unknown): AllowedStudentGender {
   return "both";
 }
 
-export async function loadBookingEligibilityContext(
-  db: Firestore,
-  studentId: string,
-  teacherId: string,
-): Promise<BookingEligibilityContext> {
-  const [studentSnap, teacherSnap, policySnap] = await Promise.all([
-    db.collection("users").doc(studentId).get(),
-    db.collection("quran_teacher_profiles").doc(teacherId).get(),
-    db.collection("quran_session_platform_config").doc("global").get(),
-  ]);
-
+function parseStudentProfile(
+  studentSnap: DocumentSnapshot,
+): StudentEligibilityProfile {
   const studentProfile =
     (studentSnap.data()?.quranSessionsProfile as Record<string, unknown>) ?? {};
-  const student: StudentEligibilityProfile = {
+  return {
     exists: studentSnap.exists && studentSnap.data()?.quranSessionsProfile != null,
     accountStatus: (studentProfile.accountStatus as string) ?? "active",
     gender: parseGender(studentProfile.gender),
     dateOfBirth: parseDate(studentProfile.dateOfBirth),
     countryCode: (studentProfile.countryCode as string) ?? null,
     cityId: (studentProfile.cityId as string) ?? null,
-    guardianId: (studentProfile.guardianId as string) ?? null,
-    guardianChildBookingApprovedAt: parseDate(
-      studentProfile.guardianChildBookingApprovedAt,
-    ),
     restrictionReason: (studentProfile.restrictionReason as string) ?? null,
   };
+}
 
+function parseTeacherEligibilityProfile(
+  teacherSnap: DocumentSnapshot,
+): TeacherEligibilityProfile {
   const teacherData = teacherSnap.data() ?? {};
-  const teacher: TeacherEligibilityProfile = {
+  return {
     exists: teacherSnap.exists,
     verificationStatus: (teacherData.verificationStatus as string) ?? "pending",
     gender: parseGender(teacherData.gender) ?? "male",
     allowedStudentGender: parseAllowedStudentGender(teacherData.allowedStudentGender),
     canTeachChildren: (teacherData.canTeachChildren as boolean) ?? true,
-    requiresGuardianApprovalForChildren:
-      (teacherData.requiresGuardianApprovalForChildren as boolean) ?? false,
   };
+}
 
-  const policyData = policySnap.data() ?? {};
-  const policy: GlobalSafetyPolicy = {
-    childAgeThreshold: (policyData.childAgeThreshold as number) ?? 14,
+function parseGlobalSafetyPolicy(
+  platformConfig: Record<string, unknown>,
+): GlobalSafetyPolicy {
+  return {
+    childAgeThreshold: (platformConfig.childAgeThreshold as number) ?? 14,
     globalAllowMaleTeacherFemaleStudent:
-      (policyData.globalAllowMaleTeacherFemaleStudent as boolean) ?? true,
+      (platformConfig.globalAllowMaleTeacherFemaleStudent as boolean) ?? true,
     globalAllowFemaleTeacherMaleStudent:
-      (policyData.globalAllowFemaleTeacherMaleStudent as boolean) ?? true,
-    requireGuardianApprovalForChildren:
-      (policyData.requireGuardianApprovalForChildren as boolean) ?? false,
+      (platformConfig.globalAllowFemaleTeacherMaleStudent as boolean) ?? true,
+  };
+}
+
+/**
+ * Resolves the student/market/platform context that every teacher in a batch
+ * shares. This is the expensive slice (student + platform config + market/city
+ * reads + policy overlay); resolving it once is what turns a list-load from
+ * O(N) full context loads into O(1) shared + O(N) teacher reads.
+ *
+ * Throws the same typed `lifecycleError`s as the single-teacher loader when the
+ * market/policy is not configured — those blocks are student-market-level, so a
+ * batch caller applies the resulting block to every requested teacher.
+ */
+export async function loadSharedBookingContext(
+  db: Firestore,
+  studentId: string,
+): Promise<SharedBookingContext> {
+  const [studentSnap, policySnap] = await Promise.all([
+    db.collection("users").doc(studentId).get(),
+    db.collection("quran_session_platform_config").doc("global").get(),
+  ]);
+
+  const platformConfig = policySnap.data() ?? {};
+  const platform = parsePlatformFeaturePolicy(platformConfig);
+  const student = parseStudentProfile(studentSnap);
+  const policy = parseGlobalSafetyPolicy(platformConfig);
+
+  let marketEnabled = true;
+  let market: ResolvedMarketPolicy = {
+    countryCode: student.countryCode ?? "",
+    cityId: student.cityId ?? "",
+    marketEnabled: true,
+    cityEnabled: true,
+    sessionFeeAmount: 0,
+    currencyCode: "USD",
+    bookingMode: "requiresTutorApproval",
+    genderMatchingEnabled: true,
+    teacherWhitelist: null,
+    tutorApprovalSlaMs: 24 * 60 * 60 * 1000,
+    minBookingNoticeMs: 60 * 60 * 1000,
+    maxConcurrentUpcomingPerStudent: 3,
+    joinWindowLeadMs: 15 * 60 * 1000,
+    sessionMode: "videoOnly",
+    policyVersion: null,
+    effectiveFrom: null,
+    paymentProviderEnabled: false,
+    manualPaymentEnabled: false,
+  };
+  let marketPricing: ResolvedPricing = {
+    isPaid: false,
+    amount: 0,
+    currencyCode: "USD",
   };
 
-  // Market + pricing depend on the student's resolved market.
-  let marketEnabled = true;
-  let pricing: ResolvedPricing = { isPaid: false, amount: 0, currencyCode: "USD" };
   if (student.countryCode != null && student.cityId != null) {
-    const marketId = `${student.countryCode}_${student.cityId}`;
-    const [marketSnap, pricingSnap] = await Promise.all([
-      db.collection("quran_session_market_configs").doc(student.countryCode).get(),
-      db
-        .collection("quran_teacher_profiles")
-        .doc(teacherId)
-        .collection("pricing")
-        .doc(marketId)
-        .get(),
+    // Read market + city once, in parallel, and reuse the snapshots for both
+    // policy-config validation and the effective-policy resolve below. This
+    // previously read the same two docs twice (here + inside
+    // loadEffectiveMarketPolicy) over two sequential round-trips.
+    const marketRef = db
+      .collection("quran_session_market_configs")
+      .doc(student.countryCode);
+    const [marketSnap, citySnap] = await Promise.all([
+      marketRef.get(),
+      marketRef.collection("cities").doc(student.cityId).get(),
     ]);
-    // Only block when the market doc explicitly disables the country; a missing
-    // doc is treated as enabled to avoid false rejections in partial seeds.
-    if (marketSnap.exists && marketSnap.data()?.isEnabled === false) {
-      marketEnabled = false;
-    }
-    if (pricingSnap.exists) {
-      const p = pricingSnap.data() ?? {};
-      pricing = {
-        isPaid: true,
-        amount: (p.amount as number) ?? 0,
-        currencyCode: (p.currencyCode as string) ?? "USD",
-      };
-    }
+    assertBookingPolicyConfigured({
+      platformConfig,
+      marketData: marketSnap.data(),
+      cityData: citySnap.exists ? citySnap.data() : null,
+      countryCode: student.countryCode,
+      cityId: student.cityId,
+      marketDocExists: marketSnap.exists,
+    });
+
+    market = await loadEffectiveMarketPolicy(
+      db,
+      student.countryCode,
+      student.cityId,
+      platformConfig,
+      new Date(),
+      { marketSnap, citySnap },
+    );
+    marketEnabled = market.marketEnabled;
+    marketPricing = {
+      isPaid: market.sessionFeeAmount > 0,
+      amount: market.sessionFeeAmount,
+      currencyCode: market.currencyCode,
+    };
   }
 
-  return { student, teacher, policy, marketEnabled, pricing };
+  return { platform, student, policy, market, marketEnabled, marketPricing };
+}
+
+/**
+ * Overlays a single teacher (verification, gender rules, price override) onto a
+ * shared context to produce the full per-teacher eligibility context. Pure — no
+ * I/O — so a batch of teacher snapshots joins onto one shared context in memory.
+ *
+ * The admin-configured teacher price override wins over the market default
+ * (0 ⇒ this teacher is free even in a paid market). Applied here so the quote
+ * (getBookingPricingQuote[s]) and the booking (createSessionBooking) share one
+ * resolution and can never disagree.
+ */
+export function buildTeacherBookingContext(
+  shared: SharedBookingContext,
+  teacherSnap: DocumentSnapshot,
+): BookingEligibilityContext {
+  const teacherData = teacherSnap.data() ?? {};
+  const teacher = parseTeacherEligibilityProfile(teacherSnap);
+  const teacherOverride = parseTeacherPricingOverride(
+    teacherData.sessionPriceOverride,
+  );
+  const resolved = resolvePricingWithOverride(
+    shared.marketPricing,
+    teacherOverride,
+  );
+
+  return {
+    platform: shared.platform,
+    student: shared.student,
+    teacher,
+    policy: shared.policy,
+    market: shared.market,
+    marketEnabled: shared.marketEnabled,
+    pricing: resolved.pricing,
+    pricingSource: resolved.source,
+  };
+}
+
+/** Reads a single teacher doc and overlays it onto [shared]. */
+export async function resolveTeacherBookingContext(
+  db: Firestore,
+  shared: SharedBookingContext,
+  teacherId: string,
+): Promise<BookingEligibilityContext> {
+  const teacherSnap = await db
+    .collection("quran_teacher_profiles")
+    .doc(teacherId)
+    .get();
+  return buildTeacherBookingContext(shared, teacherSnap);
+}
+
+export async function loadBookingEligibilityContext(
+  db: Firestore,
+  studentId: string,
+  teacherId: string,
+): Promise<BookingEligibilityContext> {
+  const [shared, teacherSnap] = await Promise.all([
+    loadSharedBookingContext(db, studentId),
+    db.collection("quran_teacher_profiles").doc(teacherId).get(),
+  ]);
+  return buildTeacherBookingContext(shared, teacherSnap);
+}
+
+/**
+ * A booking only counts against the max-upcoming cap while its session has
+ * not ended. Sessions that elapsed without a lifecycle transition (no-show
+ * sweep lag, legacy data) must not block new bookings — the client's
+ * "upcoming" tab is time-bounded the same way (`endsAt >= now`).
+ *
+ * A missing/unparseable `endsAt` counts (fail closed against cap abuse).
+ */
+export function isBookingStillUpcoming(endsAtRaw: unknown, now: Date): boolean {
+  const endsAt = parseDate(endsAtRaw);
+  if (endsAt == null) return true;
+  return endsAt.getTime() > now.getTime();
+}
+
+export async function countStudentUpcomingBookings(
+  db: Firestore,
+  studentId: string,
+  now: Date = new Date(),
+): Promise<number> {
+  const upcomingStatuses = [
+    "scheduled",
+    "confirmed",
+    "in_progress",
+    "pending_tutor_approval",
+    "pending_payment",
+    "rescheduled",
+  ];
+  const snap = await db
+    .collection("quran_bookings")
+    .where("studentId", "==", studentId)
+    .where("lifecycleStatus", "in", upcomingStatuses)
+    .limit(20)
+    .get();
+  return snap.docs.filter((doc) =>
+    isBookingStillUpcoming(doc.data().endsAt, now),
+  ).length;
 }

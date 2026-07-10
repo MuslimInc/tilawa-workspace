@@ -10,6 +10,7 @@ import '../repositories/audit_repository.dart';
 import '../repositories/session_aggregate_repository.dart';
 import '../value_objects/action_source.dart';
 import '../value_objects/actor_role.dart';
+import '../policies/platform_scheduling_policy.dart';
 import '../value_objects/session_action.dart';
 
 class ExpirePendingReservationsUseCase {
@@ -30,7 +31,9 @@ class ExpirePendingReservationsUseCase {
   Future<Either<QuranSessionsFailure, List<SessionAggregate>>> call() async {
     final pending = await _aggregateRepository.listByStatus(
       SessionLifecycleStatus.pendingPayment,
-      startsBefore: _now().add(const Duration(minutes: 10)),
+      startsBefore: _now().subtract(
+        PlatformSchedulingPolicy.pendingPaymentSlotHoldTtl,
+      ),
     );
     if (pending.isLeft()) return pending;
     final aggregates = pending.fold(

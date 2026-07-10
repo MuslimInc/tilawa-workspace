@@ -221,7 +221,10 @@ class SettingsTeachingOnMemuslimTile extends StatelessWidget {
         context.push(QuranSessionsRoutes.completeTeacherProfile);
       case TeacherCapabilityNavigationTarget.teacherDashboard:
         analytics.onTeacherDashboardOpened?.call();
-        context.push(QuranSessionsRoutes.teacherDashboard);
+        context.push(
+          QuranSessionsRoutes.teacherDashboard,
+          extra: capability,
+        );
     }
   }
 }

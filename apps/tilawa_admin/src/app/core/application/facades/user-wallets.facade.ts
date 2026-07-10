@@ -1,11 +1,7 @@
 import { Injectable, inject, signal } from '@angular/core';
 
 import { GetUserWalletUseCase } from '../../domain/usecases/wallet.usecases';
-import {
-  DEFAULT_PAGE_SIZE,
-  SortRequest,
-  sortsEqual,
-} from '../../domain/entities/pagination.types';
+import { DEFAULT_PAGE_SIZE, SortRequest, sortsEqual } from '../../domain/entities/pagination.types';
 import {
   UserWalletDetail,
   WALLET_TRANSACTION_DEFAULT_SORT,
@@ -57,9 +53,7 @@ export class UserWalletsFacade {
       this.detailState.set('success');
     } catch (error) {
       this.detailState.set('error');
-      this.detailError.set(
-        error instanceof Error ? error.message : 'Failed to load wallet.',
-      );
+      this.detailError.set(error instanceof Error ? error.message : 'Failed to load wallet.');
     }
   }
 
@@ -93,9 +87,7 @@ export class UserWalletsFacade {
       this.detailState.set('success');
     } catch (error) {
       this.detailState.set('error');
-      this.detailError.set(
-        error instanceof Error ? error.message : 'Failed to load transactions.',
-      );
+      this.detailError.set(error instanceof Error ? error.message : 'Failed to load transactions.');
     }
   }
 

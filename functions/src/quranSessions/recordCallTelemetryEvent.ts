@@ -125,6 +125,8 @@ export const recordCallTelemetryEvent = onCall(
           prefetchedSession: {
             bookingId: (session.bookingId as string | undefined) ?? "",
             startsAt: session.startsAt as Timestamp | undefined,
+            endsAt: session.endsAt as Timestamp | undefined,
+            lifecycleStatus: session.lifecycleStatus as string | undefined,
           },
         },
         Date.now(),

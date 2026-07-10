@@ -26,12 +26,7 @@ export interface ModerationGateway {
     reason?: string,
   ): Promise<void>;
 
-  setUserTeacherApplicationAccess(
-    userId: string,
-    canApplyAsTeacher: boolean | null,
-  ): Promise<void>;
+  setUserTeacherApplicationAccess(userId: string, canApplyAsTeacher: boolean | null): Promise<void>;
 }
 
-export const MODERATION_GATEWAY = new InjectionToken<ModerationGateway>(
-  'ModerationGateway',
-);
+export const MODERATION_GATEWAY = new InjectionToken<ModerationGateway>('ModerationGateway');

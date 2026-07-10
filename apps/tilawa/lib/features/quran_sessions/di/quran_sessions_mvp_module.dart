@@ -2,14 +2,17 @@ import 'package:get_it/get_it.dart';
 import 'package:quran_sessions/quran_sessions.dart';
 import 'package:tilawa/core/bootstrap/app_launch_config.dart';
 import 'package:tilawa/core/di/get_it_idempotent.dart';
+import 'package:tilawa/features/quran_sessions/quran_sessions_feature_flags.dart';
 import 'package:tilawa/features/quran_sessions/quran_sessions_launch_policy.dart';
 import 'package:tilawa_core/network/network_info.dart';
 
+import '../data/external_meeting_url_launcher.dart';
 import '../data/fake_auth_session_provider.dart';
 import '../data/fake_mvp_availability_provider.dart';
 import '../data/fake_mvp_booking_repository.dart';
 import '../data/fake_mvp_market_config_repository.dart';
 import '../data/fake_mvp_schedule_repository.dart';
+import '../data/fake_mvp_session_lifecycle.dart';
 import '../data/fake_mvp_session_policy_repository.dart';
 import '../data/fake_mvp_session_repository.dart';
 import '../data/fake_mvp_teacher_application_repository.dart';
@@ -17,16 +20,17 @@ import '../data/fake_mvp_teacher_profile_repository.dart';
 import '../data/fake_mvp_teacher_repository.dart';
 import '../data/fake_mvp_user_profile_repository.dart';
 import '../data/fake_mvp_wallet_repository.dart';
-import '../data/fake_mvp_session_lifecycle.dart';
-import '../data/external_meeting_url_launcher.dart';
 import '../data/manual_payment_link_launcher.dart';
 import '../data/quran_sessions_mvp_store.dart';
 import '../data/session_backed_booked_slot_lock_repository.dart';
 import '../presentation/quran_sessions_scheduling_analytics.dart';
 import 'quran_sessions_lifecycle_module.dart';
 
-/// Wires fake MVP repositories, boundaries, use cases, and BLoC factories
-/// into [GetIt]. Call once after [configureDependencies].
+/// **NON-PRODUCTION ONLY** — wires in-memory fake repositories for local UI dev.
+///
+/// Never register this module in release builds. Production uses
+/// [QuranSessionsFirebaseModule] with Firestore + Cloud Functions.
+/// See `docs/quran-sessions/domain-audit-report.md`.
 class QuranSessionsMvpModule {
   QuranSessionsMvpModule._();
 
@@ -314,6 +318,11 @@ class QuranSessionsMvpModule {
     );
     sl.registerLazySingletonIfAbsent(
       () => GetTeacherDashboardUseCase(
+        // Present only when the launch flag registered it (firebase module);
+        // null keeps the legacy multi-fetch path.
+        summarySource: sl.isRegistered<TeacherDashboardSummarySource>()
+            ? sl<TeacherDashboardSummarySource>()
+            : null,
         userProfileRepository: sl<UserProfileRepository>(),
         marketSchedulingConfigRepository:
             sl<MarketSchedulingConfigRepository>(),
@@ -362,7 +371,15 @@ class QuranSessionsMvpModule {
     );
     sl.registerFactoryIfAbsent(
       () => TeacherListBloc(
-        sl<GetTeachersUseCase>(),
+        ResolveTeacherListUseCase(
+          sl<GetTeachersUseCase>(),
+          getPricingQuote: sl.isRegistered<SessionPricingQuoteGateway>()
+              ? GetBookingPricingQuoteUseCase(sl<SessionPricingQuoteGateway>())
+              : null,
+          getPricingQuotes: sl.isRegistered<SessionPricingQuoteGateway>()
+              ? GetBookingPricingQuotesUseCase(sl<SessionPricingQuoteGateway>())
+              : null,
+        ),
         sl<GetTeacherAvailabilityUseCase>(),
       ),
     );
@@ -373,19 +390,28 @@ class QuranSessionsMvpModule {
         reportConcern: sl.isRegistered<ReportSessionConcernUseCase>()
             ? sl<ReportSessionConcernUseCase>()
             : null,
+        getPricingQuote: sl.isRegistered<SessionPricingQuoteGateway>()
+            ? GetBookingPricingQuoteUseCase(sl<SessionPricingQuoteGateway>())
+            : null,
       ),
     );
     sl.registerFactoryIfAbsent(
       () {
         final schedulingAnalytics = quranSessionsSchedulingAnalyticsCallbacks();
         final launchConfig = sl<AppLaunchConfig>();
+        final platformConfig = quranSessionsEffectivePlatformConfig();
         return BookingBloc(
           getAvailability: sl<GetTeacherAvailabilityUseCase>(),
           submitBooking: sl<SubmitSessionBookingUseCase>(),
           validateEligibility: sl<ValidateBookingEligibilityUseCase>(),
           getTeacherProfile: sl<GetTeacherProfileByIdUseCase>(),
-          getTeacherListing: sl<GetTeacherProfileUseCase>(),
-          sessionModePolicy: sessionModePolicyFromLaunchConfig(launchConfig),
+          getPricingQuote: sl.isRegistered<SessionPricingQuoteGateway>()
+              ? GetBookingPricingQuoteUseCase(sl<SessionPricingQuoteGateway>())
+              : null,
+          sessionModePolicy: sessionModePolicyFromPlatformConfig(
+            platformConfig,
+            launchConfig,
+          ),
           paymentConfirmation: sl.isRegistered<SessionPaymentConfirmation>()
               ? sl<SessionPaymentConfirmation>()
               : null,
@@ -418,6 +444,7 @@ class QuranSessionsMvpModule {
         cancelSessionUseCase: sl<CancelSessionViaServerUseCase>(),
         respondToBookingRequestUseCase: sl<RespondToBookingRequestUseCase>(),
         completeSessionUseCase: sl<CompleteSessionViaServerUseCase>(),
+        joinSessionUseCase: sl<JoinSessionUseCase>(),
         fridayReminderStore: sl<FridayReviewReminderStore>(),
         teacherUserId: sl<AuthSessionProvider>().currentUserId ?? 'teacher_mvp',
         isConnected: sl.isRegistered<NetworkInfo>()

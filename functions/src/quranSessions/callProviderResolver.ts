@@ -67,10 +67,18 @@ export function resolveCallProviderForBooking(params: {
   teacherProfile: Record<string, unknown>;
   platformConfig: Record<string, unknown>;
   clientCallProvider?: string;
+  sessionMode?: "videoOnly" | "freeBeta";
 }): ResolvedCallProvider {
   const { callType, sessionId, teacherProfile, platformConfig } = params;
+  const sessionMode =
+    params.sessionMode ??
+    (platformConfig.sessionMode === "videoOnly" ? "videoOnly" : "freeBeta");
 
   assertValidCallType(callType);
+
+  if (sessionMode === "videoOnly" && callType !== "videoCall") {
+    throw new Error("unsupported_session_mode:videoOnly");
+  }
 
   if (callType === "externalMeeting") {
     const meetingLink = resolveMeetingLink(

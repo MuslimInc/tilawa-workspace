@@ -12,10 +12,7 @@ import {
 } from "./idempotencyService";
 import { recordTerminalTransition } from "./metricsAggregationService";
 import { enqueueSessionNotification } from "./notificationOutboxService";
-import {
-  resolveTeacherProfileUserId,
-  teacherUserIdFromDenormalizedSessionData,
-} from "./teacherProfileUserId";
+import { resolveTeacherUserIdForSessionAuth } from "./teacherProfileUserId";
 import {
   requireAuthenticatedUid,
   requireValidSessionEpoch,
@@ -56,9 +53,7 @@ export const respondToBookingRequest = onCall(
     const booking = bookingSnap.data() ?? {};
     const teacherProfileId = (booking.teacherId as string) ?? "";
     const studentId = (booking.studentId as string) ?? "";
-    const teacherUserId =
-      teacherUserIdFromDenormalizedSessionData(booking) ??
-      (await resolveTeacherProfileUserId(db, teacherProfileId));
+    const teacherUserId = await resolveTeacherUserIdForSessionAuth(db, booking);
 
     const actor = resolveActorRole(
       request,
@@ -148,6 +143,8 @@ export const respondToBookingRequest = onCall(
           { bookingRef, sessionRef },
           guard.to,
           lifecyclePatch,
+          {},
+          fresh,
         );
 
         const slotId = fresh.slotId as string | undefined;

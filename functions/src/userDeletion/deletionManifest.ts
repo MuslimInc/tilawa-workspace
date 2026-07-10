@@ -2,7 +2,7 @@
  * Explicit deletion manifest for admin-initiated user deletion.
  *
  * Every top-level Firestore collection MUST be classified here. The unit test
- * in test/userDeletion.manifest.test.ts parses firestore.rules and fails if a
+ * in test/userDeletionManifest.test.ts parses firestore.rules and fails if a
  * collection exists without a classification — new user-linked collections
  * cannot silently escape the deletion flow.
  *
@@ -130,7 +130,13 @@ export const COLLECTION_CLASSIFICATIONS: Record<
   user_deletion_audit: "retain",
 
   // ── unrelated ─────────────────────────────────────────────────────────
-  app_config: "unrelated",
+  // NOTE: app_config is intentionally NOT listed. firestore.rules exposes it
+  // only as a single fixed public document (match /app_config/in_app_update),
+  // not as a /app_config/{docId} collection, so it holds no per-user data and
+  // the rules parser never surfaces it as a top-level collection. Adding it
+  // here would drift from the parser and fail the manifest guard test. If a
+  // per-user /app_config/{...} collection is ever introduced, the guard will
+  // force a classification then.
   subscription_plans: "unrelated",
   quran_session_market_configs: "unrelated",
   quran_session_platform_config: "unrelated",

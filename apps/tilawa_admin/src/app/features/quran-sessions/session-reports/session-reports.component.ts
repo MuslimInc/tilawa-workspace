@@ -62,9 +62,7 @@ export class SessionReportsComponent implements OnInit {
 
   buildFilters(): SessionReportFilters {
     return {
-      status: this.statusFilter
-        ? (this.statusFilter as SessionReportFilters['status'])
-        : null,
+      status: this.statusFilter ? (this.statusFilter as SessionReportFilters['status']) : null,
       severity: this.severityFilter
         ? (this.severityFilter as SessionReportFilters['severity'])
         : null,

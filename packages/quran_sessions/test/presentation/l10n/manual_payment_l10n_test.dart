@@ -9,14 +9,15 @@ void main() {
   test(
     'manualPaymentInstructionsText includes centralized InstaPay values',
     () {
+      const cfg = ManualPaymentMarketConfig.egFallback;
       final l10n = lookupQuranSessionsLocalizations(const Locale('en'));
-      final text = l10n.manualPaymentInstructionsText;
+      final text = l10n.manualPaymentInstructionsText();
 
       check(text).contains(l10n.manualPaymentInstructionsBody);
-      check(text).contains(ManualPaymentPilotConfig.instapayHandle);
-      check(text).contains(ManualPaymentPilotConfig.instapayPaymentLink);
-      check(text).contains(ManualPaymentPilotConfig.recipientMaskedName);
-      check(text).contains(ManualPaymentPilotConfig.supportWhatsappNumber);
+      check(text).contains(cfg.instapayHandle!);
+      check(text).contains(cfg.instapayPaymentLink!);
+      check(text).contains(cfg.recipientMaskedName!);
+      check(text).contains(cfg.supportWhatsappNumber);
       check(text).contains(l10n.manualPaymentConfirmationRule);
       check(text.toLowerCase().contains('free session')).isFalse();
     },
@@ -24,7 +25,7 @@ void main() {
 
   test('manual payment cancellation keys are separate from instructions', () {
     final l10n = lookupQuranSessionsLocalizations(const Locale('en'));
-    final instructions = l10n.manualPaymentInstructionsText;
+    final instructions = l10n.manualPaymentInstructionsText();
 
     check(
       instructions.contains(l10n.manualPaymentCancellationPolicy),
@@ -32,7 +33,7 @@ void main() {
     check(
       instructions.contains(
         l10n.manualPaymentCancellationSupportHint(
-          ManualPaymentPilotConfig.supportWhatsappNumber,
+          ManualPaymentMarketConfig.egFallback.supportWhatsappNumber,
         ),
       ),
     ).isFalse();

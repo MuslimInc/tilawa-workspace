@@ -8,6 +8,7 @@ QuranSessionsFailure mapQuranSessionsCallableFailure(
   String? slotId,
   String? teacherId,
   SessionCallType? callType,
+  String? sessionId,
 }) {
   final lifecycleCode = _readLifecycleCode(error);
 
@@ -18,6 +19,7 @@ QuranSessionsFailure mapQuranSessionsCallableFailure(
       slotId: slotId,
       teacherId: teacherId,
       callType: callType,
+      sessionId: sessionId,
     );
   }
 
@@ -57,6 +59,7 @@ QuranSessionsFailure _mapLifecycleCode(
   String? slotId,
   String? teacherId,
   SessionCallType? callType,
+  String? sessionId,
 }) {
   final details = error.details is Map ? error.details as Map : const {};
 
@@ -70,7 +73,10 @@ QuranSessionsFailure _mapLifecycleCode(
     'profile_incomplete' => ProfileIncompleteFailure(
       missingFields: _stringList(details['missingFields']),
     ),
-    'market_not_enabled' => MarketNotEnabledFailure(
+    // `market_not_supported` is the config-driven market gate (the student's
+    // country is not in `enabledMarketCodes`); surface it as the same
+    // region-unavailable state as an explicitly disabled market.
+    'market_not_enabled' || 'market_not_supported' => MarketNotEnabledFailure(
       countryCode: details['countryCode'] as String? ?? '',
       cityId: details['cityId'] as String?,
     ),
@@ -83,13 +89,6 @@ QuranSessionsFailure _mapLifecycleCode(
     ),
     'age_not_allowed' => AgeNotAllowedFailure(
       studentAgeGroup: details['studentAgeGroup'] as String? ?? 'child',
-    ),
-    'guardian_approval_required' => GuardianApprovalRequiredFailure(
-      studentId: details['guardianId'] as String? ?? '',
-    ),
-    'guardian_approval_invalid' => const ValidationFailure(
-      field: 'guardianApproval',
-      code: 'invalid',
     ),
     'meeting_link_required' => const MeetingLinkUnavailableFailure(),
     'group_booking_not_supported' => const GroupBookingNotSupportedFailure(),
@@ -107,6 +106,26 @@ QuranSessionsFailure _mapLifecycleCode(
       action: details['action'] as String? ?? 'booking',
     ),
     'late_student_cancellation_blocked' => const BookingConflictFailure(),
+    'min_notice_violation' => MinBookingNoticeViolationFailure(
+      minNoticeMinutes: details['minNoticeMinutes'] as int? ?? 0,
+    ),
+    'max_upcoming_exceeded' => MaxUpcomingSessionsExceededFailure(
+      maxUpcoming: details['maxUpcoming'] as int? ?? 0,
+    ),
+    'teacher_not_whitelisted' => const TeacherNotWhitelistedFailure(),
+    'feature_disabled' => PlatformBookingDisabledFailure(
+      scope: details['field'] as String?,
+    ),
+    'policy_not_configured' => PricingConfigMissingFailure(
+      scope: details['scope'] as String?,
+      countryCode: details['countryCode'] as String?,
+      missingFields: _stringList(details['missingFields']),
+    ),
+    'already_active_on_other_device' => LiveSessionAlreadyActiveFailure(
+      sessionId: sessionId ?? '',
+      activeDeviceId: details['activeDeviceId'] as String? ?? '',
+      sinceMs: (details['sinceTs'] as num?)?.toInt() ?? 0,
+    ),
     'unauthorized_actor' || 'not_participant' => const UnauthorizedFailure(),
     _ => const UnknownFailure(),
   };

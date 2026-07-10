@@ -20,6 +20,7 @@ class TilawaThumbReachLayout extends StatelessWidget {
     this.actionFlex = defaultActionFlex,
     this.useSafeArea = false,
     this.actionMaxWidthKind = TilawaContentKind.form,
+    this.actionTopInset,
   });
 
   /// Flex weight for the scrollable / hero content band.
@@ -49,6 +50,9 @@ class TilawaThumbReachLayout extends StatelessWidget {
   /// Max width applied to [actions] via [TilawaContentBounds.resolveMaxWidth].
   final TilawaContentKind actionMaxWidthKind;
 
+  /// Top inset inside the action band; defaults to [MeMuslimDesignTokens.spaceExtraLarge].
+  final double? actionTopInset;
+
   /// Fraction from the top of the layout where the action band begins (0–1).
   static double actionBandStartFraction({
     int contentFlex = defaultContentFlex,
@@ -68,7 +72,7 @@ class TilawaThumbReachLayout extends StatelessWidget {
           flex: actionFlex,
           child: SingleChildScrollView(
             child: TilawaBottomActionInset(
-              top: tokens.spaceExtraLarge,
+              top: actionTopInset ?? tokens.spaceExtraLarge,
               maxWidthKind: actionMaxWidthKind,
               child: actions,
             ),

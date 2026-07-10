@@ -37,16 +37,11 @@ export class FirebaseUserDeletionGateway implements UserDeletionGateway {
     });
   }
 
-  async cancelUserDeletion(
-    targetUserId: string,
-    reason: string,
-  ): Promise<void> {
+  async cancelUserDeletion(targetUserId: string, reason: string): Promise<void> {
     await this.invokeCallable('cancelUserDeletion', { targetUserId, reason });
   }
 
-  async listAuditEvents(
-    targetUserId: string,
-  ): Promise<readonly UserDeletionAuditEvent[]> {
+  async listAuditEvents(targetUserId: string): Promise<readonly UserDeletionAuditEvent[]> {
     const snapshot = await getDocs(
       query(
         collection(this.firestore, 'user_deletion_audit'),
@@ -69,9 +64,7 @@ export class FirebaseUserDeletionGateway implements UserDeletionGateway {
     });
   }
 
-  async lookupDuplicateAccountsByEmail(
-    email: string,
-  ): Promise<DuplicateAccountsLookupResult> {
+  async lookupDuplicateAccountsByEmail(email: string): Promise<DuplicateAccountsLookupResult> {
     const result = await this.invokeCallableWithData<DuplicateAccountsLookupResult>(
       'lookupDuplicateAccountsByEmail',
       { email },
@@ -80,9 +73,7 @@ export class FirebaseUserDeletionGateway implements UserDeletionGateway {
       email: result.email,
       authScanTruncated: result.authScanTruncated === true,
       suggestedKeepGooglePlan: result.suggestedKeepGooglePlan ?? null,
-      accounts: (result.accounts ?? []).map((account) =>
-        mapDuplicateAccount(account),
-      ),
+      accounts: (result.accounts ?? []).map((account) => mapDuplicateAccount(account)),
     };
   }
 
@@ -100,14 +91,8 @@ export class FirebaseUserDeletionGateway implements UserDeletionGateway {
     );
   }
 
-  private async invokeCallableWithData<T>(
-    name: string,
-    data: Record<string, unknown>,
-  ): Promise<T> {
-    const callable = httpsCallable<Record<string, unknown>, T>(
-      this.functions,
-      name,
-    );
+  private async invokeCallableWithData<T>(name: string, data: Record<string, unknown>): Promise<T> {
+    const callable = httpsCallable<Record<string, unknown>, T>(this.functions, name);
 
     try {
       const result = await callable(data);
@@ -117,10 +102,7 @@ export class FirebaseUserDeletionGateway implements UserDeletionGateway {
     }
   }
 
-  private async invokeCallable(
-    name: string,
-    data: Record<string, unknown>,
-  ): Promise<void> {
+  private async invokeCallable(name: string, data: Record<string, unknown>): Promise<void> {
     const callable = httpsCallable(this.functions, name);
 
     try {
@@ -140,9 +122,7 @@ function mapDuplicateAccount(raw: DuplicateAuthAccount): DuplicateAuthAccount {
     uid: String(raw.uid),
     email: raw.email ?? null,
     disabled: raw.disabled === true,
-    providerIds: Array.isArray(raw.providerIds)
-      ? raw.providerIds.map(String)
-      : [],
+    providerIds: Array.isArray(raw.providerIds) ? raw.providerIds.map(String) : [],
     hasGoogleProvider: raw.hasGoogleProvider === true,
     creationTime: raw.creationTime ?? null,
     lastSignInTime: raw.lastSignInTime ?? null,
@@ -153,5 +133,3 @@ function mapDuplicateAccount(raw: DuplicateAuthAccount): DuplicateAuthAccount {
     isFirestoreOnly: raw.isFirestoreOnly === true,
   };
 }
-
-

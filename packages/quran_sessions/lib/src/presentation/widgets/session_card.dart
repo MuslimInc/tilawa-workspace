@@ -87,17 +87,25 @@ class SessionCard extends StatelessWidget {
                       ),
                     ),
                     if (showCancelOverflow)
-                      PopupMenuButton<void>(
-                        icon: Icon(
-                          Icons.more_vert,
-                          color: scheme.onSurfaceVariant,
-                        ),
-                        itemBuilder: (context) => [
-                          PopupMenuItem<void>(
-                            onTap: onCancel,
-                            child: Text(l10n.tutorCancelSessionFromCard),
+                      Theme(
+                        data: Theme.of(context).copyWith(
+                          popupMenuTheme: PopupMenuThemeData(
+                            color: scheme.surface,
+                            surfaceTintColor: scheme.surfaceTint,
                           ),
-                        ],
+                        ),
+                        child: PopupMenuButton<void>(
+                          icon: Icon(
+                            Icons.more_vert,
+                            color: scheme.onSurfaceVariant,
+                          ),
+                          itemBuilder: (context) => [
+                            PopupMenuItem<void>(
+                              onTap: onCancel,
+                              child: Text(l10n.tutorCancelSessionFromCard),
+                            ),
+                          ],
+                        ),
                       ),
                     _StatusBadge(session: session),
                   ],

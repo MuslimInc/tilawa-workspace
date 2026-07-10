@@ -1,3 +1,4 @@
+import 'dart:developer' as developer;
 import 'package:checks/checks.dart';
 import 'package:dartz_plus/dartz_plus.dart';
 import 'package:flutter/material.dart';
@@ -8,6 +9,8 @@ import 'package:tilawa/core/bootstrap/app_launch_config.dart';
 import 'package:tilawa/core/di/injection.dart';
 import 'package:tilawa/features/home/presentation/widgets/home_dashboard_footer.dart';
 import 'package:tilawa/features/quran_sessions/data/fake_auth_session_provider.dart';
+import 'package:tilawa/features/quran_sessions/domain/entities/quran_sessions_platform_config.dart';
+import 'package:tilawa/features/quran_sessions/quran_sessions_platform_config_store.dart';
 import 'package:tilawa/l10n/generated/app_localizations.dart';
 import 'package:tilawa_ui_kit/tilawa_ui_kit.dart';
 
@@ -72,6 +75,18 @@ Future<void> _registerSessionsDependencies({
   getIt.registerSingleton<AuthSessionProvider>(authSession);
   getIt.registerSingleton<GetUserProfileUseCase>(
     GetUserProfileUseCase(_FakeUserProfileRepository(profile)),
+  );
+  getIt.registerSingleton<QuranSessionsPlatformConfigStore>(
+    QuranSessionsPlatformConfigStore()..setConfig(
+      const QuranSessionsPlatformConfig(
+        quranSessionsEnabled: true,
+        studentEntryEnabled: true,
+        bookingEnabled: true,
+        bookingMode: 'requiresTutorApproval',
+        sessionMode: 'videoOnly',
+        enabledCallProviders: {'mock'},
+      ),
+    ),
   );
 }
 
@@ -149,9 +164,18 @@ void main() {
   ) async {
     await resetScopeGetIt();
     getIt.registerSingleton<AppLaunchConfig>(
-      const AppLaunchConfig(
-        quranSessionsEnabled: true,
-        learnQuranStudentFeatureEnabled: true,
+      const AppLaunchConfig(),
+    );
+    getIt.registerSingleton<QuranSessionsPlatformConfigStore>(
+      QuranSessionsPlatformConfigStore()..setConfig(
+        const QuranSessionsPlatformConfig(
+          quranSessionsEnabled: true,
+          studentEntryEnabled: true,
+          bookingEnabled: true,
+          bookingMode: 'requiresTutorApproval',
+          sessionMode: 'videoOnly',
+          enabledCallProviders: {'mock'},
+        ),
       ),
     );
 
@@ -170,9 +194,18 @@ void main() {
   ) async {
     await resetScopeGetIt();
     getIt.registerSingleton<AppLaunchConfig>(
-      const AppLaunchConfig(
-        quranSessionsEnabled: true,
-        learnQuranStudentFeatureEnabled: false,
+      const AppLaunchConfig(),
+    );
+    getIt.registerSingleton<QuranSessionsPlatformConfigStore>(
+      QuranSessionsPlatformConfigStore()..setConfig(
+        const QuranSessionsPlatformConfig(
+          quranSessionsEnabled: true,
+          studentEntryEnabled: false,
+          bookingEnabled: true,
+          bookingMode: 'requiresTutorApproval',
+          sessionMode: 'videoOnly',
+          enabledCallProviders: {'mock'},
+        ),
       ),
     );
 
@@ -191,9 +224,18 @@ void main() {
   ) async {
     await resetScopeGetIt();
     getIt.registerSingleton<AppLaunchConfig>(
-      const AppLaunchConfig(
-        quranSessionsEnabled: true,
-        learnQuranStudentFeatureEnabled: true,
+      const AppLaunchConfig(),
+    );
+    getIt.registerSingleton<QuranSessionsPlatformConfigStore>(
+      QuranSessionsPlatformConfigStore()..setConfig(
+        const QuranSessionsPlatformConfig(
+          quranSessionsEnabled: true,
+          studentEntryEnabled: true,
+          bookingEnabled: true,
+          bookingMode: 'requiresTutorApproval',
+          sessionMode: 'videoOnly',
+          enabledCallProviders: {'mock'},
+        ),
       ),
     );
     await _registerSessionsDependencies(
@@ -226,9 +268,18 @@ void main() {
     testWidgets('does not push routes when feature disabled', (tester) async {
       await resetScopeGetIt();
       getIt.registerSingleton<AppLaunchConfig>(
-        const AppLaunchConfig(
-          quranSessionsEnabled: true,
-          learnQuranStudentFeatureEnabled: false,
+        const AppLaunchConfig(),
+      );
+      getIt.registerSingleton<QuranSessionsPlatformConfigStore>(
+        QuranSessionsPlatformConfigStore()..setConfig(
+          const QuranSessionsPlatformConfig(
+            quranSessionsEnabled: true,
+            studentEntryEnabled: false,
+            bookingEnabled: true,
+            bookingMode: 'requiresTutorApproval',
+            sessionMode: 'videoOnly',
+            enabledCallProviders: {'mock'},
+          ),
         ),
       );
 
@@ -256,9 +307,30 @@ void main() {
     testWidgets('routes logged-out users to login', (tester) async {
       await resetScopeGetIt();
       getIt.registerSingleton<AppLaunchConfig>(
-        const AppLaunchConfig(
-          quranSessionsEnabled: true,
-          learnQuranStudentFeatureEnabled: true,
+        const AppLaunchConfig(),
+      );
+      getIt.registerSingleton<QuranSessionsPlatformConfigStore>(
+        QuranSessionsPlatformConfigStore()..setConfig(
+          const QuranSessionsPlatformConfig(
+            quranSessionsEnabled: true,
+            studentEntryEnabled: true,
+            bookingEnabled: true,
+            bookingMode: 'requiresTutorApproval',
+            sessionMode: 'videoOnly',
+            enabledCallProviders: {'mock'},
+          ),
+        ),
+      );
+      getIt.registerSingleton<QuranSessionsPlatformConfigStore>(
+        QuranSessionsPlatformConfigStore()..setConfig(
+          const QuranSessionsPlatformConfig(
+            quranSessionsEnabled: true,
+            studentEntryEnabled: true,
+            bookingEnabled: true,
+            bookingMode: 'requiresTutorApproval',
+            sessionMode: 'videoOnly',
+            enabledCallProviders: {'mock'},
+          ),
         ),
       );
       getIt.registerSingleton<AuthSessionProvider>(_LoggedOutAuthSession());
@@ -277,6 +349,7 @@ void main() {
       );
       await tester.pump();
 
+      developer.log("USER_ID: ${getIt<AuthSessionProvider>().currentUserId}");
       await tapTrigger(tester);
 
       check(find.byKey(_loginKey).evaluate().length).equals(1);
@@ -287,9 +360,18 @@ void main() {
     ) async {
       await resetScopeGetIt();
       getIt.registerSingleton<AppLaunchConfig>(
-        const AppLaunchConfig(
-          quranSessionsEnabled: true,
-          learnQuranStudentFeatureEnabled: true,
+        const AppLaunchConfig(),
+      );
+      getIt.registerSingleton<QuranSessionsPlatformConfigStore>(
+        QuranSessionsPlatformConfigStore()..setConfig(
+          const QuranSessionsPlatformConfig(
+            quranSessionsEnabled: true,
+            studentEntryEnabled: true,
+            bookingEnabled: true,
+            bookingMode: 'requiresTutorApproval',
+            sessionMode: 'videoOnly',
+            enabledCallProviders: {'mock'},
+          ),
         ),
       );
       await _registerSessionsDependencies(
@@ -311,6 +393,7 @@ void main() {
       );
       await tester.pump();
 
+      developer.log("USER_ID: ${getIt<AuthSessionProvider>().currentUserId}");
       await tapTrigger(tester);
 
       check(find.byKey(_sessionsKey).evaluate().length).equals(1);
@@ -321,9 +404,18 @@ void main() {
     ) async {
       await resetScopeGetIt();
       getIt.registerSingleton<AppLaunchConfig>(
-        const AppLaunchConfig(
-          quranSessionsEnabled: true,
-          learnQuranStudentFeatureEnabled: true,
+        const AppLaunchConfig(),
+      );
+      getIt.registerSingleton<QuranSessionsPlatformConfigStore>(
+        QuranSessionsPlatformConfigStore()..setConfig(
+          const QuranSessionsPlatformConfig(
+            quranSessionsEnabled: true,
+            studentEntryEnabled: true,
+            bookingEnabled: true,
+            bookingMode: 'requiresTutorApproval',
+            sessionMode: 'videoOnly',
+            enabledCallProviders: {'mock'},
+          ),
         ),
       );
       await _registerSessionsDependencies(
@@ -345,6 +437,7 @@ void main() {
       );
       await tester.pump();
 
+      developer.log("USER_ID: ${getIt<AuthSessionProvider>().currentUserId}");
       await tapTrigger(tester);
 
       check(find.byKey(_profileCompletionKey).evaluate().length).equals(1);
@@ -356,9 +449,18 @@ void main() {
     ) async {
       await resetScopeGetIt();
       getIt.registerSingleton<AppLaunchConfig>(
-        const AppLaunchConfig(
-          quranSessionsEnabled: true,
-          learnQuranStudentFeatureEnabled: true,
+        const AppLaunchConfig(),
+      );
+      getIt.registerSingleton<QuranSessionsPlatformConfigStore>(
+        QuranSessionsPlatformConfigStore()..setConfig(
+          const QuranSessionsPlatformConfig(
+            quranSessionsEnabled: true,
+            studentEntryEnabled: true,
+            bookingEnabled: true,
+            bookingMode: 'requiresTutorApproval',
+            sessionMode: 'videoOnly',
+            enabledCallProviders: {'mock'},
+          ),
         ),
       );
       await _registerSessionsDependencies(
@@ -396,9 +498,18 @@ void main() {
     ) async {
       await resetScopeGetIt();
       getIt.registerSingleton<AppLaunchConfig>(
-        const AppLaunchConfig(
-          quranSessionsEnabled: true,
-          learnQuranStudentFeatureEnabled: true,
+        const AppLaunchConfig(),
+      );
+      getIt.registerSingleton<QuranSessionsPlatformConfigStore>(
+        QuranSessionsPlatformConfigStore()..setConfig(
+          const QuranSessionsPlatformConfig(
+            quranSessionsEnabled: true,
+            studentEntryEnabled: true,
+            bookingEnabled: true,
+            bookingMode: 'requiresTutorApproval',
+            sessionMode: 'videoOnly',
+            enabledCallProviders: {'mock'},
+          ),
         ),
       );
       await _registerSessionsDependencies(

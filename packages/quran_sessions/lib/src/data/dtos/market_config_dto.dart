@@ -42,6 +42,12 @@ class MarketConfigDto {
     this.sortOrder = 0,
     this.minimumStudentAgeYears,
     this.minimumTeacherAgeYears,
+    this.manualPaymentEnabled = false,
+    this.supportWhatsappNumber,
+    this.instapayHandle,
+    this.instapayPaymentLink,
+    this.recipientMaskedName,
+    this.vodafoneCashNumber,
   });
 
   final String countryCode;
@@ -60,4 +66,12 @@ class MarketConfigDto {
   final double platformCommissionPercent;
   final int? minimumStudentAgeYears;
   final int? minimumTeacherAgeYears;
+
+  // Manual / off-app payment block (per-market Firestore doc fields).
+  final bool manualPaymentEnabled;
+  final String? supportWhatsappNumber;
+  final String? instapayHandle;
+  final String? instapayPaymentLink;
+  final String? recipientMaskedName;
+  final String? vodafoneCashNumber;
 }

@@ -174,7 +174,6 @@ class _DownloadsNestedTabViewState extends State<DownloadsNestedTabView>
 class _DownloadsScreenAppBar extends StatelessWidget
     implements PreferredSizeWidget {
   const _DownloadsScreenAppBar({
-    required this.preferredHeight,
     required this.totalBytes,
     required this.onRefresh,
   });
@@ -185,75 +184,20 @@ class _DownloadsScreenAppBar extends StatelessWidget
     required VoidCallback onRefresh,
   }) {
     return _DownloadsScreenAppBar(
-      preferredHeight: _resolvePreferredHeight(context, totalBytes),
       totalBytes: totalBytes,
       onRefresh: onRefresh,
     );
   }
 
-  final double preferredHeight;
   final int totalBytes;
   final VoidCallback onRefresh;
 
-  static double _resolvePreferredHeight(
-    BuildContext context,
-    int totalBytes,
-  ) {
-    if (totalBytes <= 0) {
-      return TilawaCatalogAppBar.resolvePreferredHeight(
-        context,
-        title: context.l10n.downloads,
-        leading: TilawaAppBarChrome.catalogBackButton(
-          context: context,
-        ),
-        actionCount: 2,
-      );
-    }
-
-    final ThemeData theme = Theme.of(context);
-    final MeMuslimDesignTokens tokens = theme.tokens;
-    final TextStyle? titleStyle = theme.textTheme.titleLarge?.copyWith(
-      fontWeight: FontWeight.w700,
-    );
-    final TextStyle? subtitleStyle = theme.textTheme.bodySmall?.copyWith(
-      fontWeight: FontWeight.w500,
-    );
-    final String title = context.l10n.downloads;
-    final String subtitle = context.l10n.storageUsed(
-      FileSizeFormatter.formatBytes(context, totalBytes),
-    );
-    final double titleBlockHeight =
-        tilawaMeasureTextHeight(
-          context: context,
-          style: titleStyle,
-          text: title,
-        ) +
-        tokens.spaceTiny +
-        tilawaMeasureTextHeight(
-          context: context,
-          style: subtitleStyle,
-          text: subtitle,
-          maxLines: 1,
-        );
-
-    return TilawaCatalogAppBar.resolvePreferredHeight(
-      context,
-      title: title,
-      leading: TilawaAppBarChrome.catalogBackButton(
-        context: context,
-      ),
-      actionCount: 2,
-      titleBlockHeight: titleBlockHeight,
-    );
-  }
-
   @override
-  Size get preferredSize => Size.fromHeight(preferredHeight);
+  Size get preferredSize => const Size.fromHeight(kToolbarHeight);
 
   @override
   Widget build(BuildContext context) {
     return TilawaCatalogAppBar(
-      preferredHeight: preferredHeight,
       title: context.l10n.downloads,
       leading: TilawaAppBarChrome.catalogBackButton(
         context: context,
@@ -264,7 +208,7 @@ class _DownloadsScreenAppBar extends StatelessWidget
           : null,
       actions: <Widget>[
         _DownloadsRefreshButton(onPressed: onRefresh),
-        const _DownloadsClearAllButton(),
+        _DownloadsClearAllButton(enabled: totalBytes > 0),
       ],
     );
   }
@@ -285,13 +229,20 @@ class _DownloadsRefreshButton extends StatelessWidget {
 }
 
 class _DownloadsClearAllButton extends StatelessWidget {
-  const _DownloadsClearAllButton();
+  const _DownloadsClearAllButton({required this.enabled});
+
+  final bool enabled;
 
   @override
   Widget build(BuildContext context) {
     return TilawaIconActionButton(
       icon: Icons.delete_sweep_rounded,
-      onTap: () => _ClearAllDownloadsDialog.show(context),
+      enabled: enabled,
+      onTap: () {
+        if (enabled) {
+          _ClearAllDownloadsDialog.show(context);
+        }
+      },
     );
   }
 }

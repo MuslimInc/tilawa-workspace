@@ -11,13 +11,12 @@ description: >-
   and AI agents making UI/UX changes.
 
 colors:
-  # Brand / action (production-locked)
+  # Brand / action (production-locked - unified for UI, splash, and launcher)
   primary: "#1DAB61"
   primary-accessible: "#148048"
   on-primary: "#003317"
   primary-dark: "#6BC992"
   primary-container-light: "#E0F2F1"
-  splash-green: "#2A9C64"
 
   # Semantic feedback
   success: "#43A047"

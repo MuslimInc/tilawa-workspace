@@ -116,13 +116,6 @@ void main() {
         await tester.pumpAndSettle();
         expect(tester.takeException(), isNull);
 
-        expect(
-          find.descendant(
-            of: find.byType(TilawaButton),
-            matching: find.byType(Flexible),
-          ),
-          findsNothing,
-        );
         expect(_labelParagraph(tester).didExceedMaxLines, isFalse);
       },
     );
@@ -194,13 +187,6 @@ void main() {
         await tester.pumpAndSettle();
         expect(tester.takeException(), isNull);
 
-        expect(
-          find.descendant(
-            of: find.byType(TilawaButton),
-            matching: find.byType(Flexible),
-          ),
-          findsNothing,
-        );
         expect(_labelParagraph(tester).didExceedMaxLines, isFalse);
       },
     );
@@ -371,6 +357,39 @@ void main() {
         kMeMuslimMinInteractiveDimension,
       );
     });
+
+    testWidgets(
+      'isFullWidth below Expanded in Column stays at min interactive height',
+      (WidgetTester tester) async {
+        addTearDown(() async {
+          await tester.binding.setSurfaceSize(null);
+        });
+        await tester.binding.setSurfaceSize(const Size(360, 640));
+
+        await tester.pumpWidget(
+          _app(
+            Column(
+              crossAxisAlignment: CrossAxisAlignment.stretch,
+              children: <Widget>[
+                const Expanded(child: SizedBox.shrink()),
+                TilawaButton(
+                  text: 'Retry',
+                  isFullWidth: true,
+                  onPressed: _noop,
+                ),
+              ],
+            ),
+          ),
+        );
+        await tester.pumpAndSettle();
+        expect(tester.takeException(), isNull);
+
+        expect(
+          tester.getSize(find.byType(TilawaButton)).height,
+          kMeMuslimMinInteractiveDimension,
+        );
+      },
+    );
   });
 
   group('TilawaButton focus visibility (WCAG 2.4.7)', () {

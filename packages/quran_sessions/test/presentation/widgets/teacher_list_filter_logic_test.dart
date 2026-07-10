@@ -1,4 +1,5 @@
 import 'package:checks/checks.dart';
+import 'package:quran_sessions/src/domain/entities/manual_payment_price.dart';
 import 'package:quran_sessions/src/domain/entities/session_price.dart';
 import 'package:quran_sessions/src/domain/entities/session_pricing_type.dart';
 import 'package:quran_sessions/src/presentation/widgets/teacher_list_filter_bar.dart';
@@ -33,11 +34,42 @@ void main() {
   });
 
   group('applyTeacherListClientFilter', () {
+    test('all filter keeps both paid and free teachers', () {
+      final teachers = [
+        makeTeacher(
+          id: 'free',
+          pricingType: SessionPricingType.free,
+          price: null,
+        ),
+        makeTeacher(
+          id: 'paid',
+          pricingType: SessionPricingType.fixedPerSession,
+          price: const SessionPrice(
+            amount: 800,
+            currencyCode: 'EGP',
+            countryCode: 'EG',
+          ),
+        ),
+      ];
+
+      final filtered = applyTeacherListClientFilter(
+        teachers,
+        TeacherListFilter.all,
+        const {},
+      );
+
+      check(filtered.map((teacher) => teacher.id).toList()).deepEquals([
+        'free',
+        'paid',
+      ]);
+    });
+
     test('paid filter excludes free teachers', () {
       final teachers = [
         makeTeacher(
           id: 'free',
           pricingType: SessionPricingType.free,
+          price: null,
         ),
         makeTeacher(
           id: 'paid',
@@ -59,6 +91,48 @@ void main() {
       check(filtered.length).equals(1);
       check(filtered.single.id).equals('paid');
     });
+
+    test(
+      'paid filter includes teacher with free type and paid quote price',
+      () {
+        final teachers = [
+          makeTeacher(
+            id: 'free',
+            pricingType: SessionPricingType.free,
+            price: null,
+          ),
+          makeTeacher(
+            id: 'manual',
+            pricingType: SessionPricingType.free,
+            price: const SessionPrice(
+              amount: 125,
+              currencyCode: 'EGP',
+              countryCode: 'EG',
+            ),
+            manualPaymentPrice: const ManualPaymentPrice(
+              amountMinor: 12500,
+              currencyCode: 'EGP',
+            ),
+          ),
+        ];
+
+        final paid = applyTeacherListClientFilter(
+          teachers,
+          TeacherListFilter.paid,
+          const {},
+        );
+        final free = applyTeacherListClientFilter(
+          teachers,
+          TeacherListFilter.free,
+          const {},
+        );
+
+        check(
+          paid.map((teacher) => teacher.id).toList(),
+        ).deepEquals(['manual']);
+        check(free.map((teacher) => teacher.id).toList()).deepEquals(['free']);
+      },
+    );
 
     test('budget filter keeps paid teachers under threshold', () {
       final teachers = [

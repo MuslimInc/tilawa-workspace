@@ -5,8 +5,8 @@
 
 :root {
   /* Brand */
-  --tilawa-primary: #8b5e3c;
-  --tilawa-primary-dark: #6b4a2e;
+  --tilawa-primary: #1dab61;
+  --tilawa-primary-dark: #17894d;
   --tilawa-on-primary: #ffffff;
   --tilawa-secondary: #65734f;
   --tilawa-on-secondary: #ffffff;
@@ -59,7 +59,7 @@
   /* Elevation */
   --tilawa-shadow-sm: 0 1px 2px rgb(48 52 60 / 0.06);
   --tilawa-shadow-md: 0 4px 12px rgb(48 52 60 / 0.08);
-  --tilawa-shadow-card: 0 2px 8px rgb(139 94 60 / 0.08);
+  --tilawa-shadow-card: 0 2px 8px rgb(29 171 97 / 0.08);
 
   /* Motion */
   --tilawa-duration-fast: 200ms;
@@ -72,7 +72,7 @@
   --tilawa-min-touch: 44px;
 
   /* Avatar initials — scheme-derived subtle containers */
-  --tilawa-avatar-1-bg: rgb(139 94 60 / 0.16);
+  --tilawa-avatar-1-bg: rgb(29 171 97 / 0.16);
   --tilawa-avatar-1-fg: var(--tilawa-primary-dark);
   --tilawa-avatar-2-bg: rgb(101 115 79 / 0.16);
   --tilawa-avatar-2-fg: var(--tilawa-secondary);
@@ -88,55 +88,53 @@
   --tilawa-avatar-7-fg: var(--tilawa-ink);
 
   /* Admin chrome */
-  --tilawa-sidebar-bg: #2a2118;
-  --tilawa-sidebar-ink: #e8e4df;
-  --tilawa-sidebar-muted: #a89b8a;
-  --tilawa-sidebar-active: rgb(139 94 60 / 0.22);
-  --tilawa-sidebar-border: rgb(255 255 255 / 0.08);
+  --tilawa-sidebar-bg: var(--tilawa-surface);
+  --tilawa-sidebar-ink: var(--tilawa-ink);
+  --tilawa-sidebar-muted: var(--tilawa-ink-muted);
+  --tilawa-sidebar-active: rgb(29 171 97 / 0.08);
+  --tilawa-sidebar-border: var(--tilawa-outline-variant);
 }
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    --tilawa-canvas: #101816;
-    --tilawa-surface: #16201d;
-    --tilawa-surface-high: #1c2925;
-    --tilawa-surface-highest: #353e3a;
-    --tilawa-outline: #3d4a45;
-    --tilawa-outline-variant: #2a3531;
+:root.dark {
+  --tilawa-canvas: #101816;
+  --tilawa-surface: #16201d;
+  --tilawa-surface-high: #1c2925;
+  --tilawa-surface-highest: #353e3a;
+  --tilawa-outline: #3d4a45;
+  --tilawa-outline-variant: #2a3531;
 
-    --tilawa-ink: #e8ece9;
-    --tilawa-ink-muted: #a8b5af;
-    --tilawa-ink-ash: #7a8a83;
-    --tilawa-on-surface: var(--tilawa-ink);
-    --tilawa-on-surface-variant: var(--tilawa-ink-muted);
+  --tilawa-ink: #e8ece9;
+  --tilawa-ink-muted: #a8b5af;
+  --tilawa-ink-ash: #7a8a83;
+  --tilawa-on-surface: var(--tilawa-ink);
+  --tilawa-on-surface-variant: var(--tilawa-ink-muted);
 
-    --tilawa-error: #ffb4ab;
-    --tilawa-error-container: rgb(220 38 38 / 0.15);
-    --tilawa-on-error-container: #ffb4ab;
-    --tilawa-success: #6bcf7f;
-    --tilawa-success-container: rgb(67 160 71 / 0.15);
-    --tilawa-on-success-container: #6bcf7f;
-    --tilawa-warning: #fb923c;
-    --tilawa-warning-container: rgb(194 65 12 / 0.15);
-    --tilawa-on-warning-container: #fb923c;
+  --tilawa-error: #ffb4ab;
+  --tilawa-error-container: rgb(220 38 38 / 0.15);
+  --tilawa-on-error-container: #ffb4ab;
+  --tilawa-success: #6bcf7f;
+  --tilawa-success-container: rgb(67 160 71 / 0.15);
+  --tilawa-on-success-container: #6bcf7f;
+  --tilawa-warning: #fb923c;
+  --tilawa-warning-container: rgb(194 65 12 / 0.15);
+  --tilawa-on-warning-container: #fb923c;
 
-    --tilawa-shadow-sm: 0 1px 2px rgb(0 0 0 / 0.2);
-    --tilawa-shadow-md: 0 4px 12px rgb(0 0 0 / 0.25);
-    --tilawa-shadow-card: 0 2px 8px rgb(0 0 0 / 0.2);
+  --tilawa-shadow-sm: 0 1px 2px rgb(0 0 0 / 0.2);
+  --tilawa-shadow-md: 0 4px 12px rgb(0 0 0 / 0.25);
+  --tilawa-shadow-card: 0 2px 8px rgb(0 0 0 / 0.2);
 
-    --tilawa-avatar-1-bg: rgb(139 94 60 / 0.28);
-    --tilawa-avatar-1-fg: #e8c9a8;
-    --tilawa-avatar-2-bg: rgb(101 115 79 / 0.28);
-    --tilawa-avatar-2-fg: #c8d4b8;
-    --tilawa-avatar-3-bg: rgb(140 104 31 / 0.28);
-    --tilawa-avatar-3-fg: #e8d4a8;
-    --tilawa-avatar-7-bg: var(--tilawa-surface-highest);
-    --tilawa-avatar-7-fg: var(--tilawa-ink);
+  --tilawa-avatar-1-bg: rgb(29 171 97 / 0.28);
+  --tilawa-avatar-1-fg: #8ce7b0;
+  --tilawa-avatar-2-bg: rgb(101 115 79 / 0.28);
+  --tilawa-avatar-2-fg: #c8d4b8;
+  --tilawa-avatar-3-bg: rgb(140 104 31 / 0.28);
+  --tilawa-avatar-3-fg: #e8d4a8;
+  --tilawa-avatar-7-bg: var(--tilawa-surface-highest);
+  --tilawa-avatar-7-fg: var(--tilawa-ink);
 
-    --tilawa-sidebar-bg: #0d1412;
-    --tilawa-sidebar-ink: #e8ece9;
-    --tilawa-sidebar-muted: #7a8a83;
-    --tilawa-sidebar-active: rgb(139 94 60 / 0.35);
-    --tilawa-sidebar-border: rgb(255 255 255 / 0.06);
-  }
+  --tilawa-sidebar-bg: var(--tilawa-surface);
+  --tilawa-sidebar-ink: var(--tilawa-ink);
+  --tilawa-sidebar-muted: var(--tilawa-ink-muted);
+  --tilawa-sidebar-active: rgb(29 171 97 / 0.15);
+  --tilawa-sidebar-border: var(--tilawa-outline-variant);
 }

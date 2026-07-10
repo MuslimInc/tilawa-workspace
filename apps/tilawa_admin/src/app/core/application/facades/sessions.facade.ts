@@ -19,6 +19,8 @@ import {
   IssueSessionCompensationUseCase,
   ConfirmSessionRescheduleUseCase,
   ApproveSessionRefundUseCase,
+  ConfirmManualBookingPaymentUseCase,
+  RejectManualBookingPaymentUseCase,
 } from '../../domain/usecases/session-moderation.usecases';
 import { AdminSessionFilters } from '../../domain/entities/admin-session-summary.entity';
 import { ADMIN_SESSION_DEFAULT_SORT } from '../../domain/entities/admin-session-summary.entity';
@@ -64,6 +66,8 @@ export class SessionsFacade {
   private readonly compensationUseCase = inject(IssueSessionCompensationUseCase);
   private readonly rescheduleUseCase = inject(ConfirmSessionRescheduleUseCase);
   private readonly refundUseCase = inject(ApproveSessionRefundUseCase);
+  private readonly confirmManualPaymentUseCase = inject(ConfirmManualBookingPaymentUseCase);
+  private readonly rejectManualPaymentUseCase = inject(RejectManualBookingPaymentUseCase);
   private readonly teacherProfileRepository = inject(TEACHER_PROFILE_REPOSITORY);
   private readonly userRepository = inject(QURAN_SESSIONS_USER_REPOSITORY);
 
@@ -188,13 +192,19 @@ export class SessionsFacade {
       // Phase 2 — secondary (non-blocking): timeline, compensations, call tracking, and participants.
       this.participantsLoading.set(true);
 
-      this.timelineUseCase.execute(session.aggregateId)
-        .then(events => this.timeline.set(events.map(QuranSessionsViewModelMapper.toTimelineEvent)))
-        .catch(error => console.error('Failed to load timeline:', error));
+      this.timelineUseCase
+        .execute(session.aggregateId)
+        .then((events) =>
+          this.timeline.set(events.map(QuranSessionsViewModelMapper.toTimelineEvent)),
+        )
+        .catch((error) => console.error('Failed to load timeline:', error));
 
-      this.compensationsUseCase.execute(session.id)
-        .then(comps => this.compensations.set(comps.map(QuranSessionsViewModelMapper.toCompensation)))
-        .catch(error => console.error('Failed to load compensations:', error));
+      this.compensationsUseCase
+        .execute(session.id)
+        .then((comps) =>
+          this.compensations.set(comps.map(QuranSessionsViewModelMapper.toCompensation)),
+        )
+        .catch((error) => console.error('Failed to load compensations:', error));
 
       const callSummaryPromise = session.sessionId
         ? this.callSummaryUseCase.execute(session.sessionId)
@@ -352,6 +362,20 @@ export class SessionsFacade {
   async approveRefund(bookingId: string, reason: string): Promise<void> {
     await this.runAction(async () => {
       await this.refundUseCase.execute(bookingId, reason);
+      await this.loadDetail(bookingId);
+    });
+  }
+
+  async confirmManualPayment(bookingId: string, note?: string): Promise<void> {
+    await this.runAction(async () => {
+      await this.confirmManualPaymentUseCase.execute(bookingId, note);
+      await this.loadDetail(bookingId);
+    });
+  }
+
+  async rejectManualPayment(bookingId: string, reason?: string): Promise<void> {
+    await this.runAction(async () => {
+      await this.rejectManualPaymentUseCase.execute(bookingId, reason);
       await this.loadDetail(bookingId);
     });
   }

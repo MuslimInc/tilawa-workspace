@@ -6,7 +6,7 @@ import { CommonModule } from '@angular/common';
   standalone: true,
   imports: [CommonModule],
   template: `
-    <div class="tilawa-empty" role="status">
+    <div class="tilawa-empty" [class.tilawa-empty-boxed]="boxed" role="status">
       <div class="tilawa-empty-icon" aria-hidden="true">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor">
           <path
@@ -30,6 +30,14 @@ import { CommonModule } from '@angular/common';
     .tilawa-empty {
       text-align: center;
       padding: 3rem 1.5rem;
+    }
+
+    .tilawa-empty-boxed {
+      background-color: var(--tilawa-surface);
+      border: 1px dashed var(--tilawa-outline-variant);
+      border-radius: var(--tilawa-radius-xl);
+      margin: 2rem auto;
+      max-width: 42rem;
     }
 
     .tilawa-empty-icon {
@@ -68,4 +76,5 @@ import { CommonModule } from '@angular/common';
 export class TilawaEmptyStateComponent {
   @Input({ required: true }) title!: string;
   @Input() description = '';
+  @Input() boxed = false;
 }

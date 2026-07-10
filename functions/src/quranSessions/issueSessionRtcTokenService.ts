@@ -8,6 +8,8 @@ import {
   readAgoraRtcCredentials,
 } from "./agoraTokenService";
 import { lifecycleError } from "./lifecycleErrors";
+import { isWithinJoinWindowOrQaBypass } from "./sessionJoinWindowPolicy";
+import { JOIN_WINDOW_LEAD_MS } from "./platformSchedulingPolicy";
 import {
   buildLiveKitRtcToken,
   LiveKitRtcCredentials,
@@ -20,9 +22,35 @@ import {
   resolveActorRole,
 } from "./sessionAuth";
 import { resolveTeacherProfileUserId, teacherUserIdFromDenormalizedSessionData } from "./teacherProfileUserId";
+import { isLiveSessionDeviceLockEnabled } from "../liveSessionDeviceLock";
+import { acquireLiveLock } from "./liveSessionLockService";
+import {
+  LIVE_LOCK_LEASE_TTL_MS,
+  liveKitIdentity,
+} from "./liveSessionLock";
+import {
+  evictLiveKitParticipant,
+  type LiveKitEvictionFn,
+} from "./liveKitEviction";
+import {
+  sendSessionTakenOverPush,
+  type TakeoverPushFn,
+} from "./liveSessionTakeoverPush";
 
 interface IssueSessionRtcTokenRequest {
   sessionId: string;
+  /**
+   * Stable device id (from the device registry). Required when the live lock is
+   * enabled so the per-participant lease can be keyed by device. Ignored on the
+   * legacy path. ADR-008 Phase 2.
+   */
+  deviceId?: string;
+  /**
+   * User-initiated takeover of the caller's own other device. When true, the
+   * server grants the lease, evicts the previous LiveKit identity, and sends a
+   * device-targeted `session_taken_over` push to the old device.
+   */
+  forceTakeover?: boolean;
 }
 
 export interface IssueSessionRtcTokenResult {
@@ -37,12 +65,17 @@ export interface IssueSessionRtcTokenDeps {
   db: Firestore;
   readAgoraCredentials?: () => AgoraRtcCredentials | null;
   readLiveKitCredentials?: () => LiveKitRtcCredentials | null;
+  /** Override for unit tests; defaults to the LiveKit RoomServiceClient impl. */
+  evictLiveKitParticipant?: LiveKitEvictionFn;
+  /** Override for unit tests; defaults to the FCM `session_taken_over` impl. */
+  sendTakeoverPush?: TakeoverPushFn;
 }
 
 const JOINABLE_STATUSES = new Set([
   "scheduled",
+  "confirmed",
   "in_progress",
-  "reschedule_pending",
+  "rescheduled",
 ]);
 
 export async function issueSessionRtcTokenForRequest(
@@ -93,6 +126,37 @@ export async function issueSessionRtcTokenForRequest(
     throw new HttpsError("not-found", "Booking not found.");
   }
   const booking = bookingSnap.data() ?? {};
+  const startsAtRaw = (session.startsAt ?? booking.startsAt) as
+    | FirebaseFirestore.Timestamp
+    | undefined;
+  const endsAtRaw = (session.endsAt ?? booking.endsAt) as
+    | FirebaseFirestore.Timestamp
+    | undefined;
+  if (startsAtRaw == null || endsAtRaw == null) {
+    throw lifecycleError(
+      "invalid_transition",
+      "Session schedule is incomplete.",
+      { reasonCode: "join_not_allowed" },
+    );
+  }
+  const joinLeadMs =
+    (booking.joinWindowLeadMs as number | undefined) ?? JOIN_WINDOW_LEAD_MS;
+  if (
+    !isWithinJoinWindowOrQaBypass({
+      startsAt: startsAtRaw.toDate(),
+      endsAt: endsAtRaw.toDate(),
+      now: new Date(),
+      leadTimeMs: joinLeadMs,
+      uid,
+    })
+  ) {
+    throw lifecycleError(
+      "join_window_closed",
+      "Session join window is not open.",
+      { reasonCode: "join_window_closed" },
+    );
+  }
+
   const participants = {
     studentId: (booking.studentId as string) ?? "",
     teacherId: (booking.teacherId as string) ?? "",
@@ -106,6 +170,60 @@ export async function issueSessionRtcTokenForRequest(
   const channelName =
     (session.providerSessionId as string | undefined)?.trim()
     || data.sessionId;
+
+  const lockEnabled = isLiveSessionDeviceLockEnabled();
+  const deviceId = data.deviceId?.trim();
+  const forceTakeover = data.forceTakeover === true;
+
+  // ADR-008 Phase 2: acquire a per-participant lease before minting the token.
+  // When the flag is off, the legacy path is unchanged (no lock, identity = uid).
+  if (lockEnabled) {
+    if (!deviceId) {
+      throw new HttpsError(
+        "invalid-argument",
+        "deviceId is required to join a live session.",
+      );
+    }
+    const lockOutcome = await acquireLiveLock({
+      db: deps.db,
+      sessionRef,
+      uid,
+      deviceId,
+      forceTakeover,
+    });
+
+    if (lockOutcome.evictIdentity) {
+      if (callProvider === "livekit") {
+        const readLiveKitCredentials =
+          deps.readLiveKitCredentials ?? readLiveKitRtcCredentials;
+        const credentials = readLiveKitCredentials();
+        if (credentials) {
+          const evict = deps.evictLiveKitParticipant ?? evictLiveKitParticipant;
+          await evict({
+            credentials,
+            roomName: channelName,
+            identity: lockOutcome.evictIdentity,
+          });
+        }
+      }
+      if (lockOutcome.previousDeviceId) {
+        const sendPush = deps.sendTakeoverPush ?? sendSessionTakenOverPush;
+        await sendPush({
+          db: deps.db,
+          uid,
+          deviceId: lockOutcome.previousDeviceId,
+          sessionId: data.sessionId,
+        });
+      }
+    }
+  }
+
+  const leaseTtlSeconds = lockEnabled
+    ? LIVE_LOCK_LEASE_TTL_MS / 1000
+    : undefined;
+  const identityForToken = lockEnabled && deviceId
+    ? liveKitIdentity(uid, deviceId)
+    : uid;
 
   if (callProvider === "livekit") {
     const readLiveKitCredentials =
@@ -122,7 +240,8 @@ export async function issueSessionRtcTokenForRequest(
     const token = await buildLiveKitRtcToken({
       credentials,
       roomName: channelName,
-      identity: uid,
+      identity: identityForToken,
+      ttlSeconds: leaseTtlSeconds,
     });
 
     return {
@@ -150,6 +269,7 @@ export async function issueSessionRtcTokenForRequest(
     credentials,
     channelName,
     uid: agoraUid,
+    ttlSeconds: leaseTtlSeconds,
   });
 
   return {

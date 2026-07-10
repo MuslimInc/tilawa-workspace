@@ -18,7 +18,6 @@ void main() {
       callType: SessionCallType.videoCall,
       providerKind: SessionCallProviderKind.mock,
       enginePool: pool,
-      labels: testAgoraCallSurfaceLabels,
     );
 
     check(surface).isNull();
@@ -32,7 +31,6 @@ void main() {
       callType: SessionCallType.videoCall,
       providerKind: SessionCallProviderKind.agora,
       enginePool: pool,
-      labels: testAgoraCallSurfaceLabels,
     );
 
     check(surface).isA<AgoraCallSurface>();
@@ -78,22 +76,18 @@ void main() {
   });
 
   group('AgoraCallVideoPlaceholder', () {
-    testWidgets('waiting placeholder shows message without AgoraVideoView', (
+    testWidgets('waiting placeholder shows icon without AgoraVideoView', (
       tester,
     ) async {
       await tester.pumpWidget(
         MaterialApp(
           theme: AppTheme.getLightTheme(primaryColor: AppColors.defaultPrimary),
           home: const Scaffold(
-            body: AgoraCallVideoPlaceholder(
-              icon: Icons.hourglass_top_outlined,
-              message: 'Waiting for other party',
-            ),
+            body: AgoraCallVideoPlaceholder(icon: Icons.hourglass_top_outlined),
           ),
         ),
       );
 
-      expect(find.text('Waiting for other party'), findsOneWidget);
       expect(find.byType(AgoraVideoView), findsNothing);
       expect(find.byIcon(Icons.hourglass_top_outlined), findsOneWidget);
     });
@@ -105,16 +99,11 @@ void main() {
         MaterialApp(
           theme: AppTheme.getLightTheme(primaryColor: AppColors.defaultPrimary),
           home: const Scaffold(
-            body: AgoraCallVideoPlaceholder(
-              icon: Icons.sync,
-              message: 'Connecting',
-              showSpinner: true,
-            ),
+            body: AgoraCallVideoPlaceholder(showSpinner: true),
           ),
         ),
       );
 
-      expect(find.text('Connecting'), findsOneWidget);
       expect(find.byType(CircularProgressIndicator), findsOneWidget);
       expect(find.byType(AgoraVideoView), findsNothing);
     });
@@ -135,7 +124,6 @@ void main() {
               sessionId: sessionId,
               callType: callType,
               enginePool: enginePool,
-              labels: testAgoraCallSurfaceLabels,
             ),
           ),
         ),
@@ -153,11 +141,10 @@ void main() {
         enginePool: AgoraRtcEnginePool(),
       );
 
-      expect(find.text('Connecting'), findsOneWidget);
       expect(find.byType(CircularProgressIndicator), findsOneWidget);
     });
 
-    testWidgets('voice call advances through connection phases', (
+    testWidgets('voice call shows avatar without duplicate status text', (
       tester,
     ) async {
       final engine = FakeRtcEngine();
@@ -174,16 +161,15 @@ void main() {
       engine.simulateJoinSuccess();
       await tester.pump();
 
-      expect(find.text('Waiting for participant'), findsWidgets);
-      expect(find.text('Voice call'), findsOneWidget);
+      expect(find.byIcon(Icons.person_outline), findsOneWidget);
 
       engine.simulateUserJoined(remoteUid: 42);
       await tester.pump();
 
-      expect(find.text('Connected'), findsWidgets);
+      expect(find.byIcon(Icons.person_outline), findsOneWidget);
     });
 
-    testWidgets('video call keeps placeholder until remote video decodes', (
+    testWidgets('video call shows remote placeholder until video decodes', (
       tester,
     ) async {
       final engine = FakeRtcEngine();
@@ -202,7 +188,7 @@ void main() {
       await tester.pump();
 
       expect(find.byType(AgoraVideoView), findsNothing);
-      expect(find.byIcon(Icons.videocam_outlined), findsOneWidget);
+      expect(find.byIcon(Icons.person_outline), findsOneWidget);
 
       engine.simulateRemoteVideoState(
         remoteUid: 42,
@@ -228,9 +214,6 @@ void main() {
       );
 
       engine.simulateJoinSuccess();
-      engine.simulateLocalVideoState(
-        LocalVideoStreamState.localVideoStreamStateCapturing,
-      );
       await tester.pump();
 
       expect(find.byType(AgoraVideoView), findsOneWidget);
@@ -265,7 +248,122 @@ void main() {
       expect(find.byType(AgoraVideoView), findsNWidgets(2));
     });
 
-    testWidgets('video call shows local PiP when camera is ready', (
+    testWidgets(
+      'local camera disabled while waiting shows placeholder not frozen preview',
+      (tester) async {
+        final engine = FakeRtcEngine();
+        final handle = FakeAgoraRtcSessionHandle(engine);
+        final pool = AgoraRtcEnginePool()..remember('session_1', handle);
+
+        await pumpSurface(
+          tester,
+          sessionId: 'session_1',
+          callType: SessionCallType.videoCall,
+          enginePool: pool,
+        );
+
+        engine.simulateJoinSuccess();
+        engine.simulateLocalVideoState(
+          LocalVideoStreamState.localVideoStreamStateCapturing,
+        );
+        await tester.pump();
+
+        expect(find.byType(AgoraVideoView), findsOneWidget);
+
+        await handle.setCameraEnabled(false);
+        await tester.pump();
+
+        expect(find.byType(AgoraVideoView), findsNothing);
+        expect(find.byIcon(Icons.person_outline), findsOneWidget);
+      },
+    );
+
+    testWidgets('video call hides local PiP when camera is disabled', (
+      tester,
+    ) async {
+      final engine = FakeRtcEngine();
+      final handle = FakeAgoraRtcSessionHandle(engine);
+      final pool = AgoraRtcEnginePool()..remember('session_1', handle);
+
+      await pumpSurface(
+        tester,
+        sessionId: 'session_1',
+        callType: SessionCallType.videoCall,
+        enginePool: pool,
+      );
+
+      engine.simulateJoinSuccess();
+      engine.simulateUserJoined(remoteUid: 42);
+      engine.simulateLocalVideoState(
+        LocalVideoStreamState.localVideoStreamStateCapturing,
+      );
+      engine.simulateRemoteVideoState(
+        remoteUid: 42,
+        state: RemoteVideoState.remoteVideoStateDecoding,
+      );
+      await tester.pump();
+
+      expect(find.byType(AgoraVideoView), findsNWidgets(2));
+
+      await handle.setCameraEnabled(false);
+      await tester.pump();
+
+      expect(find.byType(AgoraVideoView), findsOneWidget);
+    });
+
+    testWidgets(
+      'remote camera muted shows participant placeholder not video view',
+      (tester) async {
+        final engine = FakeRtcEngine();
+        final pool = AgoraRtcEnginePool()
+          ..remember('session_1', FakeAgoraRtcSessionHandle(engine));
+
+        await tester.pumpWidget(
+          MaterialApp(
+            theme: AppTheme.getLightTheme(
+              primaryColor: AppColors.defaultPrimary,
+            ),
+            home: Scaffold(
+              body: InAppCallConnectionReporter(
+                onPhaseChanged: (_) {},
+                remoteParticipantDisplayName: 'Ustadh Ahmad',
+                child: AgoraCallSurface(
+                  sessionId: 'session_1',
+                  callType: SessionCallType.videoCall,
+                  enginePool: pool,
+                ),
+              ),
+            ),
+          ),
+        );
+        await tester.pump();
+
+        engine.simulateJoinSuccess();
+        engine.simulateUserJoined(remoteUid: 42);
+        engine.simulateLocalVideoState(
+          LocalVideoStreamState.localVideoStreamStateCapturing,
+        );
+        engine.simulateRemoteVideoState(
+          remoteUid: 42,
+          state: RemoteVideoState.remoteVideoStateDecoding,
+        );
+        await tester.pump();
+
+        expect(find.byType(AgoraVideoView), findsNWidgets(2));
+
+        engine.simulateRemoteVideoState(
+          remoteUid: 42,
+          state: RemoteVideoState.remoteVideoStateStopped,
+        );
+        await tester.pump();
+
+        expect(find.byType(AgoraVideoView), findsOneWidget);
+        expect(find.byIcon(Icons.person_outline), findsOneWidget);
+        expect(find.text('Ustadh Ahmad'), findsNothing);
+      },
+    );
+
+    testWidgets('onUserMuteVideo hides remote video view immediately', (
       tester,
     ) async {
       final engine = FakeRtcEngine();
@@ -281,12 +379,19 @@ void main() {
 
       engine.simulateJoinSuccess();
       engine.simulateUserJoined(remoteUid: 42);
-      engine.simulateLocalVideoState(
-        LocalVideoStreamState.localVideoStreamStateCapturing,
+      engine.simulateRemoteVideoState(
+        remoteUid: 42,
+        state: RemoteVideoState.remoteVideoStateDecoding,
       );
       await tester.pump();
 
       expect(find.byType(AgoraVideoView), findsOneWidget);
+
+      engine.simulateUserMuteVideo(remoteUid: 42, muted: true);
+      await tester.pump();
+
+      expect(find.byType(AgoraVideoView), findsNothing);
+      expect(find.byIcon(Icons.person_outline), findsOneWidget);
     });
 
     testWidgets('external meeting uses voice layout', (tester) async {
@@ -301,7 +406,7 @@ void main() {
         enginePool: pool,
       );
 
-      expect(find.text('Voice call'), findsOneWidget);
+      expect(find.byIcon(Icons.person_outline), findsOneWidget);
     });
 
     testWidgets('remote participant leaving returns to waiting state', (
@@ -324,8 +429,7 @@ void main() {
       engine.simulateUserOffline(remoteUid: 42);
       await tester.pump();
 
-      expect(find.text('Waiting for participant'), findsWidgets);
-      expect(find.text('Connected'), findsNothing);
+      expect(find.byIcon(Icons.person_outline), findsOneWidget);
     });
 
     testWidgets('session change rebinds engine events for new session', (
@@ -353,14 +457,14 @@ void main() {
 
       firstEngine.simulateJoinSuccess();
       await tester.pump();
-      expect(find.text('Waiting for participant'), findsWidgets);
+      expect(find.byIcon(Icons.person_outline), findsOneWidget);
 
       await tester.tap(find.byKey(const Key('switch_session')));
       await tester.pump();
 
       secondEngine.simulateJoinSuccess();
       await tester.pump();
-      expect(find.text('Waiting for participant'), findsWidgets);
+      expect(find.byIcon(Icons.person_outline), findsOneWidget);
       check(firstEngine.handler).isNull();
       check(secondEngine.handler).isNotNull();
     });
@@ -484,7 +588,6 @@ class _SessionHarnessState extends State<_SessionHarness> {
             sessionId: _sessionId,
             callType: widget.callType,
             enginePool: widget.enginePool,
-            labels: testAgoraCallSurfaceLabels,
           ),
         ),
         TextButton(
@@ -509,6 +612,7 @@ class _RecordingTokenProvider implements CallTokenProvider {
   Future<RtcJoinCredentials> fetchCredentials({
     required String sessionId,
     required String userId,
+    bool forceTakeover = false,
   }) async {
     return const RtcJoinCredentials(
       token: 'tok',

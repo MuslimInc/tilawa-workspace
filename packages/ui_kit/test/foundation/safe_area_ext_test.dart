@@ -266,6 +266,33 @@ void main() {
 
       expect(padding, 34 + _spaceSmall);
     });
+
+    testWidgets(
+      'keeps floatingBottomPadding when it exceeds keyboardInset + buffer '
+      '(no abrupt drop as the keyboard begins to appear)',
+      (tester) async {
+        late double padding;
+
+        await tester.pumpWidget(
+          _wrap(
+            // Home-indicator device: floating = 34 + 8 = 42.
+            viewPadding: const EdgeInsets.only(bottom: 34),
+            // Keyboard only partway in: 10 + 8 = 18 < 42.
+            viewInsets: const EdgeInsets.only(bottom: 10),
+            child: Builder(
+              builder: (context) {
+                padding = context.keyboardAwareBottomPadding;
+                return const SizedBox.shrink();
+              },
+            ),
+          ),
+        );
+
+        // The continuous max() must hold at the floating value rather than
+        // dropping to 18 (the old boolean branch) and springing back up.
+        expect(padding, 34 + _spaceSmall);
+      },
+    );
   });
 
   group('TilawaSafeAreaX — floatingBottomPaddingWithMin', () {
@@ -345,5 +372,28 @@ void main() {
 
       expect(padding, 48);
     });
+
+    testWidgets(
+      'keeps fallbackMinSpacing base when the keyboard inset is still small '
+      '(no abrupt drop)',
+      (tester) async {
+        late double padding;
+
+        await tester.pumpWidget(
+          _wrap(
+            // Keyboard barely in: 10 + 8 (default buffer) = 18 < 48.
+            viewInsets: const EdgeInsets.only(bottom: 10),
+            child: Builder(
+              builder: (context) {
+                padding = context.keyboardAwarePadding(fallbackMinSpacing: 48);
+                return const SizedBox.shrink();
+              },
+            ),
+          ),
+        );
+
+        expect(padding, 48);
+      },
+    );
   });
 }

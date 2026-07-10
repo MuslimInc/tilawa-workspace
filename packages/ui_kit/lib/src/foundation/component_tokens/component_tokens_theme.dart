@@ -4,6 +4,7 @@ import '../app_colors.dart';
 import 'atoms_tokens.dart';
 import 'molecules_tokens.dart';
 import 'organisms_tokens.dart';
+import '../design_tokens.dart';
 
 @immutable
 class MeMuslimComponentTokens extends ThemeExtension<MeMuslimComponentTokens> {
@@ -40,6 +41,7 @@ class MeMuslimComponentTokens extends ThemeExtension<MeMuslimComponentTokens> {
     required this.capabilityActionCard,
     required this.experimentalBadge,
     required this.cupertinoWheelPicker,
+    required this.metricTile,
   });
 
   final TilawaSectionTitleTokens sectionTitle;
@@ -74,6 +76,7 @@ class MeMuslimComponentTokens extends ThemeExtension<MeMuslimComponentTokens> {
   final TilawaCapabilityActionCardTokens capabilityActionCard;
   final TilawaExperimentalBadgeTokens experimentalBadge;
   final TilawaCupertinoWheelPickerTokens cupertinoWheelPicker;
+  final TilawaMetricTileTokens metricTile;
 
   /// Creates light theme component tokens.
   factory MeMuslimComponentTokens.light({ColorScheme? colorScheme}) =>
@@ -99,6 +102,10 @@ class MeMuslimComponentTokens extends ThemeExtension<MeMuslimComponentTokens> {
           seedColor: AppColors.defaultPrimary,
           brightness: brightness,
         );
+    final designTokens = brightness == Brightness.dark
+        ? MeMuslimDesignTokens.dark()
+        : MeMuslimDesignTokens.light();
+
     return MeMuslimComponentTokens(
       sectionTitle: TilawaSectionTitleTokens.defaults(),
       sheetHandle: TilawaSheetHandleTokens.defaults(),
@@ -130,9 +137,11 @@ class MeMuslimComponentTokens extends ThemeExtension<MeMuslimComponentTokens> {
       ),
       adaptiveShell: TilawaAdaptiveShellTokens.fromColorScheme(
         effectiveColorScheme,
+        designTokens,
       ),
       settingsGroup: TilawaSettingsGroupTokens.fromColorScheme(
         effectiveColorScheme,
+        designTokens,
       ),
       immersiveComposer: TilawaImmersiveComposerTokens.fromColorScheme(
         effectiveColorScheme,
@@ -156,6 +165,7 @@ class MeMuslimComponentTokens extends ThemeExtension<MeMuslimComponentTokens> {
       cupertinoWheelPicker: TilawaCupertinoWheelPickerTokens.fromColorScheme(
         effectiveColorScheme,
       ),
+      metricTile: TilawaMetricTileTokens.fromColorScheme(effectiveColorScheme),
     );
   }
 
@@ -193,6 +203,7 @@ class MeMuslimComponentTokens extends ThemeExtension<MeMuslimComponentTokens> {
     TilawaCapabilityActionCardTokens? capabilityActionCard,
     TilawaExperimentalBadgeTokens? experimentalBadge,
     TilawaCupertinoWheelPickerTokens? cupertinoWheelPicker,
+    TilawaMetricTileTokens? metricTile,
   }) {
     return MeMuslimComponentTokens(
       sectionTitle: sectionTitle ?? this.sectionTitle,
@@ -227,6 +238,7 @@ class MeMuslimComponentTokens extends ThemeExtension<MeMuslimComponentTokens> {
       capabilityActionCard: capabilityActionCard ?? this.capabilityActionCard,
       experimentalBadge: experimentalBadge ?? this.experimentalBadge,
       cupertinoWheelPicker: cupertinoWheelPicker ?? this.cupertinoWheelPicker,
+      metricTile: metricTile ?? this.metricTile,
     );
   }
 
@@ -353,6 +365,7 @@ class MeMuslimComponentTokens extends ThemeExtension<MeMuslimComponentTokens> {
         other.cupertinoWheelPicker,
         t,
       ),
+      metricTile: TilawaMetricTileTokens.lerp(metricTile, other.metricTile, t),
     );
   }
 }

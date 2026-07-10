@@ -13,16 +13,23 @@ class SessionJoinPolicy {
     required QuranSession session,
     required String userId,
     required DateTime now,
+
+    /// Firebase auth uid when [userId] is the teacher (profile doc id ≠ auth uid).
+    String? teacherAuthUserId,
   }) {
     final isStudent = session.studentId == userId;
-    final isTeacher = session.teacherId == userId;
+    final isTeacher =
+        session.teacherId == userId ||
+        (teacherAuthUserId != null && teacherAuthUserId == userId);
     if (!isStudent && !isTeacher) return false;
 
     if (!session.effectiveLifecycleStatus.canJoinSession) return false;
 
     return windowPolicy.isWithinJoinWindow(
       startsAt: session.startsAt,
+      endsAt: session.endsAt,
       now: now,
+      qaBypassUserId: userId,
     );
   }
 }

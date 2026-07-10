@@ -1,16 +1,16 @@
 import 'package:bloc_concurrency/bloc_concurrency.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
-import '../../../domain/entities/quran_teacher.dart';
+import '../../../domain/entities/teacher_list_item.dart';
 import '../../../domain/usecases/get_teacher_availability_usecase.dart';
-import '../../../domain/usecases/get_teachers_usecase.dart';
+import '../../../domain/usecases/resolve_teacher_list_usecase.dart';
 import '../../models/teacher_availability_summary.dart';
 import 'teacher_list_event.dart';
 import 'teacher_list_state.dart';
 
 class TeacherListBloc extends Bloc<TeacherListEvent, TeacherListState> {
   TeacherListBloc(
-    this._getTeachers,
+    this._resolveTeacherList,
     this._getAvailability, {
     this._availabilityPresenter = const TeacherAvailabilitySummaryPresenter(),
   }) : super(const TeacherListInitial()) {
@@ -19,7 +19,9 @@ class TeacherListBloc extends Bloc<TeacherListEvent, TeacherListState> {
     on<TeacherFilterChanged>(_onFilterChanged, transformer: restartable());
   }
 
-  final GetTeachersUseCase _getTeachers;
+  /// Fetches teachers and resolves each row's server quote + bookability. All
+  /// pricing/bookability rules live here, not in the BLoC.
+  final ResolveTeacherListUseCase _resolveTeacherList;
   final GetTeacherAvailabilityUseCase _getAvailability;
   final TeacherAvailabilitySummaryPresenter _availabilityPresenter;
 
@@ -31,45 +33,47 @@ class TeacherListBloc extends Bloc<TeacherListEvent, TeacherListState> {
   ) async {
     emit(const TeacherListLoading());
 
-    final result = await _getTeachers(
+    final result = await _resolveTeacherList(
       specialization: event.specialization,
       language: event.language,
     );
 
-    if (result.isLeft()) {
-      emit(
-        TeacherListFailure(
-          result.fold((failure) => failure, (_) {
-            throw StateError('unreachable');
-          }),
-        ),
-      );
-      return;
-    }
+    await result.fold(
+      (failure) async => emit(TeacherListFailure(failure)),
+      (page) async {
+        if (page.rawTeacherCount == 0) {
+          emit(
+            TeacherListEmpty(
+              activeSpecialization: event.specialization,
+              activeLanguage: event.language,
+            ),
+          );
+          return;
+        }
+        if (page.items.isEmpty) {
+          // Teachers exist but every one is durably non-bookable for this
+          // viewer (typically paid while the payment provider is disabled).
+          emit(
+            TeacherListNoBookableTeachers(
+              activeSpecialization: event.specialization,
+              activeLanguage: event.language,
+              hiddenByBlockReason: page.hiddenByBlockReason,
+            ),
+          );
+          return;
+        }
 
-    final page = result.fold((_) => throw StateError('unreachable'), (p) => p);
-    if (page.teachers.isEmpty) {
-      emit(
-        TeacherListEmpty(
-          activeSpecialization: event.specialization,
-          activeLanguage: event.language,
-        ),
-      );
-      return;
-    }
-
-    final availabilitySummaries = await _loadAvailabilitySummaries(
-      page.teachers,
-    );
-    emit(
-      TeacherListSuccess(
-        teachers: page.teachers,
-        hasMore: page.nextCursor != null,
-        availabilitySummaries: availabilitySummaries,
-        nextCursor: page.nextCursor,
-        activeSpecialization: event.specialization,
-        activeLanguage: event.language,
-      ),
+        emit(
+          TeacherListSuccess(
+            items: page.items,
+            hasMore: page.hasMore,
+            availabilitySummaries: await _loadAvailabilitySummaries(page.items),
+            nextCursor: page.nextCursor,
+            activeSpecialization: event.specialization,
+            activeLanguage: event.language,
+          ),
+        );
+      },
     );
   }
 
@@ -82,30 +86,26 @@ class TeacherListBloc extends Bloc<TeacherListEvent, TeacherListState> {
 
     emit(current.copyWith(isLoadingMore: true));
 
-    final result = await _getTeachers(
+    final result = await _resolveTeacherList(
       specialization: current.activeSpecialization,
       language: current.activeLanguage,
       cursor: current.nextCursor,
     );
 
-    if (result.isLeft()) {
+    await result.fold(
       // On pagination error keep existing items visible and clear the flag.
-      emit(current.copyWith(isLoadingMore: false));
-      return;
-    }
-
-    final page = result.fold((_) => throw StateError('unreachable'), (p) => p);
-    final newSummaries = await _loadAvailabilitySummaries(page.teachers);
-    emit(
-      current.copyWith(
-        teachers: [...current.teachers, ...page.teachers],
-        availabilitySummaries: {
-          ...current.availabilitySummaries,
-          ...newSummaries,
-        },
-        hasMore: page.nextCursor != null,
-        nextCursor: page.nextCursor,
-        isLoadingMore: false,
+      (_) async => emit(current.copyWith(isLoadingMore: false)),
+      (page) async => emit(
+        current.copyWith(
+          items: [...current.items, ...page.items],
+          availabilitySummaries: {
+            ...current.availabilitySummaries,
+            ...await _loadAvailabilitySummaries(page.items),
+          },
+          hasMore: page.hasMore,
+          nextCursor: page.nextCursor,
+          isLoadingMore: false,
+        ),
       ),
     );
   }
@@ -124,14 +124,17 @@ class TeacherListBloc extends Bloc<TeacherListEvent, TeacherListState> {
     );
   }
 
+  /// Builds the per-teacher availability summary shown on each card. Keyed by
+  /// teacher id for O(1) lookup; fetched only for the visible [items].
   Future<Map<String, TeacherAvailabilitySummary>> _loadAvailabilitySummaries(
-    List<QuranTeacher> teachers,
+    List<TeacherListItem> items,
   ) async {
-    if (teachers.isEmpty) return const {};
+    if (items.isEmpty) return const {};
 
     final now = DateTime.now();
     final entries = await Future.wait(
-      teachers.map((teacher) async {
+      items.map((item) async {
+        final teacher = item.teacher;
         final result = await _getAvailability(
           teacher.id,
           from: now,

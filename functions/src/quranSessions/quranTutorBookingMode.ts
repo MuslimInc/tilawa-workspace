@@ -6,16 +6,18 @@ const VALID_MODES: ReadonlySet<string> = new Set([
 ]);
 
 export function distributionDefaultBookingMode(): QuranTutorBookingMode {
-  const distribution = process.env.TILAWA_DISTRIBUTION ?? "local";
-  return distribution === "play_production"
-    ? "requiresTutorApproval"
-    : "autoConfirm";
+  return "requiresTutorApproval";
 }
 
 export function resolveQuranTutorBookingMode(
   platformConfig: Record<string, unknown> | undefined,
 ): QuranTutorBookingMode {
-  const raw = platformConfig?.quranTutorBookingMode;
+  // `bookingMode` is canonical. The other names are read-only migration
+  // aliases for existing seeded docs and older admin clients.
+  const raw =
+    platformConfig?.bookingMode ??
+    platformConfig?.quranTutorBookingMode ??
+    platformConfig?.defaultBookingMode;
   if (typeof raw === "string" && VALID_MODES.has(raw)) {
     return raw as QuranTutorBookingMode;
   }
@@ -28,7 +30,12 @@ export function resolveQuranTutorBookingMode(
         resolvedMode: fallback,
       }),
     );
-  } else if (platformConfig != null && !("quranTutorBookingMode" in platformConfig)) {
+  } else if (
+    platformConfig != null &&
+    !("bookingMode" in platformConfig) &&
+    !("quranTutorBookingMode" in platformConfig) &&
+    !("defaultBookingMode" in platformConfig)
+  ) {
     console.warn(
       JSON.stringify({
         event: "booking_mode_fallback",

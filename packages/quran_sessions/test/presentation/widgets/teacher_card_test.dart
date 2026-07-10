@@ -80,10 +80,44 @@ void main() {
       expect(find.text('جديد'), findsOneWidget);
     });
 
-    testWidgets('shows Free / مجاني for free teachers', (tester) async {
+    testWidgets('shows مجاني only with a resolved free market quote', (
+      tester,
+    ) async {
       await pumpInApp(
         tester,
         TeacherCard(
+          teacher: makeTeacher(
+            avatarUrl: '',
+            pricingType: SessionPricingType.free,
+            price: null,
+          ),
+          onTap: () {},
+          pricing: const SessionPricingQuote(
+            pricingType: SessionPricingType.free,
+            amount: 0,
+            currencyCode: 'USD',
+            paymentRequired: false,
+            paymentProviderAvailable: false,
+            bookingEnabled: true,
+            quranSessionsEnabled: true,
+            effectivePricingSource: EffectivePricingSource.teacherOverride,
+            blockReason: BookingBlockReason.none,
+          ),
+        ),
+        locale: const Locale('ar'),
+        textDirection: TextDirection.rtl,
+        surfaceSize: const Size(360, 800),
+      );
+      expect(find.text('مجاني'), findsOneWidget);
+    });
+
+    testWidgets('never shows مجاني when pricing is unresolved', (tester) async {
+      await pumpInApp(
+        tester,
+        TeacherCard(
+          // Entity claims free (legacy DTO default) but no market quote was
+          // resolved — the badge must hide, not promise a free session the
+          // booking flow would price as paid.
           teacher: makeTeacher(
             avatarUrl: '',
             pricingType: SessionPricingType.free,
@@ -95,7 +129,7 @@ void main() {
         textDirection: TextDirection.rtl,
         surfaceSize: const Size(360, 800),
       );
-      expect(find.text('مجاني'), findsOneWidget);
+      expect(find.text('مجاني'), findsNothing);
     });
 
     testWidgets(

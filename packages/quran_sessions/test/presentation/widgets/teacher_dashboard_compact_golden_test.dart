@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:intl/date_symbol_data_local.dart';
 import 'package:quran_sessions/src/domain/entities/session_lifecycle_status.dart';
-import 'package:quran_sessions/src/presentation/widgets/teacher_dashboard_schedule_section.dart';
 import 'package:quran_sessions/src/presentation/widgets/teacher_dashboard_inline_empty_state.dart';
 import 'package:quran_sessions/src/presentation/widgets/tutor_dashboard_section.dart';
 import 'package:quran_sessions/src/presentation/widgets/tutor_session_compact_card.dart';
@@ -33,18 +32,14 @@ void main() {
       );
     });
 
-    testWidgets('secondary section header with schedule action ar rtl', (
+    testWidgets('secondary section header without schedule action ar rtl', (
       tester,
     ) async {
       await pumpInApp(
         tester,
-        TutorDashboardSection(
+        const TutorDashboardSection(
           title: 'المواعيد القابلة للحجز',
           variant: TutorDashboardSectionVariant.secondary,
-          trailing: TeacherDashboardScheduleSection(
-            actionLabel: 'تعديل الجدول الأسبوعي',
-            onManageSchedule: () {},
-          ),
         ),
         locale: const Locale('ar'),
         textDirection: TextDirection.rtl,

@@ -129,6 +129,9 @@ export const markSessionNoShow = onCall(
           tx,
           { bookingRef, sessionRef },
           guard.to,
+          {},
+          {},
+          fresh,
         );
 
         appendAuditEvent(tx, db, {

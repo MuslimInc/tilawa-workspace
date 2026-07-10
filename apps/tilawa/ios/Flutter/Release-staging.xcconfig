@@ -1,0 +1,8 @@
+#include? "Pods/Target Support Files/Pods-Runner/Pods-Runner.release-staging.xcconfig"
+#include "Generated.xcconfig"
+#include "Release.xcconfig"
+PRODUCT_BUNDLE_IDENTIFIER=com.tilawa.app.staging
+INFOPLIST_KEY_CFBundleDisplayName=MeMuslim Staging
+GOOGLE_SIGN_IN_CLIENT_ID=181575856185-o2k7lc3j2itugtg2b7l4kj4kauhucsiu.apps.googleusercontent.com
+GOOGLE_SIGN_IN_REVERSED_CLIENT_ID=com.googleusercontent.apps.181575856185-o2k7lc3j2itugtg2b7l4kj4kauhucsiu
+IPHONEOS_DEPLOYMENT_TARGET=15.0

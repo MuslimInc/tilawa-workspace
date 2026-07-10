@@ -9,7 +9,7 @@ export class NotificationEntity {
     public readonly targetUserIds: string[],
     public readonly createdAt: Date,
     public readonly actionType: string = 'home',
-    public readonly actionData?: string
+    public readonly actionData?: string,
   ) {}
 
   // Domain logic validation

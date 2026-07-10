@@ -50,7 +50,7 @@ abstract final class HomeNextPrayerTime {
     final MeMuslimDesignTokens tokens = Theme.of(context).tokens;
     final double textScale = MediaQuery.textScalerOf(
       context,
-    ).scale(1).clamp(1.0, 1.4);
+    ).scale(1).clamp(1.0, 1.3);
     final double horizontalGutter =
         TilawaHomeScreenTokens.screenHorizontalPadding(tokens) * 2;
     final bool tightCard =
@@ -186,7 +186,7 @@ class _HomeNextPrayerTimeCard extends StatelessWidget {
       button: !showFailure && !showFullSkeleton,
       label: context.l10n.nextPrayer,
       child: HomeDashboardCard(
-        surface: TilawaCardSurface.flat,
+        surface: TilawaCardSurface.raised,
         padding: EdgeInsets.all(tokens.spaceLarge),
         onTap: showFailure || showFullSkeleton ? null : onOpenPrayer,
         child: showFullSkeleton

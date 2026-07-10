@@ -1,0 +1,90 @@
+<section class="tilawa-pricing-panel" role="group" [attr.aria-label]="'teacherPricing_title' | t">
+  <header class="tilawa-pricing-panel__header">
+    <h3>{{ 'teacherPricing_title' | t }}</h3>
+    <p class="tilawa-pricing-panel__current">
+      @if (currentSummaryKey() === 'teacherPricing_current') {
+        {{ 'teacherPricing_current' | t: { value: currentSummaryValue() } }}
+      } @else {
+        {{ currentSummaryKey() | t }}
+      }
+    </p>
+  </header>
+
+  <div class="tilawa-pricing-panel__status">
+    <dl class="tilawa-pricing-panel__status-grid">
+      <dt>{{ 'teacherPricing_sourceLabel' | t }}</dt>
+      <dd>{{ effectivePricingSourceKey() | t }}</dd>
+      <dt>{{ 'teacherPricing_effectiveLabel' | t }}</dt>
+      <dd>
+        @if (effectivePriceKey()) {
+          {{ effectivePriceKey() | t }}
+        } @else {
+          {{ effectivePriceValue() }}
+        }
+      </dd>
+    </dl>
+    <p class="tilawa-pricing-panel__bookability-note">
+      {{ 'teacherPricing_bookabilityNote' | t }}
+    </p>
+  </div>
+
+  <form (ngSubmit)="onSubmit()">
+    <fieldset class="tilawa-pricing-panel__modes" [disabled]="isSubmitting()">
+      <label>
+        <input type="radio" name="pricingMode" value="inherit" [(ngModel)]="mode" />
+        {{ 'teacherPricing_modeInherit' | t }}
+      </label>
+      <label>
+        <input type="radio" name="pricingMode" value="free" [(ngModel)]="mode" />
+        {{ 'teacherPricing_modeFree' | t }}
+      </label>
+      <label>
+        <input type="radio" name="pricingMode" value="fixed" [(ngModel)]="mode" />
+        {{ 'teacherPricing_modeFixed' | t }}
+      </label>
+    </fieldset>
+
+    @if (mode === 'fixed') {
+      <div class="tilawa-pricing-panel__fixed">
+        <label>
+          <span>{{ 'teacherPricing_amount' | t }}</span>
+          <input
+            type="number"
+            name="amount"
+            min="0"
+            step="1"
+            [(ngModel)]="amount"
+            [disabled]="isSubmitting()"
+          />
+        </label>
+        <label>
+          <span>{{ 'teacherPricing_currency' | t }}</span>
+          <input
+            type="text"
+            name="currencyCode"
+            maxlength="3"
+            [(ngModel)]="currencyCode"
+            [disabled]="isSubmitting()"
+            [attr.placeholder]="'teacherPricing_currencyHint' | t"
+          />
+        </label>
+      </div>
+    }
+
+    @if (error()) {
+      <p class="tilawa-pricing-panel__error" role="alert">{{ error() }}</p>
+    }
+    @if (savedState()) {
+      <p class="tilawa-pricing-panel__saved" role="status">{{ 'teacherPricing_saved' | t }}</p>
+    }
+
+    <div class="tilawa-pricing-panel__actions">
+      <app-tilawa-button
+        type="submit"
+        [label]="'teacherPricing_save' | t"
+        [loading]="isSubmitting()"
+        [disabled]="isSubmitting()"
+      />
+    </div>
+  </form>
+</section>

@@ -4,6 +4,8 @@ import 'package:firebase_core/firebase_core.dart' show FirebaseOptions;
 import 'package:flutter/foundation.dart'
     show defaultTargetPlatform, kIsWeb, TargetPlatform;
 
+import 'core/bootstrap/app_environment.dart';
+
 /// Default [FirebaseOptions] for use with your Firebase apps.
 ///
 /// Example:
@@ -16,6 +18,20 @@ import 'package:flutter/foundation.dart'
 /// ```
 class DefaultFirebaseOptions {
   static FirebaseOptions get currentPlatform {
+    return optionsForEnvironment(AppEnvironment.current);
+  }
+
+  /// Firebase options for [environment].
+  ///
+  /// All flavors currently use `quran-playera-app`, but each iOS bundle ID has
+  /// its own Firebase app registration.
+  static FirebaseOptions optionsForEnvironment(AppEnvironment environment) {
+    switch (environment) {
+      case AppEnvironment.development:
+      case AppEnvironment.staging:
+      case AppEnvironment.production:
+        break;
+    }
     if (kIsWeb) {
       throw UnsupportedError(
         'DefaultFirebaseOptions have not been configured for web - '
@@ -26,7 +42,11 @@ class DefaultFirebaseOptions {
       case TargetPlatform.android:
         return android;
       case TargetPlatform.iOS:
-        return ios;
+        return switch (environment) {
+          AppEnvironment.development => iosDevelopment,
+          AppEnvironment.staging => iosStaging,
+          AppEnvironment.production => ios,
+        };
       case TargetPlatform.macOS:
         throw UnsupportedError(
           'DefaultFirebaseOptions have not been configured for macos - '
@@ -55,6 +75,32 @@ class DefaultFirebaseOptions {
     messagingSenderId: '181575856185',
     projectId: 'quran-playera-app',
     storageBucket: 'quran-playera-app.firebasestorage.app',
+  );
+
+  static const FirebaseOptions iosDevelopment = FirebaseOptions(
+    apiKey: 'AIzaSyDlIxMc7sRMmNYmYCo-IJbgHo8H9avi4ws',
+    appId: '1:181575856185:ios:b2c664fdf9f8ece6381de8',
+    messagingSenderId: '181575856185',
+    projectId: 'quran-playera-app',
+    storageBucket: 'quran-playera-app.firebasestorage.app',
+    androidClientId:
+        '181575856185-3tdkcorcrq2vq5hqoj40p1u5hjupnpam.apps.googleusercontent.com',
+    iosClientId:
+        '181575856185-v2hhlsvcr0ieia4d8cvo1d0uk71l1jej.apps.googleusercontent.com',
+    iosBundleId: 'com.tilawa.app.dev',
+  );
+
+  static const FirebaseOptions iosStaging = FirebaseOptions(
+    apiKey: 'AIzaSyDlIxMc7sRMmNYmYCo-IJbgHo8H9avi4ws',
+    appId: '1:181575856185:ios:c04495544365732a381de8',
+    messagingSenderId: '181575856185',
+    projectId: 'quran-playera-app',
+    storageBucket: 'quran-playera-app.firebasestorage.app',
+    androidClientId:
+        '181575856185-3tdkcorcrq2vq5hqoj40p1u5hjupnpam.apps.googleusercontent.com',
+    iosClientId:
+        '181575856185-o2k7lc3j2itugtg2b7l4kj4kauhucsiu.apps.googleusercontent.com',
+    iosBundleId: 'com.tilawa.app.staging',
   );
 
   static const FirebaseOptions ios = FirebaseOptions(

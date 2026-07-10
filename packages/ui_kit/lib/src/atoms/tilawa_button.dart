@@ -213,6 +213,11 @@ class TilawaButton extends StatelessWidget {
           resolvedMinHeight,
         ),
       ),
+      // Cap height so full-width buttons in Columns with [Expanded] siblings
+      // (unbounded max height on non-flex children) do not stretch vertically.
+      maximumSize: WidgetStateProperty.all(
+        Size(double.infinity, resolvedMinHeight),
+      ),
       padding: WidgetStateProperty.all(resolvedPadding),
       tapTargetSize: shrinkWrapTapTarget
           ? MaterialTapTargetSize.shrinkWrap
@@ -391,9 +396,10 @@ class _ButtonContent extends StatelessWidget {
     }
 
     // Full-width: [Expanded] so the label uses the row width and ellipsizes.
-    // Non–full-width: plain label — [Flexible] would expand to the parent's max
-    // width and stretch the button in loose layouts (e.g. illustrated states).
+    // Non–full-width: [Flexible] so the label shrinks to its intrinsic width
+    // but truncates gracefully if it hits the button's max width constraint.
     final label = Center(
+      widthFactor: 1.0,
       child: Text(
         text,
         overflow: TextOverflow.ellipsis,
@@ -416,7 +422,7 @@ class _ButtonContent extends StatelessWidget {
           ),
           SizedBox(width: iconGap),
         ],
-        if (isFullWidth) Expanded(child: label) else label,
+        if (isFullWidth) Expanded(child: label) else Flexible(child: label),
         if (trailingIcon != null) ...[
           SizedBox(width: iconGap),
           IconTheme(

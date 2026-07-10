@@ -15,6 +15,8 @@ import {
   IssueSessionCompensationUseCase,
   ConfirmSessionRescheduleUseCase,
   ApproveSessionRefundUseCase,
+  ConfirmManualBookingPaymentUseCase,
+  RejectManualBookingPaymentUseCase,
 } from '../../domain/usecases/session-moderation.usecases';
 import {
   TEACHER_PROFILE_REPOSITORY,
@@ -48,6 +50,10 @@ describe('SessionsFacade — participants', () => {
     countryCode: 'EG',
     cityId: 'cairo',
     paymentStatus: 'none',
+    paymentReference: null,
+    paymentProvider: 'none',
+    priceAmount: 0,
+    priceCurrency: 'USD',
     amountPaidUsd: 0,
     cancellationReason: null,
     createdAt: new Date(),
@@ -80,12 +86,10 @@ describe('SessionsFacade — participants', () => {
     userRepo = {
       list: vi.fn(),
       listMatchingUserIds: vi.fn(),
-      getById: vi.fn(),
-      getByIds: vi.fn().mockImplementation(async (ids: readonly string[]) => {
-        const map = new Map();
-        for (const id of ids) {
-          if (id === 'student-1') {
-            map.set(id, {
+      getByIds: vi.fn(),
+      getById: vi.fn().mockImplementation(async (id: string) => {
+        if (id === 'student-1') {
+          return {
               userId: id,
               email: 's@example.com',
               displayName: 'Fatima',
@@ -100,10 +104,10 @@ describe('SessionsFacade — participants', () => {
               canApplyAsTeacher: true,
               createdAt: new Date(),
               updatedAt: new Date(),
-            });
-          }
-          if (id === 'user-teacher') {
-            map.set(id, {
+          };
+        }
+        if (id === 'user-teacher') {
+          return {
               userId: id,
               email: 't@example.com',
               displayName: 'Ustad Ahmad',
@@ -118,10 +122,9 @@ describe('SessionsFacade — participants', () => {
               canApplyAsTeacher: false,
               createdAt: new Date(),
               updatedAt: new Date(),
-            });
-          }
+          };
         }
-        return map;
+        return null;
       }),
     };
 
@@ -161,6 +164,14 @@ describe('SessionsFacade — participants', () => {
           useValue: { execute: vi.fn() },
         },
         { provide: ApproveSessionRefundUseCase, useValue: { execute: vi.fn() } },
+        {
+          provide: ConfirmManualBookingPaymentUseCase,
+          useValue: { execute: vi.fn() },
+        },
+        {
+          provide: RejectManualBookingPaymentUseCase,
+          useValue: { execute: vi.fn() },
+        },
         { provide: TEACHER_PROFILE_REPOSITORY, useValue: teacherRepo },
         { provide: QURAN_SESSIONS_USER_REPOSITORY, useValue: userRepo },
       ],
@@ -174,7 +185,9 @@ describe('SessionsFacade — participants', () => {
 
     expect(teacherRepo.getById).toHaveBeenCalledWith('teacher-1');
     expect(teacherRepo.list).not.toHaveBeenCalled();
-    expect(userRepo.getByIds).toHaveBeenCalledWith(['student-1', 'user-teacher']);
+    expect(userRepo.getById).toHaveBeenCalledWith('student-1');
+    expect(userRepo.getById).toHaveBeenCalledWith('user-teacher');
+    expect(userRepo.getByIds).not.toHaveBeenCalled();
     expect(userRepo.list).not.toHaveBeenCalled();
   });
 
@@ -208,6 +221,9 @@ describe('SessionsFacade — participants', () => {
 
   it('exposes participant view models on the detail load', async () => {
     await facade.loadDetail('booking-1');
+    await vi.waitFor(() => {
+      expect(facade.isParticipantsLoading()).toBe(false);
+    });
 
     const participants = facade.sessionParticipants();
     expect(participants?.teacher.displayName).toBe('Ustad Ahmad');
@@ -217,12 +233,11 @@ describe('SessionsFacade — participants', () => {
   });
 
   it('renders critical detail data before participant profiles load', async () => {
-    // Delay the user repo getByIds to simulate a slow secondary fetch.
-    let resolveUsers!: (map: Map<string, unknown>) => void;
-    userRepo.getByIds = vi.fn().mockImplementation(
+    const resolvers: Array<(u: unknown) => void> = [];
+    userRepo.getById = vi.fn().mockImplementation(
       () =>
-        new Promise<Map<string, unknown>>((resolve) => {
-          resolveUsers = resolve;
+        new Promise<unknown>((resolve) => {
+          resolvers.push(resolve);
         }),
     );
 
@@ -244,9 +259,11 @@ describe('SessionsFacade — participants', () => {
     expect(facade.isParticipantsLoading()).toBe(true);
     expect(facade.sessionParticipants()).toBeNull();
 
-    // Now resolve the slow user fetch.
-    resolveUsers(new Map());
-    await detailPromise;
+    // Now resolve the slow user fetch
+    resolvers.forEach(r => r(null));
+    await vi.waitFor(() => {
+      expect(facade.isParticipantsLoading()).toBe(false);
+    });
 
     expect(facade.isParticipantsLoading()).toBe(false);
     expect(facade.sessionParticipants()).not.toBeNull();
@@ -255,6 +272,9 @@ describe('SessionsFacade — participants', () => {
   it('missing call tracking does not block session detail', async () => {
     // callSummaryUseCase already returns null in beforeEach — verify detail renders.
     await facade.loadDetail('booking-1');
+    await vi.waitFor(() => {
+      expect(facade.isParticipantsLoading()).toBe(false);
+    });
 
     expect(facade.detailLoadState()).toBe('success');
     expect(facade.detail()).not.toBeNull();

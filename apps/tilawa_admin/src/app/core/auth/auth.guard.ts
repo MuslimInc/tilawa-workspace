@@ -51,9 +51,7 @@ export const guestGuard: CanActivateFn = () => {
 
       return from(user.getIdTokenResult()).pipe(
         map((token) =>
-          token.claims['admin'] === true
-            ? router.createUrlTree(['/dashboard'])
-            : true,
+          token.claims['admin'] === true ? router.createUrlTree(['/dashboard']) : true,
         ),
       );
     }),

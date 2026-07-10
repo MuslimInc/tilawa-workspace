@@ -29,5 +29,19 @@ void main() {
 
       check(callType).equals(SessionCallType.externalMeeting);
     });
+
+    test('videoOnly enables video and defaults to video call type', () {
+      const policy = SessionModePolicy.videoOnly;
+
+      check(policy.isEnabled(SessionCallType.videoCall)).isTrue();
+      check(policy.isEnabled(SessionCallType.voiceCall)).isFalse();
+      check(policy.isEnabled(SessionCallType.externalMeeting)).isFalse();
+      check(
+        SessionModePolicy.defaultCallType(
+          policy: policy,
+          externalMeetingUrl: 'https://meet.example.com/room',
+        ),
+      ).equals(SessionCallType.videoCall);
+    });
   });
 }

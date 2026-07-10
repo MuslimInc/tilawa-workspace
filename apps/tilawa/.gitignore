@@ -46,6 +46,9 @@ android/key.properties
 android/app/*.jks
 android/app/*.keystore
 
+# Local staging video QA overrides (Agora App ID — never commit)
+env/staging.video.local.json
+
 # generated files
 *.g.dart
 *.mocks.dart

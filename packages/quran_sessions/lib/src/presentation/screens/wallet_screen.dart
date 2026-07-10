@@ -44,102 +44,103 @@ class _WalletScreenState extends State<WalletScreen> {
               WalletLoadRequested(userId: widget.userId),
             ),
           ),
-          WalletSuccess(:final wallet, :final transactions) => RefreshIndicator(
-            onRefresh: () async {
-              context.read<WalletBloc>().add(
-                WalletLoadRequested(userId: widget.userId),
-              );
-              await context.read<WalletBloc>().stream.firstWhere(
-                (value) => value is! WalletLoading,
-              );
-            },
-            child: ListView(
-              padding: EdgeInsets.all(tokens.spaceLarge),
-              children: [
-                TilawaFeedbackStrip(
-                  icon: Icons.science_outlined,
-                  message: l10n.walletSandboxNotice,
-                  backgroundColor: scheme.primaryContainer,
-                  foregroundColor: scheme.onPrimaryContainer,
-                  variant: TilawaFeedbackVariant.info,
-                ),
-                SizedBox(height: tokens.spaceMedium),
-                if (wallet?.isFrozen == true)
-                  Padding(
-                    padding: EdgeInsets.only(bottom: tokens.spaceMedium),
-                    child: TilawaFeedbackStrip(
-                      icon: Icons.warning_amber_rounded,
-                      message: l10n.walletFrozenMessage,
-                      backgroundColor: scheme.warning.withValues(
-                        alpha: tokens.opacitySubtle,
-                      ),
-                      foregroundColor: scheme.warning,
-                      variant: TilawaFeedbackVariant.warning,
-                    ),
+          WalletSuccess(:final wallet, :final transactions) =>
+            TilawaRefreshIndicator(
+              onRefresh: () async {
+                context.read<WalletBloc>().add(
+                  WalletLoadRequested(userId: widget.userId),
+                );
+                await context.read<WalletBloc>().stream.firstWhere(
+                  (value) => value is! WalletLoading,
+                );
+              },
+              child: ListView(
+                padding: EdgeInsets.all(tokens.spaceLarge),
+                children: [
+                  TilawaFeedbackStrip(
+                    icon: Icons.science_outlined,
+                    message: l10n.walletSandboxNotice,
+                    backgroundColor: scheme.primaryContainer,
+                    foregroundColor: scheme.onPrimaryContainer,
+                    variant: TilawaFeedbackVariant.info,
                   ),
-                TilawaCard(
-                  child: Padding(
-                    padding: EdgeInsets.all(tokens.spaceLarge),
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Text(
-                          l10n.walletAvailableBalanceLabel,
-                          style: theme.textTheme.labelLarge,
+                  SizedBox(height: tokens.spaceMedium),
+                  if (wallet?.isFrozen == true)
+                    Padding(
+                      padding: EdgeInsets.only(bottom: tokens.spaceMedium),
+                      child: TilawaFeedbackStrip(
+                        icon: Icons.warning_amber_rounded,
+                        message: l10n.walletFrozenMessage,
+                        backgroundColor: scheme.warning.withValues(
+                          alpha: tokens.opacitySubtle,
                         ),
-                        SizedBox(height: tokens.spaceSmall),
-                        Text(
-                          _formatBalance(
-                            wallet?.availableBalance ?? 0,
-                            wallet?.currency ?? 'EGP',
+                        foregroundColor: scheme.warning,
+                        variant: TilawaFeedbackVariant.warning,
+                      ),
+                    ),
+                  TilawaCard(
+                    child: Padding(
+                      padding: EdgeInsets.all(tokens.spaceLarge),
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text(
+                            l10n.walletAvailableBalanceLabel,
+                            style: theme.textTheme.labelLarge,
                           ),
-                          style: theme.textTheme.headlineMedium,
-                        ),
-                        if ((wallet?.heldBalance ?? 0) > 0) ...[
                           SizedBox(height: tokens.spaceSmall),
                           Text(
-                            l10n.walletHeldBalanceLabel(
-                              _formatBalance(
-                                wallet!.heldBalance,
-                                wallet.currency,
-                              ),
+                            _formatBalance(
+                              wallet?.availableBalance ?? 0,
+                              wallet?.currency ?? 'EGP',
                             ),
-                            style: theme.textTheme.bodySmall,
+                            style: theme.textTheme.headlineMedium,
                           ),
+                          if ((wallet?.heldBalance ?? 0) > 0) ...[
+                            SizedBox(height: tokens.spaceSmall),
+                            Text(
+                              l10n.walletHeldBalanceLabel(
+                                _formatBalance(
+                                  wallet!.heldBalance,
+                                  wallet.currency,
+                                ),
+                              ),
+                              style: theme.textTheme.bodySmall,
+                            ),
+                          ],
                         ],
-                      ],
-                    ),
-                  ),
-                ),
-                SizedBox(height: tokens.spaceLarge),
-                Text(
-                  l10n.walletTransactionsTitle,
-                  style: theme.textTheme.titleMedium,
-                ),
-                SizedBox(height: tokens.spaceSmall),
-                if (transactions.isEmpty)
-                  Padding(
-                    padding: EdgeInsets.symmetric(
-                      vertical: tokens.spaceExtraLarge,
-                    ),
-                    child: Center(
-                      child: Text(
-                        l10n.walletEmptyState,
-                        textAlign: TextAlign.center,
-                        style: theme.textTheme.bodyMedium,
                       ),
                     ),
-                  )
-                else
-                  ...transactions.map(
-                    (txn) => Padding(
-                      padding: EdgeInsets.only(bottom: tokens.spaceSmall),
-                      child: _WalletTransactionTile(transaction: txn),
-                    ),
                   ),
-              ],
+                  SizedBox(height: tokens.spaceLarge),
+                  Text(
+                    l10n.walletTransactionsTitle,
+                    style: theme.textTheme.titleMedium,
+                  ),
+                  SizedBox(height: tokens.spaceSmall),
+                  if (transactions.isEmpty)
+                    Padding(
+                      padding: EdgeInsets.symmetric(
+                        vertical: tokens.spaceExtraLarge,
+                      ),
+                      child: Center(
+                        child: Text(
+                          l10n.walletEmptyState,
+                          textAlign: TextAlign.center,
+                          style: theme.textTheme.bodyMedium,
+                        ),
+                      ),
+                    )
+                  else
+                    ...transactions.map(
+                      (txn) => Padding(
+                        padding: EdgeInsets.only(bottom: tokens.spaceSmall),
+                        child: _WalletTransactionTile(transaction: txn),
+                      ),
+                    ),
+                ],
+              ),
             ),
-          ),
         },
       ),
     );

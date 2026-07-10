@@ -187,6 +187,9 @@ void main() {
       () => mockNotificationPermission.requestPermissionIfNecessary(),
     ).thenAnswer((_) async {});
     when(
+      () => mockNotificationPermission.isPermissionGranted(),
+    ).thenAnswer((_) async => true);
+    when(
       () => mockNotificationsRepo.requestPermission(),
     ).thenAnswer((_) async {});
     when(() => mockNotificationsRepo.getToken()).thenAnswer((_) async {
@@ -281,6 +284,28 @@ void main() {
         () => mockNotificationPermission.requestPermissionIfNecessary(),
       ).called(1);
     });
+
+    test(
+      'requestNotificationPermission refreshes prayer notifications after grant',
+      () async {
+        await requestNotificationPermission();
+
+        verify(() => mockPrayerNotificationService.initialize()).called(1);
+      },
+    );
+
+    test(
+      'requestNotificationPermission skips prayer refresh when permission denied',
+      () async {
+        when(
+          () => mockNotificationPermission.isPermissionGranted(),
+        ).thenAnswer((_) async => false);
+
+        await requestNotificationPermission();
+
+        verifyNever(() => mockPrayerNotificationService.initialize());
+      },
+    );
 
     test('requestNotificationPermission failure', () async {
       when(

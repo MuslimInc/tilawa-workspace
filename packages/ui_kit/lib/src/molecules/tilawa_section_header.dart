@@ -73,8 +73,8 @@ class TilawaSectionHeader extends StatelessWidget {
           theme.textTheme,
           groupTokens.groupTitleTextRole,
         ).copyWith(
-          fontWeight: FontWeight.w600,
-          height: 1.3,
+          fontWeight: FontWeight.w800,
+          height: 1.15,
           color: colorScheme.onSurface,
           letterSpacing: groupTokens.groupTitleLetterSpacing,
         );
@@ -103,6 +103,7 @@ class TilawaSectionHeader extends StatelessWidget {
                       header: true,
                       child: Row(
                         mainAxisSize: MainAxisSize.min,
+                        spacing: tokens.spaceSmall,
                         children: [
                           if (leadingIcon != null) ...[
                             Icon(
@@ -110,7 +111,6 @@ class TilawaSectionHeader extends StatelessWidget {
                               size: tokens.iconSizeSmall,
                               color: colorScheme.onSurface,
                             ),
-                            SizedBox(width: tokens.spaceSmall),
                           ],
                           Flexible(
                             child: Text(

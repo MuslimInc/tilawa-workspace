@@ -6,7 +6,9 @@
              launch drawable/background used before Android 12 and during the
              Flutter handoff window. -->
         <item name="windowSplashScreenBackground">@color/launch_background</item>
-        <!-- Logo is drawn in Flutter at splash_logo_size; avoid a second OS-scaled icon. -->
+        <!-- Logo is drawn by Flutter after the first launch frame is ready;
+             keep the native Android 12 icon transparent to avoid OS scaling
+             the launcher/adaptive icon into a full splash circle. -->
         <item name="windowSplashScreenAnimatedIcon">@drawable/transparent_splash_icon</item>
         <item name="postSplashScreenTheme">@style/NormalTheme</item>
     </style>

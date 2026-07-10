@@ -30,13 +30,15 @@
   width: 2rem;
   height: 2rem;
   border-radius: var(--tilawa-radius-sm);
-  background-color: var(--tilawa-primary);
+  background-color: transparent;
   color: var(--tilawa-on-primary);
+  overflow: hidden;
 }
 
-.tilawa-sidebar-logo svg {
-  width: 1.25rem;
-  height: 1.25rem;
+.tilawa-sidebar-logo img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
 }
 
 .tilawa-sidebar-title {
@@ -53,10 +55,8 @@
 
 .tilawa-sidebar-section {
   margin: 0 0.5rem 0.5rem;
-  font-size: 0.6875rem;
-  font-weight: 600;
-  letter-spacing: 0.06em;
-  text-transform: uppercase;
+  font-size: 1rem;
+  font-weight: 700;
   color: var(--tilawa-sidebar-muted);
 }
 
@@ -108,10 +108,8 @@
   padding: 0.5rem 0.75rem;
   border: none;
   background: none;
-  font-size: 0.6875rem;
-  font-weight: 600;
-  letter-spacing: 0.06em;
-  text-transform: uppercase;
+  font-size: 1rem;
+  font-weight: 700;
   color: var(--tilawa-sidebar-muted);
   cursor: pointer;
 }

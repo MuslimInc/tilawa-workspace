@@ -54,8 +54,7 @@ export class CallTrackingMapper {
       teacherNoShow: dto.teacherNoShow ?? false,
       studentNoShow: dto.studentNoShow ?? false,
       noShowWindowMinutes: dto.noShowWindowMinutes ?? 0,
-      bothParticipantsConnectedSeconds:
-        dto.bothParticipantsConnectedSeconds ?? 0,
+      bothParticipantsConnectedSeconds: dto.bothParticipantsConnectedSeconds ?? 0,
       reconnectCount: dto.reconnectCount ?? 0,
       interruptionCount: dto.interruptionCount ?? 0,
       updatedAt: readTimestamp(dto.updatedAt),

@@ -6,10 +6,19 @@ import {
   resolveQuranTutorBookingMode,
 } from "../../src/quranSessions/quranTutorBookingMode";
 
-test("defaults staging/local to autoConfirm", () => {
+test("defaults all distributions to requiresTutorApproval", () => {
   const prev = process.env.TILAWA_DISTRIBUTION;
   process.env.TILAWA_DISTRIBUTION = "staging";
-  assert.equal(distributionDefaultBookingMode(), "autoConfirm");
+  assert.equal(distributionDefaultBookingMode(), "requiresTutorApproval");
+  process.env.TILAWA_DISTRIBUTION = "play_production";
+  assert.equal(distributionDefaultBookingMode(), "requiresTutorApproval");
+  process.env.TILAWA_DISTRIBUTION = prev;
+});
+
+test("defaults local to requiresTutorApproval", () => {
+  const prev = process.env.TILAWA_DISTRIBUTION;
+  process.env.TILAWA_DISTRIBUTION = "local";
+  assert.equal(distributionDefaultBookingMode(), "requiresTutorApproval");
   process.env.TILAWA_DISTRIBUTION = prev;
 });
 
@@ -22,7 +31,18 @@ test("defaults play_production to requiresTutorApproval", () => {
 
 test("reads valid Firestore config", () => {
   assert.equal(
+    resolveQuranTutorBookingMode({ bookingMode: "autoConfirm" }),
+    "autoConfirm",
+  );
+});
+
+test("reads legacy Firestore aliases", () => {
+  assert.equal(
     resolveQuranTutorBookingMode({ quranTutorBookingMode: "autoConfirm" }),
+    "autoConfirm",
+  );
+  assert.equal(
+    resolveQuranTutorBookingMode({ defaultBookingMode: "autoConfirm" }),
     "autoConfirm",
   );
 });
@@ -32,7 +52,7 @@ test("falls back when config invalid", () => {
   process.env.TILAWA_DISTRIBUTION = "staging";
   assert.equal(
     resolveQuranTutorBookingMode({ quranTutorBookingMode: "bogus" }),
-    "autoConfirm",
+    "requiresTutorApproval",
   );
   process.env.TILAWA_DISTRIBUTION = prev;
 });

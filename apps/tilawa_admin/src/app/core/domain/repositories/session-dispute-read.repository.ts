@@ -15,7 +15,6 @@ export interface SessionDisputeReadRepository {
   getById(disputeId: string): Promise<SessionDisputeSummary | null>;
 }
 
-export const SESSION_DISPUTE_READ_REPOSITORY =
-  new InjectionToken<SessionDisputeReadRepository>(
-    'SessionDisputeReadRepository',
-  );
+export const SESSION_DISPUTE_READ_REPOSITORY = new InjectionToken<SessionDisputeReadRepository>(
+  'SessionDisputeReadRepository',
+);

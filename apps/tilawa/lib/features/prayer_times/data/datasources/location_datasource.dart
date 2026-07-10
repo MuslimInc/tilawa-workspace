@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'dart:ui';
 
 import 'package:geocoding/geocoding.dart';
 import 'package:geolocator/geolocator.dart';
@@ -109,11 +110,13 @@ class LocationDataSourceImpl implements LocationDataSource {
     String? localeIdentifier,
   }) async {
     try {
-      await _applyGeocodingLocale(localeIdentifier);
-      final List<Placemark> placemarks = await placemarkFromCoordinates(
-        latitude,
-        longitude,
-      ).timeout(_geocodingTimeout);
+      final geocoding = _getGeocoding(localeIdentifier);
+      final List<Placemark> placemarks = await geocoding
+          .placemarkFromCoordinates(
+            latitude,
+            longitude,
+          )
+          .timeout(_geocodingTimeout);
 
       return _locationNameFromPlacemarks(
         placemarks,
@@ -127,10 +130,13 @@ class LocationDataSourceImpl implements LocationDataSource {
   @override
   Future<String?> getCountryCode(double latitude, double longitude) async {
     try {
-      final List<Placemark> placemarks = await placemarkFromCoordinates(
-        latitude,
-        longitude,
-      ).timeout(_geocodingTimeout);
+      final geocoding = _getGeocoding();
+      final List<Placemark> placemarks = await geocoding
+          .placemarkFromCoordinates(
+            latitude,
+            longitude,
+          )
+          .timeout(_geocodingTimeout);
 
       if (placemarks.isNotEmpty) {
         final code = placemarks.first.isoCountryCode;
@@ -204,11 +210,13 @@ class LocationDataSourceImpl implements LocationDataSource {
     String? countryCode;
 
     try {
-      await _applyGeocodingLocale(localeIdentifier);
-      final List<Placemark> placemarks = await placemarkFromCoordinates(
-        position.latitude,
-        position.longitude,
-      ).timeout(_geocodingTimeout);
+      final geocoding = _getGeocoding(localeIdentifier);
+      final List<Placemark> placemarks = await geocoding
+          .placemarkFromCoordinates(
+            position.latitude,
+            position.longitude,
+          )
+          .timeout(_geocodingTimeout);
 
       if (placemarks.isNotEmpty) {
         locationName = _locationNameFromPlacemarks(
@@ -283,11 +291,11 @@ class LocationDataSourceImpl implements LocationDataSource {
     return null;
   }
 
-  Future<void> _applyGeocodingLocale(String? localeIdentifier) async {
-    if (localeIdentifier == null || localeIdentifier.isEmpty) {
-      return;
+  Geocoding _getGeocoding([String? localeIdentifier]) {
+    if (localeIdentifier != null && localeIdentifier.isNotEmpty) {
+      return Geocoding(locale: Locale(localeIdentifier));
     }
-    await setLocaleIdentifier(localeIdentifier);
+    return Geocoding();
   }
 
   String? _locationNameFromPlacemarks(

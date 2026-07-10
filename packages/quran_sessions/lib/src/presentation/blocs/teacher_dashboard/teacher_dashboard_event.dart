@@ -148,3 +148,26 @@ final class TeacherBookingRequestRejected extends TeacherDashboardEvent {
   @override
   List<Object?> get props => [bookingId, reason];
 }
+
+/// Teacher joins an upcoming session from the dashboard list.
+final class TeacherDashboardSessionJoinRequested extends TeacherDashboardEvent {
+  const TeacherDashboardSessionJoinRequested({
+    required this.sessionId,
+    this.forceTakeover = false,
+  });
+
+  final String sessionId;
+
+  /// ADR-008 Phase 2: true when retrying after a "Switch to this device"
+  /// prompt (the live lock denied a second device).
+  final bool forceTakeover;
+
+  @override
+  List<Object?> get props => [sessionId, forceTakeover];
+}
+
+/// Clears [TeacherDashboardSuccess.joinCompletedSessionId] after navigation.
+final class TeacherDashboardJoinCompletedAcknowledged
+    extends TeacherDashboardEvent {
+  const TeacherDashboardJoinCompletedAcknowledged();
+}

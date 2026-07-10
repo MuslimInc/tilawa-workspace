@@ -150,30 +150,6 @@ class _QuranSurahScreenState extends State<QuranSurahScreen> {
 
     return Scaffold(
       appBar: TilawaCatalogAppBar(
-        preferredHeight: TilawaCatalogAppBar.resolvePreferredHeight(
-          context,
-          title: context.l10n.quranHubTitle,
-          automaticallyImplyLeading: true,
-          actions: [
-            TilawaIconActionButton(
-              icon: Icons.tune_rounded,
-              tooltip: context.l10n.readerSettings,
-              onTap: _openReaderSettings,
-            ),
-            QuranReaderViewToggle(
-              currentMode: QuranReaderViewMode.ayahList,
-              onPressed: _switchToMushaf,
-            ),
-          ],
-          titleBlockHeight: tilawaMeasureTextHeight(
-            context: context,
-            style: theme.textTheme.titleMedium?.copyWith(
-              fontWeight: FontWeight.w700,
-              letterSpacing: 1.2,
-            ),
-            text: context.l10n.quranHubTitle,
-          ),
-        ),
         centerTitle: false,
         automaticallyImplyLeading: true,
         titleWidget: Text(

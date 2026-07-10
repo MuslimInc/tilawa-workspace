@@ -32,6 +32,7 @@ import 'features/localization/presentation/bloc/localization_bloc.dart';
 import 'features/prayer_times/domain/entities/entities.dart';
 import 'features/prayer_times/domain/usecases/load_prayer_settings_use_case.dart';
 import 'features/prayer_times/domain/usecases/schedule_prayer_notifications_use_case.dart';
+import 'features/quran_sessions/quran_sessions_platform_config_store.dart';
 import 'features/theme/domain/entities/app_theme_preset.dart';
 import 'features/theme/presentation/cubit/theme_cubit.dart';
 import 'features/theme/presentation/theme_state_material.dart';
@@ -243,6 +244,9 @@ class _PlayerApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     PerfLogger.markBuild('PlayerAppMaterialRoot');
+    if (getIt.isRegistered<QuranSessionsPlatformConfigStore>()) {
+      context.watch<QuranSessionsPlatformConfigStore>();
+    }
     return BlocListener<LocalizationBloc, LocalizationState>(
       listener: (context, state) {
         // Update download notification locale when app locale changes

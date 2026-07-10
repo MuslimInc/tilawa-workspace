@@ -117,13 +117,28 @@ test("resolveActorRole returns teacher for booking teacher", () => {
   );
 });
 
-test("resolveActorRole returns admin for admin callers", () => {
+test("resolveActorRole returns admin for admin callers who are not participants", () => {
   assert.equal(
     resolveActorRole(authRequest("admin_1", { admin: true }), "admin", {
       studentId: "student_1",
       teacherId: "teacher_1",
     }),
     "admin",
+  );
+});
+
+test("resolveActorRole returns teacher when admin caller is the assigned teacher", () => {
+  assert.equal(
+    resolveActorRole(
+      authRequest("auth_teacher_uid", { admin: true }),
+      "teacher",
+      {
+        studentId: "student_1",
+        teacherId: "profile_doc_id",
+      },
+      "auth_teacher_uid",
+    ),
+    "teacher",
   );
 });
 
@@ -188,7 +203,7 @@ test("requireParticipantOrAdmin returns teacher actor", () => {
   assert.deepEqual(result, { uid: "teacher_1", actor: "teacher" });
 });
 
-test("requireParticipantOrAdmin returns admin actor", () => {
+test("requireParticipantOrAdmin returns admin actor for non-participant admin", () => {
   const result = requireParticipantOrAdmin(
     authRequest("admin_1", { admin: true }),
     {
@@ -198,6 +213,19 @@ test("requireParticipantOrAdmin returns admin actor", () => {
   );
 
   assert.deepEqual(result, { uid: "admin_1", actor: "admin" });
+});
+
+test("requireParticipantOrAdmin returns teacher when admin is assigned teacher", () => {
+  const result = requireParticipantOrAdmin(
+    authRequest("auth_teacher_uid", { admin: true }),
+    {
+      studentId: "student_1",
+      teacherId: "profile_doc_id",
+    },
+    "auth_teacher_uid",
+  );
+
+  assert.deepEqual(result, { uid: "auth_teacher_uid", actor: "teacher" });
 });
 
 test("requireAdminOrSystemActor rejects claimed system actor", () => {

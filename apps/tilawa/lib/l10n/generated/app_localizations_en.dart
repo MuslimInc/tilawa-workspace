@@ -1205,6 +1205,20 @@ class AppLocalizationsEn extends AppLocalizations {
   String get googleSignInUpdatePlayServices => 'Update Google Play Services';
 
   @override
+  String get googleSignInTimeout => 'Sign-in timed out. Please try again.';
+
+  @override
+  String get googleSignInTimeoutUiHidden =>
+      'Sign-in timed out. If the account picker did not appear, go back and try again, or use the options below.';
+
+  @override
+  String get googleSignInUserMismatch =>
+      'This Google account does not match the signed-in account. Please try again.';
+
+  @override
+  String get googleSignInCancelled => 'Sign-in cancelled.';
+
+  @override
   String get networkError => 'Please check your internet connection';
 
   @override
@@ -1214,6 +1228,167 @@ class AppLocalizationsEn extends AppLocalizations {
   @override
   String get authErrorGenericMessage =>
       'Something went wrong. Please try again.';
+
+  @override
+  String get signInWithEmailDescription =>
+      'Sign in with your email and password';
+
+  @override
+  String get createAccountDescription =>
+      'Create an account with email and password';
+
+  @override
+  String get emailAddress => 'Email address';
+
+  @override
+  String get password => 'Password';
+
+  @override
+  String get confirmPassword => 'Confirm password';
+
+  @override
+  String get signInWithEmail => 'Sign in with email';
+
+  @override
+  String get createAccount => 'Create account';
+
+  @override
+  String registrationStepProgress(int current, int total, String title) {
+    return 'Step $current of $total: $title';
+  }
+
+  @override
+  String get registrationStepAccountTitle => 'Account';
+
+  @override
+  String get registrationStepAccountDescription =>
+      'Choose your email and password';
+
+  @override
+  String get registrationStepPersonalTitle => 'Personal details';
+
+  @override
+  String get registrationStepPersonalDescription => 'Tell us about yourself';
+
+  @override
+  String get registrationStepLearningTitle => 'Quran learning';
+
+  @override
+  String get registrationStepLearningDescription =>
+      'What would you like to learn?';
+
+  @override
+  String get registrationStepReviewTitle => 'Review';
+
+  @override
+  String get registrationStepReviewDescription =>
+      'Review your details, then create your account';
+
+  @override
+  String get registrationPreferredLanguageLabel => 'Preferred app language';
+
+  @override
+  String get registrationDisplayNameRequired => 'Enter your full name';
+
+  @override
+  String get registrationGenderRequired => 'Select your gender';
+
+  @override
+  String get registrationDateOfBirthRequired => 'Select your date of birth';
+
+  @override
+  String get registrationCountryRequired => 'Select your country';
+
+  @override
+  String get registrationCityRequired => 'Select your city';
+
+  @override
+  String get registrationPreferredLanguageRequired =>
+      'Select your preferred language';
+
+  @override
+  String get registrationLearningGoalsRequired =>
+      'Select at least one learning goal';
+
+  @override
+  String get registrationProfilePersistenceFailed =>
+      'Account created but saving your profile failed. Tap retry or complete your profile after sign-in.';
+
+  @override
+  String get registrationRetryProfileSave => 'Retry saving profile';
+
+  @override
+  String get forgotPassword => 'Forgot password?';
+
+  @override
+  String get forgotPasswordDescription =>
+      'Enter your email and we will send a reset link';
+
+  @override
+  String get sendResetLink => 'Send reset link';
+
+  @override
+  String get orContinueWith => 'Or continue with';
+
+  @override
+  String get alreadyHaveAccount => 'Already have an account? Sign in';
+
+  @override
+  String get noAccountYet => 'No account yet? Create one';
+
+  @override
+  String get authInvalidEmail => 'Enter a valid email address';
+
+  @override
+  String get authWeakPassword => 'Password must be at least 6 characters';
+
+  @override
+  String get authPasswordsDoNotMatch => 'Passwords do not match';
+
+  @override
+  String get authUserNotFound => 'No account found for this email';
+
+  @override
+  String get authWrongPassword => 'Incorrect password';
+
+  @override
+  String get authEmailAlreadyInUse =>
+      'An account already exists with this email. Sign in instead.';
+
+  @override
+  String get authEmailAlreadyInUseWithGoogle =>
+      'This email is registered with Google. Sign in with Google instead.';
+
+  @override
+  String get authAccountExistsWithDifferentCredential =>
+      'This email uses a different sign-in method. Use the original method.';
+
+  @override
+  String get authAccountExistsUseEmailPassword =>
+      'This email is registered with a password. Sign in with email instead.';
+
+  @override
+  String get authTooManyRequests =>
+      'Too many attempts. Please wait and try again.';
+
+  @override
+  String get authOperationNotAllowed =>
+      'Email sign-in is not enabled. Contact support.';
+
+  @override
+  String get authUserDisabled =>
+      'This account has been disabled. Contact support.';
+
+  @override
+  String get authInvalidCredential => 'Invalid email or password';
+
+  @override
+  String get authResetEmailSent =>
+      'If an account exists, a reset link was sent to your email.';
+
+  @override
+  String get completeProfilePrompt =>
+      'Complete your profile to book Quran sessions';
 
   @override
   String get downloadLowStorageWarning =>
@@ -3277,6 +3452,32 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get tourDebugResetDone => 'Product tours reset';
+
+  @override
+  String get adhanDebugTestTitle => 'Test Adhan in 10 seconds';
+
+  @override
+  String get adhanDebugTestSubtitle =>
+      'Requests notification permission, then schedules the native Adhan alarm.';
+
+  @override
+  String get adhanDebugScheduled =>
+      'Adhan test scheduled for 10 seconds from now';
+
+  @override
+  String get adhanDebugNativeInexactScheduled =>
+      'Native Adhan test scheduled with inexact timing. Enable Alarms & reminders for exact timing.';
+
+  @override
+  String get adhanDebugFallbackScheduled =>
+      'Fallback Adhan test scheduled. Enable Alarms & reminders for native playback.';
+
+  @override
+  String get adhanDebugPermissionMissing =>
+      'Notification permission is required before scheduling the Adhan test';
+
+  @override
+  String get adhanDebugFailed => 'Could not schedule Adhan test';
 
   @override
   String get notificationDebugLabTitle => 'Notification Debug Lab';

@@ -94,6 +94,55 @@ describe('TeacherProfileMapper', () => {
       'specializations',
     ]);
   });
+
+  it('reads an enabled price override (amount 0 = free)', () => {
+    const entity = TeacherProfileMapper.fromFirestore('teacher-3', {
+      userId: 'user-3',
+      displayName: 'Free Teacher',
+      verificationStatus: 'verified',
+      isActive: true,
+      sessionPriceOverride: { enabled: true, amount: 0 },
+    });
+    expect(entity.sessionPriceOverride).toEqual({
+      enabled: true,
+      amount: 0,
+      currencyCode: null,
+    });
+  });
+
+  it('reads a fixed price override with currency', () => {
+    const entity = TeacherProfileMapper.fromFirestore('teacher-4', {
+      userId: 'user-4',
+      displayName: 'Paid Teacher',
+      verificationStatus: 'verified',
+      isActive: true,
+      sessionPriceOverride: { enabled: true, amount: 40, currencyCode: 'EGP' },
+    });
+    expect(entity.sessionPriceOverride).toEqual({
+      enabled: true,
+      amount: 40,
+      currencyCode: 'EGP',
+    });
+  });
+
+  it('treats a disabled or absent override as inherit (null)', () => {
+    const disabled = TeacherProfileMapper.fromFirestore('teacher-5', {
+      userId: 'user-5',
+      displayName: 'Teacher',
+      verificationStatus: 'verified',
+      isActive: true,
+      sessionPriceOverride: { enabled: false, amount: 10 },
+    });
+    expect(disabled.sessionPriceOverride).toBeNull();
+
+    const absent = TeacherProfileMapper.fromFirestore('teacher-6', {
+      userId: 'user-6',
+      displayName: 'Teacher',
+      verificationStatus: 'verified',
+      isActive: true,
+    });
+    expect(absent.sessionPriceOverride).toBeNull();
+  });
 });
 
 describe('computeProfileCompleteness', () => {

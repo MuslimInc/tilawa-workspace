@@ -11,8 +11,10 @@ import '../../domain/repositories/notifications_repository.dart';
 import '../../presentation/services/fcm_notification_handler_service.dart';
 import '../../../settings/domain/services/teacher_capability_refresh_notifier.dart';
 import '../../../auth/domain/services/session_revoked_notifier.dart';
+import '../../../quran_sessions/domain/services/session_taken_over_notifier.dart';
 import '../datasources/notifications_remote_data_source.dart';
 import '../fcm_session_revoked_message.dart';
+import '../fcm_session_taken_over_message.dart';
 
 @LazySingleton(as: NotificationsRepository)
 class NotificationsRepositoryImpl implements NotificationsRepository {
@@ -23,6 +25,7 @@ class NotificationsRepositoryImpl implements NotificationsRepository {
     this._logger,
     this._teacherCapabilityRefreshNotifier,
     this._sessionRevokedNotifier,
+    this._sessionTakenOverNotifier,
   );
 
   final NotificationsRemoteDataSource _remoteDataSource;
@@ -31,6 +34,7 @@ class NotificationsRepositoryImpl implements NotificationsRepository {
   final Logger _logger;
   final TeacherCapabilityRefreshNotifier _teacherCapabilityRefreshNotifier;
   final SessionRevokedNotifier _sessionRevokedNotifier;
+  final SessionTakenOverNotifier _sessionTakenOverNotifier;
   bool _listenersInitialized = false;
 
   @override
@@ -107,6 +111,12 @@ class NotificationsRepositoryImpl implements NotificationsRepository {
     }
     if (isSessionRevokedFcmMessage(message.data)) {
       _sessionRevokedNotifier.notifySessionRevoked();
+    }
+    if (isSessionTakenOverFcmMessage(message.data)) {
+      final sessionId = sessionTakenOverSessionId(message.data);
+      if (sessionId != null) {
+        _sessionTakenOverNotifier.notifySessionTakenOver(sessionId);
+      }
     }
     _handler.showForegroundNotification(message);
   }

@@ -22,6 +22,13 @@ class MapBackedSharedPreferencesAsync {
     when(() => mock.getBool(any())).thenAnswer((invocation) async {
       return store[invocation.positionalArguments[0] as String] as bool?;
     });
+    when(() => mock.setString(any(), any())).thenAnswer((invocation) async {
+      store[invocation.positionalArguments[0] as String] =
+          invocation.positionalArguments[1] as String;
+    });
+    when(() => mock.getString(any())).thenAnswer((invocation) async {
+      return store[invocation.positionalArguments[0] as String] as String?;
+    });
     when(() => mock.remove(any())).thenAnswer((invocation) async {
       store.remove(invocation.positionalArguments[0] as String);
     });

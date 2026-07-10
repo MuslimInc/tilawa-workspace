@@ -5,7 +5,6 @@ import 'package:tilawa_ui_kit/tilawa_ui_kit.dart';
 
 import '../boundaries/call/livekit_room_pool.dart';
 import 'agora_call_surface.dart';
-import 'package:quran_sessions_rtc/quran_sessions_rtc.dart';
 
 enum _LiveKitCallConnectionPhase {
   connecting,
@@ -21,14 +20,12 @@ class LiveKitCallSurface extends StatefulWidget {
     required this.sessionId,
     required this.callType,
     required this.roomPool,
-    required this.labels,
     this.eventHub,
   });
 
   final String sessionId;
   final SessionCallType callType;
   final LiveKitRoomPool roomPool;
-  final AgoraCallSurfaceLabels labels;
   final SessionCallProviderEventHub? eventHub;
 
   @override
@@ -158,7 +155,12 @@ class _LiveKitCallSurfaceState extends State<LiveKitCallSurface> {
       return;
     }
     _syncRemoteParticipant(room);
-    _localVideoReady = _hasRenderableLocalVideo(room);
+    final localReady = _hasRenderableLocalVideo(room);
+    if (localReady != _localVideoReady) {
+      setState(() {
+        _localVideoReady = localReady;
+      });
+    }
   }
 
   void _syncRemoteParticipant(Room room) {
@@ -290,12 +292,8 @@ class _LiveKitCallSurfaceState extends State<LiveKitCallSurface> {
           _reportConnectionPhase();
         }
       });
-      return SizedBox.expand(
-        child: _LiveKitStatusPanel(
-          icon: Icons.sync,
-          message: widget.labels.connecting,
-          showSpinner: true,
-        ),
+      return const SizedBox.expand(
+        child: _LiveKitStatusPanel(showSpinner: true),
       );
     }
 
@@ -306,14 +304,14 @@ class _LiveKitCallSurfaceState extends State<LiveKitCallSurface> {
           SessionCallType.videoCall => _LiveKitVideoLayout(
             room: room,
             phase: _phase,
+            hasRemoteParticipant: _remoteParticipantId != null,
             remoteVideoReady: _remoteVideoReady,
             localVideoReady: _localVideoReady,
             remoteVideoTrack: _remoteVideoTrack(room),
             localVideoTrack: _localVideoTrack(room),
-            labels: widget.labels,
           ),
-          SessionCallType.voiceCall || SessionCallType.externalMeeting =>
-            _LiveKitVoiceLayout(phase: _phase, labels: widget.labels),
+          SessionCallType.voiceCall ||
+          SessionCallType.externalMeeting => _LiveKitVoiceLayout(phase: _phase),
         },
       ),
     );
@@ -324,63 +322,54 @@ class _LiveKitVideoLayout extends StatelessWidget {
   const _LiveKitVideoLayout({
     required this.room,
     required this.phase,
+    required this.hasRemoteParticipant,
     required this.remoteVideoReady,
     required this.localVideoReady,
     required this.remoteVideoTrack,
     required this.localVideoTrack,
-    required this.labels,
   });
 
   final Room room;
   final _LiveKitCallConnectionPhase phase;
+  final bool hasRemoteParticipant;
   final bool remoteVideoReady;
   final bool localVideoReady;
   final VideoTrack? remoteVideoTrack;
   final LocalVideoTrack? localVideoTrack;
-  final AgoraCallSurfaceLabels labels;
 
   @override
   Widget build(BuildContext context) {
     final tokens = Theme.of(context).tokens;
     final colorScheme = Theme.of(context).colorScheme;
-    final showRemoteVideo = remoteVideoReady && remoteVideoTrack != null;
-    final showLocalFullscreen = localVideoReady && !showRemoteVideo;
-    final showLocalPiP = localVideoReady && showRemoteVideo;
+    final showRemoteVideo =
+        hasRemoteParticipant && remoteVideoReady && remoteVideoTrack != null;
+    final showLocalFullscreen =
+        !showRemoteVideo && localVideoTrack != null && !hasRemoteParticipant;
+    final showLocalPiP =
+        localVideoReady &&
+        hasRemoteParticipant &&
+        localVideoTrack != null &&
+        !showLocalFullscreen;
     final pipWidth = tokens.spaceXXL * 3.5;
     final pipHeight = tokens.spaceXXL * 4.625;
 
-    final (placeholderIcon, placeholderMessage) = switch (phase) {
-      _LiveKitCallConnectionPhase.connecting => (Icons.sync, labels.connecting),
-      _LiveKitCallConnectionPhase.reconnecting => (
-        Icons.wifi_off,
-        labels.connecting,
-      ),
-      _LiveKitCallConnectionPhase.waitingForParticipant => (
-        Icons.hourglass_top_outlined,
-        labels.waitingForParticipant,
-      ),
-      _LiveKitCallConnectionPhase.participantJoined when !showRemoteVideo => (
-        Icons.videocam_outlined,
-        labels.connected,
-      ),
-      _ => (Icons.person_outline, labels.connected),
-    };
+    final showConnectingPlaceholder =
+        phase == _LiveKitCallConnectionPhase.connecting ||
+        phase == _LiveKitCallConnectionPhase.reconnecting;
+    final showRemoteMutedPlaceholder =
+        hasRemoteParticipant && !showRemoteVideo && !showConnectingPlaceholder;
 
     return Stack(
       fit: StackFit.expand,
       children: [
         if (showRemoteVideo)
           VideoTrackRenderer(remoteVideoTrack!)
-        else if (showLocalFullscreen && localVideoTrack != null)
+        else if (showLocalFullscreen)
           VideoTrackRenderer(localVideoTrack!)
-        else
-          AgoraCallVideoPlaceholder(
-            icon: placeholderIcon,
-            message: placeholderMessage,
-            showSpinner:
-                phase == _LiveKitCallConnectionPhase.connecting ||
-                phase == _LiveKitCallConnectionPhase.reconnecting,
-          ),
+        else if (showConnectingPlaceholder)
+          const AgoraCallVideoPlaceholder(showSpinner: true)
+        else if (showRemoteMutedPlaceholder)
+          const AgoraCallVideoPlaceholder(icon: Icons.person_outline),
         if (showLocalPiP && localVideoTrack != null)
           PositionedDirectional(
             top: tokens.spaceMedium,
@@ -415,10 +404,9 @@ class _LiveKitVideoLayout extends StatelessWidget {
 }
 
 class _LiveKitVoiceLayout extends StatelessWidget {
-  const _LiveKitVoiceLayout({required this.phase, required this.labels});
+  const _LiveKitVoiceLayout({required this.phase});
 
   final _LiveKitCallConnectionPhase phase;
-  final AgoraCallSurfaceLabels labels;
 
   @override
   Widget build(BuildContext context) {
@@ -428,53 +416,22 @@ class _LiveKitVoiceLayout extends StatelessWidget {
     final avatarIconSize = tokens.iconSizeLargePlus;
 
     return Center(
-      child: Column(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          CircleAvatar(
-            radius: avatarRadius,
-            backgroundColor: colorScheme.primaryContainer,
-            child: Icon(
-              Icons.person_outline,
-              size: avatarIconSize,
-              color: colorScheme.onPrimaryContainer,
-            ),
-          ),
-          SizedBox(height: tokens.spaceLarge),
-          Text(
-            labels.voiceCallTitle,
-            style: Theme.of(context).textTheme.titleLarge,
-            textAlign: TextAlign.center,
-          ),
-          SizedBox(height: tokens.spaceSmall),
-          Text(
-            switch (phase) {
-              _LiveKitCallConnectionPhase.connecting => labels.connecting,
-              _LiveKitCallConnectionPhase.reconnecting => labels.connecting,
-              _LiveKitCallConnectionPhase.waitingForParticipant =>
-                labels.waitingForParticipant,
-              _LiveKitCallConnectionPhase.participantJoined => labels.connected,
-            },
-            style: Theme.of(context).textTheme.bodyLarge?.copyWith(
-              color: colorScheme.onSurfaceVariant,
-            ),
-            textAlign: TextAlign.center,
-          ),
-        ],
+      child: CircleAvatar(
+        radius: avatarRadius,
+        backgroundColor: colorScheme.primaryContainer,
+        child: Icon(
+          Icons.person_outline,
+          size: avatarIconSize,
+          color: colorScheme.onPrimaryContainer,
+        ),
       ),
     );
   }
 }
 
 class _LiveKitStatusPanel extends StatelessWidget {
-  const _LiveKitStatusPanel({
-    required this.icon,
-    required this.message,
-    this.showSpinner = false,
-  });
+  const _LiveKitStatusPanel({this.showSpinner = false});
 
-  final IconData icon;
-  final String message;
   final bool showSpinner;
 
   @override
@@ -483,25 +440,13 @@ class _LiveKitStatusPanel extends StatelessWidget {
     final colorScheme = Theme.of(context).colorScheme;
 
     return Center(
-      child: Column(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          if (showSpinner)
-            const CircularProgressIndicator()
-          else
-            Icon(
-              icon,
+      child: showSpinner
+          ? const CircularProgressIndicator()
+          : Icon(
+              Icons.sync,
               size: tokens.iconSizeExtraLarge + tokens.spaceExtraSmall,
               color: colorScheme.primary,
             ),
-          SizedBox(height: tokens.spaceMedium),
-          Text(
-            message,
-            style: Theme.of(context).textTheme.bodyLarge,
-            textAlign: TextAlign.center,
-          ),
-        ],
-      ),
     );
   }
 }
@@ -512,7 +457,6 @@ Widget? buildLiveKitCallSurface({
   required SessionCallType callType,
   required SessionCallProviderKind providerKind,
   required LiveKitRoomPool roomPool,
-  required AgoraCallSurfaceLabels labels,
   SessionCallProviderEventHub? eventHub,
 }) {
   if (providerKind != SessionCallProviderKind.livekit) {
@@ -523,7 +467,6 @@ Widget? buildLiveKitCallSurface({
     sessionId: sessionId,
     callType: callType,
     roomPool: roomPool,
-    labels: labels,
     eventHub: eventHub,
   );
 }

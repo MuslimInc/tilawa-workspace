@@ -9,9 +9,14 @@ import 'package:tilawa/features/auth/application/account_deletion_flow_tracker.d
 import 'package:tilawa/features/auth/data/services/google_sign_in_session_tracker.dart';
 import 'package:tilawa/features/auth/domain/entities/auth_error_key.dart';
 import 'package:tilawa/features/auth/domain/entities/auth_result.dart';
+import 'package:tilawa/features/auth/domain/entities/email_auth_failure_key.dart';
+import 'package:tilawa/features/auth/domain/entities/email_registration_draft.dart';
+import 'package:tilawa/features/auth/domain/entities/register_with_email_result.dart';
 import 'package:tilawa/features/auth/domain/entities/user_entity.dart';
 import 'package:tilawa/features/auth/domain/usecases/delete_account.dart';
 import 'package:tilawa/features/auth/domain/usecases/get_current_user_use_case.dart';
+import 'package:tilawa/features/auth/domain/usecases/register_with_email_use_case.dart';
+import 'package:tilawa/features/auth/domain/usecases/sign_in_with_email_use_case.dart';
 import 'package:tilawa/features/auth/domain/usecases/sign_in_with_google_use_case.dart';
 import 'package:tilawa/features/auth/domain/usecases/sign_out.dart';
 import 'package:tilawa/features/auth/domain/usecases/sync_device_token_use_case.dart';
@@ -25,11 +30,12 @@ import 'package:tilawa_core/errors/failures.dart';
 
 import '../../../../support/map_backed_shared_preferences_async.dart';
 
-import '../../../../helpers/hydrated_bloc_test_helper.dart';
 import 'auth_bloc_test.mocks.dart';
 
 @GenerateMocks([
   SignInWithGoogleUseCase,
+  SignInWithEmailUseCase,
+  RegisterWithEmailUseCase,
   SignOut,
   DeleteAccount,
   GetCurrentUserUseCase,
@@ -40,6 +46,8 @@ import 'auth_bloc_test.mocks.dart';
 void main() {
   late AuthBloc authBloc;
   late MockSignInWithGoogleUseCase mockSignInWithGoogleUseCase;
+  late MockSignInWithEmailUseCase mockSignInWithEmailUseCase;
+  late MockRegisterWithEmailUseCase mockRegisterWithEmailUseCase;
   late MockSignOut mockSignOut;
   late MockDeleteAccount mockDeleteAccount;
   late MockGetCurrentUserUseCase mockGetCurrentUserUseCase;
@@ -50,17 +58,12 @@ void main() {
   late GoogleSignInSessionTracker signInSessionTracker;
   late MapBackedSharedPreferencesAsync defaultRevokePrefs;
 
-  setUpAll(() async {
+  setUpAll(() {
     TestWidgetsFlutterBinding.ensureInitialized();
     provideDummy<Either<Failure, void>>(const Right(null));
     provideDummy<Either<Failure, String>>(
       Right(LanguageConfig.defaultLanguageCode),
     );
-    await initializeHydratedStorageForTest();
-  });
-
-  tearDownAll(() async {
-    await clearHydratedStorageForTest();
   });
 
   final tUser = UserEntity(
@@ -70,12 +73,31 @@ void main() {
     createdAt: DateTime.utc(2023),
   );
 
+  AuthBloc buildAuthBloc({bool multiDeviceLoginEnabled = false}) {
+    return AuthBloc(
+      mockSignInWithGoogleUseCase,
+      mockSignInWithEmailUseCase,
+      mockRegisterWithEmailUseCase,
+      mockSignOut,
+      mockDeleteAccount,
+      mockGetCurrentUserUseCase,
+      mockSyncDeviceTokenUseCase,
+      mockGetCurrentLanguageUseCase,
+      mockSyncUserLanguagePreference,
+      accountDeletionFlowTracker,
+      signInSessionTracker,
+      multiDeviceLoginEnabled: () => multiDeviceLoginEnabled,
+    );
+  }
+
   setUp(() {
     defaultRevokePrefs = MapBackedSharedPreferencesAsync();
     PendingSessionRevokeStore.setPrefsFactoryForTesting(
       () => defaultRevokePrefs.prefs,
     );
     mockSignInWithGoogleUseCase = MockSignInWithGoogleUseCase();
+    mockSignInWithEmailUseCase = MockSignInWithEmailUseCase();
+    mockRegisterWithEmailUseCase = MockRegisterWithEmailUseCase();
     mockSignOut = MockSignOut();
     mockDeleteAccount = MockDeleteAccount();
     mockGetCurrentUserUseCase = MockGetCurrentUserUseCase();
@@ -99,17 +121,7 @@ void main() {
       (_) async => const Right(null),
     );
 
-    authBloc = AuthBloc(
-      mockSignInWithGoogleUseCase,
-      mockSignOut,
-      mockDeleteAccount,
-      mockGetCurrentUserUseCase,
-      mockSyncDeviceTokenUseCase,
-      mockGetCurrentLanguageUseCase,
-      mockSyncUserLanguagePreference,
-      accountDeletionFlowTracker,
-      signInSessionTracker,
-    );
+    authBloc = buildAuthBloc();
   });
 
   tearDown(() {
@@ -150,6 +162,25 @@ void main() {
         verify: (_) {
           verify(mockSignOut(skipServerTokenClear: true)).called(1);
           verifyNever(mockGetCurrentLanguageUseCase());
+        },
+      );
+
+      blocTest<AuthBloc, AuthState>(
+        'multi-device login ignores stale passive sync and keeps user',
+        build: () {
+          when(mockGetCurrentUserUseCase()).thenReturn(tUser);
+          when(mockSyncDeviceTokenUseCase(tUser.id)).thenAnswer(
+            (_) async => const Left(
+              PermissionFailure(AuthErrorKey.staleDeviceRejected),
+            ),
+          );
+          return buildAuthBloc(multiDeviceLoginEnabled: true);
+        },
+        act: (bloc) => bloc.add(const CheckAuthStatusEvent()),
+        expect: () => [AuthState.authenticated(user: tUser)],
+        verify: (_) {
+          verifyNever(mockSignOut(skipServerTokenClear: true));
+          verify(mockGetCurrentLanguageUseCase()).called(1);
         },
       );
 
@@ -211,7 +242,7 @@ void main() {
       );
 
       blocTest<AuthBloc, AuthState>(
-        'keeps hydrated authenticated user when live Firebase user is missing',
+        'keeps in-memory authenticated user when live Firebase user is missing',
         build: () {
           when(mockGetCurrentUserUseCase()).thenReturn(null);
           return authBloc;
@@ -470,7 +501,7 @@ void main() {
         act: (bloc) => bloc.add(const SignInWithGoogleEvent()),
         expect: () => [
           const AuthState.loading(),
-          const AuthState.error(message: 'Authentication failed'),
+          const AuthState.error(message: EmailAuthFailureKey.generic),
         ],
         verify: (_) {
           expect(signInSessionTracker.inFlight, isFalse);
@@ -495,6 +526,26 @@ void main() {
           verifyNever(mockSyncDeviceTokenUseCase(any));
         },
       );
+
+      blocTest<AuthBloc, AuthState>(
+        'returns to authenticated when sign in is cancelled mid-session',
+        seed: () => AuthState.authenticated(user: tUser),
+        build: () {
+          when(
+            mockSignInWithGoogleUseCase(),
+          ).thenAnswer((_) async => const AuthResult.cancelled());
+          return authBloc;
+        },
+        act: (bloc) => bloc.add(const SignInWithGoogleEvent()),
+        expect: () => [
+          const AuthState.loading(),
+          AuthState.authenticated(user: tUser),
+        ],
+        verify: (_) {
+          verify(mockSignInWithGoogleUseCase()).called(1);
+          verifyNever(mockSyncDeviceTokenUseCase(any));
+        },
+      );
     });
 
     group('SessionInvalidatedEvent', () {
@@ -504,6 +555,14 @@ void main() {
         build: () => authBloc,
         act: (bloc) => bloc.add(const SessionInvalidatedEvent()),
         expect: () => [const AuthState.unauthenticated()],
+      );
+
+      blocTest<AuthBloc, AuthState>(
+        'multi-device login ignores remote session invalidation',
+        seed: () => AuthState.authenticated(user: tUser),
+        build: () => buildAuthBloc(multiDeviceLoginEnabled: true),
+        act: (bloc) => bloc.add(const SessionInvalidatedEvent()),
+        expect: () => <AuthState>[],
       );
     });
 
@@ -662,7 +721,7 @@ void main() {
 
       blocTest<AuthBloc, AuthState>(
         'emits [error, authenticated] when delete fails with not signed in '
-        'but hydrated auth state still has a user',
+        'but in-memory auth state still has a user',
         build: () {
           when(mockGetCurrentUserUseCase()).thenReturn(null);
           when(
@@ -740,39 +799,76 @@ void main() {
       );
     });
 
-    group('hydration', () {
-      test('toJson / fromJson work correctly for authenticated state', () {
-        final state = AuthState.authenticated(user: tUser);
-        final Map<String, dynamic>? json = authBloc.toJson(state);
-        expect(json, isNotNull);
-        final Map<String, dynamic> jsonData = json!;
-        expect(jsonData['state'], 'authenticated');
-        final userMap = jsonData['user'] as Map<String, dynamic>;
-        expect(userMap['id'], tUser.id);
+    group('SignInWithEmailEvent', () {
+      test(
+        'keeps CheckAuthStatus deferred until email device registration finishes',
+        () async {
+          final registrationCompleter = Completer<Either<Failure, void>>();
+          when(
+            mockSignInWithEmailUseCase(
+              email: anyNamed('email'),
+              password: anyNamed('password'),
+            ),
+          ).thenAnswer((_) async => AuthResult.success(user: tUser));
+          when(
+            mockSyncDeviceTokenUseCase.registerExplicitSignIn(tUser.id),
+          ).thenAnswer((_) => registrationCompleter.future);
 
-        final AuthState? restoredState = authBloc.fromJson(json);
-        expect(restoredState, state);
-      });
+          authBloc.add(
+            const SignInWithEmailEvent(
+              email: 'test@example.com',
+              password: 'Password1!',
+            ),
+          );
+          await Future<void>.delayed(Duration.zero);
 
-      test('toJson returns null for unauthenticated state', () {
-        const state = AuthState.unauthenticated();
-        final Map<String, dynamic>? json = authBloc.toJson(state);
-        expect(json, isNull);
-      });
+          expect(authBloc.state, AuthState.authenticated(user: tUser));
+          expect(signInSessionTracker.inFlight, isTrue);
 
-      test('fromJson returns initial for empty/invalid json', () {
-        expect(authBloc.fromJson({}), const AuthState.initial());
-        expect(
-          authBloc.fromJson({'state': 'invalid'}),
-          const AuthState.initial(),
-        );
-      });
+          authBloc.add(const CheckAuthStatusEvent());
+          await Future<void>.delayed(Duration.zero);
+          verifyNever(mockGetCurrentUserUseCase());
 
-      test('fromJson returns initial on exception', () {
-        final json = {'state': 'authenticated', 'user': 'invalid'};
-        final AuthState? restoredState = authBloc.fromJson(json);
-        expect(restoredState, const AuthState.initial());
-      });
+          registrationCompleter.complete(const Right(null));
+          await Future<void>.delayed(Duration.zero);
+
+          expect(signInSessionTracker.inFlight, isFalse);
+        },
+      );
+    });
+
+    group('RegisterWithEmailEvent', () {
+      const EmailRegistrationDraft draft = EmailRegistrationDraft(
+        email: 'mm@gmail.com',
+        password: 'Password1!',
+        confirmPassword: 'Password1!',
+      );
+
+      blocTest<AuthBloc, AuthState>(
+        'emits loading then error without authenticated on duplicate email',
+        build: () {
+          when(
+            mockRegisterWithEmailUseCase(draft: draft),
+          ).thenAnswer(
+            (_) async => const RegisterWithEmailResult.authFailed(
+              message: EmailAuthFailureKey.emailAlreadyInUse,
+              code: 'email-already-in-use',
+            ),
+          );
+          return authBloc;
+        },
+        act: (bloc) => bloc.add(const RegisterWithEmailEvent(draft: draft)),
+        expect: () => <AuthState>[
+          const AuthState.loading(),
+          const AuthState.error(
+            message: EmailAuthFailureKey.emailAlreadyInUse,
+          ),
+        ],
+        verify: (_) {
+          verify(mockRegisterWithEmailUseCase(draft: draft)).called(1);
+          verifyNever(mockSyncDeviceTokenUseCase.registerExplicitSignIn(any));
+        },
+      );
     });
   });
 }

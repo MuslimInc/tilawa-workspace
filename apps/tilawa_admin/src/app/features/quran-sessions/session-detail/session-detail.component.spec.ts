@@ -30,6 +30,10 @@ function detailVm(overrides: Partial<AdminSessionDetailVm> = {}): AdminSessionDe
     countryCode: 'EG',
     cityId: 'cairo',
     paymentStatus: 'none',
+    paymentReference: null,
+    paymentProvider: 'none',
+    priceAmount: 0,
+    priceCurrency: 'USD',
     amountPaidUsd: '0.00',
     cancellationReason: null,
     createdAt: new Date('2026-06-20T12:00:00Z'),
@@ -61,9 +65,7 @@ function callVm(overrides: Partial<CallTrackingVm> = {}): CallTrackingVm {
   };
 }
 
-function participantsVm(
-  overrides: Partial<SessionParticipantsVm> = {},
-): SessionParticipantsVm {
+function participantsVm(overrides: Partial<SessionParticipantsVm> = {}): SessionParticipantsVm {
   return {
     teacher: {
       loadState: 'loaded',
@@ -123,6 +125,8 @@ function makeFakeFacade() {
     loadDetail: vi.fn().mockResolvedValue(undefined),
     loadCallEvents: vi.fn().mockResolvedValue(undefined),
     loadMoreCallEvents: vi.fn().mockResolvedValue(undefined),
+    confirmManualPayment: vi.fn().mockResolvedValue(undefined),
+    rejectManualPayment: vi.fn().mockResolvedValue(undefined),
   };
 }
 

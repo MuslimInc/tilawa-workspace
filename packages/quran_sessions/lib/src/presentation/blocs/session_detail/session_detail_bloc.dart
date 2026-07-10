@@ -23,6 +23,7 @@ import '../../../domain/usecases/submit_review_usecase.dart';
 import '../../../application/usecases/get_session_detail_usecase.dart';
 import '../../../application/usecases/invalidate_quran_session_cache_usecase.dart';
 import '../../../domain/entities/session_lifecycle_status.dart';
+import '../../../domain/policies/platform_scheduling_policy.dart';
 import '../../../domain/policies/session_join_window_policy.dart';
 import '../../../boundaries/call/call_token_provider.dart';
 import '../../../domain/repositories/session_repository.dart';
@@ -168,6 +169,7 @@ class SessionDetailBloc extends Bloc<SessionDetailEvent, SessionDetailState> {
     );
 
     final viewerRole = await _resolveActorRole?.forAggregate(aggregate);
+    final viewerUserId = _authSession?.currentUserId;
 
     emit(
       SessionDetailSuccess(
@@ -182,6 +184,7 @@ class SessionDetailBloc extends Bloc<SessionDetailEvent, SessionDetailState> {
         canRespondToReschedule: rescheduleContext.canRespond,
         isAwaitingRescheduleCounterparty: rescheduleContext.isAwaiting,
         viewerRole: viewerRole,
+        viewerUserId: viewerUserId,
       ),
     );
 
@@ -214,13 +217,28 @@ class SessionDetailBloc extends Bloc<SessionDetailEvent, SessionDetailState> {
     }
     if (!_joinWindowPolicy.isWithinJoinWindow(
       startsAt: aggregate.startsAt,
+      endsAt: aggregate.startsAt.add(
+        const Duration(
+          minutes: PlatformSchedulingPolicy.defaultSlotDurationMinutes,
+        ),
+      ),
       now: DateTime.now(),
+      qaBypassUserId: userId,
     )) {
       return;
     }
 
     unawaited(
-      tokenProvider.fetchCredentials(sessionId: sessionId, userId: userId),
+      () async {
+        try {
+          await tokenProvider.fetchCredentials(
+            sessionId: sessionId,
+            userId: userId,
+          );
+        } catch (_) {
+          // Swallow prefetch errors; JoinSessionUseCase will handle them on join.
+        }
+      }(),
     );
   }
 
@@ -348,7 +366,10 @@ class SessionDetailBloc extends Bloc<SessionDetailEvent, SessionDetailState> {
 
     emit(current.copyWith(joinInProgress: true, clearJoinFailure: true));
 
-    final result = await joinSession(sessionId: sessionId);
+    final result = await joinSession(
+      sessionId: sessionId,
+      forceTakeover: event.forceTakeover,
+    );
     final after = state;
     if (after is! SessionDetailSuccess) return;
 

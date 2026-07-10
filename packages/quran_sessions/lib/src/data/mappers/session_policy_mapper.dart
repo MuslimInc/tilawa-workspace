@@ -10,7 +10,6 @@ extension SessionPolicyDtoMapper on SessionPolicyDto {
     globalAllowFemaleTeacherMaleStudent: globalAllowFemaleTeacherMaleStudent,
     videoCallAllowedForChildren: videoCallAllowedForChildren,
     recordingEnabled: recordingEnabled,
-    requireGuardianApprovalForChildren: requireGuardianApprovalForChildren,
   );
 }
 
@@ -23,7 +22,6 @@ extension SessionPolicyDomainMapper on QuranSessionSafetyPolicy {
     globalAllowFemaleTeacherMaleStudent: globalAllowFemaleTeacherMaleStudent,
     videoCallAllowedForChildren: videoCallAllowedForChildren,
     recordingEnabled: recordingEnabled,
-    requireGuardianApprovalForChildren: requireGuardianApprovalForChildren,
   );
 }
 
@@ -31,7 +29,6 @@ extension TeacherEligibilityPolicyDtoMapper on TeacherEligibilityPolicyDto {
   TeacherEligibilityPolicy toDomain() => TeacherEligibilityPolicy(
     allowedStudentGender: _mapAllowedStudentGender(allowedStudentGender),
     canTeachChildren: canTeachChildren,
-    requiresGuardianApprovalForChildren: requiresGuardianApprovalForChildren,
   );
 }
 
@@ -39,7 +36,6 @@ extension TeacherEligibilityPolicyDomainMapper on TeacherEligibilityPolicy {
   TeacherEligibilityPolicyDto toDto() => TeacherEligibilityPolicyDto(
     allowedStudentGender: allowedStudentGender.name,
     canTeachChildren: canTeachChildren,
-    requiresGuardianApprovalForChildren: requiresGuardianApprovalForChildren,
   );
 }
 

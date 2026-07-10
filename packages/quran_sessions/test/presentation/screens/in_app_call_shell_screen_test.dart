@@ -105,13 +105,18 @@ void main() {
       ),
     );
 
-    final toggleTokens = theme.componentTokens.iconToggle;
-    final activeColor = toggleTokens.activeBackgroundColor;
-    final inactiveColor = toggleTokens.inactiveBackgroundColor;
+    final activeColor = theme.colorScheme.primary;
+    final inactiveColor =
+        theme.componentTokens.iconToggle.inactiveBackgroundColor;
+    final activeIconColor = theme.colorScheme.onPrimary;
 
     expect(
       _callControlMaterialColor(tester, const Key('call_shell_mute')),
       activeColor,
+    );
+    expect(
+      _callControlIconColor(tester, const Key('call_shell_mute')),
+      activeIconColor,
     );
     expect(
       tester
@@ -149,6 +154,10 @@ void main() {
       activeColor,
     );
     expect(
+      _callControlIconColor(tester, const Key('call_shell_speaker')),
+      activeIconColor,
+    );
+    expect(
       tester
           .getSemantics(find.byKey(const Key('call_shell_speaker')))
           .flagsCollection
@@ -173,6 +182,10 @@ void main() {
 
     final flipButton = find.byKey(const Key('call_shell_flip'));
     expect(flipButton, findsOneWidget);
+    expect(
+      find.bySemanticsLabel('Switch camera'),
+      findsOneWidget,
+    );
 
     await tester.tap(find.byKey(const Key('call_shell_video')));
     await tester.pump();
@@ -182,6 +195,107 @@ void main() {
     await tester.pump();
 
     check(gateway.switchCameraCount).equals(0);
+  });
+
+  testWidgets('Switch camera keeps unified label and icon after switch', (
+    tester,
+  ) async {
+    final gateway = _RecordingCallControlGateway(delaySwitchCamera: true);
+    late ThemeData theme;
+
+    await tester.pumpWidget(
+      _shellApp(
+        Builder(
+          builder: (context) {
+            theme = Theme.of(context);
+            return InAppCallShellScreen(
+              sessionId: 'session_1',
+              callType: SessionCallType.videoCall,
+              callProviderKind: SessionCallProviderKind.agora,
+              callControlGateway: gateway,
+            );
+          },
+        ),
+      ),
+    );
+
+    final inactiveColor =
+        theme.componentTokens.iconToggle.inactiveBackgroundColor;
+    final frontIconColor = theme.colorScheme.onSurface;
+    final backIconColor = theme.colorScheme.onSurfaceVariant;
+
+    expect(find.bySemanticsLabel('Switch camera'), findsOneWidget);
+    expect(find.byIcon(Icons.cameraswitch), findsOneWidget);
+    expect(
+      _callControlMaterialColor(tester, const Key('call_shell_flip')),
+      inactiveColor,
+    );
+    expect(
+      _callControlIconColor(tester, const Key('call_shell_flip')),
+      frontIconColor,
+    );
+
+    await tester.tap(find.byKey(const Key('call_shell_flip')));
+    await tester.pump();
+    await tester.pump(const Duration(milliseconds: 300));
+    await tester.pumpAndSettle();
+
+    expect(find.bySemanticsLabel('Switch camera'), findsOneWidget);
+    expect(find.byIcon(Icons.cameraswitch), findsOneWidget);
+    expect(find.byIcon(Icons.camera_rear_outlined), findsNothing);
+    expect(find.byIcon(Icons.camera_front_outlined), findsNothing);
+    expect(
+      _callControlMaterialColor(tester, const Key('call_shell_flip')),
+      inactiveColor,
+    );
+    expect(
+      _callControlIconColor(tester, const Key('call_shell_flip')),
+      backIconColor,
+    );
+    check(gateway.switchCameraCount).equals(1);
+  });
+
+  testWidgets('Switch camera failure shows friendly error toast', (
+    tester,
+  ) async {
+    final gateway = _RecordingCallControlGateway(failSwitchCamera: true);
+
+    await tester.pumpWidget(
+      _shellApp(
+        InAppCallShellScreen(
+          sessionId: 'session_1',
+          callType: SessionCallType.videoCall,
+          callProviderKind: SessionCallProviderKind.agora,
+          callControlGateway: gateway,
+        ),
+      ),
+    );
+
+    await tester.tap(find.byKey(const Key('call_shell_flip')));
+    await tester.pumpAndSettle();
+
+    expect(
+      find.text('Could not complete that action. Try again.'),
+      findsOneWidget,
+    );
+    check(gateway.switchCameraCount).equals(1);
+  });
+
+  testWidgets('Switch camera hidden when only one lens available', (
+    tester,
+  ) async {
+    await tester.pumpWidget(
+      _shellApp(
+        InAppCallShellScreen(
+          sessionId: 'session_1',
+          callType: SessionCallType.videoCall,
+          callProviderKind: SessionCallProviderKind.external,
+          callControlGateway: _RecordingCallControlGateway(),
+        ),
+      ),
+    );
+
+    expect(find.byKey(const Key('call_shell_flip')), findsNothing);
   });
 
   testWidgets('Speaker toggle updates active icon state', (tester) async {
@@ -229,31 +343,98 @@ void main() {
     expect(find.byKey(const Key('call_shell_flip')), findsOneWidget);
   });
 
-  testWidgets('Mock provider shows beta preview banner', (tester) async {
+  testWidgets('Video toggle swaps active background and slash icon', (
+    tester,
+  ) async {
+    final gateway = _RecordingCallControlGateway();
+    late ThemeData theme;
+
     await tester.pumpWidget(
       _shellApp(
-        const InAppCallShellScreen(
-          sessionId: 'session_mock',
-          callProviderKind: SessionCallProviderKind.mock,
+        Builder(
+          builder: (context) {
+            theme = Theme.of(context);
+            return InAppCallShellScreen(
+              sessionId: 'session_1',
+              callType: SessionCallType.videoCall,
+              callProviderKind: SessionCallProviderKind.agora,
+              callControlGateway: gateway,
+            );
+          },
         ),
       ),
     );
 
-    expect(find.textContaining('Beta preview'), findsOneWidget);
+    final activeColor = theme.colorScheme.primary;
+    final inactiveColor =
+        theme.componentTokens.iconToggle.inactiveBackgroundColor;
+    final activeIconColor = theme.colorScheme.onPrimary;
+
+    expect(
+      _callControlMaterialColor(tester, const Key('call_shell_video')),
+      activeColor,
+    );
+    expect(
+      _callControlIconColor(tester, const Key('call_shell_video')),
+      activeIconColor,
+    );
+    expect(find.byIcon(Icons.videocam_rounded), findsOneWidget);
+    expect(find.byIcon(Icons.videocam_off_rounded), findsNothing);
+
+    await tester.tap(find.byKey(const Key('call_shell_video')));
+    await tester.pumpAndSettle();
+
+    check(gateway.cameraEnabledCalls).deepEquals([false]);
+    expect(
+      _callControlMaterialColor(tester, const Key('call_shell_video')),
+      inactiveColor,
+    );
+    expect(find.byIcon(Icons.videocam_off_rounded), findsOneWidget);
+    expect(find.byIcon(Icons.videocam_rounded), findsNothing);
+    expect(
+      tester
+          .getSemantics(find.byKey(const Key('call_shell_video')))
+          .flagsCollection
+          .isToggled,
+      Tristate.isFalse,
+    );
   });
 
-  testWidgets('Participant name appears in glass info bar', (tester) async {
+  testWidgets('Flip camera stays neutral when video is on', (tester) async {
+    final gateway = _RecordingCallControlGateway();
+    late ThemeData theme;
+
     await tester.pumpWidget(
       _shellApp(
-        const InAppCallShellScreen(
-          sessionId: 'session_1',
-          participantName: 'Ustadh Ahmad',
-          participantSubtitle: 'Voice call',
+        Builder(
+          builder: (context) {
+            theme = Theme.of(context);
+            return InAppCallShellScreen(
+              sessionId: 'session_1',
+              callType: SessionCallType.videoCall,
+              callProviderKind: SessionCallProviderKind.agora,
+              callControlGateway: gateway,
+            );
+          },
         ),
       ),
     );
 
-    expect(find.text('Ustadh Ahmad'), findsOneWidget);
+    final inactiveColor =
+        theme.componentTokens.iconToggle.inactiveBackgroundColor;
+
+    expect(
+      _callControlMaterialColor(tester, const Key('call_shell_video')),
+      theme.colorScheme.primary,
+    );
+    expect(
+      _callControlMaterialColor(tester, const Key('call_shell_flip')),
+      inactiveColor,
+    );
+    expect(
+      _callControlIconColor(tester, const Key('call_shell_flip')),
+      theme.colorScheme.onSurface,
+    );
   });
 }
 
@@ -279,7 +460,32 @@ Color _callControlMaterialColor(WidgetTester tester, Key key) {
   return tester.widget<Material>(materialFinder).color!;
 }
 
+Color _callControlIconColor(WidgetTester tester, Key key) {
+  final buttonFinder = find.byKey(key);
+  final iconFinder = find.descendant(
+    of: buttonFinder,
+    matching: find.byType(Icon),
+  );
+  final icon = tester.widget<Icon>(iconFinder);
+  if (icon.color != null) {
+    return icon.color!;
+  }
+
+  final iconThemeFinder = find.descendant(
+    of: buttonFinder,
+    matching: find.byType(IconTheme),
+  );
+  return tester.widgetList<IconTheme>(iconThemeFinder).first.data.color!;
+}
+
 class _RecordingCallControlGateway implements SessionCallControlGateway {
+  _RecordingCallControlGateway({
+    this.delaySwitchCamera = false,
+    this.failSwitchCamera = false,
+  });
+
+  final bool delaySwitchCamera;
+  final bool failSwitchCamera;
   final List<bool> microphoneEnabledCalls = [];
   final List<bool> cameraEnabledCalls = [];
   final List<bool> speakerEnabledCalls = [];
@@ -298,7 +504,13 @@ class _RecordingCallControlGateway implements SessionCallControlGateway {
 
   @override
   Future<void> switchCamera() async {
+    if (delaySwitchCamera) {
+      await Future<void>.delayed(const Duration(milliseconds: 50));
+    }
     switchCameraCount++;
+    if (failSwitchCamera) {
+      throw StateError('switch camera failed');
+    }
   }
 
   @override

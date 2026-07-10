@@ -83,9 +83,7 @@ describe('TeacherApplicationDetailComponent', () => {
 
   it('falls back to email when names are placeholders', () => {
     expect(
-      component.avatarDisplayName(
-        makeDetail({ publicDisplayName: '—', accountDisplayName: '—' }),
-      ),
+      component.avatarDisplayName(makeDetail({ publicDisplayName: '—', accountDisplayName: '—' })),
     ).toBe('ahmad@example.com');
   });
 });

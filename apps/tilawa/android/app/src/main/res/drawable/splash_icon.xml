@@ -1,13 +1,12 @@
 <?xml version="1.0" encoding="utf-8"?>
-<!-- Fixed 288dp splash mark — same box as Flutter [AppColors.launchSplashLogoSize].
-     Foreground-only on @color/launch_background (not @mipmap/ic_launcher). -->
+<!-- White open-book mark: 1152 px frame (288 dp @4x), with the mark centered
+     well inside the 768 px / 192 dp mask circle. Same asset drawn by Flutter
+     [LaunchSplashContent] in a 288 dp box, so the handoff is pixel-aligned.
+     Regenerate: python3 scripts/generate_splash_icons.py -->
 <layer-list xmlns:android="http://schemas.android.com/apk/res/android">
     <item
-        android:width="@dimen/splash_logo_size"
-        android:height="@dimen/splash_logo_size"
-        android:gravity="center">
-        <bitmap
-            android:gravity="center"
-            android:src="@drawable/splash_icon_bitmap" />
-    </item>
+        android:width="@dimen/splash_logo_frame_size"
+        android:height="@dimen/splash_logo_frame_size"
+        android:gravity="center"
+        android:drawable="@drawable/splash_icon_bitmap" />
 </layer-list>

@@ -30,7 +30,7 @@ void main() {
   setUp(() {
     if (!getIt.isRegistered<AppLaunchConfig>()) {
       getIt.registerSingleton<AppLaunchConfig>(
-        const AppLaunchConfig(quranSessionsEnabled: false),
+        const AppLaunchConfig(),
       );
     }
   });

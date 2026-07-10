@@ -26,7 +26,7 @@ List<QuranTeacher> filterTeachersByNameQuery(
 /// Resolves the numeric ceiling for [TeacherListFilter.budget] from loaded rows.
 double resolveTeacherBudgetPriceThreshold(List<QuranTeacher> teachers) {
   final paidAmounts = teachers
-      .where((teacher) => !teacher.isFree && teacher.price != null)
+      .where((teacher) => _isPaidTeacher(teacher) && teacher.price != null)
       .map((teacher) => teacher.price!.amount)
       .toList();
   if (paidAmounts.isEmpty) return kTeacherListDefaultBudgetThreshold;
@@ -51,7 +51,7 @@ String formatTeacherBudgetFilterLabel({
 
 SessionPrice? _referencePaidPrice(List<QuranTeacher> teachers) {
   for (final teacher in teachers) {
-    if (!teacher.isFree && teacher.price != null) {
+    if (_isPaidTeacher(teacher) && teacher.price != null) {
       return teacher.price;
     }
   }
@@ -63,10 +63,17 @@ String _resolveBudgetCurrencyCode(List<QuranTeacher> teachers) {
 }
 
 bool _matchesBudgetFilter(QuranTeacher teacher, double threshold) {
-  if (teacher.isFree) return false;
+  if (!_isPaidTeacher(teacher)) return false;
   final price = teacher.price;
   if (price == null) return true;
   return price.amount <= threshold;
+}
+
+bool _isPaidTeacher(QuranTeacher teacher) {
+  if (!teacher.isFree) return true;
+  if (teacher.manualPaymentPrice != null) return true;
+  final price = teacher.price;
+  return price != null && price.amount > 0;
 }
 
 /// Applies client-side teacher list filters on top of repository results.
@@ -81,9 +88,8 @@ List<QuranTeacher> applyTeacherListClientFilter(
 
   return switch (filter) {
     TeacherListFilter.free =>
-      teachers.where((teacher) => teacher.isFree).toList(),
-    TeacherListFilter.paid =>
-      teachers.where((teacher) => !teacher.isFree).toList(),
+      teachers.where((teacher) => !_isPaidTeacher(teacher)).toList(),
+    TeacherListFilter.paid => teachers.where(_isPaidTeacher).toList(),
     TeacherListFilter.budget =>
       teachers
           .where((teacher) => _matchesBudgetFilter(teacher, budgetThreshold))

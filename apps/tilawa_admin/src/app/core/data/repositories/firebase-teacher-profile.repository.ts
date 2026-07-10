@@ -1,5 +1,14 @@
 import { Injectable, inject } from '@angular/core';
-import { Firestore, doc, getDoc, where, query, getDocs, limit, collection } from '@angular/fire/firestore';
+import {
+  Firestore,
+  doc,
+  getDoc,
+  where,
+  query,
+  getDocs,
+  limit,
+  collection,
+} from '@angular/fire/firestore';
 
 import { QuranSessionsPaths } from '../paths/quran-sessions.paths';
 import { TeacherProfileMapper, TeacherProfileFirestoreDto } from '../mappers/quran-sessions.mapper';
@@ -93,12 +102,12 @@ export class FirebaseTeacherProfileRepository implements TeacherProfileRepositor
       where('isActive', '==', true),
       where('displayName', '>=', normalized),
       where('displayName', '<=', endBound),
-      limit(10)
+      limit(10),
     );
 
     const snap = await getDocs(q);
     return snap.docs.map((docSnap) =>
-      TeacherProfileMapper.fromFirestore(docSnap.id, docSnap.data() as TeacherProfileFirestoreDto)
+      TeacherProfileMapper.fromFirestore(docSnap.id, docSnap.data() as TeacherProfileFirestoreDto),
     );
   }
 }

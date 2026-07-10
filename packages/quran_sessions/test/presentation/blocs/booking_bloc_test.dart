@@ -6,11 +6,20 @@ import 'package:quran_sessions/src/domain/entities/teacher_availability.dart';
 import 'package:quran_sessions/src/domain/entities/teacher_profile.dart';
 import 'package:quran_sessions/src/domain/entities/teacher_verification_status.dart';
 import 'package:quran_sessions/src/domain/rules/teacher_profile_completeness.dart';
+import 'package:quran_sessions/src/domain/entities/market_config.dart';
 import 'package:quran_sessions/src/domain/entities/quran_booking.dart';
+import 'package:quran_sessions/src/domain/entities/session_aggregate.dart';
+import 'package:quran_sessions/src/domain/entities/session_booking_outcome.dart';
 import 'package:quran_sessions/src/domain/entities/session_call_type.dart';
+import 'package:quran_sessions/src/domain/entities/session_lifecycle_status.dart';
 import 'package:quran_sessions/src/domain/entities/user_profile.dart';
 import 'package:quran_sessions/src/domain/entities/weekly_schedule.dart';
 import 'package:quran_sessions/src/domain/failures/quran_sessions_failure.dart';
+import 'package:quran_sessions/src/domain/entities/booking_block_reason.dart';
+import 'package:quran_sessions/src/domain/entities/effective_pricing_source.dart';
+import 'package:quran_sessions/src/domain/entities/session_pricing_quote.dart';
+import 'package:quran_sessions/src/domain/entities/session_pricing_type.dart';
+import 'package:quran_sessions/src/domain/usecases/get_booking_pricing_quote_usecase.dart';
 import 'package:quran_sessions/src/domain/usecases/get_teacher_profile_by_id_usecase.dart';
 import 'package:quran_sessions/src/domain/usecases/get_teacher_availability_usecase.dart';
 import 'package:quran_sessions/src/domain/usecases/validate_booking_eligibility_usecase.dart';
@@ -24,6 +33,7 @@ import '../../helpers/fakes/fake_session_repository.dart';
 import '../../helpers/fakes/fake_teacher_repository.dart';
 import '../../helpers/fakes/fake_user_profile_repository.dart';
 import '../../helpers/fakes/fake_session_mutation_gateway.dart';
+import '../../helpers/fakes/fake_session_pricing_quote_gateway.dart';
 import '../../helpers/fakes/fake_teacher_profile_repository.dart';
 import '../../helpers/lifecycle_test_helpers.dart';
 import '../../helpers/fixtures.dart';
@@ -125,13 +135,13 @@ void main() {
         final state = b.state as BookingSelecting;
         check(state.availableSlots).isNotEmpty();
         check(state.canSubmit).isFalse();
-        check(state.selectedCallType).equals(SessionCallType.voiceCall);
+        check(state.selectedCallType).equals(SessionCallType.videoCall);
         check(state.hasExternalMeetingUrl).isFalse();
       },
     );
 
     blocTest<BookingBloc, BookingState>(
-      'defaults to external when teacher has meeting URL',
+      'defaults to video when teacher has meeting URL under video-only policy',
       build: () {
         teacherProfileRepo = FakeTeacherProfileRepository(
           profile: _teacherProfile(
@@ -169,7 +179,7 @@ void main() {
       ],
       verify: (b) {
         final state = b.state as BookingSelecting;
-        check(state.selectedCallType).equals(SessionCallType.externalMeeting);
+        check(state.selectedCallType).equals(SessionCallType.videoCall);
         check(state.hasExternalMeetingUrl).isTrue();
       },
     );
@@ -372,6 +382,612 @@ void main() {
       ],
     );
   });
+
+  group('BookingBloc server pricing quote', () {
+    BookingBloc buildWithQuote(FakeSessionPricingQuoteGateway gateway) =>
+        BookingBloc(
+          getAvailability: getAvailability,
+          submitBooking: buildSubmitSessionBookingUseCase(
+            getAvailability: getAvailability,
+            mutationGateway: mutationGateway,
+            teacherProfiles: teacherProfileRepo,
+          ),
+          validateEligibility: ValidateBookingEligibilityUseCase(
+            profileRepository: profileRepo,
+            policyRepository: policyRepo,
+            teacherRepository: teacherRepo,
+            marketConfigRepository: marketConfigRepo,
+          ),
+          getTeacherProfile: GetTeacherProfileByIdUseCase(teacherProfileRepo),
+          getPricingQuote: GetBookingPricingQuoteUseCase(gateway),
+        );
+
+    void openScreen(BookingBloc b) => b.add(
+      BookingScreenOpened(
+        teacherId: 'teacher_1',
+        studentId: 'student_1',
+        from: windowFrom,
+        to: windowTo,
+      ),
+    );
+
+    late FakeSessionPricingQuoteGateway gateway;
+
+    blocTest<BookingBloc, BookingState>(
+      'free quote shows free pricing and allows booking once a slot is picked',
+      build: () => buildWithQuote(
+        FakeSessionPricingQuoteGateway(
+          quote: const SessionPricingQuote(
+            pricingType: SessionPricingType.free,
+            amount: 0,
+            currencyCode: 'USD',
+            paymentRequired: false,
+            paymentProviderAvailable: false,
+            bookingEnabled: true,
+            quranSessionsEnabled: true,
+            effectivePricingSource: EffectivePricingSource.marketConfig,
+            blockReason: BookingBlockReason.none,
+          ),
+        ),
+      ),
+      act: openScreen,
+      skip: 2,
+      expect: () => [isA<BookingSelecting>(), isA<BookingSelecting>()],
+      verify: (b) {
+        final state = b.state as BookingSelecting;
+        check(state.pricingType).equals(SessionPricingType.free);
+        check(state.sessionPrice).isNull();
+        check(state.isPaymentBlocked).isFalse();
+        check(state.blockReason).equals(BookingBlockReason.none);
+      },
+    );
+
+    blocTest<BookingBloc, BookingState>(
+      'free teacher override quote with provider disabled still allows booking',
+      build: () => buildWithQuote(
+        FakeSessionPricingQuoteGateway(
+          quote: const SessionPricingQuote(
+            pricingType: SessionPricingType.free,
+            amount: 0,
+            currencyCode: 'USD',
+            paymentRequired: false,
+            // Provider off must never gate a free session.
+            paymentProviderAvailable: false,
+            bookingEnabled: true,
+            quranSessionsEnabled: true,
+            effectivePricingSource: EffectivePricingSource.teacherOverride,
+            blockReason: BookingBlockReason.none,
+          ),
+        ),
+      ),
+      act: (b) async {
+        openScreen(b);
+        await b.stream.firstWhere(
+          (s) => s is BookingSelecting && !s.isQuoteLoading,
+        );
+        final selecting = b.state as BookingSelecting;
+        b.add(SlotSelected(selecting.availableSlots.first));
+      },
+      verify: (b) {
+        final state = b.state as BookingSelecting;
+        check(state.pricingType).equals(SessionPricingType.free);
+        check(state.sessionPrice).isNull();
+        check(state.paymentProviderAvailable).equals(false);
+        check(state.isPaymentBlocked).isFalse();
+        check(state.blockReason).equals(BookingBlockReason.none);
+        check(state.selectedSlot).isNotNull();
+        check(state.canSubmit).isTrue();
+      },
+    );
+
+    blocTest<BookingBloc, BookingState>(
+      'paid quote with provider available shows the price and permits submit',
+      build: () => buildWithQuote(
+        FakeSessionPricingQuoteGateway(
+          quote: const SessionPricingQuote(
+            pricingType: SessionPricingType.fixedPerSession,
+            amount: 50,
+            currencyCode: 'EGP',
+            paymentRequired: true,
+            paymentProviderAvailable: true,
+            bookingEnabled: true,
+            quranSessionsEnabled: true,
+            effectivePricingSource: EffectivePricingSource.marketConfig,
+            blockReason: BookingBlockReason.none,
+            countryCode: 'EG',
+            cityId: 'cairo',
+          ),
+        ),
+      ),
+      act: openScreen,
+      skip: 2,
+      expect: () => [isA<BookingSelecting>(), isA<BookingSelecting>()],
+      verify: (b) {
+        final state = b.state as BookingSelecting;
+        check(state.pricingType).equals(SessionPricingType.fixedPerSession);
+        check(state.sessionPrice).isNotNull();
+        check(state.sessionPrice!.amount).equals(50);
+        check(state.sessionPrice!.currencyCode).equals('EGP');
+        check(state.isPaymentBlocked).isFalse();
+      },
+    );
+
+    blocTest<BookingBloc, BookingState>(
+      'manual paid quote shows price and submit awaits payment verification',
+      build: () {
+        mutationGateway.onCreate =
+            ({required teacherId, required studentId, required slotId}) async {
+              return Right(
+                SessionBookingOutcome(
+                  aggregate: SessionAggregate(
+                    id: 'booking_manual_1',
+                    teacherId: teacherId,
+                    studentId: studentId,
+                    slotId: slotId,
+                    startsAt: generatedSlot.startsAt,
+                    pricingType: SessionPricingType.fixedPerSession,
+                    lifecycleStatus: SessionLifecycleStatus.pendingPayment,
+                    createdAt: DateTime.utc(2026, 1, 10),
+                    updatedAt: DateTime.utc(2026, 1, 10),
+                    paymentReference: 'QS-1234',
+                    paymentProvider: 'manual_off_app',
+                    paymentStatus: 'manual_pending',
+                  ),
+                  paymentReference: 'QS-1234',
+                ),
+              );
+            };
+        return buildWithQuote(
+          FakeSessionPricingQuoteGateway(
+            quote: const SessionPricingQuote(
+              pricingType: SessionPricingType.free,
+              amount: 125,
+              currencyCode: 'EGP',
+              paymentRequired: true,
+              paymentProviderAvailable: true,
+              manualPaymentEnabled: true,
+              paymentMode: SessionPaymentMode.manualOffApp,
+              bookingEnabled: true,
+              quranSessionsEnabled: true,
+              effectivePricingSource: EffectivePricingSource.marketConfig,
+              blockReason: BookingBlockReason.none,
+              countryCode: 'EG',
+              cityId: 'cairo',
+            ),
+          ),
+        );
+      },
+      act: (b) async {
+        openScreen(b);
+        await b.stream.firstWhere(
+          (s) => s is BookingSelecting && !s.isQuoteLoading,
+        );
+        final selecting = b.state as BookingSelecting;
+        b.add(SlotSelected(selecting.availableSlots.first));
+        await b.stream.firstWhere(
+          (state) => state is BookingSelecting && state.selectedSlot != null,
+        );
+        b.add(
+          BookingSubmitted(
+            teacherId: 'teacher_1',
+            slotId: generatedSlot.slotId,
+            callType: SessionCallType.videoCall,
+            pricingType: SessionPricingType.fixedPerSession,
+          ),
+        );
+      },
+      expect: () => [
+        isA<BookingEligibilityChecking>(),
+        isA<BookingSlotsLoading>(),
+        isA<BookingSelecting>(),
+        isA<BookingSelecting>(),
+        isA<BookingSelecting>(),
+        isA<BookingSubmitting>(),
+        isA<BookingManualPaymentPending>(),
+      ],
+      verify: (b) {
+        final state = b.state as BookingManualPaymentPending;
+        check(state.paymentReference).equals('QS-1234');
+        check(state.sessionPrice!.amount).equals(125);
+        check(state.booking.effectiveLifecycleStatus).equals(
+          SessionLifecycleStatus.pendingPayment,
+        );
+      },
+    );
+
+    blocTest<BookingBloc, BookingState>(
+      'paid quote with provider disabled blocks submission before booking',
+      build: () => buildWithQuote(
+        FakeSessionPricingQuoteGateway(
+          quote: const SessionPricingQuote(
+            pricingType: SessionPricingType.fixedPerSession,
+            amount: 50,
+            currencyCode: 'EGP',
+            paymentRequired: true,
+            paymentProviderAvailable: false,
+            bookingEnabled: true,
+            quranSessionsEnabled: true,
+            effectivePricingSource: EffectivePricingSource.marketConfig,
+            blockReason: BookingBlockReason.paymentProviderUnavailable,
+            countryCode: 'EG',
+            cityId: 'cairo',
+          ),
+        ),
+      ),
+      act: (b) async {
+        openScreen(b);
+        await b.stream.firstWhere(
+          (s) => s is BookingSelecting && !s.isQuoteLoading,
+        );
+        final selecting = b.state as BookingSelecting;
+        b.add(SlotSelected(selecting.availableSlots.first));
+      },
+      verify: (b) {
+        final state = b.state as BookingSelecting;
+        check(state.isPaymentBlocked).isTrue();
+        // A selected slot must NOT unlock submission while payment is blocked.
+        check(state.selectedSlot).isNotNull();
+        check(state.canSubmit).isFalse();
+      },
+    );
+
+    blocTest<BookingBloc, BookingState>(
+      'successful quote with pricing config missing surfaces config block',
+      build: () => buildWithQuote(
+        FakeSessionPricingQuoteGateway(
+          quote: const SessionPricingQuote(
+            pricingType: SessionPricingType.free,
+            amount: 0,
+            currencyCode: 'EGP',
+            paymentRequired: false,
+            paymentProviderAvailable: false,
+            bookingEnabled: true,
+            quranSessionsEnabled: true,
+            effectivePricingSource: EffectivePricingSource.platformFallback,
+            blockReason: BookingBlockReason.pricingConfigMissing,
+            countryCode: 'EG',
+            cityId: 'cairo',
+          ),
+        ),
+      ),
+      act: (b) async {
+        openScreen(b);
+        await b.stream.firstWhere(
+          (s) => s is BookingSelecting && !s.isQuoteLoading,
+        );
+        final selecting = b.state as BookingSelecting;
+        b.add(SlotSelected(selecting.availableSlots.first));
+      },
+      verify: (b) {
+        final state = b.state as BookingSelecting;
+        check(
+          state.blockReason,
+        ).equals(BookingBlockReason.pricingConfigMissing);
+        check(state.isPaymentBlocked).isTrue();
+        check(state.canSubmit).isFalse();
+      },
+    );
+
+    blocTest<BookingBloc, BookingState>(
+      'successful quote with admin booking disabled surfaces admin block',
+      build: () => buildWithQuote(
+        FakeSessionPricingQuoteGateway(
+          quote: const SessionPricingQuote(
+            pricingType: SessionPricingType.free,
+            amount: 0,
+            currencyCode: 'EGP',
+            paymentRequired: false,
+            paymentProviderAvailable: false,
+            bookingEnabled: false,
+            quranSessionsEnabled: true,
+            effectivePricingSource: EffectivePricingSource.platformFallback,
+            blockReason: BookingBlockReason.bookingDisabledByAdmin,
+            countryCode: 'EG',
+            cityId: 'cairo',
+          ),
+        ),
+      ),
+      act: (b) async {
+        openScreen(b);
+        await b.stream.firstWhere(
+          (s) => s is BookingSelecting && !s.isQuoteLoading,
+        );
+        final selecting = b.state as BookingSelecting;
+        b.add(SlotSelected(selecting.availableSlots.first));
+      },
+      verify: (b) {
+        final state = b.state as BookingSelecting;
+        check(
+          state.blockReason,
+        ).equals(BookingBlockReason.bookingDisabledByAdmin);
+        check(state.isPaymentBlocked).isTrue();
+        check(state.canSubmit).isFalse();
+      },
+    );
+
+    blocTest<BookingBloc, BookingState>(
+      'quote transport failure shows pricing unavailable without payment block',
+      build: () {
+        marketConfigRepo.marketConfigOverride = _paidMarketConfig();
+        return buildWithQuote(
+          FakeSessionPricingQuoteGateway(
+            failure: const NetworkFailure(),
+          ),
+        );
+      },
+      act: openScreen,
+      skip: 2,
+      expect: () => [isA<BookingSelecting>(), isA<BookingSelecting>()],
+      verify: (b) {
+        final state = b.state as BookingSelecting;
+        // Market-only preview cannot see teacher overrides, so transport
+        // failures must not claim a paid session or payment-provider block.
+        check(state.pricingType).isNull();
+        check(state.sessionPrice).isNull();
+        check(state.paymentProviderAvailable).isNull();
+        check(state.blockReason).equals(
+          BookingBlockReason.pricingQuoteUnavailable,
+        );
+        check(state.isPaymentBlocked).isTrue();
+        check(state.canSubmit).isFalse();
+      },
+    );
+
+    blocTest<BookingBloc, BookingState>(
+      'paid market quote transport failure still does not infer payment block',
+      build: () {
+        marketConfigRepo.marketConfigOverride = _paidMarketConfig();
+        return buildWithQuote(
+          FakeSessionPricingQuoteGateway(
+            failure: const NetworkFailure(),
+          ),
+        );
+      },
+      act: (b) async {
+        openScreen(b);
+        await b.stream.firstWhere(
+          (s) => s is BookingSelecting && !s.isQuoteLoading,
+        );
+        final selecting = b.state as BookingSelecting;
+        b.add(SlotSelected(selecting.availableSlots.first));
+      },
+      verify: (b) {
+        final state = b.state as BookingSelecting;
+        check(state.pricingType).isNull();
+        check(state.sessionPrice).isNull();
+        check(state.blockReason).equals(
+          BookingBlockReason.pricingQuoteUnavailable,
+        );
+        check(state.selectedSlot).isNotNull();
+        check(state.canSubmit).isFalse();
+      },
+    );
+
+    blocTest<BookingBloc, BookingState>(
+      'free teacher in paid market quote transport failure keeps pricing unknown',
+      build: () {
+        teacherRepo.teachers = [
+          makeTeacher(
+            id: 'teacher_1',
+            pricingType: SessionPricingType.free,
+            price: null,
+          ),
+        ];
+        marketConfigRepo.marketConfigOverride = _paidMarketConfig();
+        return buildWithQuote(
+          FakeSessionPricingQuoteGateway(
+            failure: const NetworkFailure(),
+          ),
+        );
+      },
+      act: (b) async {
+        openScreen(b);
+        await b.stream.firstWhere(
+          (s) => s is BookingSelecting && !s.isQuoteLoading,
+        );
+        final selecting = b.state as BookingSelecting;
+        b.add(SlotSelected(selecting.availableSlots.first));
+      },
+      verify: (b) {
+        final state = b.state as BookingSelecting;
+        check(state.pricingType).isNull();
+        check(state.sessionPrice).isNull();
+        check(state.blockReason).equals(
+          BookingBlockReason.pricingQuoteUnavailable,
+        );
+        check(state.selectedSlot).isNotNull();
+        check(state.canSubmit).isFalse();
+      },
+    );
+
+    blocTest<BookingBloc, BookingState>(
+      'admin booking disabled quote failure surfaces blockReason and blocks submit',
+      build: () => buildWithQuote(
+        FakeSessionPricingQuoteGateway(
+          failure: const PlatformBookingDisabledFailure(),
+        ),
+      ),
+      act: (b) async {
+        openScreen(b);
+        await b.stream.firstWhere(
+          (s) => s is BookingSelecting && !s.isQuoteLoading,
+        );
+        final selecting = b.state as BookingSelecting;
+        b.add(SlotSelected(selecting.availableSlots.first));
+      },
+      verify: (b) {
+        final state = b.state as BookingSelecting;
+        check(
+          state.blockReason,
+        ).equals(BookingBlockReason.bookingDisabledByAdmin);
+        check(state.isPaymentBlocked).isTrue();
+        // Posting the admin-disabled banner must NOT fall back to the client
+        // preview, which would hide the block and let the student submit.
+        check(state.selectedSlot).isNotNull();
+        check(state.canSubmit).isFalse();
+      },
+    );
+
+    blocTest<BookingBloc, BookingState>(
+      'pricing config missing quote failure surfaces blockReason and blocks submit',
+      build: () => buildWithQuote(
+        FakeSessionPricingQuoteGateway(
+          failure: const PricingConfigMissingFailure(),
+        ),
+      ),
+      act: (b) async {
+        openScreen(b);
+        await b.stream.firstWhere(
+          (s) => s is BookingSelecting && !s.isQuoteLoading,
+        );
+        final selecting = b.state as BookingSelecting;
+        b.add(SlotSelected(selecting.availableSlots.first));
+      },
+      verify: (b) {
+        final state = b.state as BookingSelecting;
+        check(
+          state.blockReason,
+        ).equals(BookingBlockReason.pricingConfigMissing);
+        check(state.isPaymentBlocked).isTrue();
+        check(state.selectedSlot).isNotNull();
+        check(state.canSubmit).isFalse();
+      },
+    );
+
+    blocTest<BookingBloc, BookingState>(
+      'teacher not bookable quote failure surfaces blockReason',
+      build: () => buildWithQuote(
+        FakeSessionPricingQuoteGateway(
+          failure: const TeacherNotWhitelistedFailure(),
+        ),
+      ),
+      act: openScreen,
+      skip: 2,
+      verify: (b) {
+        final state = b.state as BookingSelecting;
+        check(state.blockReason).equals(BookingBlockReason.teacherNotBookable);
+        check(state.canSubmit).isFalse();
+      },
+    );
+
+    blocTest<BookingBloc, BookingState>(
+      'shows slots with a loading price section before the quote resolves',
+      build: () => buildWithQuote(
+        FakeSessionPricingQuoteGateway(
+          quote: const SessionPricingQuote(
+            pricingType: SessionPricingType.free,
+            amount: 0,
+            currencyCode: 'USD',
+            paymentRequired: false,
+            paymentProviderAvailable: false,
+            bookingEnabled: true,
+            quranSessionsEnabled: true,
+            effectivePricingSource: EffectivePricingSource.marketConfig,
+            blockReason: BookingBlockReason.none,
+          ),
+          quoteDelay: const Duration(milliseconds: 200),
+        ),
+      ),
+      act: openScreen,
+      wait: const Duration(milliseconds: 400),
+      expect: () => [
+        isA<BookingEligibilityChecking>(),
+        isA<BookingSlotsLoading>(),
+        // Teacher + slots render immediately with the price section still
+        // loading and submit disabled.
+        isA<BookingSelecting>()
+            .having((s) => s.isQuoteLoading, 'isQuoteLoading', isTrue)
+            .having((s) => s.availableSlots, 'availableSlots', isNotEmpty)
+            .having((s) => s.canSubmit, 'canSubmit', isFalse),
+        // Then the quote patches the price section without a full reload.
+        isA<BookingSelecting>()
+            .having((s) => s.isQuoteLoading, 'isQuoteLoading', isFalse)
+            .having(
+              (s) => s.pricingType,
+              'pricingType',
+              SessionPricingType.free,
+            ),
+      ],
+    );
+
+    blocTest<BookingBloc, BookingState>(
+      'a single screen open fetches the quote exactly once',
+      build: () {
+        gateway = FakeSessionPricingQuoteGateway(
+          quote: const SessionPricingQuote(
+            pricingType: SessionPricingType.free,
+            amount: 0,
+            currencyCode: 'USD',
+            paymentRequired: false,
+            paymentProviderAvailable: false,
+            bookingEnabled: true,
+            quranSessionsEnabled: true,
+            effectivePricingSource: EffectivePricingSource.marketConfig,
+            blockReason: BookingBlockReason.none,
+          ),
+        );
+        return buildWithQuote(gateway);
+      },
+      act: (b) async {
+        openScreen(b);
+        await b.stream.firstWhere(
+          (s) => s is BookingSelecting && !s.isQuoteLoading,
+        );
+      },
+      verify: (b) {
+        check(gateway.perTeacherCallCount).equals(1);
+      },
+    );
+
+    blocTest<BookingBloc, BookingState>(
+      'retrying the quote refetches only pricing and keeps slots + selection',
+      build: () {
+        gateway = FakeSessionPricingQuoteGateway(
+          failure: const NetworkFailure(),
+        );
+        return buildWithQuote(gateway);
+      },
+      act: (b) async {
+        openScreen(b);
+        // Transport failure: pricing unavailable, submit blocked.
+        await b.stream.firstWhere(
+          (s) => s is BookingSelecting && !s.isQuoteLoading,
+        );
+        final selecting = b.state as BookingSelecting;
+        b.add(SlotSelected(selecting.availableSlots.first));
+        await b.stream.firstWhere(
+          (s) => s is BookingSelecting && s.selectedSlot != null,
+        );
+        // Recover the backend, then retry ONLY the quote.
+        gateway.failure = null;
+        gateway.quote = const SessionPricingQuote(
+          pricingType: SessionPricingType.free,
+          amount: 0,
+          currencyCode: 'USD',
+          paymentRequired: false,
+          paymentProviderAvailable: false,
+          bookingEnabled: true,
+          quranSessionsEnabled: true,
+          effectivePricingSource: EffectivePricingSource.marketConfig,
+          blockReason: BookingBlockReason.none,
+        );
+        b.add(const BookingQuoteRetried(teacherId: 'teacher_1'));
+        await b.stream.firstWhere(
+          (s) => s is BookingSelecting && !s.isQuoteLoading && s.canSubmit,
+        );
+      },
+      verify: (b) {
+        final state = b.state as BookingSelecting;
+        check(state.blockReason).equals(BookingBlockReason.none);
+        check(state.pricingType).equals(SessionPricingType.free);
+        check(state.selectedSlot).isNotNull();
+        check(state.canSubmit).isTrue();
+        // Only the quote refetched (open + retry); the schedule/profile were
+        // never reloaded.
+        check(gateway.perTeacherCallCount).equals(2);
+      },
+    );
+  });
 }
 
 TeacherProfile _teacherProfile({required String? externalMeetingUrl}) =>
@@ -394,3 +1010,26 @@ TeacherProfile _teacherProfile({required String? externalMeetingUrl}) =>
         updatedAt: DateTime.utc(2026, 1, 1),
       ),
     );
+
+MarketConfig _paidMarketConfig() => const MarketConfig(
+  countryCode: 'EG',
+  countryName: 'Egypt',
+  currencyCode: 'EGP',
+  defaultCityId: 'cairo',
+  isEnabled: true,
+  cities: [
+    CityConfig(
+      cityId: 'cairo',
+      cityName: 'Cairo',
+      countryCode: 'EG',
+      timezone: 'Africa/Cairo',
+      currencyCode: 'EGP',
+      isEnabled: true,
+      minSessionPrice: 100,
+      maxSessionPrice: 100,
+    ),
+  ],
+  minSessionPrice: 100,
+  maxSessionPrice: 100,
+  platformCommissionPercent: 0,
+);

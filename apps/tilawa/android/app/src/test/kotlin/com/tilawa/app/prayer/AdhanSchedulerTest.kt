@@ -75,17 +75,41 @@ class AdhanSchedulerTest {
     }
 
     @Test
-    fun `schedule returns false when exact alarms unavailable`() {
+    fun `schedule uses native inexact fallback when exact alarms unavailable`() {
         val context = ApplicationProvider.getApplicationContext<android.content.Context>()
         val mockAM = mockk<PrayerAlarmManager>(relaxed = true)
         val mockST = mockk<PrayerStorage>(relaxed = true)
 
         AdhanScheduler.setDependencies(mockST, mockAM)
         every { mockAM.canScheduleExact() } returns false
+        every {
+            mockAM.scheduleInexact(1, "fajr", "fajr", 1000L, "adhan_fajr")
+        } returns true
+
+        val result = AdhanScheduler.schedule(context, 1, "fajr", "fajr", 1000L)
+
+        assertTrue(result)
+        verify { mockAM.scheduleInexact(1, "fajr", "fajr", 1000L, "adhan_fajr") }
+        verify(exactly = 0) { mockAM.scheduleExact(any(), any(), any(), any(), any()) }
+        verify { mockST.addActiveId(1) }
+    }
+
+    @Test
+    fun `schedule returns false when native fallback also fails`() {
+        val context = ApplicationProvider.getApplicationContext<android.content.Context>()
+        val mockAM = mockk<PrayerAlarmManager>(relaxed = true)
+        val mockST = mockk<PrayerStorage>(relaxed = true)
+
+        AdhanScheduler.setDependencies(mockST, mockAM)
+        every { mockAM.canScheduleExact() } returns false
+        every {
+            mockAM.scheduleInexact(1, "fajr", "fajr", 1000L, "adhan_fajr")
+        } returns false
 
         val result = AdhanScheduler.schedule(context, 1, "fajr", "fajr", 1000L)
 
         assertFalse(result)
+        verify { mockAM.scheduleInexact(1, "fajr", "fajr", 1000L, "adhan_fajr") }
         verify(exactly = 0) { mockST.addActiveId(any()) }
     }
 
@@ -119,5 +143,35 @@ class AdhanSchedulerTest {
 
         assertTrue(result)
         verify { mockAM.scheduleExact(3, "fajr", "fajr", 5000L, "adhan_fajr") }
+    }
+
+    @Test
+    fun `schedule with location and language uses inexact fallback`() {
+        val context = ApplicationProvider.getApplicationContext<android.content.Context>()
+        val mockAM = mockk<PrayerAlarmManager>(relaxed = true)
+        val mockST = mockk<PrayerStorage>(relaxed = true)
+
+        AdhanScheduler.setDependencies(mockST, mockAM)
+        every { mockAM.canScheduleExact() } returns false
+        every {
+            mockAM.scheduleInexact(1, "fajr", "fajr", 1000L, "adhan_fajr", "Cairo", "ar")
+        } returns true
+
+        val result = AdhanScheduler.schedule(
+            context,
+            1,
+            "fajr",
+            "fajr",
+            1000L,
+            "adhan_fajr",
+            "Cairo",
+            "ar",
+        )
+
+        assertTrue(result)
+        verify {
+            mockAM.scheduleInexact(1, "fajr", "fajr", 1000L, "adhan_fajr", "Cairo", "ar")
+        }
+        verify { mockST.addActiveId(1) }
     }
 }

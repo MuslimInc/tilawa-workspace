@@ -1,4 +1,4 @@
-name: Android Release (Google Play)
+name: Android Staging (Video QA) Release (Google Play)
 
 # Build a signed Android App Bundle with Flutter and publish it to Google
 # Play. Trigger it from the GitHub mobile app / web ("Actions" tab -> this
@@ -6,6 +6,13 @@ name: Android Release (Google Play)
 #
 # IMPORTANT: GitHub only shows the "Run workflow" button once this file is on
 # the repository's DEFAULT branch. Merge it first, then trigger from mobile.
+#
+# PROMOTION POLICY — feature flags are compiled into the AAB via dart-defines
+# (TILAWA_DISTRIBUTION=play_<track> plus any testing-only flags below). An
+# internal/alpha/beta artifact therefore carries closed-testing behaviour with
+# it. NEVER promote a testing-track AAB to production in the Play Console;
+# always re-run this workflow with track=production so production defaults
+# (play_production, all testing flags off) are compiled in.
 #
 # Required repository secrets (Settings -> Secrets and variables -> Actions):
 #   ANDROID_KEYSTORE_BASE64   - upload keystore (.jks) as base64
@@ -28,13 +35,23 @@ on:
         required: true
       build_name:
         description: "Version name, e.g. 1.0.8"
+        default: "2.1.2"
         required: true
       build_number:
         description: "Version code, e.g. 40 (must be higher than the last upload)"
+        default: "74"
         required: true
       rollout:
         description: "Production staged-rollout fraction (0.0-1.0). 1.0 = full."
         default: "1.0"
+        required: false
+      learn_quran_student:
+        description: >-
+          Enable the Learn Quran student hub (closed testing only). Rejected
+          when track=production — the resulting AAB must never be promoted to
+          production.
+        type: boolean
+        default: false
         required: false
 
 permissions:
@@ -50,6 +67,14 @@ jobs:
     runs-on: ubuntu-latest
     timeout-minutes: 60
     steps:
+      - name: Guard — Learn Quran student flag is testing-tracks only
+        if: ${{ inputs.learn_quran_student && inputs.track == 'production' }}
+        run: |
+          echo "::error::learn_quran_student=true is not allowed with track=production." \
+            "The Learn Quran student hub is gated to closed testing;" \
+            "re-run with track=internal/alpha/beta or disable the flag."
+          exit 1
+
       - name: Checkout
         uses: actions/checkout@v6
 
@@ -79,9 +104,9 @@ jobs:
       - name: Resolve workspace dependencies
         run: flutter pub get
 
-      - name: Exclude RTC native SDKs (all Play tracks)
+      - name: Include RTC native SDKs for Video QA
         working-directory: apps/tilawa
-        run: dart run tool/configure_rtc_deps.dart --stub
+        run: dart run tool/configure_rtc_deps.dart --sdk
 
       - name: Refresh dependencies after RTC configure
         run: flutter pub get
@@ -136,12 +161,17 @@ jobs:
           # still AOT-compiles all ABIs unless --target-platform is set (they
           # do not conflict — unlike --split-per-abi).
           flutter build appbundle --release \
+            --flavor production \
+            --dart-define-from-file=env/staging.json \
+            --dart-define-from-file=env/staging.video.local.json.example \
+            --dart-define=TILAWA_LAUNCH_AGORA_APP_ID=${{ secrets.AGORA_APP_ID }} \
             --target-platform android-arm64 \
             --obfuscate \
             --split-debug-info=build/symbols \
             --build-name=${{ inputs.build_name }} \
             --build-number=${{ inputs.build_number }} \
-            --dart-define=TILAWA_DISTRIBUTION=play_${{ inputs.track }}
+            --dart-define=TILAWA_DISTRIBUTION=play_${{ inputs.track }} \
+            --dart-define=TILAWA_LAUNCH_LEARN_QURAN_STUDENT_FEATURE_ENABLED=${{ inputs.learn_quran_student && inputs.track != 'production' }}
 
       - name: Upload debug symbols
         if: always()
@@ -156,16 +186,30 @@ jobs:
         with:
           serviceAccountJsonPlainText: ${{ secrets.PLAY_SERVICE_ACCOUNT_JSON }}
           packageName: com.tilawa.app
-          releaseFiles: apps/tilawa/build/app/outputs/bundle/release/app-release.aab
+          releaseFiles: apps/tilawa/build/app/outputs/bundle/productionRelease/app-production-release.aab
           tracks: ${{ inputs.track }}
           # Staged rollout only applies to production with a fraction < 1.0.
           status: ${{ (inputs.track == 'production' && inputs.rollout != '1.0') && 'inProgress' || 'completed' }}
           userFraction: ${{ (inputs.track == 'production' && inputs.rollout != '1.0') && inputs.rollout || '' }}
+
+      - name: Warn — do not promote testing artifacts to production
+        if: ${{ inputs.track != 'production' }}
+        run: |
+          {
+            echo "## ⚠️ Do NOT promote this AAB to production"
+            echo ""
+            echo "This artifact was compiled for **play_${{ inputs.track }}**:"
+            echo "- Learn Quran student hub: **${{ inputs.learn_quran_student && 'ENABLED' || 'disabled' }}**"
+            echo "- Closed-testing flag defaults (booking, teacher application, dashboard summary read) are compiled **ON** for non-production distributions."
+            echo ""
+            echo "Production releases must be rebuilt with \`track=production\` so play_production defaults apply."
+          } >> "$GITHUB_STEP_SUMMARY"
+          echo "::warning::play_${{ inputs.track }} artifact — never promote to production in Play Console; rebuild with track=production instead."
 
       - name: Upload AAB as build artifact
         if: always()
         uses: actions/upload-artifact@v7
         with:
           name: app-release-aab
-          path: apps/tilawa/build/app/outputs/bundle/release/app-release.aab
+          path: apps/tilawa/build/app/outputs/bundle/productionRelease/app-production-release.aab
           if-no-files-found: ignore

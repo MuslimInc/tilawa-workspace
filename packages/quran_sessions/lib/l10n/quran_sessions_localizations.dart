@@ -239,90 +239,6 @@ abstract class QuranSessionsLocalizations {
   /// **'Your account is suspended. Please contact support.'**
   String get accountBlocked;
 
-  /// No description provided for @guardianApprovalRequired.
-  ///
-  /// In en, this message translates to:
-  /// **'Booking for this student requires guardian approval first.'**
-  String get guardianApprovalRequired;
-
-  /// No description provided for @guardianApprovalTitle.
-  ///
-  /// In en, this message translates to:
-  /// **'Guardian approval'**
-  String get guardianApprovalTitle;
-
-  /// No description provided for @guardianApprovalBody.
-  ///
-  /// In en, this message translates to:
-  /// **'A parent or guardian must sign in on this device and confirm that they allow QuranTutor bookings for this student account.'**
-  String get guardianApprovalBody;
-
-  /// No description provided for @guardianApprovalStudentIdLabel.
-  ///
-  /// In en, this message translates to:
-  /// **'Student account ID'**
-  String get guardianApprovalStudentIdLabel;
-
-  /// No description provided for @guardianApprovalStudentIdHint.
-  ///
-  /// In en, this message translates to:
-  /// **'Child student user ID'**
-  String get guardianApprovalStudentIdHint;
-
-  /// No description provided for @guardianApprovalConfirm.
-  ///
-  /// In en, this message translates to:
-  /// **'Approve bookings'**
-  String get guardianApprovalConfirm;
-
-  /// No description provided for @guardianApprovalCaptured.
-  ///
-  /// In en, this message translates to:
-  /// **'Guardian approval recorded. You can return to booking.'**
-  String get guardianApprovalCaptured;
-
-  /// No description provided for @guardianApprovalSetupAction.
-  ///
-  /// In en, this message translates to:
-  /// **'Set up guardian approval'**
-  String get guardianApprovalSetupAction;
-
-  /// No description provided for @guardianDashboardTitle.
-  ///
-  /// In en, this message translates to:
-  /// **'Guardian hub'**
-  String get guardianDashboardTitle;
-
-  /// No description provided for @guardianDashboardIntroTitle.
-  ///
-  /// In en, this message translates to:
-  /// **'Child session bookings'**
-  String get guardianDashboardIntroTitle;
-
-  /// No description provided for @guardianDashboardIntroBody.
-  ///
-  /// In en, this message translates to:
-  /// **'Approve QuranTutor bookings for your child on this device. You will confirm consent once; the student can then complete booking.'**
-  String get guardianDashboardIntroBody;
-
-  /// No description provided for @guardianDashboardApproveAction.
-  ///
-  /// In en, this message translates to:
-  /// **'Approve child bookings'**
-  String get guardianDashboardApproveAction;
-
-  /// No description provided for @guardianDashboardOpenAction.
-  ///
-  /// In en, this message translates to:
-  /// **'Open guardian hub'**
-  String get guardianDashboardOpenAction;
-
-  /// No description provided for @guardianDashboardDeferredNote.
-  ///
-  /// In en, this message translates to:
-  /// **'Upcoming child sessions and pending approvals in one list require guardian account linking — coming after MVP auth roles.'**
-  String get guardianDashboardDeferredNote;
-
   /// No description provided for @sessionRevisionPracticeUpcomingTitle.
   ///
   /// In en, this message translates to:
@@ -388,6 +304,24 @@ abstract class QuranSessionsLocalizations {
   /// In en, this message translates to:
   /// **'Sessions are not available in your country right now.'**
   String get marketNotEnabled;
+
+  /// No description provided for @teacherNotWhitelisted.
+  ///
+  /// In en, this message translates to:
+  /// **'This teacher is not currently accepting bookings in your region.'**
+  String get teacherNotWhitelisted;
+
+  /// No description provided for @minNoticeViolation.
+  ///
+  /// In en, this message translates to:
+  /// **'You must book at least {minNoticeMinutes} minutes in advance.'**
+  String minNoticeViolation(int minNoticeMinutes);
+
+  /// No description provided for @maxUpcomingExceeded.
+  ///
+  /// In en, this message translates to:
+  /// **'You have reached the maximum limit of {maxUpcoming} upcoming sessions.'**
+  String maxUpcomingExceeded(int maxUpcoming);
 
   /// No description provided for @marketCatalogEmpty.
   ///
@@ -568,6 +502,12 @@ abstract class QuranSessionsLocalizations {
   /// In en, this message translates to:
   /// **'We need this information to match you with the right teacher and show correct pricing for your region.'**
   String get profileCompletionSubtitle;
+
+  /// No description provided for @profileCompletionLearnQuranSubtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'We need a few details to prepare your Quran session booking.'**
+  String get profileCompletionLearnQuranSubtitle;
 
   /// No description provided for @profileFieldGender.
   ///
@@ -851,6 +791,12 @@ abstract class QuranSessionsLocalizations {
   /// **'Upcoming'**
   String get sessionsTabUpcoming;
 
+  /// No description provided for @sessionsTabPending.
+  ///
+  /// In en, this message translates to:
+  /// **'Pending'**
+  String get sessionsTabPending;
+
   /// No description provided for @sessionsTabPast.
   ///
   /// In en, this message translates to:
@@ -862,6 +808,12 @@ abstract class QuranSessionsLocalizations {
   /// In en, this message translates to:
   /// **'Cancelled'**
   String get sessionsTabCancelled;
+
+  /// No description provided for @noPendingSessions.
+  ///
+  /// In en, this message translates to:
+  /// **'No pending sessions'**
+  String get noPendingSessions;
 
   /// No description provided for @bookAgainAction.
   ///
@@ -1049,6 +1001,54 @@ abstract class QuranSessionsLocalizations {
   /// **'This call link expired or is invalid. Tap Join again to get a fresh connection.'**
   String get rtcCallJoinInvalidToken;
 
+  /// No description provided for @liveSessionAlreadyActiveMessage.
+  ///
+  /// In en, this message translates to:
+  /// **'This session is already active on another device.'**
+  String get liveSessionAlreadyActiveMessage;
+
+  /// No description provided for @liveSessionTakeoverTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Active on another device'**
+  String get liveSessionTakeoverTitle;
+
+  /// No description provided for @liveSessionTakeoverBody.
+  ///
+  /// In en, this message translates to:
+  /// **'You\'re already in this session on another device. Switch to this device? The other device will be disconnected.'**
+  String get liveSessionTakeoverBody;
+
+  /// No description provided for @liveSessionTakeoverSwitch.
+  ///
+  /// In en, this message translates to:
+  /// **'Switch to this device'**
+  String get liveSessionTakeoverSwitch;
+
+  /// No description provided for @liveSessionTakeoverCancel.
+  ///
+  /// In en, this message translates to:
+  /// **'Cancel'**
+  String get liveSessionTakeoverCancel;
+
+  /// No description provided for @liveSessionTakenOverTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Moved to another device'**
+  String get liveSessionTakenOverTitle;
+
+  /// No description provided for @liveSessionTakenOverBody.
+  ///
+  /// In en, this message translates to:
+  /// **'You joined this session on another device.'**
+  String get liveSessionTakenOverBody;
+
+  /// No description provided for @liveSessionTakenOverDismiss.
+  ///
+  /// In en, this message translates to:
+  /// **'OK'**
+  String get liveSessionTakenOverDismiss;
+
   /// No description provided for @webrtcSignalingUnavailable.
   ///
   /// In en, this message translates to:
@@ -1118,7 +1118,7 @@ abstract class QuranSessionsLocalizations {
   /// No description provided for @inAppCallShellFlipCamera.
   ///
   /// In en, this message translates to:
-  /// **'Flip camera'**
+  /// **'Switch camera'**
   String get inAppCallShellFlipCamera;
 
   /// No description provided for @inAppCallShellTurnVideoOn.
@@ -2912,7 +2912,7 @@ abstract class QuranSessionsLocalizations {
   /// No description provided for @completeTeacherProfileFirstMessage.
   ///
   /// In en, this message translates to:
-  /// **'Complete your teacher profile before opening the dashboard.'**
+  /// **'Please complete your teacher profile before you can start teaching students.'**
   String get completeTeacherProfileFirstMessage;
 
   /// No description provided for @teacherDashboard.
@@ -3431,6 +3431,96 @@ abstract class QuranSessionsLocalizations {
   /// **'Charged once when you confirm (sandbox only).'**
   String get bookingPricePerSessionHint;
 
+  /// No description provided for @bookingPaymentUnavailableNotice.
+  ///
+  /// In en, this message translates to:
+  /// **'This session requires payment, but payment is not available yet. Booking is temporarily unavailable.'**
+  String get bookingPaymentUnavailableNotice;
+
+  /// No description provided for @pricingQuoteUnavailableTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'We could not verify the session price right now.'**
+  String get pricingQuoteUnavailableTitle;
+
+  /// No description provided for @pricingQuoteUnavailableSubtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Please check your connection and try again.'**
+  String get pricingQuoteUnavailableSubtitle;
+
+  /// No description provided for @bookingPreparingPaymentDetails.
+  ///
+  /// In en, this message translates to:
+  /// **'Preparing payment details…'**
+  String get bookingPreparingPaymentDetails;
+
+  /// No description provided for @bookingPaidUnavailableTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Paid booking is currently unavailable.'**
+  String get bookingPaidUnavailableTitle;
+
+  /// No description provided for @bookingPaidUnavailableSubtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Paid bookings are temporarily unavailable. Please try again later.'**
+  String get bookingPaidUnavailableSubtitle;
+
+  /// No description provided for @bookingDisabledByAdminTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Booking is currently unavailable.'**
+  String get bookingDisabledByAdminTitle;
+
+  /// No description provided for @bookingDisabledByAdminSubtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Booking has been temporarily paused by the admin.'**
+  String get bookingDisabledByAdminSubtitle;
+
+  /// No description provided for @pricingConfigIncompleteTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Booking is unavailable right now.'**
+  String get pricingConfigIncompleteTitle;
+
+  /// No description provided for @pricingConfigIncompleteSubtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Pricing configuration is incomplete. Please try again later.'**
+  String get pricingConfigIncompleteSubtitle;
+
+  /// No description provided for @marketDisabledBookingTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Booking is unavailable in your area.'**
+  String get marketDisabledBookingTitle;
+
+  /// No description provided for @marketDisabledBookingSubtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'This market is not open for bookings yet.'**
+  String get marketDisabledBookingSubtitle;
+
+  /// No description provided for @teacherNotBookableTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'This teacher is not available for booking.'**
+  String get teacherNotBookableTitle;
+
+  /// No description provided for @teacherNotBookableSubtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Please choose a different teacher.'**
+  String get teacherNotBookableSubtitle;
+
+  /// No description provided for @sessionFreeBadge.
+  ///
+  /// In en, this message translates to:
+  /// **'This session is free.'**
+  String get sessionFreeBadge;
+
   /// No description provided for @walletSandboxNotice.
   ///
   /// In en, this message translates to:
@@ -3788,13 +3878,25 @@ abstract class QuranSessionsLocalizations {
   /// No description provided for @bookingRequestSentSubtitle.
   ///
   /// In en, this message translates to:
-  /// **'The booking is under review.'**
+  /// **'Awaiting teacher approval.'**
   String get bookingRequestSentSubtitle;
+
+  /// No description provided for @sessionAwaitingTeacherApproval.
+  ///
+  /// In en, this message translates to:
+  /// **'Awaiting teacher approval'**
+  String get sessionAwaitingTeacherApproval;
+
+  /// No description provided for @sessionAwaitingTeacherApprovalHint.
+  ///
+  /// In en, this message translates to:
+  /// **'The teacher will accept or decline your request. You\'ll be notified when they respond.'**
+  String get sessionAwaitingTeacherApprovalHint;
 
   /// No description provided for @sessionAwaitingReviewNextSteps.
   ///
   /// In en, this message translates to:
-  /// **'The booking is under review.\nPlease complete the payment using one of the available methods.\nThe session will be confirmed after payment review and teacher confirmation.'**
+  /// **'Awaiting teacher approval.\nThe teacher will accept or decline your booking request.\nYou\'ll be notified when they respond.'**
   String get sessionAwaitingReviewNextSteps;
 
   /// No description provided for @paidSessionNoticeTitle.
@@ -3857,6 +3959,24 @@ abstract class QuranSessionsLocalizations {
   /// **'Copied to clipboard'**
   String get manualPaymentCopiedToClipboard;
 
+  /// No description provided for @bookingAwaitingPaymentVerification.
+  ///
+  /// In en, this message translates to:
+  /// **'Booking is awaiting payment verification.'**
+  String get bookingAwaitingPaymentVerification;
+
+  /// No description provided for @paymentReferenceLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Payment reference'**
+  String get paymentReferenceLabel;
+
+  /// No description provided for @sendReceiptOnWhatsapp.
+  ///
+  /// In en, this message translates to:
+  /// **'Send receipt on WhatsApp'**
+  String get sendReceiptOnWhatsapp;
+
   /// No description provided for @paymentMethodVodafoneCash.
   ///
   /// In en, this message translates to:
@@ -3878,19 +3998,19 @@ abstract class QuranSessionsLocalizations {
   /// No description provided for @bookingUnderReviewTitle.
   ///
   /// In en, this message translates to:
-  /// **'Booking under review'**
+  /// **'Awaiting teacher approval'**
   String get bookingUnderReviewTitle;
 
   /// No description provided for @bookingUnderReviewPaymentHint.
   ///
   /// In en, this message translates to:
-  /// **'Please complete the payment using one of the available methods.'**
+  /// **'The teacher will accept or decline your booking request.'**
   String get bookingUnderReviewPaymentHint;
 
   /// No description provided for @bookingUnderReviewConfirmHint.
   ///
   /// In en, this message translates to:
-  /// **'The booking will be confirmed after payment review and teacher confirmation.'**
+  /// **'You\'ll be notified when the teacher responds.'**
   String get bookingUnderReviewConfirmHint;
 
   /// No description provided for @bookingAcceptedTitle.
@@ -3926,7 +4046,7 @@ abstract class QuranSessionsLocalizations {
   /// No description provided for @sessionStatusBookingUnderReview.
   ///
   /// In en, this message translates to:
-  /// **'Under review'**
+  /// **'Awaiting teacher approval'**
   String get sessionStatusBookingUnderReview;
 
   /// No description provided for @sessionStatusRejectedByTutor.
@@ -3953,6 +4073,18 @@ abstract class QuranSessionsLocalizations {
   /// **'Upcoming sessions'**
   String get upcomingSessionsSectionTitle;
 
+  /// No description provided for @teacherDashboardShowAllSessions.
+  ///
+  /// In en, this message translates to:
+  /// **'Show all ({count})'**
+  String teacherDashboardShowAllSessions(int count);
+
+  /// No description provided for @teacherDashboardShowLessSessions.
+  ///
+  /// In en, this message translates to:
+  /// **'Show less'**
+  String get teacherDashboardShowLessSessions;
+
   /// No description provided for @teacherPendingBookingRequestsEmptyTitle.
   ///
   /// In en, this message translates to:
@@ -3964,6 +4096,24 @@ abstract class QuranSessionsLocalizations {
   /// In en, this message translates to:
   /// **'Student requests will appear here'**
   String get teacherPendingBookingRequestsEmptySubtitle;
+
+  /// No description provided for @teacherDashboardLoadingLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Loading your dashboard'**
+  String get teacherDashboardLoadingLabel;
+
+  /// No description provided for @teacherDashboardRefreshingLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Refreshing'**
+  String get teacherDashboardRefreshingLabel;
+
+  /// No description provided for @teacherDashboardSummaryTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Quick glance'**
+  String get teacherDashboardSummaryTitle;
 
   /// No description provided for @teacherDashboardStatPendingRequests.
   ///
@@ -3988,6 +4138,66 @@ abstract class QuranSessionsLocalizations {
   /// In en, this message translates to:
   /// **'Open slots (14 days)'**
   String get teacherDashboardStatBookableSlotsHorizon;
+
+  /// No description provided for @teacherDashboardCategoriesTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Dashboard categories'**
+  String get teacherDashboardCategoriesTitle;
+
+  /// No description provided for @teacherDashboardCategoriesSubtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Open a category for the full list and actions.'**
+  String get teacherDashboardCategoriesSubtitle;
+
+  /// No description provided for @teacherDashboardViewAsGrid.
+  ///
+  /// In en, this message translates to:
+  /// **'Grid'**
+  String get teacherDashboardViewAsGrid;
+
+  /// No description provided for @teacherDashboardViewAsList.
+  ///
+  /// In en, this message translates to:
+  /// **'List'**
+  String get teacherDashboardViewAsList;
+
+  /// No description provided for @teacherDashboardShowAsGrid.
+  ///
+  /// In en, this message translates to:
+  /// **'Show as grid'**
+  String get teacherDashboardShowAsGrid;
+
+  /// No description provided for @teacherDashboardShowAsList.
+  ///
+  /// In en, this message translates to:
+  /// **'Show as list'**
+  String get teacherDashboardShowAsList;
+
+  /// No description provided for @teacherDashboardOpenCategory.
+  ///
+  /// In en, this message translates to:
+  /// **'Open'**
+  String get teacherDashboardOpenCategory;
+
+  /// No description provided for @teacherDashboardBookingRequestsCategorySubtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Review student requests before they expire.'**
+  String get teacherDashboardBookingRequestsCategorySubtitle;
+
+  /// No description provided for @teacherDashboardUpcomingSessionsCategorySubtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Join sessions, open details, or manage changes.'**
+  String get teacherDashboardUpcomingSessionsCategorySubtitle;
+
+  /// No description provided for @teacherDashboardBookableTimesCategorySubtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Review open slots generated from your weekly schedule.'**
+  String get teacherDashboardBookableTimesCategorySubtitle;
 
   /// No description provided for @teacherDashboardWeeklyScheduleSectionTitle.
   ///
@@ -4064,7 +4274,7 @@ abstract class QuranSessionsLocalizations {
   /// No description provided for @sessionLifecycleBookingUnderReview.
   ///
   /// In en, this message translates to:
-  /// **'Booking under review'**
+  /// **'Awaiting teacher approval'**
   String get sessionLifecycleBookingUnderReview;
 
   /// No description provided for @sessionLifecycleRejectedByTutor.
@@ -4168,6 +4378,30 @@ abstract class QuranSessionsLocalizations {
   /// In en, this message translates to:
   /// **'{count} min'**
   String tutorSessionDurationMinutes(int count);
+
+  /// No description provided for @noFreeTeachersAvailableTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'No teachers available right now'**
+  String get noFreeTeachersAvailableTitle;
+
+  /// No description provided for @noFreeTeachersAvailableSubtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Free teachers are not available at the moment. Please check back later.'**
+  String get noFreeTeachersAvailableSubtitle;
+
+  /// No description provided for @videoOnlyCallTypeLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Video session'**
+  String get videoOnlyCallTypeLabel;
+
+  /// No description provided for @teacherNotBookableForStudent.
+  ///
+  /// In en, this message translates to:
+  /// **'This teacher is not available for booking at the moment.'**
+  String get teacherNotBookableForStudent;
 }
 
 class _QuranSessionsLocalizationsDelegate

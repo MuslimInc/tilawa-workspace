@@ -91,6 +91,18 @@ class _ThrowingAuthRepositoryForPrepare implements AuthRepository {
   Future<AuthResult> signInWithGoogle() async => const AuthResult.cancelled();
 
   @override
+  Future<AuthResult> signInWithEmailPassword({
+    required String email,
+    required String password,
+  }) async => const AuthResult.failure(message: 'not-implemented');
+
+  @override
+  Future<AuthResult> registerWithEmailPassword({
+    required String email,
+    required String password,
+  }) async => const AuthResult.failure(message: 'not-implemented');
+
+  @override
   Future<void> signOut() async {}
 
   @override
@@ -103,6 +115,8 @@ void main() {
   final GetIt getIt = GetIt.instance;
 
   late MockSignInWithGoogleUseCase mockSignInWithGoogleUseCase;
+  late MockSignInWithEmailUseCase mockSignInWithEmailUseCase;
+  late MockRegisterWithEmailUseCase mockRegisterWithEmailUseCase;
   late MockSignOut mockSignOut;
   late MockDeleteAccount mockDeleteAccount;
   late MockGetCurrentUserUseCase mockGetCurrentUserUseCase;
@@ -146,6 +160,8 @@ void main() {
     );
     await getIt.reset();
     mockSignInWithGoogleUseCase = MockSignInWithGoogleUseCase();
+    mockSignInWithEmailUseCase = MockSignInWithEmailUseCase();
+    mockRegisterWithEmailUseCase = MockRegisterWithEmailUseCase();
     mockSignOut = MockSignOut();
     mockDeleteAccount = MockDeleteAccount();
     mockGetCurrentUserUseCase = MockGetCurrentUserUseCase();
@@ -184,6 +200,8 @@ void main() {
 
     authBloc = AuthBloc(
       mockSignInWithGoogleUseCase,
+      mockSignInWithEmailUseCase,
+      mockRegisterWithEmailUseCase,
       mockSignOut,
       mockDeleteAccount,
       mockGetCurrentUserUseCase,
@@ -308,7 +326,6 @@ void main() {
 
       expect(find.text('Welcome to MeMuslim'), findsOneWidget);
       expect(find.text('Sign in with Google'), findsOneWidget);
-      expect(find.text('Privacy policy'), findsOneWidget);
       expect(find.byType(AppLanguageSwitcher), findsOneWidget);
       expect(find.text('English'), findsOneWidget);
       expect(find.text('العربية'), findsOneWidget);
@@ -374,7 +391,10 @@ void main() {
 
       verifyNever(mockSignInWithGoogleUseCase());
       expect(isGoogleButtonLoading(tester), isFalse);
-      expect(find.text('blocked'), findsOneWidget);
+      expect(
+        find.text('Something went wrong. Please try again.'),
+        findsOneWidget,
+      );
     });
 
     testWidgets('manual tap while offline shows message without sign-in flow', (
@@ -458,7 +478,7 @@ void main() {
       await tester.pump();
 
       expect(
-        find.text('Unable to sign in with third-party account'),
+        find.text('Something went wrong. Please try again.'),
         findsOneWidget,
       );
     });
@@ -558,11 +578,10 @@ void main() {
       },
     );
 
-    testWidgets('skips auto sign-in during account deletion flow', (
+    testWidgets('does not auto sign-in on screen load', (
       WidgetTester tester,
     ) async {
       registerAutoSignInPolicy();
-      accountDeletionFlowTracker.markDeletionStarted();
 
       await pumpLoginScreen(tester);
       await pumpLoginInitFrames(tester);
@@ -570,42 +589,51 @@ void main() {
       verifyNever(mockSignInWithGoogleUseCase());
     });
 
-    testWidgets('shows no toast when manual sign-in is cancelled', (
-      WidgetTester tester,
-    ) async {
-      final Completer<AuthResult> signInCompleter = Completer<AuthResult>();
-      when(
-        mockSignInWithGoogleUseCase(),
-      ).thenAnswer((_) => signInCompleter.future);
+    testWidgets(
+      'shows localized cancel toast when manual sign-in is cancelled',
+      (
+        WidgetTester tester,
+      ) async {
+        final Completer<AuthResult> signInCompleter = Completer<AuthResult>();
+        when(
+          mockSignInWithGoogleUseCase(),
+        ).thenAnswer((_) => signInCompleter.future);
 
-      await pumpLoginScreen(tester);
-      await pumpLoginInitFrames(tester);
+        await pumpLoginScreen(tester);
+        await pumpLoginInitFrames(tester);
 
-      await tester.tap(googleButtonFinder());
-      await tester.pump();
-      await tester.runAsync(() async {
-        await authBloc.stream.firstWhere(
-          (AuthState state) => state is AuthLoading,
+        await tester.tap(googleButtonFinder());
+        await tester.pump();
+        await tester.runAsync(() async {
+          await authBloc.stream.firstWhere(
+            (AuthState state) => state is AuthLoading,
+          );
+        });
+        await tester.pump();
+
+        expect(authBloc.state, isA<AuthLoading>());
+
+        await tester.runAsync(() async {
+          signInCompleter.complete(const AuthResult.cancelled());
+          await authBloc.stream.firstWhere(
+            (AuthState state) => state is AuthUnauthenticated,
+          );
+        });
+        await tester.pump();
+        await tester.pump(const Duration(milliseconds: 400));
+
+        expect(authBloc.state, isA<AuthUnauthenticated>());
+        expect(
+          find.textContaining('No Google account found on this device'),
+          findsNothing,
         );
-      });
-      await tester.pump();
-
-      expect(authBloc.state, isA<AuthLoading>());
-
-      signInCompleter.complete(const AuthResult.cancelled());
-      await tester.pump();
-      await tester.pump();
-
-      expect(authBloc.state, isA<AuthUnauthenticated>());
-      expect(
-        find.textContaining('No Google account found on this device'),
-        findsNothing,
-      );
-      expect(
-        find.text('Unable to sign in with third-party account'),
-        findsNothing,
-      );
-    });
+        expect(
+          find.text('Unable to sign in with third-party account'),
+          findsNothing,
+        );
+        expect(find.text('Sign-in cancelled.'), findsOneWidget);
+      },
+    );
 
     testWidgets(
       'surfaces noGoogleAccounts when CM is unavailable and chooser dismissed',
@@ -666,6 +694,52 @@ void main() {
       );
 
       expect(authBloc.state, isA<AuthError>());
+    });
+
+    testWidgets('shows email auth entry points on small screens', (
+      WidgetTester tester,
+    ) async {
+      tester.view.physicalSize = const Size(360, 640);
+      tester.view.devicePixelRatio = 1;
+      addTearDown(tester.view.resetPhysicalSize);
+      addTearDown(tester.view.resetDevicePixelRatio);
+
+      await pumpLoginScreen(tester);
+      await pumpLoginInitFrames(tester);
+
+      expect(find.byType(TilawaGoogleSignInButton), findsOneWidget);
+      expect(find.text('Sign in with email'), findsOneWidget);
+      expect(find.text('No account yet? Create one'), findsOneWidget);
+      expect(find.byType(SingleChildScrollView), findsNothing);
+      expect(tester.takeException(), isNull);
+    });
+
+    testWidgets('renders Arabic auth labels when locale is ar', (
+      WidgetTester tester,
+    ) async {
+      await tester.pumpWidget(
+        MaterialApp(
+          theme: AppTheme.getLightTheme(
+            primaryColor: PrimaryColorPreset.defaultPreset.value,
+          ),
+          supportedLocales: AppLocalizations.supportedLocales,
+          localizationsDelegates: AppLocalizations.localizationsDelegates,
+          locale: const Locale('ar'),
+          builder: (BuildContext context, Widget? child) {
+            return TilawaFeedbackHost(child: child!);
+          },
+          home: MultiBlocProvider(
+            providers: <BlocProvider<dynamic>>[
+              BlocProvider<AuthBloc>.value(value: authBloc),
+              BlocProvider<LocalizationBloc>.value(value: localizationBloc),
+            ],
+            child: const LoginScreen(),
+          ),
+        ),
+      );
+      await pumpLoginInitFrames(tester);
+
+      expect(find.text('تسجيل الدخول بالبريد'), findsOneWidget);
     });
 
     testWidgets('marks splash handoff painted when still false on init', (

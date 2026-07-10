@@ -10,12 +10,7 @@ import { nextSortForField } from '../../utils/sortable-column.util';
   imports: [CommonModule],
   template: `
     <th [class]="headerClass" scope="col">
-      <button
-        type="button"
-        class="tilawa-sort-btn"
-        [attr.aria-sort]="ariaSort"
-        (click)="onClick()"
-      >
+      <button type="button" class="tilawa-sort-btn" [attr.aria-sort]="ariaSort" (click)="onClick()">
         <span>{{ label }}</span>
         <span class="tilawa-sort-icon" aria-hidden="true">{{ sortIcon }}</span>
       </button>

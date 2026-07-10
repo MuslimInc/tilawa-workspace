@@ -7,8 +7,9 @@ import 'package:tilawa_ui_kit/tilawa_ui_kit.dart';
 
 import '../failure_ui/quran_sessions_failure_body.dart';
 import '../layout/quran_sessions_scroll_padding.dart';
+import '../widgets/live_session_takeover_dialog.dart';
 
-enum _MySessionsTab { upcoming, past, cancelled }
+enum _MySessionsTab { upcoming, pending, past, cancelled }
 
 class MySessionsScreen extends StatefulWidget {
   const MySessionsScreen({
@@ -22,7 +23,6 @@ class MySessionsScreen extends StatefulWidget {
     this.onBookAgainRequested,
     this.createCallControlGateway,
     this.createCallTelemetry,
-    this.buildCallSurface,
   });
 
   final String studentId;
@@ -48,7 +48,6 @@ class MySessionsScreen extends StatefulWidget {
 
   final SessionCallControlGatewayFactory? createCallControlGateway;
   final CallTelemetryCoordinatorFactory? createCallTelemetry;
-  final InAppCallSurfaceBuilder? buildCallSurface;
 
   @override
   State<MySessionsScreen> createState() => _MySessionsScreenState();
@@ -113,7 +112,6 @@ class _MySessionsScreenState extends State<MySessionsScreen> {
                   session.teacherId,
                 ),
                 participantSubtitle: l10n.callTypeLabel(session.callType),
-                buildCallSurface: widget.buildCallSurface,
                 createCallControlGateway: widget.createCallControlGateway,
                 createCallTelemetry: widget.createCallTelemetry,
               );
@@ -157,11 +155,25 @@ class _MySessionsScreenState extends State<MySessionsScreen> {
                 );
               }
               if (state is MySessionsSuccess && state.joinFailure != null) {
-                TilawaFeedback.showToast(
-                  context,
-                  message: state.joinFailure!.toLocalizedMessage(context),
-                  variant: TilawaFeedbackVariant.error,
-                );
+                final failure = state.joinFailure!;
+                if (failure is LiveSessionAlreadyActiveFailure) {
+                  showLiveSessionTakeoverDialog(
+                    context,
+                    failure,
+                    onSwitch: () => context.read<MySessionsBloc>().add(
+                      SessionJoinRequested(
+                        sessionId: failure.sessionId,
+                        forceTakeover: true,
+                      ),
+                    ),
+                  );
+                } else {
+                  TilawaFeedback.showToast(
+                    context,
+                    message: failure.toLocalizedMessage(context),
+                    variant: TilawaFeedbackVariant.error,
+                  );
+                }
               }
             },
           ),
@@ -202,7 +214,11 @@ class _MySessionsScreenState extends State<MySessionsScreen> {
   }
 
   QuranSession? _findSession(MySessionsSuccess state, String sessionId) {
-    for (final session in state.upcoming) {
+    for (final session in [
+      ...state.upcoming,
+      ...state.pending,
+      ...state.past,
+    ]) {
       if (session.id == sessionId) {
         return session;
       }
@@ -239,9 +255,10 @@ class _MySessionsScreenState extends State<MySessionsScreen> {
     final reason = await showCancelSessionSheet(
       context,
       sessionStartsAt: session.startsAt,
-      pricingType: SessionPricingType.free,
-      // Egypt pilot sessions are manual/off-app paid; suppress free-session copy.
-      isManualPayment: true,
+      pricingType: session.isManualPayment
+          ? SessionPricingType.fixedPerSession
+          : SessionPricingType.free,
+      isManualPayment: session.isManualPayment,
     );
     if (reason != null && mounted) {
       context.read<MySessionsBloc>().add(
@@ -357,18 +374,15 @@ class _SuccessBody extends StatelessWidget {
         (scrollBottomPadding ?? quranSessionsDefaultScrollBottomPadding)(
           context,
         );
-    final cancelled = _cancelledSessions(success);
-    final upcomingSessions = success.upcoming
-        .where(SessionListClassifier.isStudentUpcoming)
-        .toList();
+    final upcomingSessions = success.upcoming;
     final sessions = switch (selectedTab) {
       _MySessionsTab.upcoming => upcomingSessions,
-      _MySessionsTab.past =>
-        success.past.where((session) => !_isCancelledSession(session)).toList(),
-      _MySessionsTab.cancelled => cancelled,
+      _MySessionsTab.pending => success.pending,
+      _MySessionsTab.past => success.past,
+      _MySessionsTab.cancelled => success.cancelled,
     };
 
-    return RefreshIndicator(
+    return TilawaRefreshIndicator(
       onRefresh: () async => onReload(),
       child: CustomScrollView(
         slivers: [
@@ -396,6 +410,10 @@ class _SuccessBody extends StatelessWidget {
                     label: l10n.sessionsTabUpcoming,
                   ),
                   TilawaSegment(
+                    value: _MySessionsTab.pending,
+                    label: l10n.sessionsTabPending,
+                  ),
+                  TilawaSegment(
                     value: _MySessionsTab.past,
                     label: l10n.sessionsTabPast,
                   ),
@@ -414,6 +432,7 @@ class _SuccessBody extends StatelessWidget {
                 child: Text(
                   switch (selectedTab) {
                     _MySessionsTab.upcoming => l10n.noUpcomingSessions,
+                    _MySessionsTab.pending => l10n.noPendingSessions,
                     _MySessionsTab.past => l10n.noPastSessions,
                     _MySessionsTab.cancelled => l10n.sessionStatusCancelled,
                   },
@@ -427,11 +446,14 @@ class _SuccessBody extends StatelessWidget {
               itemBuilder: (context, index) {
                 final session = sessions[index];
                 final isUpcomingTab = selectedTab == _MySessionsTab.upcoming;
+                final isPendingTab = selectedTab == _MySessionsTab.pending;
+                final canManageSession = isUpcomingTab || isPendingTab;
                 return QuranSessionCard(
                   session: session,
                   now: now,
                   highlighted: isUpcomingTab && index == 0,
                   teacherName: resolveTeacherName?.call(session.teacherId),
+                  viewerUserId: studentId,
                   variant: isUpcomingTab
                       ? QuranSessionCardVariant.upcoming
                       : QuranSessionCardVariant.past,
@@ -455,7 +477,7 @@ class _SuccessBody extends StatelessWidget {
                         )
                       : null,
                   onCancel:
-                      isUpcomingTab && canStudentCancelQuranSession(session)
+                      canManageSession && canStudentCancelQuranSession(session)
                       ? () => onCancel(session)
                       : null,
                   onBookAgain:
@@ -500,16 +522,6 @@ class _SuccessBody extends StatelessWidget {
       ),
     );
   }
-
-  List<QuranSession> _cancelledSessions(MySessionsSuccess success) {
-    return [
-      ...success.upcoming.where(_isCancelledSession),
-      ...success.past.where(_isCancelledSession),
-    ];
-  }
-
-  bool _isCancelledSession(QuranSession session) =>
-      SessionListClassifier.isCancelledSession(session);
 
   bool _canStudentRequestReschedule(QuranSession session, DateTime now) {
     if (session.effectiveLifecycleStatus.phase !=

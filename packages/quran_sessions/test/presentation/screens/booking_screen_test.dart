@@ -8,95 +8,8 @@ import 'package:quran_sessions/l10n/quran_sessions_localizations.dart';
 import 'package:quran_sessions/quran_sessions.dart';
 import 'package:tilawa_ui_kit/tilawa_ui_kit.dart';
 
-import '../../helpers/availability_test_helpers.dart';
-import '../../helpers/fakes/fake_market_config_repository.dart';
-import '../../helpers/fakes/fake_session_policy_repository.dart';
-import '../../helpers/fakes/fake_session_repository.dart';
-import '../../helpers/fakes/fake_teacher_repository.dart';
-import '../../helpers/fakes/fake_user_profile_repository.dart';
-import '../../helpers/fakes/fake_teacher_profile_repository.dart';
-import '../../helpers/lifecycle_test_helpers.dart';
-
-class _SeededBookingBloc extends BookingBloc {
-  _SeededBookingBloc({required BookingSelecting seed})
-    : super(
-        getAvailability: buildGetTeacherAvailabilityUseCase(
-          scheduleRepository: FakeScheduleRepository(),
-          sessionRepository: FakeSessionRepository(),
-        ),
-        submitBooking: buildSubmitSessionBookingUseCase(
-          getAvailability: buildGetTeacherAvailabilityUseCase(
-            scheduleRepository: FakeScheduleRepository(),
-            sessionRepository: FakeSessionRepository(),
-          ),
-        ),
-        validateEligibility: ValidateBookingEligibilityUseCase(
-          profileRepository: FakeUserProfileRepository(),
-          policyRepository: FakeSessionPolicyRepository(),
-          teacherRepository: FakeTeacherRepository(),
-          marketConfigRepository: FakeMarketConfigRepository(),
-        ),
-        getTeacherProfile: GetTeacherProfileByIdUseCase(
-          FakeTeacherProfileRepository(
-            profile: TeacherProfile(
-              id: 'teacher_1',
-              userId: 'teacher_1',
-              displayName: 'Teacher',
-              verificationStatus: TeacherVerificationStatus.verified,
-              teachingLanguages: const ['ar'],
-              specializations: const ['tajweed'],
-              averageRating: 0,
-              reviewCount: 0,
-              isActive: true,
-              profileCompleteness: TeacherProfileCompletenessStatus.complete,
-              isPubliclyVisible: true,
-              externalMeetingUrl: 'https://meet.google.com/room',
-              createdAt: DateTime.utc(2024, 1, 1),
-              updatedAt: DateTime.utc(2024, 1, 2),
-            ),
-          ),
-        ),
-      ) {
-    emit(seed);
-  }
-
-  @override
-  void add(BookingEvent event) {}
-}
-
-class _SuccessEmittingBookingBloc extends BookingBloc {
-  _SuccessEmittingBookingBloc()
-    : super(
-        getAvailability: buildGetTeacherAvailabilityUseCase(
-          scheduleRepository: FakeScheduleRepository(),
-          sessionRepository: FakeSessionRepository(),
-        ),
-        submitBooking: buildSubmitSessionBookingUseCase(
-          getAvailability: buildGetTeacherAvailabilityUseCase(
-            scheduleRepository: FakeScheduleRepository(),
-            sessionRepository: FakeSessionRepository(),
-          ),
-        ),
-        validateEligibility: ValidateBookingEligibilityUseCase(
-          profileRepository: FakeUserProfileRepository(),
-          policyRepository: FakeSessionPolicyRepository(),
-          teacherRepository: FakeTeacherRepository(),
-          marketConfigRepository: FakeMarketConfigRepository(),
-        ),
-        getTeacherProfile: GetTeacherProfileByIdUseCase(
-          FakeTeacherProfileRepository(),
-        ),
-      ) {
-    emit(
-      const BookingSelecting(teacherId: 'teacher_1', availableSlots: []),
-    );
-  }
-
-  @override
-  void add(BookingEvent event) {}
-
-  void emitSuccess(QuranBooking booking) => emit(BookingSuccess(booking));
-}
+import 'seeded_booking_bloc.dart';
+import 'success_emitting_booking_bloc.dart';
 
 TeacherAvailability _slot(int day) {
   final start = DateTime.utc(2026, 7, day, 10);
@@ -126,7 +39,7 @@ void main() {
         ],
         supportedLocales: QuranSessionsLocalizations.supportedLocales,
         home: BlocProvider<BookingBloc>(
-          create: (_) => _SeededBookingBloc(
+          create: (_) => SeededBookingBloc(
             seed: BookingSelecting(
               teacherId: 'teacher_1',
               availableSlots: slots,
@@ -158,7 +71,7 @@ void main() {
     String? capturedPricingType;
     String? capturedCallType;
 
-    final bloc = _SuccessEmittingBookingBloc();
+    final bloc = SuccessEmittingBookingBloc();
 
     await tester.pumpWidget(
       MaterialApp(
@@ -239,7 +152,7 @@ void main() {
         ],
         supportedLocales: QuranSessionsLocalizations.supportedLocales,
         home: BlocProvider<BookingBloc>(
-          create: (_) => _SeededBookingBloc(
+          create: (_) => SeededBookingBloc(
             seed: BookingSelecting(
               teacherId: 'teacher_1',
               availableSlots: slots,
@@ -277,7 +190,7 @@ void main() {
         ],
         supportedLocales: QuranSessionsLocalizations.supportedLocales,
         home: BlocProvider<BookingBloc>(
-          create: (_) => _SeededBookingBloc(
+          create: (_) => SeededBookingBloc(
             seed: BookingSelecting(
               teacherId: 'teacher_1',
               availableSlots: slots,
@@ -297,27 +210,58 @@ void main() {
     await tester.pumpAndSettle();
 
     expect(find.text('External link'), findsOneWidget);
-    expect(find.text('Voice'), findsOneWidget);
-    expect(find.text('Video'), findsOneWidget);
-
-    final voiceSemantics = tester.getSemantics(find.text('Voice'));
-    final videoSemantics = tester.getSemantics(find.text('Video'));
-    expect(voiceSemantics.flagsCollection.isEnabled, Tristate.isFalse);
-    expect(videoSemantics.flagsCollection.isEnabled, Tristate.isFalse);
-
-    await tester.tap(find.text('Voice'));
-    await tester.pump();
-
-    final externalSemantics = tester.getSemantics(find.text('External link'));
-    expect(externalSemantics.flagsCollection.isSelected, Tristate.isTrue);
-
-    expect(
-      find.text(
-        'Voice sessions are not available yet. Choose external link.',
-      ),
-      findsOneWidget,
-    );
+    // Voice and Video are no longer rendered as disabled segments; the control is hidden.
+    expect(find.text('Voice'), findsNothing);
+    expect(find.text('Video'), findsNothing);
+    expect(find.byType(TilawaSegmentedControl<SessionCallType>), findsNothing);
   });
+
+  testWidgets(
+    'videoOnly policy shows static label instead of segmented control',
+    (
+      tester,
+    ) async {
+      final slots = [_slot(1)];
+
+      await tester.pumpWidget(
+        MaterialApp(
+          theme: AppTheme.getLightTheme(primaryColor: AppColors.defaultPrimary),
+          localizationsDelegates: const [
+            QuranSessionsLocalizations.delegate,
+            GlobalMaterialLocalizations.delegate,
+            GlobalWidgetsLocalizations.delegate,
+          ],
+          supportedLocales: QuranSessionsLocalizations.supportedLocales,
+          home: BlocProvider<BookingBloc>(
+            create: (_) => SeededBookingBloc(
+              seed: BookingSelecting(
+                teacherId: 'teacher_1',
+                availableSlots: slots,
+                selectedSlot: slots.first,
+                selectedCallType: SessionCallType.videoCall,
+                teacherExternalMeetingUrl: null,
+              ),
+            ),
+            child: const BookingScreen(
+              teacherId: 'teacher_1',
+              studentId: 'student_1',
+              sessionModePolicy: SessionModePolicy.videoOnly,
+            ),
+          ),
+        ),
+      );
+      await tester.pumpAndSettle();
+
+      expect(find.text('Video session'), findsOneWidget);
+      // Should NOT show segments for other types
+      expect(find.text('External link'), findsNothing);
+      expect(find.text('Voice'), findsNothing);
+      expect(
+        find.byType(TilawaSegmentedControl<SessionCallType>),
+        findsNothing,
+      );
+    },
+  );
 
   testWidgets('teacher without meeting URL disables external and selects voice', (
     tester,
@@ -334,7 +278,7 @@ void main() {
         ],
         supportedLocales: QuranSessionsLocalizations.supportedLocales,
         home: BlocProvider<BookingBloc>(
-          create: (_) => _SeededBookingBloc(
+          create: (_) => SeededBookingBloc(
             seed: BookingSelecting(
               teacherId: 'teacher_1',
               availableSlots: slots,
@@ -364,4 +308,542 @@ void main() {
       findsOneWidget,
     );
   });
+
+  testWidgets(
+    'paid session shows price summary and price is visible before booking',
+    (tester) async {
+      final slots = [_slot(1)];
+
+      await tester.pumpWidget(
+        MaterialApp(
+          theme: AppTheme.getLightTheme(primaryColor: AppColors.defaultPrimary),
+          localizationsDelegates: const [
+            QuranSessionsLocalizations.delegate,
+            GlobalMaterialLocalizations.delegate,
+            GlobalWidgetsLocalizations.delegate,
+          ],
+          supportedLocales: QuranSessionsLocalizations.supportedLocales,
+          home: BlocProvider<BookingBloc>(
+            create: (_) => SeededBookingBloc(
+              seed: BookingSelecting(
+                teacherId: 'teacher_1',
+                availableSlots: slots,
+                selectedSlot: slots.first,
+                selectedCallType: SessionCallType.videoCall,
+                pricingType: SessionPricingType.fixedPerSession,
+                sessionPrice: const SessionPrice(
+                  amount: 50,
+                  currencyCode: 'EGP',
+                  countryCode: 'EG',
+                  cityId: 'cairo',
+                ),
+                paymentProviderAvailable: true,
+              ),
+            ),
+            child: const BookingScreen(
+              teacherId: 'teacher_1',
+              studentId: 'student_1',
+            ),
+          ),
+        ),
+      );
+      await tester.pumpAndSettle();
+
+      expect(find.text('Session price'), findsOneWidget);
+      expect(find.textContaining('50'), findsWidgets);
+      // Provider available: the confirm CTA stays enabled.
+      final button = tester.widget<TilawaButton>(
+        find.byWidgetPredicate(
+          (w) => w is TilawaButton && w.text == 'Confirm booking',
+        ),
+      );
+      expect(button.onPressed, isNotNull);
+    },
+  );
+
+  testWidgets('manual paid session shows instructions before confirm', (
+    tester,
+  ) async {
+    final slots = [_slot(1)];
+
+    await tester.pumpWidget(
+      MaterialApp(
+        theme: AppTheme.getLightTheme(primaryColor: AppColors.defaultPrimary),
+        localizationsDelegates: const [
+          QuranSessionsLocalizations.delegate,
+          GlobalMaterialLocalizations.delegate,
+          GlobalWidgetsLocalizations.delegate,
+        ],
+        supportedLocales: QuranSessionsLocalizations.supportedLocales,
+        home: BlocProvider<BookingBloc>(
+          create: (_) => SeededBookingBloc(
+            seed: BookingSelecting(
+              teacherId: 'teacher_1',
+              availableSlots: slots,
+              selectedSlot: slots.first,
+              selectedCallType: SessionCallType.videoCall,
+              pricingType: SessionPricingType.free,
+              sessionPrice: const SessionPrice(
+                amount: 125,
+                currencyCode: 'EGP',
+                countryCode: 'EG',
+                cityId: 'cairo',
+              ),
+              manualPaymentPrice: const ManualPaymentPrice(
+                amountMinor: 12500,
+                currencyCode: 'EGP',
+              ),
+              paymentProviderAvailable: true,
+            ),
+          ),
+          child: const BookingScreen(
+            teacherId: 'teacher_1',
+            studentId: 'student_1',
+          ),
+        ),
+      ),
+    );
+    await tester.pumpAndSettle();
+
+    expect(find.text('This session is paid'), findsOneWidget);
+    expect(find.text('Vodafone Cash'), findsOneWidget);
+    expect(find.text('InstaPay'), findsOneWidget);
+    expect(find.text('+201060099009'), findsOneWidget);
+    expect(find.text('Confirm booking'), findsOneWidget);
+  });
+
+  testWidgets(
+    'free session with payment provider disabled shows no payment error '
+    'and enables submit once a slot is selected',
+    (tester) async {
+      final slots = [_slot(1)];
+
+      await tester.pumpWidget(
+        MaterialApp(
+          theme: AppTheme.getLightTheme(primaryColor: AppColors.defaultPrimary),
+          localizationsDelegates: const [
+            QuranSessionsLocalizations.delegate,
+            GlobalMaterialLocalizations.delegate,
+            GlobalWidgetsLocalizations.delegate,
+          ],
+          supportedLocales: QuranSessionsLocalizations.supportedLocales,
+          home: BlocProvider<BookingBloc>(
+            create: (_) => SeededBookingBloc(
+              seed: BookingSelecting(
+                teacherId: 'teacher_1',
+                availableSlots: slots,
+                selectedSlot: slots.first,
+                selectedCallType: SessionCallType.videoCall,
+                pricingType: SessionPricingType.free,
+                sessionPrice: null,
+                // Provider off must not surface any payment error for free.
+                paymentProviderAvailable: false,
+              ),
+            ),
+            child: const BookingScreen(
+              teacherId: 'teacher_1',
+              studentId: 'student_1',
+            ),
+          ),
+        ),
+      );
+      await tester.pumpAndSettle();
+
+      expect(find.text('Free'), findsOneWidget);
+      expect(
+        find.textContaining('payment is not available'),
+        findsNothing,
+      );
+      final button = tester.widget<TilawaButton>(
+        find.byWidgetPredicate(
+          (w) => w is TilawaButton && w.text == 'Confirm booking',
+        ),
+      );
+      expect(button.onPressed, isNotNull);
+    },
+  );
+
+  testWidgets(
+    'paid session with payment provider disabled blocks booking in the UI',
+    (tester) async {
+      final slots = [_slot(1)];
+
+      await tester.pumpWidget(
+        MaterialApp(
+          theme: AppTheme.getLightTheme(primaryColor: AppColors.defaultPrimary),
+          localizationsDelegates: const [
+            QuranSessionsLocalizations.delegate,
+            GlobalMaterialLocalizations.delegate,
+            GlobalWidgetsLocalizations.delegate,
+          ],
+          supportedLocales: QuranSessionsLocalizations.supportedLocales,
+          home: BlocProvider<BookingBloc>(
+            create: (_) => SeededBookingBloc(
+              seed: BookingSelecting(
+                teacherId: 'teacher_1',
+                availableSlots: slots,
+                selectedSlot: slots.first,
+                selectedCallType: SessionCallType.videoCall,
+                pricingType: SessionPricingType.fixedPerSession,
+                sessionPrice: const SessionPrice(
+                  amount: 50,
+                  currencyCode: 'EGP',
+                  countryCode: 'EG',
+                  cityId: 'cairo',
+                ),
+                paymentProviderAvailable: false,
+                blockReason: BookingBlockReason.paymentProviderUnavailable,
+              ),
+            ),
+            child: const BookingScreen(
+              teacherId: 'teacher_1',
+              studentId: 'student_1',
+            ),
+          ),
+        ),
+      );
+      await tester.pumpAndSettle();
+
+      // The server-reported typed block reason maps to the paid-unavailable
+      // banner — not the old generic "payment not available" string.
+      expect(
+        find.text('Paid booking is currently unavailable.'),
+        findsOneWidget,
+      );
+      expect(
+        find.text(
+          'Paid bookings are temporarily unavailable. Please try again later.',
+        ),
+        findsOneWidget,
+      );
+      // The confirm CTA must be disabled even with a slot selected.
+      final button = tester.widget<TilawaButton>(
+        find.byWidgetPredicate(
+          (w) => w is TilawaButton && w.text == 'Confirm booking',
+        ),
+      );
+      expect(button.onPressed, isNull);
+    },
+  );
+
+  testWidgets(
+    'free session shows no payment error and enables the CTA even when the '
+    'payment provider is unavailable',
+    (tester) async {
+      final slots = [_slot(1)];
+
+      await tester.pumpWidget(
+        MaterialApp(
+          theme: AppTheme.getLightTheme(primaryColor: AppColors.defaultPrimary),
+          localizationsDelegates: const [
+            QuranSessionsLocalizations.delegate,
+            GlobalMaterialLocalizations.delegate,
+            GlobalWidgetsLocalizations.delegate,
+          ],
+          supportedLocales: QuranSessionsLocalizations.supportedLocales,
+          home: BlocProvider<BookingBloc>(
+            create: (_) => SeededBookingBloc(
+              seed: BookingSelecting(
+                teacherId: 'teacher_1',
+                availableSlots: slots,
+                selectedSlot: slots.first,
+                selectedCallType: SessionCallType.videoCall,
+                // Free session: no price, provider unavailability is irrelevant.
+                pricingType: SessionPricingType.free,
+                sessionPrice: null,
+                paymentProviderAvailable: false,
+              ),
+            ),
+            child: const BookingScreen(
+              teacherId: 'teacher_1',
+              studentId: 'student_1',
+            ),
+          ),
+        ),
+      );
+      await tester.pumpAndSettle();
+
+      // The paid-session payment-unavailable notice must NOT appear.
+      expect(
+        find.text(
+          'This session requires payment, but payment is not available '
+          'yet. Booking is temporarily unavailable.',
+        ),
+        findsNothing,
+      );
+      // The price summary shows the session as free.
+      expect(find.text('Free'), findsOneWidget);
+      // A valid slot alone enables submission for a free session.
+      final button = tester.widget<TilawaButton>(
+        find.byWidgetPredicate(
+          (w) => w is TilawaButton && w.text == 'Confirm booking',
+        ),
+      );
+      expect(button.onPressed, isNotNull);
+    },
+  );
+
+  testWidgets(
+    'pricing quote unavailable shows retry copy and blocks submit',
+    (tester) async {
+      final slots = [_slot(1)];
+
+      await tester.pumpWidget(
+        MaterialApp(
+          theme: AppTheme.getLightTheme(primaryColor: AppColors.defaultPrimary),
+          localizationsDelegates: const [
+            QuranSessionsLocalizations.delegate,
+            GlobalMaterialLocalizations.delegate,
+            GlobalWidgetsLocalizations.delegate,
+          ],
+          supportedLocales: QuranSessionsLocalizations.supportedLocales,
+          home: BlocProvider<BookingBloc>(
+            create: (_) => SeededBookingBloc(
+              seed: BookingSelecting(
+                teacherId: 'teacher_1',
+                availableSlots: slots,
+                selectedSlot: slots.first,
+                selectedCallType: SessionCallType.videoCall,
+                blockReason: BookingBlockReason.pricingQuoteUnavailable,
+              ),
+            ),
+            child: const BookingScreen(
+              teacherId: 'teacher_1',
+              studentId: 'student_1',
+            ),
+          ),
+        ),
+      );
+      await tester.pumpAndSettle();
+
+      expect(
+        find.text('We could not verify the session price right now.'),
+        findsOneWidget,
+      );
+      expect(
+        find.text('Please check your connection and try again.'),
+        findsOneWidget,
+      );
+      expect(
+        find.text('Paid booking is currently unavailable.'),
+        findsNothing,
+      );
+      expect(find.text('Session price'), findsNothing);
+      final button = tester.widget<TilawaButton>(
+        find.byWidgetPredicate(
+          (w) => w is TilawaButton && w.text == 'Confirm booking',
+        ),
+      );
+      expect(button.onPressed, isNull);
+    },
+  );
+
+  testWidgets(
+    'admin booking disabled shows the admin-disabled banner and blocks submit',
+    (tester) async {
+      final slots = [_slot(1)];
+
+      await tester.pumpWidget(
+        MaterialApp(
+          theme: AppTheme.getLightTheme(primaryColor: AppColors.defaultPrimary),
+          localizationsDelegates: const [
+            QuranSessionsLocalizations.delegate,
+            GlobalMaterialLocalizations.delegate,
+            GlobalWidgetsLocalizations.delegate,
+          ],
+          supportedLocales: QuranSessionsLocalizations.supportedLocales,
+          home: BlocProvider<BookingBloc>(
+            create: (_) => SeededBookingBloc(
+              seed: BookingSelecting(
+                teacherId: 'teacher_1',
+                availableSlots: slots,
+                selectedSlot: slots.first,
+                selectedCallType: SessionCallType.videoCall,
+                blockReason: BookingBlockReason.bookingDisabledByAdmin,
+              ),
+            ),
+            child: const BookingScreen(
+              teacherId: 'teacher_1',
+              studentId: 'student_1',
+            ),
+          ),
+        ),
+      );
+      await tester.pumpAndSettle();
+
+      expect(
+        find.text('Booking is currently unavailable.'),
+        findsOneWidget,
+      );
+      expect(
+        find.text('Booking has been temporarily paused by the admin.'),
+        findsOneWidget,
+      );
+      // Admin-disabled must NOT show the paid-unavailable banner.
+      expect(
+        find.text('Paid booking is currently unavailable.'),
+        findsNothing,
+      );
+      final button = tester.widget<TilawaButton>(
+        find.byWidgetPredicate(
+          (w) => w is TilawaButton && w.text == 'Confirm booking',
+        ),
+      );
+      expect(button.onPressed, isNull);
+    },
+  );
+
+  testWidgets(
+    'pricing config missing shows the pricing-incomplete banner and blocks submit',
+    (tester) async {
+      final slots = [_slot(1)];
+
+      await tester.pumpWidget(
+        MaterialApp(
+          theme: AppTheme.getLightTheme(primaryColor: AppColors.defaultPrimary),
+          localizationsDelegates: const [
+            QuranSessionsLocalizations.delegate,
+            GlobalMaterialLocalizations.delegate,
+            GlobalWidgetsLocalizations.delegate,
+          ],
+          supportedLocales: QuranSessionsLocalizations.supportedLocales,
+          home: BlocProvider<BookingBloc>(
+            create: (_) => SeededBookingBloc(
+              seed: BookingSelecting(
+                teacherId: 'teacher_1',
+                availableSlots: slots,
+                selectedSlot: slots.first,
+                selectedCallType: SessionCallType.videoCall,
+                blockReason: BookingBlockReason.pricingConfigMissing,
+              ),
+            ),
+            child: const BookingScreen(
+              teacherId: 'teacher_1',
+              studentId: 'student_1',
+            ),
+          ),
+        ),
+      );
+      await tester.pumpAndSettle();
+
+      expect(
+        find.text('Booking is unavailable right now.'),
+        findsOneWidget,
+      );
+      expect(
+        find.text(
+          'Pricing configuration is incomplete. Please try again later.',
+        ),
+        findsOneWidget,
+      );
+      final button = tester.widget<TilawaButton>(
+        find.byWidgetPredicate(
+          (w) => w is TilawaButton && w.text == 'Confirm booking',
+        ),
+      );
+      expect(button.onPressed, isNull);
+    },
+  );
+
+  testWidgets(
+    'shows a preparing-payment loading state and blocks submit while quote loads',
+    (tester) async {
+      final slots = [_slot(1)];
+
+      await tester.pumpWidget(
+        MaterialApp(
+          theme: AppTheme.getLightTheme(primaryColor: AppColors.defaultPrimary),
+          localizationsDelegates: const [
+            QuranSessionsLocalizations.delegate,
+            GlobalMaterialLocalizations.delegate,
+            GlobalWidgetsLocalizations.delegate,
+          ],
+          supportedLocales: QuranSessionsLocalizations.supportedLocales,
+          home: BlocProvider<BookingBloc>(
+            create: (_) => SeededBookingBloc(
+              seed: BookingSelecting(
+                teacherId: 'teacher_1',
+                availableSlots: slots,
+                selectedSlot: slots.first,
+                selectedCallType: SessionCallType.videoCall,
+                isQuoteLoading: true,
+              ),
+            ),
+            child: const BookingScreen(
+              teacherId: 'teacher_1',
+              studentId: 'student_1',
+            ),
+          ),
+        ),
+      );
+      // A spinner animates in the price section, so pump once (not settle).
+      await tester.pump();
+
+      // Teacher + slots are visible while the price section still loads.
+      expect(find.text('Preparing payment details…'), findsOneWidget);
+      // Submit stays disabled until the quote resolves, even with a slot picked.
+      final button = tester.widget<TilawaButton>(
+        find.byWidgetPredicate(
+          (w) => w is TilawaButton && w.text == 'Confirm booking',
+        ),
+      );
+      expect(button.onPressed, isNull);
+    },
+  );
+
+  testWidgets(
+    'tapping retry on the price section dispatches a quote-only retry',
+    (tester) async {
+      final slots = [_slot(1)];
+      final bloc = _RecordingBookingBloc(
+        seed: BookingSelecting(
+          teacherId: 'teacher_1',
+          availableSlots: slots,
+          selectedSlot: slots.first,
+          selectedCallType: SessionCallType.videoCall,
+          blockReason: BookingBlockReason.pricingQuoteUnavailable,
+        ),
+      );
+
+      await tester.pumpWidget(
+        MaterialApp(
+          theme: AppTheme.getLightTheme(primaryColor: AppColors.defaultPrimary),
+          localizationsDelegates: const [
+            QuranSessionsLocalizations.delegate,
+            GlobalMaterialLocalizations.delegate,
+            GlobalWidgetsLocalizations.delegate,
+          ],
+          supportedLocales: QuranSessionsLocalizations.supportedLocales,
+          home: BlocProvider<BookingBloc>(
+            create: (_) => bloc,
+            child: const BookingScreen(
+              teacherId: 'teacher_1',
+              studentId: 'student_1',
+            ),
+          ),
+        ),
+      );
+      await tester.pump();
+
+      await tester.tap(find.text('Retry'), warnIfMissed: false);
+      await tester.pump();
+
+      final retries = bloc.added.whereType<BookingQuoteRetried>().toList();
+      expect(retries, hasLength(1));
+      expect(retries.single.teacherId, 'teacher_1');
+    },
+  );
+}
+
+/// Records dispatched events (still ignoring them for state) so widget tests can
+/// assert that the price-section retry emits a quote-only [BookingQuoteRetried].
+class _RecordingBookingBloc extends SeededBookingBloc {
+  _RecordingBookingBloc({required super.seed});
+
+  final List<BookingEvent> added = [];
+
+  @override
+  void add(BookingEvent event) {
+    added.add(event);
+  }
 }

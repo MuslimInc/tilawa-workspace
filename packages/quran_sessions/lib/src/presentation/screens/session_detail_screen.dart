@@ -5,10 +5,12 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:quran_sessions/quran_sessions.dart';
 import 'package:tilawa_ui_kit/tilawa_ui_kit.dart';
 
-import '../session_join/session_join_ui_state.dart';
 import '../l10n/session_join_l10n.dart';
 import '../l10n/session_lifecycle_l10n.dart';
+import '../session_join/session_join_ui_state.dart';
 import '../utils/session_revision_practice.dart';
+import '../widgets/live_session_takeover_dialog.dart';
+import '../widgets/manual_payment_instructions.dart';
 import '../widgets/pending_reschedule_banner.dart';
 import '../widgets/session_revision_practice_card.dart';
 
@@ -19,7 +21,6 @@ class SessionDetailScreen extends StatefulWidget {
     this.analytics = const QuranSessionsAnalyticsCallbacks(),
     this.createCallControlGateway,
     this.createCallTelemetry,
-    this.buildCallSurface,
     this.onPracticeRevisionRequested,
   });
 
@@ -27,7 +28,6 @@ class SessionDetailScreen extends StatefulWidget {
   final QuranSessionsAnalyticsCallbacks analytics;
   final SessionCallControlGatewayFactory? createCallControlGateway;
   final CallTelemetryCoordinatorFactory? createCallTelemetry;
-  final InAppCallSurfaceBuilder? buildCallSurface;
 
   /// Host opens Tilawa Quran reader for [surahNumber] (optional [ayahNumber]).
   final void Function({required int surahNumber, int? ayahNumber})?
@@ -99,6 +99,7 @@ class _SessionDetailScreenState extends State<SessionDetailScreen>
                       previous.cancellationInProgress !=
                           current.cancellationInProgress ||
                       previous.canOpenDispute != current.canOpenDispute ||
+                      previous.canReportConcern != current.canReportConcern ||
                       previous.canOpenMeetingAgain !=
                           current.canOpenMeetingAgain ||
                       previous.canReview != current.canReview ||
@@ -122,11 +123,22 @@ class _SessionDetailScreenState extends State<SessionDetailScreen>
                 if (state is! SessionDetailSuccess) return;
 
                 if (state.joinFailure != null) {
-                  TilawaFeedback.showToast(
-                    context,
-                    message: state.joinFailure!.toLocalizedMessage(context),
-                    variant: TilawaFeedbackVariant.error,
-                  );
+                  final failure = state.joinFailure!;
+                  if (failure is LiveSessionAlreadyActiveFailure) {
+                    showLiveSessionTakeoverDialog(
+                      context,
+                      failure,
+                      onSwitch: () => context.read<SessionDetailBloc>().add(
+                        const SessionDetailJoinRequested(forceTakeover: true),
+                      ),
+                    );
+                  } else {
+                    TilawaFeedback.showToast(
+                      context,
+                      message: failure.toLocalizedMessage(context),
+                      variant: TilawaFeedbackVariant.error,
+                    );
+                  }
                   return;
                 }
 
@@ -147,7 +159,6 @@ class _SessionDetailScreenState extends State<SessionDetailScreen>
                     callType: callType,
                     callProviderKind: callProviderKind,
                     participantSubtitle: l10n.callTypeLabel(callType),
-                    buildCallSurface: widget.buildCallSurface,
                     createCallControlGateway: widget.createCallControlGateway,
                     createCallTelemetry: widget.createCallTelemetry,
                   );
@@ -338,7 +349,7 @@ class _SessionDetailScreenState extends State<SessionDetailScreen>
                 :final isAwaitingRescheduleCounterparty,
                 :final rescheduleRespondInProgress,
               ) =>
-                RefreshIndicator(
+                TilawaRefreshIndicator(
                   onRefresh: _reloadDetail,
                   child: ListView(
                     physics: const AlwaysScrollableScrollPhysics(),
@@ -406,6 +417,11 @@ class _SessionDetailScreenState extends State<SessionDetailScreen>
                         ),
                       ],
                       SizedBox(height: Theme.of(context).tokens.spaceSmall),
+                      if (aggregate.lifecycleStatus ==
+                          SessionLifecycleStatus.pendingPayment) ...[
+                        _ManualPaymentDetailCard(aggregate: aggregate),
+                        SizedBox(height: Theme.of(context).tokens.spaceSmall),
+                      ],
                       _SessionJoinStateBanner(state: state),
                       if (_showsRevisionPractice(state)) ...[
                         SizedBox(height: Theme.of(context).tokens.spaceLarge),
@@ -485,6 +501,64 @@ class _SessionDetailScreenState extends State<SessionDetailScreen>
       return false;
     }
     return sessionShowsRevisionPractice(state.aggregate.lifecycleStatus);
+  }
+}
+
+class _ManualPaymentDetailCard extends StatelessWidget {
+  const _ManualPaymentDetailCard({required this.aggregate});
+
+  final SessionAggregate aggregate;
+
+  @override
+  Widget build(BuildContext context) {
+    final l10n = context.quranSessionsL10n;
+    final theme = Theme.of(context);
+    final tokens = theme.tokens;
+    final localStart = aggregate.startsAt.toLocal();
+    final dateTimeLabel =
+        '${MaterialLocalizations.of(context).formatFullDate(localStart)} '
+        '${MaterialLocalizations.of(context).formatTimeOfDay(TimeOfDay.fromDateTime(localStart))}';
+    final paymentReference = aggregate.paymentReference ?? aggregate.id;
+    final whatsappUrl = ManualPaymentMarketConfig.egFallback
+        .buildWhatsappPrefillUrl(
+          paymentReference: paymentReference,
+          teacher: aggregate.teacherId,
+          dateTime: dateTimeLabel,
+          amount: l10n.paymentCheckoutAmountPending,
+          paymentMethod: l10n.paymentMethodInstapay,
+        );
+
+    return TilawaCard(
+      child: Padding(
+        padding: EdgeInsets.all(tokens.spaceMedium),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text(
+              l10n.bookingAwaitingPaymentVerification,
+              style: theme.textTheme.titleSmall?.copyWith(
+                fontWeight: FontWeight.w700,
+              ),
+            ),
+            SizedBox(height: tokens.spaceSmall),
+            Text('${l10n.paymentReferenceLabel}: $paymentReference'),
+            SizedBox(height: tokens.spaceSmall),
+            ManualPaymentInstructions(whatsappUrl: whatsappUrl),
+            SizedBox(height: tokens.spaceSmall),
+            TilawaButton(
+              text: l10n.sendReceiptOnWhatsapp,
+              leadingIcon: const Icon(Icons.chat_outlined),
+              onPressed: () async {
+                final launcher = ManualPaymentLinkLauncher.launchUrl;
+                await launcher?.call(whatsappUrl);
+              },
+              isFullWidth: true,
+              variant: TilawaButtonVariant.secondary,
+            ),
+          ],
+        ),
+      ),
+    );
   }
 }
 
@@ -643,7 +717,7 @@ class _SessionJoinStateBanner extends StatelessWidget {
           SizedBox(height: Theme.of(context).tokens.spaceSmall),
           TilawaFeedbackStrip(
             icon: Icons.hourglass_top_rounded,
-            message: l10n.sessionAwaitingReviewNextSteps,
+            message: l10n.sessionAwaitingTeacherApprovalHint,
             backgroundColor: scheme.primaryContainer,
             foregroundColor: scheme.onPrimaryContainer,
             variant: TilawaFeedbackVariant.info,
@@ -714,8 +788,20 @@ class _SessionDetailFooter extends StatelessWidget {
 
   final SessionDetailSuccess state;
 
+  bool get _hasActions =>
+      state.canJoin ||
+      state.canCancel ||
+      state.canOpenMeetingAgain ||
+      state.canReview ||
+      state.canReportConcern ||
+      state.canOpenDispute;
+
   @override
   Widget build(BuildContext context) {
+    if (!_hasActions) {
+      return const SizedBox.shrink();
+    }
+
     final l10n = context.quranSessionsL10n;
     final tokens = Theme.of(context).tokens;
 
@@ -843,8 +929,7 @@ class _SessionDetailFooter extends StatelessWidget {
       context,
       sessionStartsAt: state.aggregate.startsAt,
       pricingType: state.aggregate.pricingType,
-      // Egypt pilot sessions are manual/off-app paid; suppress free-session copy.
-      isManualPayment: true,
+      isManualPayment: state.aggregate.isManualPayment,
     );
     if (reason == null || !context.mounted) return;
     context.read<SessionDetailBloc>().add(

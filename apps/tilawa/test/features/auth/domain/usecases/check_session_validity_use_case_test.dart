@@ -73,6 +73,43 @@ void main() {
   });
 
   test(
+    'returns verificationUnknown when local device registration is incomplete',
+    () async {
+      when(() => mockCache.getSessionEpoch()).thenAnswer((_) async => 0);
+      when(() => mockCache.getActiveDeviceId()).thenAnswer((_) async => null);
+      await fakeFirestore.collection('users').doc('user_1').set({
+        'session': {'epoch': 1, 'activeDeviceId': 'device_1'},
+      });
+
+      final result = await useCase('user_1');
+
+      result.fold((_) => fail('expected Right'), (validity) {
+        expect(validity, SessionValidityResult.verificationUnknown);
+      });
+    },
+  );
+
+  test(
+    'returns verificationUnknown when server session doc lags after first login',
+    () async {
+      when(() => mockCache.getSessionEpoch()).thenAnswer((_) async => 2);
+      when(
+        () => mockCache.getActiveDeviceId(),
+      ).thenAnswer((_) async => 'device_1');
+      await fakeFirestore
+          .collection('users')
+          .doc('user_1')
+          .set(<String, dynamic>{});
+
+      final result = await useCase('user_1');
+
+      result.fold((_) => fail('expected Right'), (validity) {
+        expect(validity, SessionValidityResult.verificationUnknown);
+      });
+    },
+  );
+
+  test(
     'returns verificationUnknown when the network is unavailable '
     '(FirebaseException unavailable)',
     () async {

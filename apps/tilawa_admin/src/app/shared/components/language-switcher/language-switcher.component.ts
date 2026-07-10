@@ -9,19 +9,18 @@ import { TranslatePipe } from '../../../core/i18n/translate.pipe';
   imports: [TranslatePipe],
   template: `
     <div
-      class="inline-flex items-center rounded-lg border border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-900 p-0.5 text-xs font-medium"
+      class="inline-flex items-center rounded-lg border border-[var(--tilawa-outline-variant)] bg-[var(--tilawa-surface-highest)] p-0.5 text-xs font-medium"
       role="group"
       [attr.aria-label]="'layout_language' | t"
     >
       <button
         type="button"
         class="rounded-md px-2.5 py-1 transition-colors"
-        [class.bg-white]="language() === 'en'"
-        [class.dark:bg-gray-800]="language() === 'en'"
+        [class.bg-[var(--tilawa-surface)]]="language() === 'en'"
         [class.shadow-sm]="language() === 'en'"
-        [class.text-gray-900]="language() === 'en'"
-        [class.dark:text-white]="language() === 'en'"
-        [class.text-gray-500]="language() !== 'en'"
+        [class.text-[var(--tilawa-ink)]]="language() === 'en'"
+        [class.text-[var(--tilawa-ink-muted)]]="language() !== 'en'"
+        [class.hover:text-[var(--tilawa-ink)]]="language() !== 'en'"
         (click)="setLanguage('en')"
       >
         EN
@@ -29,12 +28,11 @@ import { TranslatePipe } from '../../../core/i18n/translate.pipe';
       <button
         type="button"
         class="rounded-md px-2.5 py-1 transition-colors"
-        [class.bg-white]="language() === 'ar'"
-        [class.dark:bg-gray-800]="language() === 'ar'"
+        [class.bg-[var(--tilawa-surface)]]="language() === 'ar'"
         [class.shadow-sm]="language() === 'ar'"
-        [class.text-gray-900]="language() === 'ar'"
-        [class.dark:text-white]="language() === 'ar'"
-        [class.text-gray-500]="language() !== 'ar'"
+        [class.text-[var(--tilawa-ink)]]="language() === 'ar'"
+        [class.text-[var(--tilawa-ink-muted)]]="language() !== 'ar'"
+        [class.hover:text-[var(--tilawa-ink)]]="language() !== 'ar'"
         (click)="setLanguage('ar')"
       >
         عربي

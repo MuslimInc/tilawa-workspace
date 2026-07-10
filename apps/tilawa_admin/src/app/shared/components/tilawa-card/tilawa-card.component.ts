@@ -33,12 +33,24 @@ import { CommonModule } from '@angular/common';
     }
 
     .tilawa-card-padded .tilawa-card-body {
-      padding: var(--tilawa-space-6);
+      padding: var(--tilawa-space-4);
+    }
+
+    @media (min-width: 768px) {
+      .tilawa-card-padded .tilawa-card-body {
+        padding: var(--tilawa-space-6);
+      }
     }
 
     .tilawa-card-header {
-      padding: var(--tilawa-space-5) var(--tilawa-space-6);
+      padding: var(--tilawa-space-4);
       border-bottom: 1px solid var(--tilawa-outline-variant);
+    }
+
+    @media (min-width: 768px) {
+      .tilawa-card-header {
+        padding: var(--tilawa-space-5) var(--tilawa-space-6);
+      }
     }
 
     .tilawa-card-title {

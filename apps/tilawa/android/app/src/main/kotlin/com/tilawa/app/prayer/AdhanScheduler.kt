@@ -1,20 +1,16 @@
 package com.tilawa.app.prayer
 
 import android.app.AlarmManager
-import android.app.PendingIntent
 import android.content.Context
-import android.content.Intent
-import android.content.SharedPreferences
-import android.os.Build
-import android.util.Log
-import androidx.core.content.edit
 
 /**
- * Schedules and cancels Adhan playback alarms via [AlarmManager.setAlarmClock].
+ * Schedules and cancels Adhan playback alarms via [AlarmManager].
  *
- * `setAlarmClock` is the highest-priority class of alarm — it bypasses Doze
- * mode, App Standby, and battery optimisation throttling, which is the
- * behavioural guarantee we need for prayer reminders.
+ * `setAlarmClock` is the preferred path because it bypasses Doze mode, App
+ * Standby, and battery optimisation throttling. If the user has not granted
+ * Android 12+ exact alarm access, we keep the alarm native with an inexact
+ * fallback so the fired notification still uses [AdhanPlaybackService] and its
+ * Stop Adhan action instead of an actionless Flutter local notification.
  *
  * Each alarm targets [AdhanReceiver] and carries the prayer name + scheduled
  * epoch millis as extras. We persist the active set of alarm IDs so the same
@@ -59,14 +55,28 @@ internal object AdhanScheduler {
         val am = getAlarmManager(context)
         val st = getStorage(context)
 
-        if (!am.canScheduleExact()) {
-            return false
-        }
-
         // Derive sound name: adhan_fajr for Fajr, else adhan
         val sound = if (prayerKey.lowercase() == "fajr") "adhan_fajr" else "adhan"
 
-        if (am.scheduleExact(notificationId, prayerName, prayerKey, triggerAtMillis, sound)) {
+        val scheduled = if (am.canScheduleExact()) {
+            am.scheduleExact(
+                notificationId,
+                prayerName,
+                prayerKey,
+                triggerAtMillis,
+                sound,
+            )
+        } else {
+            am.scheduleInexact(
+                notificationId,
+                prayerName,
+                prayerKey,
+                triggerAtMillis,
+                sound,
+            )
+        }
+
+        if (scheduled) {
             st.addActiveId(notificationId)
             return true
         }
@@ -87,11 +97,8 @@ internal object AdhanScheduler {
         val am = getAlarmManager(context)
         val st = getStorage(context)
 
-        if (!am.canScheduleExact()) {
-            return false
-        }
-
-        if (am.scheduleExact(
+        val scheduled = if (am.canScheduleExact()) {
+            am.scheduleExact(
                 notificationId,
                 prayerName,
                 prayerKey,
@@ -100,7 +107,19 @@ internal object AdhanScheduler {
                 locationName,
                 languageCode,
             )
-        ) {
+        } else {
+            am.scheduleInexact(
+                notificationId,
+                prayerName,
+                prayerKey,
+                triggerAtMillis,
+                sound,
+                locationName,
+                languageCode,
+            )
+        }
+
+        if (scheduled) {
             st.addActiveId(notificationId)
             return true
         }

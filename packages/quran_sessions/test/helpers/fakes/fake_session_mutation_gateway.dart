@@ -24,6 +24,7 @@ class FakeSessionMutationGateway implements SessionMutationGateway {
     required SessionPricingType pricingType,
     String? paymentReference,
     String? studentNote,
+    String? idempotencyKey,
   }) async {
     calls.add('create:$slotId');
     if (onCreate != null) {

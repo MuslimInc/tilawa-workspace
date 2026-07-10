@@ -1,6 +1,7 @@
 import 'package:equatable/equatable.dart';
 
 import '../../../domain/policies/session_mode_policy.dart';
+import '../../../domain/entities/booking_block_reason.dart';
 import '../../../domain/entities/quran_booking.dart';
 import '../../../domain/entities/session_booking_outcome.dart';
 import '../../../domain/entities/manual_payment_price.dart';
@@ -37,16 +38,21 @@ final class BookingSelecting extends BookingState {
     required this.availableSlots,
     this.selectedSlot,
     this.selectedCallType = SessionCallType.voiceCall,
+    this.teacherDisplayName,
     this.teacherExternalMeetingUrl,
     this.pricingType,
     this.sessionPrice,
     this.manualPaymentPrice,
+    this.paymentProviderAvailable,
+    this.blockReason = BookingBlockReason.none,
+    this.isQuoteLoading = false,
   });
 
   final String teacherId;
   final List<TeacherAvailability> availableSlots;
   final TeacherAvailability? selectedSlot;
   final SessionCallType selectedCallType;
+  final String? teacherDisplayName;
   final String? teacherExternalMeetingUrl;
   final SessionPricingType? pricingType;
   final SessionPrice? sessionPrice;
@@ -55,10 +61,32 @@ final class BookingSelecting extends BookingState {
   /// screen shows a paid-session notice instead of the free price summary.
   final ManualPaymentPrice? manualPaymentPrice;
 
+  /// Server quote signal; null when no quote was obtained (client preview).
+  final bool? paymentProviderAvailable;
+
+  /// Typed block reason. Backend reasons are authoritative; transport-level
+  /// quote failures use [BookingBlockReason.pricingQuoteUnavailable] so Flutter
+  /// never derives final paid/free state from a market-only preview.
+  final BookingBlockReason blockReason;
+
+  /// True while the server pricing quote is still in flight. The screen shows
+  /// the teacher + slots immediately with a dedicated price-section loading
+  /// state; submit stays disabled until the quote resolves.
+  final bool isQuoteLoading;
+
   bool get hasExternalMeetingUrl =>
       SessionModePolicy.hasExternalMeetingUrl(teacherExternalMeetingUrl);
 
-  bool get canSubmit => selectedSlot != null;
+  /// True when the booking screen must show a block banner and disable submit.
+  /// Derived from [blockReason] — never inferred from loose payment booleans,
+  /// so admin-disabled / pricing-missing / market-disabled /
+  /// teacher-not-bookable / quote-unavailable each get distinct copy.
+  bool get isPaymentBlocked => blockReason != BookingBlockReason.none;
+
+  bool get canSubmit =>
+      selectedSlot != null &&
+      !isQuoteLoading &&
+      blockReason == BookingBlockReason.none;
 
   @override
   List<Object?> get props => [
@@ -66,30 +94,43 @@ final class BookingSelecting extends BookingState {
     availableSlots,
     selectedSlot,
     selectedCallType,
+    teacherDisplayName,
     teacherExternalMeetingUrl,
     pricingType,
     sessionPrice,
     manualPaymentPrice,
+    paymentProviderAvailable,
+    blockReason,
+    isQuoteLoading,
   ];
 
   BookingSelecting copyWith({
     List<TeacherAvailability>? availableSlots,
     TeacherAvailability? selectedSlot,
     SessionCallType? selectedCallType,
+    String? teacherDisplayName,
     String? teacherExternalMeetingUrl,
     SessionPricingType? pricingType,
     SessionPrice? sessionPrice,
     ManualPaymentPrice? manualPaymentPrice,
+    bool? paymentProviderAvailable,
+    BookingBlockReason? blockReason,
+    bool? isQuoteLoading,
   }) => BookingSelecting(
     teacherId: teacherId,
     availableSlots: availableSlots ?? this.availableSlots,
     selectedSlot: selectedSlot ?? this.selectedSlot,
     selectedCallType: selectedCallType ?? this.selectedCallType,
+    teacherDisplayName: teacherDisplayName ?? this.teacherDisplayName,
     teacherExternalMeetingUrl:
         teacherExternalMeetingUrl ?? this.teacherExternalMeetingUrl,
     pricingType: pricingType ?? this.pricingType,
     sessionPrice: sessionPrice ?? this.sessionPrice,
     manualPaymentPrice: manualPaymentPrice ?? this.manualPaymentPrice,
+    paymentProviderAvailable:
+        paymentProviderAvailable ?? this.paymentProviderAvailable,
+    blockReason: blockReason ?? this.blockReason,
+    isQuoteLoading: isQuoteLoading ?? this.isQuoteLoading,
   );
 }
 
@@ -105,6 +146,32 @@ final class BookingSuccess extends BookingState {
 
   @override
   List<Object?> get props => [booking];
+}
+
+/// Manual/off-app booking created and awaiting payment review.
+final class BookingManualPaymentPending extends BookingState {
+  const BookingManualPaymentPending({
+    required this.booking,
+    required this.paymentReference,
+    required this.teacherDisplayName,
+    required this.startsAt,
+    this.sessionPrice,
+  });
+
+  final QuranBooking booking;
+  final String paymentReference;
+  final String teacherDisplayName;
+  final DateTime startsAt;
+  final SessionPrice? sessionPrice;
+
+  @override
+  List<Object?> get props => [
+    booking,
+    paymentReference,
+    teacherDisplayName,
+    startsAt,
+    sessionPrice,
+  ];
 }
 
 /// Paid booking created server-side; awaiting sandbox/PSP confirmation.

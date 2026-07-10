@@ -3,13 +3,19 @@ import 'package:tilawa_ui_kit/tilawa_ui_kit.dart';
 
 /// Glance metrics row for [TeacherDashboardScreen].
 ///
+/// Rendered as a read-only [TilawaMetricTileStrip] — a flat summary strip,
+/// visually distinct from the raised, tappable category/action cards below.
 /// Counts are pre-computed from [TeacherDashboardSuccess] in the screen.
-/// Pending requests carry the single primary (ink) emphasis lane because they
-/// are the only metric that demands teacher action; the other tiles stay on
-/// supporting manuscript tints.
+///
+/// Pending requests carry the single primary ([TilawaSemanticTint.ink])
+/// emphasis lane because they are the only metric that demands teacher
+/// action; the other tiles stay on supporting manuscript tints. The
+/// *action* itself still lives in the category section — the stat tile keeps
+/// no tap affordance.
 class TeacherDashboardSummaryStats extends StatelessWidget {
   const TeacherDashboardSummaryStats({
     super.key,
+    required this.sectionTitle,
     required this.pendingRequestsCount,
     required this.upcomingSessionsCount,
     required this.bookableSlotsCount,
@@ -18,6 +24,7 @@ class TeacherDashboardSummaryStats extends StatelessWidget {
     required this.bookableSlotsLabel,
   });
 
+  final String sectionTitle;
   final int pendingRequestsCount;
   final int upcomingSessionsCount;
   final int bookableSlotsCount;
@@ -27,107 +34,56 @@ class TeacherDashboardSummaryStats extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final tokens = Theme.of(context).tokens;
+    final theme = Theme.of(context);
+    final textTheme = theme.textTheme;
+    final tokens = theme.tokens;
 
-    return Padding(
-      padding: EdgeInsetsDirectional.fromSTEB(
-        tokens.spaceLarge,
-        tokens.spaceMedium,
-        tokens.spaceLarge,
-        tokens.spaceSmall,
-      ),
-      // IntrinsicHeight keeps the three tiles equal-height while the sliver
-      // parent provides unbounded height (stretch alone would blow up).
-      child: IntrinsicHeight(
-        child: Row(
-          crossAxisAlignment: CrossAxisAlignment.stretch,
-          spacing: tokens.spaceSmall,
-          children: [
-            Expanded(
-              child: _SummaryStatTile(
-                value: pendingRequestsCount,
-                label: pendingRequestsLabel,
-                icon: Icons.inbox_outlined,
-                tint: TilawaSemanticTint.ink,
-              ),
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      mainAxisSize: MainAxisSize.min,
+      children: [
+        Padding(
+          padding: EdgeInsetsDirectional.fromSTEB(
+            tokens.spaceLarge,
+            tokens.spaceLarge,
+            tokens.spaceLarge,
+            0,
+          ),
+          child: Text(
+            sectionTitle,
+            style: textTheme.titleMedium?.copyWith(
+              fontWeight: FontWeight.w800,
+              color: theme.colorScheme.onSurface,
+              height: 1.15,
+              letterSpacing: -0.2,
             ),
-            Expanded(
-              child: _SummaryStatTile(
-                value: upcomingSessionsCount,
-                label: upcomingSessionsLabel,
-                icon: Icons.event_outlined,
-                tint: TilawaSemanticTint.scholar,
-              ),
+          ),
+        ),
+        SizedBox(height: tokens.spaceMedium),
+        TilawaMetricTileStrip(
+          padding: EdgeInsets.symmetric(horizontal: tokens.spaceLarge),
+          metrics: [
+            TilawaMetricData(
+              value: '$pendingRequestsCount',
+              label: pendingRequestsLabel,
+              icon: Icons.inbox_outlined,
+              tint: TilawaSemanticTint.ink,
             ),
-            Expanded(
-              child: _SummaryStatTile(
-                value: bookableSlotsCount,
-                label: bookableSlotsLabel,
-                icon: Icons.schedule_outlined,
-                tint: TilawaSemanticTint.neutral,
-              ),
+            TilawaMetricData(
+              value: '$upcomingSessionsCount',
+              label: upcomingSessionsLabel,
+              icon: Icons.event_outlined,
+              tint: TilawaSemanticTint.scholar,
+            ),
+            TilawaMetricData(
+              value: '$bookableSlotsCount',
+              label: bookableSlotsLabel,
+              icon: Icons.schedule_outlined,
+              tint: TilawaSemanticTint.neutral,
             ),
           ],
         ),
-      ),
-    );
-  }
-}
-
-class _SummaryStatTile extends StatelessWidget {
-  const _SummaryStatTile({
-    required this.value,
-    required this.label,
-    required this.icon,
-    required this.tint,
-  });
-
-  final int value;
-  final String label;
-  final IconData icon;
-  final TilawaSemanticTint tint;
-
-  @override
-  Widget build(BuildContext context) {
-    final theme = Theme.of(context);
-    final scheme = theme.colorScheme;
-    final tokens = theme.tokens;
-
-    return TilawaCard(
-      padding: EdgeInsets.all(tokens.spaceSmall + tokens.spaceExtraSmall),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          TilawaIconBox(
-            icon: icon,
-            variant: TilawaIconBoxVariant.tinted,
-            semanticTint: tint,
-            size: tokens.iconSizeSmall,
-          ),
-          SizedBox(height: tokens.spaceSmall),
-          Text(
-            '$value',
-            style: theme.textTheme.headlineSmall?.copyWith(
-              fontWeight: FontWeight.w800,
-              color: scheme.onSurface,
-              height: 1.1,
-            ),
-          ),
-          SizedBox(height: tokens.spaceTiny),
-          Text(
-            label,
-            style: theme.textTheme.labelSmall?.copyWith(
-              color: scheme.onSurfaceVariant,
-              fontWeight: FontWeight.w500,
-              height: 1.25,
-            ),
-            maxLines: 2,
-            overflow: TextOverflow.ellipsis,
-            textAlign: TextAlign.start,
-          ),
-        ],
-      ),
+      ],
     );
   }
 }

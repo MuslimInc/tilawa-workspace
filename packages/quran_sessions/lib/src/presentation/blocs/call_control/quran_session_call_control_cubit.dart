@@ -45,9 +45,6 @@ class QuranSessionCallControlCubit extends Cubit<QuranSessionCallControlState> {
         state.copyWith(
           isMicrophoneEnabled: nextEnabled,
           isMicrophoneLoading: false,
-          feedback: nextEnabled
-              ? CallControlFeedback.microphoneUnmuted
-              : CallControlFeedback.microphoneMuted,
         ),
       );
     } on Object {
@@ -79,9 +76,6 @@ class QuranSessionCallControlCubit extends Cubit<QuranSessionCallControlState> {
         state.copyWith(
           isCameraEnabled: nextEnabled,
           isCameraLoading: false,
-          feedback: nextEnabled
-              ? CallControlFeedback.cameraOn
-              : CallControlFeedback.cameraOff,
         ),
       );
     } on Object {
@@ -113,9 +107,6 @@ class QuranSessionCallControlCubit extends Cubit<QuranSessionCallControlState> {
         state.copyWith(
           isSpeakerEnabled: nextEnabled,
           isSpeakerLoading: false,
-          feedback: nextEnabled
-              ? CallControlFeedback.speakerOn
-              : CallControlFeedback.speakerOff,
         ),
       );
     } on Object {
@@ -133,15 +124,6 @@ class QuranSessionCallControlCubit extends Cubit<QuranSessionCallControlState> {
       return;
     }
 
-    if (!state.isCameraEnabled) {
-      emit(
-        state.copyWith(
-          feedback: CallControlFeedback.switchCameraBlocked,
-        ),
-      );
-      return;
-    }
-
     emit(
       state.copyWith(
         isSwitchCameraLoading: true,
@@ -151,7 +133,12 @@ class QuranSessionCallControlCubit extends Cubit<QuranSessionCallControlState> {
 
     try {
       await _gateway.switchCamera();
-      emit(state.copyWith(isSwitchCameraLoading: false));
+      emit(
+        state.copyWith(
+          isSwitchCameraLoading: false,
+          cameraFacing: state.cameraFacing.opposite,
+        ),
+      );
     } on Object {
       emit(
         state.copyWith(

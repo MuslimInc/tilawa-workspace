@@ -11,6 +11,26 @@ DateTime readFirestoreDateTime(Object? raw) {
 SessionLifecycleStatus parseLifecycleStatus(String raw) =>
     parseLifecycleStatusFromRaw(raw);
 
+SessionAllowedActions? parseAllowedActionsField(Object? raw) {
+  if (raw is! List) return null;
+  final actions = <SessionAllowedAction>{};
+  for (final item in raw) {
+    if (item is! String) continue;
+    final action = switch (item) {
+      'join' => SessionAllowedAction.join,
+      'cancel' => SessionAllowedAction.cancel,
+      'reschedule' => SessionAllowedAction.reschedule,
+      'reportConcern' => SessionAllowedAction.reportConcern,
+      'openDispute' => SessionAllowedAction.openDispute,
+      'submitReview' => SessionAllowedAction.submitReview,
+      'respondToBookingRequest' => SessionAllowedAction.respondToBookingRequest,
+      _ => null,
+    };
+    if (action != null) actions.add(action);
+  }
+  return SessionAllowedActions(actions);
+}
+
 SessionAggregate mapBookingDocToAggregate(
   String bookingId,
   Map<String, dynamic> data,
@@ -40,9 +60,18 @@ SessionAggregate mapBookingDocToAggregate(
     lastActionReason: data['lastActionReason'] as String?,
     rejectionReason: data['rejectionReason'] as String?,
     paymentReference: data['paymentReference'] as String?,
+    paymentProvider:
+        (data['paymentProvider'] ?? data['payment_provider']) as String?,
+    paymentStatus: (data['paymentStatus'] ?? data['payment_status']) as String?,
     sessionId: data['sessionId'] as String?,
     revisionSurahNumber: data['revisionSurahNumber'] as int?,
     revisionAyahNumber: data['revisionAyahNumber'] as int?,
+    allowedActionsForStudent: parseAllowedActionsField(
+      data['allowedActionsStudent'],
+    ),
+    allowedActionsForTeacher: parseAllowedActionsField(
+      data['allowedActionsTeacher'],
+    ),
   );
 }
 
@@ -86,6 +115,9 @@ SessionAggregate mapSessionDocToAggregate(
         data['cancellationReason'] as String?,
     rejectionReason: data['rejectionReason'] as String?,
     paymentReference: data['paymentReference'] as String?,
+    paymentProvider:
+        (data['paymentProvider'] ?? data['payment_provider']) as String?,
+    paymentStatus: (data['paymentStatus'] ?? data['payment_status']) as String?,
     sessionId: sessionDocId,
     revisionSurahNumber: data['revisionSurahNumber'] as int?,
     revisionAyahNumber: data['revisionAyahNumber'] as int?,

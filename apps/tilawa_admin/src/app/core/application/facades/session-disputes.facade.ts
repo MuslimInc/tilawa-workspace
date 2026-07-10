@@ -6,12 +6,11 @@ import {
 } from '../../domain/usecases/session-dispute.usecases';
 import { SessionDisputeFilters } from '../../domain/entities/session-dispute-summary.entity';
 import { SESSION_DISPUTE_DEFAULT_SORT } from '../../domain/entities/session-dispute-summary.entity';
+import { DEFAULT_PAGE_SIZE, SortRequest, sortsEqual } from '../../domain/entities/pagination.types';
 import {
-  DEFAULT_PAGE_SIZE,
-  SortRequest,
-  sortsEqual,
-} from '../../domain/entities/pagination.types';
-import { SessionReadRepository, SESSION_READ_REPOSITORY } from '../../domain/repositories/session-read.repository';
+  SessionReadRepository,
+  SESSION_READ_REPOSITORY,
+} from '../../domain/repositories/session-read.repository';
 import {
   QuranSessionsUserRepository,
   QURAN_SESSIONS_USER_REPOSITORY,
@@ -103,9 +102,7 @@ export class SessionDisputesFacade {
       this.listState.set('success');
     } catch (error) {
       this.listState.set('error');
-      this.listError.set(
-        error instanceof Error ? error.message : 'Failed to load disputes.',
-      );
+      this.listError.set(error instanceof Error ? error.message : 'Failed to load disputes.');
     }
   }
 
@@ -120,10 +117,7 @@ export class SessionDisputesFacade {
     });
   }
 
-  async changeSort(
-    filters: SessionDisputeFilters,
-    sort: SortRequest,
-  ): Promise<void> {
+  async changeSort(filters: SessionDisputeFilters, sort: SortRequest): Promise<void> {
     await this.loadList(filters, { sort, append: false, cursor: null });
   }
 
@@ -144,29 +138,21 @@ export class SessionDisputesFacade {
         ? await this.sessionReadRepository.getById(dispute.bookingId)
         : null;
 
-      const userIds = [session?.studentId, session?.teacherId].filter(
-        (id): id is string => Boolean(id),
+      const userIds = [session?.studentId, session?.teacherId].filter((id): id is string =>
+        Boolean(id),
       );
-      const users = userIds.length
-        ? await this.userRepository.getByIds(userIds)
-        : new Map();
+      const users = userIds.length ? await this.userRepository.getByIds(userIds) : new Map();
 
-      this.detailItem.set(
-        this.toDetail(dispute, session, users),
-      );
+      this.detailItem.set(this.toDetail(dispute, session, users));
       this.detailState.set('success');
     } catch (error) {
       this.detailState.set('error');
-      this.detailError.set(
-        error instanceof Error ? error.message : 'Failed to load dispute.',
-      );
+      this.detailError.set(error instanceof Error ? error.message : 'Failed to load dispute.');
     }
   }
 
   private toListItem(
-    item: Awaited<
-      ReturnType<ListSessionDisputesUseCase['execute']>
-    >['items'][number],
+    item: Awaited<ReturnType<ListSessionDisputesUseCase['execute']>>['items'][number],
   ): SessionDisputeListItemVm {
     return {
       id: item.id,
@@ -177,10 +163,7 @@ export class SessionDisputesFacade {
       openedByRole: item.openedByRole,
       createdAt: item.createdAt,
       updatedAt: item.updatedAt,
-      reasonPreview:
-        item.reason.length > 80
-          ? `${item.reason.slice(0, 80)}…`
-          : item.reason,
+      reasonPreview: item.reason.length > 80 ? `${item.reason.slice(0, 80)}…` : item.reason,
     };
   }
 

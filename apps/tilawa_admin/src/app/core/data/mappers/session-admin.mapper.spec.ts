@@ -25,6 +25,10 @@ describe('AdminSessionMapper', () => {
       countryCode: 'EG',
       cityId: 'cairo',
       paymentStatus: 'none',
+      paymentReference: 'MAN-123',
+      paymentProvider: 'manual_off_app',
+      priceAmount: 250,
+      priceCurrency: 'EGP',
       amountPaidUsd: 0,
       createdAt: 1_700_000_000_000,
       updatedAt: 1_700_000_100_000,
@@ -35,20 +39,20 @@ describe('AdminSessionMapper', () => {
     expect(entity.sessionId).toBe('session-1');
     expect(entity.lifecycleStatus).toBe(SessionLifecycleStatus.Scheduled);
     expect(entity.countryCode).toBe('EG');
+    expect(entity.paymentReference).toBe('MAN-123');
+    expect(entity.paymentProvider).toBe('manual_off_app');
+    expect(entity.priceAmount).toBe(250);
+    expect(entity.priceCurrency).toBe('EGP');
   });
 
   it('falls back legacy status when lifecycleStatus missing', () => {
-    expect(
-      resolveLifecycleStatus({ status: 'completed' }),
-    ).toBe(SessionLifecycleStatus.Completed);
+    expect(resolveLifecycleStatus({ status: 'completed' })).toBe(SessionLifecycleStatus.Completed);
   });
 });
 
 describe('parseSessionLifecycleStatus', () => {
   it('returns unknown for invalid values', () => {
-    expect(parseSessionLifecycleStatus('not_a_status')).toBe(
-      SessionLifecycleStatus.Unknown,
-    );
+    expect(parseSessionLifecycleStatus('not_a_status')).toBe(SessionLifecycleStatus.Unknown);
   });
 });
 

@@ -20,10 +20,7 @@ export class FirebaseSessionModerationGateway implements SessionModerationGatewa
     });
   }
 
-  async markSessionNoShow(
-    sessionId: string,
-    classification: NoShowClassification,
-  ): Promise<void> {
+  async markSessionNoShow(sessionId: string, classification: NoShowClassification): Promise<void> {
     await this.invokeCallable('markSessionNoShow', {
       sessionId,
       classification,
@@ -48,10 +45,7 @@ export class FirebaseSessionModerationGateway implements SessionModerationGatewa
     });
   }
 
-  async confirmSessionReschedule(
-    requestId: string,
-    accept: boolean,
-  ): Promise<void> {
+  async confirmSessionReschedule(requestId: string, accept: boolean): Promise<void> {
     await this.invokeCallable('confirmSessionReschedule', {
       requestId,
       accept,
@@ -63,6 +57,20 @@ export class FirebaseSessionModerationGateway implements SessionModerationGatewa
     await this.invokeCallable('approveSessionRefund', {
       bookingId,
       reason,
+    });
+  }
+
+  async confirmManualBookingPayment(bookingId: string, note?: string): Promise<void> {
+    await this.invokeCallable('confirmManualBookingPayment', {
+      bookingId,
+      ...(note ? { note } : {}),
+    });
+  }
+
+  async rejectManualBookingPayment(bookingId: string, reason?: string): Promise<void> {
+    await this.invokeCallable('rejectManualBookingPayment', {
+      bookingId,
+      ...(reason ? { reason } : {}),
     });
   }
 
@@ -92,10 +100,7 @@ export class FirebaseSessionModerationGateway implements SessionModerationGatewa
     });
   }
 
-  private async invokeCallable(
-    name: string,
-    data: Record<string, unknown>,
-  ): Promise<void> {
+  private async invokeCallable(name: string, data: Record<string, unknown>): Promise<void> {
     const callable = httpsCallable(this.functions, name);
 
     try {
@@ -126,9 +131,7 @@ export class FirebaseSessionModerationGateway implements SessionModerationGatewa
   }
 }
 
-function isCallableError(
-  error: unknown,
-): error is { code: string; message: string } {
+function isCallableError(error: unknown): error is { code: string; message: string } {
   return (
     typeof error === 'object' &&
     error !== null &&

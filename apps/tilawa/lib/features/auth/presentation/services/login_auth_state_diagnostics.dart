@@ -1,7 +1,7 @@
 import '../bloc/auth_bloc.dart';
 import '../cubit/login_google_sign_in_cubit.dart';
 
-/// Debug label for [AuthState] transitions on the login screen.
+/// Label for [AuthState] on the login screen.
 String loginAuthStateLabel(AuthState state) {
   return state.when(
     initial: () => 'initial',
@@ -30,22 +30,4 @@ bool loginLaunchAffectsGoogleSignInButtonLoading(
   LoginGoogleSignInState current,
 ) {
   return previous.isLaunchPending != current.isLaunchPending;
-}
-
-/// Whether auto sign-in should dispatch [SignInWithGoogleEvent] for [state].
-bool loginShouldDispatchAutoSignIn(AuthState state) {
-  return state is AuthInitial ||
-      state is AuthUnauthenticated ||
-      state is AuthError;
-}
-
-/// Whether auto sign-in should run given account-deletion suppression.
-bool loginShouldAttemptAutoSignIn({
-  required bool suppressForAccountDeletion,
-  required AuthState authState,
-}) {
-  if (suppressForAccountDeletion) {
-    return false;
-  }
-  return loginShouldDispatchAutoSignIn(authState);
 }

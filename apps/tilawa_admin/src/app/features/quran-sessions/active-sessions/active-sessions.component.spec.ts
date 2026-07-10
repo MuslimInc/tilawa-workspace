@@ -129,9 +129,7 @@ describe('ActiveSessionsComponent', () => {
 
   it('changes filter via facade', () => {
     fixture.componentInstance.setFilter(ActiveSessionOperationalFilter.LiveNow);
-    expect(facade.changeFilter).toHaveBeenCalledWith(
-      ActiveSessionOperationalFilter.LiveNow,
-    );
+    expect(facade.changeFilter).toHaveBeenCalledWith(ActiveSessionOperationalFilter.LiveNow);
   });
 
   it('renders session detail action', () => {

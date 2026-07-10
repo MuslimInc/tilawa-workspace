@@ -4,7 +4,6 @@ import 'package:quran_sessions/quran_sessions.dart';
 import 'package:tilawa_ui_kit/tilawa_ui_kit.dart';
 
 import '../boundaries/call/agora_rtc_engine_pool.dart';
-import 'package:quran_sessions_rtc/quran_sessions_rtc.dart';
 
 enum _AgoraCallConnectionPhase {
   connecting,
@@ -20,14 +19,12 @@ class AgoraCallSurface extends StatefulWidget {
     required this.sessionId,
     required this.callType,
     required this.enginePool,
-    required this.labels,
     this.eventHub,
   });
 
   final String sessionId;
   final SessionCallType callType;
   final AgoraRtcEnginePool enginePool;
-  final AgoraCallSurfaceLabels labels;
   final SessionCallProviderEventHub? eventHub;
 
   @override
@@ -39,7 +36,7 @@ class _AgoraCallSurfaceState extends State<AgoraCallSurface> {
   int? _remoteUid;
   String? _channelId;
   bool _remoteVideoReady = false;
-  bool _localVideoReady = false;
+  bool? _localVideoReady;
   RtcEngineEventHandler? _eventHandler;
 
   @override
@@ -56,7 +53,7 @@ class _AgoraCallSurfaceState extends State<AgoraCallSurface> {
       _remoteUid = null;
       _channelId = null;
       _remoteVideoReady = false;
-      _localVideoReady = false;
+      _localVideoReady = null;
       _phase = _AgoraCallConnectionPhase.connecting;
       _bindEngineEvents();
       _reportConnectionPhase();
@@ -171,6 +168,14 @@ class _AgoraCallSurfaceState extends State<AgoraCallSurface> {
               _remoteVideoReady = _isRemoteVideoRenderable(state);
             });
           },
+      onUserMuteVideo: (connection, remoteUid, muted) {
+        if (!mounted || _remoteUid != remoteUid) return;
+        if (muted) {
+          setState(() {
+            _remoteVideoReady = false;
+          });
+        }
+      },
       onLocalVideoStateChanged: (source, state, reason) {
         if (!mounted) return;
         setState(() {
@@ -251,13 +256,7 @@ class _AgoraCallSurfaceState extends State<AgoraCallSurface> {
           _reportConnectionPhase();
         }
       });
-      return SizedBox.expand(
-        child: _StatusPanel(
-          icon: Icons.sync,
-          message: widget.labels.connecting,
-          showSpinner: true,
-        ),
-      );
+      return const SizedBox.expand(child: _StatusPanel(showSpinner: true));
     }
 
     return SizedBox.expand(
@@ -271,10 +270,9 @@ class _AgoraCallSurfaceState extends State<AgoraCallSurface> {
             phase: _phase,
             remoteVideoReady: _remoteVideoReady,
             localVideoReady: _localVideoReady,
-            labels: widget.labels,
           ),
-          SessionCallType.voiceCall || SessionCallType.externalMeeting =>
-            _VoiceLayout(phase: _phase, labels: widget.labels),
+          SessionCallType.voiceCall ||
+          SessionCallType.externalMeeting => _VoiceLayout(phase: _phase),
         },
       ),
     );
@@ -289,7 +287,6 @@ class _VideoLayout extends StatefulWidget {
     required this.phase,
     required this.remoteVideoReady,
     required this.localVideoReady,
-    required this.labels,
   });
 
   final RtcEngine engine;
@@ -297,8 +294,7 @@ class _VideoLayout extends StatefulWidget {
   final String? channelId;
   final _AgoraCallConnectionPhase phase;
   final bool remoteVideoReady;
-  final bool localVideoReady;
-  final AgoraCallSurfaceLabels labels;
+  final bool? localVideoReady;
 
   @override
   State<_VideoLayout> createState() => _VideoLayoutState();
@@ -320,6 +316,10 @@ class _VideoLayoutState extends State<_VideoLayout> {
     if (oldWidget.remoteUid != widget.remoteUid ||
         oldWidget.channelId != widget.channelId) {
       _remoteController = null;
+    }
+    // Drop the local texture when capture stops so the last frame cannot linger.
+    if (oldWidget.localVideoReady != false && widget.localVideoReady == false) {
+      _localController = null;
     }
     // Invalidate local controller only when the engine changes.
     if (oldWidget.engine != widget.engine) {
@@ -365,31 +365,33 @@ class _VideoLayoutState extends State<_VideoLayout> {
         widget.remoteUid != null &&
         widget.channelId != null &&
         widget.channelId!.isNotEmpty;
+    final hasChannel = widget.channelId != null && widget.channelId!.isNotEmpty;
     final showRemoteVideo = hasRemoteParticipant && widget.remoteVideoReady;
-    final showLocalFullscreen = widget.localVideoReady && !showRemoteVideo;
-    final showLocalPiP = widget.localVideoReady && showRemoteVideo;
+    // Solo waiting: render local preview optimistically until SDK reports stopped.
+    // PiP: require SDK-confirmed capture so remote-placeholder states stay clean.
+    final showLocalFullscreen =
+        widget.localVideoReady != false &&
+        !showRemoteVideo &&
+        hasChannel &&
+        !hasRemoteParticipant;
+    final showLocalPiP =
+        widget.localVideoReady == true &&
+        hasRemoteParticipant &&
+        !showLocalFullscreen;
     final pipWidth = tokens.spaceXXL * 3.5;
     final pipHeight = tokens.spaceXXL * 4.625;
 
-    final (placeholderIcon, placeholderMessage) = switch (widget.phase) {
-      _AgoraCallConnectionPhase.connecting => (
-        Icons.sync,
-        widget.labels.connecting,
-      ),
-      _AgoraCallConnectionPhase.reconnecting => (
-        Icons.wifi_off,
-        widget.labels.connecting,
-      ),
-      _AgoraCallConnectionPhase.waitingForParticipant => (
-        Icons.hourglass_top_outlined,
-        widget.labels.waitingForParticipant,
-      ),
-      _AgoraCallConnectionPhase.participantJoined when !showRemoteVideo => (
-        Icons.videocam_outlined,
-        widget.labels.connected,
-      ),
-      _ => (Icons.person_outline, widget.labels.connected),
-    };
+    final showConnectingPlaceholder =
+        widget.phase == _AgoraCallConnectionPhase.connecting ||
+        widget.phase == _AgoraCallConnectionPhase.reconnecting;
+    final showRemoteMutedPlaceholder =
+        hasRemoteParticipant && !showRemoteVideo && !showConnectingPlaceholder;
+    final showLocalMutedPlaceholder =
+        widget.localVideoReady == false &&
+        !showRemoteVideo &&
+        hasChannel &&
+        !hasRemoteParticipant &&
+        !showConnectingPlaceholder;
 
     return Stack(
       fit: StackFit.expand,
@@ -398,14 +400,12 @@ class _VideoLayoutState extends State<_VideoLayout> {
           AgoraVideoView(controller: _effectiveRemoteController!)
         else if (showLocalFullscreen)
           AgoraVideoView(controller: _effectiveLocalController)
-        else
-          AgoraCallVideoPlaceholder(
-            icon: placeholderIcon,
-            message: placeholderMessage,
-            showSpinner:
-                widget.phase == _AgoraCallConnectionPhase.connecting ||
-                widget.phase == _AgoraCallConnectionPhase.reconnecting,
-          ),
+        else if (showConnectingPlaceholder)
+          const AgoraCallVideoPlaceholder(showSpinner: true)
+        else if (showRemoteMutedPlaceholder)
+          const AgoraCallVideoPlaceholder(icon: Icons.person_outline)
+        else if (showLocalMutedPlaceholder)
+          const AgoraCallVideoPlaceholder(icon: Icons.person_outline),
         if (showLocalPiP)
           PositionedDirectional(
             top: tokens.spaceMedium,
@@ -439,17 +439,15 @@ class _VideoLayoutState extends State<_VideoLayout> {
   }
 }
 
-/// Placeholder for video calls before Agora streams are renderable.
+/// Minimal placeholder before Agora streams bind — shell chrome owns status text.
 class AgoraCallVideoPlaceholder extends StatelessWidget {
   const AgoraCallVideoPlaceholder({
     super.key,
-    required this.icon,
-    required this.message,
+    this.icon = Icons.person_outline,
     this.showSpinner = false,
   });
 
   final IconData icon;
-  final String message;
   final bool showSpinner;
 
   @override
@@ -478,12 +476,6 @@ class AgoraCallVideoPlaceholder extends StatelessWidget {
                   color: colorScheme.onPrimaryContainer,
                 ),
               ),
-            SizedBox(height: tokens.spaceLarge),
-            Text(
-              message,
-              style: Theme.of(context).textTheme.titleMedium,
-              textAlign: TextAlign.center,
-            ),
           ],
         ),
       ),
@@ -519,10 +511,9 @@ bool agoraLocalVideoIsRenderable(LocalVideoStreamState state) {
 }
 
 class _VoiceLayout extends StatelessWidget {
-  const _VoiceLayout({required this.phase, required this.labels});
+  const _VoiceLayout({required this.phase});
 
   final _AgoraCallConnectionPhase phase;
-  final AgoraCallSurfaceLabels labels;
 
   @override
   Widget build(BuildContext context) {
@@ -536,40 +527,14 @@ class _VoiceLayout extends StatelessWidget {
       fit: StackFit.expand,
       children: [
         Center(
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              CircleAvatar(
-                radius: avatarRadius,
-                backgroundColor: colorScheme.primaryContainer,
-                child: Icon(
-                  Icons.person_outline,
-                  size: avatarIconSize,
-                  color: colorScheme.onPrimaryContainer,
-                ),
-              ),
-              SizedBox(height: tokens.spaceLarge),
-              Text(
-                labels.voiceCallTitle,
-                style: Theme.of(context).textTheme.titleLarge,
-                textAlign: TextAlign.center,
-              ),
-              SizedBox(height: tokens.spaceSmall),
-              Text(
-                switch (phase) {
-                  _AgoraCallConnectionPhase.connecting => labels.connecting,
-                  _AgoraCallConnectionPhase.reconnecting => labels.connecting,
-                  _AgoraCallConnectionPhase.waitingForParticipant =>
-                    labels.waitingForParticipant,
-                  _AgoraCallConnectionPhase.participantJoined =>
-                    labels.connected,
-                },
-                style: Theme.of(context).textTheme.bodyLarge?.copyWith(
-                  color: colorScheme.onSurfaceVariant,
-                ),
-                textAlign: TextAlign.center,
-              ),
-            ],
+          child: CircleAvatar(
+            radius: avatarRadius,
+            backgroundColor: colorScheme.primaryContainer,
+            child: Icon(
+              Icons.person_outline,
+              size: avatarIconSize,
+              color: colorScheme.onPrimaryContainer,
+            ),
           ),
         ),
         if (phase == _AgoraCallConnectionPhase.participantJoined)
@@ -660,14 +625,8 @@ class _VoiceActivePulseState extends State<_VoiceActivePulse>
 }
 
 class _StatusPanel extends StatelessWidget {
-  const _StatusPanel({
-    required this.icon,
-    required this.message,
-    this.showSpinner = false,
-  });
+  const _StatusPanel({this.showSpinner = false});
 
-  final IconData icon;
-  final String message;
   final bool showSpinner;
 
   @override
@@ -676,25 +635,13 @@ class _StatusPanel extends StatelessWidget {
     final colorScheme = Theme.of(context).colorScheme;
 
     return Center(
-      child: Column(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          if (showSpinner)
-            const CircularProgressIndicator()
-          else
-            Icon(
-              icon,
+      child: showSpinner
+          ? const CircularProgressIndicator()
+          : Icon(
+              Icons.sync,
               size: tokens.iconSizeExtraLarge + tokens.spaceExtraSmall,
               color: colorScheme.primary,
             ),
-          SizedBox(height: tokens.spaceMedium),
-          Text(
-            message,
-            style: Theme.of(context).textTheme.bodyLarge,
-            textAlign: TextAlign.center,
-          ),
-        ],
-      ),
     );
   }
 }
@@ -705,7 +652,6 @@ Widget? buildAgoraCallSurface({
   required SessionCallType callType,
   required SessionCallProviderKind providerKind,
   required AgoraRtcEnginePool enginePool,
-  required AgoraCallSurfaceLabels labels,
   SessionCallProviderEventHub? eventHub,
 }) {
   if (providerKind != SessionCallProviderKind.agora) {
@@ -716,7 +662,6 @@ Widget? buildAgoraCallSurface({
     sessionId: sessionId,
     callType: callType,
     enginePool: enginePool,
-    labels: labels,
     eventHub: eventHub,
   );
 }

@@ -171,6 +171,7 @@ class _FakeMutationGateway implements SessionMutationGateway {
     required SessionPricingType pricingType,
     String? paymentReference,
     String? studentNote,
+    String? idempotencyKey,
   }) async {
     final id = 'booking_${_stack.aggregates.length + 1}';
     final aggregate = SessionAggregate(
