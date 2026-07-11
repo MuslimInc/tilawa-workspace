@@ -1,4 +1,3 @@
-// ignore_for_file: prefer_initializing_formals
 import 'package:bloc_concurrency/bloc_concurrency.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
@@ -16,15 +15,11 @@ import 'profile_completion_state.dart';
 class ProfileCompletionBloc
     extends Bloc<ProfileCompletionEvent, ProfileCompletionState> {
   ProfileCompletionBloc({
-    required GetUserProfileUseCase getUserProfile,
-    required CompleteStudentProfileUseCase completeStudentProfile,
-    required GetMarketConfigUseCase getMarketConfig,
-    required GetSessionPolicyUseCase getSessionPolicy,
-  }) : _getUserProfile = getUserProfile,
-       _completeStudentProfile = completeStudentProfile,
-       _getMarketConfig = getMarketConfig,
-       _getSessionPolicy = getSessionPolicy,
-       super(const ProfileCompletionInitial()) {
+    required this._getUserProfile,
+    required this._completeStudentProfile,
+    required this._getMarketConfig,
+    required this._getSessionPolicy,
+  }) : super(const ProfileCompletionInitial()) {
     on<ProfileLoadRequested>(_onLoadRequested, transformer: restartable());
     on<GenderSelected>(_onGenderSelected, transformer: sequential());
     on<DateOfBirthSet>(_onDateOfBirthSet, transformer: sequential());

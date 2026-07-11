@@ -47,8 +47,8 @@ void main() {
     return SessionDetailBloc(
       getSessionAggregate: GetSessionAggregateUseCase(aggregateRepository),
       getTimeline: GetSessionTimelineUseCase(auditRepository),
-      sessionDetailUseCase: getSessionDetail,
-      cacheInvalidator: invalidateCache,
+      getSessionDetail: getSessionDetail,
+      invalidateCache: invalidateCache,
       sessionRepository: sessionRepository,
       joinSession: joinSession,
       reportConcern: reportConcern,

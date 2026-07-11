@@ -32,7 +32,7 @@ AvailabilityCubit _build(FakeScheduleRepository repo) => AvailabilityCubit(
     repo,
     const WeeklyScheduleValidator(),
   ),
-  repository: repo,
+  repo: repo,
   defaultTimezone: 'Africa/Cairo',
 );
 
@@ -228,7 +228,7 @@ void main() {
             delayingRepo,
             const WeeklyScheduleValidator(),
           ),
-          repository: delayingRepo,
+          repo: delayingRepo,
           defaultTimezone: 'Africa/Cairo',
         );
 

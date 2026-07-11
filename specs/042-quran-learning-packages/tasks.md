@@ -24,16 +24,16 @@
 
 **⚠️ CRITICAL**: No story implementation begins until package invariants and server-only writes pass.
 
-- [ ] T006 [P] Add package/order/credit domain entities and value objects in packages/quran_sessions/lib/src/domain/entities/quran_learning_package.dart
-- [ ] T007 [P] Add package failure hierarchy in packages/quran_sessions/lib/src/domain/failures/quran_package_failure.dart
-- [ ] T008 [P] Add package repository and command gateway contracts in packages/quran_sessions/lib/src/domain/repositories/quran_package_repository.dart
-- [ ] T009 [P] Add package DTOs and mappers with invariant validation in packages/quran_sessions/lib/src/data/dtos/quran_package_dto.dart and packages/quran_sessions/lib/src/data/mappers/quran_package_mapper.dart
-- [ ] T010 Add package catalog, order, entitlement, and movement TypeScript types in functions/src/quranSessions/packages/packageTypes.ts
-- [ ] T011 Implement atomic issue/reserve/consume/restore/expire/adjust service with deterministic movement ids in functions/src/quranSessions/packages/packageCreditService.ts
-- [ ] T012 Implement package authorization and granular admin-claim guards in functions/src/quranSessions/packages/packageAuth.ts
+- [x] T006 [P] Add package/order/credit domain entities and value objects in packages/quran_sessions/lib/src/domain/entities/quran_learning_package.dart
+- [x] T007 [P] Add package failure hierarchy in packages/quran_sessions/lib/src/domain/failures/quran_package_failure.dart
+- [x] T008 [P] Add package repository and command gateway contracts in packages/quran_sessions/lib/src/domain/repositories/quran_package_repository.dart
+- [x] T009 [P] Add package DTOs and mappers with invariant validation in packages/quran_sessions/lib/src/data/dtos/quran_package_dto.dart and packages/quran_sessions/lib/src/data/mappers/quran_package_mapper.dart
+- [x] T010 Add package catalog, order, entitlement, and movement TypeScript types in functions/src/quranSessions/packages/packageTypes.ts
+- [x] T011 Implement atomic issue/reserve/consume/restore/expire/adjust service with deterministic movement ids in functions/src/quranSessions/packages/packageCreditService.ts
+- [x] T012 Implement package authorization and granular admin-claim guards in functions/src/quranSessions/packages/packageAuth.ts
 - [ ] T013 Implement bounded package/order/activity query projections in functions/src/quranSessions/packages/packageProjectionService.ts
-- [ ] T014 [P] Add unit tests for invariants, concurrency preconditions, and deterministic movements in functions/test/quranSessions/packageCreditService.test.ts
-- [ ] T015 [P] Add Dart entity/mapper success, corruption, and edge tests in packages/quran_sessions/test/domain/quran_learning_package_test.dart and packages/quran_sessions/test/data/quran_package_mapper_test.dart
+- [x] T014 [P] Add unit tests for invariants, concurrency preconditions, and deterministic movements in functions/test/quranSessions/packageCreditService.test.ts
+- [x] T015 [P] Add Dart entity/mapper success, corruption, and edge tests in packages/quran_sessions/test/domain/quran_learning_package_test.dart and packages/quran_sessions/test/data/quran_package_mapper_test.dart
 - [ ] T016 Add Firestore deny-client-write and participant/admin read boundaries in firestore.rules
 - [ ] T017 Add required bounded query indexes in firestore.indexes.json
 - [ ] T018 [P] Add owner/guardian/teacher/admin/unauthorized rules tests in functions/test-rules/quranPackages.rules.test.ts
@@ -49,12 +49,12 @@
 
 **Independent Test**: Submit one eligible Egypt order, confirm payment, and observe exactly one active package with eight credits; reject/retry/non-Egypt paths have no entitlement effect.
 
-- [ ] T020 [P] [US1] Add create/cancel order and resolve-payment use cases in packages/quran_sessions/lib/src/domain/usecases/quran_package_order_usecases.dart
+- [x] T020 [P] [US1] Add create/cancel order and resolve-payment use cases in packages/quran_sessions/lib/src/domain/usecases/quran_package_order_usecases.dart
 - [ ] T021 [P] [US1] Implement `createQuranPackageOrder` with immutable terms/payment snapshot in functions/src/quranSessions/packages/createPackageOrder.ts
 - [ ] T022 [P] [US1] Implement owner/guardian pending-order cancellation in functions/src/quranSessions/packages/cancelPackageOrder.ts
 - [ ] T023 [US1] Implement idempotent admin confirm/reject and one-time package activation in functions/src/quranSessions/packages/resolvePackagePayment.ts
 - [ ] T024 [P] [US1] Implement Firebase package command/read gateways in apps/tilawa/lib/features/quran_sessions/data/firebase/firebase_quran_package_gateway.dart
-- [ ] T025 [US1] Add order/pending-payment/activation BLoC states in packages/quran_sessions/lib/src/presentation/blocs/package_order/package_order_bloc.dart
+- [x] T025 [US1] Add order/pending-payment/activation BLoC states in packages/quran_sessions/lib/src/presentation/blocs/package_order/package_order_bloc.dart
 - [ ] T026 [US1] Build localized package disclosure, payment instruction, and pending screens in packages/quran_sessions/lib/src/presentation/screens/quran_package_checkout_screen.dart
 - [ ] T027 [US1] Add typed package routes and feature-gate redirects in packages/quran_sessions/lib/src/presentation/router/quran_package_routes.dart and apps/tilawa/lib/features/quran_sessions/router/quran_sessions_router.dart
 - [ ] T028 [P] [US1] Add callable validation/idempotency/market tests in functions/test/quranSessions/packageOrderCallables.test.ts
@@ -73,13 +73,13 @@
 
 - [ ] T031 [P] [US2] Add package booking and balance/activity use cases in packages/quran_sessions/lib/src/domain/usecases/quran_package_booking_usecases.dart
 - [ ] T032 [US2] Implement `createQuranPackageBooking` by composing existing eligibility/slot locks with atomic credit reservation in functions/src/quranSessions/packages/createPackageBooking.ts
-- [ ] T033 [US2] Integrate deterministic credit finalization with cancellation, teacher response, no-show, completion, and expiry in functions/src/quranSessions/packages/packageLifecycleCreditAdapter.ts
+- [x] T033 [US2] Integrate deterministic credit finalization with cancellation, teacher response, no-show, completion, and expiry in functions/src/quranSessions/packages/packageLifecycleCreditAdapter.ts
 - [ ] T034 [US2] Add optional package linkage without changing pay-per-session behavior in functions/src/quranSessions/createSessionBooking.ts
 - [ ] T035 [US2] Implement expiration/reconciliation job and bounded mismatch report in functions/src/quranSessions/packages/reconcilePackageCredits.ts
 - [ ] T036 [US2] Add package balance/activity repository implementation in apps/tilawa/lib/features/quran_sessions/data/firebase/firestore_quran_package_repository.dart
 - [ ] T037 [US2] Extend booking BLoC with package entitlement selection and authoritative balance refresh in packages/quran_sessions/lib/src/presentation/blocs/booking/booking_bloc.dart
 - [ ] T038 [US2] Build package home/balance/activity states with Tilawa UI Kit in packages/quran_sessions/lib/src/presentation/screens/quran_package_detail_screen.dart
-- [ ] T039 [P] [US2] Add credit policy/unit tests for every lifecycle result in functions/test/quranSessions/packageLifecycleCreditAdapter.test.ts
+- [x] T039 [P] [US2] Add credit policy/unit tests for every lifecycle result in functions/test/quranSessions/packageLifecycleCreditAdapter.test.ts
 - [ ] T040 [P] [US2] Add final-credit concurrency, duplicate cancellation, expiry, and reconciliation integration tests in functions/test-integration/quranPackageBooking.integration.test.ts
 - [ ] T041 [P] [US2] Add package booking/balance/activity BLoC and widget tests in packages/quran_sessions/test/presentation/quran_package_booking_test.dart
 

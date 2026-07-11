@@ -73,7 +73,7 @@ void main() {
       repo,
       const WeeklyScheduleValidator(),
     ),
-    repository: repo,
+    repo: repo,
     defaultTimezone: 'Africa/Cairo',
   );
 

@@ -16,7 +16,7 @@ class TeacherJoinNavigationTestBloc extends TeacherDashboardBloc {
     required FakeSessionRepository sessionRepo,
     required FakeScheduleRepository scheduleRepo,
   }) : super(
-         dashboardUseCase: GetTeacherDashboardUseCase(
+         getTeacherDashboard: GetTeacherDashboardUseCase(
            userProfileRepository: FakeUserProfileRepository(),
            marketSchedulingConfigRepository:
                FakeMarketSchedulingConfigRepository(),
@@ -29,27 +29,27 @@ class TeacherJoinNavigationTestBloc extends TeacherDashboardBloc {
            ),
            cacheStore: MemoryCacheStore(),
          ),
-         cacheInvalidator: InvalidateQuranSessionCacheUseCase(
+         invalidateCache: InvalidateQuranSessionCacheUseCase(
            MemoryCacheStore(),
          ),
-         slotBookedUseCase: IsSlotBookedUseCase(
+         isSlotBooked: IsSlotBookedUseCase(
            FakeBookedSlotLockRepository(),
          ),
-         availabilityUseCase: SpyGetTeacherAvailabilityUseCase(
+         getAvailability: SpyGetTeacherAvailabilityUseCase(
            scheduleRepository: scheduleRepo,
            bookedSlotLocks: FakeBookedSlotLockRepository(),
          ),
-         blockSlotUseCase: BlockGeneratedSlotUseCase(scheduleRepo),
-         availabilityGateway: FakeAvailabilityProvider(),
-         cancelSessionUseCase: buildCancelSessionViaServerUseCase(),
-         respondToBookingRequestUseCase: buildRespondToBookingRequestUseCase(),
-         completeSessionUseCase: buildCompleteSessionViaServerUseCase(),
-         joinSessionUseCase: buildJoinSessionUseCase(
+         blockGeneratedSlot: BlockGeneratedSlotUseCase(scheduleRepo),
+         availabilityProvider: FakeAvailabilityProvider(),
+         cancelSession: buildCancelSessionViaServerUseCase(),
+         respondToBookingRequest: buildRespondToBookingRequestUseCase(),
+         completeSession: buildCompleteSessionViaServerUseCase(),
+         joinSession: buildJoinSessionUseCase(
            sessionRepository: sessionRepo,
            userId: 'teacher_1',
          ),
-         fridayReminderStore: InMemoryFridayReviewReminderStore(),
-         teacherUserId: 'teacher_1',
+         fridayReviewReminderStore: InMemoryFridayReviewReminderStore(),
+         teacherId: 'teacher_1',
        ) {
     emit(seed);
   }

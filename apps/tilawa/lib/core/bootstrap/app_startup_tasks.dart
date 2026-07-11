@@ -20,9 +20,10 @@ import 'package:quran_qcf/quran_qcf.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:tilawa/core/bootstrap/app_launch_config.dart';
 import 'package:tilawa/core/bootstrap/app_startup.dart';
-import 'package:tilawa/core/bootstrap/shared_preferences_migration.dart';
 import 'package:tilawa/core/bootstrap/launch_timeline.dart';
+import 'package:tilawa/core/bootstrap/shared_preferences_migration.dart';
 import 'package:tilawa/core/di/injection.dart';
+import 'package:tilawa/core/extensions.dart';
 import 'package:tilawa/core/logging/app_logger.dart';
 import 'package:tilawa/core/navigation/notification_launch_dedup.dart';
 import 'package:tilawa/core/observers/composite_bloc_observer.dart';
@@ -39,28 +40,25 @@ import 'package:tilawa/core/services/tasbeeh_reminder_notification_service.dart'
 import 'package:tilawa/core/telemetry/startup_telemetry.dart';
 import 'package:tilawa/features/athkar/domain/services/tasbeeh_reminder_scheduler.dart';
 import 'package:tilawa/features/audio_player/domain/repositories/audio_player_repository.dart';
+import 'package:tilawa/features/audio_player/domain/services/playback_notification_bridge.dart';
+import 'package:tilawa/features/audio_player/presentation/bloc/audio_player_bloc.dart';
+import 'package:tilawa/features/audio_player/presentation/player_presentation_controller.dart';
+import 'package:tilawa/features/audio_player/presentation/quran_player_presentation_entry.dart';
+import 'package:tilawa/features/downloads/domain/services/download_notification_service_interface.dart';
+import 'package:tilawa/features/downloads/domain/services/downloads_initializer.dart';
 import 'package:tilawa/features/islamic_widgets/app/ayah_widget_sync_service.dart';
 import 'package:tilawa/features/islamic_widgets/data/athkar_widget_repository.dart';
 import 'package:tilawa/features/islamic_widgets/data/daily_ayah_widget_repository.dart';
 import 'package:tilawa/features/islamic_widgets/data/widget_snapshot_bridge.dart';
-import 'package:tilawa/features/audio_player/domain/services/playback_notification_bridge.dart';
-import 'package:tilawa/features/audio_player/presentation/bloc/audio_player_bloc.dart';
-import 'package:tilawa/features/audio_player/presentation/player_presentation_controller.dart';
-import 'package:tilawa/core/extensions.dart';
-import 'package:tilawa/features/audio_player/presentation/quran_player_presentation_entry.dart';
-import 'package:tilawa/router/app_router.dart';
-import 'package:tilawa_ui_kit/tilawa_ui_kit.dart';
-import 'package:tilawa/features/downloads/domain/services/download_notification_service_interface.dart';
-import 'package:tilawa/features/downloads/domain/services/downloads_initializer.dart';
 import 'package:tilawa/features/notifications/data/services/fcm_service.dart';
 import 'package:tilawa/features/notifications/domain/repositories/notifications_repository.dart';
-import 'package:tilawa/features/prayer_times/domain/entities/entities.dart';
 import 'package:tilawa/features/prayer_times/domain/services/adhan_alarm_player_interface.dart';
 import 'package:tilawa/features/prayer_times/domain/services/prayer_adhan_notification_service_interface.dart';
 import 'package:tilawa/features/prayer_times/domain/services/prayer_notification_watchdog_scheduler.dart';
 import 'package:tilawa/features/prayer_times/domain/usecases/usecases.dart';
 import 'package:tilawa/features/quran_sessions/data/quran_sessions_platform_config_repository.dart';
 import 'package:tilawa/firebase_options.dart';
+import 'package:tilawa/router/app_router.dart';
 import 'package:tilawa/router/app_router_config.dart';
 import 'package:tilawa/router/notification_navigation_resolver.dart';
 import 'package:tilawa/shared/audio/audio_player_handler.dart';
@@ -68,6 +66,7 @@ import 'package:tilawa_core/observers/app_bloc_observer.dart';
 import 'package:tilawa_core/services/app_orientation_service.dart';
 import 'package:tilawa_core/services/interfaces/athkar_notification_service_interface.dart';
 import 'package:tilawa_core/services/interfaces/notification_dispatcher_interface.dart';
+import 'package:tilawa_ui_kit/tilawa_ui_kit.dart';
 
 class AppStartupTasks {
   AppStartupTasks({AppLaunchConfig? launchConfig})
@@ -1219,10 +1218,8 @@ class AppStartupTasks {
       final IPrayerAdhanNotificationService service =
           getIt<IPrayerAdhanNotificationService>();
       await service.initialize();
-      final LoadPrayerSettingsUseCase loadSettings =
-          getIt<LoadPrayerSettingsUseCase>();
-      final SchedulePrayerNotificationsUseCase scheduleNotifications =
-          getIt<SchedulePrayerNotificationsUseCase>();
+      final EnsurePrayerNotificationsScheduledUseCase ensureScheduled =
+          getIt<EnsurePrayerNotificationsScheduledUseCase>();
       final IAdhanAlarmPlayer adhanPlayer = getIt<IAdhanAlarmPlayer>();
 
       // If the device booted (or the package was replaced/timezone changed)
@@ -1240,33 +1237,35 @@ class AppStartupTasks {
         }
       } catch (_) {}
 
-      final result = await loadSettings.call();
+      final result = await ensureScheduled(forceReschedule: forceReschedule);
       await result.fold(
         (failure) async {
           logger.d(
-            '[AppLaunch] source=AppStartupTasks.initializePrayerNotifications: Warning: Could not load prayer settings for startup schedule: ${failure.message}',
+            '[AppLaunch] source=AppStartupTasks.initializePrayerNotifications: Warning: Could not ensure startup prayer schedule: ${failure.message}',
           );
         },
-        (PrayerSettingsEntity settings) async {
-          final double? latitude = settings.effectiveSchedulingLatitude;
-          final double? longitude = settings.effectiveSchedulingLongitude;
-          if (latitude == null || longitude == null) {
-            if (forceReschedule) {
-              await adhanPlayer.markNeedsReschedule();
-            }
-            logger.d(
-              '[AppLaunch] source=AppStartupTasks.initializePrayerNotifications: No saved location; startup schedule skipped',
-            );
-            return;
-          }
-          final scheduleResult = await scheduleNotifications.call(
-            settings: settings,
-            latitude: latitude,
-            longitude: longitude,
-            forceReschedule: forceReschedule,
-          );
-          if (forceReschedule && scheduleResult.isLeft()) {
-            await adhanPlayer.markNeedsReschedule();
+        (ensureResult) async {
+          switch (ensureResult.action) {
+            case PrayerNotificationEnsureAction.rescheduled:
+              logger.d(
+                '[AppLaunch] source=AppStartupTasks.initializePrayerNotifications: Prayer schedule refreshed during startup',
+              );
+            case PrayerNotificationEnsureAction.skippedWindowSufficient:
+              logger.d(
+                '[AppLaunch] source=AppStartupTasks.initializePrayerNotifications: Existing prayer schedule window still sufficient; startup refresh skipped',
+              );
+            case PrayerNotificationEnsureAction.skippedNoSavedLocation:
+              logger.d(
+                '[AppLaunch] source=AppStartupTasks.initializePrayerNotifications: No saved location; startup schedule skipped',
+              );
+            case PrayerNotificationEnsureAction.skippedNotificationsDisabled:
+              logger.d(
+                '[AppLaunch] source=AppStartupTasks.initializePrayerNotifications: Prayer notifications disabled; startup schedule skipped',
+              );
+            case PrayerNotificationEnsureAction.skippedPermissionDenied:
+              logger.d(
+                '[AppLaunch] source=AppStartupTasks.initializePrayerNotifications: Notification permission denied; startup schedule skipped',
+              );
           }
         },
       );

@@ -22,6 +22,57 @@ No package implementation files existed when this baseline ran. Continue Phase
 select legacy mode or confirms another intended baseline. Do not weaken package
 tests or production behavior to compensate for this unrelated failure.
 
+## Foundation Implemented — 2026-07-11 (Phase 2 pure-logic core)
+
+The verifiable, framework-free core of Phase 2 is implemented and green. No
+Firestore-transactional, callable, rules, screen, or admin code is written yet;
+those require emulator/device/staging verification and are intentionally left
+for a session where those harnesses can run.
+
+Delivered and tested:
+
+- **Dart domain** (`packages/quran_sessions`): package/order/entitlement/movement
+  entities + value objects with the credit conservation invariant
+  (`quran_learning_package.dart`); separate sealed `QuranPackageFailure` family;
+  read repository + server-only command gateway contracts; DTOs and
+  fail-closed mappers that reject corrupt/inconsistent documents. Exported via
+  the package barrel.
+- **Functions** (`functions/src/quranSessions/packages`): shared `packageTypes.ts`;
+  pure atomic `packageCreditService.ts`
+  (issue/reserve/consume/restore/expire/adjust) with deterministic movement ids
+  and enforced conservation invariant; `packageAuth.ts` granular admin claims,
+  market eligibility, guardian-on-behalf resolution, and role-safe reads;
+  `packageLifecycleCreditAdapter.ts` — deterministic policy mapping every
+  session terminal status to a credit op (consume/restore/none) with the 12h
+  cutoff rule for student cancellations (T033/T039).
+- **US1 sale path (Dart, testable slice)**: order use cases
+  (`quran_package_order_usecases.dart`, T020) and `PackageOrderBloc` with
+  disclosure → submit → pending-payment → resolved states (T025), verified with
+  a fake gateway. (Checkout screen/routing T026–T027 and the callables
+  themselves remain — they need the emulator/device.)
+
+Test evidence:
+
+```text
+packages/quran_sessions: flutter test (new files) → 34 pass, 0 fail; dart analyze lib → no issues
+functions:              node --test package suites → 49 pass, 0 fail; tsc --noEmit → clean
+```
+
+Credit conservation invariant (enforced in both Dart and TS):
+
+```text
+issued + adjustPositive == available + reserved + consumed + expired + adjustNegative
+```
+
+`restoredCredits` is a monotonic tally (restore moves reserved → available), not
+part of the sum. `consumed`/`expired` are terminal.
+
+Not yet started (need emulator/device/staging + GO gates): T013 projections,
+T016 rules, T017 indexes (field-name casing pending the write path), T018 rules
+tests, T019 exports/DI, the US1/US2 callables and screens (T021–T024, T026–T032,
+T034–T038), and all of US3–US6. The credit engine, lifecycle credit policy, and
+US1 order BLoC that these will consume are done and tested.
+
 ## Preconditions
 
 - Use Firebase emulators or the designated staging project, never production for initial validation.

@@ -435,18 +435,18 @@ class QuranSessionsMvpModule {
     );
     sl.registerFactoryIfAbsent(
       () => TeacherDashboardBloc(
-        dashboardUseCase: sl<GetTeacherDashboardUseCase>(),
-        cacheInvalidator: sl<InvalidateQuranSessionCacheUseCase>(),
-        slotBookedUseCase: sl<IsSlotBookedUseCase>(),
-        availabilityUseCase: sl<GetTeacherAvailabilityUseCase>(),
-        blockSlotUseCase: sl<BlockGeneratedSlotUseCase>(),
-        availabilityGateway: sl<AvailabilityProvider>(),
-        cancelSessionUseCase: sl<CancelSessionViaServerUseCase>(),
-        respondToBookingRequestUseCase: sl<RespondToBookingRequestUseCase>(),
-        completeSessionUseCase: sl<CompleteSessionViaServerUseCase>(),
-        joinSessionUseCase: sl<JoinSessionUseCase>(),
-        fridayReminderStore: sl<FridayReviewReminderStore>(),
-        teacherUserId: sl<AuthSessionProvider>().currentUserId ?? 'teacher_mvp',
+        getTeacherDashboard: sl<GetTeacherDashboardUseCase>(),
+        invalidateCache: sl<InvalidateQuranSessionCacheUseCase>(),
+        isSlotBooked: sl<IsSlotBookedUseCase>(),
+        getAvailability: sl<GetTeacherAvailabilityUseCase>(),
+        blockGeneratedSlot: sl<BlockGeneratedSlotUseCase>(),
+        availabilityProvider: sl<AvailabilityProvider>(),
+        cancelSession: sl<CancelSessionViaServerUseCase>(),
+        respondToBookingRequest: sl<RespondToBookingRequestUseCase>(),
+        completeSession: sl<CompleteSessionViaServerUseCase>(),
+        joinSession: sl<JoinSessionUseCase>(),
+        fridayReviewReminderStore: sl<FridayReviewReminderStore>(),
+        teacherId: sl<AuthSessionProvider>().currentUserId ?? 'teacher_mvp',
         isConnected: sl.isRegistered<NetworkInfo>()
             ? () => sl<NetworkInfo>().isConnected
             : null,
@@ -462,10 +462,10 @@ class QuranSessionsMvpModule {
       () => SessionDetailBloc(
         getSessionAggregate: sl<GetSessionAggregateUseCase>(),
         getTimeline: sl<GetSessionTimelineUseCase>(),
-        sessionDetailUseCase: sl.isRegistered<GetSessionDetailUseCase>()
+        getSessionDetail: sl.isRegistered<GetSessionDetailUseCase>()
             ? sl<GetSessionDetailUseCase>()
             : null,
-        cacheInvalidator: sl.isRegistered<InvalidateQuranSessionCacheUseCase>()
+        invalidateCache: sl.isRegistered<InvalidateQuranSessionCacheUseCase>()
             ? sl<InvalidateQuranSessionCacheUseCase>()
             : null,
         sessionRepository: sl<SessionRepository>(),
@@ -506,7 +506,7 @@ class QuranSessionsMvpModule {
       () => AvailabilityCubit(
         getSchedule: sl<GetWeeklyScheduleUseCase>(),
         saveSchedule: sl<SaveWeeklyScheduleUseCase>(),
-        repository: sl<ScheduleRepository>(),
+        repo: sl<ScheduleRepository>(),
       ),
     );
     sl.registerFactoryIfAbsent(

@@ -20,11 +20,10 @@ class AvailabilityCubit extends Cubit<AvailabilityState> {
   AvailabilityCubit({
     required this._getSchedule,
     required this._saveSchedule,
-    required ScheduleRepository repository,
+    required this._repo,
     this._defaultTimezone = 'Africa/Cairo',
     this._vacationValidator = const VacationOverrideValidator(),
-  }) : _repo = repository,
-       super(AvailabilityState.loading(''));
+  }) : super(AvailabilityState.loading(''));
 
   final GetWeeklyScheduleUseCase _getSchedule;
   final SaveWeeklyScheduleUseCase _saveSchedule;

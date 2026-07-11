@@ -379,3 +379,14 @@ export 'src/domain/policies/session_join_policy.dart';
 export 'src/application/cache/quran_session_cache_store.dart';
 export 'src/application/cache/session_cache_key.dart';
 export 'src/data/stores/memory_cache_store.dart';
+
+// ── Quran Learning Packages (feature 042) ─────────────────────────────────────
+export 'src/domain/entities/quran_learning_package.dart';
+export 'src/domain/failures/quran_package_failure.dart';
+export 'src/domain/repositories/quran_package_repository.dart';
+export 'src/data/dtos/quran_package_dto.dart';
+export 'src/data/mappers/quran_package_mapper.dart';
+export 'src/domain/usecases/quran_package_order_usecases.dart';
+export 'src/presentation/blocs/package_order/package_order_bloc.dart';
+export 'src/presentation/blocs/package_order/package_order_event.dart';
+export 'src/presentation/blocs/package_order/package_order_state.dart';

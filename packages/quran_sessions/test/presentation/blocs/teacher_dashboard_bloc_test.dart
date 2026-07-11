@@ -1,16 +1,16 @@
 import 'package:bloc_test/bloc_test.dart';
 import 'package:checks/checks.dart';
 import 'package:flutter_test/flutter_test.dart';
-
 import 'package:quran_sessions/quran_sessions.dart';
+import 'package:timezone/data/latest.dart' as tz_data;
+
 import '../../helpers/availability_test_helpers.dart';
-import '../../helpers/fakes/fake_user_profile_repository.dart';
 import '../../helpers/fakes/fake_availability_provider.dart';
 import '../../helpers/fakes/fake_booked_slot_lock_repository.dart';
 import '../../helpers/fakes/fake_session_repository.dart';
-import '../../helpers/lifecycle_test_helpers.dart';
+import '../../helpers/fakes/fake_user_profile_repository.dart';
 import '../../helpers/fixtures.dart';
-import 'package:timezone/data/latest.dart' as tz_data;
+import '../../helpers/lifecycle_test_helpers.dart';
 
 /// Test double for [CommitTimerFactory] — fires callbacks on demand.
 class FakeCommitTimers {
