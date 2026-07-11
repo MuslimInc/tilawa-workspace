@@ -31,4 +31,9 @@
     <string name="widget_preview_time_asr">4:37</string>
     <string name="widget_preview_time_maghrib">8:00</string>
     <string name="widget_preview_time_isha">9:31</string>
+    <!-- Ayah of the Day widget (spec 041, US2) -->
+    <string name="widget_ayah_label">Ayah of the Day</string>
+    <string name="widget_ayah_description">A daily verse in the authentic Mushaf script</string>
+    <string name="widget_ayah_preview_glyph">﷽</string>
+    <string name="widget_ayah_preview_caption">Ayah of the Day</string>
 </resources>

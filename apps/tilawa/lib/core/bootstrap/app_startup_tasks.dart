@@ -39,6 +39,9 @@ import 'package:tilawa/core/services/tasbeeh_reminder_notification_service.dart'
 import 'package:tilawa/core/telemetry/startup_telemetry.dart';
 import 'package:tilawa/features/athkar/domain/services/tasbeeh_reminder_scheduler.dart';
 import 'package:tilawa/features/audio_player/domain/repositories/audio_player_repository.dart';
+import 'package:tilawa/features/islamic_widgets/app/ayah_widget_sync_service.dart';
+import 'package:tilawa/features/islamic_widgets/data/daily_ayah_widget_repository.dart';
+import 'package:tilawa/features/islamic_widgets/data/widget_snapshot_bridge.dart';
 import 'package:tilawa/features/audio_player/domain/services/playback_notification_bridge.dart';
 import 'package:tilawa/features/audio_player/presentation/bloc/audio_player_bloc.dart';
 import 'package:tilawa/features/audio_player/presentation/player_presentation_controller.dart';
@@ -791,6 +794,33 @@ class AppStartupTasks {
     } catch (e) {
       logger.d(
         '[AppLaunch] source=AppStartupTasks.initializeDownloads: Warning: Could not initialize downloads at (${DateTime.now()}): $e',
+      );
+    }
+  }
+
+  /// Publishes the Ayah of the Day widget snapshot (spec 041, T022). Runs
+  /// once per local day (dedup inside the sync service); Android-only.
+  Future<void> initializeIslamicWidgets() async {
+    if (!Platform.isAndroid) return;
+    logger.d(
+      '[AppLaunch] source=AppStartupTasks.initializeIslamicWidgets: Start in (${DateTime.now()})',
+    );
+    try {
+      final SharedPreferencesAsync prefs = getIt<SharedPreferencesAsync>();
+      final AyahWidgetSyncService syncService = AyahWidgetSyncService(
+        repository: DailyAyahWidgetRepository(
+          fontService: getIt<QuranFontService>(),
+          bridge: const WidgetSnapshotBridge(
+            MethodChannel('com.tilawa.app/prayer_adhan'),
+          ),
+          prefs: prefs,
+        ),
+        prefs: prefs,
+      );
+      await syncService.syncIfNeeded();
+    } catch (e) {
+      logger.d(
+        '[AppLaunch] source=AppStartupTasks.initializeIslamicWidgets: Warning: Could not sync ayah widget at (${DateTime.now()}): $e',
       );
     }
   }

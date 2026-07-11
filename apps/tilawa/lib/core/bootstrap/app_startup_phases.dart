@@ -183,6 +183,8 @@ extension AppStartupBackgroundPhases on AppStartupTasks {
       if (launchConfig.downloadsInit) {
         tasks.add(initializeDownloads());
       }
+      // Ayah widget snapshot (spec 041) — guards itself (Android + daily dedup).
+      tasks.add(initializeIslamicWidgets());
       if (tasks.isNotEmpty) {
         await Future.wait(tasks);
       }

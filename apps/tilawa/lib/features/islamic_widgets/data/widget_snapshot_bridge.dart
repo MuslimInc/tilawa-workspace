@@ -13,11 +13,13 @@ class WidgetSnapshotBridge {
   Future<void> dispatchSnapshot<T extends Object>(
     WidgetSnapshotEnvelope<T> envelope,
   ) async {
+    // Key names must match the native parser contract
+    // (WidgetSnapshotEnvelope.kt): generatedAtMs / validUntilMs.
     final Map<String, dynamic> jsonMap = <String, dynamic>{
       'schemaVersion': envelope.schemaVersion,
       'widgetType': envelope.widgetType.name,
-      'generatedAt': envelope.generatedAt.millisecondsSinceEpoch,
-      'validUntil': envelope.validUntil?.millisecondsSinceEpoch,
+      'generatedAtMs': envelope.generatedAt.millisecondsSinceEpoch,
+      'validUntilMs': envelope.validUntil?.millisecondsSinceEpoch,
       // Assume T has a toJson() method or is directly encodable.
       'payload': (envelope.payload as dynamic).toJson(),
     };

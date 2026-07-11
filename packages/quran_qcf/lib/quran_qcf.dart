@@ -97,6 +97,7 @@ export 'src/presentation/services/idle_scheduler.dart';
 export 'src/presentation/services/page_snapshot_service.dart';
 export 'src/presentation/services/quran_font_service.dart';
 export 'src/presentation/services/quran_page_preparation_service.dart';
+export 'src/presentation/services/widget_ayah_artifact_renderer.dart';
 // =============================================================================
 // WIDGETS
 // =============================================================================

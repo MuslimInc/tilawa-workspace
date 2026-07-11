@@ -31,4 +31,9 @@
     <string name="widget_preview_time_asr">٤:٣٧</string>
     <string name="widget_preview_time_maghrib">٨:٠٠</string>
     <string name="widget_preview_time_isha">٩:٣١</string>
+    <!-- Ayah of the Day widget (spec 041, US2) -->
+    <string name="widget_ayah_label">آية اليوم</string>
+    <string name="widget_ayah_description">آية يومية بخط المصحف الشريف</string>
+    <string name="widget_ayah_preview_glyph">﷽</string>
+    <string name="widget_ayah_preview_caption">آية اليوم</string>
 </resources>
