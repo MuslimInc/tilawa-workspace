@@ -33,6 +33,7 @@ import '../config/notification_config.dart';
 import 'notification_permission_service.dart';
 import 'prayer_notification_config.dart';
 import 'prayer_notification_payload_classifier.dart';
+import 'prayer_widget_schedule_sync.dart';
 
 /// Prayer time entries that participate in scheduled notifications. Sunrise is
 /// notification-only; midnight and lastThird are not user-configurable.
@@ -56,7 +57,8 @@ class PrayerAdhanNotificationService
     this._adhanPlayer,
     this._notificationPermissionService, {
     @ignoreParam @visibleForTesting this._isAndroidOverride,
-  });
+    @ignoreParam @visibleForTesting PrayerWidgetScheduleSync? widgetSync,
+  }) : _widgetSync = widgetSync ?? PrayerWidgetScheduleSync();
 
   final SharedPreferencesAsync _prefs;
   final INotificationDispatcher _dispatcher;
@@ -65,6 +67,7 @@ class PrayerAdhanNotificationService
   final IAdhanAlarmPlayer _adhanPlayer;
   final NotificationPermissionService _notificationPermissionService;
   final bool? _isAndroidOverride;
+  final PrayerWidgetScheduleSync _widgetSync;
 
   bool get _isAndroid => _isAndroidOverride ?? Platform.isAndroid;
 
@@ -590,6 +593,20 @@ class PrayerAdhanNotificationService
       } catch (e) {
         logger.w(
           '${PrayerNotificationConfig.logTag} persistPendingAlarms failed: $e',
+        );
+      }
+
+      // Push the fresh multi-day schedule to the home-screen widget so it can
+      // render without a Dart isolate (spec 041, P1). Best-effort — the widget
+      // keeps its previous snapshot on failure.
+      try {
+        await _widgetSync.push(
+          days: prayerTimesForDays,
+          locationName: notificationLocationLabel,
+        );
+      } catch (e) {
+        logger.w(
+          '${PrayerNotificationConfig.logTag} widget schedule push failed: $e',
         );
       }
 

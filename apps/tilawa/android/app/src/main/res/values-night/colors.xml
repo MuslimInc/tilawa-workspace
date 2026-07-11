@@ -3,4 +3,16 @@
     <!-- Match light launch canvas for a single branded handoff. -->
     <!-- Production: #1DAB61 -->
     <color name="launch_background">#1DAB61</color>
+
+    <!-- Prayer widget (spec 041) dark theme. -->
+    <color name="widget_surface">#302645</color>
+    <!-- Keep widget gradient tied to app brand theme. -->
+    <color name="widget_surface_start">#2CC57B</color>
+    <color name="widget_surface_end">#167A47</color>
+    <color name="widget_left_panel">#33FFFFFF</color>
+    <color name="widget_text_primary">#F5FFFFFF</color>
+    <color name="widget_text_secondary">#D9FFFFFF</color>
+    <color name="widget_accent">#FFD44F</color>
+    <color name="widget_next_row">#FFD44F</color>
+    <color name="widget_highlight">#00000000</color>
 </resources>

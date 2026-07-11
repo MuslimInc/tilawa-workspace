@@ -78,14 +78,11 @@ class TilawaSegmentedControl<T> extends StatelessWidget {
     final EdgeInsets itemPadding = tokens.itemPadding.resolve(
       Directionality.of(context),
     );
-    final EdgeInsets containerPadding = tokens.containerPadding.resolve(
-      Directionality.of(context),
-    );
     final double labelHeight = tilawaMeasureTextHeight(
       context: context,
       style: labelStyle,
     );
-    return containerPadding.vertical + itemPadding.vertical + labelHeight;
+    return itemPadding.vertical + labelHeight;
   }
 
   @override
@@ -105,9 +102,6 @@ class TilawaSegmentedControl<T> extends StatelessWidget {
 
     final designTokens = theme.tokens;
     final itemPadding = tokens.itemPadding.resolve(Directionality.of(context));
-    final containerPadding = tokens.containerPadding.resolve(
-      Directionality.of(context),
-    );
     final labelStyle = theme.textTheme.labelLarge;
     final double labelHeight = tilawaMeasureTextHeight(
       context: context,
@@ -116,7 +110,7 @@ class TilawaSegmentedControl<T> extends StatelessWidget {
     final double itemHeight = itemPadding.vertical + labelHeight;
     final defaultRadii = designTokens.resolveSegmentedControlRadii(
       itemHeight: itemHeight,
-      containerPadding: containerPadding.top,
+      containerPadding: 0,
     );
     final double effectiveContainerRadius =
         containerRadius ?? defaultRadii.containerRadius;
@@ -124,11 +118,10 @@ class TilawaSegmentedControl<T> extends StatelessWidget {
         itemRadius ??
         designTokens.concentricInner(
           outerRadius: effectiveContainerRadius,
-          padding: containerPadding.top,
+          padding: 0,
         );
 
-    return Container(
-      padding: tokens.containerPadding,
+    return DecoratedBox(
       decoration: BoxDecoration(
         color: effectiveBackground,
         borderRadius: BorderRadius.circular(effectiveContainerRadius),
@@ -254,15 +247,12 @@ class _SegmentButton extends StatelessWidget {
                 ]
               : null,
         ),
-        child: Container(
-          padding: tokens.itemPadding,
-          child: Center(
-            child: Text(
-              label,
-              style: textStyle,
-              maxLines: 1,
-              overflow: TextOverflow.ellipsis,
-            ),
+        child: Center(
+          child: Text(
+            label,
+            style: textStyle,
+            maxLines: 1,
+            overflow: TextOverflow.ellipsis,
           ),
         ),
       ),

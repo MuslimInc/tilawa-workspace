@@ -12,4 +12,38 @@
     <string name="prayer_maghrib">المغرب</string>
     <string name="prayer_isha">العشاء</string>
     <string name="prayer_sunrise">الشروق</string>
+    <string name="widget_prayer_label">مواقيت الصلاة</string>
+    <string name="widget_prayer_description">الصلوات الخمس اليوم مع عدّ تنازلي للصلاة القادمة</string>
+    <string name="widget_prayer_title">مواقيت الصلاة</string>
+    <string name="widget_next_prayer">%1$s بعد</string>
+    <string name="widget_empty_hint">افتح التطبيق لتحميل مواقيت الصلاة</string>
+    <string name="widget_stale_hint">افتح التطبيق للتحديث</string>
+    <string name="widget_setup_hint">انقر لتحديد الموقع</string>
+    <!-- Widget-picker preview placeholders; overwritten at runtime. -->
+    <string name="widget_preview_next">الفجر بعد ٢:١٠</string>
+    <string name="widget_preview_next_prayer_name">الفجر</string>
+    <string name="widget_preview_day_name">السبت</string>
+    <string name="widget_preview_hijri_date">١٤٤٨-٠١-٢٦</string>
+    <string name="widget_preview_gregorian_date">٢٠٢٦-٠٧-١١</string>
+    <string name="widget_preview_time_fajr">٤:١٨</string>
+    <string name="widget_preview_time_sunrise">٦:٠٢</string>
+    <string name="widget_preview_time_dhuhr">١:٠١</string>
+    <string name="widget_preview_time_asr">٤:٣٧</string>
+    <string name="widget_preview_time_maghrib">٨:٠٠</string>
+    <string name="widget_preview_time_isha">٩:٣١</string>
+    <!-- Ayah of the Day widget (spec 041, US2) -->
+    <string name="widget_ayah_label">آية اليوم</string>
+    <string name="widget_ayah_description">آية يومية بخط المصحف الشريف</string>
+    <string name="widget_ayah_preview_glyph">﷽</string>
+    <string name="widget_ayah_preview_caption">آية اليوم</string>
+    <!-- Athkar widget (spec 041, US3) -->
+    <string name="widget_athkar_label">أذكار الصباح والمساء</string>
+    <string name="widget_athkar_description">الأذكار المناسبة للوقت مع التقدّم بلمسة</string>
+    <string name="widget_athkar_empty_hint">افتح التطبيق لتحميل الأذكار</string>
+    <string name="widget_athkar_done">تقبَّل الله — أتممت أذكارك 🌿</string>
+    <string name="widget_athkar_count">×%1$s</string>
+    <string name="widget_athkar_preview_title">أذكار الصباح</string>
+    <string name="widget_athkar_preview_progress">١/٢٥</string>
+    <string name="widget_athkar_preview_text">أَصْبَحْنَا وَأَصْبَحَ الْمُلْكُ لِلَّهِ، وَالْحَمْدُ لِلَّهِ</string>
+    <string name="widget_athkar_preview_count">×٣</string>
 </resources>

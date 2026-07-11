@@ -1,6 +1,7 @@
 import 'dart:async';
 
 import 'package:dartz_plus/dartz_plus.dart';
+// ignore_for_file: avoid_public_fields, file_names
 import 'package:flutter/material.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:flutter_test/flutter_test.dart';

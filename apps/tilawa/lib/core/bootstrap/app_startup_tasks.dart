@@ -39,6 +39,10 @@ import 'package:tilawa/core/services/tasbeeh_reminder_notification_service.dart'
 import 'package:tilawa/core/telemetry/startup_telemetry.dart';
 import 'package:tilawa/features/athkar/domain/services/tasbeeh_reminder_scheduler.dart';
 import 'package:tilawa/features/audio_player/domain/repositories/audio_player_repository.dart';
+import 'package:tilawa/features/islamic_widgets/app/ayah_widget_sync_service.dart';
+import 'package:tilawa/features/islamic_widgets/data/athkar_widget_repository.dart';
+import 'package:tilawa/features/islamic_widgets/data/daily_ayah_widget_repository.dart';
+import 'package:tilawa/features/islamic_widgets/data/widget_snapshot_bridge.dart';
 import 'package:tilawa/features/audio_player/domain/services/playback_notification_bridge.dart';
 import 'package:tilawa/features/audio_player/presentation/bloc/audio_player_bloc.dart';
 import 'package:tilawa/features/audio_player/presentation/player_presentation_controller.dart';
@@ -793,6 +797,68 @@ class AppStartupTasks {
         '[AppLaunch] source=AppStartupTasks.initializeDownloads: Warning: Could not initialize downloads at (${DateTime.now()}): $e',
       );
     }
+  }
+
+  /// Publishes the Ayah of the Day widget snapshot (spec 041, T022). Runs
+  /// once per local day (dedup inside the sync service); Android-only.
+  ///
+  /// Fire-and-forget with a post-startup delay: composing the snapshot uses
+  /// `Picture.toImage()`, which competes with the raster thread during launch
+  /// (see the warm-up note in [QuranFontService]) — awaiting it here deadlocks
+  /// Phase 3. The delay lands the render after first frame; the timeout
+  /// guarantees a hung render can never leak past one launch.
+  Future<void> initializeIslamicWidgets() async {
+    if (!Platform.isAndroid) return;
+    logger.d(
+      '[AppLaunch] source=AppStartupTasks.initializeIslamicWidgets: Scheduled in (${DateTime.now()})',
+    );
+    unawaited(
+      // 15s: far enough past the startup tail that the render pipeline's
+      // main-isolate work cannot pile onto launch contention (an 8s delay
+      // landed exactly on an input-dispatch ANR under heavy device load).
+      Future<void>.delayed(const Duration(seconds: 15)).then((_) async {
+        try {
+          final SharedPreferencesAsync prefs = getIt<SharedPreferencesAsync>();
+          final AyahWidgetSyncService syncService = AyahWidgetSyncService(
+            repository: DailyAyahWidgetRepository(
+              bridge: const WidgetSnapshotBridge(
+                MethodChannel('com.tilawa.app/prayer_adhan'),
+              ),
+              prefs: prefs,
+            ),
+            prefs: prefs,
+          );
+          await syncService.syncIfNeeded().timeout(
+            const Duration(seconds: 45),
+          );
+        } catch (e) {
+          logger.d(
+            '[AppLaunch] source=AppStartupTasks.initializeIslamicWidgets: Warning: Could not sync ayah widget at (${DateTime.now()}): $e',
+          );
+        }
+        // Breathe between the two publishes so their main-isolate work can
+        // never fuse into one long UI-thread stall.
+        await Future<void>.delayed(const Duration(seconds: 2));
+        try {
+          // Athkar content is static: publish once per content revision.
+          const int athkarRevision = 1;
+          const String athkarRevKey = 'islamic_widget_athkar_published_rev';
+          final SharedPreferencesAsync prefs = getIt<SharedPreferencesAsync>();
+          if (await prefs.getInt(athkarRevKey) != athkarRevision) {
+            await AthkarWidgetRepository(
+              bridge: const WidgetSnapshotBridge(
+                MethodChannel('com.tilawa.app/prayer_adhan'),
+              ),
+            ).publish(DateTime.now()).timeout(const Duration(seconds: 30));
+            await prefs.setInt(athkarRevKey, athkarRevision);
+          }
+        } catch (e) {
+          logger.d(
+            '[AppLaunch] source=AppStartupTasks.initializeIslamicWidgets: Warning: Could not publish athkar widget at (${DateTime.now()}): $e',
+          );
+        }
+      }),
+    );
   }
 
   Future<void> prepareNotificationLaunchState() async {

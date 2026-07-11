@@ -17,6 +17,7 @@ import 'package:tilawa/features/auth/domain/entities/user_entity.dart';
 import 'package:tilawa/features/auth/domain/gateways/google_sign_in_launch_gateway.dart';
 import 'package:tilawa/features/auth/domain/repositories/auth_repository.dart';
 import 'package:tilawa/features/auth/domain/services/google_sign_in_launch_readiness_store.dart';
+import 'package:tilawa/features/auth/domain/usecases/await_auth_restoration_use_case.dart';
 import 'package:tilawa/features/auth/domain/usecases/prepare_google_sign_in_use_case.dart';
 import 'package:tilawa/features/auth/domain/usecases/prewarm_google_sign_in_launch_use_case.dart';
 import 'package:tilawa/features/auth/domain/usecases/resolve_google_sign_in_launch_use_case.dart';
@@ -198,6 +199,13 @@ void main() {
       noopSyncUserLanguagePreferenceUseCase(),
     );
 
+    final mockAwaitAuthRestoration = MockAwaitAuthRestorationUseCase();
+    final mockGetPersistedUser = MockGetPersistedAuthenticatedUserUseCase();
+    when(mockGetPersistedUser()).thenAnswer((_) async => null);
+    when(
+      mockAwaitAuthRestoration(sessionUser: anyNamed('sessionUser')),
+    ).thenAnswer((_) async => AuthRestorationOutcome.unauthenticated);
+
     authBloc = AuthBloc(
       mockSignInWithGoogleUseCase,
       mockSignInWithEmailUseCase,
@@ -210,6 +218,8 @@ void main() {
       mockSyncUserLanguagePreference,
       accountDeletionFlowTracker,
       sessionTracker,
+      mockAwaitAuthRestoration,
+      mockGetPersistedUser,
     );
 
     getIt.registerSingleton<GoogleSignInLaunchGateway>(testLauncher);

@@ -1,3 +1,4 @@
+// ignore_for_file: avoid_public_fields, file_names
 import 'dart:ui' show Tristate;
 
 import 'package:flutter/material.dart';

@@ -5,8 +5,8 @@ import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:intl/date_symbol_data_local.dart';
 import 'package:quran_sessions/l10n/quran_sessions_localizations.dart';
-import 'package:quran_sessions/src/presentation/widgets/tutor_session_compact_card.dart';
 import 'package:quran_sessions/quran_sessions.dart';
+import 'package:quran_sessions/src/presentation/widgets/tutor_session_compact_card.dart';
 import 'package:tilawa_ui_kit/tilawa_ui_kit.dart';
 import 'package:timezone/data/latest.dart' as tz_data;
 
@@ -93,12 +93,13 @@ void main() {
       tester,
     ) async {
       addTearDown(tester.view.resetPhysicalSize);
+      final sessionStart = DateTime.now().add(const Duration(days: 1));
       final sessionRepo = FakeSessionRepository()
         ..sessions = [
           makeSession(
             lifecycleStatus: SessionLifecycleStatus.scheduled,
-            startsAt: DateTime.utc(2026, 7, 10, 9),
-            endsAt: DateTime.utc(2026, 7, 10, 9, 30),
+            startsAt: sessionStart,
+            endsAt: sessionStart.add(const Duration(minutes: 30)),
           ),
         ];
       final scheduleRepo = FakeScheduleRepository()
@@ -117,12 +118,6 @@ void main() {
         completeSession: buildCompleteSessionViaServerUseCase(),
         scheduleRepo: scheduleRepo,
         userProfileRepo: FakeUserProfileRepository(),
-      );
-
-      bloc.emit(
-        seedTeacherDashboardSuccess(
-          upcomingSessions: sessionRepo.sessions,
-        ),
       );
 
       await pumpDashboard(tester, bloc: bloc);
@@ -145,7 +140,7 @@ void main() {
         ..store['booking_1'] = makeAggregate(
           id: 'booking_1',
           status: SessionLifecycleStatus.scheduled,
-          startsAt: DateTime.utc(2026, 7, 10, 9),
+          startsAt: DateTime.now().add(const Duration(days: 1)),
           paymentReference: null,
           pricingType: SessionPricingType.free,
         );
@@ -153,8 +148,10 @@ void main() {
         ..sessions = [
           makeSession(
             lifecycleStatus: SessionLifecycleStatus.scheduled,
-            startsAt: DateTime.utc(2026, 7, 10, 9),
-            endsAt: DateTime.utc(2026, 7, 10, 9, 30),
+            startsAt: DateTime.now().add(const Duration(days: 1, hours: 1)),
+            endsAt: DateTime.now().add(
+              const Duration(days: 1, hours: 1, minutes: 30),
+            ),
           ),
         ];
       final scheduleRepo = FakeScheduleRepository()
@@ -173,12 +170,6 @@ void main() {
         completeSession: buildCompleteSessionViaServerUseCase(),
         scheduleRepo: scheduleRepo,
         userProfileRepo: FakeUserProfileRepository(),
-      );
-
-      bloc.emit(
-        seedTeacherDashboardSuccess(
-          upcomingSessions: sessionRepo.sessions,
-        ),
       );
 
       await pumpDashboard(
@@ -202,8 +193,10 @@ void main() {
       addTearDown(tester.view.resetPhysicalSize);
       final session = makeSession(
         lifecycleStatus: SessionLifecycleStatus.scheduled,
-        startsAt: DateTime.utc(2026, 7, 10, 9),
-        endsAt: DateTime.utc(2026, 7, 10, 9, 30),
+        startsAt: DateTime.now().add(const Duration(days: 1, hours: 1)),
+        endsAt: DateTime.now().add(
+          const Duration(days: 1, hours: 1, minutes: 30),
+        ),
       );
       final scheduleRepo = FakeScheduleRepository()
         ..schedule = makeWeeklySchedule();
@@ -250,14 +243,16 @@ void main() {
           ..store['booking_1'] = makeAggregate(
             id: 'booking_1',
             status: SessionLifecycleStatus.scheduled,
-            startsAt: DateTime.utc(2026, 7, 10, 9),
+            startsAt: DateTime.now().add(const Duration(days: 1)),
             paymentReference: null,
             pricingType: SessionPricingType.free,
           );
         final session = makeSession(
           lifecycleStatus: SessionLifecycleStatus.scheduled,
-          startsAt: DateTime.utc(2026, 7, 10, 9),
-          endsAt: DateTime.utc(2026, 7, 10, 9, 30),
+          startsAt: DateTime.now().add(const Duration(days: 1, hours: 1)),
+          endsAt: DateTime.now().add(
+            const Duration(days: 1, hours: 1, minutes: 30),
+          ),
         );
         final sessionRepo = FakeSessionRepository()..sessions = [session];
         final scheduleRepo = FakeScheduleRepository()
@@ -276,10 +271,6 @@ void main() {
           completeSession: buildCompleteSessionViaServerUseCase(),
           scheduleRepo: scheduleRepo,
           userProfileRepo: FakeUserProfileRepository(),
-        );
-
-        bloc.emit(
-          seedTeacherDashboardSuccess(upcomingSessions: [session]),
         );
 
         await pumpDashboard(tester, bloc: bloc);

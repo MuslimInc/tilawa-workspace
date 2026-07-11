@@ -17,5 +17,9 @@
   "kiroAgent.configureMCP": "Disabled",
   "yaml.schemas": {
     "https://json.schemastore.org/github-action.json": ".github/actions/*/action.yml"
-  }
+  },
+  "java.import.exclusions": [
+    "**/build/**",
+    "**/.dart_tool/**"
+  ]
 }

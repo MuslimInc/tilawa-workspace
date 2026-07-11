@@ -1,0 +1,191 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Prayer times home-screen widget in split-panel style (spec 041, P1). -->
+<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:id="@+id/widget_root"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="@drawable/widget_bg"
+    android:padding="8dp">
+
+    <TextView
+        android:id="@+id/widget_empty"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:gravity="center"
+        android:text="@string/widget_empty_hint"
+        android:textColor="@color/widget_text_primary"
+        android:textSize="13sp"
+        android:visibility="gone" />
+
+    <LinearLayout
+        android:id="@+id/widget_content"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:baselineAligned="false"
+        android:orientation="horizontal">
+
+        <LinearLayout style="@style/PrayerWidgetLeftPanel">
+
+            <TextView
+                android:id="@+id/widget_day_name"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:gravity="center"
+                android:maxLines="1"
+                android:text="@string/widget_preview_day_name"
+                android:textColor="@color/widget_text_primary"
+                android:textSize="22sp"
+                android:textStyle="bold" />
+
+            <TextView
+                android:id="@+id/widget_hijri_date"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="3dp"
+                android:gravity="center"
+                android:maxLines="1"
+                android:text="@string/widget_preview_hijri_date"
+                android:textColor="@color/widget_text_primary"
+                android:textSize="11sp"
+                android:textStyle="bold" />
+
+            <TextView
+                android:id="@+id/widget_gregorian_date"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="2dp"
+                android:gravity="center"
+                android:maxLines="1"
+                android:text="@string/widget_preview_gregorian_date"
+                android:textColor="@color/widget_text_primary"
+                android:textSize="11sp"
+                android:textStyle="bold" />
+
+            <TextView
+                android:id="@+id/widget_next_label"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="12dp"
+                android:gravity="center"
+                android:maxLines="1"
+                android:text="@string/widget_preview_next_prayer_name"
+                android:textColor="@color/widget_text_primary"
+                android:textSize="32sp"
+                android:textStyle="bold" />
+
+            <Chronometer
+                android:id="@+id/widget_countdown"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:gravity="center"
+                android:textColor="@color/widget_text_primary"
+                android:textSize="28sp"
+                android:textStyle="bold"
+                android:visibility="gone" />
+
+            <TextView
+                android:id="@+id/widget_stale"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:gravity="center"
+                android:textColor="@color/widget_text_primary"
+                android:textSize="11sp"
+                android:visibility="gone" />
+
+            <TextView
+                android:id="@+id/widget_location"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="6dp"
+                android:ellipsize="end"
+                android:gravity="center"
+                android:maxLines="1"
+                android:text="@string/widget_prayer_title"
+                android:textColor="@color/widget_text_secondary"
+                android:textSize="10sp" />
+        </LinearLayout>
+
+        <LinearLayout
+            android:id="@+id/widget_rows"
+            style="@style/PrayerWidgetRightPanel">
+
+            <LinearLayout
+                android:id="@+id/widget_cell_fajr"
+                style="@style/PrayerWidgetListRow">
+                <TextView
+                    android:id="@+id/widget_name_fajr"
+                    style="@style/PrayerWidgetListName"
+                    android:text="@string/prayer_fajr" />
+                <TextView
+                    android:id="@+id/widget_time_fajr"
+                    style="@style/PrayerWidgetListTime"
+                    android:text="@string/widget_preview_time_fajr" />
+            </LinearLayout>
+
+            <LinearLayout
+                android:id="@+id/widget_cell_sunrise"
+                style="@style/PrayerWidgetListRow">
+                <TextView
+                    android:id="@+id/widget_name_sunrise"
+                    style="@style/PrayerWidgetListName"
+                    android:text="@string/prayer_sunrise" />
+                <TextView
+                    android:id="@+id/widget_time_sunrise"
+                    style="@style/PrayerWidgetListTime"
+                    android:text="@string/widget_preview_time_sunrise" />
+            </LinearLayout>
+
+            <LinearLayout
+                android:id="@+id/widget_cell_dhuhr"
+                style="@style/PrayerWidgetListRow">
+                <TextView
+                    android:id="@+id/widget_name_dhuhr"
+                    style="@style/PrayerWidgetListName"
+                    android:text="@string/prayer_dhuhr" />
+                <TextView
+                    android:id="@+id/widget_time_dhuhr"
+                    style="@style/PrayerWidgetListTime"
+                    android:text="@string/widget_preview_time_dhuhr" />
+            </LinearLayout>
+
+            <LinearLayout
+                android:id="@+id/widget_cell_asr"
+                style="@style/PrayerWidgetListRow">
+                <TextView
+                    android:id="@+id/widget_name_asr"
+                    style="@style/PrayerWidgetListName"
+                    android:text="@string/prayer_asr" />
+                <TextView
+                    android:id="@+id/widget_time_asr"
+                    style="@style/PrayerWidgetListTime"
+                    android:text="@string/widget_preview_time_asr" />
+            </LinearLayout>
+
+            <LinearLayout
+                android:id="@+id/widget_cell_maghrib"
+                style="@style/PrayerWidgetListRow">
+                <TextView
+                    android:id="@+id/widget_name_maghrib"
+                    style="@style/PrayerWidgetListName"
+                    android:text="@string/prayer_maghrib" />
+                <TextView
+                    android:id="@+id/widget_time_maghrib"
+                    style="@style/PrayerWidgetListTime"
+                    android:text="@string/widget_preview_time_maghrib" />
+            </LinearLayout>
+
+            <LinearLayout
+                android:id="@+id/widget_cell_isha"
+                style="@style/PrayerWidgetListRow">
+                <TextView
+                    android:id="@+id/widget_name_isha"
+                    style="@style/PrayerWidgetListName"
+                    android:text="@string/prayer_isha" />
+                <TextView
+                    android:id="@+id/widget_time_isha"
+                    style="@style/PrayerWidgetListTime"
+                    android:text="@string/widget_preview_time_isha" />
+            </LinearLayout>
+        </LinearLayout>
+    </LinearLayout>
+</FrameLayout>

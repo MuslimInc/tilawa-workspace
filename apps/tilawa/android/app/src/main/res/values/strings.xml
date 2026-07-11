@@ -12,4 +12,38 @@
     <string name="prayer_maghrib">Maghrib</string>
     <string name="prayer_isha">Isha</string>
     <string name="prayer_sunrise">Sunrise</string>
+    <string name="widget_prayer_label">Prayer Times</string>
+    <string name="widget_prayer_description">Today\'s five prayers with a live countdown to the next one</string>
+    <string name="widget_prayer_title">Prayer Times</string>
+    <string name="widget_next_prayer">%1$s in</string>
+    <string name="widget_empty_hint">Open the app to load prayer times</string>
+    <string name="widget_stale_hint">Open the app to refresh</string>
+    <string name="widget_setup_hint">Tap to set location</string>
+    <!-- Widget-picker preview placeholders; overwritten at runtime. -->
+    <string name="widget_preview_next">Fajr in 2:10</string>
+    <string name="widget_preview_next_prayer_name">Fajr</string>
+    <string name="widget_preview_day_name">Saturday</string>
+    <string name="widget_preview_hijri_date">1448-01-26</string>
+    <string name="widget_preview_gregorian_date">2026-07-11</string>
+    <string name="widget_preview_time_fajr">4:18</string>
+    <string name="widget_preview_time_sunrise">6:02</string>
+    <string name="widget_preview_time_dhuhr">1:01</string>
+    <string name="widget_preview_time_asr">4:37</string>
+    <string name="widget_preview_time_maghrib">8:00</string>
+    <string name="widget_preview_time_isha">9:31</string>
+    <!-- Ayah of the Day widget (spec 041, US2) -->
+    <string name="widget_ayah_label">Ayah of the Day</string>
+    <string name="widget_ayah_description">A daily verse in the authentic Mushaf script</string>
+    <string name="widget_ayah_preview_glyph">﷽</string>
+    <string name="widget_ayah_preview_caption">Ayah of the Day</string>
+    <!-- Athkar widget (spec 041, US3) -->
+    <string name="widget_athkar_label">Morning &amp; Evening Athkar</string>
+    <string name="widget_athkar_description">The applicable athkar set with tap-to-advance progress</string>
+    <string name="widget_athkar_empty_hint">Open the app to load athkar</string>
+    <string name="widget_athkar_done">تقبَّل الله — أتممت أذكارك 🌿</string>
+    <string name="widget_athkar_count">×%1$s</string>
+    <string name="widget_athkar_preview_title">أذكار الصباح</string>
+    <string name="widget_athkar_preview_progress">١/٢٥</string>
+    <string name="widget_athkar_preview_text">أَصْبَحْنَا وَأَصْبَحَ الْمُلْكُ لِلَّهِ، وَالْحَمْدُ لِلَّهِ</string>
+    <string name="widget_athkar_preview_count">×٣</string>
 </resources>

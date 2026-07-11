@@ -89,6 +89,7 @@ part 'app_router_config.g.dart';
     TypedGoRoute<QuranIndexRoute>(path: '/quran-index'),
     TypedGoRoute<QuranRenderDemoRoute>(path: '/render-demo'),
     TypedGoRoute<SmartQuranPlanRoute>(path: '/smart-quran-plan'),
+    TypedGoRoute<WidgetActionRoute>(path: '/widget/:action'),
   ],
 )
 class AppShellRoute extends ShellRouteData {
@@ -766,5 +767,44 @@ class SmartQuranPlanRoute extends GoRouteData
       content: getIt<TrustedContentResolver>(),
       request: const GenUiSurfaceRequest(surface: 'smartQuranPlan'),
     );
+  }
+}
+
+class WidgetActionRoute extends GoRouteData
+    with $WidgetActionRoute, TilawaRouteData {
+  const WidgetActionRoute({required this.action, this.id});
+
+  final String action;
+  final String? id;
+
+  @override
+  String? redirect(BuildContext context, GoRouterState state) {
+    switch (action) {
+      case 'prayer':
+      case 'prayer-times':
+        return const PrayerTimesRoute().location;
+      case 'ayah':
+        final String? surahId = id ?? state.uri.queryParameters['surah'];
+        final String? ayahId = state.uri.queryParameters['ayah'];
+        if (surahId != null && int.tryParse(surahId) != null) {
+          return QuranReaderRoute(
+            surahNumber: int.parse(surahId),
+            ayahNumber: ayahId != null ? int.tryParse(ayahId) : null,
+          ).location;
+        }
+        return const QuranIndexRoute().location;
+      case 'athkar':
+        return const AthkarCategoriesRoute().location;
+      case 'hijri':
+        return const SettingsRoute().location;
+      case 'setup':
+      default:
+        return const HomeRoute().location;
+    }
+  }
+
+  @override
+  Widget build(BuildContext context, GoRouterState state) {
+    return const SizedBox.shrink();
   }
 }

@@ -88,8 +88,7 @@ void main() {
     final cubit = ManageDevicesCubit(repo);
     await cubit.load(userId);
 
-    final ok = await cubit.signOutDevice(userId, 'device-a');
-    check(ok).isFalse();
+    await cubit.signOutDevice(userId, 'device-a');
     check(cubit.state.devices.single.isRevoked).isFalse();
     await cubit.close();
   });
@@ -102,9 +101,9 @@ void main() {
     final cubit = ManageDevicesCubit(repo);
     await cubit.load(userId);
 
-    final ok = await cubit.signOutDevice(userId, 'device-b');
+    await cubit.signOutDevice(userId, 'device-b');
 
-    check(ok).isTrue();
+    check(cubit.state.status).equals(ManageDevicesStatus.loaded);
     final b = cubit.state.devices.firstWhere((d) => d.deviceId == 'device-b');
     check(b.isRevoked).isTrue();
     check(cubit.state.busyDeviceIds).isEmpty();
@@ -123,9 +122,9 @@ void main() {
       final cubit = ManageDevicesCubit(repo);
       await cubit.load(userId);
 
-      final ok = await cubit.signOutOtherDevices(userId);
+      await cubit.signOutOtherDevices(userId);
 
-      check(ok).isTrue();
+      check(cubit.state.status).equals(ManageDevicesStatus.loaded);
       check(cubit.state.signingOutOthers).isFalse();
       final current = cubit.state.devices.firstWhere(
         (d) => d.deviceId == 'device-a',
@@ -144,8 +143,10 @@ void main() {
     final cubit = ManageDevicesCubit(repo);
     await cubit.load(userId);
 
-    check(await cubit.signOutDevice(userId, 'device-b')).isFalse();
-    check(await cubit.signOutOtherDevices(userId)).isFalse();
+    await cubit.signOutDevice(userId, 'device-b');
+    check(cubit.state.status).equals(ManageDevicesStatus.error);
+    await cubit.signOutOtherDevices(userId);
+    check(cubit.state.status).equals(ManageDevicesStatus.error);
     await cubit.close();
   });
 

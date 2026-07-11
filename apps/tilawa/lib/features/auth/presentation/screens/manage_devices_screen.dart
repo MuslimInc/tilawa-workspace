@@ -64,8 +64,8 @@ class _ManageDevicesView extends StatelessWidget {
       ),
     );
     if (confirmed != true || !context.mounted) return;
-    final ok = await cubit.signOutOtherDevices(userId);
-    if (!ok && context.mounted) {
+    await cubit.signOutOtherDevices(userId);
+    if (cubit.state.status == ManageDevicesStatus.error && context.mounted) {
       TilawaFeedback.showToast(
         context,
         message: l10n.manageDevicesSignOutFailed,
@@ -77,8 +77,8 @@ class _ManageDevicesView extends StatelessWidget {
   Future<void> _signOutDevice(BuildContext context, String deviceId) async {
     final l10n = context.l10n;
     final cubit = context.read<ManageDevicesCubit>();
-    final ok = await cubit.signOutDevice(userId, deviceId);
-    if (!ok && context.mounted) {
+    await cubit.signOutDevice(userId, deviceId);
+    if (cubit.state.status == ManageDevicesStatus.error && context.mounted) {
       TilawaFeedback.showToast(
         context,
         message: l10n.manageDevicesSignOutFailed,

@@ -251,6 +251,46 @@ internal class MethodChannelLogic(
                     result.error("STOP_ADHAN_FAILED", t.message, null)
                 }
             }
+            "updatePrayerWidgetSchedule" -> {
+                val json = arguments?.get("json") as? String
+                if (json.isNullOrBlank()) {
+                    result.error("BAD_ARGS", "json required", null)
+                } else {
+                    try {
+                        val context = scheduler.getContext()
+                        com.tilawa.app.prayer.widget.PrayerWidgetStore(context)
+                            .writeSnapshotJson(json)
+                        com.tilawa.app.prayer.widget.PrayerTimesWidgetProvider
+                            .notifySnapshotUpdated(context)
+                        result.success(true)
+                    } catch (t: Throwable) {
+                        Log.e("MethodChannelLogic", "updatePrayerWidgetSchedule failed", t)
+                        result.error("WIDGET_UPDATE_FAILED", t.message, null)
+                    }
+                }
+            }
+            "updateIslamicWidgetSnapshot" -> {
+                val type = arguments?.get("widgetType") as? String
+                val json = arguments?.get("json") as? String
+                if (type.isNullOrBlank() || json.isNullOrBlank()) {
+                    result.error("BAD_ARGS", "widgetType and json required", null)
+                } else {
+                    try {
+                        val context = scheduler.getContext()
+                        // Write to the shared atomic store
+                        com.tilawa.app.widget.WidgetSnapshotStore(context).write(json)
+                        // Broadcast update to the specific provider
+                        val action = "com.tilawa.app.widget.${type.uppercase()}.ACTION_REFRESH"
+                        context.sendBroadcast(Intent(action).apply {
+                            setPackage(context.packageName)
+                        })
+                        result.success(true)
+                    } catch (t: Throwable) {
+                        Log.e("MethodChannelLogic", "updateIslamicWidgetSnapshot failed", t)
+                        result.error("WIDGET_UPDATE_FAILED", t.message, null)
+                    }
+                }
+            }
             "isAdhanPlaying" -> {
                 result.success(AdhanPlaybackService.isRunning)
             }

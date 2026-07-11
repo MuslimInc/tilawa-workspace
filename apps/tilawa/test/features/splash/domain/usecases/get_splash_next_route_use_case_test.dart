@@ -56,7 +56,7 @@ void main() {
     ).thenReturn(null);
     when(
       () => mockAwaitAuthRestoration(sessionUser: any(named: 'sessionUser')),
-    ).thenAnswer((_) async {});
+    ).thenAnswer((_) async => AuthRestorationOutcome.unauthenticated);
     when(
       () => mockGetPersistedAuthenticatedUser(),
     ).thenAnswer((_) async => null);

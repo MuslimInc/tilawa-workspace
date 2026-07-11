@@ -13,8 +13,10 @@ import 'package:tilawa/features/auth/domain/entities/email_auth_failure_key.dart
 import 'package:tilawa/features/auth/domain/entities/email_registration_draft.dart';
 import 'package:tilawa/features/auth/domain/entities/register_with_email_result.dart';
 import 'package:tilawa/features/auth/domain/entities/user_entity.dart';
+import 'package:tilawa/features/auth/domain/usecases/await_auth_restoration_use_case.dart';
 import 'package:tilawa/features/auth/domain/usecases/delete_account.dart';
 import 'package:tilawa/features/auth/domain/usecases/get_current_user_use_case.dart';
+import 'package:tilawa/features/auth/domain/usecases/get_persisted_authenticated_user_use_case.dart';
 import 'package:tilawa/features/auth/domain/usecases/register_with_email_use_case.dart';
 import 'package:tilawa/features/auth/domain/usecases/sign_in_with_email_use_case.dart';
 import 'package:tilawa/features/auth/domain/usecases/sign_in_with_google_use_case.dart';
@@ -42,6 +44,8 @@ import 'auth_bloc_test.mocks.dart';
   SyncDeviceTokenUseCase,
   GetCurrentLanguageUseCase,
   SyncUserLanguagePreferenceUseCase,
+  AwaitAuthRestorationUseCase,
+  GetPersistedAuthenticatedUserUseCase,
 ])
 void main() {
   late AuthBloc authBloc;
@@ -56,6 +60,8 @@ void main() {
   late MockSyncUserLanguagePreferenceUseCase mockSyncUserLanguagePreference;
   late AccountDeletionFlowTracker accountDeletionFlowTracker;
   late GoogleSignInSessionTracker signInSessionTracker;
+  late MockAwaitAuthRestorationUseCase mockAwaitAuthRestoration;
+  late MockGetPersistedAuthenticatedUserUseCase mockGetPersistedUser;
   late MapBackedSharedPreferencesAsync defaultRevokePrefs;
 
   setUpAll(() {
@@ -86,6 +92,8 @@ void main() {
       mockSyncUserLanguagePreference,
       accountDeletionFlowTracker,
       signInSessionTracker,
+      mockAwaitAuthRestoration,
+      mockGetPersistedUser,
       multiDeviceLoginEnabled: () => multiDeviceLoginEnabled,
     );
   }
@@ -107,6 +115,12 @@ void main() {
     accountDeletionFlowTracker = AccountDeletionFlowTracker();
     signInSessionTracker = GoogleSignInSessionTracker();
     signInSessionTracker.markFinished();
+    mockAwaitAuthRestoration = MockAwaitAuthRestorationUseCase();
+    mockGetPersistedUser = MockGetPersistedAuthenticatedUserUseCase();
+    when(mockGetPersistedUser()).thenAnswer((_) async => null);
+    when(
+      mockAwaitAuthRestoration(sessionUser: anyNamed('sessionUser')),
+    ).thenAnswer((_) async => AuthRestorationOutcome.unauthenticated);
 
     when(
       mockGetCurrentLanguageUseCase(),
@@ -143,6 +157,40 @@ void main() {
     });
 
     group('CheckAuthStatusEvent', () {
+      blocTest<AuthBloc, AuthState>(
+        'awaits Firebase restoration (with the persisted hint) before reading '
+        'currentUser, so a cold-start race is not mis-emitted as logged out',
+        build: () {
+          final persisted = UserEntity(
+            id: '1',
+            email: '',
+            displayName: '',
+            createdAt: DateTime.fromMillisecondsSinceEpoch(0),
+          );
+          when(mockGetPersistedUser()).thenAnswer((_) async => persisted);
+          // currentUser is null when the event fires, then Firebase finishes
+          // restoring while we await, so the real user is present afterwards.
+          when(mockGetCurrentUserUseCase()).thenReturn(null);
+          when(
+            mockAwaitAuthRestoration(sessionUser: anyNamed('sessionUser')),
+          ).thenAnswer((_) async {
+            when(mockGetCurrentUserUseCase()).thenReturn(tUser);
+            return AuthRestorationOutcome.restored;
+          });
+          return buildAuthBloc(multiDeviceLoginEnabled: true);
+        },
+        act: (bloc) => bloc.add(const CheckAuthStatusEvent()),
+        expect: () => [AuthState.authenticated(user: tUser)],
+        verify: (_) {
+          verify(
+            mockAwaitAuthRestoration(sessionUser: anyNamed('sessionUser')),
+          ).called(1);
+          verifyNever(
+            mockSignOut(skipServerTokenClear: anyNamed('skipServerTokenClear')),
+          );
+        },
+      );
+
       blocTest<AuthBloc, AuthState>(
         'emits [unauthenticated] when passive sync confirms stale device',
         build: () {
