@@ -198,6 +198,20 @@
                 android:resource="@xml/ayah_of_day_widget_info" />
         </receiver>
 
+        <!-- Morning/Evening athkar widget (spec 041, US3). -->
+        <receiver
+            android:name=".widget.athkar.AthkarWidgetProvider"
+            android:exported="true"
+            android:label="@string/widget_athkar_label">
+            <intent-filter>
+                <action android:name="android.appwidget.action.APPWIDGET_UPDATE" />
+                <action android:name="com.tilawa.app.widget.ATHKAR.ACTION_REFRESH" />
+            </intent-filter>
+            <meta-data
+                android:name="android.appwidget.provider"
+                android:resource="@xml/athkar_widget_info" />
+        </receiver>
+
         <meta-data
             android:name="flutterEmbedding"
             android:value="2" />

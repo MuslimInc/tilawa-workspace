@@ -36,4 +36,14 @@
     <string name="widget_ayah_description">A daily verse in the authentic Mushaf script</string>
     <string name="widget_ayah_preview_glyph">﷽</string>
     <string name="widget_ayah_preview_caption">Ayah of the Day</string>
+    <!-- Athkar widget (spec 041, US3) -->
+    <string name="widget_athkar_label">Morning &amp; Evening Athkar</string>
+    <string name="widget_athkar_description">The applicable athkar set with tap-to-advance progress</string>
+    <string name="widget_athkar_empty_hint">Open the app to load athkar</string>
+    <string name="widget_athkar_done">تقبَّل الله — أتممت أذكارك 🌿</string>
+    <string name="widget_athkar_count">×%1$s</string>
+    <string name="widget_athkar_preview_title">أذكار الصباح</string>
+    <string name="widget_athkar_preview_progress">١/٢٥</string>
+    <string name="widget_athkar_preview_text">أَصْبَحْنَا وَأَصْبَحَ الْمُلْكُ لِلَّهِ، وَالْحَمْدُ لِلَّهِ</string>
+    <string name="widget_athkar_preview_count">×٣</string>
 </resources>

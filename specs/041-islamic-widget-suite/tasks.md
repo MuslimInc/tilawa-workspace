@@ -68,12 +68,12 @@ description: "Implementation tasks for the Islamic home-screen widget suite"
 
 **Independent Test**: Control time across morning/evening windows, advance two instances independently, restart the launcher, and tap through to the matching category.
 
-- [ ] T024 [P] [US3] Add Athkar period/progress domain tests in `apps/tilawa/test/features/islamic_widgets/domain/athkar_widget_period_test.dart`
-- [ ] T025 [US3] Implement applicable-period and reset rules in `apps/tilawa/lib/features/islamic_widgets/domain/services/athkar_widget_period_resolver.dart`
-- [ ] T026 [US3] Compose localized display snapshots from existing Athkar repositories in `apps/tilawa/lib/features/islamic_widgets/data/athkar_widget_repository.dart`
-- [ ] T027 [P] [US3] Add native per-instance progress tests in `apps/tilawa/android/app/src/test/kotlin/com/tilawa/app/widget/athkar/AthkarWidgetLogicTest.kt`
-- [ ] T028 [US3] Implement Athkar provider, store, advance action, period reset, and deep link in `apps/tilawa/android/app/src/main/kotlin/com/tilawa/app/widget/athkar/`
-- [ ] T029 [US3] Add Athkar layouts, localized resources, metadata, and manifest registration in `apps/tilawa/android/app/src/main/res/` and `apps/tilawa/android/app/src/main/AndroidManifest.xml`
+- [x] T024 [P] [US3] Add Athkar period/progress domain tests in `apps/tilawa/test/features/islamic_widgets/domain/athkar_widget_period_test.dart`
+- [x] T025 [US3] Implement applicable-period and reset rules in `apps/tilawa/lib/features/islamic_widgets/domain/services/athkar_widget_period_resolver.dart`
+- [x] T026 [US3] Compose localized display snapshots from existing Athkar repositories in `apps/tilawa/lib/features/islamic_widgets/data/athkar_widget_repository.dart`
+- [x] T027 [P] [US3] Add native per-instance progress tests in `apps/tilawa/android/app/src/test/kotlin/com/tilawa/app/widget/athkar/AthkarWidgetLogicTest.kt`
+- [x] T028 [US3] Implement Athkar provider, store, advance action, period reset, and deep link in `apps/tilawa/android/app/src/main/kotlin/com/tilawa/app/widget/athkar/`
+- [x] T029 [US3] Add Athkar layouts, localized resources, metadata, and manifest registration in `apps/tilawa/android/app/src/main/res/` and `apps/tilawa/android/app/src/main/AndroidManifest.xml`
 
 ## Phase 5: User Story 4 - Hijri Date (Priority: P4)
 

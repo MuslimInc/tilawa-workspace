@@ -40,6 +40,7 @@ import 'package:tilawa/core/telemetry/startup_telemetry.dart';
 import 'package:tilawa/features/athkar/domain/services/tasbeeh_reminder_scheduler.dart';
 import 'package:tilawa/features/audio_player/domain/repositories/audio_player_repository.dart';
 import 'package:tilawa/features/islamic_widgets/app/ayah_widget_sync_service.dart';
+import 'package:tilawa/features/islamic_widgets/data/athkar_widget_repository.dart';
 import 'package:tilawa/features/islamic_widgets/data/daily_ayah_widget_repository.dart';
 import 'package:tilawa/features/islamic_widgets/data/widget_snapshot_bridge.dart';
 import 'package:tilawa/features/audio_player/domain/services/playback_notification_bridge.dart';
@@ -830,6 +831,24 @@ class AppStartupTasks {
         } catch (e) {
           logger.d(
             '[AppLaunch] source=AppStartupTasks.initializeIslamicWidgets: Warning: Could not sync ayah widget at (${DateTime.now()}): $e',
+          );
+        }
+        try {
+          // Athkar content is static: publish once per content revision.
+          const int athkarRevision = 1;
+          const String athkarRevKey = 'islamic_widget_athkar_published_rev';
+          final SharedPreferencesAsync prefs = getIt<SharedPreferencesAsync>();
+          if (await prefs.getInt(athkarRevKey) != athkarRevision) {
+            await AthkarWidgetRepository(
+              bridge: const WidgetSnapshotBridge(
+                MethodChannel('com.tilawa.app/prayer_adhan'),
+              ),
+            ).publish(DateTime.now()).timeout(const Duration(seconds: 30));
+            await prefs.setInt(athkarRevKey, athkarRevision);
+          }
+        } catch (e) {
+          logger.d(
+            '[AppLaunch] source=AppStartupTasks.initializeIslamicWidgets: Warning: Could not publish athkar widget at (${DateTime.now()}): $e',
           );
         }
       }),
