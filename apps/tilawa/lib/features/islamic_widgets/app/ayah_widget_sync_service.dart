@@ -22,6 +22,10 @@ class AyahWidgetSyncService {
   static const String _lastPublishedDateKey =
       'islamic_widget_ayah_last_published_date';
 
+  /// Bump when the rendered artifact format/typography changes so existing
+  /// installs re-render on next launch instead of serving stale artwork.
+  static const int artifactRevision = 3;
+
   final DailyAyahWidgetRepository _repository;
   final SharedPreferencesAsync _prefs;
   final bool? _isSupportedOverride;
@@ -32,16 +36,16 @@ class AyahWidgetSyncService {
   Future<void> syncIfNeeded({DateTime? now}) async {
     if (!isSupported) return;
     final DateTime instant = now ?? DateTime.now();
-    final String today = _dateKey(instant);
+    final String publishStamp = '${_dateKey(instant)}#r$artifactRevision';
     try {
       final String? lastPublished = await _prefs.getString(
         _lastPublishedDateKey,
       );
-      if (lastPublished == today) {
+      if (lastPublished == publishStamp) {
         return;
       }
       await _repository.publishFor(instant);
-      await _prefs.setString(_lastPublishedDateKey, today);
+      await _prefs.setString(_lastPublishedDateKey, publishStamp);
     } catch (e, stackTrace) {
       logger.w(
         '[AyahWidgetSyncService] sync failed (widget keeps last snapshot): $e',

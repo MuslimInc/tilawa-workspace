@@ -42,9 +42,11 @@ class DailyAyahWidgetRepository {
   static const String _seedPrefsKey = 'islamic_widget_ayah_rotation_seed';
 
   /// Rendered artifact bounds (logical px). Wide enough for a 4x2 widget at
-  /// xxhdpi without exceeding RemoteViews bitmap budgets.
+  /// xxhdpi without exceeding RemoteViews bitmap budgets. Height is capped so
+  /// the wrap_content ImageView (width-fit aspect scaling) plus the caption
+  /// row still fit a 4x2 cell without clipping.
   static const double artifactWidth = 840;
-  static const double artifactHeight = 400;
+  static const double artifactHeight = 360;
 
   static const Color _lightThemeTextColor = Color(0xDE000000);
   static const Color _darkThemeTextColor = Color(0xF2FFFFFF);

@@ -4,9 +4,20 @@ import 'package:flutter/painting.dart';
 
 /// Renders QCF text into a byte array (PNG) suitable for Android widgets.
 class WidgetAyahArtifactRenderer {
+  /// Line-height multiplier for QCF glyphs. Mushaf glyphs carry tall stacked
+  /// diacritics; 1.0 makes wrapped lines collide, the reader uses ~2.0.
+  /// 1.7 keeps lines clearly separated while staying widget-compact.
+  static const double lineHeightMultiplier = 1.7;
+
+  /// Vertical padding (px) kept above and below the text inside the artifact.
+  static const double _verticalPadding = 8;
+
   /// Renders the [qcfText] using [fontFamily] to a PNG byte array.
-  /// The [width] and [height] define the maximum bounding box.
-  /// If the text is larger, it will be scaled down to fit.
+  ///
+  /// [width] is the artifact width; [height] is the MAXIMUM height. The
+  /// output is cropped to the laid-out text height (plus a small padding) so
+  /// the widget's `fitCenter` ImageView shows no phantom empty space above or
+  /// below the verse (spec 041 compact-UI requirement).
   Future<List<int>> renderAyahToPng({
     required String qcfText,
     required String fontFamily,
@@ -14,63 +25,68 @@ class WidgetAyahArtifactRenderer {
     required double height,
     required Color textColor,
   }) async {
-    final ui.PictureRecorder recorder = ui.PictureRecorder();
-    final ui.Canvas canvas = ui.Canvas(recorder, Rect.fromLTWH(0, 0, width, height));
-
-    final TextSpan span = TextSpan(
-      text: qcfText,
-      style: TextStyle(
-        fontFamily: fontFamily,
-        fontSize: height * 0.8, // Initial large size
-        color: textColor,
-        height: 1.0,
-      ),
-    );
-
-    final TextPainter painter = TextPainter(
-      text: span,
-      textAlign: TextAlign.center,
-      textDirection: TextDirection.rtl,
-    );
-
-    painter.layout(maxWidth: width);
-
-    // Scale down if it exceeds the bounds
-    if (painter.size.height > height || painter.size.width > width) {
-      final double scale = (height / painter.size.height).clamp(0.1, 1.0);
-      final double scaleW = (width / painter.size.width).clamp(0.1, 1.0);
-      final double finalScale = scale < scaleW ? scale : scaleW;
-      
-      final TextSpan scaledSpan = TextSpan(
-        text: qcfText,
-        style: TextStyle(
-          fontFamily: fontFamily,
-          fontSize: (height * 0.8) * finalScale,
-          color: textColor,
-          height: 1.0,
+    TextPainter buildPainter(double fontSize) {
+      final TextPainter painter = TextPainter(
+        text: TextSpan(
+          text: qcfText,
+          style: TextStyle(
+            fontFamily: fontFamily,
+            fontSize: fontSize,
+            color: textColor,
+            height: lineHeightMultiplier,
+          ),
         ),
-      );
-      
-      final TextPainter scaledPainter = TextPainter(
-        text: scaledSpan,
         textAlign: TextAlign.center,
         textDirection: TextDirection.rtl,
       );
-      scaledPainter.layout(maxWidth: width);
-      
-      final double x = (width - scaledPainter.size.width) / 2;
-      final double y = (height - scaledPainter.size.height) / 2;
-      scaledPainter.paint(canvas, Offset(x, y));
-    } else {
-      final double x = (width - painter.size.width) / 2;
-      final double y = (height - painter.size.height) / 2;
-      painter.paint(canvas, Offset(x, y));
+      painter.layout(maxWidth: width);
+      return painter;
     }
 
+    final double maxTextHeight = height - (_verticalPadding * 2);
+
+    // Binary-search the largest font size whose laid-out block fits the
+    // bounds. A one-shot proportional rescale under-sizes long verses badly:
+    // a smaller font re-wraps into fewer lines, so the needed scale is far
+    // gentler than the first layout suggests.
+    bool fits(TextPainter p) =>
+        p.size.height <= maxTextHeight && p.size.width <= width;
+    double lo = 8;
+    double hi = 120;
+    TextPainter painter = buildPainter(lo);
+    while (hi - lo > 1) {
+      final double mid = (lo + hi) / 2;
+      final TextPainter candidate = buildPainter(mid);
+      if (fits(candidate)) {
+        lo = mid;
+        painter = candidate;
+      } else {
+        hi = mid;
+      }
+    }
+
+    // Crop the artifact to the actual text block: no dead vertical space.
+    final double outputHeight = (painter.size.height + _verticalPadding * 2)
+        .clamp(1.0, height);
+    final ui.PictureRecorder recorder = ui.PictureRecorder();
+    final ui.Canvas canvas = ui.Canvas(
+      recorder,
+      Rect.fromLTWH(0, 0, width, outputHeight),
+    );
+    painter.paint(
+      canvas,
+      Offset((width - painter.size.width) / 2, _verticalPadding),
+    );
+
     final ui.Picture picture = recorder.endRecording();
-    final ui.Image image = await picture.toImage(width.toInt(), height.toInt());
-    final ByteData? byteData = await image.toByteData(format: ui.ImageByteFormat.png);
-    
+    final ui.Image image = await picture.toImage(
+      width.toInt(),
+      outputHeight.toInt(),
+    );
+    final ByteData? byteData = await image.toByteData(
+      format: ui.ImageByteFormat.png,
+    );
+
     return byteData?.buffer.asUint8List() ?? <int>[];
   }
 }
