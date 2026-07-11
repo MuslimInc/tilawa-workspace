@@ -80,6 +80,10 @@ class DailyAyahWidgetRepository {
     final String pageFamily =
         'QCF_P${ayah.pageNumber.toString().padLeft(3, '0')}';
     await _ensureFontRegistered(pageFamily);
+    // Yield between the heavy pipeline stages so the UI isolate keeps
+    // pumping input/frames — an unbroken run of font IO + text layout +
+    // double PNG encode blocked the main thread into an ANR under load.
+    await Future<void>.delayed(Duration.zero);
     final String qcfText =
         getVerseQCF(
           ayah.surahNumber,
@@ -96,7 +100,9 @@ class DailyAyahWidgetRepository {
     final String lightPath = '${dir.path}/ayah_light.png';
     final String darkPath = '${dir.path}/ayah_dark.png';
     await _renderArtifact(qcfText, fontFamily, _lightThemeTextColor, lightPath);
+    await Future<void>.delayed(Duration.zero);
     await _renderArtifact(qcfText, fontFamily, _darkThemeTextColor, darkPath);
+    await Future<void>.delayed(Duration.zero);
 
     final String dateKey = _dateKey(now);
     final AyahWidgetPayload payload = AyahWidgetPayload(
@@ -155,7 +161,9 @@ class DailyAyahWidgetRepository {
     if (fontFile == null) {
       throw StateError('No downloaded font file resolves to $family');
     }
-    final Uint8List bytes = fontFile.readAsBytesSync();
+    // Async IO: this runs on the UI isolate during app usage — sync reads
+    // here contributed to an input-dispatch ANR under load.
+    final Uint8List bytes = await fontFile.readAsBytes();
     final FontLoader loader = FontLoader(family)
       ..addFont(Future<ByteData>.value(ByteData.sublistView(bytes)));
     await loader.load();
@@ -194,8 +202,8 @@ class DailyAyahWidgetRepository {
     }
     // Write-then-rename so the provider never decodes a half-written file.
     final File tmp = File('$path.tmp');
-    tmp.writeAsBytesSync(bytes, flush: true);
-    tmp.renameSync(path);
+    await tmp.writeAsBytes(bytes, flush: true);
+    await tmp.rename(path);
   }
 
   Future<List<CuratedAyah>> _loadCatalog() async {

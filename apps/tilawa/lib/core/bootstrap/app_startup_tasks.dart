@@ -813,7 +813,10 @@ class AppStartupTasks {
       '[AppLaunch] source=AppStartupTasks.initializeIslamicWidgets: Scheduled in (${DateTime.now()})',
     );
     unawaited(
-      Future<void>.delayed(const Duration(seconds: 8)).then((_) async {
+      // 15s: far enough past the startup tail that the render pipeline's
+      // main-isolate work cannot pile onto launch contention (an 8s delay
+      // landed exactly on an input-dispatch ANR under heavy device load).
+      Future<void>.delayed(const Duration(seconds: 15)).then((_) async {
         try {
           final SharedPreferencesAsync prefs = getIt<SharedPreferencesAsync>();
           final AyahWidgetSyncService syncService = AyahWidgetSyncService(
@@ -833,6 +836,9 @@ class AppStartupTasks {
             '[AppLaunch] source=AppStartupTasks.initializeIslamicWidgets: Warning: Could not sync ayah widget at (${DateTime.now()}): $e',
           );
         }
+        // Breathe between the two publishes so their main-isolate work can
+        // never fuse into one long UI-thread stall.
+        await Future<void>.delayed(const Duration(seconds: 2));
         try {
           // Athkar content is static: publish once per content revision.
           const int athkarRevision = 1;
