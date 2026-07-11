@@ -48,8 +48,13 @@ class DailyAyahWidgetRepository {
   static const double artifactWidth = 840;
   static const double artifactHeight = 360;
 
-  static const Color _lightThemeTextColor = Color(0xDE000000);
-  static const Color _darkThemeTextColor = Color(0xF2FFFFFF);
+  static const Color _lightThemeTextColor = Color.fromRGBO(0, 0, 0, 0.87);
+  static const Color _darkThemeTextColor = Color.fromRGBO(
+    255,
+    255,
+    255,
+    0.95,
+  );
 
   final WidgetSnapshotBridge _bridge;
   final SharedPreferencesAsync _prefs;

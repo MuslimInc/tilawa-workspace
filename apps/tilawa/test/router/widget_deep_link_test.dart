@@ -1,64 +1,82 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:go_router/go_router.dart';
+import 'package:mocktail/mocktail.dart';
 import 'package:tilawa/router/app_router_config.dart';
+
+class _MockGoRouterState extends Mock implements GoRouterState {}
 
 void main() {
   group('WidgetActionRoute redirection', () {
-    test('prayer routes redirect to PrayerTimesRoute', () {
+    testWidgets('prayer routes redirect to PrayerTimesRoute', (
+      tester,
+    ) async {
+      final context = await _pumpContext(tester);
       final route = const WidgetActionRoute(action: 'prayer');
       final redirectPath = route.redirect(
-        _mockContext(),
+        context,
         _mockState('/widget/prayer'),
       );
       expect(redirectPath, '/prayer-times');
-      
+
       final route2 = const WidgetActionRoute(action: 'prayer-times');
       final redirectPath2 = route2.redirect(
-        _mockContext(),
+        context,
         _mockState('/widget/prayer-times'),
       );
       expect(redirectPath2, '/prayer-times');
     });
 
-    test('ayah routes redirect to QuranReaderRoute or index', () {
+    testWidgets('ayah routes redirect to QuranReaderRoute or index', (
+      tester,
+    ) async {
+      final context = await _pumpContext(tester);
       final route = const WidgetActionRoute(action: 'ayah', id: '114');
       final redirectPath = route.redirect(
-        _mockContext(),
+        context,
         _mockState('/widget/ayah?ayah=5'),
       );
-      expect(redirectPath, '/quran-reader/114');
-      
+      expect(redirectPath, '/quran-reader/114?ayah-number=5');
+
       final routeFallback = const WidgetActionRoute(action: 'ayah');
       final redirectFallback = routeFallback.redirect(
-        _mockContext(),
+        context,
         _mockState('/widget/ayah'),
       );
       expect(redirectFallback, '/quran-index');
     });
 
-    test('athkar routes redirect to AthkarCategoriesRoute', () {
+    testWidgets('athkar routes redirect to AthkarCategoriesRoute', (
+      tester,
+    ) async {
+      final context = await _pumpContext(tester);
       final route = const WidgetActionRoute(action: 'athkar');
       final redirectPath = route.redirect(
-        _mockContext(),
+        context,
         _mockState('/widget/athkar'),
       );
       expect(redirectPath, '/athkar');
     });
 
-    test('hijri routes redirect to SettingsRoute', () {
+    testWidgets('hijri routes redirect to SettingsRoute', (
+      tester,
+    ) async {
+      final context = await _pumpContext(tester);
       final route = const WidgetActionRoute(action: 'hijri');
       final redirectPath = route.redirect(
-        _mockContext(),
+        context,
         _mockState('/widget/hijri'),
       );
       expect(redirectPath, '/settings');
     });
 
-    test('unknown actions fallback to HomeRoute', () {
+    testWidgets('unknown actions fallback to HomeRoute', (
+      tester,
+    ) async {
+      final context = await _pumpContext(tester);
       final route = const WidgetActionRoute(action: 'unknown_stuff');
       final redirectPath = route.redirect(
-        _mockContext(),
+        context,
         _mockState('/widget/unknown_stuff'),
       );
       expect(redirectPath, '/');
@@ -66,19 +84,24 @@ void main() {
   });
 }
 
-BuildContext _mockContext() => null as dynamic;
+Future<BuildContext> _pumpContext(WidgetTester tester) async {
+  late BuildContext context;
+  await tester.pumpWidget(
+    MaterialApp(
+      home: Builder(
+        builder: (ctx) {
+          context = ctx;
+          return const SizedBox.shrink();
+        },
+      ),
+    ),
+  );
+  return context;
+}
 
 GoRouterState _mockState(String uriStr) {
   final uri = Uri.parse(uriStr);
-  return GoRouterState(
-    null as dynamic,
-    uri: uri,
-    matchedLocation: uri.path,
-    name: null,
-    path: uri.path,
-    fullPath: uri.path,
-    pathParameters: const {},
-    extra: null,
-    pageKey: const ValueKey('mock'),
-  );
+  final state = _MockGoRouterState();
+  when(() => state.uri).thenReturn(uri);
+  return state;
 }

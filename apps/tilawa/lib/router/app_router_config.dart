@@ -770,9 +770,10 @@ class SmartQuranPlanRoute extends GoRouteData
   }
 }
 
-class WidgetActionRoute extends GoRouteData with $WidgetActionRoute, TilawaRouteData {
+class WidgetActionRoute extends GoRouteData
+    with $WidgetActionRoute, TilawaRouteData {
   const WidgetActionRoute({required this.action, this.id});
-  
+
   final String action;
   final String? id;
 
