@@ -61,7 +61,7 @@ void main() {
     when(() => mockGetCurrentUserUseCase()).thenReturn(null);
     when(
       () => mockAwaitAuthRestoration(sessionUser: any(named: 'sessionUser')),
-    ).thenAnswer((_) async {});
+    ).thenAnswer((_) async => AuthRestorationOutcome.unauthenticated);
 
     final SplashRouteResult result = await useCase();
 
@@ -79,6 +79,7 @@ void main() {
         () => mockAwaitAuthRestoration(sessionUser: any(named: 'sessionUser')),
       ).thenAnswer((_) async {
         await Future<void>.delayed(const Duration(milliseconds: 50));
+        return AuthRestorationOutcome.restored;
       });
 
       final SplashRouteResult result = await useCase();
@@ -100,7 +101,7 @@ void main() {
       ).thenAnswer((_) async => firebaseUser);
       when(
         () => mockAwaitAuthRestoration(sessionUser: firebaseUser),
-      ).thenAnswer((_) async {});
+      ).thenAnswer((_) async => AuthRestorationOutcome.unauthenticated);
 
       final SplashRouteResult result = await useCase();
 
@@ -123,6 +124,7 @@ void main() {
       ).thenAnswer((_) async {
         // Simulates restoration timeout with no network — no throw.
         await Future<void>.delayed(const Duration(milliseconds: 10));
+        return AuthRestorationOutcome.pendingUnresolved;
       });
 
       final SplashRouteResult result = await useCase();
@@ -137,7 +139,7 @@ void main() {
       when(() => mockGetCurrentUserUseCase()).thenReturn(firebaseUser);
       when(
         () => mockAwaitAuthRestoration(sessionUser: any(named: 'sessionUser')),
-      ).thenAnswer((_) async {});
+      ).thenAnswer((_) async => AuthRestorationOutcome.unauthenticated);
 
       final SplashRouteResult result = await useCase();
 

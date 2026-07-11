@@ -800,29 +800,41 @@ class AppStartupTasks {
 
   /// Publishes the Ayah of the Day widget snapshot (spec 041, T022). Runs
   /// once per local day (dedup inside the sync service); Android-only.
+  ///
+  /// Fire-and-forget with a post-startup delay: composing the snapshot uses
+  /// `Picture.toImage()`, which competes with the raster thread during launch
+  /// (see the warm-up note in [QuranFontService]) — awaiting it here deadlocks
+  /// Phase 3. The delay lands the render after first frame; the timeout
+  /// guarantees a hung render can never leak past one launch.
   Future<void> initializeIslamicWidgets() async {
     if (!Platform.isAndroid) return;
     logger.d(
-      '[AppLaunch] source=AppStartupTasks.initializeIslamicWidgets: Start in (${DateTime.now()})',
+      '[AppLaunch] source=AppStartupTasks.initializeIslamicWidgets: Scheduled in (${DateTime.now()})',
     );
-    try {
-      final SharedPreferencesAsync prefs = getIt<SharedPreferencesAsync>();
-      final AyahWidgetSyncService syncService = AyahWidgetSyncService(
-        repository: DailyAyahWidgetRepository(
-          fontService: getIt<QuranFontService>(),
-          bridge: const WidgetSnapshotBridge(
-            MethodChannel('com.tilawa.app/prayer_adhan'),
-          ),
-          prefs: prefs,
-        ),
-        prefs: prefs,
-      );
-      await syncService.syncIfNeeded();
-    } catch (e) {
-      logger.d(
-        '[AppLaunch] source=AppStartupTasks.initializeIslamicWidgets: Warning: Could not sync ayah widget at (${DateTime.now()}): $e',
-      );
-    }
+    unawaited(
+      Future<void>.delayed(const Duration(seconds: 8)).then((_) async {
+        try {
+          final SharedPreferencesAsync prefs = getIt<SharedPreferencesAsync>();
+          final AyahWidgetSyncService syncService = AyahWidgetSyncService(
+            repository: DailyAyahWidgetRepository(
+              fontService: getIt<QuranFontService>(),
+              bridge: const WidgetSnapshotBridge(
+                MethodChannel('com.tilawa.app/prayer_adhan'),
+              ),
+              prefs: prefs,
+            ),
+            prefs: prefs,
+          );
+          await syncService.syncIfNeeded().timeout(
+            const Duration(seconds: 45),
+          );
+        } catch (e) {
+          logger.d(
+            '[AppLaunch] source=AppStartupTasks.initializeIslamicWidgets: Warning: Could not sync ayah widget at (${DateTime.now()}): $e',
+          );
+        }
+      }),
+    );
   }
 
   Future<void> prepareNotificationLaunchState() async {

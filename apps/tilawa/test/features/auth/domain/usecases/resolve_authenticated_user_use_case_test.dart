@@ -14,8 +14,9 @@ class _RecordingAwaitAuthRestoration extends AwaitAuthRestorationUseCase {
 
   var callCount = 0;
   @override
-  Future<void> call({UserEntity? sessionUser}) async {
+  Future<AuthRestorationOutcome> call({UserEntity? sessionUser}) async {
     callCount++;
+    return AuthRestorationOutcome.unauthenticated;
   }
 }
 

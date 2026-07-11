@@ -19,7 +19,9 @@ import '../../domain/entities/email_auth_failure_key.dart';
 import '../../domain/entities/email_registration_draft.dart';
 import '../../domain/entities/register_with_email_result.dart';
 import '../../domain/entities/user_entity.dart';
+import '../../domain/usecases/await_auth_restoration_use_case.dart';
 import '../../domain/usecases/delete_account.dart';
+import '../../domain/usecases/get_persisted_authenticated_user_use_case.dart';
 import '../../domain/usecases/get_current_user_use_case.dart';
 import '../../domain/usecases/register_with_email_use_case.dart';
 import '../../domain/usecases/sign_in_with_email_use_case.dart';
@@ -45,7 +47,9 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
     this._getCurrentLanguage,
     this._syncUserLanguagePreference,
     this._accountDeletionFlow,
-    this._signInSessionTracker, {
+    this._signInSessionTracker,
+    this._awaitAuthRestoration,
+    this._getPersistedAuthenticatedUser, {
     this._multiDeviceLoginEnabled = isMultiDeviceLoginEnabled,
   }) : super(const AuthState.initial()) {
     on<SignInWithGoogleEvent>(_onSignInWithGoogle);
@@ -71,6 +75,8 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
   final SyncUserLanguagePreferenceUseCase _syncUserLanguagePreference;
   final AccountDeletionFlowTracker _accountDeletionFlow;
   final GoogleSignInSessionTracker _signInSessionTracker;
+  final AwaitAuthRestorationUseCase _awaitAuthRestoration;
+  final GetPersistedAuthenticatedUserUseCase _getPersistedAuthenticatedUser;
   final MultiDeviceLoginEnabledPredicate _multiDeviceLoginEnabled;
 
   Future<void> _onSignInWithGoogle(
@@ -299,6 +305,10 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
   }
 
   Future<void> _onSignOut(SignOutEvent event, Emitter<AuthState> emit) async {
+    logger.d(
+      '[DebugNotificationAuthFlow] AUTH_SIGN_OUT_REQUESTED '
+      'caller=AuthBloc._onSignOut reason=user-action',
+    );
     _interactiveSignInGeneration++;
     try {
       final result = await _signOut();
@@ -403,7 +413,14 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
       return;
     }
 
-    final UserEntity? user = _liveOrInMemoryUser();
+    // Firebase Auth restores the persisted session asynchronously on cold
+    // start; `currentUser` is transiently null until it finishes. Wait for
+    // restoration (gated by a persisted hint) before reading it, so a startup
+    // race is never mis-emitted as `unauthenticated`.
+    final UserEntity? hint = await _getPersistedAuthenticatedUser();
+    await _awaitAuthRestoration(sessionUser: hint);
+
+    final UserEntity? user = _liveOrInMemoryUser() ?? hint;
     if (user != null) {
       final Either<Failure, void> registration = await _syncDeviceToken(
         user.id,

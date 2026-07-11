@@ -13,6 +13,7 @@ import 'package:tilawa/features/auth/domain/entities/email_auth_failure_key.dart
 import 'package:tilawa/features/auth/domain/entities/email_registration_draft.dart';
 import 'package:tilawa/features/auth/domain/entities/register_with_email_result.dart';
 import 'package:tilawa/features/auth/domain/entities/user_entity.dart';
+import 'package:tilawa/features/auth/domain/usecases/await_auth_restoration_use_case.dart';
 import 'package:tilawa/features/auth/presentation/bloc/auth_bloc.dart';
 import 'package:tilawa_core/config/language_config.dart';
 import 'package:tilawa_core/errors/failures.dart';
@@ -32,6 +33,8 @@ void main() {
   late MockSyncDeviceTokenUseCase mockSyncDeviceTokenUseCase;
   late MockGetCurrentLanguageUseCase mockGetCurrentLanguageUseCase;
   late MockSyncUserLanguagePreferenceUseCase mockSyncUserLanguagePreference;
+  late MockAwaitAuthRestorationUseCase mockAwaitAuthRestoration;
+  late MockGetPersistedAuthenticatedUserUseCase mockGetPersistedUser;
   late AccountDeletionFlowTracker accountDeletionFlowTracker;
   late GoogleSignInSessionTracker signInSessionTracker;
 
@@ -73,6 +76,12 @@ void main() {
     accountDeletionFlowTracker = AccountDeletionFlowTracker();
     signInSessionTracker = GoogleSignInSessionTracker();
     signInSessionTracker.markFinished();
+    mockAwaitAuthRestoration = MockAwaitAuthRestorationUseCase();
+    mockGetPersistedUser = MockGetPersistedAuthenticatedUserUseCase();
+    when(mockGetPersistedUser()).thenAnswer((_) async => null);
+    when(
+      mockAwaitAuthRestoration(sessionUser: anyNamed('sessionUser')),
+    ).thenAnswer((_) async => AuthRestorationOutcome.unauthenticated);
 
     when(
       mockGetCurrentLanguageUseCase(),
@@ -97,6 +106,8 @@ void main() {
       mockSyncUserLanguagePreference,
       accountDeletionFlowTracker,
       signInSessionTracker,
+      mockAwaitAuthRestoration,
+      mockGetPersistedUser,
       multiDeviceLoginEnabled: () => false,
     );
   });
@@ -294,6 +305,8 @@ void main() {
             mockSyncUserLanguagePreference,
             accountDeletionFlowTracker,
             signInSessionTracker,
+            mockAwaitAuthRestoration,
+            mockGetPersistedUser,
             multiDeviceLoginEnabled: () => true,
           );
         },

@@ -70,6 +70,7 @@ class DailyAyahWidgetRepository {
     );
 
     await _fontService.ensureSingleFontLoaded(ayah.pageNumber);
+    logger.d('[DailyAyahWidgetRepository] step=font_loaded p=${ayah.pageNumber}');
     final String qcfText =
         getVerseQCF(
           ayah.surahNumber,
@@ -79,15 +80,19 @@ class DailyAyahWidgetRepository {
         getVerseNumberQCF(ayah.surahNumber, ayah.ayahNumber);
     final String fontFamily =
         'QCF_P${ayah.pageNumber.toString().padLeft(3, '0')}';
+    logger.d('[DailyAyahWidgetRepository] step=glyphs len=${qcfText.length}');
 
     final Directory dir = await _artifactDirectory();
     if (!dir.existsSync()) {
       dir.createSync(recursive: true);
     }
+    logger.d('[DailyAyahWidgetRepository] step=dir ${dir.path}');
     final String lightPath = '${dir.path}/ayah_light.png';
     final String darkPath = '${dir.path}/ayah_dark.png';
     await _renderArtifact(qcfText, fontFamily, _lightThemeTextColor, lightPath);
+    logger.d('[DailyAyahWidgetRepository] step=render_light done');
     await _renderArtifact(qcfText, fontFamily, _darkThemeTextColor, darkPath);
+    logger.d('[DailyAyahWidgetRepository] step=render_dark done');
 
     final String dateKey = _dateKey(now);
     final AyahWidgetPayload payload = AyahWidgetPayload(

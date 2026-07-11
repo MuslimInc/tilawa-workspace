@@ -4,6 +4,7 @@ import 'package:tilawa/features/auth/application/account_deletion_flow_tracker.d
 import 'package:tilawa/features/auth/data/services/google_sign_in_session_tracker.dart';
 import 'package:tilawa/features/auth/data/services/pending_session_revoke_store.dart';
 import 'package:tilawa/features/auth/domain/entities/user_entity.dart';
+import 'package:tilawa/features/auth/domain/usecases/await_auth_restoration_use_case.dart';
 import 'package:tilawa/features/auth/presentation/bloc/auth_bloc.dart';
 import 'package:tilawa_core/config/language_config.dart';
 import 'package:tilawa_core/errors/failures.dart';
@@ -43,6 +44,13 @@ class AuthWidgetTestHarness {
     );
     when(mockGetCurrentUser()).thenReturn(null);
 
+    mockAwaitAuthRestoration = MockAwaitAuthRestorationUseCase();
+    mockGetPersistedUser = MockGetPersistedAuthenticatedUserUseCase();
+    when(mockGetPersistedUser()).thenAnswer((_) async => null);
+    when(
+      mockAwaitAuthRestoration(sessionUser: anyNamed('sessionUser')),
+    ).thenAnswer((_) async => AuthRestorationOutcome.unauthenticated);
+
     authBloc = AuthBloc(
       mockSignInWithGoogle,
       mockSignInWithEmail,
@@ -55,6 +63,8 @@ class AuthWidgetTestHarness {
       mockSyncUserLanguagePreference,
       accountDeletionFlowTracker,
       signInSessionTracker,
+      mockAwaitAuthRestoration,
+      mockGetPersistedUser,
     );
   }
 
@@ -68,6 +78,8 @@ class AuthWidgetTestHarness {
   late MockSyncDeviceTokenUseCase mockSyncDeviceToken;
   late MockGetCurrentLanguageUseCase mockGetCurrentLanguage;
   late MockSyncUserLanguagePreferenceUseCase mockSyncUserLanguagePreference;
+  late MockAwaitAuthRestorationUseCase mockAwaitAuthRestoration;
+  late MockGetPersistedAuthenticatedUserUseCase mockGetPersistedUser;
   late AccountDeletionFlowTracker accountDeletionFlowTracker;
   late GoogleSignInSessionTracker signInSessionTracker;
 
