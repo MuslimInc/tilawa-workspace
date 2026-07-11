@@ -16,7 +16,6 @@ import '../../../domain/failures/quran_sessions_failure.dart';
 import '../../../domain/policies/platform_scheduling_policy.dart';
 import '../../../domain/policies/session_join_window_policy.dart';
 import '../../../domain/providers/auth_session_provider.dart';
-import '../../../domain/repositories/session_repository.dart';
 import '../../../domain/usecases/cancel_session_via_server_usecase.dart';
 import '../../../domain/usecases/get_pending_reschedule_request_usecase.dart';
 import '../../../domain/usecases/get_session_aggregate_usecase.dart';
@@ -39,7 +38,6 @@ class SessionDetailBloc extends Bloc<SessionDetailEvent, SessionDetailState> {
     required this._getTimeline,
     this._getSessionDetail,
     this._invalidateCache,
-    this._sessionRepository,
     this._joinSession,
     this._openExternalMeetingUrl,
     this._reportConcern,
@@ -112,7 +110,6 @@ class SessionDetailBloc extends Bloc<SessionDetailEvent, SessionDetailState> {
   final ResolveSessionActorRoleUseCase? _resolveActorRole;
   final GetSessionDetailUseCase? _getSessionDetail;
   final InvalidateQuranSessionCacheUseCase? _invalidateCache;
-  final SessionRepository? _sessionRepository;
   final JoinSessionUseCase? _joinSession;
   final OpenExternalMeetingUrl? _openExternalMeetingUrl;
   final ReportSessionConcernUseCase? _reportConcern;
@@ -307,7 +304,7 @@ class SessionDetailBloc extends Bloc<SessionDetailEvent, SessionDetailState> {
     })
   >
   _loadSessionCallContext({required String? sessionId}) async {
-    final repository = _sessionRepository;
+    final getSessionDetail = _getSessionDetail;
     if (sessionId == null || sessionId.isEmpty) {
       return (
         callType: null,
@@ -315,17 +312,15 @@ class SessionDetailBloc extends Bloc<SessionDetailEvent, SessionDetailState> {
         callProviderKind: null,
       );
     }
-
-    final sessionResult = _getSessionDetail != null
-        ? await _getSessionDetail(sessionId)
-        : await repository?.getSessionById(sessionId);
-    if (sessionResult == null) {
+    if (getSessionDetail == null) {
       return (
         callType: null,
         externalMeetingJoinUrl: null,
         callProviderKind: null,
       );
     }
+
+    final sessionResult = await getSessionDetail(sessionId);
     return sessionResult.fold(
       (_) => (
         callType: null,

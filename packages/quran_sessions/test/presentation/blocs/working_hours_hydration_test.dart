@@ -32,7 +32,9 @@ AvailabilityCubit _build(FakeScheduleRepository repo) => AvailabilityCubit(
     repo,
     const WeeklyScheduleValidator(),
   ),
-  repo: repo,
+  getOverrides: GetAvailabilityOverridesUseCase(repo),
+  saveOverride: SaveAvailabilityOverrideUseCase(repo),
+  removeOverride: RemoveAvailabilityOverrideUseCase(repo),
   defaultTimezone: 'Africa/Cairo',
 );
 
@@ -228,7 +230,9 @@ void main() {
             delayingRepo,
             const WeeklyScheduleValidator(),
           ),
-          repo: delayingRepo,
+          getOverrides: GetAvailabilityOverridesUseCase(delayingRepo),
+          saveOverride: SaveAvailabilityOverrideUseCase(delayingRepo),
+          removeOverride: RemoveAvailabilityOverrideUseCase(delayingRepo),
           defaultTimezone: 'Africa/Cairo',
         );
 

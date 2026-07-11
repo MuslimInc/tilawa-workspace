@@ -73,7 +73,9 @@ void main() {
       repo,
       const WeeklyScheduleValidator(),
     ),
-    repo: repo,
+    getOverrides: GetAvailabilityOverridesUseCase(repo),
+    saveOverride: SaveAvailabilityOverrideUseCase(repo),
+    removeOverride: RemoveAvailabilityOverrideUseCase(repo),
     defaultTimezone: 'Africa/Cairo',
   );
 

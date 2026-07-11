@@ -298,10 +298,19 @@ class QuranSessionsMvpModule {
       () => GetWeeklyScheduleUseCase(sl<ScheduleRepository>()),
     );
     sl.registerLazySingletonIfAbsent(
+      () => GetAvailabilityOverridesUseCase(sl<ScheduleRepository>()),
+    );
+    sl.registerLazySingletonIfAbsent(
       () => SaveWeeklyScheduleUseCase(
         sl<ScheduleRepository>(),
         sl<WeeklyScheduleValidator>(),
       ),
+    );
+    sl.registerLazySingletonIfAbsent(
+      () => SaveAvailabilityOverrideUseCase(sl<ScheduleRepository>()),
+    );
+    sl.registerLazySingletonIfAbsent(
+      () => RemoveAvailabilityOverrideUseCase(sl<ScheduleRepository>()),
     );
     sl.registerLazySingletonIfAbsent(
       () => GetMarketSchedulingConfigUseCase(
@@ -468,7 +477,6 @@ class QuranSessionsMvpModule {
         invalidateCache: sl.isRegistered<InvalidateQuranSessionCacheUseCase>()
             ? sl<InvalidateQuranSessionCacheUseCase>()
             : null,
-        sessionRepository: sl<SessionRepository>(),
         joinSession: sl<JoinSessionUseCase>(),
         openExternalMeetingUrl: launchExternalMeetingUrl,
         reportConcern: sl.isRegistered<ReportSessionConcernUseCase>()
@@ -506,7 +514,9 @@ class QuranSessionsMvpModule {
       () => AvailabilityCubit(
         getSchedule: sl<GetWeeklyScheduleUseCase>(),
         saveSchedule: sl<SaveWeeklyScheduleUseCase>(),
-        repo: sl<ScheduleRepository>(),
+        getOverrides: sl<GetAvailabilityOverridesUseCase>(),
+        saveOverride: sl<SaveAvailabilityOverrideUseCase>(),
+        removeOverride: sl<RemoveAvailabilityOverrideUseCase>(),
       ),
     );
     sl.registerFactoryIfAbsent(

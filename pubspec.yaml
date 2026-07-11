@@ -27,6 +27,7 @@ dev_dependencies:
   melos: ^8.0.0
   bloc_lint: ^0.4.1
   bloc_tools: ^0.1.0-dev.24
+  very_good_analysis: 10.3.0
 
 dependency_overrides:
   ffi: ^2.1.4

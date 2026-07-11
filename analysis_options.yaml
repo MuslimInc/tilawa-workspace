@@ -18,7 +18,12 @@
 # Run `melos run bloc:lint` for the bloc_tools CLI; member packages declare
 # `bloc_lint` in dev_dependencies so the include resolves.
 
+linter:
+  rules:
+    parameter_assignments: true
+
 include:
+  - package:very_good_analysis/analysis_options.yaml
   - package:flutter_lints/flutter.yaml
   - package:bloc_lint/recommended.yaml
 

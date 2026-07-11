@@ -7,9 +7,11 @@ import '../../../domain/entities/time_range.dart';
 import '../../../domain/entities/weekday.dart';
 import '../../../domain/entities/weekly_schedule.dart';
 import '../../../domain/failures/quran_sessions_failure.dart';
-import '../../../domain/repositories/schedule_repository.dart';
 import '../../../domain/services/vacation_override_validator.dart';
+import '../../../domain/usecases/get_availability_overrides_usecase.dart';
 import '../../../domain/usecases/get_weekly_schedule_usecase.dart';
+import '../../../domain/usecases/remove_availability_override_usecase.dart';
+import '../../../domain/usecases/save_availability_override_usecase.dart';
 import '../../../domain/usecases/save_weekly_schedule_usecase.dart';
 import 'availability_state.dart';
 
@@ -20,14 +22,18 @@ class AvailabilityCubit extends Cubit<AvailabilityState> {
   AvailabilityCubit({
     required this._getSchedule,
     required this._saveSchedule,
-    required this._repo,
+    required this._getOverrides,
+    required this._saveOverride,
+    required this._removeOverride,
     this._defaultTimezone = 'Africa/Cairo',
     this._vacationValidator = const VacationOverrideValidator(),
   }) : super(AvailabilityState.loading(''));
 
   final GetWeeklyScheduleUseCase _getSchedule;
   final SaveWeeklyScheduleUseCase _saveSchedule;
-  final ScheduleRepository _repo;
+  final GetAvailabilityOverridesUseCase _getOverrides;
+  final SaveAvailabilityOverrideUseCase _saveOverride;
+  final RemoveAvailabilityOverrideUseCase _removeOverride;
   final String _defaultTimezone;
   final VacationOverrideValidator _vacationValidator;
   int _loadGeneration = 0;
@@ -46,7 +52,7 @@ class AvailabilityCubit extends Cubit<AvailabilityState> {
       teacherId,
       defaultTimezone: _defaultTimezone,
     );
-    final overridesResult = await _repo.getOverrides(teacherId);
+    final overridesResult = await _getOverrides(teacherId);
 
     if (generation != _loadGeneration) {
       return;
@@ -186,7 +192,7 @@ class AvailabilityCubit extends Cubit<AvailabilityState> {
     emit(state.copyWith(isAddingOverride: true, clearFailure: true));
 
     for (final override in overrides) {
-      final result = await _repo.saveOverride(state.teacherId, override);
+      final result = await _saveOverride(state.teacherId, override);
       final failure = result.fold((f) => f, (_) => null);
       if (failure != null) {
         emit(state.copyWith(isAddingOverride: false, failure: failure));
@@ -226,7 +232,7 @@ class AvailabilityCubit extends Cubit<AvailabilityState> {
     );
 
     for (final dateKey in keys) {
-      final result = await _repo.removeOverride(state.teacherId, dateKey);
+      final result = await _removeOverride(state.teacherId, dateKey);
       final failure = result.fold((f) => f, (_) => null);
       if (failure != null) {
         emit(
