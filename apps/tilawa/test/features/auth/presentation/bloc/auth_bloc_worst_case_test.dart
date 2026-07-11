@@ -272,6 +272,40 @@ void main() {
         act: (bloc) => bloc.add(const CheckAuthStatusEvent()),
         expect: () => [const AuthState.unauthenticated()],
       );
+
+      blocTest<AuthBloc, AuthState>(
+        'multi-device cold start keeps user authenticated on stale passive sync',
+        build: () {
+          when(mockGetCurrentUserUseCase()).thenReturn(userA);
+          when(mockSyncDeviceTokenUseCase(userA.id)).thenAnswer(
+            (_) async => const Left(
+              PermissionFailure(AuthErrorKey.staleDeviceRejected),
+            ),
+          );
+          return AuthBloc(
+            mockSignInWithGoogleUseCase,
+            mockSignInWithEmailUseCase,
+            mockRegisterWithEmailUseCase,
+            mockSignOut,
+            mockDeleteAccount,
+            mockGetCurrentUserUseCase,
+            mockSyncDeviceTokenUseCase,
+            mockGetCurrentLanguageUseCase,
+            mockSyncUserLanguagePreference,
+            accountDeletionFlowTracker,
+            signInSessionTracker,
+            multiDeviceLoginEnabled: () => true,
+          );
+        },
+        seed: () => const AuthState.initial(),
+        act: (bloc) => bloc.add(const CheckAuthStatusEvent()),
+        expect: () => [AuthState.authenticated(user: userA)],
+        verify: (_) {
+          verifyNever(
+            mockSignOut(skipServerTokenClear: anyNamed('skipServerTokenClear')),
+          );
+        },
+      );
     });
 
     group('auth state flicker', () {
