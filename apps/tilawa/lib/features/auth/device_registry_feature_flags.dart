@@ -25,8 +25,8 @@ bool isDeviceRegistryWriteEnabled() {
 /// longer forces a whole-app logout. Pairs with the server
 /// `MULTI_DEVICE_LOGIN_ENABLED` Functions env gate.
 ///
-/// Default off in production, on for staging/local builds. Override with:
-/// `--dart-define=TILAWA_LAUNCH_MULTI_DEVICE_LOGIN_ENABLED=true`
+/// Default on in all distributions. Override with:
+/// `--dart-define=TILAWA_LAUNCH_MULTI_DEVICE_LOGIN_ENABLED=false`
 bool isMultiDeviceLoginEnabled() {
   if (!getIt.isRegistered<AppLaunchConfig>()) {
     return AppLaunchConfig.fromEnvironment().multiDeviceLoginEnabled;

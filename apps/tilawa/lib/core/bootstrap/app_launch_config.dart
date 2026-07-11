@@ -20,7 +20,7 @@ import 'package:flutter/foundation.dart';
 /// Example: `--dart-define=TILAWA_LAUNCH_AGORA_APP_ID=your_agora_app_id`
 /// Example: `--dart-define=TILAWA_LAUNCH_LIVEKIT_URL=wss://tilawa-7whzug8z.livekit.cloud`
 /// Example: `--dart-define=TILAWA_LAUNCH_DEVICE_REGISTRY_WRITE_ENABLED=true`
-/// Example: `--dart-define=TILAWA_LAUNCH_MULTI_DEVICE_LOGIN_ENABLED=true`
+/// Example: `--dart-define=TILAWA_LAUNCH_MULTI_DEVICE_LOGIN_ENABLED=false`
 ///
 /// Quran Sessions product behavior is controlled by Admin Panel Firestore
 /// config, not launch config. Launch config only carries SDK credentials such
@@ -168,7 +168,7 @@ abstract final class _LaunchEnvironment {
   );
   static const bool multiDeviceLoginEnabled = bool.fromEnvironment(
     'TILAWA_LAUNCH_MULTI_DEVICE_LOGIN_ENABLED',
-    defaultValue: stagingFlagsOn,
+    defaultValue: true,
   );
   static const bool authLifecycleHardeningEnabled = bool.fromEnvironment(
     'TILAWA_LAUNCH_AUTH_LIFECYCLE_HARDENING_ENABLED',
@@ -226,7 +226,7 @@ class AppLaunchConfig extends Equatable {
     this.notificationPermissionRequest = true,
     this.teacherDashboardSummaryReadEnabled = false,
     this.deviceRegistryWriteEnabled = false,
-    this.multiDeviceLoginEnabled = false,
+    this.multiDeviceLoginEnabled = true,
     this.authLifecycleHardeningEnabled = false,
     this.teacherApplicationFormUrl = kDefaultTeacherApplicationFormUrl,
     this.agoraAppId = '',
