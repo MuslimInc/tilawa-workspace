@@ -21,8 +21,7 @@ class _FakePrefs implements SharedPreferencesAsync {
   }
 
   @override
-  dynamic noSuchMethod(Invocation invocation) =>
-      super.noSuchMethod(invocation);
+  dynamic noSuchMethod(Invocation invocation) => super.noSuchMethod(invocation);
 }
 
 /// Records publish calls instead of rendering; the real repository needs the
@@ -51,8 +50,7 @@ class _RecordingRepository implements DailyAyahWidgetRepository {
   }
 
   @override
-  dynamic noSuchMethod(Invocation invocation) =>
-      super.noSuchMethod(invocation);
+  dynamic noSuchMethod(Invocation invocation) => super.noSuchMethod(invocation);
 }
 
 void main() {
@@ -155,48 +153,51 @@ void main() {
   });
 
   group('WidgetSnapshotBridge', () {
-    test('sends generatedAtMs and validUntilMs keys (native contract)', () async {
-      const channel = MethodChannel('bridge_test');
-      final List<MethodCall> calls = <MethodCall>[];
-      TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger
-          .setMockMethodCallHandler(channel, (call) async {
-            calls.add(call);
-            return null;
-          });
-      addTearDown(
-        () => TestDefaultBinaryMessengerBinding
-            .instance
-            .defaultBinaryMessenger
-            .setMockMethodCallHandler(channel, null),
-      );
+    test(
+      'sends generatedAtMs and validUntilMs keys (native contract)',
+      () async {
+        const channel = MethodChannel('bridge_test');
+        final List<MethodCall> calls = <MethodCall>[];
+        TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger
+            .setMockMethodCallHandler(channel, (call) async {
+              calls.add(call);
+              return null;
+            });
+        addTearDown(
+          () => TestDefaultBinaryMessengerBinding
+              .instance
+              .defaultBinaryMessenger
+              .setMockMethodCallHandler(channel, null),
+        );
 
-      const bridge = WidgetSnapshotBridge(channel);
-      const payload = AyahWidgetPayload(
-        dateKey: '2026-07-11',
-        surahNumber: 2,
-        ayahNumber: 152,
-        pageNumber: 23,
-        caption: 'c',
-        imagePathLight: '/l.png',
-        imagePathDark: '/d.png',
-      );
-      // ignore: prefer_const_constructors
-      final envelope = WidgetSnapshotEnvelope<AyahWidgetPayload>(
-        schemaVersion: 1,
-        widgetType: IslamicWidgetType.ayah,
-        generatedAt: DateTime(2026, 7, 11, 6),
-        validUntil: DateTime(2026, 7, 12),
-        payload: payload,
-      );
+        const bridge = WidgetSnapshotBridge(channel);
+        const payload = AyahWidgetPayload(
+          dateKey: '2026-07-11',
+          surahNumber: 2,
+          ayahNumber: 152,
+          pageNumber: 23,
+          caption: 'c',
+          imagePathLight: '/l.png',
+          imagePathDark: '/d.png',
+        );
+        // ignore: prefer_const_constructors
+        final envelope = WidgetSnapshotEnvelope<AyahWidgetPayload>(
+          schemaVersion: 1,
+          widgetType: IslamicWidgetType.ayah,
+          generatedAt: DateTime(2026, 7, 11, 6),
+          validUntil: DateTime(2026, 7, 12),
+          payload: payload,
+        );
 
-      await bridge.dispatchSnapshot(envelope);
+        await bridge.dispatchSnapshot(envelope);
 
-      check(calls.length).equals(1);
-      final args = calls.single.arguments as Map<Object?, Object?>;
-      final String json = args['json']! as String;
-      check(json).contains('"generatedAtMs"');
-      check(json).contains('"validUntilMs"');
-      check(json).contains('"widgetType":"ayah"');
-    });
+        check(calls.length).equals(1);
+        final args = calls.single.arguments as Map<Object?, Object?>;
+        final String json = args['json']! as String;
+        check(json).contains('"generatedAtMs"');
+        check(json).contains('"validUntilMs"');
+        check(json).contains('"widgetType":"ayah"');
+      },
+    );
   });
 }

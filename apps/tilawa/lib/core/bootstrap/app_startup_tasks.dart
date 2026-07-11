@@ -817,7 +817,6 @@ class AppStartupTasks {
           final SharedPreferencesAsync prefs = getIt<SharedPreferencesAsync>();
           final AyahWidgetSyncService syncService = AyahWidgetSyncService(
             repository: DailyAyahWidgetRepository(
-              fontService: getIt<QuranFontService>(),
               bridge: const WidgetSnapshotBridge(
                 MethodChannel('com.tilawa.app/prayer_adhan'),
               ),

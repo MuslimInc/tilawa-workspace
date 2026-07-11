@@ -7,7 +7,6 @@ import android.appwidget.AppWidgetProvider
 import android.content.ComponentName
 import android.content.Context
 import android.content.Intent
-import android.content.res.Configuration
 import android.graphics.Bitmap
 import android.graphics.BitmapFactory
 import android.util.Log
@@ -109,15 +108,12 @@ internal class AyahOfDayWidgetProvider : AppWidgetProvider() {
         return views
     }
 
-    /** Decodes the theme-matching artifact; bounded by the render size. */
+    /** Decodes the artifact; bounded by the render size. The widget background
+     *  is the brand-green gradient in BOTH themes, so the white-glyph (dark)
+     *  artifact is always the readable one; the light artifact is kept for a
+     *  future light-surface variant. */
     private fun decodeArtwork(context: Context, payload: AyahWidgetPayload): Bitmap? {
-        val nightMode = context.resources.configuration.uiMode and
-            Configuration.UI_MODE_NIGHT_MASK
-        val path = if (nightMode == Configuration.UI_MODE_NIGHT_YES) {
-            payload.imagePathDark
-        } else {
-            payload.imagePathLight
-        }
+        val path = payload.imagePathDark
         return try {
             val file = File(path)
             if (!file.exists()) return null

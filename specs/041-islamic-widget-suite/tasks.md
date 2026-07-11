@@ -51,14 +51,14 @@ description: "Implementation tasks for the Islamic home-screen widget suite"
 - [x] T013 [P] [US2] Add curated launch pool fixture and validation test in `apps/tilawa/assets/data/widget_daily_ayahs.json` and `apps/tilawa/test/features/islamic_widgets/data/curated_ayah_catalog_test.dart`
 - [x] T014 [P] [US2] Add bounded QCF artifact renderer tests in `packages/quran_qcf/test/widget_ayah_artifact_renderer_test.dart`
 - [x] T015 [US2] Implement bounded QCF artifact rendering and atomic PNG output in `packages/quran_qcf/lib/src/presentation/services/widget_ayah_artifact_renderer.dart`
-- [ ] T016 [US2] Implement daily selection persistence and snapshot composition in `apps/tilawa/lib/features/islamic_widgets/data/daily_ayah_widget_repository.dart`
-- [ ] T017 [P] [US2] Add native Ayah snapshot parsing/state tests in `apps/tilawa/android/app/src/test/kotlin/com/tilawa/app/widget/ayah/AyahWidgetLogicTest.kt`
-- [ ] T018 [US2] Implement native Ayah snapshot, store, and state resolution in `apps/tilawa/android/app/src/main/kotlin/com/tilawa/app/widget/ayah/`
-- [ ] T019 [US2] Add compact/expanded Ayah widget layouts, resources, and picker previews in `apps/tilawa/android/app/src/main/res/`
-- [ ] T020 [US2] Implement Ayah provider lifecycle, resize handling, fallback, midnight refresh, and Mushaf deep link in `apps/tilawa/android/app/src/main/kotlin/com/tilawa/app/widget/ayah/AyahOfDayWidgetProvider.kt`
-- [ ] T021 [US2] Register the Ayah provider and metadata in `apps/tilawa/android/app/src/main/AndroidManifest.xml` and `apps/tilawa/android/app/src/main/res/xml/ayah_of_day_widget_info.xml`
-- [ ] T022 [US2] Wire Ayah snapshot refresh at startup/date/locale changes in `apps/tilawa/lib/features/islamic_widgets/app/ayah_widget_sync_service.dart`
-- [ ] T023 [US2] Add Ayah provider Robolectric lifecycle/deep-link tests in `apps/tilawa/android/app/src/test/kotlin/com/tilawa/app/widget/ayah/AyahOfDayWidgetProviderTest.kt`
+- [x] T016 [US2] Implement daily selection persistence and snapshot composition in `apps/tilawa/lib/features/islamic_widgets/data/daily_ayah_widget_repository.dart`
+- [x] T017 [P] [US2] Add native Ayah snapshot parsing/state tests in `apps/tilawa/android/app/src/test/kotlin/com/tilawa/app/widget/ayah/AyahWidgetLogicTest.kt`
+- [x] T018 [US2] Implement native Ayah snapshot, store, and state resolution in `apps/tilawa/android/app/src/main/kotlin/com/tilawa/app/widget/ayah/`
+- [x] T019 [US2] Add compact/expanded Ayah widget layouts, resources, and picker previews in `apps/tilawa/android/app/src/main/res/`
+- [x] T020 [US2] Implement Ayah provider lifecycle, resize handling, fallback, midnight refresh, and Mushaf deep link in `apps/tilawa/android/app/src/main/kotlin/com/tilawa/app/widget/ayah/AyahOfDayWidgetProvider.kt`
+- [x] T021 [US2] Register the Ayah provider and metadata in `apps/tilawa/android/app/src/main/AndroidManifest.xml` and `apps/tilawa/android/app/src/main/res/xml/ayah_of_day_widget_info.xml`
+- [x] T022 [US2] Wire Ayah snapshot refresh at startup/date/locale changes in `apps/tilawa/lib/features/islamic_widgets/app/ayah_widget_sync_service.dart`
+- [x] T023 [US2] Add Ayah provider Robolectric lifecycle/deep-link tests in `apps/tilawa/android/app/src/test/kotlin/com/tilawa/app/widget/ayah/AyahOfDayWidgetProviderTest.kt`
 
 **Checkpoint**: The Ayah widget works offline, remains stable for a local day, survives restart, resizes without clipping, and opens the exact Mushaf page.
 

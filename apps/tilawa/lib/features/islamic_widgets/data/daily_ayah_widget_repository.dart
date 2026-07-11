@@ -1,9 +1,10 @@
 import 'dart:convert';
 import 'dart:io';
 import 'dart:math';
+import 'dart:typed_data';
 import 'dart:ui' show Color;
 
-import 'package:flutter/services.dart' show rootBundle;
+import 'package:flutter/services.dart' show FontLoader, rootBundle;
 import 'package:path_provider/path_provider.dart';
 import 'package:quran_qcf/quran_qcf.dart';
 import 'package:shared_preferences/shared_preferences.dart';
@@ -24,16 +25,18 @@ import 'widget_snapshot_bridge.dart';
 /// the widget itself never needs a Dart isolate (FR-004/FR-005/FR-010).
 class DailyAyahWidgetRepository {
   DailyAyahWidgetRepository({
-    required this._fontService,
     required this._bridge,
     required this._prefs,
     this._selector = const DailyAyahSelector(),
     WidgetAyahArtifactRenderer? renderer,
     Future<String> Function(String key)? loadAsset,
     Future<Directory> Function()? artifactDirectory,
+    Future<Directory> Function()? documentsDirectory,
   }) : _renderer = renderer ?? WidgetAyahArtifactRenderer(),
        _loadAsset = loadAsset ?? rootBundle.loadString,
-       _artifactDirectory = artifactDirectory ?? _defaultArtifactDirectory;
+       _artifactDirectory = artifactDirectory ?? _defaultArtifactDirectory,
+       _documentsDirectory =
+           documentsDirectory ?? getApplicationDocumentsDirectory;
 
   static const String catalogAssetKey = 'assets/data/widget_daily_ayahs.json';
   static const String _seedPrefsKey = 'islamic_widget_ayah_rotation_seed';
@@ -46,13 +49,16 @@ class DailyAyahWidgetRepository {
   static const Color _lightThemeTextColor = Color(0xDE000000);
   static const Color _darkThemeTextColor = Color(0xF2FFFFFF);
 
-  final QuranFontService _fontService;
   final WidgetSnapshotBridge _bridge;
   final SharedPreferencesAsync _prefs;
   final DailyAyahSelector _selector;
   final WidgetAyahArtifactRenderer _renderer;
   final Future<String> Function(String key) _loadAsset;
   final Future<Directory> Function() _artifactDirectory;
+  final Future<Directory> Function() _documentsDirectory;
+
+  /// Families registered by this repository in the current process.
+  static final Set<String> _registeredFontFamilies = <String>{};
 
   static Future<Directory> _defaultArtifactDirectory() async {
     final Directory support = await getApplicationSupportDirectory();
@@ -69,8 +75,9 @@ class DailyAyahWidgetRepository {
       catalog: catalog,
     );
 
-    await _fontService.ensureSingleFontLoaded(ayah.pageNumber);
-    logger.d('[DailyAyahWidgetRepository] step=font_loaded p=${ayah.pageNumber}');
+    final String pageFamily =
+        'QCF_P${ayah.pageNumber.toString().padLeft(3, '0')}';
+    await _ensureFontRegistered(pageFamily);
     final String qcfText =
         getVerseQCF(
           ayah.surahNumber,
@@ -78,21 +85,16 @@ class DailyAyahWidgetRepository {
           verseEndSymbol: false,
         ) +
         getVerseNumberQCF(ayah.surahNumber, ayah.ayahNumber);
-    final String fontFamily =
-        'QCF_P${ayah.pageNumber.toString().padLeft(3, '0')}';
-    logger.d('[DailyAyahWidgetRepository] step=glyphs len=${qcfText.length}');
+    final String fontFamily = pageFamily;
 
     final Directory dir = await _artifactDirectory();
     if (!dir.existsSync()) {
       dir.createSync(recursive: true);
     }
-    logger.d('[DailyAyahWidgetRepository] step=dir ${dir.path}');
     final String lightPath = '${dir.path}/ayah_light.png';
     final String darkPath = '${dir.path}/ayah_dark.png';
     await _renderArtifact(qcfText, fontFamily, _lightThemeTextColor, lightPath);
-    logger.d('[DailyAyahWidgetRepository] step=render_light done');
     await _renderArtifact(qcfText, fontFamily, _darkThemeTextColor, darkPath);
-    logger.d('[DailyAyahWidgetRepository] step=render_dark done');
 
     final String dateKey = _dateKey(now);
     final AyahWidgetPayload payload = AyahWidgetPayload(
@@ -122,6 +124,54 @@ class DailyAyahWidgetRepository {
       '${ayah.surahNumber}:${ayah.ayahNumber} (page ${ayah.pageNumber})',
     );
     return payload;
+  }
+
+  /// Registers the page font directly from the downloaded QCF bundle.
+  ///
+  /// Deliberately bypasses `QuranFontService.ensureSingleFontLoaded`: awaiting
+  /// it from the deferred startup context never resumed (its internal load
+  /// completed and logged, but the caller-facing future stayed pending —
+  /// deadlocking the publish until its 45s timeout). Direct [FontLoader]
+  /// registration is self-contained and idempotent per process.
+  ///
+  /// File-name resolution mirrors `QuranFontService._resolvePageFontFamily`
+  /// (QCF4001_X-Regular.woff, QCF4_163.woff, 163.woff, p001.ttf …).
+  Future<void> _ensureFontRegistered(String family) async {
+    if (_registeredFontFamilies.contains(family)) return;
+    final Directory docs = await _documentsDirectory();
+    final Directory fontsDir = Directory('${docs.path}/qcf4_fonts');
+    if (!fontsDir.existsSync()) {
+      throw StateError('QCF fonts are not downloaded yet');
+    }
+    File? fontFile;
+    for (final FileSystemEntity entity in fontsDir.listSync()) {
+      if (entity is File && _familyForFontFile(entity.path) == family) {
+        fontFile = entity;
+        break;
+      }
+    }
+    if (fontFile == null) {
+      throw StateError('No downloaded font file resolves to $family');
+    }
+    final Uint8List bytes = fontFile.readAsBytesSync();
+    final FontLoader loader = FontLoader(family)
+      ..addFont(Future<ByteData>.value(ByteData.sublistView(bytes)));
+    await loader.load();
+    _registeredFontFamilies.add(family);
+  }
+
+  static String? _familyForFontFile(String path) {
+    final String filename = path.split('/').last;
+    final RegExpMatch? qcfMatch = RegExp(
+      r'QCF[34]_?(\d+)',
+    ).firstMatch(filename);
+    String? pageNumStr = qcfMatch?.group(1);
+    pageNumStr ??= RegExp(r'(\d+)\.[^.]+$').firstMatch(filename)?.group(1);
+    if (pageNumStr == null) return null;
+    if (pageNumStr.length > 3) {
+      pageNumStr = pageNumStr.substring(pageNumStr.length - 3);
+    }
+    return 'QCF_P${pageNumStr.padLeft(3, '0')}';
   }
 
   Future<void> _renderArtifact(

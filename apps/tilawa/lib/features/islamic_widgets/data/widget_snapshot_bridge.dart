@@ -26,9 +26,12 @@ class WidgetSnapshotBridge {
 
     final String jsonString = jsonEncode(jsonMap);
 
-    await _channel.invokeMethod<void>('updateIslamicWidgetSnapshot', <String, dynamic>{
-      'widgetType': envelope.widgetType.name,
-      'json': jsonString,
-    });
+    await _channel.invokeMethod<void>(
+      'updateIslamicWidgetSnapshot',
+      <String, dynamic>{
+        'widgetType': envelope.widgetType.name,
+        'json': jsonString,
+      },
+    );
   }
 }
