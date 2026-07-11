@@ -29,10 +29,10 @@ colors:
   on-error: "#FFFFFF"
 
   # Light surfaces (60-30-10)
-  canvas: "#F4F2EE"
+  canvas: "#F3F6F4"
   surface: "#FFFFFF"
   surface-container-high: "#F0F7F2"
-  surface-container-highest: "#EEEEEE"
+  surface-container-highest: "#DFE8E2"
   ink: "#1A2E24"
   body: "#1A2E24"
   mute: "#6B7F74"
@@ -156,7 +156,7 @@ Design system for **MeMuslim / أنا مسلم** (internal package name `tilawa`
 ## Visual theme and atmosphere
 
 - **Material 3** via **FlexColorScheme**, refined in `AppTheme` with palette from `AppColors`.
-- **Calm, content-first:** small palette, warm parchment canvas (`#F4F2EE`), white cards (`#FFFFFF`), one **green global accent** (`#1DAB61`) for CTAs and active chrome. No legacy purple. Brown/warm tones appear only as approved secondary micro-accents (gold featured cards, warm hero gradients, metadata browns) — never as a new primary.
+- **Calm, content-first:** small palette, porcelain-green canvas (`#F3F6F4`), white cards (`#FFFFFF`), one **green global accent** (`#1DAB61`) for CTAs and active chrome. No legacy purple. Brown/warm tones appear only as approved secondary micro-accents (gold featured cards, warm hero gradients, metadata browns) — never as a new primary.
 - **Not e-commerce / admin:** avoid dense data grids, heavy gradients on chrome, stacked shadows, or crowded multi-accent layouts.
 - **Readable Arabic:** `textHeightLoose` (2.0) for dense script; bundled **IBM Plex Sans Arabic** on all M3 roles.
 - **Comfortable density:** `FlexColorScheme.comfortablePlatformDensity` — not compact.
@@ -194,7 +194,7 @@ Dev/QA only (`TILAWA_SHOW_COLOR_PICKER=true`): coral, teal, sage, forest presets
 
 | Role | Hex | `ColorScheme` / API |
 |------|-----|-------------------|
-| Canvas / scaffold | `#F4F2EE` | `surfaceContainerLowest` |
+| Canvas / scaffold | `#F3F6F4` | `surfaceContainerLowest` |
 | Cards, sheets | `#FFFFFF` | `surface` |
 | Ink / onSurface | `#1A2E24` | `onSurface` |
 | Muted labels | `#6B7F74` | `onSurfaceVariant` |
@@ -454,7 +454,7 @@ Calm parchment surfaces; one green CTA per screen; no gold pay chrome; no worshi
 - Add purple, random accent colors, or e-commerce-style dense dashboards.
 - Use heavy gradients, excessive shadows, or primary-tinted catalog backgrounds.
 - Toast field validation errors.
-- Flatten scaffold to pure white — use warm canvas `#F4F2EE` so white cards lift.
+- Flatten scaffold to pure white — use porcelain canvas `#F3F6F4` so white cards lift.
 - Put support/donation UI on worship surfaces (reader, prayer, athkar).
 
 ---

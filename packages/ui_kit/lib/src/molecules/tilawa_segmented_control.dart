@@ -1,3 +1,5 @@
+import 'dart:math' as math;
+
 import 'package:flutter/material.dart';
 
 import '../foundation/component_tokens.dart';
@@ -75,6 +77,9 @@ class TilawaSegmentedControl<T> extends StatelessWidget {
     final TilawaSegmentedControlTokens tokens =
         theme.componentTokens.segmentedControl;
     final TextStyle? labelStyle = theme.textTheme.labelLarge;
+    final EdgeInsets containerPadding = tokens.containerPadding.resolve(
+      Directionality.of(context),
+    );
     final EdgeInsets itemPadding = tokens.itemPadding.resolve(
       Directionality.of(context),
     );
@@ -82,7 +87,25 @@ class TilawaSegmentedControl<T> extends StatelessWidget {
       context: context,
       style: labelStyle,
     );
-    return itemPadding.vertical + labelHeight;
+    return containerPadding.vertical +
+        _itemHeight(
+          itemPadding: itemPadding,
+          labelHeight: labelHeight,
+          containerPadding: containerPadding,
+        );
+  }
+
+  /// Segment height: label plus item padding, floored so the control's total
+  /// height (with container padding) meets the 48 dp interactive minimum.
+  static double _itemHeight({
+    required EdgeInsets itemPadding,
+    required double labelHeight,
+    required EdgeInsets containerPadding,
+  }) {
+    return math.max(
+      itemPadding.vertical + labelHeight,
+      kMeMuslimMinInteractiveDimension - containerPadding.vertical,
+    );
   }
 
   @override
@@ -101,16 +124,23 @@ class TilawaSegmentedControl<T> extends StatelessWidget {
         unselectedTextColor ?? colorScheme.onSurfaceVariant;
 
     final designTokens = theme.tokens;
+    final containerPadding = tokens.containerPadding.resolve(
+      Directionality.of(context),
+    );
     final itemPadding = tokens.itemPadding.resolve(Directionality.of(context));
     final labelStyle = theme.textTheme.labelLarge;
     final double labelHeight = tilawaMeasureTextHeight(
       context: context,
       style: labelStyle,
     );
-    final double itemHeight = itemPadding.vertical + labelHeight;
+    final double itemHeight = _itemHeight(
+      itemPadding: itemPadding,
+      labelHeight: labelHeight,
+      containerPadding: containerPadding,
+    );
     final defaultRadii = designTokens.resolveSegmentedControlRadii(
       itemHeight: itemHeight,
-      containerPadding: 0,
+      containerPadding: containerPadding.top,
     );
     final double effectiveContainerRadius =
         containerRadius ?? defaultRadii.containerRadius;
@@ -118,7 +148,7 @@ class TilawaSegmentedControl<T> extends StatelessWidget {
         itemRadius ??
         designTokens.concentricInner(
           outerRadius: effectiveContainerRadius,
-          padding: 0,
+          padding: containerPadding.top,
         );
 
     return DecoratedBox(
@@ -126,32 +156,36 @@ class TilawaSegmentedControl<T> extends StatelessWidget {
         color: effectiveBackground,
         borderRadius: BorderRadius.circular(effectiveContainerRadius),
       ),
-      child: Row(
-        spacing: tokens.itemSpacing,
-        children: segments.map((segment) {
-          final isSelected = segment.value == selectedValue;
-          final segmentEnabled = enabled && segment.enabled;
-          return Expanded(
-            child: _SegmentButton(
-              label: segment.label,
-              isSelected: isSelected,
-              onTap: () {
-                if (!segmentEnabled) return;
-                if (segment.value != selectedValue) {
-                  TilawaInteractionFeedback.trigger(TilawaHaptic.selection);
-                  onValueChanged(segment.value);
-                }
-              },
-              selectedBackgroundColor: effectiveSelectedColor,
-              selectedTextColor: effectiveSelectedTextColor,
-              unselectedTextColor: effectiveUnselectedTextColor,
-              tokens: tokens,
-              itemRadius: effectiveItemRadius,
-              enabled: segmentEnabled,
-              semanticsHint: segment.semanticsHint,
-            ),
-          );
-        }).toList(),
+      child: Padding(
+        padding: containerPadding,
+        child: Row(
+          spacing: tokens.itemSpacing,
+          children: segments.map((segment) {
+            final isSelected = segment.value == selectedValue;
+            final segmentEnabled = enabled && segment.enabled;
+            return Expanded(
+              child: _SegmentButton(
+                label: segment.label,
+                isSelected: isSelected,
+                onTap: () {
+                  if (!segmentEnabled) return;
+                  if (segment.value != selectedValue) {
+                    TilawaInteractionFeedback.trigger(TilawaHaptic.selection);
+                    onValueChanged(segment.value);
+                  }
+                },
+                selectedBackgroundColor: effectiveSelectedColor,
+                selectedTextColor: effectiveSelectedTextColor,
+                unselectedTextColor: effectiveUnselectedTextColor,
+                tokens: tokens,
+                itemRadius: effectiveItemRadius,
+                itemHeight: itemHeight,
+                enabled: segmentEnabled,
+                semanticsHint: segment.semanticsHint,
+              ),
+            );
+          }).toList(),
+        ),
       ),
     );
   }
@@ -194,6 +228,7 @@ class _SegmentButton extends StatelessWidget {
     required this.unselectedTextColor,
     required this.tokens,
     required this.itemRadius,
+    required this.itemHeight,
     required this.enabled,
     this.semanticsHint,
   });
@@ -206,6 +241,7 @@ class _SegmentButton extends StatelessWidget {
   final Color unselectedTextColor;
   final TilawaSegmentedControlTokens tokens;
   final double itemRadius;
+  final double itemHeight;
   final bool enabled;
   final String? semanticsHint;
 
@@ -233,26 +269,38 @@ class _SegmentButton extends StatelessWidget {
       // actually changes), so the surface stays silent to avoid a double tap.
       haptic: TilawaHaptic.none,
       borderRadius: itemBorderRadius,
-      child: DecoratedBox(
-        decoration: BoxDecoration(
-          color: isSelected ? selectedBackgroundColor : Colors.transparent,
-          borderRadius: itemBorderRadius,
-          boxShadow: isSelected
-              ? [
-                  BoxShadow(
-                    color: tokens.selectedItemShadowColor,
-                    blurRadius: tokens.selectedItemShadowBlur,
-                    offset: tokens.selectedItemShadowOffset,
-                  ),
-                ]
-              : null,
-        ),
-        child: Center(
-          child: Text(
-            label,
-            style: textStyle,
-            maxLines: 1,
-            overflow: TextOverflow.ellipsis,
+      child: SizedBox(
+        height: itemHeight,
+        child: DecoratedBox(
+          decoration: BoxDecoration(
+            color: isSelected ? selectedBackgroundColor : Colors.transparent,
+            borderRadius: itemBorderRadius,
+            boxShadow: isSelected
+                ? [
+                    BoxShadow(
+                      color: tokens.selectedItemShadowColor,
+                      blurRadius: tokens.selectedItemShadowBlur,
+                      offset: tokens.selectedItemShadowOffset,
+                    ),
+                  ]
+                : null,
+          ),
+          child: Padding(
+            padding: EdgeInsets.symmetric(
+              horizontal:
+                  tokens.itemPadding
+                      .resolve(Directionality.of(context))
+                      .horizontal /
+                  2,
+            ),
+            child: Center(
+              child: Text(
+                label,
+                style: textStyle,
+                maxLines: 1,
+                overflow: TextOverflow.ellipsis,
+              ),
+            ),
           ),
         ),
       ),

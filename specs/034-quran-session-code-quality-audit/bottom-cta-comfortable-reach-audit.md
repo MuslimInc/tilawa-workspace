@@ -50,7 +50,7 @@
 | R08 | Scroll body has trailing padding so last row is not hidden behind sticky footer. |
 | R09 | One obvious **primary** action per screen/sheet; secondaries are outline/text. |
 | R10 | Destructive confirm not adjacent equal-weight to dismiss without clear hierarchy (spec 015 / UX). |
-| R11 | Min 48 dp touch targets (`kTilawaMinInteractiveDimension` / `TilawaButton`). |
+| R11 | Min 48 dp touch targets (`kMeMuslimMinInteractiveDimension` / `TilawaButton`). |
 | R12 | Full-width primary on phone (`TilawaButton(isFullWidth: true)`). |
 | R13 | No `FloatingActionButton` for main booking CTA on long scroll profiles. |
 | R14 | Paired footer actions stack on narrow width (`TilawaBottomSheetActions` @ 360 dp). |

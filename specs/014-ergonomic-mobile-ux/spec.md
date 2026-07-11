@@ -7,7 +7,7 @@
 
 ## Intent
 
-The kit is already disciplined on the 48 dp hit-target floor: `kTilawaMinInteractiveDimension` is wired into `TilawaButton`, `TilawaChip`, `TilawaSelectionPill`, `TilawaSettingsTile`, `TilawaSearchField`, `TilawaIconActionButton`, the media-player transport tokens, and the seek bar's touch strip. Most controls route through Material widgets (`IconButton`, `ListTile`, `InkWell`, `Tooltip`, `Switch.adaptive`) so they pick up Material's hit-slop, ripple, and accessibility scaffolding for free.
+The kit is already disciplined on the 48 dp hit-target floor: `kMeMuslimMinInteractiveDimension` is wired into `TilawaButton`, `TilawaChip`, `TilawaSelectionPill`, `TilawaSettingsTile`, `TilawaSearchField`, `TilawaIconActionButton`, the media-player transport tokens, and the seek bar's touch strip. Most controls route through Material widgets (`IconButton`, `ListTile`, `InkWell`, `Tooltip`, `Switch.adaptive`) so they pick up Material's hit-slop, ripple, and accessibility scaffolding for free.
 
 The remaining ergonomic gaps are subtler:
 
@@ -38,14 +38,14 @@ As an app team migrating a screen to the kit, I want every kit-provided interact
 
 ### User Story 5 — Read accurate docs
 
-As a future contributor reading the kit's token comments to decide what size to pick for a new component, I want the doc-comments to match the values they describe. Today one component says "44 dp" while resolving to `kTilawaMinInteractiveDimension` (48 dp).
+As a future contributor reading the kit's token comments to decide what size to pick for a new component, I want the doc-comments to match the values they describe. Today one component says "44 dp" while resolving to `kMeMuslimMinInteractiveDimension` (48 dp).
 
 ## Requirements
 
 ### Functional
 
-- **FR-001**: Every kit-provided interactive widget guarantees a hit area of `kTilawaMinInteractiveDimension` (48 dp) on both axes *on its own*, without relying on a parent (e.g. `ListTile`, `ConstrainedBox`) to provide it. This applies in particular to `Switch.adaptive` usage inside `TilawaSettingsSwitchTile` and to any new `TilawaSwitch` / `TilawaCheckbox` atoms added by this spec.
-- **FR-002**: `TilawaIconActionButtonTokens.defaults` has its doc-comment updated so the documented size matches the resolved value. The constant `kTilawaMinInteractiveDimension` documents itself once as the single floor; per-component comments must not contradict it (no "44 dp" residue).
+- **FR-001**: Every kit-provided interactive widget guarantees a hit area of `kMeMuslimMinInteractiveDimension` (48 dp) on both axes *on its own*, without relying on a parent (e.g. `ListTile`, `ConstrainedBox`) to provide it. This applies in particular to `Switch.adaptive` usage inside `TilawaSettingsSwitchTile` and to any new `TilawaSwitch` / `TilawaCheckbox` atoms added by this spec.
+- **FR-002**: `TilawaIconActionButtonTokens.defaults` has its doc-comment updated so the documented size matches the resolved value. The constant `kMeMuslimMinInteractiveDimension` documents itself once as the single floor; per-component comments must not contradict it (no "44 dp" residue).
 - **FR-003**: `TilawaMediaPlayerBar` separates the "tap-anywhere-to-open-player" target from the inline transport buttons. Acceptable resolutions: (a) the outer `GestureDetector` declares its hit region as the artwork + title strip only, leaving transport icons un-wrapped; (b) the `IconButton` taps consume the gesture and prevent the bar-level `onTap` from also firing; (c) the bar-level `onTap` is moved to an explicit affordance (artwork tap, swipe-up, or a chevron). Whichever path is chosen, a tap on a transport `IconButton` must never *also* fire `onTap`.
 - **FR-004**: `TilawaMediaPlayerBar` exposes a "next" affordance in compact layout. When `useCompactControls == true`, the bar still renders the next-track `IconButton` (collapsing only previous + sleep timer). If artwork space must be saved, the bar may shrink the play-pause to its tokenised secondary size — but skip-forward must remain visible.
 - **FR-005**: `showTilawaModalBottomSheet` + `TilawaBottomSheetScaffold` provide at least one dismiss affordance reachable from the bottom of the screen. The decorative `TilawaSheetHandle` is upgraded into a drag-to-dismiss surface (a `GestureDetector` with `behavior: HitTestBehavior.opaque` and `onVerticalDragEnd` calling `Navigator.maybePop`), *or* `TilawaBottomSheetScaffold` gains an optional `trailingClose` slot in its title row that renders a tokenised close button. The top scrim is no longer the only dismiss path.

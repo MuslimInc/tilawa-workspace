@@ -7,7 +7,7 @@
 
 ## Doc-comment drift (FR-002)
 
-- [X] **T-001**: In [molecules_tokens.dart:285-286](../../packages/ui_kit/lib/src/foundation/component_tokens/molecules_tokens.dart#L285-L286), change `// Size = Tilawa hit-target floor (44 dp). At the floor; do not shrink further.` to read `48 dp`. The value beneath (`kTilawaMinInteractiveDimension`) already resolves to 48; this is a comment-only fix.
+- [X] **T-001**: In [molecules_tokens.dart:285-286](../../packages/ui_kit/lib/src/foundation/component_tokens/molecules_tokens.dart#L285-L286), change `// Size = Tilawa hit-target floor (44 dp). At the floor; do not shrink further.` to read `48 dp`. The value beneath (`kMeMuslimMinInteractiveDimension`) already resolves to 48; this is a comment-only fix.
 
 ## IconActionButton motion (FR-007)
 
@@ -16,7 +16,7 @@
 
 ## `HitTestBehavior.opaque` rule (FR-006)
 
-- [X] **T-020**: Add a dartdoc paragraph to `kTilawaMinInteractiveDimension` in [design_tokens.dart:1-18](../../packages/ui_kit/lib/src/foundation/design_tokens.dart#L1-L18) codifying the rule: every `GestureDetector` in the kit that wraps a visible interactive surface declares `behavior: HitTestBehavior.opaque`; bare detectors are reserved for non-visible regions (pan handlers, pan-to-dismiss).
+- [X] **T-020**: Add a dartdoc paragraph to `kMeMuslimMinInteractiveDimension` in [design_tokens.dart:1-18](../../packages/ui_kit/lib/src/foundation/design_tokens.dart#L1-L18) codifying the rule: every `GestureDetector` in the kit that wraps a visible interactive surface declares `behavior: HitTestBehavior.opaque`; bare detectors are reserved for non-visible regions (pan handlers, pan-to-dismiss).
 - [X] **T-021**: Add a contract test that greps `packages/ui_kit/lib/src/` for `GestureDetector(` call sites and asserts the allow-list is exactly: `tilawa_media_player_bar.dart`, `alphabet_scrollbar.dart` (two sites), `immersive_composer_scaffold.dart`. Test file: `test/foundation/kit_contracts_test.dart`. Failure message should point future contributors at this spec.
 
 ## Verification

@@ -61,11 +61,11 @@ switch ON. **Not** for scaffold fills (use the neutral canvas).
 
 ### Light neutral ramp (warm near-white canvas + white cards)
 
-60-30-10: canvas ~60% (`lightCanvas`), elevated surfaces ~30% (`lightSurface`, chips), accent ~10% (`primary`). Scaffold stays warm near-white — not pure white.
+60-30-10: canvas ~60% (`lightCanvas`), elevated surfaces ~30% (`lightSurface`, chips), accent ~10% (`primary`). Scaffold stays porcelain-green near-white — not pure white.
 
 | `AppColors` | Hex | `ColorScheme` / usage |
 |-------------|-----|------------------------|
-| `lightCanvas` / `lightBackground` | `#F4F2EE` | Scaffold, `surfaceContainerLowest` |
+| `lightCanvas` / `lightBackground` | `#F3F6F4` | Scaffold, `surfaceContainerLowest` |
 | `lightSurface` | `#FFFFFF` | Cards, sheets, dialogs |
 | `lightInk` | `#1A2E24` | `onSurface` |
 | `lightMute` | `#6B7F74` | Muted labels (`onSurfaceVariant`) |
