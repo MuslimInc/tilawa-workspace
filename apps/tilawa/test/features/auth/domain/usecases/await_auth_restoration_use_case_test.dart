@@ -34,16 +34,19 @@ void main() {
   });
 
   test(
-    'unauthenticated without waiting when no persisted hint and no user',
+    'unauthenticated on the first null emission when no persisted hint',
     () async {
       when(() => mockAuthRepository.currentUser).thenReturn(null);
+      when(() => mockAuthRepository.authStateChanges).thenAnswer(
+        (_) => Stream<UserEntity?>.value(null),
+      );
 
       final outcome = await useCase();
 
       expect(outcome, AuthRestorationOutcome.unauthenticated);
-      // No hint → must not stall the login path on a stream that never
-      // carries a user.
-      verifyNever(() => mockAuthRepository.authStateChanges);
+      // No hint → the first determined emission is authoritative; the login
+      // path is not stalled waiting for a non-null user.
+      verify(() => mockAuthRepository.authStateChanges).called(1);
     },
   );
 

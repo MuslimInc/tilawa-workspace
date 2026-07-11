@@ -46,52 +46,42 @@ class AwaitAuthRestorationUseCase {
       return AuthRestorationOutcome.restored;
     }
 
-    // No persisted user was ever recorded for this install → genuinely logged
-    // out. Do not stall the login path waiting for an emission that never
-    // carries a user.
-    if (sessionUser == null) {
-      _log(source: 'startup-check', outcome: 'unauthenticated', signedIn: false);
-      return AuthRestorationOutcome.unauthenticated;
+    // Always consult the restoration stream so routing waits for a definitive
+    // auth result. When a persisted user is expected ([sessionUser] hint), skip
+    // FlutterFire's premature `null` and wait for the first *non-null* emission;
+    // otherwise the first determined emission is authoritative.
+    final bool expectsUser = sessionUser != null;
+    String reason = 'first-emission';
+    try {
+      if (expectsUser) {
+        await _authRepository.authStateChanges
+            .firstWhere((UserEntity? user) => user != null)
+            .timeout(startupTimeout);
+      } else {
+        await _authRepository.authStateChanges.first.timeout(startupTimeout);
+      }
+    } on TimeoutException {
+      reason = 'timeout';
+    } catch (_) {
+      // Stream closed before a matching emission (empty/closed controller).
+      reason = 'stream-closed';
     }
 
-    try {
-      final UserEntity? restored = await _authRepository.authStateChanges
-          .firstWhere((UserEntity? user) => user != null)
-          .timeout(startupTimeout);
-      final bool signedIn = restored != null || _authRepository.currentUser != null;
-      _log(
-        source: 'firebase-listener',
-        outcome: signedIn ? 'restored' : 'pendingUnresolved',
-        signedIn: signedIn,
-      );
-      return signedIn
-          ? AuthRestorationOutcome.restored
-          : AuthRestorationOutcome.pendingUnresolved;
-    } on TimeoutException {
-      final bool signedIn = _authRepository.currentUser != null;
-      _log(
-        source: 'firebase-listener',
-        outcome: signedIn ? 'restored' : 'pendingUnresolved',
-        signedIn: signedIn,
-        reason: 'timeout',
-      );
-      return signedIn
-          ? AuthRestorationOutcome.restored
-          : AuthRestorationOutcome.pendingUnresolved;
-    } catch (_) {
-      // Stream closed without a non-null emission. Treat as unresolved (not a
-      // logout) because a hint said a user should exist.
-      final bool signedIn = _authRepository.currentUser != null;
-      _log(
-        source: 'firebase-listener',
-        outcome: signedIn ? 'restored' : 'pendingUnresolved',
-        signedIn: signedIn,
-        reason: 'stream-closed',
-      );
-      return signedIn
-          ? AuthRestorationOutcome.restored
-          : AuthRestorationOutcome.pendingUnresolved;
-    }
+    final bool signedIn = _authRepository.currentUser != null;
+    final AuthRestorationOutcome outcome = signedIn
+        ? AuthRestorationOutcome.restored
+        // A hint said a user should exist but restoration did not surface one:
+        // presume the session is intact (unresolved), never a confirmed logout.
+        : expectsUser
+        ? AuthRestorationOutcome.pendingUnresolved
+        : AuthRestorationOutcome.unauthenticated;
+    _log(
+      source: 'firebase-listener',
+      outcome: outcome.name,
+      signedIn: signedIn,
+      reason: reason,
+    );
+    return outcome;
   }
 
   void _log({
