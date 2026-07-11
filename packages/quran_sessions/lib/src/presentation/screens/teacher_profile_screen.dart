@@ -6,17 +6,17 @@ import 'package:tilawa_ui_kit/tilawa_ui_kit.dart';
 import '../../domain/entities/booking_block_reason.dart';
 import '../../domain/entities/quran_teacher.dart';
 import '../../domain/entities/session_call_type.dart';
-import '../../domain/policies/session_mode_policy.dart';
 import '../../domain/entities/session_pricing_quote.dart';
 import '../../domain/entities/session_review.dart';
 import '../../domain/entities/teacher_availability.dart';
+import '../../domain/policies/session_mode_policy.dart';
 import '../../domain/value_objects/teacher_public_name.dart';
-import '../config/quran_sessions_analytics_callbacks.dart';
-import '../failure_ui/quran_sessions_failure_ui.dart';
-import '../launch_scope.dart';
 import '../blocs/teacher_profile/teacher_profile_bloc.dart';
 import '../blocs/teacher_profile/teacher_profile_event.dart';
 import '../blocs/teacher_profile/teacher_profile_state.dart';
+import '../config/quran_sessions_analytics_callbacks.dart';
+import '../failure_ui/quran_sessions_failure_ui.dart';
+import '../launch_scope.dart';
 import '../theme/quran_sessions_status_colors.dart';
 import '../widgets/availability_slot_picker.dart';
 import '../widgets/booking_block_notice.dart';
@@ -245,7 +245,7 @@ class _TeacherProfileUnavailableBody extends StatelessWidget {
   }
 }
 
-class _TeacherProfileBody extends StatefulWidget {
+class _TeacherProfileBody extends StatelessWidget {
   const _TeacherProfileBody({
     required this.teacher,
     required this.availability,
@@ -275,19 +275,16 @@ class _TeacherProfileBody extends StatefulWidget {
   final SessionPricingQuote? pricingQuote;
 
   @override
-  State<_TeacherProfileBody> createState() => _TeacherProfileBodyState();
-}
-
-class _TeacherProfileBodyState extends State<_TeacherProfileBody> {
-  @override
   Widget build(BuildContext context) {
     final l10n = context.quranSessionsL10n;
     final theme = Theme.of(context);
     final scheme = theme.colorScheme;
     final status = context.quranSessionsStatus;
     final tokens = Theme.of(context).tokens;
-    final displayName = widget.teacher.displayName.trim();
-    final bio = widget.teacher.bio.trim();
+    final displayName = teacher.displayName.trim();
+    final bio = teacher.bio.trim();
+    final isBlocked =
+        pricingQuote != null && _isNonTransientBlock(pricingQuote!.blockReason);
 
     return ListView(
       padding: EdgeInsets.symmetric(
@@ -302,7 +299,7 @@ class _TeacherProfileBodyState extends State<_TeacherProfileBody> {
               TeacherInitialsAvatar(
                 displayName: displayName,
                 radius: tokens.iconSizeLarge,
-                avatarUrl: widget.teacher.avatarUrl,
+                avatarUrl: teacher.avatarUrl,
               ),
               SizedBox(height: tokens.spaceSmall),
               Text(
@@ -315,7 +312,7 @@ class _TeacherProfileBodyState extends State<_TeacherProfileBody> {
                 maxLines: 2,
                 overflow: TextOverflow.ellipsis,
               ),
-              if (widget.teacher.isVerified) ...[
+              if (teacher.isVerified) ...[
                 SizedBox(height: tokens.spaceExtraSmall),
                 Center(
                   child: TilawaVerifiedTeacherBadge(
@@ -325,11 +322,11 @@ class _TeacherProfileBodyState extends State<_TeacherProfileBody> {
               ],
               SizedBox(height: tokens.spaceExtraSmall),
               _TeacherProfileRatingRow(
-                rating: widget.teacher.averageRating,
-                reviewsCount: widget.teacher.totalReviews,
+                rating: teacher.averageRating,
+                reviewsCount: teacher.totalReviews,
               ),
               SizedBox(height: tokens.spaceSmall),
-              TeacherDiscoveryDetails(teacher: widget.teacher),
+              TeacherDiscoveryDetails(teacher: teacher),
               SizedBox(height: tokens.spaceExtraSmall),
               SingleChildScrollView(
                 scrollDirection: Axis.horizontal,
@@ -337,19 +334,19 @@ class _TeacherProfileBodyState extends State<_TeacherProfileBody> {
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: [
                     QuranSessionPriceChip(
-                      teacher: widget.teacher,
-                      pricing: widget.pricingQuote,
+                      teacher: teacher,
+                      pricing: pricingQuote,
                     ),
-                    for (final code in widget.teacher.specializations) ...[
+                    for (final code in teacher.specializations) ...[
                       SizedBox(width: tokens.spaceExtraSmall),
                       TilawaMetadataChip(
                         label: l10n.specializationLabel(code),
                       ),
                     ],
-                    if (widget.sessionModePolicy.isEnabled(
+                    if (sessionModePolicy.isEnabled(
                           SessionCallType.externalMeeting,
                         ) &&
-                        widget.teacher.supportedCallTypes.contains(
+                        teacher.supportedCallTypes.contains(
                           SessionCallType.externalMeeting,
                         )) ...[
                       SizedBox(width: tokens.spaceExtraSmall),
@@ -363,126 +360,124 @@ class _TeacherProfileBodyState extends State<_TeacherProfileBody> {
             ],
           ),
         ),
-        if (widget.teacher.manualPaymentPrice case final manualPrice?) ...[
+        if (teacher.manualPaymentPrice case final manualPrice?) ...[
           SizedBox(height: tokens.spaceSmall),
           PaidSessionNotice(price: manualPrice),
         ],
-        if (widget.pricingQuote != null &&
-            _isNonTransientBlock(
-              widget.pricingQuote!.blockReason,
-            )) ...[
+        if (isBlocked) ...[
           SizedBox(height: tokens.spaceSmall),
           BookingBlockNotice(
-            blockReason: widget.pricingQuote!.blockReason,
+            blockReason: pricingQuote!.blockReason,
           ),
-        ],
-        if (bio.isNotEmpty) ...[
+        ] else ...[
+          if (bio.isNotEmpty) ...[
+            SizedBox(height: tokens.spaceSmall),
+            QuranSessionsSectionHeader(title: l10n.aboutTeacherSection),
+            SizedBox(height: tokens.spaceExtraSmall),
+            TilawaCard(
+              padding: EdgeInsets.all(tokens.spaceSmall),
+              child: Text(
+                bio,
+                style: theme.textTheme.bodyMedium?.copyWith(
+                  color: scheme.onSurfaceVariant,
+                  height: 1.35,
+                ),
+              ),
+            ),
+          ],
           SizedBox(height: tokens.spaceSmall),
-          QuranSessionsSectionHeader(title: l10n.aboutTeacherSection),
+          TeacherCredentialsSection(credentials: teacher.credentials),
+          SizedBox(height: tokens.spaceSmall),
+          QuranSessionsSectionHeader(
+            title: l10n.availableSlots,
+            trailing: isLoadingAvailability
+                ? const SizedBox(
+                    width: 16,
+                    height: 16,
+                    child: CircularProgressIndicator(strokeWidth: 2),
+                  )
+                : null,
+          ),
           SizedBox(height: tokens.spaceExtraSmall),
           TilawaCard(
             padding: EdgeInsets.all(tokens.spaceSmall),
-            child: Text(
-              bio,
-              style: theme.textTheme.bodyMedium?.copyWith(
-                color: scheme.onSurfaceVariant,
-                height: 1.35,
-              ),
-            ),
-          ),
-        ],
-        SizedBox(height: tokens.spaceSmall),
-        TeacherCredentialsSection(credentials: widget.teacher.credentials),
-        SizedBox(height: tokens.spaceSmall),
-        QuranSessionsSectionHeader(
-          title: l10n.availableSlots,
-          trailing: widget.isLoadingAvailability
-              ? const SizedBox(
-                  width: 16,
-                  height: 16,
-                  child: CircularProgressIndicator(strokeWidth: 2),
-                )
-              : null,
-        ),
-        SizedBox(height: tokens.spaceExtraSmall),
-        TilawaCard(
-          padding: EdgeInsets.all(tokens.spaceSmall),
-          child: widget.availability.isEmpty && !widget.isLoadingAvailability
-              ? Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(
-                      l10n.noAvailabilityYet,
-                      style: theme.textTheme.titleSmall?.copyWith(
-                        fontWeight: FontWeight.w600,
-                        color: scheme.onSurface,
+            child: availability.isEmpty && !isLoadingAvailability
+                ? Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        l10n.noAvailabilityYet,
+                        style: theme.textTheme.titleSmall?.copyWith(
+                          fontWeight: FontWeight.w600,
+                          color: scheme.onSurface,
+                        ),
                       ),
-                    ),
-                    SizedBox(height: tokens.spaceExtraSmall),
-                    Text(
-                      l10n.noAvailabilityHelper,
-                      style: theme.textTheme.bodySmall?.copyWith(
-                        color: scheme.onSurfaceVariant,
-                        height: 1.3,
+                      SizedBox(height: tokens.spaceExtraSmall),
+                      Text(
+                        l10n.noAvailabilityHelper,
+                        style: theme.textTheme.bodySmall?.copyWith(
+                          color: scheme.onSurfaceVariant,
+                          height: 1.3,
+                        ),
                       ),
-                    ),
-                  ],
-                )
-              : AvailabilitySlotPicker(
-                  slots: widget.availability,
-                  selectedSlotId: widget.selectedSlotId,
-                  onSlotSelected: (slot) {
-                    widget.onSlotSelected?.call(slot.slotId);
-                  },
-                ),
-        ),
-        SizedBox(height: tokens.spaceSmall),
-        QuranSessionsSectionHeader(title: l10n.reviewsSection),
-        SizedBox(height: tokens.spaceExtraSmall),
-        TilawaCard(
-          padding: EdgeInsets.all(tokens.spaceSmall),
-          child: widget.reviews.isEmpty
-              ? Text(
-                  l10n.noReviewsYet,
-                  style: theme.textTheme.bodySmall?.copyWith(
-                    color: scheme.onSurfaceVariant,
-                    height: 1.3,
+                    ],
+                  )
+                : AvailabilitySlotPicker(
+                    slots: availability,
+                    selectedSlotId: selectedSlotId,
+                    onSlotSelected: (slot) {
+                      onSlotSelected?.call(slot.slotId);
+                    },
                   ),
-                )
-              : Column(
-                  children: widget.reviews
-                      .map(
-                        (r) => Padding(
-                          padding: EdgeInsets.only(
-                            bottom: tokens.spaceExtraSmall,
-                          ),
-                          child: Row(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              Text(
-                                '${r.rating}★',
-                                style: theme.textTheme.labelMedium?.copyWith(
-                                  fontWeight: FontWeight.w600,
-                                  color: status.rating,
-                                ),
-                              ),
-                              SizedBox(width: tokens.spaceSmall),
-                              Expanded(
-                                child: Text(
-                                  r.comment ?? '',
-                                  style: theme.textTheme.bodySmall?.copyWith(
-                                    color: scheme.onSurfaceVariant,
-                                    height: 1.3,
+          ),
+          SizedBox(height: tokens.spaceSmall),
+          QuranSessionsSectionHeader(title: l10n.reviewsSection),
+          SizedBox(height: tokens.spaceExtraSmall),
+          TilawaCard(
+            padding: EdgeInsets.all(tokens.spaceSmall),
+            child: reviews.isEmpty
+                ? Text(
+                    l10n.noReviewsYet,
+                    style: theme.textTheme.bodySmall?.copyWith(
+                      color: scheme.onSurfaceVariant,
+                      height: 1.3,
+                    ),
+                  )
+                : Column(
+                    children: reviews
+                        .map(
+                          (r) => Padding(
+                            padding: EdgeInsets.only(
+                              bottom: tokens.spaceExtraSmall,
+                            ),
+                            child: Row(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                Text(
+                                  '${r.rating}★',
+                                  style: theme.textTheme.labelMedium?.copyWith(
+                                    fontWeight: FontWeight.w600,
+                                    color: status.rating,
                                   ),
                                 ),
-                              ),
-                            ],
+                                SizedBox(width: tokens.spaceSmall),
+                                Expanded(
+                                  child: Text(
+                                    r.comment ?? '',
+                                    style: theme.textTheme.bodySmall?.copyWith(
+                                      color: scheme.onSurfaceVariant,
+                                      height: 1.3,
+                                    ),
+                                  ),
+                                ),
+                              ],
+                            ),
                           ),
-                        ),
-                      )
-                      .toList(),
-                ),
-        ),
+                        )
+                        .toList(),
+                  ),
+          ),
+        ],
         SizedBox(height: tokens.spaceExtraLarge * 2),
       ],
     );
