@@ -260,4 +260,3 @@
 ### Format Validation
 
 All implementation checklist items use `- [ ] T### [P?] [US?] Description with path`; setup/foundation/release tasks intentionally omit story labels, and every user-story task includes its story label.
-

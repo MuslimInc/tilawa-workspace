@@ -1,5 +1,27 @@
 # Quickstart Validation: Quran Learning Packages
 
+## Implementation Baseline — 2026-07-11
+
+Phase 1 stopped before package code because the existing Functions unit suite
+is not green on the feature branch baseline:
+
+```text
+npm test → 436 tests; 428 pass; 8 fail
+```
+
+The failures are outside the package feature:
+
+- Six legacy FCM-token tests build user-document-only Firestore fakes, while
+  multi-device login now defaults on and the production token service reads the
+  `users/{uid}/devices` subcollection.
+- Two legacy session-epoch tests expect stale/missing epochs to fail, while
+  multi-device login now defaults on and intentionally bypasses epoch checks.
+
+No package implementation files existed when this baseline ran. Continue Phase
+1 only after the owning auth/device work either makes those tests explicitly
+select legacy mode or confirms another intended baseline. Do not weaken package
+tests or production behavior to compensate for this unrelated failure.
+
 ## Preconditions
 
 - Use Firebase emulators or the designated staging project, never production for initial validation.
@@ -84,4 +106,3 @@ npm run build
 
 - Record dated automated outputs, staging project/version, tester accounts/roles, device matrix, App Check results, payment aging, reconciliation, rollback duration, legal/privacy approvals, and named GO owners.
 - Stop promotion on any P0 financial/credit/child-safety defect, reconciliation mismatch, unauthorized access, or rollback failure.
-
