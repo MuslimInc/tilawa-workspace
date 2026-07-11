@@ -221,12 +221,14 @@ class _DeviceRow extends StatelessWidget {
     return TilawaCard(
       child: Row(
         crossAxisAlignment: CrossAxisAlignment.center,
+        spacing: tokens.spaceSmall,
+        mainAxisSize: .min,
         children: [
           Icon(_platformIcon, color: scheme.primary),
-          SizedBox(width: tokens.spaceMedium),
           Expanded(
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
+              spacing: tokens.spaceExtraSmall,
               children: [
                 Text(
                   label,
@@ -234,9 +236,10 @@ class _DeviceRow extends StatelessWidget {
                   overflow: TextOverflow.ellipsis,
                   style: theme.textTheme.titleSmall,
                 ),
-                SizedBox(height: tokens.spaceExtraSmall),
                 Text(
                   _statusLine(context, l10n),
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
                   style: theme.textTheme.bodySmall?.copyWith(
                     color: device.isRevoked
                         ? scheme.error
@@ -246,7 +249,6 @@ class _DeviceRow extends StatelessWidget {
               ],
             ),
           ),
-          SizedBox(width: tokens.spaceSmall),
           _trailing(context, l10n),
         ],
       ),

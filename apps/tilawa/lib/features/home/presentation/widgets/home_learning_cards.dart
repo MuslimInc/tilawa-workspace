@@ -237,7 +237,7 @@ class _HomeLearningNextSessionCardState
         QuranSessionsMvpStore.instance.resolveTeacherName(
           widget.session.teacherId,
         ) ??
-        widget.session.teacherId;
+        context.quranSessionsL10n.quranTeacherFallbackName;
 
     return HomeDashboardCard(
       surface: TilawaCardSurface.raised,
@@ -367,7 +367,7 @@ class HomeLearningPendingBookingCard extends StatelessWidget {
 
     final tutorName =
         QuranSessionsMvpStore.instance.resolveTeacherName(session.teacherId) ??
-        session.teacherId;
+        context.quranSessionsL10n.quranTeacherFallbackName;
 
     final isPendingPayment =
         session.effectiveLifecycleStatus ==

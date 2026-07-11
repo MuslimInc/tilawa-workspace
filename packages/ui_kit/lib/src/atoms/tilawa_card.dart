@@ -14,6 +14,13 @@ enum TilawaCardSurface {
   /// Default top-level card on a scaffold background.
   raised,
 
+  /// Solid `surface` colour with a hairline outline and the deeper
+  /// [MeMuslimElevationX.elevationFloating] shadow tier.
+  ///
+  /// Reserved for the one surface per screen that floats above the
+  /// dashboard — e.g. the Home prayer hero. Everything else stays [raised].
+  floating,
+
   /// Solid `surface` colour with a hairline outline and **no** shadow.
   ///
   /// Use when the card is nested inside another elevated container
@@ -109,7 +116,12 @@ class TilawaCard extends StatelessWidget {
     );
 
     final bool isOutline = surface == TilawaCardSurface.outline;
-    final bool hasShadow = surface == TilawaCardSurface.raised;
+    final bool hasShadow =
+        surface == TilawaCardSurface.raised ||
+        surface == TilawaCardSurface.floating;
+    final List<BoxShadow> shadows = surface == TilawaCardSurface.floating
+        ? designTokens.elevationFloating(colorScheme.shadow)
+        : designTokens.elevationRaised(colorScheme.shadow);
 
     final Color resolvedFill = isOutline
         ? Colors.transparent
@@ -143,8 +155,7 @@ class TilawaCard extends StatelessWidget {
       surfaceWidget = hasShadow
           ? _TilawaCardShadow(
               borderRadius: borderRadiusValue,
-              designTokens: designTokens,
-              colorScheme: colorScheme,
+              shadows: shadows,
               child: cardBody,
             )
           : cardBody;
@@ -164,8 +175,7 @@ class TilawaCard extends StatelessWidget {
       surfaceWidget = hasShadow
           ? _TilawaCardShadow(
               borderRadius: borderRadiusValue,
-              designTokens: designTokens,
-              colorScheme: colorScheme,
+              shadows: shadows,
               child: interactiveCore,
             )
           : interactiveCore;
@@ -182,14 +192,12 @@ class TilawaCard extends StatelessWidget {
 class _TilawaCardShadow extends StatelessWidget {
   const _TilawaCardShadow({
     required this.borderRadius,
-    required this.designTokens,
-    required this.colorScheme,
+    required this.shadows,
     required this.child,
   });
 
   final BorderRadius borderRadius;
-  final MeMuslimDesignTokens designTokens;
-  final ColorScheme colorScheme;
+  final List<BoxShadow> shadows;
   final Widget child;
 
   @override
@@ -197,15 +205,7 @@ class _TilawaCardShadow extends StatelessWidget {
     return DecoratedBox(
       decoration: BoxDecoration(
         borderRadius: borderRadius,
-        boxShadow: [
-          BoxShadow(
-            color: colorScheme.shadow.withValues(
-              alpha: designTokens.opacityShadow,
-            ),
-            blurRadius: designTokens.blurShadow,
-            offset: designTokens.shadowOffsetMedium,
-          ),
-        ],
+        boxShadow: shadows,
       ),
       child: child,
     );

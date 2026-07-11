@@ -186,7 +186,7 @@ class _HomeNextPrayerTimeCard extends StatelessWidget {
       button: !showFailure && !showFullSkeleton,
       label: context.l10n.nextPrayer,
       child: HomeDashboardCard(
-        surface: TilawaCardSurface.raised,
+        surface: TilawaCardSurface.floating,
         padding: EdgeInsets.all(tokens.spaceLarge),
         onTap: showFailure || showFullSkeleton ? null : onOpenPrayer,
         child: showFullSkeleton

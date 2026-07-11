@@ -563,15 +563,7 @@ class _CapabilityActionCardFrame extends StatelessWidget {
       child: DecoratedBox(
         decoration: BoxDecoration(
           borderRadius: borderRadius,
-          boxShadow: [
-            BoxShadow(
-              color: colorScheme.shadow.withValues(
-                alpha: designTokens.opacityShadow,
-              ),
-              blurRadius: designTokens.blurShadow,
-              offset: designTokens.shadowOffsetMedium,
-            ),
-          ],
+          boxShadow: designTokens.elevationRaised(colorScheme.shadow),
         ),
         child: surface,
       ),

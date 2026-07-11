@@ -98,12 +98,28 @@ lifted in the same hue family for WCAG 3:1 on green-tinted surfaces.
 
 ### Depth and touch (`MeMuslimDesignTokens`)
 
+**Layered elevation (added 2026-07-11):** raised surfaces take a
+`MeMuslimElevationX` tier — a tight *contact* shadow plus a soft *ambient*
+bloom, tinted with `ColorScheme.shadow` (brand ink, not gray). Do not
+hand-roll `BoxShadow` lists on new surfaces.
+
+| Tier | Layers (alpha / blur / y-offset) | Use |
+|------|----------------------------------|-----|
+| `elevationRaised(colorScheme.shadow)` | 0.05 / 3 / 1 + 0.07 / 24 / 10 | Resting cards — `TilawaCard` raised, settings group panels, capability action cards |
+| `elevationFloating(colorScheme.shadow)` | 0.06 / 6 / 2 + 0.11 / 32 / 14 | Floating chrome — hero summaries, pinned bars, dialogs |
+
+Every shadow value (legacy and tiers) scales with `kElevationMultiplier`
+(currently `1.0`) — a single device-tuning knob; safe range ≈ 0.8–1.3.
+
+Legacy single-shadow tokens stay for existing chrome (search field, collapsed
+header); prefer the tiers for new work:
+
 | Token | Value | Use |
 |-------|-------|-----|
-| `opacityShadow` | 0.04 | Raised cards, chips |
-| `opacityShadowStrong` | 0.08 | Floating chrome (nav, player) |
-| `shadowOffsetSmall` / `shadowOffsetMedium` | `(0, 1)` / `(0, 2)` | Shadow offsets |
-| `blurShadow` | 8 | Shadow blur |
+| `opacityShadow` | 0.04 | Legacy single shadow on raised chips |
+| `opacityShadowStrong` | 0.08 | Legacy floating chrome (nav, player) |
+| `shadowOffsetSmall` / `shadowOffsetMedium` | `(0, 1.5)` / `(0, 3)` | Legacy shadow offsets |
+| `blurShadow` | 12 | Legacy shadow blur |
 | `borderWidthThin` | 0.5 | Hairlines |
 | `minInteractiveDimension` | 48 dp | Minimum hit target (`kMeMuslimMinInteractiveDimension`) |
 

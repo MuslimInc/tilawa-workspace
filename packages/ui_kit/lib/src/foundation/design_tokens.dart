@@ -997,3 +997,51 @@ extension MeMuslimSegmentedRadiusX on MeMuslimDesignTokens {
     return (containerRadius: containerRadius, itemRadius: itemRadius);
   }
 }
+
+/// Layered elevation — the kit's premium depth language.
+///
+/// A single soft shadow at 4% alpha disappears on the near-white canvas and
+/// the UI reads flat. Depth that reads as intentional pairs a tight
+/// **contact** shadow (grounds the surface at its edge) with a wide, soft
+/// **ambient** bloom (lifts it off the canvas). Pass [ColorScheme.shadow] as
+/// `tint` so depth stays in the brand ink family instead of photocopier
+/// gray; each tier owns its alphas via `withValues`.
+///
+/// Tiers:
+/// - [elevationRaised] — resting content surfaces ([TilawaCard] raised,
+///   settings group panels, capability action cards).
+/// - [elevationFloating] — chrome floating above content (hero summaries,
+///   pinned bars, dialogs, FAB-adjacent panels).
+///
+/// All values scale with [kElevationMultiplier].
+extension MeMuslimElevationX on MeMuslimDesignTokens {
+  /// Soft two-layer shadow for resting cards on the scaffold canvas.
+  List<BoxShadow> elevationRaised(Color tint) => <BoxShadow>[
+    BoxShadow(
+      color: tint.withValues(alpha: 0.05 * kElevationMultiplier),
+      blurRadius: 3.0 * kElevationMultiplier,
+      offset: const Offset(0, 1.0 * kElevationMultiplier),
+    ),
+    BoxShadow(
+      color: tint.withValues(alpha: 0.07 * kElevationMultiplier),
+      blurRadius: 24.0 * kElevationMultiplier,
+      spreadRadius: -2.0,
+      offset: const Offset(0, 10.0 * kElevationMultiplier),
+    ),
+  ];
+
+  /// Deeper two-layer shadow for chrome floating above content.
+  List<BoxShadow> elevationFloating(Color tint) => <BoxShadow>[
+    BoxShadow(
+      color: tint.withValues(alpha: 0.06 * kElevationMultiplier),
+      blurRadius: 6.0 * kElevationMultiplier,
+      offset: const Offset(0, 2.0 * kElevationMultiplier),
+    ),
+    BoxShadow(
+      color: tint.withValues(alpha: 0.11 * kElevationMultiplier),
+      blurRadius: 32.0 * kElevationMultiplier,
+      spreadRadius: -4.0,
+      offset: const Offset(0, 14.0 * kElevationMultiplier),
+    ),
+  ];
+}
