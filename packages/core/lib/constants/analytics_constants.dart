@@ -128,6 +128,12 @@ class AnalyticsEvents {
   static const String weeklyTemplateSaved = 'weekly_template_saved';
   static const String bookingLostDueToNoAvailability =
       'booking_lost_due_to_no_availability';
+
+  // Islamic Widgets
+  static const String widgetAdded = 'widget_added';
+  static const String widgetRemoved = 'widget_removed';
+  static const String widgetTapped = 'widget_tapped';
+  static const String widgetSnapshotGenerated = 'widget_snapshot_generated';
 }
 
 class AnalyticsParams {
@@ -200,6 +206,11 @@ class AnalyticsParams {
   static const String contentType = 'content_type';
   static const String itemType = 'item_type';
   static const String ratingValue = 'rating';
+
+  // Widgets
+  static const String widgetType = 'widget_type';
+  static const String widgetSizeClass = 'widget_size_class';
+  static const String widgetAction = 'widget_action';
 
   // Screens
   static const String reciterDetailsScreen = 'ReciterDetailsScreen';

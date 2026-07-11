@@ -19,16 +19,24 @@ description: "Implementation tasks for the Islamic home-screen widget suite"
 - [x] T003 [US1] Add Arabic/English resources and compact prayer layout in `apps/tilawa/android/app/src/main/res/`
 - [x] T004 [US1] Add native prayer widget contract tests in `apps/tilawa/android/app/src/test/kotlin/com/tilawa/app/prayer/widget/`
 
+## Phase 1.5: P1 Gap Fill (Prayer Widget Requirements)
+
+**Purpose**: Fulfill missing functional requirements for the Prayer Widget (US1).
+
+- [x] T004a [US1] Add expanded size layout and responsive scaling for Prayer widget to meet FR-009 in `apps/tilawa/android/app/src/main/res/`
+- [x] T004b [US1] Add non-color visual distinction (e.g. icon/weight) for the next prayer to meet FR-017 in `PrayerTimesWidgetProvider.kt`
+- [x] T004c [US1] Implement non-blank first-use setup state (location needed) and setup action deep link to meet FR-022 in `PrayerTimesWidgetProvider.kt`
+
 ## Phase 2: Shared Foundation
 
 **Purpose**: Reusable contracts needed by the remaining widget types.
 
-- [x] T005 Define privacy-safe versioned widget envelope and action models in `apps/tilawa/lib/features/islamic_widgets/domain/entities/`
-- [x] T006 [P] Add native envelope parser and atomic snapshot store tests in `apps/tilawa/android/app/src/test/kotlin/com/tilawa/app/widget/WidgetSnapshotStoreTest.kt`
-- [x] T007 Implement native envelope parser and atomic last-valid snapshot store in `apps/tilawa/android/app/src/main/kotlin/com/tilawa/app/widget/`
-- [ ] T008 Implement Flutter-to-native snapshot bridge on the existing channel boundary in `apps/tilawa/lib/features/islamic_widgets/data/widget_snapshot_bridge.dart` and `apps/tilawa/android/app/src/main/kotlin/com/tilawa/app/prayer/MethodChannelLogic.kt`
-- [ ] T009 [P] Add widget analytics names and privacy-safe parameters in `packages/core/lib/constants/analytics_constants.dart` and `apps/tilawa/lib/features/islamic_widgets/data/widget_analytics.dart`
-- [ ] T010 Add typed widget destination resolution in `apps/tilawa/lib/router/app_router_config.dart` with tests in `apps/tilawa/test/router/widget_deep_link_test.dart`
+- [x] T005 [US1-5] Define privacy-safe versioned widget envelope and action models in `apps/tilawa/lib/features/islamic_widgets/domain/entities/widget_snapshot_envelope.dart`
+- [x] T006 [US1-5] Add native envelope parser and atomic snapshot store tests in `apps/tilawa/android/app/src/test/kotlin/com/tilawa/app/widget/WidgetSnapshotStoreTest.kt`
+- [x] T007 [US1-5] Implement native envelope parser and atomic last-valid snapshot store in `apps/tilawa/android/app/src/main/kotlin/com/tilawa/app/widget/WidgetSnapshotStore.kt`
+- [x] T008 [US1-5] Implement Flutter-to-native snapshot bridge on the existing channel boundary in `apps/tilawa/lib/features/islamic_widgets/data/widget_snapshot_bridge.dart` and `apps/tilawa/android/app/src/main/kotlin/com/tilawa/app/prayer/MethodChannelLogic.kt`
+- [x] T009 [US1-5] Add widget analytics names and privacy-safe parameters in `packages/core/lib/constants/analytics_constants.dart` and `apps/tilawa/lib/features/islamic_widgets/data/widget_analytics.dart`
+- [x] T010 Add typed widget destination resolution in `apps/tilawa/lib/router/app_router_config.dart` with tests in `apps/tilawa/test/router/widget_deep_link_test.dart`
 
 **Checkpoint**: New providers can persist display-ready snapshots, render a non-blank fallback, emit safe analytics, and deep-link without duplicating domain rules.
 
@@ -40,9 +48,9 @@ description: "Implementation tasks for the Islamic home-screen widget suite"
 
 - [x] T011 [P] [US2] Add deterministic no-repeat daily selection tests in `apps/tilawa/test/features/islamic_widgets/domain/daily_ayah_selector_test.dart`
 - [x] T012 [US2] Implement curated Ayah entry and deterministic selector in `apps/tilawa/lib/features/islamic_widgets/domain/entities/curated_ayah.dart` and `apps/tilawa/lib/features/islamic_widgets/domain/services/daily_ayah_selector.dart`
-- [ ] T013 [P] [US2] Add curated launch pool fixture and validation test in `apps/tilawa/assets/data/widget_daily_ayahs.json` and `apps/tilawa/test/features/islamic_widgets/data/curated_ayah_catalog_test.dart`
-- [ ] T014 [P] [US2] Add bounded QCF artifact renderer tests in `packages/quran_qcf/test/widget_ayah_artifact_renderer_test.dart`
-- [ ] T015 [US2] Implement bounded QCF artifact rendering and atomic PNG output in `packages/quran_qcf/lib/src/presentation/services/widget_ayah_artifact_renderer.dart`
+- [x] T013 [P] [US2] Add curated launch pool fixture and validation test in `apps/tilawa/assets/data/widget_daily_ayahs.json` and `apps/tilawa/test/features/islamic_widgets/data/curated_ayah_catalog_test.dart`
+- [x] T014 [P] [US2] Add bounded QCF artifact renderer tests in `packages/quran_qcf/test/widget_ayah_artifact_renderer_test.dart`
+- [x] T015 [US2] Implement bounded QCF artifact rendering and atomic PNG output in `packages/quran_qcf/lib/src/presentation/services/widget_ayah_artifact_renderer.dart`
 - [ ] T016 [US2] Implement daily selection persistence and snapshot composition in `apps/tilawa/lib/features/islamic_widgets/data/daily_ayah_widget_repository.dart`
 - [ ] T017 [P] [US2] Add native Ayah snapshot parsing/state tests in `apps/tilawa/android/app/src/test/kotlin/com/tilawa/app/widget/ayah/AyahWidgetLogicTest.kt`
 - [ ] T018 [US2] Implement native Ayah snapshot, store, and state resolution in `apps/tilawa/android/app/src/main/kotlin/com/tilawa/app/widget/ayah/`

@@ -38,8 +38,20 @@ internal data class PrayerWidgetDay(
             KEY_ISHA to ishaMs,
         )
 
+    /** Display rows in widget order (sunrise included, never a countdown target). */
+    val displayRows: List<Pair<String, Long>>
+        get() = listOf(
+            KEY_FAJR to fajrMs,
+            KEY_SUNRISE to sunriseMs,
+            KEY_DHUHR to dhuhrMs,
+            KEY_ASR to asrMs,
+            KEY_MAGHRIB to maghribMs,
+            KEY_ISHA to ishaMs,
+        )
+
     companion object {
         const val KEY_FAJR = "fajr"
+        const val KEY_SUNRISE = "sunrise"
         const val KEY_DHUHR = "dhuhr"
         const val KEY_ASR = "asr"
         const val KEY_MAGHRIB = "maghrib"

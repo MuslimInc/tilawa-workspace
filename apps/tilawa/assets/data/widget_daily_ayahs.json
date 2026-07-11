@@ -1,0 +1,42 @@
+[
+  {
+    "id": 1,
+    "surahNumber": 2,
+    "ayahNumber": 152,
+    "theme": "Remembrance",
+    "text": "فَاذْكُرُونِي أَذْكُرْكُمْ وَاشْكُرُوا لِي وَلَا تَكْفُرُونِ",
+    "translationId": "en_clear_quran"
+  },
+  {
+    "id": 2,
+    "surahNumber": 2,
+    "ayahNumber": 286,
+    "theme": "Mercy and Ease",
+    "text": "لَا يُكَلِّفُ اللَّهُ نَفْسًا إِلَّا وُسْعَهَا",
+    "translationId": "en_clear_quran"
+  },
+  {
+    "id": 3,
+    "surahNumber": 3,
+    "ayahNumber": 103,
+    "theme": "Unity",
+    "text": "وَاعْتَصِمُوا بِحَبْلِ اللَّهِ جَمِيعًا وَلَا تَفَرَّقُوا",
+    "translationId": "en_clear_quran"
+  },
+  {
+    "id": 4,
+    "surahNumber": 40,
+    "ayahNumber": 60,
+    "theme": "Supplication",
+    "text": "وَقَالَ رَبُّكُمُ ادْعُونِي أَسْتَجِبْ لَكُمْ",
+    "translationId": "en_clear_quran"
+  },
+  {
+    "id": 5,
+    "surahNumber": 94,
+    "ayahNumber": 5,
+    "theme": "Ease after Hardship",
+    "text": "فَإِنَّ مَعَ الْعُسْرِ يُسْرًا",
+    "translationId": "en_clear_quran"
+  }
+]

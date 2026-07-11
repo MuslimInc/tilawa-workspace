@@ -11,9 +11,12 @@ import android.os.SystemClock
 import android.util.Log
 import android.view.View
 import android.widget.RemoteViews
+import android.icu.text.SimpleDateFormat
+import android.icu.util.IslamicCalendar
 import com.tilawa.app.MainActivity
 import com.tilawa.app.R
 import java.util.Date
+import java.util.Locale
 
 /**
  * Home-screen prayer times widget (spec 041, User Story 1).
@@ -83,10 +86,7 @@ internal class PrayerTimesWidgetProvider : AppWidgetProvider() {
         views.setViewVisibility(R.id.widget_empty, View.GONE)
 
         // Header: location + countdown (or stale cue).
-        views.setTextViewText(
-            R.id.widget_location,
-            state.locationName.ifBlank { context.getString(R.string.widget_prayer_title) },
-        )
+        bindLeftPanelMeta(views, state)
         val nextMs = state.nextPrayerTimeMs
         if (nextMs != null) {
             views.setViewVisibility(R.id.widget_countdown, View.VISIBLE)
@@ -111,20 +111,36 @@ internal class PrayerTimesWidgetProvider : AppWidgetProvider() {
             views.setTextViewText(R.id.widget_next_label, "")
             views.setTextViewText(
                 R.id.widget_stale,
-                context.getString(R.string.widget_stale_hint),
+                context.getString(if (state.locationName.isBlank()) R.string.widget_setup_hint else R.string.widget_stale_hint),
             )
         }
 
-        // Five prayer cells.
+        // Prayer rows (sunrise included for display only).
         val timeFormat = android.text.format.DateFormat.getTimeFormat(context)
-        for ((key, timeMs) in state.day.prayers) {
+        for ((key, timeMs) in state.day.displayRows) {
             val ids = CELL_IDS.getValue(key)
+            val isNext = key == state.nextPrayerKey
             views.setTextViewText(ids.nameId, prayerLabel(context, key))
-            views.setTextViewText(ids.timeId, timeFormat.format(Date(timeMs)))
+            views.setTextViewText(
+                ids.timeId,
+                if (timeMs > 0L) timeFormat.format(Date(timeMs)) else "--:--",
+            )
+            views.setTextColor(
+                ids.nameId,
+                context.getColor(
+                    if (isNext) R.color.widget_next_row else R.color.widget_text_secondary,
+                ),
+            )
+            views.setTextColor(
+                ids.timeId,
+                context.getColor(
+                    if (isNext) R.color.widget_next_row else R.color.widget_text_primary,
+                ),
+            )
             views.setInt(
                 ids.cellId,
                 "setBackgroundResource",
-                if (key == state.nextPrayerKey) R.drawable.widget_cell_highlight else 0,
+                if (isNext) R.drawable.widget_cell_highlight else 0,
             )
         }
         return views
@@ -145,11 +161,25 @@ internal class PrayerTimesWidgetProvider : AppWidgetProvider() {
 
     private fun prayerLabel(context: Context, key: String): String = when (key) {
         PrayerWidgetDay.KEY_FAJR -> context.getString(R.string.prayer_fajr)
+        PrayerWidgetDay.KEY_SUNRISE -> context.getString(R.string.prayer_sunrise)
         PrayerWidgetDay.KEY_DHUHR -> context.getString(R.string.prayer_dhuhr)
         PrayerWidgetDay.KEY_ASR -> context.getString(R.string.prayer_asr)
         PrayerWidgetDay.KEY_MAGHRIB -> context.getString(R.string.prayer_maghrib)
         PrayerWidgetDay.KEY_ISHA -> context.getString(R.string.prayer_isha)
         else -> key
+    }
+
+    private fun bindLeftPanelMeta(views: RemoteViews, state: PrayerWidgetState) {
+        val locale = Locale.getDefault()
+        val anchorDate = Date(state.day.fajrMs)
+        val dayFormatter = SimpleDateFormat("EEEE", locale)
+        val gregorianFormatter = SimpleDateFormat("yyyy-MM-dd", locale)
+        val hijriFormatter = SimpleDateFormat("yyyy-MM-dd", locale).apply {
+            calendar = IslamicCalendar(locale)
+        }
+        views.setTextViewText(R.id.widget_day_name, dayFormatter.format(anchorDate))
+        views.setTextViewText(R.id.widget_hijri_date, hijriFormatter.format(anchorDate))
+        views.setTextViewText(R.id.widget_gregorian_date, gregorianFormatter.format(anchorDate))
     }
 
     private fun scheduleBoundaryAlarm(context: Context, state: PrayerWidgetState?) {
@@ -201,6 +231,9 @@ internal class PrayerTimesWidgetProvider : AppWidgetProvider() {
         private val CELL_IDS = mapOf(
             PrayerWidgetDay.KEY_FAJR to CellIds(
                 R.id.widget_cell_fajr, R.id.widget_name_fajr, R.id.widget_time_fajr,
+            ),
+            PrayerWidgetDay.KEY_SUNRISE to CellIds(
+                R.id.widget_cell_sunrise, R.id.widget_name_sunrise, R.id.widget_time_sunrise,
             ),
             PrayerWidgetDay.KEY_DHUHR to CellIds(
                 R.id.widget_cell_dhuhr, R.id.widget_name_dhuhr, R.id.widget_time_dhuhr,

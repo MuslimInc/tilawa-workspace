@@ -5,9 +5,13 @@
     <color name="launch_background">#1DAB61</color>
 
     <!-- Prayer widget (spec 041) dark theme. -->
-    <color name="widget_surface">#F21C1C1E</color>
-    <color name="widget_text_primary">#DEFFFFFF</color>
-    <color name="widget_text_secondary">#8AFFFFFF</color>
-    <color name="widget_accent">#2ECC7A</color>
-    <color name="widget_highlight">#402ECC7A</color>
+    <color name="widget_surface">#302645</color>
+    <color name="widget_surface_start">#A33D77</color>
+    <color name="widget_surface_end">#1F2FA2</color>
+    <color name="widget_left_panel">#33FFFFFF</color>
+    <color name="widget_text_primary">#F5FFFFFF</color>
+    <color name="widget_text_secondary">#D9FFFFFF</color>
+    <color name="widget_accent">#FFD44F</color>
+    <color name="widget_next_row">#FFD44F</color>
+    <color name="widget_highlight">#00000000</color>
 </resources>

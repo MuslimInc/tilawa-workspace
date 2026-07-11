@@ -1,4 +1,5 @@
 import 'package:equatable/equatable.dart';
+// ignore_for_file: avoid_public_fields, prefer_void_public_methods_on_cubit
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:injectable/injectable.dart';
 import 'package:tilawa/features/auth/domain/entities/registered_device.dart';
@@ -89,10 +90,9 @@ class ManageDevicesCubit extends Cubit<ManageDevicesState> {
   }
 
   /// Signs out one device, then refreshes. Never targets the current device.
-  /// Returns whether the write succeeded.
-  Future<bool> signOutDevice(String userId, String deviceId) async {
+  Future<void> signOutDevice(String userId, String deviceId) async {
     if (deviceId == state.currentDeviceId) {
-      return false;
+      return;
     }
     emit(state.copyWith(busyDeviceIds: {...state.busyDeviceIds, deviceId}));
     final result = await _repository.revokeDevice(deviceId);
@@ -101,12 +101,13 @@ class ManageDevicesCubit extends Cubit<ManageDevicesState> {
     final succeeded = result.isRight();
     if (succeeded) {
       await load(userId);
+    } else {
+      emit(state.copyWith(status: ManageDevicesStatus.error));
     }
-    return succeeded;
   }
 
-  /// Signs out all other devices, then refreshes. Returns whether it succeeded.
-  Future<bool> signOutOtherDevices(String userId) async {
+  /// Signs out all other devices, then refreshes.
+  Future<void> signOutOtherDevices(String userId) async {
     final currentId =
         state.currentDeviceId ?? await _repository.currentDeviceId();
     emit(state.copyWith(signingOutOthers: true, currentDeviceId: currentId));
@@ -115,7 +116,8 @@ class ManageDevicesCubit extends Cubit<ManageDevicesState> {
     final succeeded = result.isRight();
     if (succeeded) {
       await load(userId);
+    } else {
+      emit(state.copyWith(status: ManageDevicesStatus.error));
     }
-    return succeeded;
   }
 }

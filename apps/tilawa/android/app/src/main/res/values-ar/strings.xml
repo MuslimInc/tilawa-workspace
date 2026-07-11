@@ -18,9 +18,15 @@
     <string name="widget_next_prayer">%1$s بعد</string>
     <string name="widget_empty_hint">افتح التطبيق لتحميل مواقيت الصلاة</string>
     <string name="widget_stale_hint">افتح التطبيق للتحديث</string>
+    <string name="widget_setup_hint">انقر لتحديد الموقع</string>
     <!-- Widget-picker preview placeholders; overwritten at runtime. -->
     <string name="widget_preview_next">الفجر بعد ٢:١٠</string>
+    <string name="widget_preview_next_prayer_name">الفجر</string>
+    <string name="widget_preview_day_name">السبت</string>
+    <string name="widget_preview_hijri_date">١٤٤٨-٠١-٢٦</string>
+    <string name="widget_preview_gregorian_date">٢٠٢٦-٠٧-١١</string>
     <string name="widget_preview_time_fajr">٤:١٨</string>
+    <string name="widget_preview_time_sunrise">٦:٠٢</string>
     <string name="widget_preview_time_dhuhr">١:٠١</string>
     <string name="widget_preview_time_asr">٤:٣٧</string>
     <string name="widget_preview_time_maghrib">٨:٠٠</string>

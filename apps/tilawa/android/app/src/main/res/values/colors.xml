@@ -11,9 +11,13 @@
     <color name="ic_launcher_background">#1DAB61</color>
 
     <!-- Prayer widget (spec 041). Light theme; dark overrides in values-night. -->
-    <color name="widget_surface">#F2FFFFFF</color>
-    <color name="widget_text_primary">#DE000000</color>
-    <color name="widget_text_secondary">#8A000000</color>
-    <color name="widget_accent">#1DAB61</color>
-    <color name="widget_highlight">#331DAB61</color>
+    <color name="widget_surface">#302645</color>
+    <color name="widget_surface_start">#A33D77</color>
+    <color name="widget_surface_end">#1F2FA2</color>
+    <color name="widget_left_panel">#33FFFFFF</color>
+    <color name="widget_text_primary">#F5FFFFFF</color>
+    <color name="widget_text_secondary">#D9FFFFFF</color>
+    <color name="widget_accent">#FFD44F</color>
+    <color name="widget_next_row">#FFD44F</color>
+    <color name="widget_highlight">#00000000</color>
 </resources>
