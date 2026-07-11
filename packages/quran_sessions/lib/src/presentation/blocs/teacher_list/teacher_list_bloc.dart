@@ -33,15 +33,17 @@ class TeacherListBloc extends Bloc<TeacherListEvent, TeacherListState> {
   ) async {
     emit(const TeacherListLoading());
 
-    final result = await _resolveTeacherList(
+    // Phase 1 — fetch the raw teacher page (cheap, fast).
+    final fetched = await _resolveTeacherList.fetchTeachers(
       specialization: event.specialization,
       language: event.language,
     );
+    if (emit.isDone) return;
 
-    await result.fold(
+    await fetched.fold(
       (failure) async => emit(TeacherListFailure(failure)),
       (page) async {
-        if (page.rawTeacherCount == 0) {
+        if (page.teachers.isEmpty) {
           emit(
             TeacherListEmpty(
               activeSpecialization: event.specialization,
@@ -50,14 +52,42 @@ class TeacherListBloc extends Bloc<TeacherListEvent, TeacherListState> {
           );
           return;
         }
-        if (page.items.isEmpty) {
+
+        // Show teachers immediately with pricing/availability still resolving,
+        // so the list never blocks on the (cold-start-prone) pricing callable.
+        final rawItems = [
+          for (final teacher in page.teachers)
+            TeacherListItem(teacher: teacher),
+        ];
+        emit(
+          TeacherListSuccess(
+            items: rawItems,
+            hasMore: page.nextCursor != null,
+            nextCursor: page.nextCursor,
+            isResolving: true,
+            activeSpecialization: event.specialization,
+            activeLanguage: event.language,
+          ),
+        );
+
+        // Phase 2 — resolve quotes + availability off the critical path.
+        final (result, summaries) = await (
+          _resolveTeacherList.resolveQuotes(
+            page.teachers,
+            nextCursor: page.nextCursor,
+          ),
+          _loadAvailabilitySummaries(rawItems),
+        ).wait;
+        if (emit.isDone) return;
+
+        if (result.items.isEmpty) {
           // Teachers exist but every one is durably non-bookable for this
           // viewer (typically paid while the payment provider is disabled).
           emit(
             TeacherListNoBookableTeachers(
               activeSpecialization: event.specialization,
               activeLanguage: event.language,
-              hiddenByBlockReason: page.hiddenByBlockReason,
+              hiddenByBlockReason: result.hiddenByBlockReason,
             ),
           );
           return;
@@ -65,10 +95,10 @@ class TeacherListBloc extends Bloc<TeacherListEvent, TeacherListState> {
 
         emit(
           TeacherListSuccess(
-            items: page.items,
-            hasMore: page.hasMore,
-            availabilitySummaries: await _loadAvailabilitySummaries(page.items),
-            nextCursor: page.nextCursor,
+            items: result.items,
+            hasMore: result.hasMore,
+            availabilitySummaries: summaries,
+            nextCursor: result.nextCursor,
             activeSpecialization: event.specialization,
             activeLanguage: event.language,
           ),

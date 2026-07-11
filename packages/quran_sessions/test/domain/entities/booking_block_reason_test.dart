@@ -1,6 +1,5 @@
 import 'package:checks/checks.dart';
 import 'package:flutter_test/flutter_test.dart';
-
 import 'package:quran_sessions/src/domain/entities/booking_block_reason.dart';
 
 void main() {
@@ -23,7 +22,6 @@ void main() {
         BookingBlockReason.paymentProviderUnavailable,
         BookingBlockReason.bookingDisabledByAdmin,
         BookingBlockReason.pricingConfigMissing,
-        BookingBlockReason.teacherNotBookable,
         BookingBlockReason.marketDisabled,
       ]) {
         check(reason.isTransient).isFalse();
@@ -31,9 +29,19 @@ void main() {
       }
     });
 
+    test('teacherNotBookable is not transient but stays visible in list', () {
+      check(BookingBlockReason.teacherNotBookable.isTransient).isFalse();
+      check(
+        BookingBlockReason.teacherNotBookable.hidesTeacherFromList,
+      ).isFalse();
+    });
+
     test('every enum value is classified without gaps', () {
       for (final reason in BookingBlockReason.values) {
-        check(reason.hidesTeacherFromList).equals(!reason.isTransient);
+        check(reason.hidesTeacherFromList).equals(
+          !reason.isTransient &&
+              reason != BookingBlockReason.teacherNotBookable,
+        );
       }
     });
   });

@@ -7,6 +7,7 @@ import '../entities/session_pricing_quote.dart';
 import '../entities/session_pricing_type.dart';
 import '../entities/teacher_list_item.dart';
 import '../failures/quran_sessions_failure.dart';
+import '../repositories/teacher_repository.dart';
 import 'get_booking_pricing_quote_usecase.dart';
 import 'get_teachers_usecase.dart';
 
@@ -61,12 +62,16 @@ class ResolveTeacherListUseCase {
   /// the per-teacher [_getPricingQuote] so a flaky batch never blanks the page.
   final GetBookingPricingQuotesUseCase? _getPricingQuotes;
 
+  /// Fetches a page and resolves quotes in one call. Kept for pagination and
+  /// callers that don't need progressive rendering; the teacher-list BLoC drives
+  /// the two phases ([fetchTeachers] then [resolveQuotes]) separately so it can
+  /// show teachers before the (cold-start-prone) pricing call returns.
   Future<Either<QuranSessionsFailure, TeacherListResult>> call({
     String? specialization,
     String? language,
     String? cursor,
   }) async {
-    final result = await _getTeachers(
+    final result = await fetchTeachers(
       specialization: specialization,
       language: language,
       cursor: cursor,
@@ -81,9 +86,34 @@ class ResolveTeacherListUseCase {
     }
 
     final page = result.fold((_) => throw StateError('unreachable'), (p) => p);
-    final quotes = await _resolveQuotes(page.teachers);
+    return Right(
+      await resolveQuotes(page.teachers, nextCursor: page.nextCursor),
+    );
+  }
+
+  /// Phase 1: the raw teacher page, before any pricing/bookability resolution.
+  /// Cheap and fast — the discovery list renders these immediately while
+  /// [resolveQuotes] runs.
+  Future<Either<QuranSessionsFailure, TeacherPage>> fetchTeachers({
+    String? specialization,
+    String? language,
+    String? cursor,
+  }) => _getTeachers(
+    specialization: specialization,
+    language: language,
+    cursor: cursor,
+  );
+
+  /// Phase 2: resolve each teacher's server quote and apply the bookability
+  /// filter. This is where the pricing/bookability policy lives — teachers with
+  /// a durable [BookingBlockReason] are hidden; transiently-blocked ones stay.
+  Future<TeacherListResult> resolveQuotes(
+    List<QuranTeacher> teachers, {
+    String? nextCursor,
+  }) async {
+    final quotes = await _resolveQuotes(teachers);
     final items = [
-      for (final teacher in page.teachers)
+      for (final teacher in teachers)
         TeacherListItem(
           teacher: _applyQuoteToTeacher(teacher, quotes[teacher.id]),
           pricingQuote: quotes[teacher.id],
@@ -95,13 +125,11 @@ class ResolveTeacherListUseCase {
       final reason = item.blockReason;
       hiddenByBlockReason[reason] = (hiddenByBlockReason[reason] ?? 0) + 1;
     }
-    return Right(
-      TeacherListResult(
-        items: visible,
-        rawTeacherCount: page.teachers.length,
-        nextCursor: page.nextCursor,
-        hiddenByBlockReason: hiddenByBlockReason,
-      ),
+    return TeacherListResult(
+      items: visible,
+      rawTeacherCount: teachers.length,
+      nextCursor: nextCursor,
+      hiddenByBlockReason: hiddenByBlockReason,
     );
   }
 

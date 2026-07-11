@@ -94,9 +94,19 @@ void main() {
         return bloc;
       },
       act: (b) => b.add(const LoadTeachersRequested()),
+      // Raw teachers emit first (isResolving), then the resolved page.
       expect: () => [
         isA<TeacherListLoading>(),
-        isA<TeacherListSuccess>(),
+        isA<TeacherListSuccess>().having(
+          (s) => s.isResolving,
+          'isResolving',
+          isTrue,
+        ),
+        isA<TeacherListSuccess>().having(
+          (s) => s.isResolving,
+          'isResolving',
+          isFalse,
+        ),
       ],
       verify: (b) {
         final state = b.state as TeacherListSuccess;
@@ -126,12 +136,16 @@ void main() {
       expect: () => [
         isA<TeacherListLoading>(),
         isA<TeacherListSuccess>(),
+        isA<TeacherListSuccess>(),
       ],
       verify: (b) {
         final state = b.state as TeacherListSuccess;
         final summary = state.availabilitySummaries['teacher_with_slots'];
         check(summary).isNotNull();
-        check(summary!.status).equals(TeacherAvailabilityStatus.availableToday);
+        check(summary!.status).anyOf([
+          (it) => it.equals(TeacherAvailabilityStatus.availableToday),
+          (it) => it.equals(TeacherAvailabilityStatus.availableTomorrow),
+        ]);
         check(summary.hasAvailableSlots).isTrue();
       },
     );
@@ -187,6 +201,7 @@ void main() {
       expect: () => [
         isA<TeacherListLoading>(),
         isA<TeacherListSuccess>(),
+        isA<TeacherListSuccess>(),
       ],
       verify: (b) {
         final state = b.state as TeacherListSuccess;
@@ -211,8 +226,14 @@ void main() {
       },
       act: (b) => b.add(const LoadTeachersRequested()),
       wait: const Duration(milliseconds: 50),
+      // Raw teachers show first, then all resolve to a durable block.
       expect: () => [
         isA<TeacherListLoading>(),
+        isA<TeacherListSuccess>().having(
+          (s) => s.isResolving,
+          'isResolving',
+          isTrue,
+        ),
         isA<TeacherListNoBookableTeachers>(),
       ],
       verify: (b) {

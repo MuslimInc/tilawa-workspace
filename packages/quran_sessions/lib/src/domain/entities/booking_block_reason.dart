@@ -37,5 +37,8 @@ enum BookingBlockReason {
   /// True when this reason must hide the teacher from the discovery list, so a
   /// student never lands on a dead-end booking screen (e.g. paid teacher while
   /// the payment provider is disabled, admin-disabled bookings, market disabled).
-  bool get hidesTeacherFromList => !isTransient;
+  ///
+  /// Note: [teacherNotBookable] intentionally does NOT hide the teacher so they
+  /// remain discoverable, but their profile will show them as unbookable.
+  bool get hidesTeacherFromList => !isTransient && this != teacherNotBookable;
 }

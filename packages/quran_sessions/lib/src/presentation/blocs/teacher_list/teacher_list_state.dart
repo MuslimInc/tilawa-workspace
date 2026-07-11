@@ -29,6 +29,7 @@ final class TeacherListSuccess extends TeacherListState {
     this.availabilitySummaries = const {},
     this.nextCursor,
     this.isLoadingMore = false,
+    this.isResolving = false,
     this.activeSpecialization,
     this.activeLanguage,
   });
@@ -43,6 +44,13 @@ final class TeacherListSuccess extends TeacherListState {
 
   /// True while appending the next page; existing [items] stay visible.
   final bool isLoadingMore;
+
+  /// True while the pricing quotes and availability summaries for [items] are
+  /// still resolving. The teacher rows are already shown (fetched cheaply); the
+  /// price chip and availability line render a skeleton until this clears. Lets
+  /// the list appear instantly instead of blocking on the pricing callable,
+  /// whose cold start can add several seconds.
+  final bool isResolving;
 
   final String? activeSpecialization;
   final String? activeLanguage;
@@ -77,6 +85,7 @@ final class TeacherListSuccess extends TeacherListState {
     availabilitySummaries,
     nextCursor,
     isLoadingMore,
+    isResolving,
     activeSpecialization,
     activeLanguage,
   ];
@@ -87,6 +96,7 @@ final class TeacherListSuccess extends TeacherListState {
     Map<String, TeacherAvailabilitySummary>? availabilitySummaries,
     String? nextCursor,
     bool? isLoadingMore,
+    bool? isResolving,
     String? activeSpecialization,
     String? activeLanguage,
   }) => TeacherListSuccess(
@@ -95,6 +105,7 @@ final class TeacherListSuccess extends TeacherListState {
     availabilitySummaries: availabilitySummaries ?? this.availabilitySummaries,
     nextCursor: nextCursor ?? this.nextCursor,
     isLoadingMore: isLoadingMore ?? this.isLoadingMore,
+    isResolving: isResolving ?? this.isResolving,
     activeSpecialization: activeSpecialization ?? this.activeSpecialization,
     activeLanguage: activeLanguage ?? this.activeLanguage,
   );

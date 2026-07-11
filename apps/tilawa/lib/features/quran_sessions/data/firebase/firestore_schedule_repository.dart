@@ -39,6 +39,8 @@ class FirestoreScheduleDataSource implements ScheduleRemoteDataSource {
 
   @override
   Future<WeeklyScheduleDto?> getSchedule(String teacherId) async {
+    if (teacherId.isEmpty) return null;
+
     final schedule = await _perf.trace('firestore_getSchedule', () async {
       try {
         final doc = await _scheduleDoc(teacherId).get();
@@ -80,6 +82,8 @@ class FirestoreScheduleDataSource implements ScheduleRemoteDataSource {
     DateTime? from,
     DateTime? to,
   }) async {
+    if (teacherId.isEmpty) return [];
+
     return _perf.trace('firestore_getOverrides', () async {
       try {
         Query<Map<String, dynamic>> query = _overrides(teacherId);
@@ -106,6 +110,8 @@ class FirestoreScheduleDataSource implements ScheduleRemoteDataSource {
     String teacherId,
     String dateKey,
   ) async {
+    if (teacherId.isEmpty) return null;
+
     return _perf.trace('firestore_getOverrideByDate', () async {
       try {
         final doc = await _overrides(teacherId).doc(dateKey).get();

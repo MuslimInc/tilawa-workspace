@@ -221,10 +221,6 @@ class _NoBookableTeachersEmptyState extends StatelessWidget {
         title: l10n.marketDisabledBookingTitle,
         subtitle: l10n.marketDisabledBookingSubtitle,
       ),
-      BookingBlockReason.teacherNotBookable => (
-        title: l10n.teacherNotBookableTitle,
-        subtitle: l10n.teacherNotBookableSubtitle,
-      ),
       _ => (
         title: l10n.noTeachersAvailableRightNow,
         subtitle: l10n.sessionsEmptySubtitle,

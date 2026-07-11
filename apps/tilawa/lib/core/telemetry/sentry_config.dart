@@ -33,7 +33,11 @@ abstract final class SentryConfig {
     options.enableLogs = kReleaseMode;
     options.enableMetrics = true;
     options.tracesSampleRate = kReleaseMode ? 0.1 : 1.0;
-    options.enableTimeToFullDisplayTracing = true;
+
+    // Disabled due to Sentry Flutter bug: '!duration.isNegative' assertion failure
+    // when TTFD duration calculation goes backwards due to frame timing issues.
+    options.enableTimeToFullDisplayTracing = false;
+
     // Relative to [tracesSampleRate]; 1.0 profiles all sampled transactions.
     // Alpha on iOS/macOS only (Sentry Flutter SDK >= 7.12.0).
     // ignore: experimental_member_use

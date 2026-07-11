@@ -131,6 +131,17 @@ class _TeacherIdentityBlock extends StatelessWidget {
         ),
         SizedBox(height: denseGap),
         TeacherDiscoveryDetails(teacher: teacher, dense: true),
+        if (teacher.bio.isNotEmpty) ...[
+          SizedBox(height: denseGap),
+          Text(
+            teacher.bio,
+            style: theme.textTheme.bodySmall?.copyWith(
+              color: scheme.onSurfaceVariant,
+            ),
+            maxLines: 2,
+            overflow: TextOverflow.ellipsis,
+          ),
+        ],
         if (summary != null) ...[
           SizedBox(height: denseGap),
           _AvailabilityHint(summary: summary),
