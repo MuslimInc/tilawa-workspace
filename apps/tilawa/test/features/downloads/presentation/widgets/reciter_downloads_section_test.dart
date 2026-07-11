@@ -44,10 +44,10 @@ void main() {
         supportedLocales: AppLocalizations.supportedLocales,
         home: BlocProvider<DownloadsBloc>.value(
           value: mockDownloadsBloc,
-          child: Scaffold(
+          child: const Scaffold(
             body: ReciterDownloadsSection(
               reciterName: testReciterName,
-              downloadsByNarrative: const {},
+              downloadsByNarrative: {},
             ),
           ),
         ),

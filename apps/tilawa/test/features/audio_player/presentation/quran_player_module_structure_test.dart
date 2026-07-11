@@ -7,7 +7,7 @@ import 'package:tilawa/shared/widgets/quran_player_widget.dart'
 
 void main() {
   group('Quran player module layout', () {
-    final String libRoot =
+    const String libRoot =
         'lib/features/audio_player/presentation/widgets/quran_player';
 
     test('canonical library lives under audio_player presentation', () {

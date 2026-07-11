@@ -118,7 +118,7 @@ void main() {
   group('TeacherDashboardBloc', () {
     blocTest<TeacherDashboardBloc, TeacherDashboardState>(
       'emits [Loading, Empty] when no sessions or generated slots',
-      build: () => buildBloc(),
+      build: buildBloc,
       act: (b) => b.add(
         const TeacherDashboardLoadRequested(teacherId: 'teacher_1'),
       ),
@@ -219,7 +219,7 @@ void main() {
 
     blocTest<TeacherDashboardBloc, TeacherDashboardState>(
       'AvailabilitySlotAdded appends slot to availability list',
-      build: () => buildBloc(),
+      build: buildBloc,
       seed: () => seedTeacherDashboardSuccess(
         upcomingSessions: const [],
         availability: const [],

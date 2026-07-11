@@ -36,11 +36,10 @@ final class KhatmaPlan {
 
   int get completedPages {
     final int completed = currentPage - startPage;
-    return completed.clamp(0, totalPages).toInt();
+    return completed.clamp(0, totalPages);
   }
 
-  int get remainingPages =>
-      (targetPage - currentPage + 1).clamp(0, totalPages).toInt();
+  int get remainingPages => (targetPage - currentPage + 1).clamp(0, totalPages);
 
   double get progress => totalPages <= 0 ? 0 : completedPages / totalPages;
 
@@ -49,16 +48,16 @@ final class KhatmaPlan {
 
   int currentDay(DateTime now) {
     final int elapsed = _dateOnly(now).difference(_dateOnly(startDate)).inDays;
-    return (elapsed + 1).clamp(1, durationDays).toInt();
+    return (elapsed + 1).clamp(1, durationDays);
   }
 
   int remainingDays(DateTime now) {
     final int elapsed = _dateOnly(now).difference(_dateOnly(startDate)).inDays;
-    return (durationDays - elapsed).clamp(1, durationDays).toInt();
+    return (durationDays - elapsed).clamp(1, durationDays);
   }
 
   int plannedDailyPages() {
-    return (totalPages / durationDays).ceil().clamp(1, lastQuranPage).toInt();
+    return (totalPages / durationDays).ceil().clamp(1, lastQuranPage);
   }
 
   int todayTargetPages(DateTime now) {

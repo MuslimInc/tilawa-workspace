@@ -1,5 +1,3 @@
-// ignore_for_file: public_member_api_docs
-
 /// Surah names in Arabic and English (114 surahs).
 class SurahNames {
   SurahNames._();
@@ -124,7 +122,7 @@ class SurahNames {
   static const List<String> englishNames = [
     'Al-Fatiha',
     'Al-Baqarah',
-    "Al Imran",
+    'Al Imran',
     'An-Nisa',
     "Al-Ma'idah",
     "Al-An'am",
@@ -142,7 +140,7 @@ class SurahNames {
     'Al-Kahf',
     'Maryam',
     'Ta-Ha',
-    "Al-Anbiya",
+    'Al-Anbiya',
     'Al-Hajj',
     "Al-Mu'minun",
     'An-Nur',
@@ -150,11 +148,11 @@ class SurahNames {
     "Ash-Shu'ara",
     'An-Naml',
     'Al-Qasas',
-    "Al-Ankabut",
+    'Al-Ankabut',
     'Ar-Rum',
     'Luqman',
     'As-Sajdah',
-    "Al-Ahzab",
+    'Al-Ahzab',
     'Saba',
     'Fatir',
     'Ya-Sin',
@@ -217,14 +215,14 @@ class SurahNames {
     'Ad-Duha',
     'Ash-Sharh',
     'At-Tin',
-    "Al-Alaq",
+    'Al-Alaq',
     'Al-Qadr',
     'Al-Bayyinah',
     'Az-Zalzalah',
-    "Al-Adiyat",
+    'Al-Adiyat',
     "Al-Qari'ah",
     'At-Takathur',
-    "Al-Asr",
+    'Al-Asr',
     'Al-Humazah',
     'Al-Fil',
     'Quraysh',

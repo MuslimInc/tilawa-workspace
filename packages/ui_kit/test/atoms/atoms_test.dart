@@ -366,24 +366,24 @@ void main() {
     });
 
     test('lerp interpolates values', () {
-      final tokens1 = TilawaEmptyStateTokens(
+      const tokens1 = TilawaEmptyStateTokens(
         iconSize: 50,
         iconOpacity: 0.5,
         titleSpacing: 10,
         subtitleSpacing: 10,
         actionSpacing: 10,
-        padding: const EdgeInsets.all(10),
+        padding: EdgeInsets.all(10),
         actionMinWidth: 200,
         actionMaxWidth: 300,
       );
 
-      final tokens2 = TilawaEmptyStateTokens(
+      const tokens2 = TilawaEmptyStateTokens(
         iconSize: 100,
         iconOpacity: 1.0,
         titleSpacing: 20,
         subtitleSpacing: 20,
         actionSpacing: 20,
-        padding: const EdgeInsets.all(20),
+        padding: EdgeInsets.all(20),
         actionMinWidth: 300,
         actionMaxWidth: 400,
       );

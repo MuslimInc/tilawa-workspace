@@ -754,7 +754,7 @@ class _ReaderScaffoldState extends State<_ReaderScaffold>
     // Determine travel direction:
     // If pageNumber is different from current, user is moving toward pageNumber.
     // Otherwise, assume direction based on last warmed page relative to current.
-    int direction = (pageNumber > current)
+    final int direction = (pageNumber > current)
         ? 1
         : (pageNumber < current ? -1 : (pageNumber >= lastWarmed ? 1 : -1));
 
@@ -1667,7 +1667,7 @@ class _ReaderOverlay extends StatelessWidget {
             duration: tokens.durationFast,
             curve: Curves.easeOutCubic,
             offset: showOverlays ? Offset.zero : const Offset(0, 1),
-            child: child!,
+            child: child,
           );
         },
         child: ValueListenableBuilder<int>(

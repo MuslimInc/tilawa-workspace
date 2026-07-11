@@ -47,7 +47,7 @@ class GetCurrentUserTeacherCapabilityUseCase {
     final profileResult = await _profiles.getProfileByUserId(userId);
     final profile = profileResult.fold(
       (_) => null,
-      (p) => TeacherProfileCompleteness.withComputedVisibility(p),
+      TeacherProfileCompleteness.withComputedVisibility,
     );
 
     return Right(

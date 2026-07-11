@@ -41,7 +41,7 @@ void main() {
           );
           expect(
             range[0],
-            lessThanOrEqualTo(range[1]),
+            lessThanOrEqualTo(range[1] as num),
             reason: 'Start verse should be <= end verse',
           );
           expect(

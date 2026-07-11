@@ -2,7 +2,7 @@ import '../entities/quran_session.dart';
 import '../entities/session_aggregate.dart';
 import '../entities/session_lifecycle_status.dart';
 import '../entities/session_pricing_type.dart';
-import '../policies/configurable_cancellation_policy.dart';
+import 'configurable_cancellation_policy.dart';
 import '../value_objects/actor_role.dart';
 
 /// Whether a student may open the cancel flow for [aggregate].

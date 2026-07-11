@@ -295,7 +295,7 @@ void main() {
               MeMuslimComponentTokens.light(),
             ],
           ),
-          home: Scaffold(
+          home: const Scaffold(
             body: SizedBox(
               width: slotWidth,
               height: slotHeight,
@@ -318,7 +318,7 @@ void main() {
       expect(tester.takeException(), isNull);
       expect(
         tester.getSize(find.byType(TilawaMediaPlayerBar)),
-        Size(slotWidth, slotHeight),
+        const Size(slotWidth, slotHeight),
       );
     });
   });

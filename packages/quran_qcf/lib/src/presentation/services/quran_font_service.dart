@@ -649,9 +649,7 @@ class QuranFontService extends ChangeNotifier {
   /// this prevents cascading rebuilds across all kept-alive PageContent widgets.
   void _scheduleNotify() {
     _coalesceTimer?.cancel();
-    _coalesceTimer = Timer(const Duration(milliseconds: 50), () {
-      notifyListeners();
-    });
+    _coalesceTimer = Timer(const Duration(milliseconds: 50), notifyListeners);
   }
 
   Future<Map<String, File>> _getFontFilesByFamily() async {

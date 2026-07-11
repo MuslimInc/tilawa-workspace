@@ -273,7 +273,7 @@ const int totalQuarters = 240;
 
 /// Returns all quarters as [Quarter] objects.
 List<Quarter> getAllQuarters() {
-  return quartersData.map((map) => Quarter.fromMap(map)).toList();
+  return quartersData.map(Quarter.fromMap).toList();
 }
 
 /// Returns a specific quarter by its index (0-239).

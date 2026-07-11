@@ -102,7 +102,9 @@ class GenUiAyahReferenceCard extends StatelessWidget {
     final ThemeData theme = Theme.of(context);
     final int? surah = node.intProp('surah');
     if (surah == null || surah < 1 || surah > 114) {
-      return GenUiUnknownComponent(type: 'AyahReferenceCard(invalid surah)');
+      return const GenUiUnknownComponent(
+        type: 'AyahReferenceCard(invalid surah)',
+      );
     }
     final int? ayah = node.intProp('ayah');
     final String label = scope.content.ayahReferenceLabel(surah, ayah: ayah);

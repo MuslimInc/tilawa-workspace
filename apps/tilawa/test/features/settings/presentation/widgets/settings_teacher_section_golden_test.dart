@@ -146,7 +146,7 @@ void main() {
       MaterialApp(
         theme: theme,
         locale: locale,
-        localizationsDelegates: [
+        localizationsDelegates: const [
           ...AppLocalizations.localizationsDelegates,
           ...QuranSessionsLocalizations.localizationsDelegates,
         ],

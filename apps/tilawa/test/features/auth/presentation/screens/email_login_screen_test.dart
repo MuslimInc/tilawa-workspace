@@ -25,7 +25,7 @@ void main() {
     TilawaInteractionFeedback.enabled = false;
     authHarness = AuthWidgetTestHarness();
     await getIt.reset();
-    getIt.registerFactory<EmailAuthFormCubit>(() => EmailAuthFormCubit());
+    getIt.registerFactory<EmailAuthFormCubit>(EmailAuthFormCubit.new);
   });
 
   tearDown(() {

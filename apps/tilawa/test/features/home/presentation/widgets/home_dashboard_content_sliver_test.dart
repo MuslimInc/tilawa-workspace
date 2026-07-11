@@ -10,11 +10,11 @@ void main() {
     await tester.pumpWidget(
       MaterialApp(
         theme: AppTheme.getLightTheme(primaryColor: AppColors.defaultPrimary),
-        home: Scaffold(
+        home: const Scaffold(
           body: CustomScrollView(
             slivers: [
               HomeDashboardContentSliver(
-                child: const Text('sheet body'),
+                child: Text('sheet body'),
               ),
             ],
           ),

@@ -56,7 +56,7 @@ void main() {
     TestWidgetsFlutterBinding.ensureInitialized();
     provideDummy<Either<Failure, void>>(const Right(null));
     provideDummy<Either<Failure, String>>(
-      Right(LanguageConfig.defaultLanguageCode),
+      const Right(LanguageConfig.defaultLanguageCode),
     );
   });
 
@@ -85,7 +85,7 @@ void main() {
 
     when(
       mockGetCurrentLanguageUseCase(),
-    ).thenAnswer((_) async => Right(LanguageConfig.defaultLanguageCode));
+    ).thenAnswer((_) async => const Right(LanguageConfig.defaultLanguageCode));
     when(mockSyncUserLanguagePreference(any)).thenAnswer((_) async {});
     when(mockSyncDeviceTokenUseCase(any)).thenAnswer(
       (_) async => const Right(null),

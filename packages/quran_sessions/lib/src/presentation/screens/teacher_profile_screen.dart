@@ -181,13 +181,13 @@ class _TeacherProfileScreenState extends State<TeacherProfileScreen> {
                       sessionModePolicy: widget.sessionModePolicy,
                       onBookTapped: widget.onBookTapped == null
                           ? null
-                          : (slotId) => _onBookTapped(slotId),
+                          : _onBookTapped,
                       onSlotSelected: (slotId) =>
                           setState(() => _selectedSlotId = slotId),
                       selectedSlotId: _selectedSlotId,
                       teacherId: widget.teacherId,
                     )
-                  : _TeacherProfileUnavailableBody(),
+                  : const _TeacherProfileUnavailableBody(),
           },
         ),
       ),

@@ -36,7 +36,7 @@ class HomePremiumSectionShell extends StatelessWidget {
               alpha: tokens.opacityShadow,
             ),
             offset: tokens.shadowOffsetSmall,
-            blurRadius: tokens.spaceSmall.toDouble(),
+            blurRadius: tokens.spaceSmall,
           ),
         ],
       ),

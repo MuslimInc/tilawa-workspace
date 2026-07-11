@@ -16,8 +16,8 @@ class SaveTeacherApplicationDraftUseCase {
     TeacherApplication draft,
   ) async {
     if (!draft.isDraft) {
-      return Left(
-        const TeacherApplicationIncompleteFailure(
+      return const Left(
+        TeacherApplicationIncompleteFailure(
           reason: 'Only draft applications can be saved via this use case.',
         ),
       );

@@ -23,9 +23,9 @@ void main() {
       await tester.pumpWidget(
         MaterialApp(
           theme: theme,
-          home: Scaffold(
+          home: const Scaffold(
             body: TilawaBottomActionArea(
-              child: const SizedBox(key: actionKey, height: 48),
+              child: SizedBox(key: actionKey, height: 48),
             ),
           ),
         ),
@@ -52,9 +52,9 @@ void main() {
       await tester.pumpWidget(
         MaterialApp(
           theme: theme,
-          home: Scaffold(
+          home: const Scaffold(
             body: TilawaBottomActionArea(
-              child: const SizedBox(key: actionKey, height: 48),
+              child: SizedBox(key: actionKey, height: 48),
             ),
           ),
         ),
@@ -97,11 +97,11 @@ void main() {
       await tester.pumpWidget(
         MaterialApp(
           theme: theme,
-          home: Scaffold(
+          home: const Scaffold(
             bottomNavigationBar: TilawaBottomActionArea(
-              child: const SizedBox(key: actionKey, height: 48),
+              child: SizedBox(key: actionKey, height: 48),
             ),
-            body: const SizedBox(key: bodyKey, height: 200),
+            body: SizedBox(key: bodyKey, height: 200),
           ),
         ),
       );
@@ -194,15 +194,15 @@ void main() {
         await tester.pumpWidget(
           MaterialApp(
             theme: theme,
-            home: Scaffold(
+            home: const Scaffold(
               resizeToAvoidBottomInset: true,
               body: MediaQuery(
-                data: const MediaQueryData(
+                data: MediaQueryData(
                   viewInsets: EdgeInsets.only(bottom: keyboardInset),
                 ),
                 child: TilawaFormScreenScaffold(
-                  body: const Text('Body'),
-                  footer: const SizedBox(key: actionKey, height: 48),
+                  body: Text('Body'),
+                  footer: SizedBox(key: actionKey, height: 48),
                 ),
               ),
             ),
@@ -250,9 +250,9 @@ void main() {
               initialBottomInset: keyboardInset,
               builder: (setLayoutCallback) {
                 setLayout = setLayoutCallback;
-                return TilawaFormScreenScaffold(
-                  body: const Text('Body'),
-                  footer: const SizedBox(key: actionKey, height: 48),
+                return const TilawaFormScreenScaffold(
+                  body: Text('Body'),
+                  footer: SizedBox(key: actionKey, height: 48),
                 );
               },
             ),
@@ -319,9 +319,9 @@ void main() {
                 initialViewPadding: EdgeInsets.zero,
                 builder: (setLayoutCallback) {
                   setLayout = setLayoutCallback;
-                  return TilawaFormScreenScaffold(
-                    body: const Text('Body'),
-                    footer: const SizedBox(key: actionKey, height: 48),
+                  return const TilawaFormScreenScaffold(
+                    body: Text('Body'),
+                    footer: SizedBox(key: actionKey, height: 48),
                   );
                 },
               ),

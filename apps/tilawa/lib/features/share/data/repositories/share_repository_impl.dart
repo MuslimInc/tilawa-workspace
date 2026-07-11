@@ -5,8 +5,8 @@ import 'package:share_plus/share_plus.dart';
 import 'package:tilawa/features/share/domain/entities/widget_capture_handle.dart';
 import 'package:tilawa_core/logger.dart';
 
-import '../../../../features/downloads/domain/entities/download_item.dart';
-import '../../../../features/downloads/domain/repositories/download_query_repository.dart';
+import '../../../downloads/domain/entities/download_item.dart';
+import '../../../downloads/domain/repositories/download_query_repository.dart';
 import '../../domain/entities/audio_clip_config.dart';
 import '../../domain/entities/share_cancel_token.dart';
 import '../../domain/entities/share_content.dart';

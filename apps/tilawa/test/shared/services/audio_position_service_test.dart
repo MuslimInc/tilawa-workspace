@@ -69,17 +69,17 @@ void main() {
       await Future<void>.delayed(Duration.zero);
 
       playbackStateSubject.add(
-        audio_service.PlaybackState(updatePosition: Duration(seconds: 1)),
+        audio_service.PlaybackState(updatePosition: const Duration(seconds: 1)),
       );
       await Future<void>.delayed(Duration.zero);
 
       playbackStateSubject.add(
-        audio_service.PlaybackState(updatePosition: Duration(seconds: 1)),
+        audio_service.PlaybackState(updatePosition: const Duration(seconds: 1)),
       );
       await Future<void>.delayed(Duration.zero);
 
       playbackStateSubject.add(
-        audio_service.PlaybackState(updatePosition: Duration(seconds: 2)),
+        audio_service.PlaybackState(updatePosition: const Duration(seconds: 2)),
       );
       await Future<void>.delayed(Duration.zero);
 

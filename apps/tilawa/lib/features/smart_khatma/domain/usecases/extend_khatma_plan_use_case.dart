@@ -18,7 +18,7 @@ final class ExtendKhatmaPlanUseCase {
         return const Right(null);
       }
       final today = now ?? DateTime.now();
-      final int extraDays = plan.missedDays(today).clamp(1, 30).toInt();
+      final int extraDays = plan.missedDays(today).clamp(1, 30);
       final KhatmaPlan updated = plan.copyWith(
         durationDays: plan.durationDays + extraDays,
       );

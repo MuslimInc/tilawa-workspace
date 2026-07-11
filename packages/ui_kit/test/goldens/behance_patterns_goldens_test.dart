@@ -130,7 +130,7 @@ void main() {
         children: [
           GoldenTestScenario(
             name: 'Light',
-            child: TilawaPreviewWrapper(
+            child: const TilawaPreviewWrapper(
               child: Builder(builder: _featuredGradientCard),
             ),
           ),
@@ -146,7 +146,7 @@ void main() {
         children: [
           GoldenTestScenario(
             name: 'Light',
-            child: TilawaPreviewWrapper(
+            child: const TilawaPreviewWrapper(
               child: Builder(builder: _instructionChip),
             ),
           ),

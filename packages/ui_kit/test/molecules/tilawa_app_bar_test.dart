@@ -170,9 +170,9 @@ void main() {
                       Navigator.of(context).push(
                         MaterialPageRoute<void>(
                           builder: (innerContext) {
-                            return Scaffold(
+                            return const Scaffold(
                               appBar: TilawaCatalogAppBar(title: 'Detail'),
-                              body: const SizedBox.shrink(),
+                              body: SizedBox.shrink(),
                             );
                           },
                         ),
@@ -208,12 +208,12 @@ void main() {
                       Navigator.of(context).push(
                         MaterialPageRoute<void>(
                           builder: (innerContext) {
-                            return Scaffold(
+                            return const Scaffold(
                               appBar: TilawaCatalogAppBar(
                                 title: 'Detail',
                                 automaticallyImplyLeading: false,
                               ),
-                              body: const SizedBox.shrink(),
+                              body: SizedBox.shrink(),
                             );
                           },
                         ),
@@ -242,12 +242,12 @@ void main() {
             theme: _lightTheme(),
             home: Builder(
               builder: (context) {
-                return Scaffold(
+                return const Scaffold(
                   appBar: TilawaCatalogAppBar(
                     title: 'Home',
                     // default automaticallyImplyLeading — root route, no back
                   ),
-                  body: const SizedBox.shrink(),
+                  body: SizedBox.shrink(),
                 );
               },
             ),
@@ -279,10 +279,9 @@ void main() {
                             builder: (innerContext) {
                               final PreferredSizeWidget appBar = useFactory
                                   ? TilawaCatalogAppBar.titleOnly(
-                                      innerContext,
                                       title: 'Detail',
                                     )
-                                  : TilawaCatalogAppBar(
+                                  : const TilawaCatalogAppBar(
                                       title: 'Detail',
                                     );
                               return Scaffold(
@@ -335,7 +334,6 @@ void main() {
                         builder: (context) {
                           return Scaffold(
                             appBar: TilawaCatalogAppBar.titleOnly(
-                              context,
                               title: 'Title',
                             ),
                             body: const SizedBox.shrink(),
@@ -416,7 +414,6 @@ void main() {
         await tester.pumpWidget(
           buildShellTabHost(
             appBarBuilder: (context) => TilawaCatalogAppBar.titleOnly(
-              context,
               title: 'Tab title',
             ),
           ),
@@ -444,14 +441,13 @@ void main() {
             theme: _lightTheme(),
             home: Builder(
               builder: (context) => Scaffold(
-                appBar: TilawaCatalogAppBar.titleOnly(context, title: 'Tab'),
+                appBar: TilawaCatalogAppBar.titleOnly(title: 'Tab'),
                 body: Builder(
                   builder: (innerContext) => ElevatedButton(
                     onPressed: () => Navigator.of(innerContext).push(
                       MaterialPageRoute<void>(
                         builder: (pushedContext) => Scaffold(
                           appBar: TilawaCatalogAppBar.titleOnly(
-                            pushedContext,
                             title: 'Detail',
                           ),
                           body: const SizedBox.shrink(),
@@ -497,7 +493,6 @@ void main() {
         await tester.pumpWidget(
           buildShellTabHost(
             appBarBuilder: (context) => TilawaCatalogAppBar.titleOnly(
-              context,
               title: 'Reciters',
               showBottomHairline: false,
               showElevationShadow: false,

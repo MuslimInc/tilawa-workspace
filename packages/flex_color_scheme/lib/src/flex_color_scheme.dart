@@ -22,7 +22,7 @@ import 'flex_surface_mode.dart';
 import 'flex_text_theme_color.dart';
 import 'flex_theme_data_extensions.dart'; // For comment refs.
 
-// ignore_for_file: sort_constructors_first, we prefer factories before props.
+// ignore_for_file: we prefer factories before props.
 
 /// Enum to select the used AppBarTheme style in [FlexColorScheme] (FCS)
 /// based themes when using its [FlexColorScheme.light] and

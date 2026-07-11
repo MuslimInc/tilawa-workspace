@@ -103,7 +103,6 @@ abstract final class SentryConfig {
       // ignore: experimental_member_use
       return SentryMaskingDecision.continueProcessing;
     }
-    // ignore: experimental_member_use
     return switch (widget.runtimeType.toString()) {
       '_VideoLayout' ||
       '_LiveKitVideoLayout' ||
@@ -123,7 +122,6 @@ abstract final class SentryConfig {
       // ignore: experimental_member_use
       return SentryMaskingDecision.continueProcessing;
     }
-    // ignore: experimental_member_use
     return switch (widget.runtimeType.toString()) {
       '_SwitchCameraButton' =>
         // ignore: experimental_member_use

@@ -117,7 +117,7 @@ Future<void> configureRecitersScreenTestGetIt({
     const DownloadsState(status: DownloadsStateStatus.loading),
   );
   when(() => mockDownloadsBloc.stream).thenAnswer((_) => const Stream.empty());
-  when(() => mockDownloadsBloc.close()).thenAnswer((_) async {});
+  when(mockDownloadsBloc.close).thenAnswer((_) async {});
   when(() => mockDownloadsBloc.add(any())).thenReturn(null);
   getIt.registerFactory<DownloadsBloc>(() => mockDownloadsBloc);
 }
@@ -140,7 +140,7 @@ FavoritesCubit seededFavoritesCubit({
       MockClearFavoriteRecitersUseCase();
 
   when(
-    () => mockGetFavorites.takeCachedSuccessForStartup(),
+    mockGetFavorites.takeCachedSuccessForStartup,
   ).thenReturn(resolvedFavorites);
   when(() => mockGetFavorites(any())).thenAnswer(
     (_) async => Right<Failure, List<ReciterEntity>>(resolvedFavorites),
@@ -148,7 +148,7 @@ FavoritesCubit seededFavoritesCubit({
   when(() => mockToggleFavorite(any())).thenAnswer(
     (_) async => const Right<Failure, void>(null),
   );
-  when(() => mockClearFavorites()).thenAnswer(
+  when(mockClearFavorites.call).thenAnswer(
     (_) async => const Right<Failure, void>(null),
   );
 
@@ -177,7 +177,7 @@ Widget buildRecitersScreenTestApp({
   when(
     () => mockLocalizationBloc.stream,
   ).thenAnswer((_) => const Stream.empty());
-  when(() => mockLocalizationBloc.close()).thenAnswer((_) async {});
+  when(mockLocalizationBloc.close).thenAnswer((_) async {});
 
   final MockSettingsCubit mockSettingsCubit = MockSettingsCubit();
   when(() => mockSettingsCubit.state).thenReturn(settingsState);
@@ -216,7 +216,7 @@ RecitersBloc loadedRecitersBloc({
   String? selectedLetter,
 }) {
   final MockGetRecitersUseCase mockGetReciters = MockGetRecitersUseCase();
-  when(() => mockGetReciters.call()).thenAnswer(
+  when(mockGetReciters.call).thenAnswer(
     (_) async => Right<Failure, List<ReciterEntity>>(reciters),
   );
 

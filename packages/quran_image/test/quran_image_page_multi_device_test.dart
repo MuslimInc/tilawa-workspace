@@ -169,9 +169,9 @@ void main() {
         const wrongPageWidth = 480.0;
         const centerX = 0.4;
         final markers = <VerseMarkerData>[
-          VerseMarkerData(sura: 48, ayah: 1, line: 2, centerX: centerX),
+          const VerseMarkerData(sura: 48, ayah: 1, line: 2, centerX: centerX),
         ];
-        final lineHeight = 24.0;
+        const lineHeight = 24.0;
         final yOffsets = List<double>.generate(15, (i) => i * lineHeight);
 
         await tester.pumpWidget(
@@ -216,9 +216,9 @@ void main() {
         const wrongPageWidth = 360.0;
         const centerX = 0.55;
         final markers = <VerseMarkerData>[
-          VerseMarkerData(sura: 2, ayah: 255, line: 7, centerX: centerX),
+          const VerseMarkerData(sura: 2, ayah: 255, line: 7, centerX: centerX),
         ];
-        final lineHeight = 20.0;
+        const lineHeight = 20.0;
         final yOffsets = List<double>.generate(15, (i) => i * lineHeight);
 
         await tester.pumpWidget(
@@ -263,9 +263,9 @@ void main() {
       const wrongPageWidth = 390.0;
       const centerX = 0.12;
       final markers = <VerseMarkerData>[
-        VerseMarkerData(sura: 1, ayah: 7, line: 14, centerX: centerX),
+        const VerseMarkerData(sura: 1, ayah: 7, line: 14, centerX: centerX),
       ];
-      final lineHeight = 28.0;
+      const lineHeight = 28.0;
       final yOffsets = List<double>.generate(15, (i) => i * lineHeight);
 
       await tester.pumpWidget(

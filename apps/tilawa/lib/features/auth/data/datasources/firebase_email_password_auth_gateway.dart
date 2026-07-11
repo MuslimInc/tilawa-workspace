@@ -47,7 +47,7 @@ class FirebaseEmailPasswordAuthGateway implements EmailPasswordAuthGateway {
           code: 'network',
         );
       }
-      return AuthResult.failure(message: EmailAuthFailureKey.generic);
+      return const AuthResult.failure(message: EmailAuthFailureKey.generic);
     }
   }
 
@@ -82,7 +82,7 @@ class FirebaseEmailPasswordAuthGateway implements EmailPasswordAuthGateway {
           code: 'network',
         );
       }
-      return AuthResult.failure(message: EmailAuthFailureKey.generic);
+      return const AuthResult.failure(message: EmailAuthFailureKey.generic);
     }
   }
 

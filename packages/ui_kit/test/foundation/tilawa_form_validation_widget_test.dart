@@ -71,11 +71,11 @@ void main() {
           home: Scaffold(
             body: TilawaFormScreenScaffold(
               validationController: controller,
-              body: TilawaFormFieldAnchor(
+              body: const TilawaFormFieldAnchor(
                 fieldId: 'alpha',
                 semanticLabel: 'Alpha',
                 order: 0,
-                child: const Text('Alpha field'),
+                child: Text('Alpha field'),
               ),
               footer: const SizedBox.shrink(),
             ),
@@ -117,11 +117,11 @@ void main() {
                   validationController: controller,
                   body: Column(
                     children: <Widget>[
-                      TilawaFormFieldAnchor(
+                      const TilawaFormFieldAnchor(
                         fieldId: 'first',
                         semanticLabel: 'First',
                         order: 0,
-                        child: const SizedBox(
+                        child: SizedBox(
                           height: 48,
                           child: Text('First'),
                         ),
@@ -133,11 +133,11 @@ void main() {
                           child: Text('Spacer $index'),
                         ),
                       ),
-                      TilawaFormFieldAnchor(
+                      const TilawaFormFieldAnchor(
                         fieldId: 'last',
                         semanticLabel: 'Last',
                         order: 1,
-                        child: const SizedBox(
+                        child: SizedBox(
                           height: 48,
                           child: Text('Last'),
                         ),
@@ -233,11 +233,11 @@ void main() {
               child: Scaffold(
                 body: TilawaFormScreenScaffold(
                   validationController: controller,
-                  body: TilawaFormFieldAnchor(
+                  body: const TilawaFormFieldAnchor(
                     fieldId: 'gender',
                     semanticLabel: 'الجنس',
                     order: 0,
-                    child: const Text('Gender'),
+                    child: Text('Gender'),
                   ),
                   footer: const SizedBox.shrink(),
                 ),

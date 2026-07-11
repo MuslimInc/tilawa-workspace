@@ -152,7 +152,7 @@ class _ScreenshotComposerScreenState extends State<ScreenshotComposerScreen> {
                       ? MediaPreviewFrame(
                           child: GeneratedImagePreview(
                             filePath:
-                                (state.content as ShareScreenshot).filePath,
+                                (state.content! as ShareScreenshot).filePath,
                           ),
                         )
                       : _ScreenshotLivePreview(

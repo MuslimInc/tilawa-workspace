@@ -83,7 +83,7 @@ void main() {
     scopeGetIt().registerFactory<ShareCubit>(() {
       createCount++;
       final mock = _MockShareCubit();
-      when(() => mock.close()).thenAnswer((_) async {});
+      when(mock.close).thenAnswer((_) async {});
       when(() => mock.state).thenReturn(const ShareState());
       when(() => mock.stream).thenAnswer((_) => const Stream.empty());
       return mock;

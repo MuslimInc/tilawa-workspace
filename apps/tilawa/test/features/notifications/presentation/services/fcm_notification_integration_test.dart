@@ -10,7 +10,7 @@ void main() {
         'data': '7',
       });
 
-      expect(location, ReciterDetailsRoute(reciterId: '7').location);
+      expect(location, const ReciterDetailsRoute(reciterId: '7').location);
     });
 
     test('accepts admin payload aliases for quran deep links', () {
@@ -23,7 +23,7 @@ void main() {
       expect(normalized['data'], '2');
       expect(
         FCMNotificationHandlerService.resolveLocation(normalized),
-        QuranReaderRoute(surahNumber: 2).location,
+        const QuranReaderRoute(surahNumber: 2).location,
       );
     });
 

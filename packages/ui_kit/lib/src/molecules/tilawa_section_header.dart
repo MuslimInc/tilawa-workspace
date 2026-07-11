@@ -26,8 +26,7 @@ class TilawaSectionHeader extends StatelessWidget {
   ///
   /// Kept for source compatibility — the unnamed constructor now applies the
   /// same token-driven defaults, so this simply forwards.
-  factory TilawaSectionHeader.settings(
-    BuildContext context, {
+  factory TilawaSectionHeader.settings({
     required String title,
     String? subtitle,
     IconData? leadingIcon,

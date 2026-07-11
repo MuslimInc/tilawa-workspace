@@ -744,8 +744,8 @@ void main() {
         ).thenAnswer((_) async => []);
 
         bloc.add(
-          LoadSurahList(
-            reciter: const ReciterEntity(
+          const LoadSurahList(
+            reciter: ReciterEntity(
               id: 1,
               name: 'Reciter',
               letter: 'R',
@@ -761,7 +761,7 @@ void main() {
                 ),
               ],
             ),
-            moshaf: const MoshafEntity(
+            moshaf: MoshafEntity(
               id: 1,
               name: 'Moshaf',
               server: 'server',

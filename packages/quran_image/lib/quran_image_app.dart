@@ -151,7 +151,7 @@ class _QuranReaderHome extends StatelessWidget {
                     Text(
                       state.appMessage.localize(l10n),
                       textAlign: TextAlign.center,
-                      style: TextStyle(
+                      style: const TextStyle(
                         fontSize: 16,
                         color: AppVideoReelDesignDefaults.frameStrongTextColor,
                       ),

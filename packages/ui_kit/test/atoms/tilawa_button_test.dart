@@ -78,7 +78,7 @@ void main() {
             Center(
               child: ConstrainedBox(
                 constraints: const BoxConstraints(maxWidth: 560),
-                child: TilawaButton(
+                child: const TilawaButton(
                   text: 'OK',
                   onPressed: _noop,
                   isFullWidth: false,
@@ -247,7 +247,7 @@ void main() {
     ) async {
       await tester.pumpWidget(
         _app(
-          TilawaButton(
+          const TilawaButton(
             text: 'Save',
             onPressed: _noop,
           ),
@@ -267,7 +267,7 @@ void main() {
     ) async {
       await tester.pumpWidget(
         _app(
-          Column(
+          const Column(
             children: [
               TilawaButton(
                 text: 'Logout',
@@ -304,7 +304,7 @@ void main() {
     ) async {
       await tester.pumpWidget(
         _app(
-          TilawaButton(
+          const TilawaButton(
             text: 'Continue',
             variant: TilawaButtonVariant.outline,
             onPressed: _noop,
@@ -324,7 +324,7 @@ void main() {
     ) async {
       await tester.pumpWidget(
         _app(
-          TilawaButton(
+          const TilawaButton(
             text: 'Save',
             size: TilawaButtonSize.small,
             onPressed: _noop,
@@ -342,7 +342,7 @@ void main() {
     ) async {
       await tester.pumpWidget(
         _app(
-          TilawaButton(
+          const TilawaButton(
             text: 'Save and continue',
             size: TilawaButtonSize.large,
             onPressed: _noop,
@@ -368,10 +368,10 @@ void main() {
 
         await tester.pumpWidget(
           _app(
-            Column(
+            const Column(
               crossAxisAlignment: CrossAxisAlignment.stretch,
               children: <Widget>[
-                const Expanded(child: SizedBox.shrink()),
+                Expanded(child: SizedBox.shrink()),
                 TilawaButton(
                   text: 'Retry',
                   isFullWidth: true,

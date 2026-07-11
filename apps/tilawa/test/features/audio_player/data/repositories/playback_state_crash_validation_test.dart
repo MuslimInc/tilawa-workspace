@@ -227,7 +227,7 @@ AudioEntity _mapMediaItem(audio_service.MediaItem item) {
   return AudioEntity(
     id: item.id,
     title: item.title,
-    url: item.extras?['url'] ?? '',
+    url: (item.extras?['url'] as String?) ?? '',
     duration: item.duration ?? Duration.zero,
     artist: item.artist,
     album: item.album,

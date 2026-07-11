@@ -142,7 +142,7 @@ class _PageSliderState extends State<PageSlider> {
             widget.onChanged(value);
           },
           onChangeEnd: (value) {
-            final rounded = value.round().clamp(1, widget.totalPages).toInt();
+            final rounded = value.round().clamp(1, widget.totalPages);
             PerfLogger.logQuranPerf(
               '[QuranPerf][Slider]',
               'pendingRelease set page=$rounded',

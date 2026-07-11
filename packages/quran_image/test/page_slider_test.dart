@@ -36,7 +36,7 @@ void main() {
 
     expect(changes, isNotEmpty);
     expect(endValue, isNotNull);
-    expect(endValue!, greaterThan(50));
+    expect(endValue, greaterThan(50));
   });
 
   /// Regression: thumb must follow the finger while [currentPage] is stale

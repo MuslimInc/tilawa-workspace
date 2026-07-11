@@ -252,12 +252,12 @@ void main() {
     test('should group multiple narratives under the same reciter', () async {
       final DownloadItem narrativeOne = downloadItem.copyWith(
         id: '1',
-        filePath: "/downloads/$testReciterName/Narrative One/001.mp3",
+        filePath: '/downloads/$testReciterName/Narrative One/001.mp3',
       );
       final DownloadItem narrativeTwo = downloadItem.copyWith(
         id: '2',
         title: 'Al-Baqarah',
-        filePath: "/downloads/$testReciterName/Narrative Two/002.mp3",
+        filePath: '/downloads/$testReciterName/Narrative Two/002.mp3',
       );
 
       when(

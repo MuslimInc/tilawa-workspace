@@ -266,9 +266,10 @@ class _HomeScreenState extends State<HomeScreen> {
       return;
     }
 
-    final double clampedTarget = snapTarget
-        .clamp(position.minScrollExtent, position.maxScrollExtent)
-        .toDouble();
+    final double clampedTarget = snapTarget.clamp(
+      position.minScrollExtent,
+      position.maxScrollExtent,
+    );
     if ((position.pixels - clampedTarget).abs() <=
         HomeScreen._heroSnapTolerance) {
       return;

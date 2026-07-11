@@ -70,11 +70,11 @@ void main() {
 
   group('Test colorFromHex:', () {
     group('Valid formats test:', () {
-      const valid6digits = <String>{'aBc', '#aBc', 'aaBBcc', '#aaBBcc'},
-          valid8digits = {'00aaBBcc', '#00aaBBcc'};
+      const valid6digits = <String>{'aBc', '#aBc', 'aaBBcc', '#aaBBcc'};
+      const valid8digits = {'00aaBBcc', '#00aaBBcc'};
 
-      const expectedColor = Color(0xffaabbcc),
-          expectedColorTransparent = Color(0x00aabbcc);
+      const expectedColor = Color(0xffaabbcc);
+      const expectedColorTransparent = Color(0x00aabbcc);
 
       for (final format in valid6digits) {
         test(

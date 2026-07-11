@@ -21,15 +21,18 @@ import '../../helpers/fakes/fake_user_profile_repository.dart';
 
 // ── Helpers ───────────────────────────────────────────────────────────────────
 
-final _cairo = DefaultMarketCatalog.enabledCitiesFor('EG').firstWhere(
-  (c) => c.cityId == 'cairo',
-);
+final MarketCity _cairo = DefaultMarketCatalog.enabledCitiesFor('EG')
+    .firstWhere(
+      (c) => c.cityId == 'cairo',
+    );
 
-final _egypt = DefaultMarketCatalog.enabledCountries.firstWhere(
+final MarketCountry _egypt = DefaultMarketCatalog.enabledCountries.firstWhere(
   (c) => c.countryCode == 'EG',
 );
 
-final _egyptCities = DefaultMarketCatalog.enabledCitiesFor('EG');
+final List<MarketCity> _egyptCities = DefaultMarketCatalog.enabledCitiesFor(
+  'EG',
+);
 
 const _userId = 'student_1';
 
@@ -242,8 +245,8 @@ void main() {
     blocTest<ProfileCompletionBloc, ProfileCompletionState>(
       'GenderSelected updates selectedGender',
       build: _makeBloc,
-      seed: () => _loadedEditing(),
-      act: (b) => b.add(GenderSelected(UserGender.female)),
+      seed: _loadedEditing,
+      act: (b) => b.add(const GenderSelected(UserGender.female)),
       expect: () => [
         isA<ProfileCompletionEditing>().having(
           (s) => s.selectedGender,
@@ -262,7 +265,7 @@ void main() {
     blocTest<ProfileCompletionBloc, ProfileCompletionState>(
       'valid past date is stored and dobFailure is cleared',
       build: _makeBloc,
-      seed: () => _loadedEditing(),
+      seed: _loadedEditing,
       act: (b) => b.add(DateOfBirthSet(validDob)),
       expect: () => [
         isA<ProfileCompletionEditing>()
@@ -274,7 +277,7 @@ void main() {
     blocTest<ProfileCompletionBloc, ProfileCompletionState>(
       'exactly the minimum age (3) is accepted (inclusive boundary)',
       build: _makeBloc,
-      seed: () => _loadedEditing(),
+      seed: _loadedEditing,
       act: (b) => b.add(DateOfBirthSet(_ageYears(_minStudentAge))),
       expect: () => [
         isA<ProfileCompletionEditing>()
@@ -286,7 +289,7 @@ void main() {
     blocTest<ProfileCompletionBloc, ProfileCompletionState>(
       'oldest allowed date (1900-01-01) is accepted',
       build: _makeBloc,
-      seed: () => _loadedEditing(),
+      seed: _loadedEditing,
       act: (b) => b.add(DateOfBirthSet(DateTime(1900))),
       expect: () => [
         isA<ProfileCompletionEditing>()
@@ -316,7 +319,7 @@ void main() {
     blocTest<ProfileCompletionBloc, ProfileCompletionState>(
       'tomorrow → clears selectedDateOfBirth, sets FutureDateOfBirthFailure',
       build: _makeBloc,
-      seed: () => _loadedEditing(),
+      seed: _loadedEditing,
       act: (b) {
         final tomorrow = DateTime.now().add(const Duration(days: 1));
         b.add(DateOfBirthSet(tomorrow));
@@ -335,7 +338,7 @@ void main() {
     blocTest<ProfileCompletionBloc, ProfileCompletionState>(
       'future DOB: canSubmit is false even if all other fields are filled',
       build: _makeBloc,
-      seed: () => _loadedEditing(),
+      seed: _loadedEditing,
       act: (b) {
         final future = DateTime(DateTime.now().year + 1, 1, 1);
         b.add(DateOfBirthSet(future));
@@ -351,7 +354,7 @@ void main() {
     blocTest<ProfileCompletionBloc, ProfileCompletionState>(
       'younger than min age → clears DOB, sets DateOfBirthTooRecentFailure',
       build: _makeBloc,
-      seed: () => _loadedEditing(),
+      seed: _loadedEditing,
       act: (b) => b.add(DateOfBirthSet(_ageYears(1))), // 1 yr < min 3
       expect: () => [
         isA<ProfileCompletionEditing>()
@@ -367,7 +370,7 @@ void main() {
     blocTest<ProfileCompletionBloc, ProfileCompletionState>(
       'too-young DOB: canSubmit is false even if all other fields are filled',
       build: _makeBloc,
-      seed: () => _loadedEditing(),
+      seed: _loadedEditing,
       act: (b) => b.add(DateOfBirthSet(_ageYears(1))),
       verify: (b) {
         final s = b.state as ProfileCompletionEditing;
@@ -398,7 +401,7 @@ void main() {
     blocTest<ProfileCompletionBloc, ProfileCompletionState>(
       '1899-12-31 → sets InvalidDateOfBirthFailure',
       build: _makeBloc,
-      seed: () => _loadedEditing(),
+      seed: _loadedEditing,
       act: (b) => b.add(DateOfBirthSet(DateTime(1899, 12, 31))),
       expect: () => [
         isA<ProfileCompletionEditing>()
@@ -489,7 +492,7 @@ void main() {
         selectedCountry: _egypt,
         selectedCity: _cairo,
       ),
-      act: (b) => b.add(ProfileSubmitted(userId: _userId)),
+      act: (b) => b.add(const ProfileSubmitted(userId: _userId)),
       verify: (b) {
         final s = b.state as ProfileCompletionEditing;
         check(s.submitAttempted).isTrue();
@@ -512,7 +515,7 @@ void main() {
         selectedCountry: _egypt,
         selectedCity: _cairo,
       ),
-      act: (b) => b.add(ProfileSubmitted(userId: _userId)),
+      act: (b) => b.add(const ProfileSubmitted(userId: _userId)),
       verify: (b) {
         final s = b.state as ProfileCompletionEditing;
         check(s.submitAttempted).isTrue();
@@ -535,7 +538,7 @@ void main() {
         selectedCountry: _egypt,
         selectedCity: _cairo,
       ),
-      act: (b) => b.add(ProfileSubmitted(userId: _userId)),
+      act: (b) => b.add(const ProfileSubmitted(userId: _userId)),
       verify: (b) {
         final s = b.state as ProfileCompletionEditing;
         check(s.submitAttempted).isTrue();
@@ -555,7 +558,7 @@ void main() {
         selectedCountry: _egypt,
         selectedCity: _cairo,
       ),
-      act: (b) => b.add(ProfileSubmitted(userId: _userId)),
+      act: (b) => b.add(const ProfileSubmitted(userId: _userId)),
       verify: (b) {
         final s = b.state as ProfileCompletionEditing;
         check(s.submitAttempted).isTrue();
@@ -573,7 +576,7 @@ void main() {
         selectedGender: UserGender.male,
         selectedDateOfBirth: DateTime(2000, 1, 1),
       ),
-      act: (b) => b.add(ProfileSubmitted(userId: _userId)),
+      act: (b) => b.add(const ProfileSubmitted(userId: _userId)),
       verify: (b) {
         final s = b.state as ProfileCompletionEditing;
         check(s.submitAttempted).isTrue();
@@ -587,7 +590,7 @@ void main() {
       'valid profile completes successfully',
       build: _makeBloc,
       seed: () => _loadedEditing(selectedDateOfBirth: DateTime(2000, 1, 1)),
-      act: (b) => b.add(ProfileSubmitted(userId: _userId)),
+      act: (b) => b.add(const ProfileSubmitted(userId: _userId)),
       expect: () => [
         isA<ProfileCompletionSaving>(),
         isA<ProfileCompletionSaved>(),
@@ -602,7 +605,7 @@ void main() {
         return _makeBloc(profileRepo: pr);
       },
       seed: () => _loadedEditing(selectedDateOfBirth: DateTime(2000, 1, 1)),
-      act: (b) => b.add(ProfileSubmitted(userId: _userId)),
+      act: (b) => b.add(const ProfileSubmitted(userId: _userId)),
       expect: () => [
         isA<ProfileCompletionSaving>(),
         isA<ProfileCompletionFailure>(),

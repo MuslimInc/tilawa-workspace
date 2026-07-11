@@ -7,7 +7,7 @@ void main() {
   late RecitationVerseRepositoryImpl repository;
 
   setUp(() {
-    repository = RecitationVerseRepositoryImpl(const VerseServiceImpl());
+    repository = const RecitationVerseRepositoryImpl(VerseServiceImpl());
   });
 
   test('returns ayah targets for a Mushaf page', () {

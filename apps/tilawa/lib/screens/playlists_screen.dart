@@ -178,7 +178,7 @@ class _PlaylistsScreenState extends State<PlaylistsScreen> {
   Widget _buildPlaylistsList(
     BuildContext context,
     AppLocalizations l10n,
-    List<dynamic> playlists,
+    List<Playlist> playlists,
   ) {
     return Column(
       children: [

@@ -95,7 +95,7 @@ class FirestoreBookingDataSource implements BookingRemoteDataSource {
       if (e.code == 'already-exists') {
         throw ConflictException(isSlotUnavailable: true, slotId: slotId);
       }
-      throw HttpException(500);
+      throw const HttpException(500);
     } on FirebaseException catch (e) {
       throw mapFirebaseException(e);
     }
@@ -124,7 +124,7 @@ class FirestoreBookingDataSource implements BookingRemoteDataSource {
       if (e.code == 'not-found') {
         throw NotFoundException('QuranBooking($bookingId)');
       }
-      throw HttpException(500);
+      throw const HttpException(500);
     } on FirebaseException catch (e) {
       throw mapFirebaseException(e);
     }
@@ -158,7 +158,7 @@ class FirestoreBookingDataSource implements BookingRemoteDataSource {
       if (e.code == 'not-found') {
         throw NotFoundException('QuranBooking($bookingId)');
       }
-      throw HttpException(500);
+      throw const HttpException(500);
     } on FirebaseException catch (e) {
       throw mapFirebaseException(e);
     }

@@ -177,7 +177,7 @@ class QuranSessionsFirebaseModule {
     );
 
     sl.registerLazySingletonIfAbsent<SessionCallProviderEventHub>(
-      () => SessionCallProviderEventHub(),
+      SessionCallProviderEventHub.new,
     );
     sl.registerLazySingletonIfAbsent<QuranSessionCallTelemetryGateway>(
       () => FirebaseCallTelemetryGateway(

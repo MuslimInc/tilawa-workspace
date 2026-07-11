@@ -64,13 +64,13 @@ final class SharedPreferencesKhatmaPlanLocalDataSource
 
   KhatmaPlan _planFromJson(Map<String, Object?> json) {
     return KhatmaPlan(
-      id: json['id'] as String,
-      createdAt: DateTime.parse(json['created_at'] as String),
-      startDate: DateTime.parse(json['start_date'] as String),
-      durationDays: json['duration_days'] as int,
-      startPage: json['start_page'] as int,
-      targetPage: json['target_page'] as int,
-      currentPage: json['current_page'] as int,
+      id: json['id']! as String,
+      createdAt: DateTime.parse(json['created_at']! as String),
+      startDate: DateTime.parse(json['start_date']! as String),
+      durationDays: json['duration_days']! as int,
+      startPage: json['start_page']! as int,
+      targetPage: json['target_page']! as int,
+      currentPage: json['current_page']! as int,
       readingStyle: KhatmaReadingStyle.values.byName(
         json['reading_style'] as String? ?? KhatmaReadingStyle.pages.name,
       ),

@@ -243,7 +243,7 @@ abstract final class MoleculesDemos {
   static Widget sectionHeader(BuildContext context) {
     return GalleryDemoFrame(
       alignment: Alignment.centerLeft,
-      child: TilawaSectionHeader.settings(context, title: 'Preferences'),
+      child: TilawaSectionHeader.settings(title: 'Preferences'),
     );
   }
 
@@ -301,7 +301,7 @@ abstract final class MoleculesDemos {
   }
 
   static Widget settingsSwitchTile(BuildContext context) {
-    return GalleryDemoFrame(
+    return const GalleryDemoFrame(
       child: _SettingsSwitchDemo(showDivider: false),
     );
   }
@@ -469,7 +469,7 @@ class _CatalogSettingsDemoState extends State<_CatalogSettingsDemo> {
             topSpacing: 0,
             children: [
               TilawaCatalogSettingsProfileRow(
-                avatar: CircleAvatar(
+                avatar: const CircleAvatar(
                   radius: 28,
                   child: Icon(Icons.person_outline),
                 ),

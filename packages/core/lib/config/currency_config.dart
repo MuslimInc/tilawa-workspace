@@ -33,7 +33,7 @@ class CurrencyConfig {
   }
 
   /// Get currency parameters for analytics
-  static Map<String, dynamic> getAnalyticsParams() {
+  static Map<String, Object> getAnalyticsParams() {
     return {
       'currency': currencyCode,
       'currency_symbol': currencySymbol,

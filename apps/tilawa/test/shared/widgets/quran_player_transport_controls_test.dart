@@ -78,7 +78,7 @@ void main() {
       }
 
       await pumpShuffle(AudioShuffleMode.none);
-      Icon offIcon = tester.widget(find.byType(Icon));
+      final Icon offIcon = tester.widget(find.byType(Icon));
       expect(offIcon.icon, Icons.shuffle);
       expect(offIcon.color, disabled);
 

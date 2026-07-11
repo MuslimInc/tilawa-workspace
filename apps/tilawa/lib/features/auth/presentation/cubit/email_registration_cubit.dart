@@ -14,7 +14,7 @@ import 'email_registration_state.dart';
 class EmailRegistrationCubit extends Cubit<EmailRegistrationState> {
   EmailRegistrationCubit(this._registerWithEmail)
     : super(
-        EmailRegistrationState(
+        const EmailRegistrationState(
           draft: EmailRegistrationDraft(
             preferredLanguageCode: LanguageConfig.defaultLanguageCode,
           ),

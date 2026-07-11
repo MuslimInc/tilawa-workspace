@@ -38,7 +38,7 @@ class _RecordingRepository implements DailyAyahWidgetRepository {
       throw StateError('render failed');
     }
     publishCalls.add(now);
-    return AyahWidgetPayload(
+    return const AyahWidgetPayload(
       dateKey: '2026-07-11',
       surahNumber: 2,
       ayahNumber: 152,
@@ -180,7 +180,6 @@ void main() {
           imagePathLight: '/l.png',
           imagePathDark: '/d.png',
         );
-        // ignore: prefer_const_constructors
         final envelope = WidgetSnapshotEnvelope<AyahWidgetPayload>(
           schemaVersion: 1,
           widgetType: IslamicWidgetType.ayah,

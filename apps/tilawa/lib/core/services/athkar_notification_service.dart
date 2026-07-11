@@ -322,7 +322,7 @@ class AthkarNotificationService implements IAthkarNotificationService {
 
       // Add a small delay to ensure cancellation completes before scheduling
       // BUG #3 FIX: Prevent race condition in cancel/schedule sequence
-      await Future<void>.delayed(Duration(milliseconds: 100));
+      await Future<void>.delayed(const Duration(milliseconds: 100));
 
       final List<ScheduledAthkarNotification>? dynamicNotifications =
           await _buildDynamicAthkarNotifications();

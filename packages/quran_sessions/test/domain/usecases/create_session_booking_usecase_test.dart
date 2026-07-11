@@ -23,7 +23,7 @@ void main() {
       auditRepository = FakeAuditRepository();
       useCase = CreateSessionBookingUseCase(
         aggregateRepository: repository,
-        lifecycleGuard: SessionLifecycleGuard(),
+        lifecycleGuard: const SessionLifecycleGuard(),
         bookingIntegrityValidator: const BookingIntegrityValidator(),
         commandGateway: commandGateway,
         notificationGateway: notificationGateway,

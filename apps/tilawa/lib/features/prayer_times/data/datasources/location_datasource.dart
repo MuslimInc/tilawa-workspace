@@ -319,14 +319,14 @@ class LocationDataSourceImpl implements LocationDataSource {
       return true;
     }
 
-    String? thoroughfare,
-        subLocality,
-        street,
-        name,
-        locality,
-        subAdmin,
-        admin,
-        country;
+    String? thoroughfare;
+    String? subLocality;
+    String? street;
+    String? name;
+    String? locality;
+    String? subAdmin;
+    String? admin;
+    String? country;
 
     for (final Placemark place in placemarks) {
       if (thoroughfare == null && isValidPart(place.thoroughfare)) {

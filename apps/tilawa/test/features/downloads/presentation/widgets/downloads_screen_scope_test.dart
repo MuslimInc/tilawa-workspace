@@ -98,7 +98,7 @@ void main() {
     scopeGetIt().registerFactory<DownloadsBloc>(() {
       createCount++;
       final mock = _MockDownloadsBloc();
-      when(() => mock.close()).thenAnswer((_) async {});
+      when(mock.close).thenAnswer((_) async {});
       when(() => mock.state).thenReturn(const DownloadsState());
       when(() => mock.stream).thenAnswer((_) => const Stream.empty());
       return mock;

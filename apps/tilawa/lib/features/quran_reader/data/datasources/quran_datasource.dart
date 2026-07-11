@@ -82,29 +82,17 @@ class QuranDataSourceImpl implements QuranDataSource {
         a,
       ) {
         final map = a as Map<String, dynamic>;
-        final text = map['text'] ?? '';
-        return AyahEntity(
-          number: map['number'] ?? 0,
-          numberInSurah: map['numberInSurah'] ?? 0,
-          surahNumber: surahNumber,
-          text: text,
-          juz: map['juz'],
-          manzil: map['manzil'],
-          page: map['page'],
-          ruku: map['ruku'],
-          hizbQuarter: map['hizbQuarter'],
-          sajda: map['sajda'] != null && map['sajda'] != false,
-        );
+        return _ayahFromMap(map, surahNumber: surahNumber);
       }).toList();
 
       // Use cleaner surah name from the info list if available
       final _SurahInfo surahInfo = surahNumber <= _surahInfoList.length
           ? _surahInfoList[surahNumber - 1]
           : _SurahInfo(
-              surahData['name'] ?? '',
-              surahData['englishName'] ?? '',
-              surahData['englishNameTranslation'] ?? '',
-              surahData['revelationType'] ?? 'Meccan',
+              (surahData['name'] as String?) ?? '',
+              (surahData['englishName'] as String?) ?? '',
+              (surahData['englishNameTranslation'] as String?) ?? '',
+              (surahData['revelationType'] as String?) ?? 'Meccan',
               ayahs.length,
             );
 
@@ -224,13 +212,9 @@ class QuranDataSourceImpl implements QuranDataSource {
         final ayahMap = ayah as Map<String, dynamic>;
         if (ayahMap['juz'] == juzNumber) {
           ayahs.add(
-            AyahEntity(
-              number: ayahMap['number'] ?? 0,
-              numberInSurah: ayahMap['numberInSurah'] ?? 0,
-              surahNumber: surah['number'] ?? 0,
-              text: ayahMap['text'] ?? '',
-              juz: ayahMap['juz'],
-              page: ayahMap['page'],
+            _ayahFromMap(
+              ayahMap,
+              surahNumber: (surah['number'] as num?)?.toInt() ?? 0,
             ),
           );
         }
@@ -256,13 +240,9 @@ class QuranDataSourceImpl implements QuranDataSource {
         final String text = ayahMap['text']?.toString().toLowerCase() ?? '';
         if (text.contains(normalizedQuery)) {
           results.add(
-            AyahEntity(
-              number: ayahMap['number'] ?? 0,
-              numberInSurah: ayahMap['numberInSurah'] ?? 0,
-              surahNumber: surah['number'] ?? 0,
-              text: ayahMap['text'] ?? '',
-              juz: ayahMap['juz'],
-              page: ayahMap['page'],
+            _ayahFromMap(
+              ayahMap,
+              surahNumber: (surah['number'] as num?)?.toInt() ?? 0,
             ),
           );
         }
@@ -271,6 +251,25 @@ class QuranDataSourceImpl implements QuranDataSource {
 
     return results;
   }
+}
+
+/// Builds an [AyahEntity] from an untyped JSON map, casting each field to its
+/// concrete type at the boundary. JSON numbers may decode as `int` or `double`,
+/// so numeric fields go through `num` before `toInt()`.
+AyahEntity _ayahFromMap(Map<String, dynamic> map, {required int surahNumber}) {
+  final dynamic sajda = map['sajda'];
+  return AyahEntity(
+    number: (map['number'] as num?)?.toInt() ?? 0,
+    numberInSurah: (map['numberInSurah'] as num?)?.toInt() ?? 0,
+    surahNumber: surahNumber,
+    text: (map['text'] as String?) ?? '',
+    juz: (map['juz'] as num?)?.toInt(),
+    manzil: (map['manzil'] as num?)?.toInt(),
+    page: (map['page'] as num?)?.toInt(),
+    ruku: (map['ruku'] as num?)?.toInt(),
+    hizbQuarter: (map['hizbQuarter'] as num?)?.toInt(),
+    sajda: sajda != null && sajda != false,
+  );
 }
 
 /// Basic surah information

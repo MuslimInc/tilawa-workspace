@@ -174,7 +174,7 @@ class QuranPlayerMorphLayout {
             TextDirection.ltr => Alignment.topLeft,
           }
         : Alignment.topCenter;
-    final bool showMorphSubtitle = true;
+    const bool showMorphSubtitle = true;
 
     return QuranPlayerMorphLayout(
       artRect: artRect,
@@ -267,7 +267,7 @@ class QuranPlayerMorphLayout {
   }) {
     final double width = viewport.width - geometry.spaceLarge * 2;
     final double top = expandedArt.bottom + geometry.spaceLarge;
-    final double height = 56;
+    const double height = 56;
     return _TitleLayout(
       bounds: Rect.fromCenter(
         center: Offset(

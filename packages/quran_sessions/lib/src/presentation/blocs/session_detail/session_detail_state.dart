@@ -252,36 +252,32 @@ final class SessionDetailSuccess extends SessionDetailState {
       callProviderKind: clearCallProviderKind
           ? null
           : callProviderKind ?? this.callProviderKind,
-      timelineLoadFailed: clearTimelineLoadFailed
-          ? false
-          : timelineLoadFailed ?? this.timelineLoadFailed,
-      pendingRescheduleLoadFailed: clearPendingRescheduleLoadFailed
-          ? false
-          : pendingRescheduleLoadFailed ?? this.pendingRescheduleLoadFailed,
+      timelineLoadFailed:
+          !clearTimelineLoadFailed &&
+          (timelineLoadFailed ?? this.timelineLoadFailed),
+      pendingRescheduleLoadFailed:
+          !clearPendingRescheduleLoadFailed &&
+          (pendingRescheduleLoadFailed ?? this.pendingRescheduleLoadFailed),
       hasOpenedExternalMeeting:
           hasOpenedExternalMeeting ?? this.hasOpenedExternalMeeting,
-      joinInProgress: clearJoinInProgress
-          ? false
-          : joinInProgress ?? this.joinInProgress,
+      joinInProgress:
+          !clearJoinInProgress && (joinInProgress ?? this.joinInProgress),
       joinFailure: clearJoinFailure ? null : joinFailure ?? this.joinFailure,
-      reportInProgress: clearReportInProgress
-          ? false
-          : reportInProgress ?? this.reportInProgress,
+      reportInProgress:
+          !clearReportInProgress && (reportInProgress ?? this.reportInProgress),
       reportFailure: clearReportFailure
           ? null
           : reportFailure ?? this.reportFailure,
-      reportSubmitted: clearReportSubmitted
-          ? false
-          : reportSubmitted ?? this.reportSubmitted,
-      disputeInProgress: clearDisputeInProgress
-          ? false
-          : disputeInProgress ?? this.disputeInProgress,
+      reportSubmitted:
+          !clearReportSubmitted && (reportSubmitted ?? this.reportSubmitted),
+      disputeInProgress:
+          !clearDisputeInProgress &&
+          (disputeInProgress ?? this.disputeInProgress),
       disputeFailure: clearDisputeFailure
           ? null
           : disputeFailure ?? this.disputeFailure,
-      disputeSubmitted: clearDisputeSubmitted
-          ? false
-          : disputeSubmitted ?? this.disputeSubmitted,
+      disputeSubmitted:
+          !clearDisputeSubmitted && (disputeSubmitted ?? this.disputeSubmitted),
       pendingRescheduleRequest: clearPendingRescheduleRequest
           ? null
           : pendingRescheduleRequest ?? this.pendingRescheduleRequest,
@@ -290,33 +286,31 @@ final class SessionDetailSuccess extends SessionDetailState {
       isAwaitingRescheduleCounterparty:
           isAwaitingRescheduleCounterparty ??
           this.isAwaitingRescheduleCounterparty,
-      rescheduleRespondInProgress: clearRescheduleRespondInProgress
-          ? false
-          : rescheduleRespondInProgress ?? this.rescheduleRespondInProgress,
+      rescheduleRespondInProgress:
+          !clearRescheduleRespondInProgress &&
+          (rescheduleRespondInProgress ?? this.rescheduleRespondInProgress),
       rescheduleRespondFailure: clearRescheduleRespondFailure
           ? null
           : rescheduleRespondFailure ?? this.rescheduleRespondFailure,
       rescheduleRespondAccepted: clearRescheduleRespondAccepted
           ? null
           : rescheduleRespondAccepted ?? this.rescheduleRespondAccepted,
-      cancellationInProgress: clearCancellationInProgress
-          ? false
-          : cancellationInProgress ?? this.cancellationInProgress,
+      cancellationInProgress:
+          !clearCancellationInProgress &&
+          (cancellationInProgress ?? this.cancellationInProgress),
       cancellationFailure: clearCancellationFailure
           ? null
           : cancellationFailure ?? this.cancellationFailure,
-      cancellationSucceeded: clearCancellationSucceeded
-          ? false
-          : cancellationSucceeded ?? this.cancellationSucceeded,
-      reviewInProgress: clearReviewInProgress
-          ? false
-          : reviewInProgress ?? this.reviewInProgress,
+      cancellationSucceeded:
+          !clearCancellationSucceeded &&
+          (cancellationSucceeded ?? this.cancellationSucceeded),
+      reviewInProgress:
+          !clearReviewInProgress && (reviewInProgress ?? this.reviewInProgress),
       reviewFailure: clearReviewFailure
           ? null
           : reviewFailure ?? this.reviewFailure,
-      reviewSubmitted: clearReviewSubmitted
-          ? false
-          : reviewSubmitted ?? this.reviewSubmitted,
+      reviewSubmitted:
+          !clearReviewSubmitted && (reviewSubmitted ?? this.reviewSubmitted),
       reviewCompleted: reviewCompleted ?? this.reviewCompleted,
       viewerRole: clearViewerRole ? null : viewerRole ?? this.viewerRole,
       viewerUserId: clearViewerUserId

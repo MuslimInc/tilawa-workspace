@@ -26,7 +26,9 @@ class LocalizationBloc
     this._getRecitersUseCase,
     this._syncUserLanguagePreferenceUseCase,
   ) : super(
-        LocalizationState(locale: Locale(LanguageConfig.defaultLanguageCode)),
+        const LocalizationState(
+          locale: Locale(LanguageConfig.defaultLanguageCode),
+        ),
       ) {
     on<LoadLanguage>(_onLoadLanguage);
     on<ChangeLanguage>(_onChangeLanguage);
@@ -46,11 +48,11 @@ class LocalizationBloc
       if (languageCode != null) {
         return LocalizationState(locale: Locale(languageCode));
       }
-      return LocalizationState(
+      return const LocalizationState(
         locale: Locale(LanguageConfig.defaultLanguageCode),
       );
     } catch (e) {
-      return LocalizationState(
+      return const LocalizationState(
         locale: Locale(LanguageConfig.defaultLanguageCode),
       );
     }

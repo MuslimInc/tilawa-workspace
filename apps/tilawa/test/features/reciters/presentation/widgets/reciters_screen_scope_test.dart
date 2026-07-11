@@ -33,7 +33,7 @@ Widget _wrapRecitersScopeTest({required Widget home}) {
   final setLanguage = _MockSetLanguageUseCase();
 
   when(
-    () => getCurrentLanguage(),
+    getCurrentLanguage.call,
   ).thenAnswer((_) async => const Right('ar'));
   when(() => setLanguage(any())).thenAnswer((_) async => const Right(null));
 

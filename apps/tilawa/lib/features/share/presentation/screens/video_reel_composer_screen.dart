@@ -80,7 +80,7 @@ class _VideoReelComposerScreenState extends State<VideoReelComposerScreen> {
     final activePages = specs.map((s) => s.pageNumber).toSet();
     _videoBoundaryKeys.removeWhere((page, _) => !activePages.contains(page));
     for (final spec in specs) {
-      _videoBoundaryKeys.putIfAbsent(spec.pageNumber, () => GlobalKey());
+      _videoBoundaryKeys.putIfAbsent(spec.pageNumber, GlobalKey.new);
     }
   }
 
@@ -201,7 +201,7 @@ class _VideoReelComposerScreenState extends State<VideoReelComposerScreen> {
                                       builder: (context, isMuted, _) {
                                         return GeneratedVideoPreview(
                                           filePath:
-                                              (bState.content as ShareVideo)
+                                              (bState.content! as ShareVideo)
                                                   .filePath,
                                           isMuted: isMuted,
                                           onMuteChanged: (muted) =>
@@ -215,7 +215,7 @@ class _VideoReelComposerScreenState extends State<VideoReelComposerScreen> {
                                     key: const ValueKey('image_preview'),
                                     child: GeneratedImagePreview(
                                       filePath:
-                                          (bState.content as ShareScreenshot)
+                                          (bState.content! as ShareScreenshot)
                                               .filePath,
                                     ),
                                   )
@@ -440,7 +440,7 @@ class _VideoReelComposerScreenState extends State<VideoReelComposerScreen> {
         appName: appTitle,
         sharedViaLabel: viaLabel,
         handles: _videoBoundaryKeys.values
-            .map((key) => WidgetCaptureHandle(key))
+            .map(WidgetCaptureHandle.new)
             .toList(),
         maxDurationSeconds: null,
       );
@@ -625,7 +625,7 @@ class _VideoLivePreviewState extends State<_VideoLivePreview> {
       );
     }
 
-    return Container(
+    return ColoredBox(
       color: widget.backgroundColor,
       child: Center(
         child: AspectRatio(

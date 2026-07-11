@@ -160,7 +160,6 @@ class TilawaSettingsGroup extends StatelessWidget {
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
             TilawaSectionHeader.settings(
-              context,
               title: title,
               leadingIcon: leadingIcon,
             ),

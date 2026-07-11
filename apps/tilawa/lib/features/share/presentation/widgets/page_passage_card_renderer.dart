@@ -106,7 +106,7 @@ class PagePassageCardRenderer extends StatelessWidget {
                       maxLines: 2,
                       overflow: TextOverflow.ellipsis,
                       textAlign: TextAlign.center,
-                      style: TextStyle(
+                      style: const TextStyle(
                         fontSize: _PagePosterLayout.arabicTitleSize,
                         height: _PagePosterLayout.arabicTitleHeight,
                         fontWeight: FontWeight.w700,
@@ -221,7 +221,7 @@ class _PosterPill extends StatelessWidget {
                 label,
                 maxLines: 1,
                 overflow: TextOverflow.ellipsis,
-                style: TextStyle(
+                style: const TextStyle(
                   fontSize: _PagePosterLayout.pillTextSize,
                   fontWeight: FontWeight.w600,
                   color: AppPagePassagePosterColors.deepGreen,

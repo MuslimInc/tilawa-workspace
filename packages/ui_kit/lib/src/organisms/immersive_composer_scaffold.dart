@@ -228,7 +228,7 @@ class _ImmersiveComposerScaffoldState extends State<ImmersiveComposerScaffold>
               ),
             if (widget.background != null)
               Positioned.fill(
-                child: RepaintBoundary(child: widget.background!),
+                child: RepaintBoundary(child: widget.background),
               ),
 
             // 2. Gesture/Preview Layer (Wrapped in RepaintBoundary to prevent repaints during overlay animations)
@@ -310,7 +310,7 @@ class _ImmersiveComposerScaffoldState extends State<ImmersiveComposerScaffold>
                   scale: _controller,
                   child: IgnorePointer(
                     ignoring: !_isVisible,
-                    child: RepaintBoundary(child: widget.floatingActionButton!),
+                    child: RepaintBoundary(child: widget.floatingActionButton),
                   ),
                 ),
               ),

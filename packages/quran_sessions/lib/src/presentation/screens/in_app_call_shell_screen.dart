@@ -659,7 +659,7 @@ class _CallChromeIconButton extends StatelessWidget {
                       child: iconWidget!,
                     )
                   : Icon(
-                      icon!,
+                      icon,
                       color: onPressed == null
                           ? iconColor.withValues(alpha: 0.38)
                           : iconColor,

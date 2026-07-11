@@ -97,7 +97,7 @@ void main() {
       );
       final tokens = lightTheme.componentTokens.experimentalBadge;
       final container = tester.widget<Container>(find.byType(Container).first);
-      final decoration = container.decoration as BoxDecoration;
+      final decoration = container.decoration! as BoxDecoration;
       expect(decoration.color, tokens.backgroundColor);
     });
 
@@ -118,7 +118,7 @@ void main() {
       );
       final tokens = darkTheme.componentTokens.experimentalBadge;
       final container = tester.widget<Container>(find.byType(Container).first);
-      final decoration = container.decoration as BoxDecoration;
+      final decoration = container.decoration! as BoxDecoration;
       expect(decoration.color, tokens.backgroundColor);
     });
 

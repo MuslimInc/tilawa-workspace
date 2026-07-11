@@ -312,7 +312,7 @@ void main() {
     });
 
     test('invalid payload flags startup without Athkar route', () {
-      AppRouter.pendingLocalNotificationResponse = NotificationResponse(
+      AppRouter.pendingLocalNotificationResponse = const NotificationResponse(
         notificationResponseType: NotificationResponseType.selectedNotification,
         payload: 'not-json-and-not-tasbeeh',
       );
@@ -324,7 +324,7 @@ void main() {
     });
 
     test('settings payload resolves to settings not Athkar', () {
-      AppRouter.pendingLocalNotificationResponse = NotificationResponse(
+      AppRouter.pendingLocalNotificationResponse = const NotificationResponse(
         notificationResponseType: NotificationResponseType.selectedNotification,
         id: 55,
         payload: '{"type":"settings"}',
@@ -362,7 +362,7 @@ void main() {
     });
 
     test('fresh valid Athkar payload resolves once during bootstrap', () {
-      AppRouter.pendingLocalNotificationResponse = NotificationResponse(
+      AppRouter.pendingLocalNotificationResponse = const NotificationResponse(
         notificationResponseType: NotificationResponseType.selectedNotification,
         id: morningAthkarNotificationId,
         payload: morningAthkarPayload,
@@ -438,7 +438,7 @@ void main() {
 
     test('consumePendingNotificationLaunchState is idempotent', () {
       AppRouter.setPendingColdStartRoute(morningAthkarLocation);
-      AppRouter.pendingLocalNotificationResponse = NotificationResponse(
+      AppRouter.pendingLocalNotificationResponse = const NotificationResponse(
         notificationResponseType: NotificationResponseType.selectedNotification,
         id: morningAthkarNotificationId,
         payload: morningAthkarPayload,
@@ -461,7 +461,7 @@ void main() {
       );
 
       AppRouter.setPendingColdStartRoute(morningAthkarLocation);
-      AppRouter.pendingLocalNotificationResponse = NotificationResponse(
+      AppRouter.pendingLocalNotificationResponse = const NotificationResponse(
         notificationResponseType: NotificationResponseType.selectedNotification,
         id: morningAthkarNotificationId,
         payload: morningAthkarPayload,

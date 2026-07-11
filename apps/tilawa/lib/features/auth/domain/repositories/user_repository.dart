@@ -1,5 +1,5 @@
-import '../../domain/entities/email_registration_draft.dart';
-import '../../domain/entities/user_entity.dart';
+import '../entities/email_registration_draft.dart';
+import '../entities/user_entity.dart';
 
 abstract class UserRepository {
   Future<void> saveUserData(

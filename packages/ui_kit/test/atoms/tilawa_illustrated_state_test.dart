@@ -81,7 +81,7 @@ void main() {
     ) async {
       await tester.pumpWidget(
         _wrap(
-          TilawaIllustratedState(
+          const TilawaIllustratedState(
             title: 'Fallback state',
           ),
         ),
@@ -170,11 +170,11 @@ void main() {
     ) async {
       await tester.pumpWidget(
         _wrap(
-          TilawaIllustratedState(
+          const TilawaIllustratedState(
             icon: Icons.search_off_rounded,
             title: 'No results',
-            primaryAction: const Text('Primary'),
-            secondaryAction: const Text('Secondary'),
+            primaryAction: Text('Primary'),
+            secondaryAction: Text('Secondary'),
           ),
         ),
       );

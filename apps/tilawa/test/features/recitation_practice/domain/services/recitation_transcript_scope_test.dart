@@ -7,9 +7,9 @@ import 'package:tilawa/features/recitation_practice/domain/services/recitation_t
 import 'package:tilawa/features/recitation_practice/domain/usecases/compare_recitation_use_case.dart';
 
 void main() {
-  final CompareRecitationUseCase compare = CompareRecitationUseCase(
-    const RecitationSpeechNormalizer(TextNormalizationServiceImpl()),
-    const RecitationTextAligner(),
+  const CompareRecitationUseCase compare = CompareRecitationUseCase(
+    RecitationSpeechNormalizer(TextNormalizationServiceImpl()),
+    RecitationTextAligner(),
   );
 
   String normalize(String text) => compare.normalizeComparisonText(text);

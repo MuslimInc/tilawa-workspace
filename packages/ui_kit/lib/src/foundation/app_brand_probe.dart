@@ -1,3 +1,5 @@
+import 'dart:ui';
+
 import 'app_colors.dart';
 
 /// Brand accent and scheme-role helpers.
@@ -8,7 +10,7 @@ abstract final class AppBrandProbe {
   AppBrandProbe._();
 
   /// Production global accent green (`#1DAB61`).
-  static const actionGreen = AppColors.brandActionGreen;
+  static const Color actionGreen = AppColors.brandActionGreen;
 
   /// Whether [primary] uses brand-locked neutral containers + ink onPrimary.
   static bool usesBrandLockedSchemeRoles(int primaryArgb) {

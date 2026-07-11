@@ -49,7 +49,7 @@ class TilawaHeroSummaryProgress extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final tokens = Theme.of(context).tokens;
-    final double clampedProgress = progress.clamp(0.0, 1.0).toDouble();
+    final double clampedProgress = progress.clamp(0.0, 1.0);
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,

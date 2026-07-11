@@ -322,8 +322,8 @@ void main() {
         await repository.initializeListeners();
 
         messageController.add(
-          RemoteMessage(
-            data: const {
+          const RemoteMessage(
+            data: {
               'actionType': 'teacher_application_reviewed',
               'status': 'approved',
               'applicationId': 'app_1',
@@ -362,8 +362,8 @@ void main() {
         await repository.initializeListeners();
 
         messageController.add(
-          RemoteMessage(
-            data: const {
+          const RemoteMessage(
+            data: {
               'actionType': 'session_revoked',
             },
           ),
@@ -394,8 +394,8 @@ void main() {
         await repository.initializeListeners();
 
         messageController.add(
-          RemoteMessage(
-            data: const {
+          const RemoteMessage(
+            data: {
               'actionType': 'session_taken_over',
               'sessionId': 'session_42',
             },
@@ -429,8 +429,8 @@ void main() {
         await repository.initializeListeners();
 
         messageController.add(
-          RemoteMessage(
-            data: const {'actionType': 'device_revoked'},
+          const RemoteMessage(
+            data: {'actionType': 'device_revoked'},
           ),
         );
         await Future<void>.delayed(Duration.zero);

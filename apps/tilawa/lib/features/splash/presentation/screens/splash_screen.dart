@@ -29,7 +29,7 @@ class SplashScreen extends StatefulWidget {
 }
 
 class _SplashScreenState extends State<SplashScreen> {
-  static final Color _launchBackground = AppColors.launchSplashBackground;
+  static const Color _launchBackground = AppColors.launchSplashBackground;
   static final SystemUiOverlayStyle _launchOverlayStyle =
       AppSystemChromeStyle.buildColoredScreenStyle(
         backgroundColor: _launchBackground,

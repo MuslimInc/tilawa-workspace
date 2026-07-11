@@ -108,7 +108,7 @@ void main() {
   group('TeacherDashboardBloc — return from working hours', () {
     blocTest<TeacherDashboardBloc, TeacherDashboardState>(
       'reload after empty dashboard shows generated open slots',
-      build: () => buildBloc(),
+      build: buildBloc,
       act: (bloc) async {
         bloc.add(const TeacherDashboardLoadRequested(teacherId: 'teacher_1'));
         await bloc.stream.firstWhere((state) => state is TeacherDashboardEmpty);

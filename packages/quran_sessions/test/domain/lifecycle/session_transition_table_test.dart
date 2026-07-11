@@ -62,7 +62,7 @@ void main() {
     });
 
     test('equatable compares transition instances by value', () {
-      final first = SessionTransition(
+      const first = SessionTransition(
         action: SessionAction.expireReservation,
         from: {
           SessionLifecycleStatus.draft,
@@ -73,7 +73,7 @@ void main() {
         requiresReason: false,
         sideEffects: [TransitionSideEffect.releaseSlot],
       );
-      final second = SessionTransition(
+      const second = SessionTransition(
         action: SessionAction.expireReservation,
         from: {
           SessionLifecycleStatus.draft,

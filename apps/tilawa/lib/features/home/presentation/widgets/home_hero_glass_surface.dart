@@ -52,9 +52,8 @@ class HomeHeroGlassSurface extends StatelessWidget {
             alpha: screenTokens.homePrayerHeroShadowOpacity,
           )
         : colorScheme.shadow.withValues(alpha: tokens.opacityShadowStrong);
-    final bool showShadow = usePrayerHeroTokens
-        ? screenTokens.homePrayerHeroShadowOpacity > 0
-        : true;
+    final bool showShadow =
+        !usePrayerHeroTokens || screenTokens.homePrayerHeroShadowOpacity > 0;
 
     final Widget decoratedChild = DecoratedBox(
       decoration: BoxDecoration(

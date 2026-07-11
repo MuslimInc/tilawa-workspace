@@ -31,7 +31,7 @@ class RecitersLocalDataSourceImpl implements RecitersLocalDataSource {
       final fileName = 'assets/json/reciters_$lang.json';
 
       final String jsonString = await rootBundle.loadString(fileName);
-      final Map<String, dynamic> data = json.decode(jsonString);
+      final data = json.decode(jsonString) as Map<String, dynamic>;
       final recitersList = data['reciters'] as List;
 
       return recitersList

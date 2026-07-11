@@ -243,7 +243,7 @@ class TasbeehReminderNotificationService implements TasbeehReminderScheduler {
     return lookupAppLocalizations(Locale(languageCode));
   }
 
-  NotificationDetails get _notificationDetails => NotificationDetails(
+  NotificationDetails get _notificationDetails => const NotificationDetails(
     android: AndroidNotificationDetails(
       TasbeehConstants.reminderChannelId,
       _channelName,
@@ -253,6 +253,6 @@ class TasbeehReminderNotificationService implements TasbeehReminderScheduler {
       icon: NotificationConfig.androidSmallIcon,
       color: AndroidNotificationDefaults.accentColor,
     ),
-    iOS: const DarwinNotificationDetails(),
+    iOS: DarwinNotificationDetails(),
   );
 }

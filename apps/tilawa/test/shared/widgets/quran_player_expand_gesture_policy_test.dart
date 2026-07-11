@@ -51,7 +51,7 @@ void main() {
 
         expect(once, closeTo(0.1, 0.001));
         expect(twice, closeTo(0.2, 0.001));
-        expect((twice - once), closeTo(once, 0.001));
+        expect(twice - once, closeTo(once, 0.001));
       });
     });
 

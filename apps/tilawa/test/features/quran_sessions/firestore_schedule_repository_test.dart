@@ -53,7 +53,7 @@ void main() {
       check(perf.traceCounts['firestore_getSchedule']).equals(1);
 
       await dataSource.saveSchedule(
-        WeeklyScheduleDto(
+        const WeeklyScheduleDto(
           teacherId: 'teacher_1',
           timezone: 'Africa/Cairo',
           slotDurationMinutes: 45,
@@ -61,7 +61,7 @@ void main() {
           maxHorizonDays: 30,
           bufferBeforeMinutes: 0,
           bufferAfterMinutes: 0,
-          weeklyRules: const {},
+          weeklyRules: {},
           version: 2,
         ),
       );

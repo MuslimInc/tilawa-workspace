@@ -63,7 +63,7 @@ class QuranSessionsMvpModule {
       () => FakeMvpSessionPolicyRepository(store),
     );
     sl.registerLazySingletonIfAbsent<MarketConfigRepository>(
-      () => FakeMvpMarketConfigRepository(),
+      FakeMvpMarketConfigRepository.new,
     );
     sl.registerLazySingletonIfAbsent<TeacherApplicationAccessRepository>(
       () => TeacherApplicationAccessRepositoryImpl(
@@ -86,12 +86,12 @@ class QuranSessionsMvpModule {
     );
 
     sl.registerLazySingletonIfAbsent<MarketSchedulingConfigRepository>(
-      () => MarketSchedulingConfigRepositoryImpl(
-        const CatalogMarketSchedulingConfigRemoteDataSource(),
+      () => const MarketSchedulingConfigRepositoryImpl(
+        CatalogMarketSchedulingConfigRemoteDataSource(),
       ),
     );
     sl.registerLazySingletonIfAbsent<FridayReviewReminderStore>(
-      () => InMemoryFridayReviewReminderStore(),
+      InMemoryFridayReviewReminderStore.new,
     );
 
     final lifecycle = FakeMvpSessionLifecycleStack.instance;
@@ -114,10 +114,10 @@ class QuranSessionsMvpModule {
 
     registerUseCases(sl);
     sl.registerLazySingletonIfAbsent<SessionCallProviderEventHub>(
-      () => SessionCallProviderEventHub(),
+      SessionCallProviderEventHub.new,
     );
     sl.registerLazySingletonIfAbsent<QuranSessionCallTelemetryGateway>(
-      () => InMemoryCallTelemetryGateway(),
+      InMemoryCallTelemetryGateway.new,
     );
     sl.registerLazySingletonIfAbsent<QuranSessionCallTelemetryCoordinator>(
       () => QuranSessionCallTelemetryCoordinator(
@@ -323,7 +323,7 @@ class QuranSessionsMvpModule {
 
     // ── Application-layer caching use cases ──────────────────────────────────
     sl.registerLazySingletonIfAbsent<QuranSessionCacheStore>(
-      () => MemoryCacheStore(),
+      MemoryCacheStore.new,
     );
     sl.registerLazySingletonIfAbsent(
       () => GetTeacherDashboardUseCase(

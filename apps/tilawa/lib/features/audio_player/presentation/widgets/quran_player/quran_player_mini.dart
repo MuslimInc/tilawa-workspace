@@ -262,9 +262,9 @@ class _YtMusicMiniPlayerBody extends StatelessWidget {
     final shellTokens = Theme.of(context).componentTokens.adaptiveShell;
     final theme = Theme.of(context);
     final designTokens = theme.tokens;
-    final bool sleepTimerEnabled = shellPillLayout || shellDockLayout
-        ? false
-        : context.watch<SettingsCubit>().state.isSleepTimerEnabled;
+    final bool sleepTimerEnabled =
+        !(shellPillLayout || shellDockLayout) &&
+        context.watch<SettingsCubit>().state.isSleepTimerEnabled;
     final String subtitle = audio.artist ?? context.l10n.unknownReciter;
     final TextStyle titleStyle =
         (theme.textTheme.titleSmall ?? const TextStyle()).copyWith(

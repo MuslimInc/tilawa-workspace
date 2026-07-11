@@ -62,9 +62,9 @@ class PrayerStatusCubit extends Cubit<PrayerStatusState> {
       final int? scheduledTimeMs = _intValue(
         data['scheduled_time_ms'] ?? data['scheduled_ms'],
       );
-      final bool adhanEnabled = data['adhan_enabled'] ?? false;
+      final bool adhanEnabled = (data['adhan_enabled'] as bool?) ?? false;
       final String? soundName =
-          data['sound_name'] ?? (adhanEnabled ? 'adhan' : null);
+          (data['sound_name'] as String?) ?? (adhanEnabled ? 'adhan' : null);
       final int? notificationId = _intValue(data['notification_id']);
 
       if (prayerName == null || scheduledTimeMs == null) {

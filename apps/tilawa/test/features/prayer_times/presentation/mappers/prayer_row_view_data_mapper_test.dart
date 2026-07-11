@@ -25,7 +25,7 @@ void main() {
 
       final now = DateTime.now();
       final prayerTimes = _buildPrayerTimes(now);
-      final settings = const PrayerSettingsEntity(showSunrise: false);
+      const settings = PrayerSettingsEntity(showSunrise: false);
       final currentPrayer = PrayerTimeItem(
         type: PrayerType.dhuhr,
         time: prayerTimes.dhuhr,
@@ -59,7 +59,7 @@ void main() {
 
       final now = DateTime.now();
       final prayerTimes = _buildPrayerTimes(now);
-      final settings = const PrayerSettingsEntity(showSunrise: true);
+      const settings = PrayerSettingsEntity(showSunrise: true);
       final currentPrayer = PrayerTimeItem(
         type: PrayerType.dhuhr,
         time: prayerTimes.dhuhr,
@@ -100,14 +100,14 @@ void main() {
 
       final now = DateTime.now();
       final prayerTimes = _buildPrayerTimes(now);
-      final settings = PrayerSettingsEntity(
-        fajrNotification: const PrayerNotificationSettings(
+      const settings = PrayerSettingsEntity(
+        fajrNotification: PrayerNotificationSettings(
           mode: PrayerAlertMode.none,
         ),
-        dhuhrNotification: const PrayerNotificationSettings(
+        dhuhrNotification: PrayerNotificationSettings(
           mode: PrayerAlertMode.notification,
         ),
-        asrNotification: const PrayerNotificationSettings(
+        asrNotification: PrayerNotificationSettings(
           mode: PrayerAlertMode.adhan,
         ),
       );

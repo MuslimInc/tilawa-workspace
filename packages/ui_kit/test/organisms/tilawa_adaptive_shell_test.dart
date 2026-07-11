@@ -1136,7 +1136,7 @@ void main() {
                 widget.width == iconSize &&
                 widget.height == iconSize &&
                 widget.child is Center &&
-                (widget.child as Center).child is FittedBox,
+                (widget.child! as Center).child is FittedBox,
           ),
         );
         expect(iconBox, findsOneWidget);

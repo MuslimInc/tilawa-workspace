@@ -1,26 +1,28 @@
 # Shared static analysis for the Tilawa workspace (Melos / Dart workspace).
 # Each member package uses: `include: ../../analysis_options.yaml`
 #
+# Base: very_good_analysis (strict) + flutter_lints + bloc_lint.
+#
+# Philosophy — signal over noise:
+# Keep every correctness / async / lifecycle / typing rule that catches real
+# bugs. Silence the high-volume *style* rules that were burying the signal
+# (~47k of ~49k infos came from docs, line-width, import-style, and ordering
+# lints). Silenced rules are safe to revisit in focused style-only PRs, but
+# they must never hide a correctness diagnostic.
+#
+# Strict language modes (strict-casts / strict-inference / strict-raw-types)
+# are LEFT ON via very_good_analysis — they surface real `dynamic`-at-boundary
+# bugs. Fix violations with explicit casts at the JSON/storage boundary rather
+# than weakening the mode.
+#
 # Deferred (documented for follow-up):
 # - do_not_use_environment — Tilawa uses fromEnvironment for launch and flags.
-# - always_use_package_imports / strict avoid_relative_lib_imports — large migration;
-#   `avoid_relative_lib_imports` is set to ignore below until imports are migrated.
-# - prefer_expression_function_bodies — often hurts Flutter `build` readability.
+# - always_use_package_imports / avoid_relative_lib_imports — large import
+#   migration; disabled below until a dedicated PR lands.
 #
-# Strict language modes (strict-casts / strict-inference / strict-raw-types) are
-# deferred: turning them on surfaced a large backlog of dynamic/json fixes across
-# apps/tilawa and packages. Re-enable in a dedicated migration PR.
-#
-# Extra style lints were omitted where they produced hundreds of infos and break
-# `melos run analyze` (`dart analyze --fatal-infos`). Add them in focused PRs.
-#
-# Bloc: `bloc_lint` recommended rules (see https://pub.dev/packages/bloc_lint).
-# Run `melos run bloc:lint` for the bloc_tools CLI; member packages declare
-# `bloc_lint` in dev_dependencies so the include resolves.
-
-linter:
-  rules:
-    parameter_assignments: true
+# Bloc: `bloc_lint` recommended rules (https://pub.dev/packages/bloc_lint).
+# Run `melos run bloc:lint`; member packages declare `bloc_lint` in
+# dev_dependencies so the include resolves.
 
 include:
   - package:very_good_analysis/analysis_options.yaml
@@ -29,13 +31,22 @@ include:
 
 analyzer:
   errors:
+    # --- Correctness diagnostics: never silently accepted. -----------------
     missing_return: error
     missing_required_param: error
     must_be_immutable: error
+
+    # --- Keep cleanup findings visible without failing the build. ----------
     dead_code: warning
     unused_import: warning
     unused_local_variable: warning
+    unused_field: warning
+    unused_element: warning
+
+    # --- Required by code generation (Freezed / JsonSerializable). ---------
     invalid_annotation_target: ignore
+
+    # --- Import migration deferred to a focused PR. ------------------------
     avoid_relative_lib_imports: ignore
   exclude:
     - "**/*.g.dart"
@@ -50,7 +61,33 @@ analyzer:
     - "**/parse_json.dart"
     - "packages/quran_qcf/scratch/**"
 
-# Formatter defaults (see dart-run-static-analysis skill; matches AGENTS 80 cols).
+linter:
+  rules:
+    # --- Kept ON (mutation safety / correctness). --------------------------
+    parameter_assignments: true
+
+    # --- Silenced: high-volume style noise with no correctness value. ------
+    # These generated the overwhelming majority of infos and buried the real
+    # async / typing / lifecycle diagnostics. Revisit in style-only PRs.
+    public_member_api_docs: false # app packages are not a published API surface
+    comment_references: false
+    lines_longer_than_80_chars: false # formatter owns width (page_width: 80)
+    omit_local_variable_types: false # explicit local types are acceptable
+    avoid_types_on_closure_parameters: false
+    avoid_final_parameters: false
+    avoid_redundant_argument_values: false
+    cascade_invocations: false
+    prefer_int_literals: false
+    unnecessary_raw_strings: false
+    always_put_required_named_parameters_first: false
+    sort_constructors_first: false
+    sort_pub_dependencies: false
+    flutter_style_todos: false
+    # Import ordering / style — revisit together with the import migration.
+    directives_ordering: false
+    always_use_package_imports: false
+
+# Formatter defaults (matches the 80-column workspace convention).
 formatter:
   page_width: 80
   trailing_commas: preserve

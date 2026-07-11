@@ -17,9 +17,10 @@ final class UpdateKhatmaProgressUseCase {
       if (plan == null) {
         return const Right(null);
       }
-      final int visitedPage = currentPage
-          .clamp(KhatmaPlan.firstQuranPage, KhatmaPlan.lastQuranPage)
-          .toInt();
+      final int visitedPage = currentPage.clamp(
+        KhatmaPlan.firstQuranPage,
+        KhatmaPlan.lastQuranPage,
+      );
       if (visitedPage <= plan.currentPage) {
         return Right(plan);
       }

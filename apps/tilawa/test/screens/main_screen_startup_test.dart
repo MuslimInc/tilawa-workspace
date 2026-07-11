@@ -169,7 +169,7 @@ void main() {
 
     final mockAppReviewTriggerManager = _MockAppReviewTriggerManager();
     when(
-      () => mockAppReviewTriggerManager.onSessionStarted(),
+      mockAppReviewTriggerManager.onSessionStarted,
     ).thenAnswer((_) async {});
     getIt.registerSingleton<AppReviewTriggerManager>(
       mockAppReviewTriggerManager,
@@ -204,7 +204,7 @@ void main() {
 
     final mockGetLanguage = _MockGetCurrentLanguageUseCase();
     when(
-      () => mockGetLanguage(),
+      mockGetLanguage.call,
     ).thenAnswer((_) async => const Right<Failure, String>('en'));
     final mockSetLanguage = _MockSetLanguageUseCase();
     when(
@@ -212,10 +212,10 @@ void main() {
     ).thenAnswer((_) async => const Right<Failure, void>(null));
 
     final mockGetReciters = _MockGetRecitersUseCase();
-    when(() => mockGetReciters.call()).thenAnswer(
+    when(mockGetReciters.call).thenAnswer(
       (_) async => const Right<Failure, List<ReciterEntity>>([]),
     );
-    when(() => mockGetReciters.invalidateCache()).thenReturn(null);
+    when(mockGetReciters.invalidateCache).thenReturn(null);
 
     getIt.registerSingleton<GetRecitersUseCase>(mockGetReciters);
     getIt.registerFactory<AlphabetScrollbarBloc>(AlphabetScrollbarBloc.new);
@@ -300,12 +300,12 @@ void main() {
       ),
     ];
 
-    when(() => mockGetReciters.call()).thenAnswer(
+    when(mockGetReciters.call).thenAnswer(
       (_) async => const Right<Failure, List<ReciterEntity>>(reciters),
     );
-    when(() => mockGetReciters.invalidateCache()).thenReturn(null);
+    when(mockGetReciters.invalidateCache).thenReturn(null);
     when(
-      () => mockGetLanguage(),
+      mockGetLanguage.call,
     ).thenAnswer((_) async => const Right<Failure, String>('en'));
     when(
       () => mockSetLanguage(any()),

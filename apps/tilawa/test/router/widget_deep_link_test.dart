@@ -12,14 +12,14 @@ void main() {
       tester,
     ) async {
       final context = await _pumpContext(tester);
-      final route = const WidgetActionRoute(action: 'prayer');
+      const route = WidgetActionRoute(action: 'prayer');
       final redirectPath = route.redirect(
         context,
         _mockState('/widget/prayer'),
       );
       expect(redirectPath, '/prayer-times');
 
-      final route2 = const WidgetActionRoute(action: 'prayer-times');
+      const route2 = WidgetActionRoute(action: 'prayer-times');
       final redirectPath2 = route2.redirect(
         context,
         _mockState('/widget/prayer-times'),
@@ -31,14 +31,14 @@ void main() {
       tester,
     ) async {
       final context = await _pumpContext(tester);
-      final route = const WidgetActionRoute(action: 'ayah', id: '114');
+      const route = WidgetActionRoute(action: 'ayah', id: '114');
       final redirectPath = route.redirect(
         context,
         _mockState('/widget/ayah?ayah=5'),
       );
       expect(redirectPath, '/quran-reader/114?ayah-number=5');
 
-      final routeFallback = const WidgetActionRoute(action: 'ayah');
+      const routeFallback = WidgetActionRoute(action: 'ayah');
       final redirectFallback = routeFallback.redirect(
         context,
         _mockState('/widget/ayah'),
@@ -50,7 +50,7 @@ void main() {
       tester,
     ) async {
       final context = await _pumpContext(tester);
-      final route = const WidgetActionRoute(action: 'athkar');
+      const route = WidgetActionRoute(action: 'athkar');
       final redirectPath = route.redirect(
         context,
         _mockState('/widget/athkar'),
@@ -62,7 +62,7 @@ void main() {
       tester,
     ) async {
       final context = await _pumpContext(tester);
-      final route = const WidgetActionRoute(action: 'hijri');
+      const route = WidgetActionRoute(action: 'hijri');
       final redirectPath = route.redirect(
         context,
         _mockState('/widget/hijri'),
@@ -74,7 +74,7 @@ void main() {
       tester,
     ) async {
       final context = await _pumpContext(tester);
-      final route = const WidgetActionRoute(action: 'unknown_stuff');
+      const route = WidgetActionRoute(action: 'unknown_stuff');
       final redirectPath = route.redirect(
         context,
         _mockState('/widget/unknown_stuff'),

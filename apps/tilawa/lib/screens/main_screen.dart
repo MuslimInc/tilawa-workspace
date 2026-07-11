@@ -40,13 +40,13 @@ class MainScreen extends StatelessWidget {
           }
 
           final bool isKeyboardOpen = context.isKeyboardVisible;
-          final bool playerShouldShow = state.isAudioBindingDeferred
-              ? false
-              : context.select((AudioPlayerBloc bloc) {
-                  final AudioPlayerState audioState = bloc.state;
-                  return audioState.shouldShowBottomPlayer &&
-                      audioState.currentAudio != null;
-                });
+          final bool playerShouldShow =
+              !state.isAudioBindingDeferred &&
+              context.select((AudioPlayerBloc bloc) {
+                final AudioPlayerState audioState = bloc.state;
+                return audioState.shouldShowBottomPlayer &&
+                    audioState.currentAudio != null;
+              });
 
           final double playerHeight = playerShouldShow && !isKeyboardOpen
               ? context.tokens.playerCollapsedHeight

@@ -182,7 +182,7 @@ class FirebaseCrashlyticsServiceImpl implements CrashlyticsService {
   @override
   Future<void> setCustomKey(String key, dynamic value) async {
     try {
-      await _crashlytics.setCustomKey(key, value);
+      await _crashlytics.setCustomKey(key, value as Object);
     } catch (e) {
       logger.d('Crashlytics setCustomKey failed: $e');
     }
@@ -192,7 +192,7 @@ class FirebaseCrashlyticsServiceImpl implements CrashlyticsService {
   Future<void> setCustomKeys(Map<String, dynamic> keys) async {
     try {
       for (final MapEntry<String, dynamic> entry in keys.entries) {
-        await _crashlytics.setCustomKey(entry.key, entry.value);
+        await _crashlytics.setCustomKey(entry.key, entry.value as Object);
       }
     } catch (e) {
       logger.d('Crashlytics setCustomKeys failed: $e');

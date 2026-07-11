@@ -93,12 +93,12 @@ void main() {
     });
 
     test('hydrates an existing saved schedule', () async {
-      repo.schedule = WeeklySchedule(
+      repo.schedule = const WeeklySchedule(
         teacherId: 'teacher_1',
         timezone: 'Asia/Riyadh',
         slotDuration: SlotDuration.sixty,
         rules: {
-          Weekday.sunday: const [
+          Weekday.sunday: [
             TimeRange(start: LocalTime(9, 0), end: LocalTime(12, 0)),
           ],
         },
@@ -236,12 +236,12 @@ void main() {
     });
 
     test('rejects invalid draft without calling repository', () async {
-      repo.schedule = WeeklySchedule(
+      repo.schedule = const WeeklySchedule(
         teacherId: 'teacher_1',
         timezone: 'Africa/Cairo',
         slotDuration: SlotDuration.thirty,
         rules: {
-          Weekday.saturday: const [
+          Weekday.saturday: [
             TimeRange(start: LocalTime(9, 0), end: LocalTime(17, 0)),
           ],
         },
@@ -433,15 +433,15 @@ void main() {
     });
 
     test('reopen weekdays match backend schedule', () async {
-      repo.schedule = WeeklySchedule(
+      repo.schedule = const WeeklySchedule(
         teacherId: 'teacher_1',
         timezone: 'Africa/Cairo',
         slotDuration: SlotDuration.thirty,
         rules: {
-          Weekday.tuesday: const [
+          Weekday.tuesday: [
             TimeRange(start: LocalTime(10, 0), end: LocalTime(14, 0)),
           ],
-          Weekday.thursday: const [
+          Weekday.thursday: [
             TimeRange(start: LocalTime(18, 0), end: LocalTime(20, 0)),
           ],
         },

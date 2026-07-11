@@ -298,9 +298,7 @@ class AppStartupTasks {
           AppStartupTasks.skipNonCriticalServicesForTesting
               ? Duration.zero
               : nonCriticalStartupDelay,
-          () {
-            return _initializeNonCriticalServicesInBackground();
-          },
+          _initializeNonCriticalServicesInBackground,
         ),
       );
     });

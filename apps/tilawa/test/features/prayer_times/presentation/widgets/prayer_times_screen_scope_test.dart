@@ -45,7 +45,7 @@ Widget wrapPrayerTimesScopeTest({required Widget home}) {
   mocktail
       .when(() => localizationBloc.stream)
       .thenAnswer((_) => const Stream.empty());
-  mocktail.when(() => localizationBloc.close()).thenAnswer((_) async {});
+  mocktail.when(localizationBloc.close).thenAnswer((_) async {});
 
   return MaterialApp(
     localizationsDelegates: AppLocalizations.localizationsDelegates,
@@ -189,7 +189,7 @@ void main() {
     scopeGetIt().registerFactory<PrayerTimesBloc>(() {
       prayerTimesCreateCount++;
       final mock = _MockPrayerTimesBloc();
-      mocktail.when(() => mock.close()).thenAnswer((_) async {});
+      mocktail.when(mock.close).thenAnswer((_) async {});
       mocktail.when(() => mock.state).thenReturn(const PrayerTimesState());
       mocktail.when(() => mock.stream).thenAnswer((_) => const Stream.empty());
       return mock;
@@ -197,7 +197,7 @@ void main() {
     scopeGetIt().registerFactory<PrayerPermissionsCubit>(() {
       permissionsCreateCount++;
       final mock = _MockPrayerPermissionsCubit();
-      mocktail.when(() => mock.close()).thenAnswer((_) async {});
+      mocktail.when(mock.close).thenAnswer((_) async {});
       mocktail
           .when(() => mock.state)
           .thenReturn(
@@ -239,7 +239,7 @@ void main() {
 
   testWidgets('dispatches loadPrayerTimes when scope mounts', (tester) async {
     final loadMock = _MockPrayerTimesBloc();
-    mocktail.when(() => loadMock.close()).thenAnswer((_) async {});
+    mocktail.when(loadMock.close).thenAnswer((_) async {});
     mocktail.when(() => loadMock.state).thenReturn(const PrayerTimesState());
     mocktail
         .when(() => loadMock.stream)
@@ -276,7 +276,7 @@ void main() {
     tester,
   ) async {
     final loadMock = _MockPrayerTimesBloc();
-    mocktail.when(() => loadMock.close()).thenAnswer((_) async {});
+    mocktail.when(loadMock.close).thenAnswer((_) async {});
     mocktail.when(() => loadMock.state).thenReturn(const PrayerTimesState());
     mocktail
         .when(() => loadMock.stream)

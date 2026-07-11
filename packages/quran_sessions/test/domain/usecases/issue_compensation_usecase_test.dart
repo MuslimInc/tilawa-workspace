@@ -25,7 +25,7 @@ void main() {
       compensationGateway = FakeCompensationGateway();
       useCase = IssueCompensationUseCase(
         aggregateRepository: repository,
-        lifecycleGuard: SessionLifecycleGuard(),
+        lifecycleGuard: const SessionLifecycleGuard(),
         compensationPolicy: const ConfigurableCompensationPolicy(),
         compensationGateway: compensationGateway,
         notificationGateway: FakeSessionNotificationGateway(),

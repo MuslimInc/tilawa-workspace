@@ -25,7 +25,7 @@ class QuranSessionActionMenu extends StatefulWidget {
 }
 
 class _QuranSessionActionMenuState extends State<QuranSessionActionMenu> {
-  final _anchorKey = GlobalKey();
+  final GlobalKey<State<StatefulWidget>> _anchorKey = GlobalKey();
 
   Future<void> _openMenu() async {
     if (_anchorKey.currentContext == null) return;

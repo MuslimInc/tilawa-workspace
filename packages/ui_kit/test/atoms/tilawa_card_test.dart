@@ -644,13 +644,13 @@ void main() {
                 onTap: () => cardTaps++,
                 backgroundColor: Colors.white,
                 padding: const EdgeInsets.all(16),
-                child: Row(
+                child: const Row(
                   children: [
-                    const Expanded(child: Text('Blank body')),
+                    Expanded(child: Text('Blank body')),
                     IconButton(
                       key: buttonKey,
                       onPressed: null,
-                      icon: const Icon(Icons.delete_outline),
+                      icon: Icon(Icons.delete_outline),
                     ),
                   ],
                 ),
@@ -689,12 +689,12 @@ void main() {
                 onTap: () => cardTaps++,
                 backgroundColor: Colors.white,
                 padding: const EdgeInsets.all(16),
-                child: Row(
+                child: const Row(
                   children: [
-                    const Expanded(child: Text('Blank body')),
+                    Expanded(child: Text('Blank body')),
                     TextButton(
                       onPressed: null,
-                      child: const Text('Action'),
+                      child: Text('Action'),
                     ),
                   ],
                 ),
@@ -733,12 +733,12 @@ void main() {
                 onTap: () => cardTaps++,
                 backgroundColor: Colors.white,
                 padding: const EdgeInsets.all(16),
-                child: Row(
+                child: const Row(
                   children: [
-                    const Expanded(child: Text('Blank body')),
+                    Expanded(child: Text('Blank body')),
                     InkWell(
                       onTap: null,
-                      child: const Padding(
+                      child: Padding(
                         padding: EdgeInsets.all(8),
                         child: Icon(Icons.settings),
                       ),
@@ -825,13 +825,13 @@ void main() {
       ) async {
         await tester.pumpWidget(
           _wrap(
-            SizedBox(
+            const SizedBox(
               width: 280,
               height: 120,
               child: TilawaCard(
                 backgroundColor: Colors.white,
-                padding: const EdgeInsets.all(16),
-                child: const Text('Static body'),
+                padding: EdgeInsets.all(16),
+                child: Text('Static body'),
               ),
             ),
           ),

@@ -276,16 +276,16 @@ Widget previewTilawaFeedbackStrip() {
   theme: moleculesPreviewTheme,
 )
 Widget previewTilawaFeedbackStripDark() {
-  return Scaffold(
+  return const Scaffold(
     backgroundColor: Colors.black,
     body: Padding(
-      padding: const EdgeInsets.all(16),
+      padding: EdgeInsets.all(16),
       child: Center(
         child: TilawaFeedbackStrip(
           icon: Icons.check_circle_rounded,
           message: 'Saved successfully',
-          backgroundColor: const Color(0xFF1B3A5C),
-          foregroundColor: const Color(0xFF90CAF9),
+          backgroundColor: Color(0xFF1B3A5C),
+          foregroundColor: Color(0xFF90CAF9),
         ),
       ),
     ),
@@ -368,15 +368,15 @@ Widget previewTilawaPermissionBannerDark() {
   theme: moleculesPreviewTheme,
 )
 Widget previewTilawaGlassPanel() {
-  return Scaffold(
+  return const Scaffold(
     backgroundColor: Colors.indigo,
     body: Padding(
-      padding: const EdgeInsets.all(24),
+      padding: EdgeInsets.all(24),
       child: Center(
         child: TilawaGlassPanel(
           enableBackdropBlur: true,
-          padding: const EdgeInsets.all(20),
-          child: const Text(
+          padding: EdgeInsets.all(20),
+          child: Text(
             'Frosted glass panel',
             style: TextStyle(color: Colors.white),
           ),
@@ -676,7 +676,7 @@ Widget previewTilawaStatusChipDark() {
   theme: moleculesPreviewTheme,
 )
 Widget previewTilawaMetricTile() {
-  return Scaffold(
+  return const Scaffold(
     body: Center(
       child: SizedBox(
         width: 360,

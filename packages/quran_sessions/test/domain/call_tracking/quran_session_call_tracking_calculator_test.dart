@@ -21,8 +21,8 @@ CallTrackingEvent ev(
   );
 }
 
-const teacher = SessionParticipantRole.teacher;
-const student = SessionParticipantRole.student;
+const SessionParticipantRole teacher = SessionParticipantRole.teacher;
+const SessionParticipantRole student = SessionParticipantRole.student;
 
 const calculator = QuranSessionCallTrackingCalculator();
 

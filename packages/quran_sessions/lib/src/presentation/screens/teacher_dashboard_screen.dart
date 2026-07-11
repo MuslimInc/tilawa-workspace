@@ -312,7 +312,7 @@ class _TeacherDashboardScreenState extends State<TeacherDashboardScreen> {
                 failure: failure,
                 onRetry: _reload,
               ),
-            TeacherDashboardSuccess success => TilawaRefreshIndicator(
+            final TeacherDashboardSuccess success => TilawaRefreshIndicator(
               backgroundColor: Theme.of(context).colorScheme.surface,
               color: Theme.of(context).colorScheme.primary,
               onRefresh: () async => _reload(),
@@ -1074,7 +1074,10 @@ class _TeacherDashboardCategoryScreenState
               failure: failure,
               onRetry: widget.onReload,
             ),
-          TeacherDashboardSuccess success => _buildSuccess(context, success),
+          final TeacherDashboardSuccess success => _buildSuccess(
+            context,
+            success,
+          ),
         },
       ),
     );
@@ -1742,7 +1745,7 @@ class _BlockSlotTrailing extends StatelessWidget {
   final double minInteractiveDimension;
   final double iconSizeSmall;
 
-  static const _visualDensity = VisualDensity.compact;
+  static const VisualDensity _visualDensity = VisualDensity.compact;
 
   @override
   Widget build(BuildContext context) {
@@ -1914,8 +1917,8 @@ class _PinnedBookableSlotsControlsDelegate
                     child: TilawaTabBar(
                       controller: weekTabController!,
                       tabs: [
-                        Tab(text: thisWeekLabel!),
-                        Tab(text: nextWeekLabel!),
+                        Tab(text: thisWeekLabel),
+                        Tab(text: nextWeekLabel),
                       ],
                     ),
                   ),

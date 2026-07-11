@@ -316,31 +316,31 @@ void main() {
 
   group('RecitersError', () {
     test('should be a subclass of RecitersState', () {
-      final state = RecitersError(UnexpectedFailure('Error message'));
+      const state = RecitersError(UnexpectedFailure('Error message'));
       expect(state, isA<RecitersState>());
     });
 
     test('props should contain failure', () {
-      final failure = UnexpectedFailure('Error message');
-      final state = RecitersError(failure);
+      const failure = UnexpectedFailure('Error message');
+      const state = RecitersError(failure);
       expect(state.props, [failure]);
     });
 
     test('two instances with same failure should be equal', () {
-      final state1 = RecitersError(UnexpectedFailure('Error message'));
-      final state2 = RecitersError(UnexpectedFailure('Error message'));
+      const state1 = RecitersError(UnexpectedFailure('Error message'));
+      const state2 = RecitersError(UnexpectedFailure('Error message'));
       expect(state1, equals(state2));
     });
 
     test('two instances with different failure should not be equal', () {
-      final state1 = RecitersError(UnexpectedFailure('Error 1'));
-      final state2 = RecitersError(UnexpectedFailure('Error 2'));
+      const state1 = RecitersError(UnexpectedFailure('Error 1'));
+      const state2 = RecitersError(UnexpectedFailure('Error 2'));
       expect(state1, isNot(equals(state2)));
     });
 
     test('failure should be accessible', () {
-      final failure = UnexpectedFailure('Test error');
-      final state = RecitersError(failure);
+      const failure = UnexpectedFailure('Test error');
+      const state = RecitersError(failure);
       expect(state.failure, failure);
     });
   });
@@ -353,7 +353,7 @@ void main() {
         reciters: testReciters,
         filteredReciters: testReciters,
       );
-      final error = RecitersError(UnexpectedFailure('Error'));
+      const error = RecitersError(UnexpectedFailure('Error'));
 
       expect(initial, isNot(equals(loading)));
       expect(initial, isNot(equals(loaded)));

@@ -33,7 +33,7 @@ extension AppStartupWidgets on AppStartupTasks {
     return SentryConfig.wrapRootWidget(
       MaterialApp(
         debugShowCheckedModeBanner: false,
-        home: _StartupFatalErrorScreen(onRetry: onRetry ?? () => bootstrap()),
+        home: _StartupFatalErrorScreen(onRetry: onRetry ?? bootstrap),
       ),
     );
   }
@@ -84,7 +84,7 @@ class _StartupFatalErrorScreenState extends State<_StartupFatalErrorScreen> {
                 color: AppColors.launchSplashForeground.withValues(alpha: 0.7),
               ),
               const SizedBox(height: 24),
-              Text(
+              const Text(
                 'حدث خطأ غير متوقع',
                 textDirection: TextDirection.rtl,
                 textAlign: TextAlign.center,
@@ -140,7 +140,7 @@ class _BootGate extends StatefulWidget {
 class _BootGateState extends State<_BootGate> {
   bool _loggedBootGateSplash = false;
 
-  static final Color _launchBackground = AppColors.launchSplashBackground;
+  static const Color _launchBackground = AppColors.launchSplashBackground;
   static final SystemUiOverlayStyle _launchOverlayStyle =
       AppSystemChromeStyle.buildColoredScreenStyle(
         backgroundColor: _launchBackground,

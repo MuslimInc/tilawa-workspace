@@ -87,7 +87,7 @@ abstract final class HomeHeroPhotoTheme {
             alpha: screenTokens.homeCollapsedHeaderShadowOpacity,
           ),
           offset: tokens.shadowOffsetSmall,
-          blurRadius: tokens.spaceSmall.toDouble(),
+          blurRadius: tokens.spaceSmall,
         ),
       ],
     );

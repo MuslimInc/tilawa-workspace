@@ -65,7 +65,7 @@ class TilawaAlphabetScrollbar extends StatefulWidget {
 class _TilawaAlphabetScrollbarState extends State<TilawaAlphabetScrollbar> {
   final Map<String, Widget> _itemCache = {};
   final _overlayController = OverlayPortalController();
-  final _trackKey = GlobalKey();
+  final GlobalKey<State<StatefulWidget>> _trackKey = GlobalKey();
   final ScrollController _railScrollController = ScrollController();
   String? _draggedLetter;
   String? _lastNotifiedLetter;

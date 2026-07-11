@@ -57,7 +57,7 @@ class QuranDataServiceImpl implements QuranDataService {
     for (final Map<String, dynamic> j in juzData) {
       final verses = j['verses'] as Map<dynamic, dynamic>;
       if (verses.containsKey(surahNumber)) {
-        final range = verses[surahNumber] as List;
+        final range = (verses[surahNumber] as List).cast<num>();
         if (verseNumber >= range[0] && verseNumber <= range[1]) {
           return j['id'] as int;
         }

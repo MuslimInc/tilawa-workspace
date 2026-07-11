@@ -219,7 +219,7 @@ class ButtonPreviews extends StatelessWidget {
 
 @Preview(name: 'TilawaEmptyState / Scale 1.5', group: 'Atoms')
 Widget previewTilawaEmptyStateScale() {
-  return TilawaPreviewWrapper(
+  return const TilawaPreviewWrapper(
     textScale: 1.5,
     child: TilawaEmptyState(
       icon: Icons.inbox_outlined,

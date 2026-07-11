@@ -286,7 +286,7 @@ void main() {
                 MeMuslimDesignTokens.light(),
               ],
             ),
-            home: _FabRebuildProbe(bottomOffset: fabBottomOffset),
+            home: const _FabRebuildProbe(bottomOffset: fabBottomOffset),
           ),
         );
         await tester.pump();

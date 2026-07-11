@@ -144,7 +144,7 @@ class QuranImagePrewarmService implements QuranImagePrewarmer {
         : null;
     if (!_imageCacheRepository.status.isReady || cacheWidth <= 0) return;
     final requestGeneration = _generation;
-    final safeTarget = pageNumber.clamp(1, PageState.quranPageCount).toInt();
+    final safeTarget = pageNumber.clamp(1, PageState.quranPageCount);
     final pageKey = '$cacheWidth:$safeTarget';
     if (_readyPageKeys.remove(pageKey)) {
       _readyPageKeys.add(pageKey);
@@ -427,9 +427,7 @@ class QuranImagePrewarmService implements QuranImagePrewarmer {
   }) {
     if (!_imageCacheRepository.status.isReady || cacheWidth <= 0) return;
 
-    final safeCenter = centerPageNumber
-        .clamp(1, PageState.quranPageCount)
-        .toInt();
+    final safeCenter = centerPageNumber.clamp(1, PageState.quranPageCount);
     if (_lastPrewarmedCenter == safeCenter &&
         _lastPrewarmedCacheWidth == cacheWidth &&
         _lastPrewarmedRadius == radius) {
@@ -440,12 +438,8 @@ class QuranImagePrewarmService implements QuranImagePrewarmer {
     _lastPrewarmedCacheWidth = cacheWidth;
     _lastPrewarmedRadius = radius;
 
-    final first = (safeCenter - radius)
-        .clamp(1, PageState.quranPageCount)
-        .toInt();
-    final last = (safeCenter + radius)
-        .clamp(1, PageState.quranPageCount)
-        .toInt();
+    final first = (safeCenter - radius).clamp(1, PageState.quranPageCount);
+    final last = (safeCenter + radius).clamp(1, PageState.quranPageCount);
 
     _prewarmQueue.clear();
     for (var d = 0; d <= radius; d++) {

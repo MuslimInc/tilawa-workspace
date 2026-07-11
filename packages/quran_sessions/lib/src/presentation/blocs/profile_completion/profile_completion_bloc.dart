@@ -68,9 +68,12 @@ class ProfileCompletionBloc
     final policy = policyResult.fold((_) => throw StateError(''), (p) => p);
 
     final countryPickerLocked = countries.length == 1;
-    MarketCountry? selectedCountry = _resolveInitialCountry(profile, countries);
+    final MarketCountry? selectedCountry = _resolveInitialCountry(
+      profile,
+      countries,
+    );
 
-    var editing = ProfileCompletionEditing(
+    final editing = ProfileCompletionEditing(
       userId: event.userId,
       availableCountries: countries,
       minimumStudentAgeYears: policy.minimumStudentAgeYears,

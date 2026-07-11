@@ -284,7 +284,7 @@ class AssetVerseMarkerRepository implements VerseMarkerRepository {
               sura: flat[i++].toInt(),
               ayah: flat[i++].toInt(),
               line: flat[i++].toInt(),
-              centerX: flat[i++].toDouble(),
+              centerX: flat[i++],
             ),
           );
         }

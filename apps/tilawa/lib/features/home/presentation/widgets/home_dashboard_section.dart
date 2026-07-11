@@ -108,7 +108,7 @@ class HomeDashboardSubsectionHeader extends StatelessWidget {
         TilawaSectionTitle(title: title),
         Align(
           alignment: AlignmentDirectional.centerEnd,
-          child: trailing!,
+          child: trailing,
         ),
       ],
     );

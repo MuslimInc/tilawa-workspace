@@ -240,7 +240,7 @@ class RecitationPracticePanel extends StatelessWidget {
                           FilledButton.icon(
                             onPressed: state.isInitializing
                                 ? null
-                                : () => cubit.endSession(),
+                                : cubit.endSession,
                             icon: const Icon(Icons.stop_rounded),
                             label: Text(l10n.recitationPracticeStop),
                           )

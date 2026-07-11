@@ -37,7 +37,7 @@ class ReaderSettingsDataSourceImpl implements ReaderSettingsDataSource {
     }
 
     try {
-      final Map<String, dynamic> json = jsonDecode(settingsJson);
+      final json = jsonDecode(settingsJson) as Map<String, dynamic>;
       return ReaderSettingsEntity.fromJson(json);
     } catch (e) {
       return const ReaderSettingsEntity();

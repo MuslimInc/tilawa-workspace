@@ -46,7 +46,7 @@ void main() {
 
       expect(result, isA<Right<Failure, PrayerAlarmCapability>>());
       final capability = result.getOrElse(
-        () => PrayerAlarmCapability(
+        () => const PrayerAlarmCapability(
           canScheduleExact: false,
           hasNotificationPermission: false,
         ),

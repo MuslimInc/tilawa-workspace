@@ -473,7 +473,6 @@ void main() {
           home: Scaffold(
             body: SurahHeaderBanner(
               surahNumber: 18,
-              // ignore: avoid_redundant_argument_values
               lineHeight: 0,
               viewportWidth: 360,
               viewportHeight: 800,
@@ -502,7 +501,6 @@ void main() {
               viewportWidth: 360,
               viewportHeight: 800,
               isLandscape: false,
-              // ignore: avoid_redundant_argument_values
               headerTextColor: null,
             ),
           ),
@@ -528,7 +526,6 @@ void main() {
               viewportWidth: 360,
               viewportHeight: 800,
               isLandscape: false,
-              // ignore: avoid_redundant_argument_values
               headerImageFilter: null,
             ),
           ),

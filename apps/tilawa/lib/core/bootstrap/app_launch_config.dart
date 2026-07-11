@@ -235,7 +235,7 @@ class AppLaunchConfig extends Equatable {
   });
 
   factory AppLaunchConfig.fromEnvironment() {
-    return AppLaunchConfig(
+    return const AppLaunchConfig(
       resetLaunchState: _LaunchEnvironment.resetLaunchState,
       frameWatcher: _LaunchEnvironment.frameWatcher,
       perfInstrumentation: _LaunchEnvironment.perfInstrumentation,

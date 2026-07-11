@@ -387,13 +387,12 @@ class _AppShellChrome extends StatelessWidget {
 
     final bool playerShouldShow =
         showPlayer &&
-        (state.isAudioBindingDeferred
-            ? false
-            : context.select((AudioPlayerBloc bloc) {
-                final AudioPlayerState audioState = bloc.state;
-                return audioState.shouldShowBottomPlayer &&
-                    audioState.currentAudio != null;
-              }));
+        (!state.isAudioBindingDeferred &&
+            context.select((AudioPlayerBloc bloc) {
+              final AudioPlayerState audioState = bloc.state;
+              return audioState.shouldShowBottomPlayer &&
+                  audioState.currentAudio != null;
+            }));
 
     final double playerHeight = playerShouldShow && !isKeyboardOpen
         ? context.tokens.playerCollapsedHeight

@@ -24,10 +24,12 @@ const AppInfo testAppInfo = AppInfo(
 
 class MockAppInfoService extends Mock implements AppInfoService {
   @override
-  Future<AppInfo> getAppInfo() => super.noSuchMethod(
-    Invocation.method(#getAppInfo, []),
-    returnValue: Future.value(testAppInfo),
-  );
+  Future<AppInfo> getAppInfo() =>
+      super.noSuchMethod(
+            Invocation.method(#getAppInfo, []),
+            returnValue: Future.value(testAppInfo),
+          )
+          as Future<AppInfo>;
 }
 
 final GetIt getIt = GetIt.instance;

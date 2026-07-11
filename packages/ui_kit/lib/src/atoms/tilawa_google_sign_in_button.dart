@@ -4,7 +4,7 @@ import 'package:flutter_svg/flutter_svg.dart';
 import '../foundation/design_tokens.dart';
 import '../foundation/tilawa_interactive_surface.dart';
 import '../foundation/tilawa_text_roles.dart';
-import './tilawa_loading_indicator.dart';
+import 'tilawa_loading_indicator.dart';
 
 /// Google Identity palette for the branded sign-in button.
 ///
@@ -151,16 +151,17 @@ class TilawaGoogleSignInButton extends StatelessWidget {
                     ),
                   ),
                 ),
-                (isLoading)
-                    ? SizedBox(
-                        width: loadingIndicatorSize,
-                        height: loadingIndicatorSize,
-                        child: TilawaLoadingIndicator(
-                          color: labelColor,
-                          strokeWidth: 2,
-                        ),
-                      )
-                    : const SizedBox.shrink(),
+                if (isLoading)
+                  SizedBox(
+                    width: loadingIndicatorSize,
+                    height: loadingIndicatorSize,
+                    child: TilawaLoadingIndicator(
+                      color: labelColor,
+                      strokeWidth: 2,
+                    ),
+                  )
+                else
+                  const SizedBox.shrink(),
               ],
             ),
           ),

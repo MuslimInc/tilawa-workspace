@@ -47,7 +47,7 @@ class DownloadQueueManager implements IDownloadQueueService {
   int get maxConcurrentDownloads => _maxConcurrentDownloads;
 
   // Current locale for localized notification messages
-  Locale locale = Locale(LanguageConfig.defaultLanguageCode);
+  Locale locale = const Locale(LanguageConfig.defaultLanguageCode);
 
   // Queue of pending downloads
   final List<QueuedDownload> _queue = [];
@@ -100,9 +100,7 @@ class DownloadQueueManager implements IDownloadQueueService {
 
     // Listen to download progress to know when downloads complete
     _progressSubscription = _downloadService.globalProgressStream.listen(
-      (progress) {
-        _handleDownloadProgress(progress);
-      },
+      _handleDownloadProgress,
       onError: (Object error) {
         logger.e('[DownloadQueueManager] Error in progress stream: $error');
       },

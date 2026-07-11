@@ -6,7 +6,7 @@ import 'package:tilawa_ui_kit/src/foundation/app_theme.dart';
 import 'package:tilawa_ui_kit/src/foundation/design_tokens.dart';
 import 'package:tilawa_ui_kit/src/foundation/tilawa_interactive_surface.dart';
 
-const _items = [
+const List<TilawaDropdownItem<String>> _items = [
   TilawaDropdownItem(value: 'eg', label: 'Egypt', icon: Icons.public),
   TilawaDropdownItem(value: 'sa', label: 'Saudi Arabia'),
 ];

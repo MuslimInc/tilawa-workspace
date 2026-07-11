@@ -90,7 +90,7 @@ void main() {
           ).thenAnswer((_) async => tPosition);
 
           mockGeocodingPlatformFactory.mockPlacemarks = [
-            Placemark(
+            const Placemark(
               isoCountryCode: 'EG',
               locality: 'Cairo',
               name: 'Downtown',
@@ -125,7 +125,7 @@ void main() {
         ).thenAnswer((_) async => tPosition);
 
         mockGeocodingPlatformFactory.mockPlacemarks = [
-          Placemark(
+          const Placemark(
             isoCountryCode: 'US',
             locality: 'New York',
             name: 'Times Square',
@@ -272,7 +272,7 @@ void main() {
     group('getLocationName', () {
       test('returns name using placemarks correctly', () async {
         mockGeocodingPlatformFactory.mockPlacemarks = [
-          Placemark(
+          const Placemark(
             thoroughfare: 'Main St',
             locality: 'New York',
           ),
@@ -377,7 +377,7 @@ void main() {
     group('getCountryCode', () {
       test('should return code from placemark if available', () async {
         mockGeocodingPlatformFactory.mockPlacemarks = [
-          Placemark(isoCountryCode: 'SA'),
+          const Placemark(isoCountryCode: 'SA'),
         ];
 
         final result = await dataSource.getCountryCode(24.7136, 46.6753);

@@ -203,7 +203,7 @@ export 'src/domain/repositories/teacher_application_access_repository.dart';
 export 'src/domain/repositories/teacher_application_repository.dart';
 export 'src/domain/repositories/teacher_profile_repository.dart';
 export 'src/domain/repositories/teacher_repository.dart'
-    show TeacherRepository, TeacherPage;
+    show TeacherPage, TeacherRepository;
 export 'src/domain/repositories/user_profile_repository.dart';
 export 'src/domain/repositories/wallet_repository.dart';
 export 'src/domain/rules/teacher_profile_completeness.dart';

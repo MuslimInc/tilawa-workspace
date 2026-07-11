@@ -118,14 +118,16 @@ class _ReportConcernSheetBodyState extends State<_ReportConcernSheetBody> {
 
   String _categoryLabel(dynamic l10n, SessionReportCategory category) {
     return switch (category) {
-      SessionReportCategory.safetyConcern => l10n.reportCategorySafetyConcern,
-      SessionReportCategory.abuseOrHarassment =>
-        l10n.reportCategoryAbuseOrHarassment,
-      SessionReportCategory.inappropriateContent =>
-        l10n.reportCategoryInappropriateContent,
-      SessionReportCategory.childSafety => l10n.reportCategoryChildSafety,
-      SessionReportCategory.fraudOrScam => l10n.reportCategoryFraudOrScam,
-      SessionReportCategory.other => l10n.reportCategoryOther,
-    };
+          SessionReportCategory.safetyConcern =>
+            l10n.reportCategorySafetyConcern,
+          SessionReportCategory.abuseOrHarassment =>
+            l10n.reportCategoryAbuseOrHarassment,
+          SessionReportCategory.inappropriateContent =>
+            l10n.reportCategoryInappropriateContent,
+          SessionReportCategory.childSafety => l10n.reportCategoryChildSafety,
+          SessionReportCategory.fraudOrScam => l10n.reportCategoryFraudOrScam,
+          SessionReportCategory.other => l10n.reportCategoryOther,
+        }
+        as String;
   }
 }

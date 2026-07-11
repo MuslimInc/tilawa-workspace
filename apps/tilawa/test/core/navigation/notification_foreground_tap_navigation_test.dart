@@ -49,7 +49,7 @@ void main() {
   late AthkarNotificationService athkarService;
 
   NotificationResponse morningAthkarTap() {
-    return NotificationResponse(
+    return const NotificationResponse(
       notificationResponseType: NotificationResponseType.selectedNotification,
       id: morningAthkarId,
       payload: morningAthkarPayload,
@@ -98,9 +98,7 @@ void main() {
     );
   });
 
-  tearDown(() {
-    AppRouter.resetForTesting();
-  });
+  tearDown(AppRouter.resetForTesting);
 
   group('NotificationDispatcher foreground tap routing', () {
     test('returns false when no handlers are registered', () async {
@@ -296,7 +294,7 @@ void main() {
       );
 
       await dispatcher.routeNotificationForTest(
-        NotificationResponse(
+        const NotificationResponse(
           notificationResponseType:
               NotificationResponseType.selectedNotification,
           id: 42,
@@ -313,7 +311,7 @@ void main() {
       registerAthkarHandler();
 
       await dispatcher.routeNotificationForTest(
-        NotificationResponse(
+        const NotificationResponse(
           notificationResponseType:
               NotificationResponseType.selectedNotification,
           id: 999,
@@ -421,7 +419,7 @@ void main() {
       AppRouter.router.go(const HomeRoute().location);
 
       await dispatcher.routeNotificationForTest(
-        NotificationResponse(
+        const NotificationResponse(
           notificationResponseType:
               NotificationResponseType.selectedNotification,
           id: 1002,

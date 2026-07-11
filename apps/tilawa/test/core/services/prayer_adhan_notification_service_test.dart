@@ -410,7 +410,7 @@ void main() {
           const payload = '{ "type": "prayer", "prayer": "fajr" }';
 
           await service.handleNotificationResponse(
-            NotificationResponse(
+            const NotificationResponse(
               notificationResponseType:
                   NotificationResponseType.selectedNotification,
               payload: payload,

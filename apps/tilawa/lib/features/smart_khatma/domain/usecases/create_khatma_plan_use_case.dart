@@ -26,14 +26,15 @@ final class CreateKhatmaPlanUseCase {
     try {
       final DateTime createdAt = now ?? DateTime.now();
       final lastRead = await _quranReaderRepository.getLastReadPosition();
-      final int startPage = (lastRead.page ?? KhatmaPlan.firstQuranPage)
-          .clamp(KhatmaPlan.firstQuranPage, KhatmaPlan.lastQuranPage)
-          .toInt();
+      final int startPage = (lastRead.page ?? KhatmaPlan.firstQuranPage).clamp(
+        KhatmaPlan.firstQuranPage,
+        KhatmaPlan.lastQuranPage,
+      );
       final plan = KhatmaPlan(
         id: 'local_${createdAt.toIso8601String()}',
         createdAt: createdAt,
         startDate: DateTime(createdAt.year, createdAt.month, createdAt.day),
-        durationDays: durationDays.clamp(1, 365).toInt(),
+        durationDays: durationDays.clamp(1, 365),
         startPage: startPage,
         targetPage: KhatmaPlan.lastQuranPage,
         currentPage: startPage,

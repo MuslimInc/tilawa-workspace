@@ -72,7 +72,7 @@ void main() {
       final audit = FakeAuditRepository();
       final useCase = ExpirePendingReservationsUseCase(
         aggregateRepository: repo,
-        lifecycleGuard: SessionLifecycleGuard(),
+        lifecycleGuard: const SessionLifecycleGuard(),
         commandGateway: command,
         auditRepository: audit,
         now: () => now,

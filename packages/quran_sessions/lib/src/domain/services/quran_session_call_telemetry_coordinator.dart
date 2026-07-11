@@ -5,12 +5,12 @@ import 'package:flutter/foundation.dart';
 
 import '../../boundaries/call/quran_session_call_telemetry_gateway.dart';
 import '../../boundaries/call/session_call_provider_event_hub.dart';
-import '../../domain/entities/quran_session_call_telemetry_event.dart';
-import '../../domain/entities/session_call_provider_event.dart';
-import '../../domain/entities/session_participant_role.dart';
+import '../entities/quran_session_call_telemetry_event.dart';
+import '../entities/session_call_provider_event.dart';
+import '../entities/session_participant_role.dart';
 
 /// Event types that must not be dropped under queue pressure.
-const _essentialTypes = {
+const Set<QuranSessionCallTelemetryEventType> _essentialTypes = {
   QuranSessionCallTelemetryEventType.joinRequested,
   QuranSessionCallTelemetryEventType.joinSucceeded,
   QuranSessionCallTelemetryEventType.joinFailed,
@@ -19,7 +19,7 @@ const _essentialTypes = {
 };
 
 /// Event types considered noisy and eligible for eviction.
-const _noisyTypes = {
+const Set<QuranSessionCallTelemetryEventType> _noisyTypes = {
   QuranSessionCallTelemetryEventType.network,
   QuranSessionCallTelemetryEventType.reconnect,
   QuranSessionCallTelemetryEventType.participantDisconnected,
@@ -53,7 +53,6 @@ class QuranSessionCallTelemetryCoordinator {
   }) : _clock = clock ?? DateTime.now,
        _timerFactory = timerFactory ?? Timer.new;
 
-  // ignore: prefer_initializing_formals — see _clock / _timerFactory
   final QuranSessionCallTelemetryGateway _gateway;
   final SessionCallProviderEventHub? _eventHub;
   final Duration _networkThrottle;

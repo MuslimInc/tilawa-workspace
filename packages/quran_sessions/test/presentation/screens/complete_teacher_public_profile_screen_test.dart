@@ -164,7 +164,7 @@ void main() {
     final scrollView = tester.widget<SingleChildScrollView>(
       find.byType(SingleChildScrollView),
     );
-    final scrollPadding = scrollView.padding as EdgeInsets;
+    final scrollPadding = scrollView.padding! as EdgeInsets;
     final footerClearance =
         TilawaFormScreenScaffold.stickyFooterScrollClearance(
           tester.element(find.byType(TilawaFormScreenScaffold)),

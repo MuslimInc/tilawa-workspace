@@ -10,11 +10,11 @@ void main() {
       await tester.pumpWidget(
         MaterialApp(
           theme: AppTheme.getLightTheme(primaryColor: AppColors.defaultPrimary),
-          home: Scaffold(
+          home: const Scaffold(
             body: SizedBox(
               width: 400,
               child: Column(
-                children: const [
+                children: [
                   ProfileAvatar(size: 72),
                 ],
               ),
@@ -34,7 +34,7 @@ void main() {
       await tester.pumpWidget(
         MaterialApp(
           theme: AppTheme.getLightTheme(primaryColor: AppColors.defaultPrimary),
-          home: Scaffold(
+          home: const Scaffold(
             body: Center(
               child: ProfileAvatar(
                 displayName: 'Teacher User',

@@ -194,7 +194,7 @@ class _TilawaAppState extends State<TilawaApp> with WidgetsBindingObserver {
         await getIt<WhatsNewCoordinator>().maybeShowAfterLaunch();
       }
     } catch (e) {
-      logger.d('[QuranPlayerApp] Error showing what\'s new: $e');
+      logger.d("[QuranPlayerApp] Error showing what's new: $e");
     }
   }
 

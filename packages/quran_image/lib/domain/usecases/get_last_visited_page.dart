@@ -16,7 +16,7 @@ class GetLastVisitedPageUseCase {
   ///
   /// Returns the saved page number, or null if no page has been saved.
   Future<int?> execute() async {
-    return await _repository.getLastVisitedPage();
+    return _repository.getLastVisitedPage();
   }
 
   /// Executes the use case and returns a valid page number.

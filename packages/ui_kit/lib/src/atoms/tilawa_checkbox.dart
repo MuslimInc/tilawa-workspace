@@ -29,7 +29,7 @@ class TilawaCheckbox extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
-    final hitSize = kMeMuslimMinInteractiveDimension;
+    const hitSize = kMeMuslimMinInteractiveDimension;
 
     return SizedBox(
       width: hitSize,

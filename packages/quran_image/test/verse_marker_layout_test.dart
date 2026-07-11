@@ -17,7 +17,7 @@ void main() {
     test('unclamped center tracks normalized centerX * layoutWidth', () {
       const layoutWidth = 360.0;
       const centerX = 0.37;
-      final expectedCenter = centerX * layoutWidth;
+      const expectedCenter = centerX * layoutWidth;
       final actualCenter = VerseMarkerLayout.markerCenterXAfterLayout(
         centerX: centerX,
         layoutWidth: layoutWidth,

@@ -126,7 +126,7 @@ GoRouter _sessionsNavRouter({
 }
 
 Future<void> _pumpFooter(WidgetTester tester, {GoRouter? router}) async {
-  final footer = const Scaffold(body: HomeDashboardFooter());
+  const footer = Scaffold(body: HomeDashboardFooter());
 
   if (router != null) {
     await tester.pumpWidget(
@@ -349,7 +349,7 @@ void main() {
       );
       await tester.pump();
 
-      developer.log("USER_ID: ${getIt<AuthSessionProvider>().currentUserId}");
+      developer.log('USER_ID: ${getIt<AuthSessionProvider>().currentUserId}');
       await tapTrigger(tester);
 
       check(find.byKey(_loginKey).evaluate().length).equals(1);
@@ -393,7 +393,7 @@ void main() {
       );
       await tester.pump();
 
-      developer.log("USER_ID: ${getIt<AuthSessionProvider>().currentUserId}");
+      developer.log('USER_ID: ${getIt<AuthSessionProvider>().currentUserId}');
       await tapTrigger(tester);
 
       check(find.byKey(_sessionsKey).evaluate().length).equals(1);
@@ -437,7 +437,7 @@ void main() {
       );
       await tester.pump();
 
-      developer.log("USER_ID: ${getIt<AuthSessionProvider>().currentUserId}");
+      developer.log('USER_ID: ${getIt<AuthSessionProvider>().currentUserId}');
       await tapTrigger(tester);
 
       check(find.byKey(_profileCompletionKey).evaluate().length).equals(1);

@@ -38,8 +38,8 @@ void main() {
                 hasMore: false,
               ),
             ),
-            child: TeacherListScreen(
-              featureConfig: const QuranSessionsFeatureConfig(),
+            child: const TeacherListScreen(
+              featureConfig: QuranSessionsFeatureConfig(),
             ),
           ),
         ),
@@ -67,8 +67,8 @@ void main() {
                 hasMore: false,
               ),
             ),
-            child: TeacherListScreen(
-              featureConfig: const QuranSessionsFeatureConfig(),
+            child: const TeacherListScreen(
+              featureConfig: QuranSessionsFeatureConfig(),
             ),
           ),
         ),
@@ -102,8 +102,8 @@ void main() {
                   hasMore: false,
                 ),
               ),
-              child: TeacherListScreen(
-                featureConfig: const QuranSessionsFeatureConfig(),
+              child: const TeacherListScreen(
+                featureConfig: QuranSessionsFeatureConfig(),
               ),
             ),
           ),
@@ -178,8 +178,8 @@ void main() {
                   },
                 ),
               ),
-              child: TeacherListScreen(
-                featureConfig: const QuranSessionsFeatureConfig(),
+              child: const TeacherListScreen(
+                featureConfig: QuranSessionsFeatureConfig(),
               ),
             ),
           ),
@@ -212,8 +212,8 @@ void main() {
           supportedLocales: QuranSessionsLocalizations.supportedLocales,
           home: BlocProvider<TeacherListBloc>(
             create: (_) => TeacherListTestBloc(const TeacherListEmpty()),
-            child: TeacherListScreen(
-              featureConfig: const QuranSessionsFeatureConfig(),
+            child: const TeacherListScreen(
+              featureConfig: QuranSessionsFeatureConfig(),
             ),
           ),
         ),
@@ -240,8 +240,8 @@ void main() {
                 },
               ),
             ),
-            child: TeacherListScreen(
-              featureConfig: const QuranSessionsFeatureConfig(),
+            child: const TeacherListScreen(
+              featureConfig: QuranSessionsFeatureConfig(),
             ),
           ),
         ),
@@ -313,8 +313,8 @@ void main() {
                 hasMore: false,
               ),
             ),
-            child: TeacherListScreen(
-              featureConfig: const QuranSessionsFeatureConfig(),
+            child: const TeacherListScreen(
+              featureConfig: QuranSessionsFeatureConfig(),
             ),
           ),
         ),

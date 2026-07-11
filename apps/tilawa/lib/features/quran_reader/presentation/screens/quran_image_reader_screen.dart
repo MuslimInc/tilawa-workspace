@@ -18,13 +18,13 @@ import 'package:tilawa_ui_kit/tilawa_ui_kit.dart';
 
 import '../../../../core/di/injection.dart';
 import '../../../../core/extensions.dart';
-import '../../../../features/audio_player/presentation/bloc/audio_player_bloc.dart'
+import '../../../audio_player/presentation/bloc/audio_player_bloc.dart'
     show AudioPlayerBloc;
-import '../../../../features/recitation_practice/presentation/cubit/recitation_practice_cubit.dart';
-import '../../../../features/recitation_practice/presentation/widgets/recitation_practice_host.dart';
-import '../../../../features/recitation_practice/recitation_practice_feature_flags.dart';
-import '../../../../features/share/presentation/widgets/share_options_sheet.dart';
-import '../../../../features/smart_khatma/smart_khatma.dart';
+import '../../../recitation_practice/presentation/cubit/recitation_practice_cubit.dart';
+import '../../../recitation_practice/presentation/widgets/recitation_practice_host.dart';
+import '../../../recitation_practice/recitation_practice_feature_flags.dart';
+import '../../../share/presentation/widgets/share_options_sheet.dart';
+import '../../../smart_khatma/smart_khatma.dart';
 import '../../domain/ports/quran_image_preload_status.dart';
 import '../../domain/usecases/load_quran_fonts_to_engine_use_case.dart';
 import '../../domain/usecases/save_last_read_position_use_case.dart';

@@ -385,7 +385,7 @@ class MeMuslimDesignTokens extends ThemeExtension<MeMuslimDesignTokens> {
   factory MeMuslimDesignTokens.dark() => MeMuslimDesignTokens._create();
 
   factory MeMuslimDesignTokens._create() {
-    return MeMuslimDesignTokens(
+    return const MeMuslimDesignTokens(
       spaceTiny: 2.0,
       spaceExtraSmall: 4.0,
       spaceSmall: 8.0,
@@ -419,9 +419,9 @@ class MeMuslimDesignTokens extends ThemeExtension<MeMuslimDesignTokens> {
       iconSizeLargePlus: 42.0,
       iconSizeExtraLarge: 44.0,
       textHeightLoose: 2.0,
-      durationFast: const Duration(milliseconds: 200),
-      durationMedium: const Duration(milliseconds: 400),
-      durationSlow: const Duration(milliseconds: 600),
+      durationFast: Duration(milliseconds: 200),
+      durationMedium: Duration(milliseconds: 400),
+      durationSlow: Duration(milliseconds: 600),
       curveStandard: Curves.easeOut,
       curveEmphasized: Curves.easeOutCubic,
       curveSymmetric: Curves.easeInOut,

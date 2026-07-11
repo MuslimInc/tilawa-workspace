@@ -1,5 +1,3 @@
-library;
-
 export 'core/l10n_extensions.dart';
 export 'core/utils/quran_image_utils.dart';
 export 'domain/domain.dart';

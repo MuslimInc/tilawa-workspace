@@ -38,7 +38,7 @@ abstract final class QuranPlayerExpandPhysics {
       return value.clamp(0.0, 1.0);
     }
     if (value < 0) {
-      return -(_rubberBandOverscroll(-value, extent));
+      return -_rubberBandOverscroll(-value, extent);
     }
     return 1 + _rubberBandOverscroll(value - 1, extent);
   }

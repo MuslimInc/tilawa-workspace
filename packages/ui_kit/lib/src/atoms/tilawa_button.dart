@@ -4,7 +4,7 @@ import 'package:flutter/material.dart';
 
 import '../foundation/design_tokens.dart';
 import '../foundation/tilawa_text_roles.dart';
-import './tilawa_loading_indicator.dart';
+import 'tilawa_loading_indicator.dart';
 
 // Material 3 state opacities (m3.material.io — interaction states):
 // disabled container 12%, disabled content 38%, pressed state layer 10%.

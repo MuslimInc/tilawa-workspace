@@ -136,7 +136,7 @@ class _ReciterDetailsScreenState extends State<ReciterDetailsScreen> {
     }
 
     // Step 1: Jump approximately so the lazy builder creates the item.
-    final double approxHeaderHeight = 300.0;
+    const double approxHeaderHeight = 300.0;
     double itemOffset = 0.0;
     final tokens = context.tokens;
     if (isGrid) {
@@ -350,7 +350,7 @@ class _ReciterDetailsScreenState extends State<ReciterDetailsScreen> {
                           state.searchQuery.isEmpty)
                         SliverToBoxAdapter(
                           child: Padding(
-                            padding: EdgeInsets.only(top: 8, bottom: 4),
+                            padding: const EdgeInsets.only(top: 8, bottom: 4),
                             child: ReciterHistorySection(
                               historyList: state.listeningHistory,
                               onPlay: (history) =>

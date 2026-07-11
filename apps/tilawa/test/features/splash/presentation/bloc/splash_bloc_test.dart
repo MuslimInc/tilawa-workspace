@@ -76,7 +76,9 @@ void main() {
       build: () {
         when(
           mockGetSplashNextRouteUseCase.call(),
-        ).thenAnswer((_) async => SplashRouteResult(SplashDestination.home));
+        ).thenAnswer(
+          (_) async => const SplashRouteResult(SplashDestination.home),
+        );
         return bloc;
       },
       setUp: () {
@@ -123,7 +125,9 @@ void main() {
       build: () {
         when(
           mockGetSplashNextRouteUseCase.call(),
-        ).thenAnswer((_) async => SplashRouteResult(SplashDestination.home));
+        ).thenAnswer(
+          (_) async => const SplashRouteResult(SplashDestination.home),
+        );
         return bloc;
       },
       act: (bloc) {
@@ -152,7 +156,9 @@ void main() {
       build: () {
         when(
           mockGetSplashNextRouteUseCase.call(),
-        ).thenAnswer((_) async => SplashRouteResult(SplashDestination.home));
+        ).thenAnswer(
+          (_) async => const SplashRouteResult(SplashDestination.home),
+        );
         return bloc;
       },
       act: (bloc) => bloc.add(const SplashStarted()),
@@ -169,7 +175,9 @@ void main() {
       build: () {
         when(
           mockGetSplashNextRouteUseCase.call(),
-        ).thenAnswer((_) async => SplashRouteResult(SplashDestination.login));
+        ).thenAnswer(
+          (_) async => const SplashRouteResult(SplashDestination.login),
+        );
         return bloc;
       },
       act: (bloc) => bloc.add(const SplashStarted()),
@@ -186,7 +194,9 @@ void main() {
       build: () {
         when(
           mockGetSplashNextRouteUseCase.call(),
-        ).thenAnswer((_) async => SplashRouteResult(SplashDestination.login));
+        ).thenAnswer(
+          (_) async => const SplashRouteResult(SplashDestination.login),
+        );
         return bloc;
       },
       act: (bloc) {
@@ -207,7 +217,7 @@ void main() {
       'emits onboarding',
       build: () {
         when(mockGetSplashNextRouteUseCase.call()).thenAnswer(
-          (_) async => SplashRouteResult(SplashDestination.onboarding),
+          (_) async => const SplashRouteResult(SplashDestination.onboarding),
         );
         return bloc;
       },
@@ -294,7 +304,9 @@ void main() {
       build: () {
         when(
           mockGetSplashNextRouteUseCase.call(),
-        ).thenAnswer((_) async => SplashRouteResult(SplashDestination.home));
+        ).thenAnswer(
+          (_) async => const SplashRouteResult(SplashDestination.home),
+        );
         when(mockReadiness.timedOut).thenReturn(true);
         return bloc;
       },

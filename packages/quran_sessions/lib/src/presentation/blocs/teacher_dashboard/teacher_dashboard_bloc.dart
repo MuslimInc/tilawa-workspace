@@ -321,7 +321,7 @@ class TeacherDashboardBloc
     );
 
     final showBanner = bannerDecision is FridayReviewBannerVisible;
-    final bannerWeekKey = showBanner ? (bannerDecision).nextWeekKey : null;
+    final bannerWeekKey = showBanner ? bannerDecision.nextWeekKey : null;
 
     return (
       thisWeekAvailability: partition.thisWeek,
@@ -372,7 +372,7 @@ class TeacherDashboardBloc
       thisWeekAvailability: partition.thisWeek,
       nextWeekAvailability: partition.nextWeek,
       showFridayReviewBanner: showBanner,
-      fridayReviewNextWeekKey: showBanner ? (bannerDecision).nextWeekKey : null,
+      fridayReviewNextWeekKey: showBanner ? bannerDecision.nextWeekKey : null,
       clearFridayReviewNextWeekKey: !showBanner,
       dismissedFridayReminderWeekKey: dismissedKey,
     );

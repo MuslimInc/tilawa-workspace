@@ -78,7 +78,7 @@ void main() {
     scopeGetIt().registerFactory<AppReviewCubit>(() {
       createCount++;
       final mock = _MockAppReviewCubit();
-      when(() => mock.close()).thenAnswer((_) async {});
+      when(mock.close).thenAnswer((_) async {});
       when(() => mock.state).thenReturn(const AppReviewState());
       when(() => mock.stream).thenAnswer((_) => const Stream.empty());
       return mock;

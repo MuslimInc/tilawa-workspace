@@ -24,9 +24,9 @@ void main() {
     await tester.pumpWidget(
       MaterialApp(
         theme: AppTheme.getLightTheme(primaryColor: AppColors.defaultPrimary),
-        home: Scaffold(
+        home: const Scaffold(
           body: HomeHeroGlassSurface(
-            child: const Text('metrics'),
+            child: Text('metrics'),
           ),
         ),
       ),
@@ -57,9 +57,9 @@ void main() {
       await tester.pumpWidget(
         MaterialApp(
           theme: AppTheme.getLightTheme(primaryColor: AppColors.defaultPrimary),
-          home: Scaffold(
+          home: const Scaffold(
             body: HomeHeroGlassSurface(
-              child: const Text('metrics'),
+              child: Text('metrics'),
             ),
           ),
         ),
@@ -85,10 +85,10 @@ void main() {
       await tester.pumpWidget(
         MaterialApp(
           theme: AppTheme.getLightTheme(primaryColor: AppColors.defaultPrimary),
-          home: Scaffold(
+          home: const Scaffold(
             body: HomeHeroGlassSurface(
               usePrayerHeroTokens: true,
-              child: const Text('metrics'),
+              child: Text('metrics'),
             ),
           ),
         ),

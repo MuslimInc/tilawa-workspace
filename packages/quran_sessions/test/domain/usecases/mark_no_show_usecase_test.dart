@@ -22,7 +22,7 @@ void main() {
         );
       useCase = MarkNoShowUseCase(
         aggregateRepository: repository,
-        lifecycleGuard: SessionLifecycleGuard(),
+        lifecycleGuard: const SessionLifecycleGuard(),
         noShowPolicy: NoShowPolicy(
           now: () => startsAt.add(const Duration(minutes: 20)),
         ),

@@ -342,9 +342,9 @@ class _TodayPlanLoadingCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return HomeDashboardCard(
+    return const HomeDashboardCard(
       surface: TilawaCardSurface.raised,
-      child: const Center(
+      child: Center(
         child: TilawaLoadingIndicator(centered: false),
       ),
     );

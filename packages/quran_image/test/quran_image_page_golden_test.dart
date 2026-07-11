@@ -61,9 +61,7 @@ String goldenPath({required int pageNumber, required String viewportLabel}) {
 void main() {
   late Directory tempDirectory;
 
-  setUpAll(() {
-    TestWidgetsFlutterBinding.ensureInitialized();
-  });
+  setUpAll(TestWidgetsFlutterBinding.ensureInitialized);
 
   setUp(() async {
     tempDirectory = await bootstrapQuranImagePageTest(

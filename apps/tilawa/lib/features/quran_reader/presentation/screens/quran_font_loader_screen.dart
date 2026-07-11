@@ -195,7 +195,7 @@ class _QuranFontLoaderScreenState extends State<QuranFontLoaderScreen> {
               prev.initialPageHint != curr.initialPageHint &&
               curr.initialPageHint != null,
           listener: (context, state) {
-            setState(() => _initialPageNumber = state.initialPageHint!);
+            setState(() => _initialPageNumber = state.initialPageHint);
             _maybeDispatchInit();
           },
         ),
@@ -484,7 +484,7 @@ class _DownloadView extends StatelessWidget {
         mainAxisSize: MainAxisSize.min,
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
-          Center(child: const TilawaAppBrandBadge()),
+          const Center(child: TilawaAppBrandBadge()),
           SizedBox(height: tokens.spaceExtraLarge),
           Text(
             context.l10n.preparingFonts,

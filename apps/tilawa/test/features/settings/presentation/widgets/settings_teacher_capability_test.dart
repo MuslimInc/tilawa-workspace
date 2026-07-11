@@ -51,7 +51,7 @@ class _SequenceTeacherCapabilityUseCase
       );
 
   final List<TeacherCapability> _capabilities;
-  var callCount = 0;
+  int callCount = 0;
 
   @override
   Future<Either<QuranSessionsFailure, TeacherCapability>> call(
@@ -115,7 +115,7 @@ Future<void> _pumpSettingsTeachingSection(
         if (useSection)
           const SettingsTeachingOnMemuslimSection()
         else
-          SettingsTeachingOnMemuslimTile(showDivider: false),
+          const SettingsTeachingOnMemuslimTile(showDivider: false),
       ],
     ),
   );
@@ -125,7 +125,7 @@ Future<void> _pumpSettingsTeachingSection(
       MaterialApp.router(
         theme: AppTheme.getLightTheme(primaryColor: AppColors.defaultPrimary),
         locale: locale,
-        localizationsDelegates: [
+        localizationsDelegates: const [
           ...AppLocalizations.localizationsDelegates,
           ...QuranSessionsLocalizations.localizationsDelegates,
         ],
@@ -142,7 +142,7 @@ Future<void> _pumpSettingsTeachingSection(
     MaterialApp(
       theme: AppTheme.getLightTheme(primaryColor: AppColors.defaultPrimary),
       locale: locale,
-      localizationsDelegates: [
+      localizationsDelegates: const [
         ...AppLocalizations.localizationsDelegates,
         ...QuranSessionsLocalizations.localizationsDelegates,
       ],
@@ -353,7 +353,7 @@ void main() {
           path: '/',
           builder: (context, state) => BlocProvider<AuthBloc>.value(
             value: _mockAuthBloc,
-            child: SettingsTeacherCapabilityScope(
+            child: const SettingsTeacherCapabilityScope(
               child: SettingsTeachingOnMemuslimTile(showDivider: false),
             ),
           ),
@@ -406,7 +406,7 @@ void main() {
             path: '/',
             builder: (context, state) => BlocProvider<AuthBloc>.value(
               value: _mockAuthBloc,
-              child: SettingsTeacherCapabilityScope(
+              child: const SettingsTeacherCapabilityScope(
                 child: SettingsTeachingOnMemuslimTile(showDivider: false),
               ),
             ),
@@ -490,14 +490,14 @@ void main() {
     await tester.pumpWidget(
       MaterialApp(
         theme: AppTheme.getLightTheme(primaryColor: AppColors.defaultPrimary),
-        localizationsDelegates: [
+        localizationsDelegates: const [
           ...AppLocalizations.localizationsDelegates,
           ...QuranSessionsLocalizations.localizationsDelegates,
         ],
         supportedLocales: AppLocalizations.supportedLocales,
         home: BlocProvider<AuthBloc>.value(
           value: _mockAuthBloc,
-          child: SettingsTeacherCapabilityScope(
+          child: const SettingsTeacherCapabilityScope(
             child: SettingsTeachingOnMemuslimTile(showDivider: false),
           ),
         ),
@@ -538,14 +538,14 @@ void main() {
     await tester.pumpWidget(
       MaterialApp(
         theme: AppTheme.getLightTheme(primaryColor: AppColors.defaultPrimary),
-        localizationsDelegates: [
+        localizationsDelegates: const [
           ...AppLocalizations.localizationsDelegates,
           ...QuranSessionsLocalizations.localizationsDelegates,
         ],
         supportedLocales: AppLocalizations.supportedLocales,
         home: BlocProvider<AuthBloc>.value(
           value: _mockAuthBloc,
-          child: SettingsTeacherCapabilityScope(
+          child: const SettingsTeacherCapabilityScope(
             child: SettingsTeachingOnMemuslimTile(showDivider: false),
           ),
         ),

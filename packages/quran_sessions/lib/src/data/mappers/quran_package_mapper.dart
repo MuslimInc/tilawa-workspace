@@ -158,7 +158,7 @@ extension StudentPackageCountersDtoMapper on StudentPackageCountersDto {
       adjustNegativeTotal: adjustNegativeTotal,
     );
     if (!counters.allNonNegative) {
-      return Left(
+      return const Left(
         PackageDataCorruptionFailure(
           documentType: 'counters',
           detail: 'negative_counter',

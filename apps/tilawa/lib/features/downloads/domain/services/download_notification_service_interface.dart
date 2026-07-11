@@ -1,4 +1,4 @@
-import '../../domain/entities/download_item.dart';
+import '../entities/download_item.dart';
 
 /// Interface for the download notification service
 ///

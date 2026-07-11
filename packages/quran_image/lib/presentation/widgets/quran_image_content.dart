@@ -34,7 +34,7 @@ class QuranImageContent extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     PerfLogger.markBuild('QuranImageContent');
-    final contentStack = Container(
+    final contentStack = ColoredBox(
       color: backgroundColor ?? Theme.of(context).scaffoldBackgroundColor,
       child: Stack(
         clipBehavior: Clip.none,

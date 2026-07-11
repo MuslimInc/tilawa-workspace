@@ -45,8 +45,7 @@ class TilawaCatalogAppBar extends StatelessWidget
   final bool centerTitle;
 
   /// Title-only catalog header.
-  factory TilawaCatalogAppBar.titleOnly(
-    BuildContext context, {
+  factory TilawaCatalogAppBar.titleOnly({
     Key? key,
     required String title,
     Widget? leading,
@@ -56,7 +55,6 @@ class TilawaCatalogAppBar extends StatelessWidget
     bool showBottomHairline = TilawaAppBarConfig.showBottomHairline,
     bool showElevationShadow = TilawaAppBarConfig.showElevationShadow,
     bool centerTitle = false,
-    double? titleBlockHeight,
   }) {
     return TilawaCatalogAppBar(
       key: key,

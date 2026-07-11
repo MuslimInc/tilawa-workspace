@@ -4,7 +4,7 @@ import 'package:flutter/material.dart';
 import '../atoms/tilawa_button.dart';
 import '../molecules/tilawa_cupertino_wheel_picker.dart';
 import '../molecules/tilawa_picker_segment_card.dart';
-import '../foundation/component_tokens.dart';
+import 'component_tokens.dart';
 import 'tilawa_bottom_sheet_scaffold.dart';
 import 'tilawa_bottom_sheet_title_row.dart';
 import 'tilawa_modal_bottom_sheet.dart';

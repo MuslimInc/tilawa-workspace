@@ -72,7 +72,7 @@ void main() {
       await _pumpCaptureProbe(tester);
 
       final Uint8List? bytes = await tester.runAsync<Uint8List?>(
-        () => TilawaFeedbackScreenshotCapture.capturePngBytes(),
+        TilawaFeedbackScreenshotCapture.capturePngBytes,
       );
 
       expect(bytes, isNotNull);
@@ -95,7 +95,7 @@ void main() {
       await tester.pumpAndSettle();
 
       final Uint8List? bytes = await tester.runAsync<Uint8List?>(
-        () => TilawaFeedbackScreenshotCapture.capturePngBytes(),
+        TilawaFeedbackScreenshotCapture.capturePngBytes,
       );
 
       expect(bytes, isNull);
@@ -246,7 +246,7 @@ void main() {
       await _pumpCaptureProbe(tester);
 
       final Uint8List? bytes = await tester.runAsync<Uint8List?>(
-        () => TilawaFeedbackScreenshotCapture.capturePngBytes(),
+        TilawaFeedbackScreenshotCapture.capturePngBytes,
       );
 
       expect(bytes, isNotNull);

@@ -22,7 +22,7 @@ void main() {
       );
 
       expect(translation, isNotNull);
-      expect(translation!, contains('Allāh'));
+      expect(translation, contains('Allāh'));
     });
 
     test('documents QUL source in bundled asset metadata', () async {

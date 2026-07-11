@@ -1,7 +1,7 @@
 import 'dart:async';
 
 import 'package:dartz_plus/dartz_plus.dart';
-// ignore_for_file: avoid_public_fields, file_names
+// ignore_for_file: avoid_public_fields
 import 'package:flutter/material.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:flutter_test/flutter_test.dart';
@@ -412,7 +412,7 @@ void main() {
         const FakeAuthSessionProvider(userId: 'teacher_user'),
       );
 
-      final capability = TeacherCapability(
+      const capability = TeacherCapability(
         state: TeacherCapabilityState.approvedIncompleteProfile,
       );
 

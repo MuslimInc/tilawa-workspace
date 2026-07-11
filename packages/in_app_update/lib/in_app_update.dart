@@ -94,23 +94,25 @@ class InAppUpdate {
       updateAvailability: UpdateAvailability.fromCode(
         result['updateAvailability'] as int? ?? 0,
       ),
-      immediateUpdateAllowed: result['immediateAllowed'],
-      immediateAllowedPreconditions: result['immediateAllowedPreconditions']
-          ?.map<int>((e) => e as int)
-          .toList(),
-      flexibleUpdateAllowed: result['flexibleAllowed'],
-      flexibleAllowedPreconditions: result['flexibleAllowedPreconditions']
-          ?.map<int>((e) => e as int)
-          .toList(),
-      availableVersionCode: result['availableVersionCode'],
+      immediateUpdateAllowed: (result['immediateAllowed'] as bool?) ?? false,
+      immediateAllowedPreconditions:
+          (result['immediateAllowedPreconditions'] as List<dynamic>?)
+              ?.map<int>((e) => e as int)
+              .toList(),
+      flexibleUpdateAllowed: (result['flexibleAllowed'] as bool?) ?? false,
+      flexibleAllowedPreconditions:
+          (result['flexibleAllowedPreconditions'] as List<dynamic>?)
+              ?.map<int>((e) => e as int)
+              .toList(),
+      availableVersionCode: result['availableVersionCode'] as int?,
       installStatus: InstallStatus.fromCode(
         result['installStatus'] as int? ?? 0,
       ),
-      packageName: result['packageName'],
-      clientVersionStalenessDays: result['clientVersionStalenessDays'],
-      updatePriority: result['updatePriority'],
-      totalBytesToDownload: result['totalBytesToDownload'],
-      bytesDownloaded: result['bytesDownloaded'],
+      packageName: (result['packageName'] as String?) ?? '',
+      clientVersionStalenessDays: result['clientVersionStalenessDays'] as int?,
+      updatePriority: (result['updatePriority'] as int?) ?? 0,
+      totalBytesToDownload: result['totalBytesToDownload'] as int?,
+      bytesDownloaded: result['bytesDownloaded'] as int?,
     );
   }
 
@@ -178,7 +180,7 @@ class InAppUpdate {
   ///
   /// [startFlexibleUpdate] has to be completed successfully.
   static Future<void> completeFlexibleUpdate() async {
-    return await _channel.invokeMethod('completeFlexibleUpdate');
+    return _channel.invokeMethod('completeFlexibleUpdate');
   }
 
   /// Opens the app's Play Store listing instead of the in-app immediate flow.

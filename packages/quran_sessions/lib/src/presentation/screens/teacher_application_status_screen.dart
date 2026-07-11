@@ -392,21 +392,22 @@ class _DebugApprovalBanner extends StatelessWidget {
             ),
           ),
           const SizedBox(height: 12),
-          isLoading
-              ? const Center(child: CircularProgressIndicator())
-              : OutlinedButton.icon(
-                  icon: const Icon(Icons.check_circle_outline),
-                  label: Text(l10n.simulateAdminApproval),
-                  style: OutlinedButton.styleFrom(
-                    foregroundColor: Colors.amber.shade800,
-                    side: const BorderSide(color: Colors.amber),
-                  ),
-                  onPressed: () => context.read<TeacherApplicationBloc>().add(
-                    TeacherApplicationDebugSimulateApproval(
-                      applicationId: application.id,
-                    ),
-                  ),
+          if (isLoading)
+            const Center(child: CircularProgressIndicator())
+          else
+            OutlinedButton.icon(
+              icon: const Icon(Icons.check_circle_outline),
+              label: Text(l10n.simulateAdminApproval),
+              style: OutlinedButton.styleFrom(
+                foregroundColor: Colors.amber.shade800,
+                side: const BorderSide(color: Colors.amber),
+              ),
+              onPressed: () => context.read<TeacherApplicationBloc>().add(
+                TeacherApplicationDebugSimulateApproval(
+                  applicationId: application.id,
                 ),
+              ),
+            ),
         ],
       ),
     );

@@ -30,7 +30,7 @@ void main() {
         home: Scaffold(
           body: TilawaAsyncContent(
             state: TilawaAsyncContentState.loading,
-            skeleton: Text('Skeleton'),
+            skeleton: const Text('Skeleton'),
             builder: (context) => const _LoadedContent(),
           ),
         ),

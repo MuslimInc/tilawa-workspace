@@ -91,7 +91,7 @@ class GenUiActionResolver {
   GenUiActionResolution _openQuranReader(GenUiNode node) {
     final int? surah = node.intProp('surah');
     if (surah == null || surah < 1 || surah > 114) {
-      return GenUiActionRejected(
+      return const GenUiActionRejected(
         actionId: 'openQuranReader',
         reason: 'surah out of range',
       );

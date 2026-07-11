@@ -128,7 +128,7 @@ void main() {
           SizedBox(
             height: tokens.playerCollapsedHeight,
             width: 360,
-            child: TilawaMediaPlayerBar(
+            child: const TilawaMediaPlayerBar(
               layoutWidth: 360,
               title: 'Surah Al-Baqarah',
               subtitle: 'Al-Minshawi',
@@ -161,7 +161,7 @@ void main() {
           SizedBox(
             height: tokens.playerCollapsedHeight,
             width: 360,
-            child: TilawaMediaPlayerBar(
+            child: const TilawaMediaPlayerBar(
               layoutWidth: 360,
               title: 'Surah Al-Baqarah',
               subtitle: 'Al-Minshawi',

@@ -241,7 +241,7 @@ class _TilawaDialogContent extends StatelessWidget {
                   end: tightBody ? 0 : inset,
                   bottom: hasActions ? 0 : inset,
                 ),
-                child: body!,
+                child: body,
               ),
             ),
           ),

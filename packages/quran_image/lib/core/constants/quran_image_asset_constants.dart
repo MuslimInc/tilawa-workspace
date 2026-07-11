@@ -1,5 +1,3 @@
-// ignore_for_file: public_member_api_docs
-
 /// Centralised asset paths for Quran page image rendering.
 class QuranImageAssetConstants {
   QuranImageAssetConstants._();

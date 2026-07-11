@@ -28,7 +28,7 @@ class PrayerSettingsDataSourceImpl implements PrayerSettingsDataSource {
     }
 
     try {
-      final Map<String, dynamic> json = jsonDecode(settingsJson);
+      final json = jsonDecode(settingsJson) as Map<String, dynamic>;
       return PrayerSettingsEntity.fromJson(json);
     } catch (e) {
       return const PrayerSettingsEntity();

@@ -104,7 +104,7 @@ void main() {
       final mockLocalizationBloc = MockLocalizationBloc();
       whenListen(
         mockLocalizationBloc,
-        Stream<LocalizationState>.empty(),
+        const Stream<LocalizationState>.empty(),
         initialState: const LocalizationState(locale: Locale('en')),
       );
 
@@ -201,7 +201,7 @@ void main() {
     final mockAuthBloc = MockAuthBloc();
     whenListen(
       mockAuthBloc,
-      Stream<AuthState>.empty(),
+      const Stream<AuthState>.empty(),
       initialState: const AuthState.loading(),
     );
 
@@ -237,7 +237,7 @@ void main() {
       );
       whenListen(
         mockAuthBloc,
-        Stream<AuthState>.empty(),
+        const Stream<AuthState>.empty(),
         initialState: AuthState.authenticated(user: user),
       );
 

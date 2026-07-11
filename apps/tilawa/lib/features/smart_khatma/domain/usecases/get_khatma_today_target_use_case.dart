@@ -21,9 +21,10 @@ final class GetKhatmaTodayTargetUseCase {
         return const Right(null);
       }
       final lastRead = await _quranReaderRepository.getLastReadPosition();
-      final int startPage = (lastRead.page ?? plan.currentPage)
-          .clamp(KhatmaPlan.firstQuranPage, KhatmaPlan.lastQuranPage)
-          .toInt();
+      final int startPage = (lastRead.page ?? plan.currentPage).clamp(
+        KhatmaPlan.firstQuranPage,
+        KhatmaPlan.lastQuranPage,
+      );
       final DateTime today = now ?? DateTime.now();
       return Right(
         KhatmaTodayTarget(

@@ -92,7 +92,7 @@ class AppStartupReadiness {
       _runShellDelays(),
       _prefetch(
         label: 'reciters',
-        fetch: () => _getReciters(),
+        fetch: _getReciters.call,
         onSuccess: () => _recitersDataReady = true,
       ),
       // Favorites readiness is encoded in FavoritesCubit.state — no flag needed.

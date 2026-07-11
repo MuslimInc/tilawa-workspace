@@ -201,10 +201,10 @@ void main() {
     test(
       'preserves extras in AudioEntity when mediaItem has metadata',
       () async {
-        final mediaItemWithExtras = audio_service.MediaItem(
+        const mediaItemWithExtras = audio_service.MediaItem(
           id: '1',
           title: 'Title',
-          extras: const {
+          extras: {
             'url': 'url',
             'reciterId': 'reciter1',
             'surahId': 1,

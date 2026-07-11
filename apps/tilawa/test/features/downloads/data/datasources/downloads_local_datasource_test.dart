@@ -288,7 +288,10 @@ void main() {
         expect(savedList.length, 2);
 
         final List<DownloadItem> decodedList = savedList
-            .map((e) => DownloadItem.fromJson(jsonDecode(e)))
+            .map(
+              (e) =>
+                  DownloadItem.fromJson(jsonDecode(e) as Map<String, dynamic>),
+            )
             .toList();
         expect(decodedList.firstWhere((e) => e.id == 'existing').title, 'New');
         expect(decodedList.any((e) => e.id == 'new'), isTrue);
@@ -327,7 +330,10 @@ void main() {
         ).captured;
         final savedList = captured.first as List<String>;
         final List<DownloadItem> decodedList = savedList
-            .map((e) => DownloadItem.fromJson(jsonDecode(e)))
+            .map(
+              (e) =>
+                  DownloadItem.fromJson(jsonDecode(e) as Map<String, dynamic>),
+            )
             .toList();
 
         expect(decodedList.firstWhere((e) => e.id == 'id1').progress, 1.0);

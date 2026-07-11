@@ -24,7 +24,6 @@ class SmartKhatmaHubScreen extends StatelessWidget {
 
     return Scaffold(
       appBar: TilawaCatalogAppBar.titleOnly(
-        context,
         title: context.l10n.khatmaHubTitle,
         automaticallyImplyLeading: true,
         onBackPressed: () => context.pop(),
@@ -34,7 +33,7 @@ class SmartKhatmaHubScreen extends StatelessWidget {
           return switch (state) {
             KhatmaPlanLoaded(:final plan, :final todayTarget) =>
               plan == null
-                  ? _KhatmaHubEmptyBody()
+                  ? const _KhatmaHubEmptyBody()
                   : _KhatmaHubActiveBody(plan: plan, todayTarget: todayTarget),
             KhatmaPlanFailure(:final message) => _KhatmaHubErrorBody(
               message: message,
