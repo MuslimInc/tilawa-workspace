@@ -10,6 +10,7 @@ import 'domain/usecases/create_khatma_plan_use_case.dart';
 import 'domain/usecases/extend_khatma_plan_use_case.dart';
 import 'domain/usecases/get_active_khatma_plan_use_case.dart';
 import 'domain/usecases/get_khatma_today_target_use_case.dart';
+import 'domain/usecases/get_wird_progress_summary_use_case.dart';
 import 'domain/usecases/reset_khatma_plan_use_case.dart';
 import 'domain/usecases/select_khatma_catch_up_use_case.dart';
 import 'domain/usecases/update_khatma_progress_use_case.dart';
@@ -34,6 +35,12 @@ final class SmartKhatmaDependencies {
       repository,
       getIt<QuranReaderRepository>(),
     );
+  }
+
+  static GetWirdProgressSummaryUseCase getWirdProgressSummary(
+    KhatmaPlanRepository repository,
+  ) {
+    return GetWirdProgressSummaryUseCase(repository);
   }
 
   static KhatmaPlanBloc bloc() {

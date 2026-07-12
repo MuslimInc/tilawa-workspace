@@ -8,6 +8,13 @@
 ## 2. Workstream Details
 
 ### Workstream 1: Athan Reliability Hardening (Existing Architecture)
+- **Pipeline Provenance**: 
+  - Android: `AdhanScheduler.kt` uses `AlarmManager.setAlarmClock()`.
+  - Trigger: `AdhanReceiver.kt` catches the alarm.
+  - Notification & Audio: the audible path uses channel **`com.tilawa.app.prayer_adhan_v5`** (`AdhanReceiver.kt:29`), not `prayer_adhan_silent_v5`. Verify the exact playback mechanism during T-A00 (an audible notification channel and a foreground `AdhanPlaybackService`/`MediaPlayer` path both appear in the code) before hardening — do not assume a single path.
+  - `flutter_local_notifications` is NOT used in the exact-alarm critical path on Android. No Dart isolate is spun up for playback.
+  - Watchdog: `PrayerNotificationsWatchdogWorker.kt` periodically wakes up to re-arm dropped alarms from SharedPreferences.
+  - iOS: Audio is capped at 30 seconds. Supported target formats are `.caf`, `.aiff`, or `.wav`. (Currently missing from repo).
 - **Audit**: Run baseline tests to characterize schedule success, alarm triggers, and audio playback.
 - **UI**: Add `AdhanHealthCubit` to query `canScheduleExactAlarms()` and battery optimization status, feeding into `AdhanHealthCheckScreen`.
 

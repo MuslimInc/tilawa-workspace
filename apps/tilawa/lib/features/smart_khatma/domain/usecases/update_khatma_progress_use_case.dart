@@ -11,7 +11,10 @@ final class UpdateKhatmaProgressUseCase {
   final KhatmaPlanRepository _repository;
   final AnalyticsService _analyticsService;
 
-  Future<Either<Failure, KhatmaPlan?>> call({required int currentPage}) async {
+  Future<Either<Failure, KhatmaPlan?>> call({
+    required int currentPage,
+    DateTime? now,
+  }) async {
     try {
       final KhatmaPlan? plan = await _repository.getActivePlan();
       if (plan == null) {
@@ -28,11 +31,17 @@ final class UpdateKhatmaProgressUseCase {
         return Right(plan);
       }
       final int nextPage = visitedPage;
+      final DateTime today = now ?? DateTime.now();
+      final bool continuesToday = _isSameDate(plan.progressDate, today);
       final KhatmaPlan updated = plan.copyWith(
         currentPage: nextPage,
         status: nextPage >= plan.targetPage
             ? KhatmaPlanStatus.completed
             : KhatmaPlanStatus.active,
+        progressDate: continuesToday ? plan.progressDate : _dateOnly(today),
+        progressStartPage: continuesToday
+            ? plan.progressStartPage
+            : plan.currentPage,
       );
       await _repository.saveActivePlan(updated);
       await _analyticsService.logEvent(
@@ -54,8 +63,17 @@ final class UpdateKhatmaProgressUseCase {
         );
       }
       return Right(updated);
-    } catch (error) {
+    } on Exception catch (error) {
       return Left(CacheFailure(error.toString()));
     }
   }
+
+  bool _isSameDate(DateTime? first, DateTime second) {
+    return first?.year == second.year &&
+        first?.month == second.month &&
+        first?.day == second.day;
+  }
+
+  DateTime _dateOnly(DateTime date) =>
+      DateTime(date.year, date.month, date.day);
 }

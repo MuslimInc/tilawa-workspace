@@ -18,6 +18,10 @@ final class SelectKhatmaCatchUpUseCase {
         return const Right(null);
       }
       final today = now ?? DateTime.now();
+      final KhatmaPlan updated = plan.copyWith(
+        adjustment: KhatmaPlanAdjustment.catchUp,
+      );
+      await _repository.saveActivePlan(updated);
       await _analyticsService.logEvent(
         AnalyticsEvents.khatmaCatchupSelected,
         parameters: <String, Object>{
@@ -26,8 +30,8 @@ final class SelectKhatmaCatchUpUseCase {
           'missed_days': plan.missedDays(today),
         },
       );
-      return Right(plan);
-    } catch (error) {
+      return Right(updated);
+    } on Exception catch (error) {
       return Left(CacheFailure(error.toString()));
     }
   }

@@ -11,11 +11,16 @@ void main() {
         _FakeAnalyticsService(),
       );
 
-      final result = await useCase(currentPage: 13);
+      final result = await useCase(
+        currentPage: 13,
+        now: DateTime(2026, 7, 12),
+      );
       final updated = result.getOrElse(() => throw StateError('expected plan'));
 
       expect(updated?.currentPage, 13);
       expect((await repository.getActivePlan())?.currentPage, 13);
+      expect(updated?.progressDate, DateTime(2026, 7, 12));
+      expect(updated?.progressStartPage, 12);
     });
 
     test(

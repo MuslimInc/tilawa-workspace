@@ -21,11 +21,12 @@ final class ExtendKhatmaPlanUseCase {
       final int extraDays = plan.missedDays(today).clamp(1, 30);
       final KhatmaPlan updated = plan.copyWith(
         durationDays: plan.durationDays + extraDays,
+        adjustment: KhatmaPlanAdjustment.extended,
       );
       await _repository.saveActivePlan(updated);
       await _logAdjustment(plan, updated, today);
       return Right(updated);
-    } catch (error) {
+    } on Exception catch (error) {
       return Left(CacheFailure(error.toString()));
     }
   }

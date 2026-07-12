@@ -1,0 +1,106 @@
+# Amendment: Daily Wird / Khatma Progress Widget (041-A1)
+
+**Status**: Proposed (documentation only — do not implement yet)
+**Parent**: `specs/041-islamic-widget-suite/spec.md`
+**Source evidence**: Khatmah review sample — **K48** (upvoted: "add widgets concerning the
+main topic… Khatmas (daily readings)… a must") and **K51** (adherence-days). This is the
+**strongest currently unowned retention opportunity observed in this extremes-only sample**;
+it is **not** a total-market-demand estimate.
+
+## Why this amendment
+Spec 041 (verified in repo) ships **Prayer** (US1, `PrayerTimesWidgetProvider.kt`), **Ayah of
+the Day** (US2, `widget/ayah/`), and **Athkar** (US3, `widget/athkar/`); **Hijri** (US4) and
+**Share cards** (US5) are pending. Widget types are `IslamicWidgetType { prayer, ayah, athkar,
+hijri }` — **there is no Khatma/Wird-progress widget.** Yet the central app habit (Spec 023
+Khatma/Wird) has no glanceable home-screen surface. This amendment adds exactly one widget to
+close that gap, reusing the shipped widget foundation (`WidgetSnapshotEnvelope`,
+`WidgetSnapshotStore.kt`, `widget_snapshot_bridge.dart`, deep-link routing).
+
+## Platform phasing (accurate — no false parity promise)
+Repository audit: **no iOS WidgetKit foundation exists** — no widget extension target, no
+`TimelineProvider`, and **no App Group entitlement** (grep of `apps/tilawa/ios` finds only
+Pods/Firebase/Agora "extension" dirs, none app-owned). Therefore:
+
+- **Phase 1 — Android (this amendment).** Build the Wird widget on the **existing, shipped**
+  Android widget infrastructure (`WidgetSnapshotStore.kt`, `widget_snapshot_bridge.dart`,
+  providers under `widget/`). Reuses the battery-safe refresh cadence — **no new scheduling
+  engine, no per-second updates**. This is the only platform in scope here.
+- **Phase 2 — iOS (future child specification, NOT a task in this slice).** iOS requires
+  foundations that do not exist yet and must be audited/built first: a WidgetKit extension
+  target, **App Group** shared storage, a `TimelineProvider`, shared snapshot serialization,
+  deep-link handling, localization, and build/provisioning (signing, entitlements). Because
+  none of this exists, iOS is filed as a **future child spec** (`041-ios-widgetkit-foundation`,
+  TBD), not an unchecked task inside the Android slice. Product **semantics** stay identical
+  across platforms (same Contract A summary); **technical parity is not promised** for v1.
+
+Consistent semantics, honestly phased delivery: same meaning both platforms, Android first.
+
+## Requirements
+- **FR-041A1.1**: Add widget type `wird` (extend `IslamicWidgetType`) with a launcher picker
+  preview. It renders the **Wird/Khatma progress summary** only.
+- **FR-041A1.2**: A **Spec 041 presentation adapter** MUST consume the **semantic summary**
+  (Contract A, `specs/023-smart-khatma-reading-plan/contracts/wird-progress-summary.md`) and
+  produce the **`WirdProgressWidgetPayload`** (Contract B,
+  `specs/041-islamic-widget-suite/contracts/wird-progress-widget-payload.md`), which is handed
+  to the native provider over the existing bridge (`widgetType: "wird"`). The widget MUST NOT
+  compute plan math, page targets, or adherence (Spec 023 owns those). **No duplicate progress
+  logic in the widget.**
+- **FR-041A1.3**: The **adapter** (not Spec 023) localizes and formats: it produces
+  `localizedTitle`/`localizedSubtitle`, formatted digit strings, and the `accessibilityLabel`.
+  Digit shaping (Arabic-Indic vs Latin) is chosen from **locale + user numeral preference, not
+  text direction alone**. The native widget renders the payload verbatim.
+- **FR-041A1.4**: MUST handle every state from the contract: **no-plan** (Start-a-Wird CTA),
+  **active**, **paused**, **completed-day**, **completed-plan**, **offline**, **stale** — and
+  MUST never show a blank frame (reuse the suite's last-known-data + staleness rule, FR-014).
+- **FR-041A1.5**: Tap MUST deep-link per `tapDestination` (`openKhatma` default) via a new
+  allowed action `openKhatma` added to the widget-bridge action set.
+- **FR-041A1.6**: MUST offer light/dark/auto themes and ≥2 size classes consistent with design
+  tokens (suite FR-009); MUST expose accessibility labels and remain legible at 200% text
+  scale (suite FR-015); MUST render correctly in **Arabic RTL** and **English LTR**.
+- **FR-041A1.7**: MUST survive reboot/launcher-restart/app-update by re-rendering from the
+  persisted snapshot without opening the app (suite FR-010).
+- **FR-041A1.8**: Privacy — the payload carries only day/aggregate numbers + pre-rendered
+  labels (never a reading-history list); analytics identify widget type/interaction only
+  (suite FR-016). On lock-screen/at-a-glance surfaces, no sensitive history is exposed.
+- **FR-041A1.9**: Payload is **versioned** (`schemaVersion`); an unknown major version renders
+  the no-data/setup state, never a crash.
+
+## Data contracts (two — semantic vs presentation)
+- **Contract A (semantic, owned by Spec 023)**: `wird-progress-summary.md` v1 — meaning/numbers
+  only, locale-free. Consumed here.
+- **Contract B (presentation, owned by Spec 041)**: `contracts/wird-progress-widget-payload.md`
+  v1 — localized + formatted, produced by the 041 adapter and rendered verbatim by the native
+  widget. This amendment **owns Contract B and the adapter**; it does not own plan math.
+
+## Analytics (privacy-safe, reuse `widget_analytics.dart`)
+`widget_added`/`widget_removed` (type=`wird`), `widget_tapped` (type=`wird`), and a
+`wird_widget_state_rendered` { `state` } for coverage of the no-plan/active/stale paths.
+
+## Tasks (not implemented — Phase 1 Android only)
+- [ ] T-041A1-a: Extend `IslamicWidgetType` + envelope payload parsing for `wird`.
+- [ ] T-041A1-b: **Presentation adapter** (Contract A → Contract B): localize, format digits by
+  locale/preference, build accessibility label, resolve `tapDestination`→deep link.
+- [ ] T-041A1-c: Native `WirdProgressWidgetProvider.kt` (compact/expanded, states, deep link) under `widget/wird/`.
+- [ ] T-041A1-d: Add `openKhatma` to allowed widget actions + router destination.
+- [ ] T-041A1-e: Flutter sync service to push the adapter payload into the snapshot store.
+- [ ] T-041A1-f: Layouts/resources/previews + AndroidManifest registration.
+- [ ] *(Phase 2 iOS — deferred to future child spec `041-ios-widgetkit-foundation`; not tasked here.)*
+
+## Tests
+- Domain/parse: envelope `wird` payload parse; unknown-version → setup state.
+- Native (Robolectric): each contract state renders non-blank; deep link fires; resize no-clip.
+- RTL/LTR + 200% text-scale + light/dark golden coverage.
+- Offline/stale: renders persisted snapshot; staleness cue appears past `validUntil`.
+
+## Manual QA
+- Xiaomi/Redmi + Samsung (Egypt OEMs): place widget, complete Wird in-app, confirm widget
+  reflects new remaining within one refresh; reboot → non-blank; airplane mode → last-known.
+
+## Rollout & fallback
+- Feature-flag `enable_wird_widget` (default off) → staged. If the 023 summary is unavailable
+  (flag off or no plan), the widget shows the **no-plan CTA**, never an error. Blocked on Spec
+  023 producing the summary (023-A2 T-023A2-c).
+
+## Non-goals
+- iOS widget (v1 Android-only), lock-screen variant, share-card of progress, any plan editing
+  from the widget, and any progress computation inside the widget.

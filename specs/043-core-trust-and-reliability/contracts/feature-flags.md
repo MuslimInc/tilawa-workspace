@@ -9,7 +9,7 @@
 ### 1. `enable_quran_integrity_check`
 - **Type**: Boolean
 - **Default**: `true`
-- **Description**: Enables the SHA-256 runtime validation of the Quran SQLite database. Can be set to `false` via Firebase Remote Config if a false-positive blocks users globally.
+- **Description**: Enables the SHA-256 runtime validation of the Quran assets (`assets/data/quran.json` + `quran_image` JSON + downloaded QCF fonts — there is no `quran.db`). Can be set to `false` via Firebase Remote Config if a false-positive blocks users globally.
 
 ### 2. `enable_adhan_health_ui`
 - **Type**: Boolean

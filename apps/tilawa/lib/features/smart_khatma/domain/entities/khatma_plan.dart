@@ -4,6 +4,8 @@ enum KhatmaReadingStyle { pages, minutes }
 
 enum KhatmaPlanStatus { active, completed }
 
+enum KhatmaPlanAdjustment { none, catchUp, extended }
+
 final class KhatmaPlan {
   const KhatmaPlan({
     required this.id,
@@ -16,6 +18,9 @@ final class KhatmaPlan {
     this.readingStyle = KhatmaReadingStyle.pages,
     this.preferredMinutesPerDay,
     this.status = KhatmaPlanStatus.active,
+    this.adjustment = KhatmaPlanAdjustment.none,
+    this.progressDate,
+    this.progressStartPage,
   });
 
   static const int firstQuranPage = 1;
@@ -31,6 +36,9 @@ final class KhatmaPlan {
   final KhatmaReadingStyle readingStyle;
   final int? preferredMinutesPerDay;
   final KhatmaPlanStatus status;
+  final KhatmaPlanAdjustment adjustment;
+  final DateTime? progressDate;
+  final int? progressStartPage;
 
   int get totalPages => targetPage - startPage + 1;
 
@@ -86,6 +94,9 @@ final class KhatmaPlan {
     int? currentPage,
     KhatmaPlanStatus? status,
     int? durationDays,
+    KhatmaPlanAdjustment? adjustment,
+    DateTime? progressDate,
+    int? progressStartPage,
   }) {
     return KhatmaPlan(
       id: id,
@@ -98,6 +109,9 @@ final class KhatmaPlan {
       readingStyle: readingStyle,
       preferredMinutesPerDay: preferredMinutesPerDay,
       status: status ?? this.status,
+      adjustment: adjustment ?? this.adjustment,
+      progressDate: progressDate ?? this.progressDate,
+      progressStartPage: progressStartPage ?? this.progressStartPage,
     );
   }
 

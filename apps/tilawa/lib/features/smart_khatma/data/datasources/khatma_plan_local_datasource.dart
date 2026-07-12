@@ -59,6 +59,9 @@ final class SharedPreferencesKhatmaPlanLocalDataSource
       'reading_style': plan.readingStyle.name,
       'preferred_minutes_per_day': plan.preferredMinutesPerDay,
       'status': plan.status.name,
+      'adjustment': plan.adjustment.name,
+      'progress_date': plan.progressDate?.toIso8601String(),
+      'progress_start_page': plan.progressStartPage,
     };
   }
 
@@ -78,6 +81,14 @@ final class SharedPreferencesKhatmaPlanLocalDataSource
       status: KhatmaPlanStatus.values.byName(
         json['status'] as String? ?? KhatmaPlanStatus.active.name,
       ),
+      adjustment: KhatmaPlanAdjustment.values.byName(
+        json['adjustment'] as String? ?? KhatmaPlanAdjustment.none.name,
+      ),
+      progressDate: switch (json['progress_date']) {
+        final String value => DateTime.parse(value),
+        _ => null,
+      },
+      progressStartPage: json['progress_start_page'] as int?,
     );
   }
 }
