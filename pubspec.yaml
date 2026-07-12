@@ -80,6 +80,10 @@ melos:
       description: Run official bloc_lint rules via bloc_tools.
       run: dart run bloc_tools:bloc lint .
 
+    ui:lint:
+      description: Enforce Tilawa UI Kit components in product code.
+      run: dart run tool/ui_kit_guard.dart
+
     # -- Testing -------------------------------------------------------
     test:
       description: Run all tests across all packages.

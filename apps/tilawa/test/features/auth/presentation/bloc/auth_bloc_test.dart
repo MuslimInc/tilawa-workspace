@@ -192,7 +192,8 @@ void main() {
       );
 
       blocTest<AuthBloc, AuthState>(
-        'emits [unauthenticated] when passive sync confirms stale device',
+        'restores optimistically, then demotes to [unauthenticated] when '
+        'background sync confirms a stale device',
         build: () {
           when(mockGetCurrentUserUseCase()).thenReturn(tUser);
           when(mockSyncDeviceTokenUseCase(tUser.id)).thenAnswer(
@@ -206,10 +207,32 @@ void main() {
           return authBloc;
         },
         act: (bloc) => bloc.add(const CheckAuthStatusEvent()),
-        expect: () => [const AuthState.unauthenticated()],
+        wait: const Duration(milliseconds: 10),
+        expect: () => [
+          AuthState.authenticated(user: tUser),
+          const AuthState.unauthenticated(),
+        ],
         verify: (_) {
           verify(mockSignOut(skipServerTokenClear: true)).called(1);
-          verifyNever(mockGetCurrentLanguageUseCase());
+        },
+      );
+
+      blocTest<AuthBloc, AuthState>(
+        'emits [authenticated] before device sync completes so a hung '
+        'network (dead or captive connection) cannot block startup auth',
+        build: () {
+          when(mockGetCurrentUserUseCase()).thenReturn(tUser);
+          when(mockSyncDeviceTokenUseCase(tUser.id)).thenAnswer(
+            (_) => Completer<Either<Failure, void>>().future,
+          );
+          return authBloc;
+        },
+        act: (bloc) => bloc.add(const CheckAuthStatusEvent()),
+        expect: () => [AuthState.authenticated(user: tUser)],
+        verify: (_) {
+          verifyNever(
+            mockSignOut(skipServerTokenClear: anyNamed('skipServerTokenClear')),
+          );
         },
       );
 
@@ -225,6 +248,7 @@ void main() {
           return buildAuthBloc(multiDeviceLoginEnabled: true);
         },
         act: (bloc) => bloc.add(const CheckAuthStatusEvent()),
+        wait: const Duration(milliseconds: 10),
         expect: () => [AuthState.authenticated(user: tUser)],
         verify: (_) {
           verifyNever(mockSignOut(skipServerTokenClear: true));
@@ -239,6 +263,7 @@ void main() {
           return authBloc;
         },
         act: (bloc) => bloc.add(const CheckAuthStatusEvent()),
+        wait: const Duration(milliseconds: 10),
         expect: () => [AuthState.authenticated(user: tUser)],
         verify: (_) {
           verify(mockGetCurrentUserUseCase()).called(1);
@@ -260,6 +285,7 @@ void main() {
           return authBloc;
         },
         act: (bloc) => bloc.add(const CheckAuthStatusEvent()),
+        wait: const Duration(milliseconds: 10),
         expect: () => [AuthState.authenticated(user: tUser)],
         verify: (_) {
           verifyNever(
@@ -297,6 +323,7 @@ void main() {
         },
         seed: () => AuthState.authenticated(user: tUser),
         act: (bloc) => bloc.add(const CheckAuthStatusEvent()),
+        wait: const Duration(milliseconds: 10),
         expect: () => <AuthState>[],
         verify: (bloc) {
           expect(bloc.state, AuthState.authenticated(user: tUser));

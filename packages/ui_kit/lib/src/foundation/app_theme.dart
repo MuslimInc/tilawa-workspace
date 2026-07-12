@@ -65,7 +65,10 @@ class AppTheme {
     // weight/size so Flutter resolves the matching bundled font file.
     // Product readability scaling is applied via [tilawaProductTextScaler] on
     // [MediaQueryData.textScaler], not by mutating theme font sizes.
-    return base.apply(fontFamily: _fontFamily);
+    final TextTheme applied = base.apply(fontFamily: _fontFamily);
+    return applied.copyWith(
+      titleLarge: applied.titleLarge?.copyWith(fontWeight: FontWeight.w700),
+    );
   }
 
   static bool _isFlutterTestEnvironment() {
@@ -406,11 +409,19 @@ class AppTheme {
         scrolledUnderElevation: 0,
         shadowColor: Colors.transparent,
         surfaceTintColor: Colors.transparent,
-        titleTextStyle: theme.textTheme.titleLarge?.copyWith(
-          fontWeight: FontWeight.w700,
-          color: colorScheme.onSurface,
+        centerTitle: false,
+        titleSpacing:
+            NavigationToolbar.kMiddleSpacing +
+            (designTokens.appBarEdgePadding - 8.0),
+        shape: RoundedRectangleBorder(
+          side: BorderSide(
+            color: colorScheme.outlineVariant.withValues(
+              alpha: designTokens.opacitySubtle * 2.5,
+            ),
+            width: designTokens.borderWidthThin,
+          ),
         ),
-        actionsPadding: MeMuslimDesignTokens.light().appBarActionsPadding,
+        actionsPadding: designTokens.appBarActionsPadding,
       ),
       cardTheme: theme.cardTheme.copyWith(
         color: colorScheme.surface,

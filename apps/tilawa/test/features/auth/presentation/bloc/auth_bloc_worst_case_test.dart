@@ -257,6 +257,7 @@ void main() {
         },
         seed: () => const AuthState.initial(),
         act: (bloc) => bloc.add(const CheckAuthStatusEvent()),
+        wait: const Duration(milliseconds: 10),
         expect: () => [AuthState.authenticated(user: userA)],
         verify: (_) {
           verifyNever(
@@ -281,6 +282,7 @@ void main() {
         },
         seed: () => AuthState.authenticated(user: userA),
         act: (bloc) => bloc.add(const CheckAuthStatusEvent()),
+        wait: const Duration(milliseconds: 10),
         expect: () => [const AuthState.unauthenticated()],
       );
 
@@ -312,6 +314,7 @@ void main() {
         },
         seed: () => const AuthState.initial(),
         act: (bloc) => bloc.add(const CheckAuthStatusEvent()),
+        wait: const Duration(milliseconds: 10),
         expect: () => [AuthState.authenticated(user: userA)],
         verify: (_) {
           verifyNever(
@@ -365,6 +368,7 @@ void main() {
         },
         seed: () => AuthState.authenticated(user: userA),
         act: (bloc) => bloc.add(const CheckAuthStatusEvent()),
+        wait: const Duration(milliseconds: 10),
         expect: () => <AuthState>[],
         verify: (bloc) {
           expect(bloc.state, AuthState.authenticated(user: userA));

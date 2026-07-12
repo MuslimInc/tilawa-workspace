@@ -154,7 +154,7 @@ class _TilawaAppBarBody extends StatelessWidget {
         enabled: showElevationShadow,
       ),
       toolbarHeight: resolvedToolbarHeight,
-      titleSpacing: isBottomOnlyChrome ? 0 : null,
+      titleSpacing: isBottomOnlyChrome ? 0 : NavigationToolbar.kMiddleSpacing,
       centerTitle: centerTitle,
       automaticallyImplyLeading: leadingConfig.automaticallyImplyLeading,
       leading: leadingConfig.leading,
@@ -334,6 +334,7 @@ class _TilawaSliverAppBarBody extends StatelessWidget {
       scrolledUnderElevation: TilawaAppBarChrome.scrolledUnderElevation(
         enabled: showElevationShadow,
       ),
+      titleSpacing: NavigationToolbar.kMiddleSpacing,
       centerTitle: centerTitle,
       automaticallyImplyLeading: leadingConfig.automaticallyImplyLeading,
       leading: leadingConfig.leading,

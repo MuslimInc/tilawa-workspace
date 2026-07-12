@@ -44,6 +44,20 @@ organisms/      TilawaMediaPlayerBar, TilawaSettingsGroup, …
 4. **No parallel palettes** — category hues, decorative gradients, and
    per-screen hex are forbidden in product chrome (see colours doc).
 
+### Automated component boundary
+
+Product code must use the UI Kit component whenever one exists. In particular,
+use `TilawaAppBar`, `TilawaCatalogAppBar`, or `TilawaSliverAppBar` instead of
+Flutter's raw `AppBar` and `SliverAppBar`. The UI Kit package may use framework
+widgets internally to implement those abstractions.
+
+Run `melos run ui:lint` locally. The same guard is blocking in pull requests.
+It scans production Dart sources, reports the file and line, and rejects new
+raw component usage. Pre-existing violations are tracked by a non-increasing
+baseline in `tool/ui_kit_guard.dart`; remove baseline entries as those screens
+are migrated. If the UI Kit lacks a suitable component, add and test one at the
+smallest correct Atomic Design level instead of bypassing the guard.
+
 ---
 
 ## 2. Theme freeze — calm catalog chrome (light)
@@ -274,4 +288,3 @@ Previews and goldens set `AppTheme.useGoogleFonts = false` and
 | [`feedback_system.md`](feedback_system.md) | Toast vs inline validation channel rules |
 | [`specs/017-catalog-theme-freeze/`](../../../specs/017-catalog-theme-freeze/spec.md) | Freeze acceptance criteria |
 | [`specs/006-ui-kit-expansion/ui-kit-inventory.md`](../../../specs/006-ui-kit-expansion/ui-kit-inventory.md) | Component inventory |
-
