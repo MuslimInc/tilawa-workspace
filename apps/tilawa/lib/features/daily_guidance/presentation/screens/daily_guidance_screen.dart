@@ -18,7 +18,11 @@ class DailyGuidanceScreen extends StatelessWidget {
     return BlocProvider(
       create: (_) {
         final cubit = getIt<DailyGuidanceCubit>();
-        unawaited(cubit.loadTodayGuidance());
+        unawaited(
+          cubit.loadTodayGuidance(
+            locale: Localizations.localeOf(context).languageCode,
+          ),
+        );
         return cubit;
       },
       child: Scaffold(
@@ -30,7 +34,9 @@ class DailyGuidanceScreen extends StatelessWidget {
             if (state is DailyGuidanceLoading) {
               return const Center(child: CircularProgressIndicator());
             } else if (state is DailyGuidanceError) {
-              return Center(child: Text('Error: ${state.message}'));
+              return Center(
+                child: Text(AppLocalizations.of(context).dailyGuidanceError),
+              );
             } else if (state is DailyGuidanceLoaded) {
               final item = state.todayItem;
               if (item == null) {
@@ -54,7 +60,9 @@ class DailyGuidanceScreen extends StatelessWidget {
 
               return RefreshIndicator(
                 onRefresh: () async {
-                  await context.read<DailyGuidanceCubit>().loadTodayGuidance();
+                  await context.read<DailyGuidanceCubit>().loadTodayGuidance(
+                    locale: Localizations.localeOf(context).languageCode,
+                  );
                 },
                 child: ListView(
                   padding: const EdgeInsets.all(16.0),
@@ -66,6 +74,11 @@ class DailyGuidanceScreen extends StatelessWidget {
                         AppLocalizations.of(
                           context,
                         ).dailyGuidanceEnableNotifications,
+                      ),
+                      subtitle: Text(
+                        AppLocalizations.of(
+                          context,
+                        ).dailyGuidanceNotificationSubtitle,
                       ),
                       value: state.preferences.enabled,
                       onChanged: (val) {

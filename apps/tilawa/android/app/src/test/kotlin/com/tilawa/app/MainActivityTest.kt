@@ -65,7 +65,7 @@ class MainActivityTest {
     }
 
     @Test
-    fun `onNewIntent routes open prayer status action with Flutter-compatible payload`() {
+    fun `onNewIntent consumes open prayer status action after routing once`() {
         val intent = Intent(activity, MainActivity::class.java).apply {
             action = MainActivity.ACTION_OPEN_PRAYER_STATUS
             putExtra(AdhanScheduler.EXTRA_PRAYER_NAME, "fajr")
@@ -80,8 +80,12 @@ class MainActivityTest {
             .getDeclaredMethod("onNewIntent", Intent::class.java)
             .apply { isAccessible = true }
             .invoke(activity, intent)
+        MainActivity::class.java
+            .getDeclaredMethod("onNewIntent", Intent::class.java)
+            .apply { isAccessible = true }
+            .invoke(activity, intent)
 
-        verify {
+        verify(exactly = 1) {
             PrayerAdhanMethodChannel.notifyNotificationTapped(
                 "fajr",
                 match {
@@ -93,5 +97,6 @@ class MainActivityTest {
                 },
             )
         }
+        assert(intent.action == null)
     }
 }

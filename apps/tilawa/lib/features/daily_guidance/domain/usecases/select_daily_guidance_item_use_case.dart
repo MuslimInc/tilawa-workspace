@@ -32,18 +32,26 @@ class SelectDailyGuidanceItemUseCase {
   Future<DailyGuidanceItem?> call({
     required String localDate,
     required DailyGuidancePreferences preferences,
+    required String locale,
   }) async {
+    // 0. Ensure seed data is loaded into local storage if empty
+    await _repository.refreshContent();
+
     // 1. Check if already committed for today
     final existingRecord = await _recordRepository.getRecordForDate(localDate);
     if (existingRecord != null) {
-      return _repository.getItemById(existingRecord.itemId);
+      return _repository.getItemById(
+        id: existingRecord.itemId,
+        locale: locale,
+        capability: DailyGuidanceCapability.display,
+      );
     }
 
     // 2. Load candidates
-    final locale = preferences.preferredLocale ?? 'en'; // Default fallback
     var candidates = await _repository.getEligibleItems(
       contentMode: preferences.contentMode,
       locale: locale,
+      capability: DailyGuidanceCapability.notification,
     );
 
     if (candidates.isEmpty) {
@@ -52,6 +60,7 @@ class SelectDailyGuidanceItemUseCase {
         candidates = await _repository.getEligibleItems(
           contentMode: DailyGuidanceContentMode.mixed,
           locale: locale,
+          capability: DailyGuidanceCapability.notification,
         );
       }
       if (candidates.isEmpty) {

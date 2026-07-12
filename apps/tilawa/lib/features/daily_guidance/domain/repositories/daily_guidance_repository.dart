@@ -8,10 +8,15 @@ abstract class DailyGuidanceRepository {
   Future<List<DailyGuidanceItem>> getEligibleItems({
     required DailyGuidanceContentMode contentMode,
     required String locale,
+    required DailyGuidanceCapability capability,
   });
 
-  /// Returns a single item by [id], or null if not found.
-  Future<DailyGuidanceItem?> getItemById(String id);
+  /// Returns a trusted item when it is eligible for the requested context.
+  Future<DailyGuidanceItem?> getItemById({
+    required String id,
+    required String locale,
+    required DailyGuidanceCapability capability,
+  });
 
   /// Refreshes the local content cache from the remote source (if available).
   /// Returns the number of items updated.

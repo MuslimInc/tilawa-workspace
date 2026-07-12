@@ -4079,28 +4079,49 @@ class AppLocalizationsAr extends AppLocalizations {
   String get settingsAdminUserBadge => 'مستخدم إداري';
 
   @override
-  String get dailyGuidanceTitle => 'نفحة اليوم';
+  String get dailyGuidanceTitle => 'رسالة اليوم';
 
   @override
-  String get dailyGuidanceEmpty => 'لا توجد نفحة متاحة لهذا اليوم.';
+  String get dailyGuidanceEmpty => 'لا توجد رسالة متاحة اليوم.';
 
   @override
-  String get dailyGuidanceEnableNotifications => 'تفعيل الإشعارات اليومية';
+  String get dailyGuidanceError => 'تعذّر تحميل رسالة اليوم. حاول مرة أخرى.';
 
   @override
-  String get dailyGuidanceNotificationTitle => 'نفحة اليوم | Daily Guidance';
+  String get dailyGuidanceEnableNotifications => 'تذكير يومي';
 
   @override
-  String get dailyGuidanceNotificationBody => 'افتح لرؤية نفحة اليوم';
+  String get dailyGuidanceNotificationSubtitle =>
+      'تصلك آية أو حديث كل يوم في الوقت الذي تختاره';
 
   @override
-  String get dailyGuidanceTypeQuran => 'قرآن';
+  String get dailyGuidanceSettingsSection => 'نفحات إيمانية';
 
   @override
-  String get dailyGuidanceTypeHadith => 'حديث';
+  String get dailyGuidanceSettings => 'رسالة اليوم';
+
+  @override
+  String get dailyGuidanceSettingsSubtitle => 'آية أو حديث كل يوم';
+
+  @override
+  String get dailyGuidanceNotificationTitle => 'رسالة اليوم 🌿';
+
+  @override
+  String get dailyGuidanceNotificationBody => 'افتح لقراءة رسالة اليوم';
+
+  @override
+  String get dailyGuidanceTypeQuran => 'آية قرآنية';
+
+  @override
+  String get dailyGuidanceTypeHadith => 'حديث نبوي';
 
   @override
   String dailyGuidanceQuranSource(String surahName, int ayahNumber) {
     return 'سورة $surahName، آية $ayahNumber';
+  }
+
+  @override
+  String dailyGuidanceHadithSource(String collection, String referenceNumber) {
+    return '$collection، حديث رقم $referenceNumber';
   }
 }

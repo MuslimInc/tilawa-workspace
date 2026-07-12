@@ -1,6 +1,6 @@
 # Feature Specification: Daily Ayah & Hadith Notifications
 
-**Feature Branch**: `042-daily-guidance-notifications`
+**Feature Branch**: `044-daily-guidance-notifications`
 
 **Created**: 2026-07-12
 
@@ -8,7 +8,7 @@
 
 **Product**: MeMuslim — أنا مسلم
 
-**Feature Name**: Daily Guidance / نفحة اليوم
+**Feature Name**: Daily Guidance / رسالة اليوم
 
 **Primary Platforms**: Android and iOS
 
@@ -20,7 +20,15 @@
 
 MeMuslim will introduce an optional daily notification that delivers one carefully reviewed Islamic guidance item to the user. The daily item may be a Quran verse, an authentic Prophetic hadith, or a short approved explanation. The feature encourages consistent, meaningful engagement with the Quran and Sunnah without manipulative engagement techniques, guilt-based messaging, gambling-like rewards, or unsupported religious claims.
 
-Content varies day to day within boundaries of verified Islamic sources, editorial and scholarly review, user-controlled preferences, anti-repetition rules, privacy-safe personalization, and respectful non-clickbait messaging. The feature shall be presented as **Daily Guidance** or **نفحة اليوم**, never as a game, prize, or random reward.
+Content varies day to day within boundaries of verified Islamic sources, editorial and scholarly review, user-controlled preferences, anti-repetition rules, privacy-safe personalization, and respectful non-clickbait messaging. The feature shall be presented as **Daily Guidance** or **رسالة اليوم**, under the Arabic settings section **نفحات إيمانية**, never as a game, prize, or random reward.
+
+## Trusted Content Boundary
+
+- Seed and cached JSON are untrusted Data-layer inputs.
+- A `DailyGuidanceItem` enters Domain only after release-mode validation of publication state, requested locale, requested capability, review evidence, and type-specific source metadata.
+- Repository reads explicitly require `locale` and `DailyGuidanceCapability` (`display`, `notification`, or `share`).
+- Arabic presentation receives Arabic explanation/source values only and never an English translation or collection name.
+- MVP Hadith content must be graded `sahih`; invalid records are excluded without changing their publication state.
 
 ---
 
@@ -494,7 +502,7 @@ Content should feel: calm, trustworthy, hopeful, clear, respectful, concise, non
 
 Daily Guidance uses a dedicated notification category/channel:
 
-- **Arabic name**: نفحة اليوم
+- **Arabic name**: رسالة اليوم
 - **English name**: Daily Guidance
 - **Arabic description**: آية أو حديث صحيح في الوقت الذي تختاره
 - **English description**: One Quran verse or authentic hadith at your selected time

@@ -4319,19 +4319,29 @@
     "@settingsAdminUserBadge": {
         "description": "Badge on Settings profile when the signed-in user has the Firebase admin custom claim"
     },
-    "dailyGuidanceTitle": "نفحة اليوم",
+    "dailyGuidanceTitle": "رسالة اليوم",
     "@dailyGuidanceTitle": { "description": "Title of the Daily Guidance screen" },
-    "dailyGuidanceEmpty": "لا توجد نفحة متاحة لهذا اليوم.",
+    "dailyGuidanceEmpty": "لا توجد رسالة متاحة اليوم.",
     "@dailyGuidanceEmpty": { "description": "Message shown when there is no daily guidance" },
-    "dailyGuidanceEnableNotifications": "تفعيل الإشعارات اليومية",
+    "dailyGuidanceError": "تعذّر تحميل رسالة اليوم. حاول مرة أخرى.",
+    "@dailyGuidanceError": { "description": "Safe error shown when trusted daily guidance cannot be loaded" },
+    "dailyGuidanceEnableNotifications": "تذكير يومي",
     "@dailyGuidanceEnableNotifications": { "description": "Label for the daily guidance notification toggle" },
-    "dailyGuidanceNotificationTitle": "نفحة اليوم | Daily Guidance",
+    "dailyGuidanceNotificationSubtitle": "تصلك آية أو حديث كل يوم في الوقت الذي تختاره",
+    "@dailyGuidanceNotificationSubtitle": { "description": "Subtitle for the daily guidance notification toggle" },
+    "dailyGuidanceSettingsSection": "نفحات إيمانية",
+    "@dailyGuidanceSettingsSection": { "description": "Settings section for faith reminders" },
+    "dailyGuidanceSettings": "رسالة اليوم",
+    "@dailyGuidanceSettings": { "description": "Title for the Daily Guidance settings tile" },
+    "dailyGuidanceSettingsSubtitle": "آية أو حديث كل يوم",
+    "@dailyGuidanceSettingsSubtitle": { "description": "Subtitle for the Daily Guidance settings row" },
+    "dailyGuidanceNotificationTitle": "رسالة اليوم 🌿",
     "@dailyGuidanceNotificationTitle": { "description": "Notification title for daily guidance" },
-    "dailyGuidanceNotificationBody": "افتح لرؤية نفحة اليوم",
+    "dailyGuidanceNotificationBody": "افتح لقراءة رسالة اليوم",
     "@dailyGuidanceNotificationBody": { "description": "Notification body for daily guidance" },
-    "dailyGuidanceTypeQuran": "قرآن",
+    "dailyGuidanceTypeQuran": "آية قرآنية",
     "@dailyGuidanceTypeQuran": { "description": "Label for Quran item type" },
-    "dailyGuidanceTypeHadith": "حديث",
+    "dailyGuidanceTypeHadith": "حديث نبوي",
     "@dailyGuidanceTypeHadith": { "description": "Label for Hadith item type" },
     "dailyGuidanceQuranSource": "سورة {surahName}، آية {ayahNumber}",
     "@dailyGuidanceQuranSource": {
@@ -4345,6 +4355,14 @@
                 "type": "int",
                 "example": "255"
             }
+        }
+    },
+    "dailyGuidanceHadithSource": "{collection}، حديث رقم {referenceNumber}",
+    "@dailyGuidanceHadithSource": {
+        "description": "Source format for an authentic Hadith item",
+        "placeholders": {
+            "collection": { "type": "String", "example": "صحيح البخاري" },
+            "referenceNumber": { "type": "String", "example": "6412" }
         }
     }
 }

@@ -1,6 +1,6 @@
 # Data Model: Daily Guidance Notifications
 
-**Branch**: `042-daily-guidance-notifications` | **Date**: 2026-07-12
+**Branch**: `044-daily-guidance-notifications` | **Date**: 2026-07-12
 
 ---
 
@@ -17,8 +17,8 @@ Represents one approved deliverable content item.
 | `status` | `ContentPublicationStatus` | ✅ | `draft`, `inReview`, `approved`, `published`, `retired`, `rejected` |
 | `originalArabicText` | `String` | ✅ | Full canonical Arabic text |
 | `notificationExcerpt` | `String?` | ❌ | Short text safe for notification preview (≤80 chars) |
-| `shortExplanation` | `Map<String, String>?` | ❌ | Locale → approved explanation |
-| `translations` | `Map<String, String>?` | ❌ | Locale → approved translation |
+| `shortExplanation` | `LocalizedGuidanceContent?` | ❌ | Locale-specific approved explanation with stable source ID |
+| `translation` | `LocalizedGuidanceContent?` | ❌ | Locale-specific approved translation with stable source ID |
 | `topicTags` | `List<String>` | ✅ | e.g. `['mercy', 'patience', 'prayer']` |
 | `occasionTags` | `List<String>?` | ❌ | e.g. `['friday', 'ramadan']` |
 | `availableLocales` | `List<String>` | ✅ | e.g. `['ar', 'en']` |
@@ -35,8 +35,14 @@ Represents one approved deliverable content item.
 - `originalArabicText` must not be empty.
 - `status` must be `published` for delivery eligibility.
 - `sourceMetadata` must be complete (all required fields populated).
-- `reviewMetadata.reviewedAt` must be non-null.
-- For hadith: `sourceMetadata.grading` must not be `weak`, `fabricated`, or `unverifiable`.
+- For hadith: `sourceMetadata.grading` must be `sahih` for MVP.
+- `reviewMetadata.sourceValidationComplete` must be true.
+- Notification and share reads require their matching review approval.
+- Non-Arabic locale reads require a validated translation for that locale.
+- Arabic and English locale variants normalize to `ar` and `en`; unsupported locales are ineligible.
+- Quran Arabic text and stable item ID must match the bundled `quran_qcf` canonical corpus.
+- Hadith item ID, Sahih collection, grading, and grading authority must form an approved stable tuple.
+- Every localized explanation or translation crossing into Domain carries a non-empty provenance source ID.
 - If `validFrom` and `validUntil` are set, `validFrom` must be before `validUntil`.
 
 ---

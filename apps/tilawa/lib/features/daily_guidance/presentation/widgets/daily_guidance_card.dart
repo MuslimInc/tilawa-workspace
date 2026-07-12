@@ -45,20 +45,20 @@ class DailyGuidanceCard extends StatelessWidget {
               textAlign: TextAlign.center,
               textDirection: TextDirection.rtl,
             ),
-            if (item.translations?.isNotEmpty == true) ...[
+            if (item.translation case final translation?) ...[
               const SizedBox(height: 16),
               Text(
-                item.translations!.values.first,
+                translation.text,
                 style: context.textTheme.bodyLarge,
                 textAlign: TextAlign.center,
               ),
             ],
-            if (item.shortExplanation?.isNotEmpty == true) ...[
+            if (item.shortExplanation case final explanation?) ...[
               const SizedBox(height: 16),
               const Divider(),
               const SizedBox(height: 8),
               Text(
-                item.shortExplanation!.values.first,
+                explanation.text,
                 style: context.textTheme.bodyMedium?.copyWith(
                   color: context.colorScheme.onSurfaceVariant,
                 ),
@@ -89,7 +89,10 @@ class DailyGuidanceCard extends StatelessWidget {
       );
     } else if (item.type == DailyGuidanceItemType.hadith &&
         item.hadithSource != null) {
-      return '${item.hadithSource!.collection} - ${item.hadithSource!.referenceNumber}';
+      return AppLocalizations.of(context).dailyGuidanceHadithSource(
+        item.hadithSource!.collection,
+        item.hadithSource!.referenceNumber,
+      );
     }
     return '';
   }

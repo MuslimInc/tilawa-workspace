@@ -18,6 +18,9 @@ enum DailyGuidanceContentMode {
   mixed,
 }
 
+/// The operation for which trusted content is being requested.
+enum DailyGuidanceCapability { display, notification, share }
+
 /// Content lifecycle status. Only [published] items are eligible for delivery.
 enum ContentPublicationStatus {
   @JsonValue('draft')

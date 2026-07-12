@@ -1,8 +1,13 @@
 # Contracts: Daily Guidance Feature
 
-**Branch**: `042-daily-guidance-notifications` | **Date**: 2026-07-12
+**Branch**: `044-daily-guidance-notifications` | **Date**: 2026-07-12
 
 This feature is internal to the MeMuslim Flutter app. The contracts below define the domain-layer interfaces that the data layer implements and the presentation layer consumes.
+
+Locale inputs accept BCP-47-style Arabic and English variants and normalize
+them to `ar` or `en`. Unsupported locales return no trusted content. Trusted
+localized text is represented by `LocalizedGuidanceContent` with `locale`,
+`text`, and stable `sourceId`; raw maps remain Data-layer parsing details only.
 
 ---
 
@@ -16,10 +21,15 @@ abstract class DailyGuidanceRepository {
   Future<List<DailyGuidanceItem>> getEligibleItems({
     required DailyGuidanceContentMode contentMode,
     required String locale,
+    required DailyGuidanceCapability capability,
   });
 
-  /// Returns a single item by [id], or null if not found.
-  Future<DailyGuidanceItem?> getItemById(String id);
+  /// Returns a trusted eligible item, or null.
+  Future<DailyGuidanceItem?> getItemById({
+    required String id,
+    required String locale,
+    required DailyGuidanceCapability capability,
+  });
 
   /// Refreshes the local content cache from the remote source (if available).
   /// Returns the number of items updated.
@@ -113,30 +123,18 @@ class SelectDailyGuidanceItemUseCase {
   Future<DailyGuidanceItem?> call({
     required String localDate,
     required DailyGuidancePreferences preferences,
+    required String locale,
   });
 }
 ```
 
 ---
 
-## 6. Notification Payload Contract
+## 6. Notification Payload Contract (current MVP)
 
-The notification payload is a JSON map with the following fields:
-
-| Field | Type | Description |
-|-------|------|-------------|
-| `type` | `String` | Always `"daily_guidance"` |
-| `itemId` | `String` | The committed item ID |
-| `localDate` | `String` | ISO date `YYYY-MM-DD` |
-
-Example:
-```json
-{
-  "type": "daily_guidance",
-  "itemId": "quran_039_053",
-  "localDate": "2026-07-12"
-}
-```
+The local notification uses the plain payload `daily_guidance_payload`.
+`DeepLinkResolver` normalizes it to `{ "type": "daily_guidance" }`; the screen
+then retrieves or selects the committed item through the validated repository.
 
 ---
 
@@ -144,13 +142,12 @@ Example:
 
 | Route | Path | Parameters |
 |-------|------|------------|
-| `DailyGuidanceDetailRoute` | `/daily-guidance/:itemId` | `itemId: String`, optional `localDate: String` query param |
-| `DailyGuidanceSettingsRoute` | `/settings/daily-guidance` | — |
+| `DailyGuidanceRoute` | `/daily-guidance` | — |
 
 Navigation from notification tap:
-1. `DeepLinkResolver` maps `type: "daily_guidance"` → `DailyGuidanceDetailRoute(itemId: data['itemId'])`.
-2. GoRouter navigates to the detail screen.
-3. The detail screen loads the item from the repository by ID.
+1. `DeepLinkResolver` maps `type: "daily_guidance"` to `/daily-guidance`.
+2. GoRouter opens `DailyGuidanceScreen`.
+3. The selector retrieves the committed item through locale/capability validation.
 
 ---
 

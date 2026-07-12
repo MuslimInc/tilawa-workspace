@@ -4119,22 +4119,45 @@ class AppLocalizationsEn extends AppLocalizations {
   String get dailyGuidanceEmpty => 'No guidance available for today.';
 
   @override
-  String get dailyGuidanceEnableNotifications => 'Enable Daily Notifications';
+  String get dailyGuidanceError =>
+      'Daily Guidance could not be loaded. Please try again.';
 
   @override
-  String get dailyGuidanceNotificationTitle => 'نفحة اليوم | Daily Guidance';
+  String get dailyGuidanceEnableNotifications => 'Daily Reminder';
+
+  @override
+  String get dailyGuidanceNotificationSubtitle =>
+      'Receive a Quran verse or authentic Hadith at your preferred time';
+
+  @override
+  String get dailyGuidanceSettingsSection => 'Daily Guidance';
+
+  @override
+  String get dailyGuidanceSettings => 'Daily Guidance';
+
+  @override
+  String get dailyGuidanceSettingsSubtitle =>
+      'A Quran verse or authentic Hadith each day';
+
+  @override
+  String get dailyGuidanceNotificationTitle => 'Daily Guidance 🌿';
 
   @override
   String get dailyGuidanceNotificationBody => 'Open to see today\'s guidance';
 
   @override
-  String get dailyGuidanceTypeQuran => 'Quran';
+  String get dailyGuidanceTypeQuran => 'Quran Verse';
 
   @override
-  String get dailyGuidanceTypeHadith => 'Hadith';
+  String get dailyGuidanceTypeHadith => 'Prophetic Hadith';
 
   @override
   String dailyGuidanceQuranSource(String surahName, int ayahNumber) {
     return 'Surah $surahName, Ayah $ayahNumber';
+  }
+
+  @override
+  String dailyGuidanceHadithSource(String collection, String referenceNumber) {
+    return '$collection, Hadith $referenceNumber';
   }
 }

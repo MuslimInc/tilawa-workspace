@@ -1,7 +1,6 @@
 import 'package:equatable/equatable.dart';
 
 import '../../domain/entities/daily_guidance_enums.dart';
-import '../../domain/entities/daily_guidance_item.dart';
 import 'content_review_metadata_model.dart';
 import 'hadith_source_metadata_model.dart';
 import 'quran_source_metadata_model.dart';
@@ -14,6 +13,8 @@ class DailyGuidanceItemModel extends Equatable {
   final String? notificationExcerpt;
   final Map<String, String>? shortExplanation;
   final Map<String, String>? translations;
+  final Map<String, String>? shortExplanationSourceIds;
+  final Map<String, String>? translationSourceIds;
   final List<String> topicTags;
   final List<String>? occasionTags;
   final List<String> availableLocales;
@@ -34,6 +35,8 @@ class DailyGuidanceItemModel extends Equatable {
     this.notificationExcerpt,
     this.shortExplanation,
     this.translations,
+    this.shortExplanationSourceIds,
+    this.translationSourceIds,
     required this.topicTags,
     this.occasionTags,
     required this.availableLocales,
@@ -56,6 +59,8 @@ class DailyGuidanceItemModel extends Equatable {
     notificationExcerpt,
     shortExplanation,
     translations,
+    shortExplanationSourceIds,
+    translationSourceIds,
     topicTags,
     occasionTags,
     availableLocales,
@@ -89,6 +94,14 @@ class DailyGuidanceItemModel extends Equatable {
       translations: (json['translations'] as Map<String, dynamic>?)?.map(
         (k, v) => MapEntry(k, v as String),
       ),
+      shortExplanationSourceIds:
+          (json['short_explanation_source_ids'] as Map<String, dynamic>?)?.map(
+            (key, value) => MapEntry(key, value as String),
+          ),
+      translationSourceIds:
+          (json['translation_source_ids'] as Map<String, dynamic>?)?.map(
+            (key, value) => MapEntry(key, value as String),
+          ),
       topicTags: (json['topic_tags'] as List<dynamic>)
           .map((e) => e as String)
           .toList(),
@@ -136,6 +149,8 @@ class DailyGuidanceItemModel extends Equatable {
       'notification_excerpt': notificationExcerpt,
       'short_explanation': shortExplanation,
       'translations': translations,
+      'short_explanation_source_ids': shortExplanationSourceIds,
+      'translation_source_ids': translationSourceIds,
       'topic_tags': topicTags,
       'occasion_tags': occasionTags,
       'available_locales': availableLocales,
@@ -148,55 +163,5 @@ class DailyGuidanceItemModel extends Equatable {
       'hadith_source': hadithSource?.toJson(),
       'review_metadata': reviewMetadata.toJson(),
     };
-  }
-}
-
-extension DailyGuidanceItemModelMapper on DailyGuidanceItemModel {
-  DailyGuidanceItem toEntity() {
-    return DailyGuidanceItem(
-      id: id,
-      type: type,
-      status: status,
-      originalArabicText: originalArabicText,
-      notificationExcerpt: notificationExcerpt,
-      shortExplanation: shortExplanation,
-      translations: translations,
-      topicTags: topicTags,
-      occasionTags: occasionTags,
-      availableLocales: availableLocales,
-      validFrom: validFrom,
-      validUntil: validUntil,
-      publishedAt: publishedAt,
-      retiredAt: retiredAt,
-      revision: revision,
-      quranSource: quranSource?.toEntity(),
-      hadithSource: hadithSource?.toEntity(),
-      reviewMetadata: reviewMetadata.toEntity(),
-    );
-  }
-}
-
-extension DailyGuidanceItemMapper on DailyGuidanceItem {
-  DailyGuidanceItemModel toModel() {
-    return DailyGuidanceItemModel(
-      id: id,
-      type: type,
-      status: status,
-      originalArabicText: originalArabicText,
-      notificationExcerpt: notificationExcerpt,
-      shortExplanation: shortExplanation,
-      translations: translations,
-      topicTags: topicTags,
-      occasionTags: occasionTags,
-      availableLocales: availableLocales,
-      validFrom: validFrom,
-      validUntil: validUntil,
-      publishedAt: publishedAt,
-      retiredAt: retiredAt,
-      revision: revision,
-      quranSource: quranSource?.toModel(),
-      hadithSource: hadithSource?.toModel(),
-      reviewMetadata: reviewMetadata.toModel(),
-    );
   }
 }

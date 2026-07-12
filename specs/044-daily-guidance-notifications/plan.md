@@ -1,12 +1,12 @@
 # Implementation Plan: Daily Ayah & Hadith Notifications
 
-**Branch**: `042-daily-guidance-notifications` | **Date**: 2026-07-12 | **Spec**: [spec.md](./spec.md)
+**Branch**: `044-daily-guidance-notifications` | **Date**: 2026-07-12 | **Spec**: [spec.md](./spec.md)
 
 **Input**: Feature specification from `/specs/044-daily-guidance-notifications/spec.md`
 
 ## Summary
 
-MeMuslim will add an optional daily notification (Daily Guidance / نفحة اليوم) delivering one curated Quran verse or authentic hadith. The implementation uses local notifications (`flutter_local_notifications`), Hive for content storage and delivery records, `SharedPreferencesAsync` for preferences, BLoC for state management, and GoRouter for notification deep linking — all matching existing project patterns.
+MeMuslim will add an optional daily notification (Daily Guidance / رسالة اليوم) delivering one curated Quran verse or authentic hadith. The implementation uses local notifications (`flutter_local_notifications`), Hive for content storage and delivery records, `SharedPreferencesAsync` for preferences, BLoC for state management, and GoRouter for notification deep linking — all matching existing project patterns.
 
 ## Technical Context
 
@@ -148,6 +148,15 @@ apps/tilawa/test/features/daily_guidance/
 - `apps/tilawa/pubspec.yaml` — Add seed asset path
 
 ## Implementation Phases
+
+### Integrity correction (implemented)
+
+Use one Data-layer validator/mapper as the only aggregate DTO-to-Domain path.
+The active UI locale flows into selection, and both list and ID repository reads
+carry explicit locale and capability. Parsing
+fails atomically with a typed failure, while integrity-invalid records are
+excluded without mutating lifecycle state. Presentation renders only the
+locale-filtered maps returned by the repository.
 
 ### Phase 1: Domain Layer + Data Models (Foundation)
 

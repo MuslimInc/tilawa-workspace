@@ -43,10 +43,5 @@ class DailyGuidanceLoaded extends DailyGuidanceState {
 }
 
 class DailyGuidanceError extends DailyGuidanceState {
-  final String message;
-
-  const DailyGuidanceError(this.message);
-
-  @override
-  List<Object?> get props => [message];
+  const DailyGuidanceError();
 }

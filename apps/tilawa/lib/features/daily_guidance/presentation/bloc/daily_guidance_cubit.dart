@@ -2,6 +2,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:injectable/injectable.dart';
 import 'package:intl/intl.dart';
 
+import '../../../../core/logging/app_logger.dart';
 import '../../domain/entities/daily_guidance_enums.dart';
 import '../../domain/repositories/daily_guidance_preferences_repository.dart';
 import '../../domain/usecases/select_daily_guidance_item_use_case.dart';
@@ -20,7 +21,7 @@ class DailyGuidanceCubit extends Cubit<DailyGuidanceState> {
     this._prefsRepo,
   ) : super(DailyGuidanceInitial());
 
-  Future<void> loadTodayGuidance() async {
+  Future<void> loadTodayGuidance({required String locale}) async {
     emit(DailyGuidanceLoading());
     try {
       final prefs = await _prefsRepo.getPreferences();
@@ -29,6 +30,7 @@ class DailyGuidanceCubit extends Cubit<DailyGuidanceState> {
       final item = await _selectUseCase(
         localDate: localDate,
         preferences: prefs,
+        locale: locale,
       );
 
       final state = prefs.enabled
@@ -42,8 +44,13 @@ class DailyGuidanceCubit extends Cubit<DailyGuidanceState> {
           featureState: state,
         ),
       );
-    } on Exception catch (e) {
-      emit(DailyGuidanceError(e.toString()));
+    } on Exception catch (error, stackTrace) {
+      logger.e(
+        'Daily Guidance failed to load trusted content',
+        error: error,
+        stackTrace: stackTrace,
+      );
+      emit(const DailyGuidanceError());
     }
   }
 
@@ -58,8 +65,13 @@ class DailyGuidanceCubit extends Cubit<DailyGuidanceState> {
             featureState: enable ? FeatureState.enabled : FeatureState.disabled,
           ),
         );
-      } on Exception catch (e) {
-        emit(DailyGuidanceError(e.toString()));
+      } on Exception catch (error, stackTrace) {
+        logger.e(
+          'Daily Guidance reminder toggle failed',
+          error: error,
+          stackTrace: stackTrace,
+        );
+        emit(const DailyGuidanceError());
       }
     }
   }

@@ -224,11 +224,12 @@ class _SettingsScreenState extends State<SettingsScreen> {
                     ],
                   ),
                   TilawaSettingsGroup(
-                    title: 'Daily Guidance',
+                    title: l10n.dailyGuidanceSettingsSection,
                     leadingIcon: Icons.local_florist,
                     children: [
                       TilawaSettingsTile(
-                        title: 'Guidance Settings',
+                        title: l10n.dailyGuidanceSettings,
+                        subtitle: l10n.dailyGuidanceSettingsSubtitle,
                         onTap: () => const DailyGuidanceRoute().push(context),
                         showDivider: false,
                       ),

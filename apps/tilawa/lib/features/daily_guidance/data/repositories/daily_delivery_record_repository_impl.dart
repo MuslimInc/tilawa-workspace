@@ -33,7 +33,7 @@ class DailyDeliveryRecordRepositoryImpl
       try {
         final recordDate = DateTime.parse(r.localDate);
         return recordDate.isAfter(cutoff);
-      } catch (_) {
+      } on FormatException {
         return false;
       }
     });
@@ -58,7 +58,7 @@ class DailyDeliveryRecordRepositoryImpl
           try {
             final recordDate = DateTime.parse(r.localDate);
             return recordDate.isBefore(cutoff);
-          } catch (_) {
+          } on FormatException {
             return true; // Prune invalid dates
           }
         })

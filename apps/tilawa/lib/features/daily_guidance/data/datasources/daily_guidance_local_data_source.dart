@@ -1,3 +1,6 @@
+// JSON cast errors must become typed content failures at this trust boundary.
+// ignore_for_file: avoid_catching_errors
+
 import 'dart:convert';
 import 'package:hive_ce/hive.dart';
 import 'package:injectable/injectable.dart';
@@ -5,6 +8,7 @@ import 'package:injectable/injectable.dart';
 import '../../../../core/services/hive_readiness.dart';
 import '../models/daily_delivery_record_model.dart';
 import '../models/daily_guidance_item_model.dart';
+import 'daily_guidance_seed_data_source.dart';
 
 @lazySingleton
 class DailyGuidanceLocalDataSource {
@@ -36,19 +40,32 @@ class DailyGuidanceLocalDataSource {
 
   Future<List<DailyGuidanceItemModel>> getItems() async {
     final box = await _getItemsBox();
-    return box.values.map((jsonStr) {
-      // We map via string JSON to avoid writing custom Hive adapters for MVP
-      // (KISS principle applied)
+    return box.values.map(_parseItem).toList();
+  }
+
+  DailyGuidanceItemModel _parseItem(String jsonString) {
+    try {
       return DailyGuidanceItemModel.fromJson(
-        jsonDecode(jsonStr) as Map<String, dynamic>,
+        jsonDecode(jsonString) as Map<String, dynamic>,
       );
-    }).toList();
+    } on FormatException catch (error) {
+      throw DailyGuidanceParsingException(itemsBoxName, error);
+    } on TypeError catch (error) {
+      throw DailyGuidanceParsingException(itemsBoxName, error);
+    } on StateError catch (error) {
+      throw DailyGuidanceParsingException(itemsBoxName, error);
+    }
   }
 
   Future<void> saveItems(List<DailyGuidanceItemModel> items) async {
     final box = await _getItemsBox();
     final map = {for (final item in items) item.id: jsonEncode(item.toJson())};
     await box.putAll(map);
+  }
+
+  Future<void> clearItems() async {
+    final box = await _getItemsBox();
+    await box.clear();
   }
 
   // --- Delivery Records ---

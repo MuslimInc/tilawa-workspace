@@ -11,6 +11,13 @@ void main() {
   const DeepLinkResolver resolver = DeepLinkResolver();
 
   group('DeepLinkResolver.resolveLocation', () {
+    test('maps daily guidance notification to the guidance screen', () {
+      expect(
+        DeepLinkResolver.resolveLocation(const {'type': 'daily_guidance'}),
+        const DailyGuidanceRoute().location,
+      );
+    });
+
     test('maps settings notification to settings route', () {
       expect(
         DeepLinkResolver.resolveLocation(const {'type': 'settings'}),
@@ -181,6 +188,18 @@ void main() {
   });
 
   group('DeepLinkResolver.notificationDataFromPayload', () {
+    test('normalizes the daily guidance local notification payload', () {
+      final data = DeepLinkResolver.notificationDataFromPayload(
+        DeepLinkResolver.dailyGuidancePayloadPrefix,
+      );
+
+      expect(data, const {'type': 'daily_guidance'});
+      expect(
+        DeepLinkResolver.resolveLocation(data!),
+        const DailyGuidanceRoute().location,
+      );
+    });
+
     test('resolves morning athkar string payload to category 1', () {
       final Map<String, dynamic>? data =
           DeepLinkResolver.notificationDataFromPayload(

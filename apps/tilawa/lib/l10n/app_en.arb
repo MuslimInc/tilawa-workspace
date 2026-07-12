@@ -4957,15 +4957,25 @@
     "@dailyGuidanceTitle": { "description": "Title of the Daily Guidance screen" },
     "dailyGuidanceEmpty": "No guidance available for today.",
     "@dailyGuidanceEmpty": { "description": "Message shown when there is no daily guidance" },
-    "dailyGuidanceEnableNotifications": "Enable Daily Notifications",
+    "dailyGuidanceError": "Daily Guidance could not be loaded. Please try again.",
+    "@dailyGuidanceError": { "description": "Safe error shown when trusted daily guidance cannot be loaded" },
+    "dailyGuidanceEnableNotifications": "Daily Reminder",
     "@dailyGuidanceEnableNotifications": { "description": "Label for the daily guidance notification toggle" },
-    "dailyGuidanceNotificationTitle": "نفحة اليوم | Daily Guidance",
+    "dailyGuidanceNotificationSubtitle": "Receive a Quran verse or authentic Hadith at your preferred time",
+    "@dailyGuidanceNotificationSubtitle": { "description": "Subtitle for the daily guidance notification toggle" },
+    "dailyGuidanceSettingsSection": "Daily Guidance",
+    "@dailyGuidanceSettingsSection": { "description": "Settings section for faith reminders" },
+    "dailyGuidanceSettings": "Daily Guidance",
+    "@dailyGuidanceSettings": { "description": "Title for the Daily Guidance settings tile" },
+    "dailyGuidanceSettingsSubtitle": "A Quran verse or authentic Hadith each day",
+    "@dailyGuidanceSettingsSubtitle": { "description": "Subtitle for the Daily Guidance settings row" },
+    "dailyGuidanceNotificationTitle": "Daily Guidance 🌿",
     "@dailyGuidanceNotificationTitle": { "description": "Notification title for daily guidance" },
     "dailyGuidanceNotificationBody": "Open to see today's guidance",
     "@dailyGuidanceNotificationBody": { "description": "Notification body for daily guidance" },
-    "dailyGuidanceTypeQuran": "Quran",
+    "dailyGuidanceTypeQuran": "Quran Verse",
     "@dailyGuidanceTypeQuran": { "description": "Label for Quran item type" },
-    "dailyGuidanceTypeHadith": "Hadith",
+    "dailyGuidanceTypeHadith": "Prophetic Hadith",
     "@dailyGuidanceTypeHadith": { "description": "Label for Hadith item type" },
     "dailyGuidanceQuranSource": "Surah {surahName}, Ayah {ayahNumber}",
     "@dailyGuidanceQuranSource": {
@@ -4979,6 +4989,14 @@
                 "type": "int",
                 "example": "255"
             }
+        }
+    },
+    "dailyGuidanceHadithSource": "{collection}, Hadith {referenceNumber}",
+    "@dailyGuidanceHadithSource": {
+        "description": "Source format for an authentic Hadith item",
+        "placeholders": {
+            "collection": { "type": "String", "example": "Sahih al-Bukhari" },
+            "referenceNumber": { "type": "String", "example": "6412" }
         }
     }
 }

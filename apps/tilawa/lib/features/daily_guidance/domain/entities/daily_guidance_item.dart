@@ -9,8 +9,8 @@ class DailyGuidanceItem extends Equatable {
   final ContentPublicationStatus status;
   final String originalArabicText;
   final String? notificationExcerpt;
-  final Map<String, String>? shortExplanation;
-  final Map<String, String>? translations;
+  final LocalizedGuidanceContent? shortExplanation;
+  final LocalizedGuidanceContent? translation;
   final List<String> topicTags;
   final List<String>? occasionTags;
   final List<String> availableLocales;
@@ -30,7 +30,7 @@ class DailyGuidanceItem extends Equatable {
     required this.originalArabicText,
     this.notificationExcerpt,
     this.shortExplanation,
-    this.translations,
+    this.translation,
     required this.topicTags,
     this.occasionTags,
     required this.availableLocales,
@@ -52,7 +52,7 @@ class DailyGuidanceItem extends Equatable {
     originalArabicText,
     notificationExcerpt,
     shortExplanation,
-    translations,
+    translation,
     topicTags,
     occasionTags,
     availableLocales,
@@ -65,6 +65,22 @@ class DailyGuidanceItem extends Equatable {
     hadithSource,
     reviewMetadata,
   ];
+}
+
+/// One locale-specific reviewed text with stable provenance.
+class LocalizedGuidanceContent extends Equatable {
+  const LocalizedGuidanceContent({
+    required this.locale,
+    required this.text,
+    required this.sourceId,
+  });
+
+  final String locale;
+  final String text;
+  final String sourceId;
+
+  @override
+  List<Object?> get props => [locale, text, sourceId];
 }
 
 class QuranSourceMetadata extends Equatable {
