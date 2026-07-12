@@ -149,7 +149,7 @@ abstract final class _LaunchEnvironment {
   );
   static const bool smartKhatmaEnabled = bool.fromEnvironment(
     'TILAWA_LAUNCH_SMART_KHATMA_ENABLED',
-    defaultValue: false,
+    defaultValue: true,
   );
   static const bool wirdWidgetEnabled = bool.fromEnvironment(
     'TILAWA_LAUNCH_WIRD_WIDGET_ENABLED',

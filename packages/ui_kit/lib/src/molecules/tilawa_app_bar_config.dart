@@ -2,11 +2,10 @@ import 'dart:math' as math;
 
 import 'package:flutter/material.dart';
 
+import '../atoms/tilawa_icon_button.dart';
 import '../foundation/component_tokens.dart';
 import '../foundation/design_tokens.dart';
 import '../foundation/tilawa_icons.dart';
-import '../foundation/tilawa_interaction_feedback.dart';
-import '../foundation/tilawa_interactive_surface.dart';
 import '../foundation/tilawa_type_scale.dart';
 
 /// Surface tier for [TilawaAppBar] / [TilawaSliverAppBar].
@@ -451,35 +450,11 @@ abstract final class TilawaAppBarChrome {
     required VoidCallback? onPressed,
     String? tooltip,
   }) {
-    final ThemeData theme = Theme.of(context);
-    final MeMuslimDesignTokens tokens = theme.tokens;
-    final double hit = tokens.minInteractiveDimension;
-    final BorderRadius radius = toolbarIconBorderRadius(theme);
-    final TilawaAppBarScope? scope = TilawaAppBarScope.maybeOf(context);
-    final Color fill = scope != null
-        ? scope.leadingControlFillColor(theme.colorScheme)
-        : toolbarControlBackground(
-            theme.colorScheme,
-            TilawaAppBarConfig.surface,
-            enabled: TilawaAppBarConfig.showLeadingControlBackground,
-          );
-
-    Widget body = SizedBox(
-      width: hit,
-      height: hit,
-      child: TilawaInteractiveSurface(
-        onTap: onPressed,
-        borderRadius: radius,
-        haptic: TilawaHaptic.lightImpact,
-        child: DecoratedBox(
-          decoration: BoxDecoration(color: fill, borderRadius: radius),
-          child: Center(child: icon),
-        ),
-      ),
+    final Widget body = TilawaIconButton(
+      icon: icon,
+      onPressed: onPressed,
     );
-    if (tooltip != null) {
-      body = Tooltip(message: tooltip, child: body);
-    }
+
     return body;
   }
 

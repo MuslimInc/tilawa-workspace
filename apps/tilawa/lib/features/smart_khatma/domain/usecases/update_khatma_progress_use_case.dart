@@ -10,9 +10,8 @@ final class UpdateKhatmaProgressUseCase {
     this._repository,
     this._analyticsService, {
     DateTime Function()? now,
-    Future<void> Function()? onProgressChanged,
-  }) : onProgressChanged = onProgressChanged,
-       _now = now ?? DateTime.now;
+    this.onProgressChanged,
+  }) : _now = now ?? DateTime.now;
 
   final KhatmaPlanRepository _repository;
   final AnalyticsService _analyticsService;
