@@ -78,8 +78,9 @@ Consistent semantics, honestly phased delivery: same meaning both platforms, And
 
 ## Tasks (not implemented — Phase 1 Android only)
 - [ ] T-041A1-a: Extend `IslamicWidgetType` + envelope payload parsing for `wird`.
-- [ ] T-041A1-b: **Presentation adapter** (Contract A → Contract B): localize, format digits by
-  locale/preference, build accessibility label, resolve `tapDestination`→deep link.
+- [x] T-041A1-b: **Presentation adapter** (Contract A → Contract B): localize, format digits by
+  locale/preference, build accessibility label, and pass through the semantic action. Concrete
+  route resolution remains T-041A1-d with the native action allow-list.
 - [ ] T-041A1-c: Native `WirdProgressWidgetProvider.kt` (compact/expanded, states, deep link) under `widget/wird/`.
 - [ ] T-041A1-d: Add `openKhatma` to allowed widget actions + router destination.
 - [ ] T-041A1-e: Flutter sync service to push the adapter payload into the snapshot store.

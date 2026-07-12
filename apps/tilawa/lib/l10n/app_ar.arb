@@ -4228,6 +4228,23 @@
     "@settingsManageDevicesTile": { "description": "Settings entry that opens Manage Devices" },
     "settingsSecuritySection": "الأمان",
     "@settingsSecuritySection": { "description": "Settings group title for security/session options" },
+    "wirdWidgetTitle": "وِرد اليوم",
+    "@wirdWidgetTitle": { "description": "Title of the Daily Wird home-screen widget" },
+    "wirdWidgetNoPlanSubtitle": "ابدأ خطة هادئة لقراءة القرآن",
+    "@wirdWidgetNoPlanSubtitle": { "description": "Daily Wird widget copy when no plan exists" },
+    "wirdWidgetProgressSubtitle": "أُنجز {completed} من {assigned} صفحة · المتبقي {remaining}",
+    "@wirdWidgetProgressSubtitle": {
+        "description": "Daily Wird widget progress summary using preformatted numbers",
+        "placeholders": {
+            "completed": { "type": "String" },
+            "assigned": { "type": "String" },
+            "remaining": { "type": "String" }
+        }
+    },
+    "wirdWidgetDayCompletedSubtitle": "اكتمل وِرد اليوم",
+    "@wirdWidgetDayCompletedSubtitle": { "description": "Daily Wird widget copy when today's target is complete" },
+    "wirdWidgetPlanCompletedSubtitle": "اكتملت الختمة",
+    "@wirdWidgetPlanCompletedSubtitle": { "description": "Daily Wird widget copy when the entire plan is complete" },
     "settingsAdminUserBadge": "مستخدم إداري",
     "@settingsAdminUserBadge": {
         "description": "Badge on Settings profile when the signed-in user has the Firebase admin custom claim"

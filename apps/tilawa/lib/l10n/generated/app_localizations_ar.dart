@@ -3854,5 +3854,26 @@ class AppLocalizationsAr extends AppLocalizations {
   String get settingsSecuritySection => 'الأمان';
 
   @override
+  String get wirdWidgetTitle => 'وِرد اليوم';
+
+  @override
+  String get wirdWidgetNoPlanSubtitle => 'ابدأ خطة هادئة لقراءة القرآن';
+
+  @override
+  String wirdWidgetProgressSubtitle(
+    String completed,
+    String assigned,
+    String remaining,
+  ) {
+    return 'أُنجز $completed من $assigned صفحة · المتبقي $remaining';
+  }
+
+  @override
+  String get wirdWidgetDayCompletedSubtitle => 'اكتمل وِرد اليوم';
+
+  @override
+  String get wirdWidgetPlanCompletedSubtitle => 'اكتملت الختمة';
+
+  @override
   String get settingsAdminUserBadge => 'مستخدم إداري';
 }

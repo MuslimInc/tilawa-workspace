@@ -6824,6 +6824,40 @@ abstract class AppLocalizations {
   /// **'Security'**
   String get settingsSecuritySection;
 
+  /// Title of the Daily Wird home-screen widget
+  ///
+  /// In en, this message translates to:
+  /// **'Today\'s Wird'**
+  String get wirdWidgetTitle;
+
+  /// Daily Wird widget copy when no plan exists
+  ///
+  /// In en, this message translates to:
+  /// **'Start a calm Quran reading plan'**
+  String get wirdWidgetNoPlanSubtitle;
+
+  /// Daily Wird widget progress summary using preformatted numbers
+  ///
+  /// In en, this message translates to:
+  /// **'{completed} of {assigned} pages completed · {remaining} remaining'**
+  String wirdWidgetProgressSubtitle(
+    String completed,
+    String assigned,
+    String remaining,
+  );
+
+  /// Daily Wird widget copy when today's target is complete
+  ///
+  /// In en, this message translates to:
+  /// **'Today\'s Wird is complete'**
+  String get wirdWidgetDayCompletedSubtitle;
+
+  /// Daily Wird widget copy when the entire plan is complete
+  ///
+  /// In en, this message translates to:
+  /// **'Khatma complete'**
+  String get wirdWidgetPlanCompletedSubtitle;
+
   /// Badge on Settings profile when the signed-in user has the Firebase admin custom claim
   ///
   /// In en, this message translates to:

@@ -33,7 +33,7 @@ KhatmaPlan domain (023)
   "formattedRemainingAmount": "٨",
   "progressValue": 0.60,
   "accessibilityLabel": "ورد اليوم، أُنجز ١٢ من ٢٠ صفحة، بقي ٨",
-  "deepLink": "tilawa://khatma",
+  "action": "openTodayWird",
   "generatedAt": "2026-07-12T09:14:00.000Z",
   "expiresAt": "2026-07-13T00:00:00.000Z",
   "isStale": false
@@ -53,7 +53,7 @@ KhatmaPlan domain (023)
 | `formattedRemainingAmount` | string | ✓ | Same. |
 | `progressValue` | double 0–1 | ✓ | Passed through from `completionRatio`. |
 | `accessibilityLabel` | string | ✓ | Full spoken description; ordered for the locale. |
-| `deepLink` | string(URI) | ✓ | Concrete route resolved from the semantic `tapDestination`. |
+| `action` | enum | ✓ | Semantic action passed through from Spec 023: `createPlan` \| `openTodayWird` \| `viewCompletedPlan`. Native routing is deliberately deferred. |
 | `generatedAt` | string(ISO-8601) | ✓ | When the adapter produced this payload. |
 | `expiresAt` | string(ISO-8601) | ✓ | Maps to envelope `validUntil`; drives staleness. |
 | `isStale` | bool | ✓ | Passed through / re-derived at render. |
@@ -66,12 +66,22 @@ Latin digits). The adapter resolves numerals via the locale/preference; the nati
 reformats numbers.
 
 ## Rendering states (native widget MUST handle, non-blank always)
-`none` (start CTA) · `active` · `paused` · `completed-day` · `completed-plan` · `offline`
+`none` (start CTA) · `active` · `completed-day` · `completed-plan` · `offline`
 (persisted payload) · `stale` (past `expiresAt` → last-known + subtle cue). Mapped from the
-semantic `planStatus`/`adherenceState` by the adapter.
+semantic `planStatus` and daily amounts by the adapter.
 
 ## Invariants
 - The widget renders this payload **verbatim**; it performs no localization, formatting, or
   plan math. All of that is the adapter's responsibility (Spec 041).
 - Unknown `schemaVersion` major → render the setup/no-data state, never crash.
 - Only display-ready strings + progress cross into native code — no raw history.
+
+## Implemented boundary
+
+- Payload: `features/islamic_widgets/domain/entities/wird_progress_widget_payload.dart`.
+- Adapter: `features/islamic_widgets/presentation/adapters/wird_progress_widget_adapter.dart`.
+- Schema v1 follows finalized Spec 023: pages only; `none`, `active`, and `completed`; no
+  paused, minute, or adherence fields.
+- Numeral shaping is an explicit adapter input and remains independent of text direction.
+- This slice does not dispatch an envelope, persist a snapshot, resolve a route, or register a
+  native widget provider.
