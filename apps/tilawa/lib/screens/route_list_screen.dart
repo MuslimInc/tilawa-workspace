@@ -49,17 +49,12 @@ class RouteListScreen extends StatelessWidget {
             ),
             trailing: isClickable
                 ? Icon(Icons.chevron_right, color: colorScheme.onSurfaceVariant)
-                : Chip(
+                : TilawaChip(
+                    label: 'Parameterized',
                     backgroundColor: colorScheme.surfaceContainerHighest,
-                    side: BorderSide(
-                      color: colorScheme.outlineVariant,
-                      width: tokens.borderWidthThin,
-                    ),
-                    label: Text(
-                      'Parameterized',
-                      style: theme.textTheme.labelSmall?.copyWith(
-                        color: colorScheme.onSurfaceVariant,
-                      ),
+                    borderColor: colorScheme.outlineVariant,
+                    textStyle: theme.textTheme.labelSmall?.copyWith(
+                      color: colorScheme.onSurfaceVariant,
                     ),
                   ),
             onTap: isClickable ? () => context.push(path) : null,

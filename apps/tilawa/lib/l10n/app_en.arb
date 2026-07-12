@@ -3936,6 +3936,18 @@
     "@playAdhan": {
         "description": "Toggle label for adhan sound playback on prayer notification"
     },
+    "adhanSound1": "Sound 1",
+    "@adhanSound1": {
+        "description": "Label for the first adhan sound option"
+    },
+    "adhanSound2": "Sound 2",
+    "@adhanSound2": {
+        "description": "Label for the second adhan sound option"
+    },
+    "adhanSound3": "Sound 3",
+    "@adhanSound3": {
+        "description": "Label for the third adhan sound option"
+    },
     "atPrayerTime": "At prayer time",
     "@atPrayerTime": {
         "description": "Label for the 0-minutes-before notification offset option"

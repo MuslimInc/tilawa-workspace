@@ -395,13 +395,9 @@ class _DebugApprovalBanner extends StatelessWidget {
           if (isLoading)
             const Center(child: CircularProgressIndicator())
           else
-            OutlinedButton.icon(
-              icon: const Icon(Icons.check_circle_outline),
-              label: Text(l10n.simulateAdminApproval),
-              style: OutlinedButton.styleFrom(
-                foregroundColor: Colors.amber.shade800,
-                side: const BorderSide(color: Colors.amber),
-              ),
+            TilawaButton(
+              // icon: Icons.check_circle_outline,
+              text: l10n.simulateAdminApproval,
               onPressed: () => context.read<TeacherApplicationBloc>().add(
                 TeacherApplicationDebugSimulateApproval(
                   applicationId: application.id,

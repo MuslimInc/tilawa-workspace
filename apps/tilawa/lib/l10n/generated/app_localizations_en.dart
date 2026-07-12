@@ -2959,6 +2959,15 @@ class AppLocalizationsEn extends AppLocalizations {
   String get playAdhan => 'Play Adhan';
 
   @override
+  String get adhanSound1 => 'Sound 1';
+
+  @override
+  String get adhanSound2 => 'Sound 2';
+
+  @override
+  String get adhanSound3 => 'Sound 3';
+
+  @override
   String get atPrayerTime => 'At prayer time';
 
   @override

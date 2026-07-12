@@ -46,22 +46,12 @@ class _ManageDevicesView extends StatelessWidget {
   Future<void> _confirmSignOutOthers(BuildContext context) async {
     final l10n = context.l10n;
     final cubit = context.read<ManageDevicesCubit>();
-    final confirmed = await showDialog<bool>(
+    final confirmed = await showTilawaConfirmDialog(
       context: context,
-      builder: (dialogContext) => AlertDialog(
-        title: Text(l10n.manageDevicesSignOutOthers),
-        content: Text(l10n.manageDevicesSignOutOthersConfirm),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.of(dialogContext).pop(false),
-            child: Text(l10n.cancel),
-          ),
-          TextButton(
-            onPressed: () => Navigator.of(dialogContext).pop(true),
-            child: Text(l10n.manageDevicesSignOutOthers),
-          ),
-        ],
-      ),
+      title: l10n.manageDevicesSignOutOthers,
+      message: l10n.manageDevicesSignOutOthersConfirm,
+      confirmLabel: l10n.manageDevicesSignOutOthers,
+      cancelLabel: l10n.cancel,
     );
     if (confirmed != true || !context.mounted) return;
     await cubit.signOutOtherDevices(userId);

@@ -14,27 +14,9 @@ class QuranSessionsAppBarLink extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final theme = Theme.of(context);
-    final tokens = theme.tokens;
-
-    return TextButton(
+    return TilawaButton(
       onPressed: onPressed,
-      style: TextButton.styleFrom(
-        padding: EdgeInsetsDirectional.symmetric(
-          horizontal: tokens.spaceSmall,
-        ),
-        minimumSize: Size.square(tokens.minInteractiveDimension),
-        tapTargetSize: MaterialTapTargetSize.shrinkWrap,
-      ),
-      child: Text(
-        label,
-        maxLines: 1,
-        overflow: TextOverflow.ellipsis,
-        style: theme.textTheme.labelMedium?.copyWith(
-          fontWeight: FontWeight.w600,
-          color: theme.colorScheme.primary,
-        ),
-      ),
+      text: label,
     );
   }
 }

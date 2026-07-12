@@ -535,24 +535,17 @@ class _HomeNextPrayerTimeFailure extends StatelessWidget {
         ),
         Align(
           alignment: AlignmentDirectional.centerStart,
-          child: TextButton(
+          child: TilawaButton(
+            text: context.l10n.retry,
+            variant: TilawaButtonVariant.ghost,
+            shrinkWrapTapTarget: true,
+            foregroundColor: onCard,
+            padding: EdgeInsets.symmetric(horizontal: tokens.spaceSmall),
+            textStyle: theme.textTheme.labelLarge?.copyWith(
+              color: onCard,
+              fontWeight: FontWeight.w600,
+            ),
             onPressed: onRetry,
-            style: TextButton.styleFrom(
-              foregroundColor: onCard,
-              padding: EdgeInsets.symmetric(horizontal: tokens.spaceSmall),
-              minimumSize: Size(
-                tokens.minInteractiveDimension,
-                tokens.minInteractiveDimension,
-              ),
-              tapTargetSize: MaterialTapTargetSize.shrinkWrap,
-            ),
-            child: Text(
-              context.l10n.retry,
-              style: theme.textTheme.labelLarge?.copyWith(
-                color: onCard,
-                fontWeight: FontWeight.w600,
-              ),
-            ),
           ),
         ),
       ],

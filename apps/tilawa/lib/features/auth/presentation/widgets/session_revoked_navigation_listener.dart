@@ -9,6 +9,7 @@ import 'package:tilawa/features/localization/presentation/bloc/localization_bloc
 import 'package:tilawa/l10n/generated/app_localizations.dart';
 import 'package:tilawa/router/app_router.dart';
 import 'package:tilawa/router/app_router_config.dart';
+import 'package:tilawa_ui_kit/tilawa_ui_kit.dart';
 
 import '../cubit/session_validity_cubit.dart';
 
@@ -58,27 +59,22 @@ void _showSignedInElsewhereDialog(BuildContext listenerContext) {
   );
 
   unawaited(
-    showDialog<void>(
+    showTilawaFormDialog<void>(
       context: dialogHost,
-      barrierDismissible: false,
-      builder: (dialogContext) {
-        return AlertDialog(
-          title: Text(l10n.authSignedInElsewhereTitle),
-          content: Text(l10n.authSignedInElsewhereBody),
-          actions: [
-            TextButton(
-              onPressed: () {
-                Navigator.of(dialogContext).pop();
-                final loginLocation = const LoginRoute().location;
-                final String? currentLocation = AppRouter.safeActivePath;
-                if (currentLocation != loginLocation) {
-                  AppRouter.router.go(loginLocation);
-                }
-              },
-              child: Text(l10n.authSignedInElsewhereAction),
-            ),
-          ],
-        );
+      title: l10n.authSignedInElsewhereTitle,
+      trailingClose: false,
+      bodyBuilder: (dialogContext) => Text(
+        l10n.authSignedInElsewhereBody,
+        style: Theme.of(dialogContext).textTheme.bodyLarge,
+      ),
+      primaryLabel: l10n.authSignedInElsewhereAction,
+      onPrimary: (dialogContext) {
+        Navigator.of(dialogContext).pop();
+        final loginLocation = const LoginRoute().location;
+        final String? currentLocation = AppRouter.safeActivePath;
+        if (currentLocation != loginLocation) {
+          AppRouter.router.go(loginLocation);
+        }
       },
     ),
   );

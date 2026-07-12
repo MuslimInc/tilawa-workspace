@@ -82,14 +82,9 @@ class _ReportConcernSheetBodyState extends State<_ReportConcernSheetBody> {
                     },
                   ),
                   SizedBox(height: tokens.spaceMedium),
-                  TextField(
+                  TilawaTextField(
                     controller: _controller,
                     maxLines: 4,
-                    decoration: InputDecoration(
-                      labelText: l10n.reportConcernDescriptionLabel,
-                      hintText: l10n.reportConcernDescriptionHint,
-                      errorText: _error,
-                    ),
                     onChanged: (_) => setState(() => _error = null),
                   ),
                 ],

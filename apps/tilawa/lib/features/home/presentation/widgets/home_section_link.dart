@@ -20,24 +20,17 @@ class HomeSectionLink extends StatelessWidget {
     final TilawaHomeDashboardCardTokens cardTokens =
         theme.componentTokens.homeDashboardCard;
 
-    return TextButton(
+    return TilawaButton(
+      text: label,
+      variant: TilawaButtonVariant.ghost,
+      shrinkWrapTapTarget: true,
+      foregroundColor: cardTokens.travelSectionLinkColor,
+      padding: EdgeInsets.symmetric(horizontal: tokens.spaceSmall),
+      textStyle: theme.textTheme.labelLarge?.copyWith(
+        color: cardTokens.travelSectionLinkColor,
+        fontWeight: FontWeight.w600,
+      ),
       onPressed: onPressed,
-      style: TextButton.styleFrom(
-        foregroundColor: cardTokens.travelSectionLinkColor,
-        padding: EdgeInsets.symmetric(horizontal: tokens.spaceSmall),
-        minimumSize: Size(
-          tokens.minInteractiveDimension,
-          tokens.minInteractiveDimension,
-        ),
-        tapTargetSize: MaterialTapTargetSize.shrinkWrap,
-      ),
-      child: Text(
-        label,
-        style: theme.textTheme.labelLarge?.copyWith(
-          color: cardTokens.travelSectionLinkColor,
-          fontWeight: FontWeight.w600,
-        ),
-      ),
     );
   }
 }

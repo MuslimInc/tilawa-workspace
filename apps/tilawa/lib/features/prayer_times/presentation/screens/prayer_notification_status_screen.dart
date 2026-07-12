@@ -367,17 +367,20 @@ class _StatusContent extends StatelessWidget {
           ),
           SizedBox(height: tokens.spaceSmall),
           Center(
-            child: TextButton(
-              onPressed: onClose,
-              child: Text(
-                l10n.close,
-                style: context.textTheme.labelLarge?.copyWith(
-                  color: onHero.withValues(
-                    alpha: heroTokens.footerForegroundOpacity,
-                  ),
-                  fontWeight: FontWeight.w700,
-                ),
+            child: TilawaButton(
+              text: l10n.close,
+              variant: TilawaButtonVariant.ghost,
+              shrinkWrapTapTarget: true,
+              foregroundColor: onHero.withValues(
+                alpha: heroTokens.footerForegroundOpacity,
               ),
+              textStyle: context.textTheme.labelLarge?.copyWith(
+                color: onHero.withValues(
+                  alpha: heroTokens.footerForegroundOpacity,
+                ),
+                fontWeight: FontWeight.w700,
+              ),
+              onPressed: onClose,
             ),
           ),
           SizedBox(height: tokens.spaceMedium),

@@ -7,6 +7,8 @@ void main() {
     defineReflectiveTests(TilawaUiComponentRuleTest);
     defineReflectiveTests(GeneratedFileTest);
     defineReflectiveTests(UiKitInternalTest);
+    defineReflectiveTests(CatalogAppTest);
+    defineReflectiveTests(NonAppBarComponentPolicyTest);
   });
 }
 
@@ -134,5 +136,91 @@ class UiKitInternalTest extends AnalysisRuleTest {
 import 'package:flutter/src/material/app_bar.dart';
 final value = AppBar();
 ''');
+  }
+}
+
+@reflectiveTest
+class CatalogAppTest extends AnalysisRuleTest {
+  @override
+  void setUp() {
+    newPackage('flutter').addFile(
+      'lib/src/material/app_bar.dart',
+      'class AppBar { const AppBar(); }',
+    );
+    rule = TilawaUiComponentRule();
+    super.setUp();
+  }
+
+  @override
+  String get testPackageRootPath => '/home/apps/ui_kit_gallery';
+
+  Future<void> test_catalogGalleryMayUseRawComponents() async {
+    await assertNoDiagnostics(r'''
+import 'package:flutter/src/material/app_bar.dart';
+final value = AppBar();
+''');
+  }
+}
+
+@reflectiveTest
+class NonAppBarComponentPolicyTest extends AnalysisRuleTest {
+  @override
+  void setUp() {
+    newPackage('flutter')
+      ..addFile(
+        'lib/src/material/elevated_button.dart',
+        'class ElevatedButton { const ElevatedButton(); }',
+      )
+      ..addFile(
+        'lib/src/material/filled_button.dart',
+        'class FilledButton { const FilledButton(); const FilledButton.icon(); }',
+      )
+      ..addFile(
+        'lib/src/material/text_button.dart',
+        'class TextButton { const TextButton(); }',
+      )
+      ..addFile(
+        'lib/src/material/outlined_button.dart',
+        'class OutlinedButton { const OutlinedButton(); }',
+      )
+      ..addFile('lib/src/material/chip.dart', 'class Chip { const Chip(); }')
+      ..addFile(
+        'lib/src/material/text_field.dart',
+        'class TextField { const TextField(); }',
+      );
+    rule = TilawaUiComponentRule();
+    super.setUp();
+  }
+
+  Future<void> test_allButtonKindsRequireTilawaButton() async {
+    const source = r'''
+import 'package:flutter/src/material/elevated_button.dart';
+import 'package:flutter/src/material/filled_button.dart';
+import 'package:flutter/src/material/text_button.dart';
+import 'package:flutter/src/material/outlined_button.dart';
+final a = ElevatedButton();
+final b = FilledButton.icon();
+final c = TextButton();
+final d = OutlinedButton();
+''';
+    await assertDiagnostics(source, [
+      lint(source.indexOf('ElevatedButton()'), 'ElevatedButton'.length),
+      lint(source.indexOf('FilledButton.icon'), 'FilledButton.icon'.length),
+      lint(source.indexOf('TextButton()'), 'TextButton'.length),
+      lint(source.indexOf('OutlinedButton()'), 'OutlinedButton'.length),
+    ]);
+  }
+
+  Future<void> test_chipAndTextFieldRequireKitEquivalent() async {
+    const source = r'''
+import 'package:flutter/src/material/chip.dart';
+import 'package:flutter/src/material/text_field.dart';
+final a = Chip();
+final b = TextField();
+''';
+    await assertDiagnostics(source, [
+      lint(source.indexOf('Chip()'), 'Chip'.length),
+      lint(source.indexOf('TextField()'), 'TextField'.length),
+    ]);
   }
 }

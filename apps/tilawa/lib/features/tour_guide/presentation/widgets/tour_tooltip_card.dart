@@ -65,15 +65,16 @@ class TourTooltipCard extends StatelessWidget {
                 Row(
                   children: <Widget>[
                     if (showSkip) ...<Widget>[
-                      TextButton(
+                      TilawaButton(
+                        text: skipLabel,
+                        variant: TilawaButtonVariant.ghost,
                         onPressed: onSkip,
-                        child: Text(skipLabel),
                       ),
                       const Spacer(),
                     ],
-                    FilledButton(
+                    TilawaButton(
+                      text: primaryActionLabel,
                       onPressed: onPrimaryAction,
-                      child: Text(primaryActionLabel),
                     ),
                   ],
                 ),

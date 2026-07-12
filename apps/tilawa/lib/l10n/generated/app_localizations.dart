@@ -5222,6 +5222,24 @@ abstract class AppLocalizations {
   /// **'Play Adhan'**
   String get playAdhan;
 
+  /// Label for the first adhan sound option
+  ///
+  /// In en, this message translates to:
+  /// **'Sound 1'**
+  String get adhanSound1;
+
+  /// Label for the second adhan sound option
+  ///
+  /// In en, this message translates to:
+  /// **'Sound 2'**
+  String get adhanSound2;
+
+  /// Label for the third adhan sound option
+  ///
+  /// In en, this message translates to:
+  /// **'Sound 3'**
+  String get adhanSound3;
+
   /// Label for the 0-minutes-before notification offset option
   ///
   /// In en, this message translates to:

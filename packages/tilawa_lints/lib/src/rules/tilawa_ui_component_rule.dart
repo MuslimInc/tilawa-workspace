@@ -17,10 +17,12 @@ final class TilawaUiComponentRule extends AnalysisRule {
 
   static const code = LintCode(
     'tilawa_ui_component',
-    'Use the UI Kit equivalent: {0}.',
+    "Do not use Flutter's {0} directly in product code; use the UI Kit "
+        'equivalent: {1}.',
     correctionMessage:
         'Import package:tilawa_ui_kit/tilawa_ui_kit.dart and replace this '
-        'constructor with {0}.',
+        'constructor with {1}. If no UI Kit equivalent fits the use case, '
+        'register a reviewed exception in component_policy.dart.',
     severity: DiagnosticSeverity.ERROR,
     uniqueName: 'TilawaLintCode.tilawa_ui_component',
   );
@@ -55,7 +57,10 @@ final class _Visitor extends SimpleAstVisitor<void> {
           policy.libraryUri == libraryUri) {
         rule.reportAtNode(
           node.constructorName,
-          arguments: <Object>[policy.replacements.join(' or ')],
+          arguments: <Object>[
+            policy.className,
+            policy.replacements.join(' or '),
+          ],
         );
         return;
       }

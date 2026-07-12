@@ -101,7 +101,9 @@ class _KhatmaHubEmptyBody extends StatelessWidget {
           runSpacing: tokens.spaceSmall,
           children: [
             for (final days in const [7, 15, 30, 60])
-              OutlinedButton(
+              TilawaButton(
+                text: context.l10n.khatmaDurationDays(days),
+                variant: TilawaButtonVariant.outline,
                 onPressed: isLoading
                     ? null
                     : () {
@@ -109,7 +111,6 @@ class _KhatmaHubEmptyBody extends StatelessWidget {
                           KhatmaPlanQuickStartRequested(days),
                         );
                       },
-                child: Text(context.l10n.khatmaDurationDays(days)),
               ),
           ],
         ),
@@ -300,13 +301,15 @@ class _KhatmaHubRecoveryPanel extends StatelessWidget {
             spacing: tokens.spaceSmall,
             runSpacing: tokens.spaceSmall,
             children: [
-              FilledButton.tonal(
+              TilawaButton(
+                text: context.l10n.khatmaCatchUpAction,
+                variant: TilawaButtonVariant.secondary,
                 onPressed: onCatchUp,
-                child: Text(context.l10n.khatmaCatchUpAction),
               ),
-              OutlinedButton(
+              TilawaButton(
+                text: context.l10n.khatmaExtendAction,
+                variant: TilawaButtonVariant.outline,
                 onPressed: onExtend,
-                child: Text(context.l10n.khatmaExtendAction),
               ),
             ],
           ),

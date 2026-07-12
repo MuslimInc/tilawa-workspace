@@ -2942,6 +2942,15 @@ class AppLocalizationsAr extends AppLocalizations {
   String get playAdhan => 'تشغيل الأذان';
 
   @override
+  String get adhanSound1 => 'الصوت ١';
+
+  @override
+  String get adhanSound2 => 'الصوت ٢';
+
+  @override
+  String get adhanSound3 => 'الصوت ٣';
+
+  @override
   String get atPrayerTime => 'عند وقت الصلاة';
 
   @override

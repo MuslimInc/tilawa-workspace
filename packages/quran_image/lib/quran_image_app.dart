@@ -157,11 +157,11 @@ class _QuranReaderHome extends StatelessWidget {
                       ),
                     ),
                     const SizedBox(height: 24),
-                    ElevatedButton(
+                    TilawaButton(
                       onPressed: () => context.read<NavigationBloc>().add(
                         const NavigationRetryRequested(),
                       ),
-                      child: Text(const RetryMessage().localize(l10n)),
+                      text: const RetryMessage().localize(l10n),
                     ),
                   ],
                 ),

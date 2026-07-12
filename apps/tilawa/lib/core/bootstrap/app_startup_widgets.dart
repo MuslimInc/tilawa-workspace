@@ -105,6 +105,10 @@ class _StartupFatalErrorScreenState extends State<_StartupFatalErrorScreen> {
                 ),
               ),
               const SizedBox(height: 32),
+              // The fatal-error app renders before the design-system theme
+              // exists (no tokens), so TilawaButton cannot be used here.
+              // tilawa-ui-exception: UIKIT-BUTTON-STARTUP-FATAL
+              // ignore: tilawa_lints/tilawa_ui_component
               FilledButton(
                 onPressed: _retrying ? null : _retry,
                 child: _retrying

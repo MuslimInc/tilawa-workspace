@@ -75,16 +75,10 @@ class _TutorRejectBookingSheetBodyState
                     style: Theme.of(context).textTheme.bodyMedium,
                   ),
                   SizedBox(height: tokens.spaceLarge),
-                  TextField(
+                  TilawaTextField(
                     controller: _controller,
                     maxLines: 4,
                     maxLength: tutorRejectBookingReasonMaxLength,
-                    decoration: InputDecoration(
-                      labelText: l10n.tutorRejectBookingReasonLabel,
-                      hintText: l10n.tutorRejectBookingReasonHint,
-                      errorText: _error,
-                      counterText: '',
-                    ),
                     onChanged: (_) => setState(() => _error = null),
                   ),
                 ],

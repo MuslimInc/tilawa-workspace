@@ -101,14 +101,9 @@ class _CancelSessionSheetBodyState extends State<_CancelSessionSheetBody> {
                   else if (widget.policyMessage case final message?)
                     Text(message),
                   SizedBox(height: tokens.spaceLarge),
-                  TextField(
+                  TilawaTextField(
                     controller: _controller,
                     maxLines: 3,
-                    decoration: InputDecoration(
-                      labelText: l10n.cancelReasonLabel,
-                      hintText: l10n.cancelReasonHint,
-                      errorText: _error,
-                    ),
                     onChanged: (_) => setState(() => _error = null),
                   ),
                 ],

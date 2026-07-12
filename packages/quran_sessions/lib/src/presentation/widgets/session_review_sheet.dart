@@ -91,13 +91,10 @@ class _SessionReviewSheetBodyState extends State<_SessionReviewSheetBody> {
                     ],
                   ),
                   SizedBox(height: tokens.spaceMedium),
-                  TextField(
+                  TilawaTextField(
                     controller: _controller,
                     maxLines: 4,
-                    decoration: InputDecoration(
-                      labelText: l10n.sessionReviewCommentLabel,
-                      hintText: l10n.sessionReviewCommentHint,
-                    ),
+                    hintText: l10n.sessionReviewCommentHint,
                   ),
                 ],
               ),

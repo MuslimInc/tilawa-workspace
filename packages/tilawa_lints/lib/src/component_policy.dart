@@ -23,6 +23,36 @@ const componentPolicies = <ComponentPolicy>[
     className: 'SliverAppBar',
     replacements: <String>['TilawaSliverAppBar'],
   ),
+  ComponentPolicy(
+    libraryUri: 'package:flutter/src/material/elevated_button.dart',
+    className: 'ElevatedButton',
+    replacements: <String>['TilawaButton'],
+  ),
+  ComponentPolicy(
+    libraryUri: 'package:flutter/src/material/filled_button.dart',
+    className: 'FilledButton',
+    replacements: <String>['TilawaButton'],
+  ),
+  ComponentPolicy(
+    libraryUri: 'package:flutter/src/material/text_button.dart',
+    className: 'TextButton',
+    replacements: <String>['TilawaButton'],
+  ),
+  ComponentPolicy(
+    libraryUri: 'package:flutter/src/material/outlined_button.dart',
+    className: 'OutlinedButton',
+    replacements: <String>['TilawaButton'],
+  ),
+  ComponentPolicy(
+    libraryUri: 'package:flutter/src/material/chip.dart',
+    className: 'Chip',
+    replacements: <String>['TilawaChip'],
+  ),
+  ComponentPolicy(
+    libraryUri: 'package:flutter/src/material/text_field.dart',
+    className: 'TextField',
+    replacements: <String>['TilawaTextField'],
+  ),
 ];
 
 /// A temporary, reviewed exception for one existing raw component use.
@@ -58,22 +88,6 @@ const uiKitExceptions = <UiKitException>[
         'genui_assistant_screen.dart',
     component: 'AppBar',
     reason: 'The experimental screen still uses a non-localized prototype bar.',
-    trackingReference: 'docs/TODO.md#ui-kit-app-bar-migration',
-  ),
-  UiKitException(
-    id: 'UIKIT-APPBAR-SENTRY-FORM',
-    pathSuffix:
-        'apps/tilawa/lib/core/telemetry/tilawa_sentry_feedback_form.dart',
-    component: 'AppBar',
-    reason: 'The embedded Sentry form needs compatibility validation first.',
-    trackingReference: 'docs/TODO.md#ui-kit-app-bar-migration',
-  ),
-  UiKitException(
-    id: 'UIKIT-APPBAR-SENTRY-SCREENSHOT',
-    pathSuffix:
-        'apps/tilawa/lib/core/telemetry/tilawa_sentry_feedback_form.dart',
-    component: 'AppBar',
-    reason: 'The screenshot editor needs compatibility validation first.',
     trackingReference: 'docs/TODO.md#ui-kit-app-bar-migration',
   ),
   UiKitException(
@@ -120,5 +134,14 @@ const uiKitExceptions = <UiKitException>[
     component: 'AppBar',
     reason: 'The device detail action layout needs parity verification.',
     trackingReference: 'docs/TODO.md#ui-kit-app-bar-migration',
+  ),
+  UiKitException(
+    id: 'UIKIT-BUTTON-STARTUP-FATAL',
+    pathSuffix: 'apps/tilawa/lib/core/bootstrap/app_startup_widgets.dart',
+    component: 'FilledButton',
+    reason:
+        'The fatal-error app renders before the design-system theme and '
+        'tokens exist, so TilawaButton (token-dependent) cannot be used.',
+    trackingReference: 'docs/TODO.md#ui-kit-button-migration',
   ),
 ];
