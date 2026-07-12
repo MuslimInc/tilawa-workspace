@@ -43,7 +43,7 @@ Future<void> initDependencies() async {
     dispose: (repo) => repo.dispose(),
   );
   sl.registerLazySingleton<VerseMarkerRepository>(
-    sl.call,
+    sl.get<AssetVerseMarkerRepository>,
   );
 
   // Surah Header Repository
