@@ -47,6 +47,7 @@ import '../features/share/presentation/screens/screenshot_composer_screen.dart';
 import '../features/share/presentation/screens/video_reel_composer_screen.dart';
 import '../features/share/presentation/widgets/share_composer_screen_scope.dart';
 import '../features/smart_khatma/presentation/widgets/smart_khatma_hub_scope.dart';
+import '../features/smart_khatma/smart_khatma_feature_flags.dart';
 import '../features/splash/presentation/screens/splash_screen.dart';
 import '../features/support/presentation/screens/support_tilawa_screen.dart';
 import '../features/ui_kit_debug/tilawa_card_nested_tap_demo_screen.dart';
@@ -796,6 +797,12 @@ class WidgetActionRoute extends GoRouteData
         return const AthkarCategoriesRoute().location;
       case 'hijri':
         return const SettingsRoute().location;
+      case 'khatma':
+      case 'wird':
+      case 'openKhatma':
+        return isSmartKhatmaEnabled()
+            ? const SmartKhatmaHubRoute().location
+            : const HomeRoute().location;
       case 'setup':
       default:
         return const HomeRoute().location;

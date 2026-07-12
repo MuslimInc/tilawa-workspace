@@ -1052,6 +1052,36 @@ abstract class AppLocalizations {
   /// **'Clear the current plan. Your bookmarks stay saved.'**
   String get khatmaHubResetSubtitle;
 
+  /// No description provided for @khatmaCompletedTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Khatma complete'**
+  String get khatmaCompletedTitle;
+
+  /// No description provided for @khatmaProgressCompleteMetric.
+  ///
+  /// In en, this message translates to:
+  /// **'100%'**
+  String get khatmaProgressCompleteMetric;
+
+  /// No description provided for @khatmaCompletedSubtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'May Allah accept it. Begin another plan whenever you are ready.'**
+  String get khatmaCompletedSubtitle;
+
+  /// No description provided for @khatmaStartAnotherAction.
+  ///
+  /// In en, this message translates to:
+  /// **'Start another Khatma'**
+  String get khatmaStartAnotherAction;
+
+  /// No description provided for @khatmaUnavailable.
+  ///
+  /// In en, this message translates to:
+  /// **'Your Khatma plan is temporarily unavailable. Try again.'**
+  String get khatmaUnavailable;
+
   /// Title for the daily Quran engagement plan card
   ///
   /// In en, this message translates to:

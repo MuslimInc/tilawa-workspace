@@ -326,6 +326,11 @@
     "khatmaHubTitle": "ختمة ذكية",
     "khatmaHomeViewPlan": "عرض الخطة",
     "khatmaHubResetSubtitle": "يمسح الخطة الحالية فقط. علاماتك المرجعية تبقى محفوظة.",
+    "khatmaCompletedTitle": "اكتملت الختمة",
+    "khatmaProgressCompleteMetric": "١٠٠٪",
+    "khatmaCompletedSubtitle": "تقبّل الله منك. ابدأ خطة جديدة حين تكون مستعدًا.",
+    "khatmaStartAnotherAction": "ابدأ ختمة أخرى",
+    "khatmaUnavailable": "خطة الختمة غير متاحة مؤقتًا. حاول مرة أخرى.",
     "todayPlanTitle": "خطة اليوم",
     "@todayPlanTitle": {
         "description": "Title for the daily Quran engagement plan card"

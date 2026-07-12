@@ -47,6 +47,7 @@ import 'package:tilawa/features/audio_player/presentation/quran_player_presentat
 import 'package:tilawa/features/downloads/domain/services/download_notification_service_interface.dart';
 import 'package:tilawa/features/downloads/domain/services/downloads_initializer.dart';
 import 'package:tilawa/features/islamic_widgets/app/ayah_widget_sync_service.dart';
+import 'package:tilawa/features/islamic_widgets/app/wird_progress_widget_sync_service.dart';
 import 'package:tilawa/features/islamic_widgets/data/athkar_widget_repository.dart';
 import 'package:tilawa/features/islamic_widgets/data/daily_ayah_widget_repository.dart';
 import 'package:tilawa/features/islamic_widgets/data/widget_snapshot_bridge.dart';
@@ -57,6 +58,7 @@ import 'package:tilawa/features/prayer_times/domain/services/prayer_adhan_notifi
 import 'package:tilawa/features/prayer_times/domain/services/prayer_notification_watchdog_scheduler.dart';
 import 'package:tilawa/features/prayer_times/domain/usecases/usecases.dart';
 import 'package:tilawa/features/quran_sessions/data/quran_sessions_platform_config_repository.dart';
+import 'package:tilawa/features/smart_khatma/smart_khatma.dart';
 import 'package:tilawa/firebase_options.dart';
 import 'package:tilawa/router/app_router.dart';
 import 'package:tilawa/router/app_router_config.dart';
@@ -806,6 +808,19 @@ class AppStartupTasks {
   /// guarantees a hung render can never leak past one launch.
   Future<void> initializeIslamicWidgets() async {
     if (!Platform.isAndroid) return;
+    const WidgetSnapshotBridge widgetBridge = WidgetSnapshotBridge(
+      MethodChannel('com.tilawa.app/prayer_adhan'),
+    );
+    final bool wirdWidgetEnabled =
+        launchConfig.smartKhatmaEnabled && launchConfig.wirdWidgetEnabled;
+    try {
+      await widgetBridge.setWirdWidgetEnabled(enabled: wirdWidgetEnabled);
+    } catch (e) {
+      logger.d(
+        '[AppLaunch] source=AppStartupTasks.initializeIslamicWidgets: '
+        'Warning: Could not apply Wird widget gate: $e',
+      );
+    }
     logger.d(
       '[AppLaunch] source=AppStartupTasks.initializeIslamicWidgets: Scheduled in (${DateTime.now()})',
     );
@@ -814,13 +829,30 @@ class AppStartupTasks {
       // main-isolate work cannot pile onto launch contention (an 8s delay
       // landed exactly on an input-dispatch ANR under heavy device load).
       Future<void>.delayed(const Duration(seconds: 15)).then((_) async {
+        if (wirdWidgetEnabled) {
+          try {
+            final SharedPreferencesAsync prefs =
+                getIt<SharedPreferencesAsync>();
+            final repository = SmartKhatmaDependencies.repository();
+            await WirdProgressWidgetSyncService(
+              useCase: SmartKhatmaDependencies.getWirdProgressSummary(
+                repository,
+              ),
+              bridge: widgetBridge,
+              prefs: prefs,
+            ).syncIfNeeded().timeout(const Duration(seconds: 10));
+          } catch (e) {
+            logger.d(
+              '[AppLaunch] source=AppStartupTasks.initializeIslamicWidgets: '
+              'Warning: Could not sync Wird widget: $e',
+            );
+          }
+        }
         try {
           final SharedPreferencesAsync prefs = getIt<SharedPreferencesAsync>();
           final AyahWidgetSyncService syncService = AyahWidgetSyncService(
             repository: DailyAyahWidgetRepository(
-              bridge: const WidgetSnapshotBridge(
-                MethodChannel('com.tilawa.app/prayer_adhan'),
-              ),
+              bridge: widgetBridge,
               prefs: prefs,
             ),
             prefs: prefs,
@@ -843,9 +875,7 @@ class AppStartupTasks {
           final SharedPreferencesAsync prefs = getIt<SharedPreferencesAsync>();
           if (await prefs.getInt(athkarRevKey) != athkarRevision) {
             await AthkarWidgetRepository(
-              bridge: const WidgetSnapshotBridge(
-                MethodChannel('com.tilawa.app/prayer_adhan'),
-              ),
+              bridge: widgetBridge,
             ).publish(DateTime.now()).timeout(const Duration(seconds: 30));
             await prefs.setInt(athkarRevKey, athkarRevision);
           }

@@ -728,6 +728,11 @@
         "description": "Home dashboard affordance to open the Smart Khatma hub"
     },
     "khatmaHubResetSubtitle": "Clear the current plan. Your bookmarks stay saved.",
+    "khatmaCompletedTitle": "Khatma complete",
+    "khatmaProgressCompleteMetric": "100%",
+    "khatmaCompletedSubtitle": "May Allah accept it. Begin another plan whenever you are ready.",
+    "khatmaStartAnotherAction": "Start another Khatma",
+    "khatmaUnavailable": "Your Khatma plan is temporarily unavailable. Try again.",
     "@khatmaHubResetSubtitle": {
         "description": "Subtitle for the reset-plan row on the Smart Khatma hub"
     },

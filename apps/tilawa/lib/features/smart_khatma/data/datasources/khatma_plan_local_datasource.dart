@@ -27,12 +27,10 @@ final class SharedPreferencesKhatmaPlanLocalDataSource
       return null;
     }
     try {
-      return _planFromJson(jsonDecode(raw) as Map<String, Object?>);
+      final Object? decoded = jsonDecode(raw);
+      if (decoded is! Map<String, dynamic>) return null;
+      return _planFromJson(decoded);
     } on FormatException {
-      return null;
-    } on TypeError {
-      return null;
-    } on ArgumentError {
       return null;
     }
   }
@@ -67,33 +65,89 @@ final class SharedPreferencesKhatmaPlanLocalDataSource
   }
 
   KhatmaPlan _planFromJson(Map<String, Object?> json) {
-    return KhatmaPlan(
-      id: json['id']! as String,
-      createdAt: DateTime.parse(json['created_at']! as String),
-      startDate: DateTime.parse(json['start_date']! as String),
-      durationDays: json['duration_days']! as int,
-      startPage: json['start_page']! as int,
-      targetPage: json['target_page']! as int,
-      currentPage: json['current_page']! as int,
-      readingStyle: KhatmaReadingStyle.values.byName(
-        json['reading_style'] as String? ?? KhatmaReadingStyle.pages.name,
+    final KhatmaPlan plan = KhatmaPlan(
+      id: _requiredString(json, 'id'),
+      createdAt: DateTime.parse(_requiredString(json, 'created_at')),
+      startDate: DateTime.parse(_requiredString(json, 'start_date')),
+      durationDays: _requiredInt(json, 'duration_days'),
+      startPage: _requiredInt(json, 'start_page'),
+      targetPage: _requiredInt(json, 'target_page'),
+      currentPage: _requiredInt(json, 'current_page'),
+      readingStyle: _enumByName(
+        KhatmaReadingStyle.values,
+        _optionalString(json, 'reading_style') ?? KhatmaReadingStyle.pages.name,
       ),
-      preferredMinutesPerDay: json['preferred_minutes_per_day'] as int?,
-      status: KhatmaPlanStatus.values.byName(
-        json['status'] as String? ?? KhatmaPlanStatus.active.name,
+      preferredMinutesPerDay: _optionalInt(json, 'preferred_minutes_per_day'),
+      status: _enumByName(
+        KhatmaPlanStatus.values,
+        _optionalString(json, 'status') ?? KhatmaPlanStatus.active.name,
       ),
-      adjustment: KhatmaPlanAdjustment.values.byName(
-        json['adjustment'] as String? ?? KhatmaPlanAdjustment.none.name,
+      adjustment: _enumByName(
+        KhatmaPlanAdjustment.values,
+        _optionalString(json, 'adjustment') ?? KhatmaPlanAdjustment.none.name,
       ),
-      adjustmentDate: switch (json['adjustment_date']) {
-        final String value => DateTime.parse(value),
-        _ => null,
-      },
-      progressDate: switch (json['progress_date']) {
-        final String value => DateTime.parse(value),
-        _ => null,
-      },
-      progressStartPage: json['progress_start_page'] as int?,
+      adjustmentDate: _optionalDate(json, 'adjustment_date'),
+      progressDate: _optionalDate(json, 'progress_date'),
+      progressStartPage: _optionalInt(json, 'progress_start_page'),
     );
+    if (!_isValid(plan)) {
+      throw const FormatException('Invalid Smart Khatma plan');
+    }
+    return plan;
+  }
+
+  bool _isValid(KhatmaPlan plan) {
+    final bool checkpointValid =
+        (plan.progressDate == null && plan.progressStartPage == null) ||
+        (plan.progressDate != null &&
+            plan.progressStartPage != null &&
+            plan.progressStartPage! >= plan.startPage &&
+            plan.progressStartPage! <= plan.currentPage);
+    return plan.id.isNotEmpty &&
+        plan.durationDays > 0 &&
+        plan.startPage >= KhatmaPlan.firstQuranPage &&
+        plan.startPage <= plan.targetPage &&
+        plan.targetPage <= KhatmaPlan.lastQuranPage &&
+        plan.currentPage >= plan.startPage &&
+        plan.currentPage <= plan.targetPage &&
+        checkpointValid;
+  }
+
+  String _requiredString(Map<String, Object?> json, String key) {
+    final Object? value = json[key];
+    if (value is String && value.isNotEmpty) return value;
+    throw FormatException('Invalid $key');
+  }
+
+  String? _optionalString(Map<String, Object?> json, String key) {
+    final Object? value = json[key];
+    if (value == null) return null;
+    if (value is String) return value;
+    throw FormatException('Invalid $key');
+  }
+
+  int _requiredInt(Map<String, Object?> json, String key) {
+    final int? value = _optionalInt(json, key);
+    if (value != null) return value;
+    throw FormatException('Invalid $key');
+  }
+
+  int? _optionalInt(Map<String, Object?> json, String key) {
+    final Object? value = json[key];
+    if (value == null) return null;
+    if (value is int) return value;
+    throw FormatException('Invalid $key');
+  }
+
+  DateTime? _optionalDate(Map<String, Object?> json, String key) {
+    final String? value = _optionalString(json, key);
+    return value == null ? null : DateTime.parse(value);
+  }
+
+  T _enumByName<T extends Enum>(List<T> values, String name) {
+    for (final T value in values) {
+      if (value.name == name) return value;
+    }
+    throw FormatException('Unknown enum value: $name');
   }
 }

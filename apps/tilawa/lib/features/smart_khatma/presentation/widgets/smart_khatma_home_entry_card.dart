@@ -22,6 +22,8 @@ class SmartKhatmaHomeEntryCard extends StatelessWidget {
           KhatmaPlanLoaded(:final plan, :final todayTarget) =>
             plan == null
                 ? _KhatmaHomeEmptyEntry(onOpenHub: () => _openHub(context))
+                : plan.isCompleted
+                ? _KhatmaHomeCompletedEntry(onOpenHub: () => _openHub(context))
                 : _KhatmaHomeActiveEntry(
                     planProgress: (plan.progress * 100).round(),
                     subtitle: context.l10n.khatmaProgressSubtitle(
@@ -33,14 +35,14 @@ class SmartKhatmaHomeEntryCard extends StatelessWidget {
                         plan.todayTargetPages(DateTime.now()),
                     onOpenHub: () => _openHub(context),
                   ),
-          KhatmaPlanFailure(:final message) => HomeDashboardCard(
-            surface: TilawaCardSurface.raised,
-            child: Text(
-              message,
-              style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                color: Theme.of(context).colorScheme.onSurfaceVariant,
-              ),
+          KhatmaPlanFailure() => HomeTravelDestinationCard(
+            tintIndex: 2,
+            icon: Icons.refresh_rounded,
+            onTap: () => context.read<KhatmaPlanBloc>().add(
+              const KhatmaPlanStarted(),
             ),
+            title: context.l10n.khatmaProgressTitle,
+            subtitle: context.l10n.khatmaUnavailable,
           ),
           _ => const HomeDashboardCard(
             surface: TilawaCardSurface.raised,
@@ -58,6 +60,21 @@ class SmartKhatmaHomeEntryCard extends StatelessWidget {
     }
     context.read<KhatmaPlanBloc>().add(const KhatmaPlanStarted());
   }
+}
+
+class _KhatmaHomeCompletedEntry extends StatelessWidget {
+  const _KhatmaHomeCompletedEntry({required this.onOpenHub});
+
+  final VoidCallback onOpenHub;
+
+  @override
+  Widget build(BuildContext context) => HomeTravelDestinationCard(
+    tintIndex: 2,
+    icon: Icons.auto_awesome_rounded,
+    onTap: onOpenHub,
+    title: context.l10n.khatmaCompletedTitle,
+    subtitle: context.l10n.khatmaCompletedSubtitle,
+  );
 }
 
 class _KhatmaHomeEmptyEntry extends StatelessWidget {

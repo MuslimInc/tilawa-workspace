@@ -1,7 +1,13 @@
+import 'dart:io';
+
+import 'package:flutter/services.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:tilawa/core/di/injection.dart';
 import 'package:tilawa/features/quran_reader/domain/repositories/quran_reader_repository.dart';
 import 'package:tilawa_core/services/analytics_service.dart';
+
+import '../islamic_widgets/app/wird_progress_widget_sync_service.dart';
+import '../islamic_widgets/data/widget_snapshot_bridge.dart';
 
 import 'data/datasources/khatma_plan_local_datasource.dart';
 import 'data/repositories/khatma_plan_repository_impl.dart';
@@ -16,6 +22,7 @@ import 'domain/usecases/select_khatma_catch_up_use_case.dart';
 import 'domain/usecases/update_khatma_progress_use_case.dart';
 import 'presentation/bloc/khatma_plan_bloc.dart';
 import 'presentation/bloc/khatma_plan_event.dart';
+import 'smart_khatma_feature_flags.dart';
 
 final class SmartKhatmaDependencies {
   const SmartKhatmaDependencies._();
@@ -58,6 +65,7 @@ final class SmartKhatmaDependencies {
       SelectKhatmaCatchUpUseCase(planRepository, analyticsService),
       ExtendKhatmaPlanUseCase(planRepository, analyticsService),
       ResetKhatmaPlanUseCase(planRepository, analyticsService),
+      syncWirdWidget,
     )..add(const KhatmaPlanStarted());
   }
 
@@ -65,6 +73,19 @@ final class SmartKhatmaDependencies {
     return UpdateKhatmaProgressUseCase(
       repository(),
       getIt<AnalyticsService>(),
+      onProgressChanged: syncWirdWidget,
     );
+  }
+
+  static Future<void> syncWirdWidget() async {
+    if (!Platform.isAndroid || !isWirdWidgetEnabled()) return;
+    final planRepository = repository();
+    await WirdProgressWidgetSyncService(
+      useCase: getWirdProgressSummary(planRepository),
+      bridge: const WidgetSnapshotBridge(
+        MethodChannel('com.tilawa.app/prayer_adhan'),
+      ),
+      prefs: getIt<SharedPreferencesAsync>(),
+    ).syncIfNeeded();
   }
 }

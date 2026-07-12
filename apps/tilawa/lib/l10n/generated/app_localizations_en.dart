@@ -576,6 +576,23 @@ class AppLocalizationsEn extends AppLocalizations {
       'Clear the current plan. Your bookmarks stay saved.';
 
   @override
+  String get khatmaCompletedTitle => 'Khatma complete';
+
+  @override
+  String get khatmaProgressCompleteMetric => '100%';
+
+  @override
+  String get khatmaCompletedSubtitle =>
+      'May Allah accept it. Begin another plan whenever you are ready.';
+
+  @override
+  String get khatmaStartAnotherAction => 'Start another Khatma';
+
+  @override
+  String get khatmaUnavailable =>
+      'Your Khatma plan is temporarily unavailable. Try again.';
+
+  @override
   String get todayPlanTitle => 'Today’s Plan';
 
   @override

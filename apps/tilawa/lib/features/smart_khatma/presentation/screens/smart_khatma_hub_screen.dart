@@ -34,10 +34,10 @@ class SmartKhatmaHubScreen extends StatelessWidget {
             KhatmaPlanLoaded(:final plan, :final todayTarget) =>
               plan == null
                   ? const _KhatmaHubEmptyBody()
+                  : plan.isCompleted
+                  ? const _KhatmaHubCompletedBody()
                   : _KhatmaHubActiveBody(plan: plan, todayTarget: todayTarget),
-            KhatmaPlanFailure(:final message) => _KhatmaHubErrorBody(
-              message: message,
-            ),
+            KhatmaPlanFailure() => const _KhatmaHubErrorBody(),
             _ => const Center(child: TilawaLoadingIndicator()),
           };
         },
@@ -46,7 +46,9 @@ class SmartKhatmaHubScreen extends StatelessWidget {
         buildWhen: (previous, current) =>
             current is KhatmaPlanLoaded && current.plan != null,
         builder: (context, state) {
-          if (state is! KhatmaPlanLoaded || state.plan == null) {
+          if (state is! KhatmaPlanLoaded ||
+              state.plan == null ||
+              state.plan!.isCompleted) {
             return const SizedBox.shrink();
           }
           return TilawaPrimaryFab(
@@ -61,6 +63,38 @@ class SmartKhatmaHubScreen extends StatelessWidget {
         TilawaFabPlacement.start,
         bottomOffset: fabBottomOffset,
       ),
+    );
+  }
+}
+
+class _KhatmaHubCompletedBody extends StatelessWidget {
+  const _KhatmaHubCompletedBody();
+
+  @override
+  Widget build(BuildContext context) {
+    final tokens = context.tokens;
+    return ListView(
+      padding: EdgeInsets.all(tokens.spaceLarge),
+      children: [
+        TilawaHeroSummaryCard(
+          label: context.l10n.khatmaCompletedTitle,
+          metric: context.l10n.khatmaProgressCompleteMetric,
+          badges: const [],
+        ),
+        SizedBox(height: tokens.spaceLarge),
+        Text(
+          context.l10n.khatmaCompletedSubtitle,
+          style: Theme.of(context).textTheme.bodyMedium,
+          textAlign: TextAlign.center,
+        ),
+        SizedBox(height: tokens.spaceLarge),
+        TilawaButton(
+          text: context.l10n.khatmaStartAnotherAction,
+          onPressed: () => context.read<KhatmaPlanBloc>().add(
+            const KhatmaPlanResetRequested(),
+          ),
+        ),
+      ],
     );
   }
 }
@@ -320,22 +354,31 @@ class _KhatmaHubRecoveryPanel extends StatelessWidget {
 }
 
 class _KhatmaHubErrorBody extends StatelessWidget {
-  const _KhatmaHubErrorBody({required this.message});
-
-  final String message;
+  const _KhatmaHubErrorBody();
 
   @override
   Widget build(BuildContext context) {
-    return Center(
-      child: Padding(
-        padding: EdgeInsets.all(context.tokens.spaceLarge),
-        child: Text(
-          message,
-          textAlign: TextAlign.center,
-          style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-            color: Theme.of(context).colorScheme.onSurfaceVariant,
+    return Padding(
+      padding: EdgeInsets.all(context.tokens.spaceLarge),
+      child: Column(
+        mainAxisAlignment: MainAxisAlignment.center,
+        spacing: context.tokens.spaceMedium,
+        children: [
+          Text(
+            context.l10n.khatmaUnavailable,
+            textAlign: TextAlign.center,
+            style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+              color: Theme.of(context).colorScheme.onSurfaceVariant,
+            ),
           ),
-        ),
+          TilawaButton(
+            text: context.l10n.retry,
+            variant: TilawaButtonVariant.outline,
+            onPressed: () => context.read<KhatmaPlanBloc>().add(
+              const KhatmaPlanStarted(),
+            ),
+          ),
+        ],
       ),
     );
   }

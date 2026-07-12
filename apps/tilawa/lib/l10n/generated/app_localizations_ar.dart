@@ -575,6 +575,22 @@ class AppLocalizationsAr extends AppLocalizations {
       'يمسح الخطة الحالية فقط. علاماتك المرجعية تبقى محفوظة.';
 
   @override
+  String get khatmaCompletedTitle => 'اكتملت الختمة';
+
+  @override
+  String get khatmaProgressCompleteMetric => '١٠٠٪';
+
+  @override
+  String get khatmaCompletedSubtitle =>
+      'تقبّل الله منك. ابدأ خطة جديدة حين تكون مستعدًا.';
+
+  @override
+  String get khatmaStartAnotherAction => 'ابدأ ختمة أخرى';
+
+  @override
+  String get khatmaUnavailable => 'خطة الختمة غير متاحة مؤقتًا. حاول مرة أخرى.';
+
+  @override
   String get todayPlanTitle => 'خطة اليوم';
 
   @override

@@ -11,3 +11,14 @@ bool isSmartKhatmaEnabled() {
   }
   return getIt<AppLaunchConfig>().smartKhatmaEnabled;
 }
+
+/// Whether the Android Daily Wird launcher widget is exposed and synchronized.
+///
+/// This is intentionally independent from [isSmartKhatmaEnabled] so the native
+/// surface has a dedicated rollout and rollback switch.
+bool isWirdWidgetEnabled() {
+  final AppLaunchConfig config = getIt.isRegistered<AppLaunchConfig>()
+      ? getIt<AppLaunchConfig>()
+      : AppLaunchConfig.fromEnvironment();
+  return config.smartKhatmaEnabled && config.wirdWidgetEnabled;
+}

@@ -18,6 +18,11 @@
     <string name="widget_next_prayer">%1$s بعد</string>
     <string name="widget_empty_hint">افتح التطبيق لتحميل مواقيت الصلاة</string>
     <string name="widget_stale_hint">افتح التطبيق للتحديث</string>
+    <string name="widget_wird_label">ورد اليوم</string>
+    <string name="widget_wird_description">تقدّم قراءة ختمة اليوم</string>
+    <string name="widget_wird_setup">ابدأ وردًا في تلاوة</string>
+    <string name="widget_wird_preview_subtitle">تقدّم قراءتك اليومية</string>
+    <string name="widget_wird_setup_accessibility">ورد اليوم. ابدأ وردًا في تلاوة.</string>
     <string name="widget_setup_hint">انقر لتحديد الموقع</string>
     <!-- Widget-picker preview placeholders; overwritten at runtime. -->
     <string name="widget_preview_next">الفجر بعد ٢:١٠</string>

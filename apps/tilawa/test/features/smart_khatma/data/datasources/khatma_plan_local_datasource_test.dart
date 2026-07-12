@@ -50,7 +50,7 @@ void main() {
     expect(saved['progress_start_page'], 12);
   });
 
-  test('invalid persisted baseline is rejected by the producer', () async {
+  test('invalid persisted baseline is ignored as a missing plan', () async {
     final json = _legacyPlanJson()
       ..addAll(<String, Object?>{
         'progress_date': '2026-07-12T00:00:00.000',
@@ -68,7 +68,11 @@ void main() {
       now: () => DateTime(2026, 7, 12),
     )();
 
-    expect(result.isLeft(), isTrue);
+    expect(result.isRight(), isTrue);
+    expect(
+      result.getOrElse(() => throw StateError('expected summary')).planStatus,
+      WirdProgressPlanStatus.none,
+    );
   });
 
   test('loads explicit null optional fields', () async {

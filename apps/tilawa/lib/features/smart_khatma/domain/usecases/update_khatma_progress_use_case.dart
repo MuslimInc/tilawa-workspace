@@ -10,11 +10,14 @@ final class UpdateKhatmaProgressUseCase {
     this._repository,
     this._analyticsService, {
     DateTime Function()? now,
-  }) : _now = now ?? DateTime.now;
+    Future<void> Function()? onProgressChanged,
+  }) : onProgressChanged = onProgressChanged,
+       _now = now ?? DateTime.now;
 
   final KhatmaPlanRepository _repository;
   final AnalyticsService _analyticsService;
   final DateTime Function() _now;
+  final Future<void> Function()? onProgressChanged;
 
   Future<Either<Failure, KhatmaPlan?>> call({
     required int currentPage,
@@ -67,6 +70,7 @@ final class UpdateKhatmaProgressUseCase {
           },
         );
       }
+      await onProgressChanged?.call();
       return Right(updated);
     } on Exception catch (error) {
       return Left(CacheFailure(error.toString()));

@@ -17,6 +17,7 @@ final class KhatmaPlanBloc extends Bloc<KhatmaPlanEvent, KhatmaPlanState> {
     this._selectCatchUp,
     this._extendPlan,
     this._resetPlan,
+    this._onPlanChanged,
   ) : super(const KhatmaPlanInitial()) {
     on<KhatmaPlanStarted>(_onStarted);
     on<KhatmaPlanQuickStartRequested>(_onQuickStartRequested);
@@ -31,6 +32,7 @@ final class KhatmaPlanBloc extends Bloc<KhatmaPlanEvent, KhatmaPlanState> {
   final SelectKhatmaCatchUpUseCase _selectCatchUp;
   final ExtendKhatmaPlanUseCase _extendPlan;
   final ResetKhatmaPlanUseCase _resetPlan;
+  final Future<void> Function() _onPlanChanged;
 
   Future<void> _onStarted(
     KhatmaPlanStarted event,
@@ -48,7 +50,10 @@ final class KhatmaPlanBloc extends Bloc<KhatmaPlanEvent, KhatmaPlanState> {
     await result.fold(
       (failure) async =>
           emit(KhatmaPlanFailure(failure.message ?? 'Khatma unavailable')),
-      (_) async => _load(emit, showLoading: false),
+      (_) async {
+        await _onPlanChanged();
+        await _load(emit, showLoading: false);
+      },
     );
   }
 
@@ -60,7 +65,10 @@ final class KhatmaPlanBloc extends Bloc<KhatmaPlanEvent, KhatmaPlanState> {
     await result.fold(
       (failure) async =>
           emit(KhatmaPlanFailure(failure.message ?? 'Khatma unavailable')),
-      (_) async => _load(emit, showLoading: false),
+      (_) async {
+        await _onPlanChanged();
+        await _load(emit, showLoading: false);
+      },
     );
   }
 
@@ -72,7 +80,10 @@ final class KhatmaPlanBloc extends Bloc<KhatmaPlanEvent, KhatmaPlanState> {
     await result.fold(
       (failure) async =>
           emit(KhatmaPlanFailure(failure.message ?? 'Khatma unavailable')),
-      (_) async => _load(emit, showLoading: false),
+      (_) async {
+        await _onPlanChanged();
+        await _load(emit, showLoading: false);
+      },
     );
   }
 
@@ -84,7 +95,10 @@ final class KhatmaPlanBloc extends Bloc<KhatmaPlanEvent, KhatmaPlanState> {
     await result.fold(
       (failure) async =>
           emit(KhatmaPlanFailure(failure.message ?? 'Khatma unavailable')),
-      (_) async => _load(emit, showLoading: false),
+      (_) async {
+        await _onPlanChanged();
+        await _load(emit, showLoading: false);
+      },
     );
   }
 
