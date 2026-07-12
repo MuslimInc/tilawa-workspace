@@ -87,8 +87,18 @@ semantic `planStatus` and daily amounts by the adapter.
   (`WirdProgressWidgetPayload.fromJson` strict / `tryParse` tolerant) symmetric to `toJson`.
   `tryParse` returns `null` (→ setup/no-data state) for an unknown `schemaVersion` major or any
   malformed field, never crashing — the Dart-side executable reference for the version invariant
-  above. The native Kotlin decoder mirrors this in T-041A1-c.
-- Still out of scope in this slice: dispatching a live envelope from a running sync service,
-  persisting a snapshot, resolving a concrete route, and registering a native widget provider.
-  The `wird` payload is proven to flow through the existing `WidgetSnapshotEnvelope` +
-  `WidgetSnapshotBridge` serialization (test only), so the native provider work can begin.
+  above.
+- Producer: `features/islamic_widgets/app/wird_progress_widget_sync_service.dart` composes the
+  Spec 023 summary → adapter → `WidgetSnapshotEnvelope(widgetType:"wird")` and dispatches it via
+  the existing `WidgetSnapshotBridge`. Locale + numeral system come from `LanguageConfig` (no
+  in-app numeral preference exists yet, so the locale drives digit shaping). A content signature
+  dedups unchanged relaunches while allowing intra-day updates; failures keep the last snapshot.
+- Native decoder: `android/.../widget/wird/WirdProgressWidgetPayload.kt` mirrors the Flutter
+  tolerant parser (unknown action/text-direction, out-of-range progress, or blank required field
+  → `null` → setup state; `generatedAt`/`expiresAt`/`isStale` stay envelope-owned and are
+  re-derived at render). `WidgetType.WIRD` was added, so the versioned `WidgetSnapshotEnvelope`
+  and `WidgetSnapshotStore` now decode and persist `wird` snapshots. Robolectric-tested.
+- Still out of scope here (the native **render half**): the `WirdProgressWidgetProvider` class,
+  compact/expanded layouts, per-state rendering, deep-link/click intents, AndroidManifest
+  registration, the startup trigger + staged `enable_wird_widget` flag, and the `openKhatma`
+  route resolution. Decode and persistence exist, but nothing renders or auto-activates yet.

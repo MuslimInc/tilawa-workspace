@@ -85,8 +85,21 @@ Consistent semantics, honestly phased delivery: same meaning both platforms, And
   locale/preference, build accessibility label, and pass through the semantic action. Concrete
   route resolution remains T-041A1-d with the native action allow-list.
 - [ ] T-041A1-c: Native `WirdProgressWidgetProvider.kt` (compact/expanded, states, deep link) under `widget/wird/`.
+  - [x] **Decode half**: `WidgetType.WIRD` + `widget/wird/WirdProgressWidgetPayload.kt` — a Kotlin
+    data class with a tolerant `parse(JSONObject)` mirroring the Flutter `tryParse` (unknown
+    action/text-direction, out-of-range progress, or blank required field → `null` → setup
+    state; timestamps stay envelope-owned). The versioned `WidgetSnapshotEnvelope` +
+    `WidgetSnapshotStore` now round-trip `wird` snapshots. Robolectric-tested.
+  - [ ] **Render half** (not in this slice): provider class, compact/expanded layouts, per-state
+    rendering, deep-link/click intents, and AndroidManifest registration.
 - [ ] T-041A1-d: Add `openKhatma` to allowed widget actions + router destination.
-- [ ] T-041A1-e: Flutter sync service to push the adapter payload into the snapshot store.
+- [x] T-041A1-e: **Flutter sync service** (`WirdProgressWidgetSyncService`) composes
+  `GetWirdProgressSummaryUseCase` → adapter → `WidgetSnapshotEnvelope(widgetType:"wird")` →
+  `WidgetSnapshotBridge`. Locale + numeral system resolved from `LanguageConfig`; content-
+  signature dedup allows intra-day updates while skipping no-op relaunches; best-effort
+  (failure keeps the last snapshot, FR-041A1.4). The startup trigger + `enable_wird_widget`
+  gate are wired with the native provider (T-041A1-c/-f), so no live publish ships before a
+  native consumer exists.
 - [ ] T-041A1-f: Layouts/resources/previews + AndroidManifest registration.
 - [ ] *(Phase 2 iOS — deferred to future child spec `041-ios-widgetkit-foundation`; not tasked here.)*
 
@@ -94,10 +107,15 @@ Consistent semantics, honestly phased delivery: same meaning both platforms, And
 - Domain/parse: envelope `wird` payload parse; unknown-version → setup state. ✅ Dart coverage
   in `test/features/islamic_widgets/domain/wird_progress_widget_payload_test.dart` and
   `test/features/islamic_widgets/data/wird_widget_snapshot_bridge_test.dart`; native decode
-  parity lands with T-041A1-c (Robolectric).
-- Native (Robolectric): each contract state renders non-blank; deep link fires; resize no-clip.
+  parity landed in `android/.../widget/wird/WirdProgressWidgetPayloadTest.kt` (Robolectric).
+- Native decode (Robolectric): `WirdProgressWidgetPayloadTest` (complete parse, reject bad
+  action/text-direction/progress/blank) + `WidgetSnapshotStoreTest` wird envelope round-trip. ✅
+- Native render (Robolectric, pending render half): each contract state renders non-blank; deep link fires; resize no-clip.
 - RTL/LTR + 200% text-scale + light/dark golden coverage.
 - Offline/stale: renders persisted snapshot; staleness cue appears past `validUntil`.
+- Producer path: `WirdProgressWidgetSyncService` dispatches a `wird` envelope, dedups unchanged
+  state, re-publishes on progress change, shapes digits by locale, and keeps the last snapshot
+  on summary failure. ✅ `test/features/islamic_widgets/app/wird_progress_widget_sync_service_test.dart`.
 
 ## Manual QA
 - Xiaomi/Redmi + Samsung (Egypt OEMs): place widget, complete Wird in-app, confirm widget
@@ -105,8 +123,10 @@ Consistent semantics, honestly phased delivery: same meaning both platforms, And
 
 ## Rollout & fallback
 - Feature-flag `enable_wird_widget` (default off) → staged. If the 023 summary is unavailable
-  (flag off or no plan), the widget shows the **no-plan CTA**, never an error. Blocked on Spec
-  023 producing the summary (023-A2 T-023A2-c).
+  (flag off or no plan), the widget shows the **no-plan CTA**, never an error. The Spec 023
+  summary source is now available (`GetWirdProgressSummaryUseCase`, wired in
+  `SmartKhatmaDependencies`), so the producer (T-041A1-e) is unblocked; the staged flag and the
+  native startup trigger gate the live publish.
 
 ## Non-goals
 - iOS widget (v1 Android-only), lock-screen variant, share-card of progress, any plan editing
