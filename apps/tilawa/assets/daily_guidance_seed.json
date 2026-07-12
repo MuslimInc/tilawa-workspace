@@ -1,0 +1,63 @@
+[
+  {
+    "id": "quran_002_152",
+    "type": "quran",
+    "status": "published",
+    "original_arabic_text": "فَاذْكُرُونِي أَذْكُرْكُمْ وَاشْكُرُوا لِي وَلَا تَكْفُرُونِ",
+    "notification_excerpt": "فَاذْكُرُونِي أَذْكُرْكُمْ",
+    "short_explanation": {
+      "ar": "تذكر الله يذكرك، واشكره على نعمه ولا تكفر بها.",
+      "en": "Remember Allah, and He will remember you. Be grateful to Him and do not deny His favors."
+    },
+    "translations": {
+      "en": "So remember Me; I will remember you. And be grateful to Me and do not deny Me."
+    },
+    "topic_tags": ["remembrance", "gratitude"],
+    "available_locales": ["ar", "en"],
+    "revision": 1,
+    "quran_source": {
+      "surah_number": 2,
+      "surah_name_arabic": "البقرة",
+      "surah_name_localized": {
+        "en": "Al-Baqarah"
+      },
+      "ayah_start": 152,
+      "quran_text_source_id": "uthmani_hafs"
+    },
+    "review_metadata": {
+      "source_validation_complete": true,
+      "translation_validation_complete": true,
+      "approved_for_notification": true,
+      "approved_for_sharing": true
+    }
+  },
+  {
+    "id": "hadith_bukhari_6464",
+    "type": "hadith",
+    "status": "published",
+    "original_arabic_text": "نِعْمَتَانِ مَغْبُونٌ فِيهِمَا كَثِيرٌ مِنَ النَّاسِ: الصِّحَّةُ وَالْفَرَاغُ.",
+    "notification_excerpt": "نِعْمَتَانِ مَغْبُونٌ فِيهِمَا كَثِيرٌ مِنَ النَّاسِ",
+    "short_explanation": {
+      "ar": "الصحة ووقت الفراغ نعمتان عظيمتان يغفل الكثيرون عن استغلالهما في طاعة الله.",
+      "en": "Health and free time are two great blessings that many people fail to utilize in the obedience of Allah."
+    },
+    "translations": {
+      "en": "There are two blessings which many people lose: (They are) health and free time for doing good."
+    },
+    "topic_tags": ["time", "health", "gratitude"],
+    "available_locales": ["ar", "en"],
+    "revision": 1,
+    "hadith_source": {
+      "collection": "Sahih al-Bukhari",
+      "reference_number": "6412",
+      "grading": "sahih",
+      "grading_authority": "Al-Bukhari"
+    },
+    "review_metadata": {
+      "source_validation_complete": true,
+      "translation_validation_complete": true,
+      "approved_for_notification": true,
+      "approved_for_sharing": true
+    }
+  }
+]
