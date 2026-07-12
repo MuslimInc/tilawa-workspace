@@ -1,25 +1,31 @@
 # Implementation Plan: Core Trust & Reliability
 
-## 1. Workstream Independence
-The three domains (Quran Integrity, Athan Reliability, Location Fallback) are isolated into separate workstreams. They share basic DI but are shielded by individual feature flags.
+## 1. Feature Boundaries and Architectural Justification
+- **Quran Integrity**: Implemented as a build-time script and lightweight runtime checker within the existing `features/quran` bounded context.
+- **Athan Reliability**: Extends the existing `features/prayer_times`. We explicitly **Keep and Harden** the existing `PrayerBootReceiver` and `PrayerNotificationsWatchdogScheduler`.
+- **Location Fallback**: While currently part of `core/services/location` or `features/prayer_times`, we will establish a dedicated `features/location` bounded context for the offline city database. *Justification*: Location resolution (GPS vs Manual offline DB) is a complex state machine that feeds multiple downstream domains (Prayer Times, Qibla, Weather). It warrants its own isolated domain with clear contracts (`LocationPreference`).
 
-### Workstream 1: Location Fallback
-- **Data Model**: `City` (id, nameAr, nameEn, lat, lng, timezone).
-- **Persistence**: `assets/data/cities.db` (SQLite).
-- **Domain**: `LocationStateMachine` managing states: `Init`, `GpsSearching`, `GpsDenied`, `ManualSelection`, `Resolved`.
-- **UI**: `LocationOnboardingScreen` adds "Set Manually" button triggering a bottom sheet with search.
+## 2. Workstream Details
 
-### Workstream 2: Athan Reliability
-- **Android Native**: Implement `AlarmReceiver.kt` utilizing `AlarmManager.setExactAndAllowWhileIdle`.
-- **iOS Native**: Utilize `flutter_local_notifications` but constrain audio to `adhan_short_ios.caf` (under 30s).
-- **Diagnostics UI**: `AdhanHealthCubit` queries `permission_handler` and `battery_plus` to display status cards with deep-links to system settings.
+### Workstream 1: Athan Reliability Hardening (Existing Architecture)
+- **Audit**: Run baseline tests to characterize schedule success, alarm triggers, and audio playback.
+- **UI**: Add `AdhanHealthCubit` to query `canScheduleExactAlarms()` and battery optimization status, feeding into `AdhanHealthCheckScreen`.
+
+### Workstream 2: Location Fallback
+- **ADR Required**: Before adding any database, `adr-offline-city-db.md` must be approved, analyzing SQLite vs JSON, coverage, size, and licensing.
+- **Implementation**: `LocationStateMachine` handles `GpsSearching`, `GpsDenied`, `ManualSelection`.
 
 ### Workstream 3: Quran Integrity
-- **Build-Time**: Add `scripts/generate_quran_manifest.dart` executed during CI to create `quran_manifest.json`.
-- **Runtime**: `QuranRepository.init()` reads the manifest, calculates the SHA-256 of the local DB using `crypto` package, and compares.
-- **Emergency State**: If mismatched, `QuranCubit` yields `QuranState.integrityError` showing a safe error screen prompting an update, preventing any incorrect text display.
+- **Build-Time**: Add `scripts/validate_quran_pipeline.dart` to assert Surah/Ayah counts and generate `quran_manifest.json`.
+- **Runtime**: `QuranValidationService` runs post-update (not cold-start) to verify the manifest against the asset payload to prevent silent corruption.
 
-## 2. Rollback Strategy
-- **Location**: Feature flag `enable_manual_location` disables the manual UI button.
-- **Athan**: Revert to `set` instead of `setExact` via Remote Config flag `use_exact_alarms`.
-- **Quran**: Feature flag `enable_quran_integrity_check` can bypass the hash check if the manifest system itself causes false positives in production.
+## 3. Threat Model for Runtime Hashing
+- *Threat*: OTA update corrupts asset bundle.
+- *Mitigation*: Lightweight versioned integrity manifest checked once post-update.
+- *Threat*: Malicious local manipulation of files.
+- *Mitigation*: App sandbox protection; full runtime hashing rejected due to cold-start performance cost.
+
+## 4. Rollback Strategy
+- **Location**: Feature flag `enable_manual_location` disables the UI.
+- **Athan**: No native architecture changes to roll back; Health UI hidden via `enable_adhan_health_ui`.
+- **Quran**: Validation bypassed via `enable_quran_integrity_check`.
