@@ -2,6 +2,7 @@ import 'dart:async';
 
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:tilawa/l10n/generated/app_localizations.dart';
 import 'package:tilawa_ui_kit/tilawa_ui_kit.dart';
 
 import '../../../../core/di/injection.dart';
@@ -21,8 +22,8 @@ class DailyGuidanceScreen extends StatelessWidget {
         return cubit;
       },
       child: Scaffold(
-        appBar: const TilawaAppBar(
-          title: 'Daily Guidance',
+        appBar: TilawaAppBar(
+          title: AppLocalizations.of(context).dailyGuidanceTitle,
         ),
         body: BlocBuilder<DailyGuidanceCubit, DailyGuidanceState>(
           builder: (context, state) {
@@ -42,7 +43,7 @@ class DailyGuidanceScreen extends StatelessWidget {
                         const Icon(Icons.info_outline, size: 48),
                         const SizedBox(height: 16),
                         Text(
-                          'No guidance available for today.',
+                          AppLocalizations.of(context).dailyGuidanceEmpty,
                           style: context.textTheme.titleMedium,
                         ),
                       ],
@@ -61,7 +62,11 @@ class DailyGuidanceScreen extends StatelessWidget {
                     DailyGuidanceCard(item: item),
                     const SizedBox(height: 24),
                     SwitchListTile(
-                      title: const Text('Enable Daily Notifications'),
+                      title: Text(
+                        AppLocalizations.of(
+                          context,
+                        ).dailyGuidanceEnableNotifications,
+                      ),
                       value: state.preferences.enabled,
                       onChanged: (val) {
                         unawaited(

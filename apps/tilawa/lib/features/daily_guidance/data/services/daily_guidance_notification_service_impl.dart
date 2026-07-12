@@ -1,5 +1,8 @@
+import 'package:flutter/material.dart';
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 import 'package:injectable/injectable.dart';
+import 'package:shared_preferences/shared_preferences.dart';
+import 'package:tilawa/l10n/generated/app_localizations.dart';
 import 'package:tilawa_core/services/interfaces/notification_dispatcher_interface.dart';
 import 'package:timezone/timezone.dart' as tz;
 
@@ -53,10 +56,12 @@ class DailyGuidanceNotificationServiceImpl
     // Let's schedule it to run daily at the preferred time.
 
     // A generic "Daily Guidance is ready" notification
+    final l10n = await _localizations();
+
     await plugin.zonedSchedule(
       id: _notificationId,
-      title: 'نفحة اليوم | Daily Guidance',
-      body: "Open to see today's guidance",
+      title: l10n.dailyGuidanceNotificationTitle,
+      body: l10n.dailyGuidanceNotificationBody,
       scheduledDate: _nextInstanceOfTime(
         preferences.preferredLocalTime.hour,
         preferences.preferredLocalTime.minute,
@@ -87,5 +92,11 @@ class DailyGuidanceNotificationServiceImpl
       scheduledDate = scheduledDate.add(const Duration(days: 1));
     }
     return scheduledDate;
+  }
+
+  Future<AppLocalizations> _localizations() async {
+    final SharedPreferences prefs = await SharedPreferences.getInstance();
+    final String languageCode = prefs.getString('languageCode') ?? 'ar';
+    return lookupAppLocalizations(Locale(languageCode));
   }
 }

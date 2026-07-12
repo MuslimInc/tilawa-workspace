@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:tilawa/l10n/generated/app_localizations.dart';
 import 'package:tilawa_ui_kit/tilawa_ui_kit.dart';
 import '../../domain/entities/daily_guidance_enums.dart';
 import '../../domain/entities/daily_guidance_item.dart';
@@ -26,7 +27,9 @@ class DailyGuidanceCard extends StatelessWidget {
                 ),
                 const SizedBox(width: 8),
                 Text(
-                  item.type == DailyGuidanceItemType.quran ? 'Quran' : 'Hadith',
+                  item.type == DailyGuidanceItemType.quran
+                      ? AppLocalizations.of(context).dailyGuidanceTypeQuran
+                      : AppLocalizations.of(context).dailyGuidanceTypeHadith,
                   style: context.textTheme.labelMedium?.copyWith(
                     color: context.colorScheme.primary,
                   ),
@@ -66,7 +69,7 @@ class DailyGuidanceCard extends StatelessWidget {
             Align(
               alignment: Alignment.centerRight,
               child: Text(
-                _buildSourceText(),
+                _buildSourceText(context),
                 style: context.textTheme.labelSmall?.copyWith(
                   color: context.colorScheme.onSurfaceVariant,
                 ),
@@ -78,9 +81,12 @@ class DailyGuidanceCard extends StatelessWidget {
     );
   }
 
-  String _buildSourceText() {
+  String _buildSourceText(BuildContext context) {
     if (item.type == DailyGuidanceItemType.quran && item.quranSource != null) {
-      return 'Surah ${item.quranSource!.surahNameArabic}, Ayah ${item.quranSource!.ayahStart}';
+      return AppLocalizations.of(context).dailyGuidanceQuranSource(
+        item.quranSource!.surahNameArabic,
+        item.quranSource!.ayahStart,
+      );
     } else if (item.type == DailyGuidanceItemType.hadith &&
         item.hadithSource != null) {
       return '${item.hadithSource!.collection} - ${item.hadithSource!.referenceNumber}';

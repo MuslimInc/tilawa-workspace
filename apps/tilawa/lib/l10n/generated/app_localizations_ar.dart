@@ -4077,4 +4077,30 @@ class AppLocalizationsAr extends AppLocalizations {
 
   @override
   String get settingsAdminUserBadge => 'مستخدم إداري';
+
+  @override
+  String get dailyGuidanceTitle => 'نفحة اليوم';
+
+  @override
+  String get dailyGuidanceEmpty => 'لا توجد نفحة متاحة لهذا اليوم.';
+
+  @override
+  String get dailyGuidanceEnableNotifications => 'تفعيل الإشعارات اليومية';
+
+  @override
+  String get dailyGuidanceNotificationTitle => 'نفحة اليوم | Daily Guidance';
+
+  @override
+  String get dailyGuidanceNotificationBody => 'افتح لرؤية نفحة اليوم';
+
+  @override
+  String get dailyGuidanceTypeQuran => 'قرآن';
+
+  @override
+  String get dailyGuidanceTypeHadith => 'حديث';
+
+  @override
+  String dailyGuidanceQuranSource(String surahName, int ayahNumber) {
+    return 'سورة $surahName، آية $ayahNumber';
+  }
 }

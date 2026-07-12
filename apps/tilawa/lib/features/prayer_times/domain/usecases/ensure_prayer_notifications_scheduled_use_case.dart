@@ -1,4 +1,5 @@
 import 'package:dartz_plus/dartz_plus.dart';
+import 'package:injectable/injectable.dart';
 import 'package:tilawa/core/services/prayer_notification_config.dart';
 import 'package:tilawa_core/core.dart';
 
@@ -37,6 +38,8 @@ class PrayerNotificationEnsureResult {
 /// The use case is intentionally policy-only: it decides whether the schedule
 /// window is low enough to refresh, then delegates the actual scheduling to the
 /// existing [SchedulePrayerNotificationsUseCase].
+
+@injectable
 class EnsurePrayerNotificationsScheduledUseCase {
   const EnsurePrayerNotificationsScheduledUseCase(
     this._scheduleRepository,

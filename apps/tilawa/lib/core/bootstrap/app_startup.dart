@@ -75,6 +75,7 @@ Future<void> bootstrap({
 
 @pragma('vm:entry-point')
 Future<void> firebaseMessagingBackgroundHandler(RemoteMessage message) async {
+  WidgetsFlutterBinding.ensureInitialized();
   logger.d(
     '[AppLaunch] source=firebaseMessagingBackgroundHandler: Start in (${DateTime.now()})',
   );

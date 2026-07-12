@@ -141,7 +141,7 @@ flutter:
   generate: true
 
   assets:
-    - assets/market/
+    - assets/images/
     - assets/daily_guidance_seed.json
     - assets/json/
     - assets/data/

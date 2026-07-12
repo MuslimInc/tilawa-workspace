@@ -4318,5 +4318,33 @@
     "settingsAdminUserBadge": "مستخدم إداري",
     "@settingsAdminUserBadge": {
         "description": "Badge on Settings profile when the signed-in user has the Firebase admin custom claim"
+    },
+    "dailyGuidanceTitle": "نفحة اليوم",
+    "@dailyGuidanceTitle": { "description": "Title of the Daily Guidance screen" },
+    "dailyGuidanceEmpty": "لا توجد نفحة متاحة لهذا اليوم.",
+    "@dailyGuidanceEmpty": { "description": "Message shown when there is no daily guidance" },
+    "dailyGuidanceEnableNotifications": "تفعيل الإشعارات اليومية",
+    "@dailyGuidanceEnableNotifications": { "description": "Label for the daily guidance notification toggle" },
+    "dailyGuidanceNotificationTitle": "نفحة اليوم | Daily Guidance",
+    "@dailyGuidanceNotificationTitle": { "description": "Notification title for daily guidance" },
+    "dailyGuidanceNotificationBody": "افتح لرؤية نفحة اليوم",
+    "@dailyGuidanceNotificationBody": { "description": "Notification body for daily guidance" },
+    "dailyGuidanceTypeQuran": "قرآن",
+    "@dailyGuidanceTypeQuran": { "description": "Label for Quran item type" },
+    "dailyGuidanceTypeHadith": "حديث",
+    "@dailyGuidanceTypeHadith": { "description": "Label for Hadith item type" },
+    "dailyGuidanceQuranSource": "سورة {surahName}، آية {ayahNumber}",
+    "@dailyGuidanceQuranSource": {
+        "description": "Source format for Quran item",
+        "placeholders": {
+            "surahName": {
+                "type": "String",
+                "example": "Al-Baqarah"
+            },
+            "ayahNumber": {
+                "type": "int",
+                "example": "255"
+            }
+        }
     }
 }

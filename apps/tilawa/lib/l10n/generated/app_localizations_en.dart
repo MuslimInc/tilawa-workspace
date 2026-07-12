@@ -4111,4 +4111,30 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get settingsAdminUserBadge => 'Admin User';
+
+  @override
+  String get dailyGuidanceTitle => 'Daily Guidance';
+
+  @override
+  String get dailyGuidanceEmpty => 'No guidance available for today.';
+
+  @override
+  String get dailyGuidanceEnableNotifications => 'Enable Daily Notifications';
+
+  @override
+  String get dailyGuidanceNotificationTitle => 'نفحة اليوم | Daily Guidance';
+
+  @override
+  String get dailyGuidanceNotificationBody => 'Open to see today\'s guidance';
+
+  @override
+  String get dailyGuidanceTypeQuran => 'Quran';
+
+  @override
+  String get dailyGuidanceTypeHadith => 'Hadith';
+
+  @override
+  String dailyGuidanceQuranSource(String surahName, int ayahNumber) {
+    return 'Surah $surahName, Ayah $ayahNumber';
+  }
 }

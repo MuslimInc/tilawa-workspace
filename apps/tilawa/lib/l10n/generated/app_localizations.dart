@@ -7198,6 +7198,54 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Admin User'**
   String get settingsAdminUserBadge;
+
+  /// Title of the Daily Guidance screen
+  ///
+  /// In en, this message translates to:
+  /// **'Daily Guidance'**
+  String get dailyGuidanceTitle;
+
+  /// Message shown when there is no daily guidance
+  ///
+  /// In en, this message translates to:
+  /// **'No guidance available for today.'**
+  String get dailyGuidanceEmpty;
+
+  /// Label for the daily guidance notification toggle
+  ///
+  /// In en, this message translates to:
+  /// **'Enable Daily Notifications'**
+  String get dailyGuidanceEnableNotifications;
+
+  /// Notification title for daily guidance
+  ///
+  /// In en, this message translates to:
+  /// **'نفحة اليوم | Daily Guidance'**
+  String get dailyGuidanceNotificationTitle;
+
+  /// Notification body for daily guidance
+  ///
+  /// In en, this message translates to:
+  /// **'Open to see today\'s guidance'**
+  String get dailyGuidanceNotificationBody;
+
+  /// Label for Quran item type
+  ///
+  /// In en, this message translates to:
+  /// **'Quran'**
+  String get dailyGuidanceTypeQuran;
+
+  /// Label for Hadith item type
+  ///
+  /// In en, this message translates to:
+  /// **'Hadith'**
+  String get dailyGuidanceTypeHadith;
+
+  /// Source format for Quran item
+  ///
+  /// In en, this message translates to:
+  /// **'Surah {surahName}, Ayah {ayahNumber}'**
+  String dailyGuidanceQuranSource(String surahName, int ayahNumber);
 }
 
 class _AppLocalizationsDelegate

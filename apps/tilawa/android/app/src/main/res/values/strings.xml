@@ -51,4 +51,7 @@
     <string name="widget_athkar_preview_progress">١/٢٥</string>
     <string name="widget_athkar_preview_text">أَصْبَحْنَا وَأَصْبَحَ الْمُلْكُ لِلَّهِ، وَالْحَمْدُ لِلَّهِ</string>
     <string name="widget_athkar_preview_count">×٣</string>
+    <string name="widget_wird_empty_hint">Open the app to start your Wird</string>
+    <string name="widget_wird_preview_title">Today\'s Wird</string>
+    <string name="widget_wird_preview_subtitle">5 of 20 pages completed · 15 remaining</string>
 </resources>
