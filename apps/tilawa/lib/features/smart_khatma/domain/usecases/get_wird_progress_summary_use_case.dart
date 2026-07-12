@@ -8,13 +8,17 @@ import '../entities/wird_progress_summary.dart';
 import '../repositories/khatma_plan_repository.dart';
 
 final class GetWirdProgressSummaryUseCase {
-  const GetWirdProgressSummaryUseCase(this._repository);
+  GetWirdProgressSummaryUseCase(
+    this._repository, {
+    DateTime Function()? now,
+  }) : _now = now ?? DateTime.now;
 
   final KhatmaPlanRepository _repository;
+  final DateTime Function() _now;
 
   Future<Either<Failure, WirdProgressSummary>> call({DateTime? now}) async {
     try {
-      final DateTime today = now ?? DateTime.now();
+      final DateTime today = now ?? _now();
       final KhatmaPlan? plan = await _repository.getActivePlan();
       if (plan == null) {
         return Right(_noPlan(today));
@@ -28,17 +32,8 @@ final class GetWirdProgressSummaryUseCase {
     }
   }
 
-  WirdProgressSummary _noPlan(DateTime today) => WirdProgressSummary(
-    schemaVersion: WirdProgressSummary.currentSchemaVersion,
-    planStatus: WirdProgressPlanStatus.none,
+  WirdProgressSummary _noPlan(DateTime today) => WirdProgressSummary.noPlan(
     localPlanDate: _dateKey(today),
-    targetType: WirdProgressTargetType.pages,
-    assignedAmount: 0,
-    completedAmount: 0,
-    remainingAmount: 0,
-    completionRatio: 0,
-    adjustment: WirdProgressAdjustment.none,
-    action: WirdProgressAction.createPlan,
   );
 
   WirdProgressSummary _fromPlan(KhatmaPlan plan, DateTime today) {
@@ -48,29 +43,20 @@ final class GetWirdProgressSummaryUseCase {
         ? 0
         : _assignedToday(plan, today, completedToday);
     final int completed = completedToday.clamp(0, assigned);
-    final int remaining = math.max(0, assigned - completed);
-    final double ratio = assigned == 0
-        ? (completedPlan ? 1 : 0)
-        : (completed / assigned).clamp(0.0, 1.0);
-    return WirdProgressSummary(
-      schemaVersion: WirdProgressSummary.currentSchemaVersion,
-      planId: 'local_${plan.createdAt.toUtc().toIso8601String()}',
-      planStatus: completedPlan
-          ? WirdProgressPlanStatus.completed
-          : WirdProgressPlanStatus.active,
-      localPlanDate: _dateKey(today),
-      targetType: switch (plan.readingStyle) {
-        KhatmaReadingStyle.pages => WirdProgressTargetType.pages,
-        KhatmaReadingStyle.minutes => WirdProgressTargetType.minutes,
-      },
+    final String planId = 'local_${plan.createdAt.toIso8601String()}';
+    final String localPlanDate = _dateKey(today);
+    if (completedPlan) {
+      return WirdProgressSummary.completed(
+        planId: planId,
+        localPlanDate: localPlanDate,
+      );
+    }
+    return WirdProgressSummary.active(
+      planId: planId,
+      localPlanDate: localPlanDate,
       assignedAmount: assigned,
       completedAmount: completed,
-      remainingAmount: remaining,
-      completionRatio: ratio,
       adjustment: _adjustment(plan, today),
-      action: completedPlan
-          ? WirdProgressAction.viewCompletedPlan
-          : WirdProgressAction.openTodayWird,
     );
   }
 
@@ -95,11 +81,15 @@ final class GetWirdProgressSummaryUseCase {
 
   WirdProgressAdjustment _adjustment(KhatmaPlan plan, DateTime today) {
     return switch (plan.adjustment) {
-      KhatmaPlanAdjustment.catchUp => WirdProgressAdjustment.catchUp,
-      KhatmaPlanAdjustment.extended => WirdProgressAdjustment.extended,
+      KhatmaPlanAdjustment.catchUp
+          when _isSameDateNullable(plan.adjustmentDate, today) =>
+        WirdProgressAdjustment.catchUp,
+      KhatmaPlanAdjustment.extended
+          when _isSameDateNullable(plan.adjustmentDate, today) =>
+        WirdProgressAdjustment.extended,
       KhatmaPlanAdjustment.none when plan.missedDays(today) > 0 =>
         WirdProgressAdjustment.automaticCatchUp,
-      KhatmaPlanAdjustment.none => WirdProgressAdjustment.none,
+      _ => WirdProgressAdjustment.none,
     };
   }
 
@@ -128,4 +118,7 @@ final class GetWirdProgressSummaryUseCase {
       first.year == second.year &&
       first.month == second.month &&
       first.day == second.day;
+
+  bool _isSameDateNullable(DateTime? first, DateTime second) =>
+      first != null && _isSameDate(first, second);
 }

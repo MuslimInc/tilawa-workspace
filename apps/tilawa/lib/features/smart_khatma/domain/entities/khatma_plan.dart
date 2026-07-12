@@ -19,6 +19,7 @@ final class KhatmaPlan {
     this.preferredMinutesPerDay,
     this.status = KhatmaPlanStatus.active,
     this.adjustment = KhatmaPlanAdjustment.none,
+    this.adjustmentDate,
     this.progressDate,
     this.progressStartPage,
   });
@@ -37,6 +38,7 @@ final class KhatmaPlan {
   final int? preferredMinutesPerDay;
   final KhatmaPlanStatus status;
   final KhatmaPlanAdjustment adjustment;
+  final DateTime? adjustmentDate;
   final DateTime? progressDate;
   final int? progressStartPage;
 
@@ -95,6 +97,7 @@ final class KhatmaPlan {
     KhatmaPlanStatus? status,
     int? durationDays,
     KhatmaPlanAdjustment? adjustment,
+    DateTime? adjustmentDate,
     DateTime? progressDate,
     int? progressStartPage,
   }) {
@@ -110,6 +113,7 @@ final class KhatmaPlan {
       preferredMinutesPerDay: preferredMinutesPerDay,
       status: status ?? this.status,
       adjustment: adjustment ?? this.adjustment,
+      adjustmentDate: adjustmentDate ?? this.adjustmentDate,
       progressDate: progressDate ?? this.progressDate,
       progressStartPage: progressStartPage ?? this.progressStartPage,
     );

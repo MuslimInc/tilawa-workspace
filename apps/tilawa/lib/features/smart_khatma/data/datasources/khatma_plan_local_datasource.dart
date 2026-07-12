@@ -60,6 +60,7 @@ final class SharedPreferencesKhatmaPlanLocalDataSource
       'preferred_minutes_per_day': plan.preferredMinutesPerDay,
       'status': plan.status.name,
       'adjustment': plan.adjustment.name,
+      'adjustment_date': plan.adjustmentDate?.toIso8601String(),
       'progress_date': plan.progressDate?.toIso8601String(),
       'progress_start_page': plan.progressStartPage,
     };
@@ -84,6 +85,10 @@ final class SharedPreferencesKhatmaPlanLocalDataSource
       adjustment: KhatmaPlanAdjustment.values.byName(
         json['adjustment'] as String? ?? KhatmaPlanAdjustment.none.name,
       ),
+      adjustmentDate: switch (json['adjustment_date']) {
+        final String value => DateTime.parse(value),
+        _ => null,
+      },
       progressDate: switch (json['progress_date']) {
         final String value => DateTime.parse(value),
         _ => null,

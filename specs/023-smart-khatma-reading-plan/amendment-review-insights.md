@@ -132,6 +132,28 @@ is missed, the app offers "catch up gently" or "extend", never guilt.
 - [ ] T-023A2-b: Calm adherence surface on the Khatma hub (reuse streak style).
 - [x] T-023A2-c: Emit the versioned Wird summary for the widget (producer side).
 
+### T-023A2-c implementation record
+
+- Schema: `WirdProgressSummary.currentSchemaVersion == 1` in
+  `domain/entities/wird_progress_summary.dart`; validated `noPlan`, `active`, and `completed`
+  factories prevent invalid state combinations.
+- Producer: `domain/usecases/get_wird_progress_summary_use_case.dart`; repository-only,
+  locale-free, analytics-free, listening-free, and read-only.
+- Daily checkpoint: `KhatmaPlan.progressDate` + `progressStartPage`, initialized and rolled over
+  only by `update_khatma_progress_use_case.dart`, persisted under the existing
+  `smart_khatma.active_plan.v1` key with backward-compatible optional fields.
+- Adjustment semantics: `KhatmaPlan.adjustment` is the last selected recovery strategy;
+  `adjustmentDate` scopes its semantic relevance to the selection's local civil day. Historical
+  choices are not emitted as current state.
+- Unit: schema v1 supports verified page progress only. `KhatmaReadingStyle.minutes` returns the
+  existing failure type; it is never interpreted as pages.
+- Pause: not supported by the shipped plan domain and therefore removed from schema v1 rather
+  than emitted speculatively.
+- Tests: summary invariants/read-only behavior, local-day rollover and injected clock, adjustment
+  expiry, legacy/null/malformed serialization, unsupported units, and corrupt checkpoints.
+- Remaining A2 gaps: adherence-day ledger, paused-plan domain behavior, and the calm adherence
+  hub surface remain T-023A2-a/b. T-023A2-c alone does not mark all of 023-A2 complete.
+
 **Tests**
 - Unit: completion increments; miss → no punitive reset; pause freezes; best-run.
 - Golden/widget: calm copy, no guilt affordances; RTL + LTR.

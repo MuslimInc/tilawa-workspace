@@ -31,10 +31,8 @@
   "completedAmount": 12,
   "remainingAmount": 8,
   "completionRatio": 0.60,
-  "adherenceState": {"daysCommitted": 5, "bestRun": 9, "state": "on_track"},
-  "tapDestination": "openKhatma",
-  "lastUpdatedAt": "2026-07-12T09:14:00.000Z",
-  "isStale": false
+  "adjustment": "none",
+  "action": "openTodayWird"
 }
 ```
 
@@ -43,17 +41,15 @@
 |---|---|---|---|
 | `schemaVersion` | int | ✓ | Consumer rejects unknown major; ignores unknown fields. |
 | `planId` | string | ✓ | Local/anonymous id — **never** a user account id. |
-| `planStatus` | enum | ✓ | `active` \| `paused` \| `completed` \| `none`. |
+| `planStatus` | enum | ✓ | `active` \| `completed` \| `none`. `paused` is reserved for a future breaking/additive contract revision and is not valid in schema v1. |
 | `localPlanDate` | string(YYYY-MM-DD) | ✓ | Local calendar day the summary applies to. |
-| `targetType` | enum | ✓ | `pages` \| `minutes` (mirrors `KhatmaReadingStyle`). Unit token, **not** a localized word. |
+| `targetType` | enum | ✓ | `pages`. Minute plans have no verified progress source and fail production in schema v1 rather than mixing units. |
 | `assignedAmount` | int | ✓ | Today's target in `targetType` units. `0` when completed/none. **Raw number, unformatted.** |
 | `completedAmount` | int | ✓ | Amount done today. **Raw number.** |
 | `remainingAmount` | int | ✓ | `max(0, assigned − completed)`. **Raw number.** |
 | `completionRatio` | double 0–1 | ✓ | Today's ratio; clamp. |
-| `adherenceState` | object | ✓ | `{ daysCommitted:int, bestRun:int, state: on_track\|behind\|paused\|none }`. Calm semantics (023-A2); no punitive fields. |
-| `tapDestination` | enum | ✓ | **Semantic intent** `openKhatma`\|`openReader`\|`openWidgetSetup` (not a URL). 041 maps it to a concrete deep link. |
-| `lastUpdatedAt` | string(ISO-8601 UTC) | ✓ | When 023 produced the summary. |
-| `isStale` | bool | ✓ | Producer hint; widget also derives staleness from envelope `validUntil`. |
+| `adjustment` | enum | ✓ | `none` \| `automaticCatchUp` \| `catchUp` \| `extended`. Explicit choices are exposed only on the local day selected. |
+| `action` | enum | ✓ | `createPlan` \| `openTodayWird` \| `viewCompletedPlan`. Semantic intent only, never a route. |
 
 ## MUST NOT contain (belongs to Contract B, Spec 041)
 `displayLabelAr`, `displayLabelEn`, any localized title/subtitle, formatted digits
@@ -62,8 +58,26 @@
 ## Semantic states (meaning only; rendering is 041's job)
 - `planStatus:none` → no active plan (widget shows a start CTA).
 - `active` → assigned/completed/remaining + ratio meaningful.
-- `paused` → adherence frozen; no missed-day accrual.
 - `completed` (`remainingAmount:0`) → day or plan complete.
+
+## Daily checkpoint lifecycle
+
+`KhatmaPlan.progressDate` is the local civil date of the current checkpoint and
+`progressStartPage` is the verified plan page immediately before that day's first accepted
+forward page advancement. `UpdateKhatmaProgressUseCase` initializes both fields before applying
+that advancement, preserves them across later same-day updates, and replaces them on the first
+accepted advancement of another local civil date. Summary reads never initialize or persist a
+checkpoint. Legacy plans without either field remain valid and report zero completed today until
+their next accepted advancement.
+
+The local plan day is the device-local civil date (`year-month-day`) supplied by the injected
+clock at the moment of the operation. The privacy-safe plan ID uses the persisted local creation
+token verbatim; it is not converted, hashed, or regenerated during summary reads.
+
+`KhatmaPlan.adjustment` records the last selected strategy and `adjustmentDate` records its local
+civil day. The semantic summary exposes an explicit catch-up/extend choice only when that date
+matches `localPlanDate`; older metadata is historical and maps to `none`. Automatic catch-up is
+derived from current page debt.
 
 ## Invariants
 - One-way producer output; 041 never writes back to it. Actions return only as the semantic

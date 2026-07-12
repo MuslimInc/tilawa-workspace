@@ -6,10 +6,15 @@ import '../entities/khatma_plan.dart';
 import '../repositories/khatma_plan_repository.dart';
 
 final class UpdateKhatmaProgressUseCase {
-  const UpdateKhatmaProgressUseCase(this._repository, this._analyticsService);
+  UpdateKhatmaProgressUseCase(
+    this._repository,
+    this._analyticsService, {
+    DateTime Function()? now,
+  }) : _now = now ?? DateTime.now;
 
   final KhatmaPlanRepository _repository;
   final AnalyticsService _analyticsService;
+  final DateTime Function() _now;
 
   Future<Either<Failure, KhatmaPlan?>> call({
     required int currentPage,
@@ -31,7 +36,7 @@ final class UpdateKhatmaProgressUseCase {
         return Right(plan);
       }
       final int nextPage = visitedPage;
-      final DateTime today = now ?? DateTime.now();
+      final DateTime today = now ?? _now();
       final bool continuesToday = _isSameDate(plan.progressDate, today);
       final KhatmaPlan updated = plan.copyWith(
         currentPage: nextPage,

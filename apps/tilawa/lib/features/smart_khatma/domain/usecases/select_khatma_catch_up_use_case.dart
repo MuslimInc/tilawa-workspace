@@ -6,10 +6,15 @@ import '../entities/khatma_plan.dart';
 import '../repositories/khatma_plan_repository.dart';
 
 final class SelectKhatmaCatchUpUseCase {
-  const SelectKhatmaCatchUpUseCase(this._repository, this._analyticsService);
+  SelectKhatmaCatchUpUseCase(
+    this._repository,
+    this._analyticsService, {
+    DateTime Function()? now,
+  }) : _now = now ?? DateTime.now;
 
   final KhatmaPlanRepository _repository;
   final AnalyticsService _analyticsService;
+  final DateTime Function() _now;
 
   Future<Either<Failure, KhatmaPlan?>> call({DateTime? now}) async {
     try {
@@ -17,9 +22,10 @@ final class SelectKhatmaCatchUpUseCase {
       if (plan == null) {
         return const Right(null);
       }
-      final today = now ?? DateTime.now();
+      final today = now ?? _now();
       final KhatmaPlan updated = plan.copyWith(
         adjustment: KhatmaPlanAdjustment.catchUp,
+        adjustmentDate: _dateOnly(today),
       );
       await _repository.saveActivePlan(updated);
       await _analyticsService.logEvent(
@@ -35,4 +41,7 @@ final class SelectKhatmaCatchUpUseCase {
       return Left(CacheFailure(error.toString()));
     }
   }
+
+  DateTime _dateOnly(DateTime date) =>
+      DateTime(date.year, date.month, date.day);
 }

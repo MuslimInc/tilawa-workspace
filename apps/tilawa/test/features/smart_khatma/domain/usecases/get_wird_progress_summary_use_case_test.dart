@@ -20,6 +20,16 @@ void main() {
       expect(summary.action, WirdProgressAction.createPlan);
     });
 
+    test('dependency factory exposes the repository-backed producer', () async {
+      final useCase = SmartKhatmaDependencies.getWirdProgressSummary(
+        _MemoryKhatmaPlanRepository(),
+      );
+
+      final result = await useCase(now: today);
+
+      expect(result.isRight(), isTrue);
+    });
+
     test('produces zero, partial, and completed daily progress', () async {
       for (final (currentPage, completed, ratio) in <(int, int, double)>[
         (21, 0, 0),
@@ -70,6 +80,60 @@ void main() {
       expect(extended.adjustment, WirdProgressAdjustment.extended);
     });
 
+    test('does not expose adjustment metadata from a previous day', () async {
+      for (final adjustment in <KhatmaPlanAdjustment>[
+        KhatmaPlanAdjustment.catchUp,
+        KhatmaPlanAdjustment.extended,
+      ]) {
+        final summary = await _summary(
+          _plan(
+            currentPage: 21,
+            adjustment: adjustment,
+            adjustmentDate: DateTime(2026, 7, 11),
+          ),
+          today,
+        );
+
+        expect(summary.adjustment, WirdProgressAdjustment.none);
+      }
+    });
+
+    test(
+      'uses injected local civil time without mutating stale checkpoint',
+      () async {
+        final repository = _MemoryKhatmaPlanRepository(_plan(currentPage: 26));
+        final useCase = GetWirdProgressSummaryUseCase(
+          repository,
+          now: () => DateTime(2026, 7, 13, 0, 1),
+        );
+
+        final result = await useCase();
+        final summary = result.getOrElse(
+          () => throw StateError('expected summary'),
+        );
+
+        expect(summary.localPlanDate, '2026-07-13');
+        expect(summary.completedAmount, 0);
+        expect(repository.saveCount, 0);
+      },
+    );
+
+    test(
+      'follows supplied local date across timezone and clock changes',
+      () async {
+        for (final (localTime, expectedDate) in <(DateTime, String)>[
+          (DateTime(2026, 7, 12, 23, 59, 59), '2026-07-12'),
+          (DateTime(2026, 7, 13, 0, 0, 1), '2026-07-13'),
+          (DateTime(2026, 7, 13, 1), '2026-07-13'),
+          (DateTime(2026, 7, 12, 22), '2026-07-12'),
+          (DateTime(2026, 10, 25, 1, 30), '2026-10-25'),
+        ]) {
+          final summary = await _summary(_plan(currentPage: 26), localTime);
+          expect(summary.localPlanDate, expectedDate);
+        }
+      },
+    );
+
     test('rejects invalid and unsupported persisted values', () async {
       final invalidResult = await GetWirdProgressSummaryUseCase(
         _MemoryKhatmaPlanRepository(_plan(currentPage: 605)),
@@ -82,6 +146,18 @@ void main() {
 
       expect(invalidResult.isLeft(), isTrue);
       expect(minutesResult.isLeft(), isTrue);
+    });
+
+    test('rejects checkpoint baselines outside plan bounds', () async {
+      for (final baseline in <int>[-1, 605]) {
+        final result = await GetWirdProgressSummaryUseCase(
+          _MemoryKhatmaPlanRepository(
+            _plan(currentPage: 26).copyWith(progressStartPage: baseline),
+          ),
+        )(now: today);
+
+        expect(result.isLeft(), isTrue);
+      }
     });
 
     test(
@@ -101,6 +177,8 @@ void main() {
         );
 
         expect(secondSummary.planId, firstSummary.planId);
+        expect(firstSummary.planId, 'local_2026-07-11T09:00:00.000Z');
+        expect(firstSummary.planId, isNot(plan.id));
         expect(secondSummary.completedAmount, firstSummary.completedAmount);
         expect(repository.saveCount, 0);
         expect(identical(await repository.getActivePlan(), plan), isTrue);
@@ -121,6 +199,7 @@ KhatmaPlan _plan({
   KhatmaPlanStatus status = KhatmaPlanStatus.active,
   KhatmaPlanAdjustment adjustment = KhatmaPlanAdjustment.none,
   KhatmaReadingStyle readingStyle = KhatmaReadingStyle.pages,
+  DateTime? adjustmentDate,
 }) {
   return KhatmaPlan(
     id: 'private-infrastructure-id',
@@ -132,6 +211,11 @@ KhatmaPlan _plan({
     currentPage: currentPage,
     status: status,
     adjustment: adjustment,
+    adjustmentDate:
+        adjustmentDate ??
+        (adjustment == KhatmaPlanAdjustment.none
+            ? null
+            : DateTime(2026, 7, 12)),
     readingStyle: readingStyle,
     progressDate: DateTime(2026, 7, 12),
     progressStartPage: currentPage.clamp(1, 21),

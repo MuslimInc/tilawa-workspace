@@ -69,6 +69,53 @@ void main() {
       expect(updated?.status, KhatmaPlanStatus.completed);
       expect(updated?.isCompleted, isTrue);
     });
+
+    test(
+      'keeps one baseline for multiple updates on the same local day',
+      () async {
+        final repository = _MemoryKhatmaPlanRepository(_plan(currentPage: 12));
+        final useCase = UpdateKhatmaProgressUseCase(
+          repository,
+          _FakeAnalyticsService(),
+          now: () => DateTime(2026, 7, 12, 23, 59),
+        );
+
+        await useCase(currentPage: 13);
+        final second = await useCase(currentPage: 14);
+        final updated = second.getOrElse(
+          () => throw StateError('expected plan'),
+        );
+
+        expect(updated?.progressDate, DateTime(2026, 7, 12));
+        expect(updated?.progressStartPage, 12);
+      },
+    );
+
+    test(
+      'rolls baseline before first advancement on a new local day',
+      () async {
+        final repository = _MemoryKhatmaPlanRepository(
+          _plan(currentPage: 20).copyWith(
+            progressDate: DateTime(2026, 7, 10),
+            progressStartPage: 12,
+          ),
+        );
+        final useCase = UpdateKhatmaProgressUseCase(
+          repository,
+          _FakeAnalyticsService(),
+          now: () => DateTime(2026, 7, 13, 0, 1),
+        );
+
+        final result = await useCase(currentPage: 21);
+        final updated = result.getOrElse(
+          () => throw StateError('expected plan'),
+        );
+
+        expect(updated?.progressDate, DateTime(2026, 7, 13));
+        expect(updated?.progressStartPage, 20);
+        expect(updated?.currentPage, 21);
+      },
+    );
   });
 
   group('ExtendKhatmaPlanUseCase', () {
@@ -91,6 +138,56 @@ void main() {
 
       expect(updated?.durationDays, greaterThan(plan.durationDays));
       expect(updated?.todayTargetPages(now), lessThan(previousTarget));
+      expect(updated?.adjustmentDate, DateTime(2026, 6, 10));
+    });
+  });
+
+  group('SelectKhatmaCatchUpUseCase', () {
+    test('preserves same-day progress checkpoint', () async {
+      final checkpointDate = DateTime(2026, 7, 12);
+      final plan = _plan(currentPage: 26).copyWith(
+        progressDate: checkpointDate,
+        progressStartPage: 21,
+      );
+      final repository = _MemoryKhatmaPlanRepository(plan);
+      final useCase = SelectKhatmaCatchUpUseCase(
+        repository,
+        _FakeAnalyticsService(),
+        now: () => checkpointDate,
+      );
+
+      final result = await useCase();
+      final updated = result.getOrElse(
+        () => throw StateError('expected plan'),
+      );
+
+      expect(updated?.progressDate, checkpointDate);
+      expect(updated?.progressStartPage, 21);
+      expect(updated?.adjustment, KhatmaPlanAdjustment.catchUp);
+      expect(updated?.adjustmentDate, checkpointDate);
+    });
+
+    test('latest same-day adjustment replaces the previous strategy', () async {
+      final today = DateTime(2026, 7, 12);
+      final repository = _MemoryKhatmaPlanRepository(_plan(currentPage: 21));
+      final analytics = _FakeAnalyticsService();
+
+      await SelectKhatmaCatchUpUseCase(
+        repository,
+        analytics,
+        now: () => today,
+      )();
+      final result = await ExtendKhatmaPlanUseCase(
+        repository,
+        analytics,
+        now: () => today,
+      )();
+      final updated = result.getOrElse(
+        () => throw StateError('expected plan'),
+      );
+
+      expect(updated?.adjustment, KhatmaPlanAdjustment.extended);
+      expect(updated?.adjustmentDate, today);
     });
   });
 

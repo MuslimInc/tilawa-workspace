@@ -6,10 +6,15 @@ import '../entities/khatma_plan.dart';
 import '../repositories/khatma_plan_repository.dart';
 
 final class ExtendKhatmaPlanUseCase {
-  const ExtendKhatmaPlanUseCase(this._repository, this._analyticsService);
+  ExtendKhatmaPlanUseCase(
+    this._repository,
+    this._analyticsService, {
+    DateTime Function()? now,
+  }) : _now = now ?? DateTime.now;
 
   final KhatmaPlanRepository _repository;
   final AnalyticsService _analyticsService;
+  final DateTime Function() _now;
 
   Future<Either<Failure, KhatmaPlan?>> call({DateTime? now}) async {
     try {
@@ -17,11 +22,12 @@ final class ExtendKhatmaPlanUseCase {
       if (plan == null) {
         return const Right(null);
       }
-      final today = now ?? DateTime.now();
+      final today = now ?? _now();
       final int extraDays = plan.missedDays(today).clamp(1, 30);
       final KhatmaPlan updated = plan.copyWith(
         durationDays: plan.durationDays + extraDays,
         adjustment: KhatmaPlanAdjustment.extended,
+        adjustmentDate: _dateOnly(today),
       );
       await _repository.saveActivePlan(updated);
       await _logAdjustment(plan, updated, today);
@@ -30,6 +36,9 @@ final class ExtendKhatmaPlanUseCase {
       return Left(CacheFailure(error.toString()));
     }
   }
+
+  DateTime _dateOnly(DateTime date) =>
+      DateTime(date.year, date.month, date.day);
 
   Future<void> _logAdjustment(
     KhatmaPlan previous,
