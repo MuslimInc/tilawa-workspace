@@ -83,5 +83,12 @@ semantic `planStatus` and daily amounts by the adapter.
 - Schema v1 follows finalized Spec 023: pages only; `none`, `active`, and `completed`; no
   paused, minute, or adherence fields.
 - Numeral shaping is an explicit adapter input and remains independent of text direction.
-- This slice does not dispatch an envelope, persist a snapshot, resolve a route, or register a
-  native widget provider.
+- `IslamicWidgetType` now carries `wird`, and the payload has a versioned Dart parse path
+  (`WirdProgressWidgetPayload.fromJson` strict / `tryParse` tolerant) symmetric to `toJson`.
+  `tryParse` returns `null` (→ setup/no-data state) for an unknown `schemaVersion` major or any
+  malformed field, never crashing — the Dart-side executable reference for the version invariant
+  above. The native Kotlin decoder mirrors this in T-041A1-c.
+- Still out of scope in this slice: dispatching a live envelope from a running sync service,
+  persisting a snapshot, resolving a concrete route, and registering a native widget provider.
+  The `wird` payload is proven to flow through the existing `WidgetSnapshotEnvelope` +
+  `WidgetSnapshotBridge` serialization (test only), so the native provider work can begin.

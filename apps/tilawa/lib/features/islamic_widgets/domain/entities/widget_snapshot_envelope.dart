@@ -1,5 +1,5 @@
 /// Supported Android home-screen widget types.
-enum IslamicWidgetType { prayer, ayah, athkar, hijri }
+enum IslamicWidgetType { prayer, ayah, athkar, hijri, wird }
 
 /// Host layout classes shared by Flutter snapshot producers and Android.
 enum IslamicWidgetSizeClass { compact, expanded }

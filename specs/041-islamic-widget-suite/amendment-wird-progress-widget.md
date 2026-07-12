@@ -77,7 +77,10 @@ Consistent semantics, honestly phased delivery: same meaning both platforms, And
 `wird_widget_state_rendered` { `state` } for coverage of the no-plan/active/stale paths.
 
 ## Tasks (not implemented — Phase 1 Android only)
-- [ ] T-041A1-a: Extend `IslamicWidgetType` + envelope payload parsing for `wird`.
+- [x] T-041A1-a: Extend `IslamicWidgetType` with `wird`; give `WirdProgressWidgetPayload`
+  a versioned Dart parse path (`fromJson`/`tryParse`) symmetric to `toJson`. Unknown
+  `schemaVersion` major or malformed fields → setup state (`null`), never a crash
+  (FR-041A1.9). Native envelope decode (Kotlin) remains part of T-041A1-c.
 - [x] T-041A1-b: **Presentation adapter** (Contract A → Contract B): localize, format digits by
   locale/preference, build accessibility label, and pass through the semantic action. Concrete
   route resolution remains T-041A1-d with the native action allow-list.
@@ -88,7 +91,10 @@ Consistent semantics, honestly phased delivery: same meaning both platforms, And
 - [ ] *(Phase 2 iOS — deferred to future child spec `041-ios-widgetkit-foundation`; not tasked here.)*
 
 ## Tests
-- Domain/parse: envelope `wird` payload parse; unknown-version → setup state.
+- Domain/parse: envelope `wird` payload parse; unknown-version → setup state. ✅ Dart coverage
+  in `test/features/islamic_widgets/domain/wird_progress_widget_payload_test.dart` and
+  `test/features/islamic_widgets/data/wird_widget_snapshot_bridge_test.dart`; native decode
+  parity lands with T-041A1-c (Robolectric).
 - Native (Robolectric): each contract state renders non-blank; deep link fires; resize no-clip.
 - RTL/LTR + 200% text-scale + light/dark golden coverage.
 - Offline/stale: renders persisted snapshot; staleness cue appears past `validUntil`.
