@@ -14,7 +14,8 @@ const _baseline = <String, int>{
   'apps/tilawa/lib/features/auth/presentation/screens/manage_devices_screen.dart':
       2,
   'apps/tilawa/lib/features/genui_assistant/presentation/screens/'
-      'genui_assistant_screen.dart': 1,
+          'genui_assistant_screen.dart':
+      1,
   'apps/tilawa/lib/router/app_router_config.dart': 1,
 };
 
@@ -133,9 +134,9 @@ String _stripCommentsAndStrings(String source) {
   var index = 0;
   while (index < source.length) {
     final remaining = source.substring(index);
-    final delimiter = RegExp(r'''^(//|/\*|''' + "'''|\"\"\"|'|\")" + r''')''')
-        .firstMatch(remaining)
-        ?.group(1);
+    final delimiter = RegExp(
+      "^(//|/\\*|'''|\"\"\"|'|\")",
+    ).firstMatch(remaining)?.group(1);
     if (delimiter == null) {
       result.write(source[index]);
       index++;

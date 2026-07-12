@@ -26,7 +26,7 @@ class ManageDevicesScreen extends StatelessWidget {
 
     if (userId == null) {
       return Scaffold(
-        appBar: AppBar(title: Text(context.l10n.manageDevicesTitle)),
+        appBar: TilawaAppBar(title: context.l10n.manageDevicesTitle),
         body: const SizedBox.shrink(),
       );
     }
@@ -92,7 +92,7 @@ class _ManageDevicesView extends StatelessWidget {
     final l10n = context.l10n;
 
     return Scaffold(
-      appBar: AppBar(title: Text(l10n.manageDevicesTitle)),
+      appBar: TilawaAppBar(title: l10n.manageDevicesTitle),
       body: BlocBuilder<ManageDevicesCubit, ManageDevicesState>(
         builder: (context, state) {
           return switch (state.status) {

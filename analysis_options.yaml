@@ -29,6 +29,10 @@ include:
   - package:flutter_lints/flutter.yaml
   - package:bloc_lint/recommended.yaml
 
+plugins:
+  tilawa_lints:
+    path: packages/tilawa_lints
+
 analyzer:
   errors:
     # --- Correctness diagnostics: never silently accepted. -----------------

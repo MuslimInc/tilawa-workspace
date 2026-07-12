@@ -12,6 +12,7 @@ workspace:
   - packages/core
   - packages/qibla
   - packages/ui_kit
+  - packages/tilawa_lints
   - packages/quran_qcf
   - packages/quran_image
   - packages/flex_color_scheme
@@ -71,7 +72,7 @@ melos:
         melos run format:fix
 
     lint:
-      description: Run analyze + format check (CI gate).
+      description: Run analyze, UI Kit policy, and format checks (CI gate).
       run: |
         melos run analyze
         melos run format
@@ -82,7 +83,7 @@ melos:
 
     ui:lint:
       description: Enforce Tilawa UI Kit components in product code.
-      run: dart run tool/ui_kit_guard.dart
+      run: dart analyze --fatal-infos
 
     # -- Testing -------------------------------------------------------
     test:

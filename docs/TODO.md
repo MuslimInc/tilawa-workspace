@@ -80,6 +80,12 @@ _Add new product work here._
 
 _Code health, architecture, tests — not user-visible features._
 
+### UI Kit AppBar migration
+
+- [ ] Replace the nine reviewed raw `AppBar` exceptions in auth, telemetry,
+  GenUI, and router screens after confirming behavior parity with the public UI
+  Kit app-bar APIs; remove each source suppression and registry entry together.
+
 - [ ] **Theme token harmonization (T4)** `P2`
   See backlog in [`missing_features.md`](missing_features.md#-post-release-maintainability-backlog).
 

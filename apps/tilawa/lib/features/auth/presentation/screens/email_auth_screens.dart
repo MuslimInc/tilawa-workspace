@@ -80,7 +80,7 @@ class _EmailLoginBody extends StatelessWidget {
         }
       },
       child: Scaffold(
-        appBar: AppBar(title: Text(context.l10n.signInWithEmail)),
+        appBar: TilawaAppBar(title: context.l10n.signInWithEmail),
         body: Column(
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: <Widget>[
@@ -276,8 +276,8 @@ class _RegisterBodyState extends State<_RegisterBody> {
       child: BlocBuilder<EmailRegistrationCubit, EmailRegistrationState>(
         builder: (BuildContext context, EmailRegistrationState regState) {
           return Scaffold(
-            appBar: AppBar(
-              title: Text(context.l10n.createAccount),
+            appBar: TilawaAppBar(
+              title: context.l10n.createAccount,
               leading: regState.canGoBack
                   ? BackButton(
                       onPressed: regState.isSubmitting
@@ -498,7 +498,7 @@ class _ForgotPasswordBody extends StatelessWidget {
         ),
       ],
       child: Scaffold(
-        appBar: AppBar(title: Text(context.l10n.forgotPassword)),
+        appBar: TilawaAppBar(title: context.l10n.forgotPassword),
         body: Column(
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: <Widget>[

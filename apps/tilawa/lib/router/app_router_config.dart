@@ -5,8 +5,8 @@ import 'package:go_router/go_router.dart';
 import 'package:tilawa/core/di/injection.dart';
 import 'package:tilawa/core/extensions.dart';
 import 'package:tilawa/features/home/presentation/cubit/home_quran_resume_cubit.dart';
-import 'package:tilawa/features/quran_reader/presentation/screens/quran_reader_host_screen.dart';
 import 'package:tilawa/features/quran_reader/presentation/screens/quran_index_screen.dart';
+import 'package:tilawa/features/quran_reader/presentation/screens/quran_reader_host_screen.dart';
 import 'package:tilawa/features/quran_reader/presentation/screens/quran_render_demo_screen.dart';
 import 'package:tilawa/features/support/presentation/bloc/support_bloc.dart';
 import 'package:tilawa/features/support/presentation/bloc/support_event.dart';
@@ -29,7 +29,6 @@ import '../features/genui_assistant/genui_assistant.dart';
 import '../features/history/presentation/bloc/history_bloc.dart';
 import '../features/history/presentation/screens/history_screen.dart';
 import '../features/notifications/debug/notification_debug_lab_screen.dart';
-import '../features/ui_kit_debug/tilawa_card_nested_tap_demo_screen.dart';
 import '../features/onboarding/presentation/screens/language_welcome_screen.dart';
 import '../features/onboarding/presentation/screens/onboarding_screen.dart';
 import '../features/prayer_times/presentation/screens/prayer_alerts_permission_screen.dart';
@@ -44,19 +43,20 @@ import '../features/reciters/presentation/screens/reciter_details_screen.dart';
 import '../features/reciters/presentation/widgets/reciters_search_route_transition.dart';
 import '../features/reciters/presentation/widgets/reciters_search_screen_scope.dart';
 import '../features/settings/presentation/widgets/settings_screen_scope.dart';
-import '../features/smart_khatma/presentation/widgets/smart_khatma_hub_scope.dart';
 import '../features/share/presentation/screens/screenshot_composer_screen.dart';
 import '../features/share/presentation/screens/video_reel_composer_screen.dart';
 import '../features/share/presentation/widgets/share_composer_screen_scope.dart';
+import '../features/smart_khatma/presentation/widgets/smart_khatma_hub_scope.dart';
 import '../features/splash/presentation/screens/splash_screen.dart';
 import '../features/support/presentation/screens/support_tilawa_screen.dart';
+import '../features/ui_kit_debug/tilawa_card_nested_tap_demo_screen.dart';
 import '../screens/app_shell_screen.dart';
 import '../screens/main_screen.dart';
 import '../screens/route_list_screen.dart';
 import '../shared/widgets/quran_player_expanded_page.dart';
 import '../shared/widgets/quran_player_expanded_route_transition.dart';
-import 'launch_route_page.dart';
 import 'app_navigator_keys.dart';
+import 'launch_route_page.dart';
 import 'prayer_alerts_permission_nav_extra.dart';
 import 'share_composer_extra.dart';
 import 'tilawa_route_data.dart';
@@ -751,7 +751,6 @@ class SmartQuranPlanRoute extends GoRouteData
         !getIt.isRegistered<GenUiActionDispatcher>() ||
         !getIt.isRegistered<TrustedContentResolver>()) {
       return Scaffold(
-        appBar: AppBar(),
         body: Center(
           child: Text(
             GenUiStrings.surfaceUnavailable,
