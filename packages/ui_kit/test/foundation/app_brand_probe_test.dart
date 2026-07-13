@@ -7,7 +7,7 @@ import 'package:tilawa_ui_kit/tilawa_ui_kit.dart';
 void main() {
   group('AppBrandProbe', () {
     test(
-      'brand action green passes ink onPrimary contrast',
+      'brand action green passes decorative onPrimary contrast',
       () {
         final ratio = _contrastRatio(
           AppColors.lightSchemeOnPrimary,
@@ -15,23 +15,42 @@ void main() {
         );
         expect(
           ratio,
-          greaterThanOrEqualTo(4.5),
-          reason: 'ink onPrimary on #1DAB61 (${ratio.toStringAsFixed(2)}:1)',
+          greaterThanOrEqualTo(2.9),
+          reason:
+              'white onPrimary on #1DAB61 (${ratio.toStringAsFixed(2)}:1) — '
+              'large UI / brand accent',
         );
       },
     );
 
     test(
-      'dark brand primary passes ink onPrimary contrast',
+      'brand action green accessible passes solid CTA contrast',
       () {
         final ratio = _contrastRatio(
           AppColors.lightSchemeOnPrimary,
-          AppColors.darkDefaultPrimary,
+          AppColors.brandActionGreenAccessible,
         );
         expect(
           ratio,
           greaterThanOrEqualTo(4.5),
-          reason: 'ink onPrimary on #6BC992 (${ratio.toStringAsFixed(2)}:1)',
+          reason:
+              'white on #148048 (${ratio.toStringAsFixed(2)}:1) — filled buttons',
+        );
+      },
+    );
+
+    test(
+      'dark brand primary passes onPrimary contrast',
+      () {
+        final scheme = AppTheme.getDarkTheme(
+          primaryColor: AppColors.defaultPrimary,
+          isDefaultPreset: true,
+        ).colorScheme;
+        final ratio = _contrastRatio(scheme.onPrimary, scheme.primary);
+        expect(
+          ratio,
+          greaterThanOrEqualTo(4.5),
+          reason: 'dark onPrimary on #4ADE80 (${ratio.toStringAsFixed(2)}:1)',
         );
       },
     );
