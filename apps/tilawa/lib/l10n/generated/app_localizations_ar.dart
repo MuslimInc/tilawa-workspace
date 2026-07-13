@@ -555,11 +555,11 @@ class AppLocalizationsAr extends AppLocalizations {
   String get khatmaResetAction => 'إعادة ضبط الخطة';
 
   @override
-  String get khatmaResetTitle => 'إعادة ضبط خطة الختمة؟';
+  String get khatmaResetTitle => 'حذف خطة الختمة؟';
 
   @override
   String get khatmaResetMessage =>
-      'سيتم حذف خطة الختمة الحالية فقط. ستبقى آخر صفحة قرأتها والعلامات المرجعية محفوظة.';
+      'سيتم حذف الخطة الحالية فقط. ستظل آخر صفحة قرأتها وعلاماتك المرجعية محفوظة.';
 
   @override
   String get khatmaContinueReading => 'تابع القراءة';
@@ -571,8 +571,209 @@ class AppLocalizationsAr extends AppLocalizations {
   String get khatmaHomeViewPlan => 'عرض الخطة';
 
   @override
-  String get khatmaHubResetSubtitle =>
-      'يمسح الخطة الحالية فقط. علاماتك المرجعية تبقى محفوظة.';
+  String get khatmaHubResetSubtitle => 'يحذف الخطة فقط، وتبقى علاماتك محفوظة';
+
+  @override
+  String get khatmaCompletedTitle => 'اكتملت الختمة';
+
+  @override
+  String get khatmaProgressCompleteMetric => '١٠٠٪';
+
+  @override
+  String get khatmaCompletedSubtitle =>
+      'تقبّل الله منك. ابدأ خطة جديدة حين تكون مستعدًا.';
+
+  @override
+  String get khatmaStartAnotherAction => 'ابدأ ختمة أخرى';
+
+  @override
+  String get khatmaUnavailable => 'خطة الختمة غير متاحة مؤقتًا. حاول مرة أخرى.';
+
+  @override
+  String get khatmaStartFromBeginning => 'من البداية';
+
+  @override
+  String get khatmaContinueCurrentPosition => 'من موضعي الحالي في القرآن';
+
+  @override
+  String get khatmaReviewPlanTitle => 'راجع خطة الختمة';
+
+  @override
+  String khatmaRangePages(int startPage, int endPage) {
+    return 'الصفحات $startPage–$endPage';
+  }
+
+  @override
+  String khatmaRangePagesFormatted(String range) {
+    return 'الصفحات $range';
+  }
+
+  @override
+  String khatmaDailyPages(int pages) {
+    return '$pages صفحات يوميًا';
+  }
+
+  @override
+  String khatmaStartPage(int page) {
+    return 'تبدأ من الصفحة $page';
+  }
+
+  @override
+  String khatmaTargetPage(int page) {
+    return 'تنتهي عند الصفحة $page';
+  }
+
+  @override
+  String khatmaExpectedCompletionDate(String date) {
+    return 'موعد الإتمام المتوقع: $date';
+  }
+
+  @override
+  String get khatmaConfirmPlanAction => 'ابدأ هذه الختمة';
+
+  @override
+  String get khatmaStartTodayAction => 'ابدأ ورد اليوم';
+
+  @override
+  String get khatmaResumeTodayAction => 'تابع ورد اليوم';
+
+  @override
+  String get khatmaTodayCompletedTitle => 'اكتمل ورد اليوم';
+
+  @override
+  String get khatmaTodayCompletedSubtitle => 'سيكون وردك التالي جاهزًا غدًا.';
+
+  @override
+  String khatmaConfirmedAndRemaining(int confirmed, int remaining) {
+    return 'أكملت $confirmed · متبقي $remaining';
+  }
+
+  @override
+  String get khatmaSaveProgressTitle => 'احفظ تقدّم الختمة';
+
+  @override
+  String khatmaCompletedThroughPage(int page) {
+    return 'أتممت القراءة حتى الصفحة $page';
+  }
+
+  @override
+  String get khatmaProgressPageSelector => 'اختر آخر صفحة أتممت قراءتها';
+
+  @override
+  String get khatmaCompleteTodayAction => 'أتممت ورد اليوم';
+
+  @override
+  String khatmaSaveThroughPageAction(int page) {
+    return 'حفظ التقدّم حتى الصفحة $page';
+  }
+
+  @override
+  String get khatmaExtendReviewTitle => 'راجع تمديد الخطة';
+
+  @override
+  String khatmaExtendReviewMessage(
+    int oldPages,
+    int newPages,
+    String oldDate,
+    String newDate,
+  ) {
+    return 'الصفحات يوميًا: $oldPages ← $newPages\nموعد الإتمام: $oldDate ← $newDate';
+  }
+
+  @override
+  String get khatmaCreateAction => 'إنشاء ختمة';
+
+  @override
+  String get khatmaBoundaryBySurah => 'نطاق السور';
+
+  @override
+  String get khatmaBoundaryByPage => 'نطاق الصفحات';
+
+  @override
+  String get khatmaStartSurah => 'سورة البداية';
+
+  @override
+  String get khatmaEndSurah => 'سورة النهاية';
+
+  @override
+  String get khatmaStartPageInput => 'صفحة البداية';
+
+  @override
+  String get khatmaEndPageInput => 'صفحة النهاية';
+
+  @override
+  String get khatmaPageBoundsHelp => 'أدخل صفحة من ١ إلى ٦٠٤';
+
+  @override
+  String get khatmaChooseDuration => 'اختر المدة';
+
+  @override
+  String khatmaTotalPages(int pages) {
+    return 'المجموع: $pages صفحات';
+  }
+
+  @override
+  String khatmaAssignedPages(int pages) {
+    return 'ورد اليوم: $pages';
+  }
+
+  @override
+  String khatmaConfirmedPages(int pages) {
+    return 'المؤكد اليوم: $pages';
+  }
+
+  @override
+  String khatmaRemainingTodayPages(int pages) {
+    return 'المتبقي اليوم: $pages';
+  }
+
+  @override
+  String get khatmaSaveProgressAction => 'حفظ التقدّم';
+
+  @override
+  String get khatmaReturnToQuranAction => 'العودة إلى القرآن';
+
+  @override
+  String get khatmaStartAyah => 'آية البداية';
+
+  @override
+  String get khatmaEndAyah => 'آية النهاية';
+
+  @override
+  String khatmaAyahNumber(int number) {
+    return 'آية $number';
+  }
+
+  @override
+  String get khatmaScheduleByDuration => 'المدة';
+
+  @override
+  String get khatmaScheduleByTargetDate => 'تاريخ الإنهاء';
+
+  @override
+  String get khatmaChooseTargetDate => 'اختر تاريخ الإنهاء';
+
+  @override
+  String get khatmaPreviewPlanAction => 'معاينة الخطة';
+
+  @override
+  String get khatmaEditPlanAction => 'تعديل الخطة';
+
+  @override
+  String get khatmaEditPlanTitle => 'راجع تغييرات الخطة';
+
+  @override
+  String get khatmaEditPlanSubtitle =>
+      'عدّل المدة أو تاريخ الإنهاء مع حفظ التقدّم';
+
+  @override
+  String get khatmaSavePlanChangesAction => 'حفظ التغييرات';
+
+  @override
+  String get khatmaDeletePlanAction => 'حذف الخطة';
+
+  @override
+  String get khatmaResetCorruptAction => 'إعادة ضبط الختمة';
 
   @override
   String get todayPlanTitle => 'خطة اليوم';
@@ -3852,6 +4053,27 @@ class AppLocalizationsAr extends AppLocalizations {
 
   @override
   String get settingsSecuritySection => 'الأمان';
+
+  @override
+  String get wirdWidgetTitle => 'وِرد اليوم';
+
+  @override
+  String get wirdWidgetNoPlanSubtitle => 'ابدأ خطة هادئة لقراءة القرآن';
+
+  @override
+  String wirdWidgetProgressSubtitle(
+    String completed,
+    String assigned,
+    String remaining,
+  ) {
+    return 'أُنجز $completed من $assigned صفحة · المتبقي $remaining';
+  }
+
+  @override
+  String get wirdWidgetDayCompletedSubtitle => 'اكتمل وِرد اليوم';
+
+  @override
+  String get wirdWidgetPlanCompletedSubtitle => 'اكتملت الختمة';
 
   @override
   String get settingsAdminUserBadge => 'مستخدم إداري';

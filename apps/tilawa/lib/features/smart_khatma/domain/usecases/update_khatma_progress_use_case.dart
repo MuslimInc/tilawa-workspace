@@ -5,56 +5,53 @@ import 'package:tilawa_core/constants/analytics_constants.dart';
 import '../entities/khatma_plan.dart';
 import '../repositories/khatma_plan_repository.dart';
 
+/// Persists progress explicitly confirmed by the user.
 final class UpdateKhatmaProgressUseCase {
-  const UpdateKhatmaProgressUseCase(this._repository, this._analyticsService);
+  UpdateKhatmaProgressUseCase(
+    this._repository,
+    this._analyticsService, {
+    this.onProgressChanged,
+  });
 
   final KhatmaPlanRepository _repository;
   final AnalyticsService _analyticsService;
+  final Future<void> Function()? onProgressChanged;
 
-  Future<Either<Failure, KhatmaPlan?>> call({required int currentPage}) async {
+  Future<Either<Failure, KhatmaPlan?>> call({
+    required int confirmedThroughPage,
+  }) async {
     try {
       final KhatmaPlan? plan = await _repository.getActivePlan();
-      if (plan == null) {
-        return const Right(null);
-      }
-      final int visitedPage = currentPage.clamp(
-        KhatmaPlan.firstQuranPage,
-        KhatmaPlan.lastQuranPage,
-      );
-      if (visitedPage <= plan.currentPage) {
+      if (plan == null) return const Right(null);
+      final int? previous = plan.confirmedCompletedThroughPage;
+      if (previous != null && confirmedThroughPage <= previous) {
         return Right(plan);
       }
-      if (visitedPage > plan.currentPage + 1) {
-        return Right(plan);
+      if (confirmedThroughPage < plan.assignmentStartPage ||
+          confirmedThroughPage > plan.assignmentEndPage) {
+        return const Left(
+          CacheFailure('Confirmed page is outside today’s assignment'),
+        );
       }
-      final int nextPage = visitedPage;
       final KhatmaPlan updated = plan.copyWith(
-        currentPage: nextPage,
-        status: nextPage >= plan.targetPage
-            ? KhatmaPlanStatus.completed
-            : KhatmaPlanStatus.active,
+        confirmedCompletedThroughPage: confirmedThroughPage,
       );
       await _repository.saveActivePlan(updated);
       await _analyticsService.logEvent(
         AnalyticsEvents.khatmaProgressUpdated,
-        parameters: <String, Object>{
-          'plan_id': updated.id,
-          'current_page': updated.currentPage,
-          'progress_percent': (updated.progress * 100).round(),
-          'remaining_pages': updated.remainingPages,
-        },
+        parameters: const <String, Object>{'source': 'user_confirmation'},
       );
-      if (updated.isCompleted) {
+      if (updated.isTodayCompleted) {
         await _analyticsService.logEvent(
-          AnalyticsEvents.khatmaCompleted,
-          parameters: <String, Object>{
-            'plan_id': updated.id,
-            'duration_days': updated.durationDays,
-          },
+          AnalyticsEvents.khatmaGoalCompleted,
         );
       }
+      if (updated.isCompleted) {
+        await _analyticsService.logEvent(AnalyticsEvents.khatmaCompleted);
+      }
+      await onProgressChanged?.call();
       return Right(updated);
-    } catch (error) {
+    } on Exception catch (error) {
       return Left(CacheFailure(error.toString()));
     }
   }

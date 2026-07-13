@@ -1,8 +1,8 @@
 import 'dart:math' as math;
 
-enum KhatmaReadingStyle { pages, minutes }
+enum KhatmaReadingStyle { pages }
 
-enum KhatmaPlanStatus { active, completed }
+enum KhatmaPlanAdjustment { none, extended }
 
 final class KhatmaPlan {
   const KhatmaPlan({
@@ -12,10 +12,12 @@ final class KhatmaPlan {
     required this.durationDays,
     required this.startPage,
     required this.targetPage,
-    required this.currentPage,
-    this.readingStyle = KhatmaReadingStyle.pages,
-    this.preferredMinutesPerDay,
-    this.status = KhatmaPlanStatus.active,
+    required this.assignmentDate,
+    required this.assignmentStartPage,
+    required this.assignmentEndPage,
+    this.confirmedCompletedThroughPage,
+    this.adjustment = KhatmaPlanAdjustment.none,
+    this.adjustmentDate,
   });
 
   static const int firstQuranPage = 1;
@@ -27,24 +29,52 @@ final class KhatmaPlan {
   final int durationDays;
   final int startPage;
   final int targetPage;
-  final int currentPage;
-  final KhatmaReadingStyle readingStyle;
-  final int? preferredMinutesPerDay;
-  final KhatmaPlanStatus status;
+  final int? confirmedCompletedThroughPage;
+  final DateTime assignmentDate;
+  final int assignmentStartPage;
+  final int assignmentEndPage;
+  final KhatmaPlanAdjustment adjustment;
+  final DateTime? adjustmentDate;
+
+  KhatmaReadingStyle get readingStyle => KhatmaReadingStyle.pages;
 
   int get totalPages => targetPage - startPage + 1;
 
   int get completedPages {
-    final int completed = currentPage - startPage;
-    return completed.clamp(0, totalPages);
+    final int? confirmed = confirmedCompletedThroughPage;
+    if (confirmed == null) return 0;
+    return (confirmed - startPage + 1).clamp(0, totalPages);
   }
 
-  int get remainingPages => (targetPage - currentPage + 1).clamp(0, totalPages);
+  int get remainingPages => totalPages - completedPages;
 
   double get progress => totalPages <= 0 ? 0 : completedPages / totalPages;
 
-  bool get isCompleted =>
-      status == KhatmaPlanStatus.completed || remainingPages == 0;
+  bool get isCompleted => confirmedCompletedThroughPage == targetPage;
+
+  int get confirmedTodayPages {
+    final int? confirmed = confirmedCompletedThroughPage;
+    if (confirmed == null || confirmed < assignmentStartPage) return 0;
+    return (confirmed - assignmentStartPage + 1).clamp(
+      0,
+      assignedTodayPages,
+    );
+  }
+
+  int get assignedTodayPages => assignmentEndPage - assignmentStartPage + 1;
+
+  int get remainingTodayPages => assignedTodayPages - confirmedTodayPages;
+
+  bool get isTodayCompleted => remainingTodayPages == 0;
+
+  int get resumePage {
+    final int firstUnconfirmed =
+        (confirmedCompletedThroughPage ?? assignmentStartPage - 1) + 1;
+    return firstUnconfirmed.clamp(assignmentStartPage, assignmentEndPage);
+  }
+
+  DateTime get expectedCompletionDate =>
+      startDate.add(Duration(days: durationDays - 1));
 
   int currentDay(DateTime now) {
     final int elapsed = _dateOnly(now).difference(_dateOnly(startDate)).inDays;
@@ -56,14 +86,11 @@ final class KhatmaPlan {
     return (durationDays - elapsed).clamp(1, durationDays);
   }
 
-  int plannedDailyPages() {
-    return (totalPages / durationDays).ceil().clamp(1, lastQuranPage);
-  }
+  int plannedDailyPages() =>
+      (totalPages / durationDays).ceil().clamp(1, lastQuranPage);
 
-  int todayTargetPages(DateTime now) {
-    if (isCompleted) {
-      return 0;
-    }
+  int targetPagesFor(DateTime now) {
+    if (isCompleted) return 0;
     return math.min(
       remainingPages,
       (remainingPages / remainingDays(now)).ceil().clamp(1, lastQuranPage),
@@ -75,17 +102,19 @@ final class KhatmaPlan {
       totalPages,
       plannedDailyPages() * currentDay(now),
     );
-    final int pageDebt = expectedPages - completedPages;
-    if (pageDebt <= 0) {
-      return 0;
-    }
-    return (pageDebt / plannedDailyPages()).ceil();
+    final int debt = expectedPages - completedPages;
+    return debt <= 0 ? 0 : (debt / plannedDailyPages()).ceil();
   }
 
   KhatmaPlan copyWith({
-    int? currentPage,
-    KhatmaPlanStatus? status,
+    int? confirmedCompletedThroughPage,
+    bool clearConfirmedCompletedThroughPage = false,
     int? durationDays,
+    DateTime? assignmentDate,
+    int? assignmentStartPage,
+    int? assignmentEndPage,
+    KhatmaPlanAdjustment? adjustment,
+    DateTime? adjustmentDate,
   }) {
     return KhatmaPlan(
       id: id,
@@ -94,10 +123,14 @@ final class KhatmaPlan {
       durationDays: durationDays ?? this.durationDays,
       startPage: startPage,
       targetPage: targetPage,
-      currentPage: currentPage ?? this.currentPage,
-      readingStyle: readingStyle,
-      preferredMinutesPerDay: preferredMinutesPerDay,
-      status: status ?? this.status,
+      confirmedCompletedThroughPage: clearConfirmedCompletedThroughPage
+          ? null
+          : confirmedCompletedThroughPage ?? this.confirmedCompletedThroughPage,
+      assignmentDate: assignmentDate ?? this.assignmentDate,
+      assignmentStartPage: assignmentStartPage ?? this.assignmentStartPage,
+      assignmentEndPage: assignmentEndPage ?? this.assignmentEndPage,
+      adjustment: adjustment ?? this.adjustment,
+      adjustmentDate: adjustmentDate ?? this.adjustmentDate,
     );
   }
 
@@ -106,19 +139,16 @@ final class KhatmaPlan {
 }
 
 final class KhatmaTodayTarget {
-  const KhatmaTodayTarget({
-    required this.plan,
-    required this.startPage,
-    required this.pages,
-    required this.missedDays,
-  });
+  const KhatmaTodayTarget({required this.plan, required this.missedDays});
 
   final KhatmaPlan plan;
-  final int startPage;
-  final int pages;
   final int missedDays;
 
+  int get startPage => plan.assignmentStartPage;
+  int get endPage => plan.assignmentEndPage;
+  int get pages => plan.assignedTodayPages;
+  int get completedPages => plan.confirmedTodayPages;
+  int get remainingTodayPages => plan.remainingTodayPages;
   double get progress => plan.progress;
-
   int get remainingPages => plan.remainingPages;
 }

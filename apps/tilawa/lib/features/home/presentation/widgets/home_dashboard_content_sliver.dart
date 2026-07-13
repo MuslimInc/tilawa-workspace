@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:tilawa/core/layout/home_dashboard_scroll_padding.dart';
 import 'package:tilawa_ui_kit/tilawa_ui_kit.dart';
 
 /// Dashboard sections on the neutral Home canvas.
@@ -44,21 +45,14 @@ class _HomeDashboardSheetBody extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final tokens = context.tokens;
-
-    return ConstrainedBox(
-      constraints: BoxConstraints(
-        minHeight: MediaQuery.sizeOf(context).height,
+    return Padding(
+      padding: EdgeInsets.fromLTRB(
+        horizontalInset,
+        topPadding,
+        horizontalInset,
+        homeDashboardScrollBottomPadding(context),
       ),
-      child: Padding(
-        padding: EdgeInsets.fromLTRB(
-          horizontalInset,
-          topPadding,
-          horizontalInset,
-          TilawaShellPadding.of(context) + tokens.spaceLarge,
-        ),
-        child: child,
-      ),
+      child: child,
     );
   }
 }

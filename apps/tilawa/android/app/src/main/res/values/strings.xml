@@ -18,6 +18,11 @@
     <string name="widget_next_prayer">%1$s in</string>
     <string name="widget_empty_hint">Open the app to load prayer times</string>
     <string name="widget_stale_hint">Open the app to refresh</string>
+    <string name="widget_wird_label">Daily Wird</string>
+    <string name="widget_wird_description">Today’s Khatma reading progress</string>
+    <string name="widget_wird_setup">Start a Wird in Tilawa</string>
+    <string name="widget_wird_preview_subtitle">Your daily reading progress</string>
+    <string name="widget_wird_setup_accessibility">Daily Wird. Start a Wird in Tilawa.</string>
     <string name="widget_setup_hint">Tap to set location</string>
     <!-- Widget-picker preview placeholders; overwritten at runtime. -->
     <string name="widget_preview_next">Fajr in 2:10</string>

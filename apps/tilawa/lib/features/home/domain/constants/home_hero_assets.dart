@@ -4,9 +4,15 @@ import 'package:flutter/material.dart';
 abstract final class HomeHeroAssets {
   const HomeHeroAssets._();
 
-  /// Kaaba courtyard photograph framed through a masjid arch.
-  static const String wallpaper = 'assets/images/home_hero_wallpaper.png';
+  /// Masjid arch lattice photograph — cropped to sky and stone, not the courtyard.
+  static const String wallpaper = 'assets/images/mecca.jpg';
 
-  /// Frames the Kaaba through the arch with breathing room for greeting text.
-  static const Alignment wallpaperAlignment = Alignment(0, 0.38);
+  /// Focal point for [wallpaper]: architectural detail on the visual-left edge,
+  /// prayer copy on the visual-right (start in RTL).
+  ///
+  /// Vertical bias favors stone lattice over open sky; excludes courtyard crowds.
+  static Alignment wallpaperFocalAlignment(TextDirection direction) {
+    final double x = direction == TextDirection.rtl ? 0.82 : -0.82;
+    return Alignment(x, -0.76);
+  }
 }

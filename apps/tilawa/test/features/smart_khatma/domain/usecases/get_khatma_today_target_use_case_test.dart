@@ -1,108 +1,80 @@
 import 'package:flutter_test/flutter_test.dart';
-import 'package:tilawa/features/quran_reader/domain/repositories/quran_reader_repository.dart';
 import 'package:tilawa/features/smart_khatma/smart_khatma.dart';
 
 void main() {
   group('GetKhatmaTodayTargetUseCase', () {
-    test('returns null when there is no active plan', () async {
-      final useCase = GetKhatmaTodayTargetUseCase(
-        _MemoryKhatmaPlanRepository(),
-        const _FakeQuranReaderRepository(page: 1),
-      );
+    test('returns the frozen assignment during the same local day', () async {
+      final repository = _MemoryRepository(_plan());
 
-      final result = await useCase(now: DateTime(2026, 6, 15));
-
-      expect(
-        result.getOrElse(() => throw StateError('expected right')),
-        isNull,
+      final result = await GetKhatmaTodayTargetUseCase(repository)(
+        now: DateTime(2026, 7, 12, 22),
       );
+      final target = result.getOrElse(() => null);
+
+      expect(target?.startPage, 1);
+      expect(target?.endPage, 21);
+      expect(target?.pages, 21);
+      expect(repository.saveCount, 0);
+    });
+
+    test('partial confirmation does not move the assignment end', () async {
+      final repository = _MemoryRepository(_plan(confirmedThrough: 5));
+
+      final target = (await GetKhatmaTodayTargetUseCase(repository)(
+        now: DateTime(2026, 7, 12, 23),
+      )).getOrElse(() => null);
+
+      expect(target?.startPage, 1);
+      expect(target?.endPage, 21);
+      expect(target?.completedPages, 5);
+      expect(target?.remainingTodayPages, 16);
     });
 
     test(
-      'computes today target from remaining pages and remaining days',
+      'next local day freezes a new assignment from first unconfirmed page',
       () async {
-        final plan = KhatmaPlan(
-          id: 'plan-1',
-          createdAt: DateTime(2026, 6, 15),
-          startDate: DateTime(2026, 6, 15),
-          durationDays: 30,
-          startPage: 1,
-          targetPage: 604,
-          currentPage: 303,
-        );
-        final useCase = GetKhatmaTodayTargetUseCase(
-          _MemoryKhatmaPlanRepository(plan),
-          const _FakeQuranReaderRepository(page: 303),
-        );
+        final repository = _MemoryRepository(_plan(confirmedThrough: 5));
 
-        final result = await useCase(now: DateTime(2026, 6, 15));
-        final target = result.getOrElse(
-          () => throw StateError('expected target'),
-        );
+        final target = (await GetKhatmaTodayTargetUseCase(repository)(
+          now: DateTime(2026, 7, 13),
+        )).getOrElse(() => null);
 
-        expect(target?.startPage, 303);
-        expect(target?.pages, 11);
-        expect(target?.remainingPages, 302);
-        expect((target?.progress ?? 0) > 0.49, isTrue);
+        expect(target?.startPage, 6);
+        expect(target?.endPage, greaterThan(6));
+        expect(repository.saveCount, 1);
       },
     );
-
-    test('increases target when elapsed days create page debt', () async {
-      final plan = KhatmaPlan(
-        id: 'plan-1',
-        createdAt: DateTime(2026, 6, 1),
-        startDate: DateTime(2026, 6, 1),
-        durationDays: 30,
-        startPage: 1,
-        targetPage: 604,
-        currentPage: 21,
-      );
-      final useCase = GetKhatmaTodayTargetUseCase(
-        _MemoryKhatmaPlanRepository(plan),
-        const _FakeQuranReaderRepository(page: 21),
-      );
-
-      final result = await useCase(now: DateTime(2026, 6, 10));
-      final target = result.getOrElse(
-        () => throw StateError('expected target'),
-      );
-
-      expect(target?.missedDays, greaterThan(0));
-      expect(target?.pages, greaterThan(plan.plannedDailyPages()));
-    });
   });
 }
 
-final class _MemoryKhatmaPlanRepository implements KhatmaPlanRepository {
-  _MemoryKhatmaPlanRepository([this._plan]);
+KhatmaPlan _plan({int? confirmedThrough}) => KhatmaPlan(
+  id: 'plan-1',
+  createdAt: DateTime(2026, 7, 12),
+  startDate: DateTime(2026, 7, 12),
+  durationDays: 30,
+  startPage: 1,
+  targetPage: 604,
+  confirmedCompletedThroughPage: confirmedThrough,
+  assignmentDate: DateTime(2026, 7, 12),
+  assignmentStartPage: 1,
+  assignmentEndPage: 21,
+);
 
-  KhatmaPlan? _plan;
+final class _MemoryRepository implements KhatmaPlanRepository {
+  _MemoryRepository(this.plan);
+
+  KhatmaPlan? plan;
+  int saveCount = 0;
 
   @override
-  Future<void> clearActivePlan() async {
-    _plan = null;
-  }
+  Future<void> clearActivePlan() async => plan = null;
 
   @override
-  Future<KhatmaPlan?> getActivePlan() async => _plan;
+  Future<KhatmaPlan?> getActivePlan() async => plan;
 
   @override
   Future<void> saveActivePlan(KhatmaPlan plan) async {
-    _plan = plan;
+    saveCount++;
+    this.plan = plan;
   }
-}
-
-final class _FakeQuranReaderRepository implements QuranReaderRepository {
-  const _FakeQuranReaderRepository({required this.page});
-
-  final int? page;
-
-  @override
-  Future<({int? ayahNumber, int? page, int? surahNumber})>
-  getLastReadPosition() async {
-    return (surahNumber: 2, ayahNumber: 1, page: page);
-  }
-
-  @override
-  dynamic noSuchMethod(Invocation invocation) => super.noSuchMethod(invocation);
 }

@@ -1,0 +1,157 @@
+# Khatmah MVP smoke + screenshots (T043).
+# Prerequisites: signed-in session on com.tilawa.app (clearState: false).
+#
+# Run from repo root:
+#   mkdir -p screenshots/khatmah_app/tilawa_maestro
+#   maestro test .maestro/khatma/khatma_smoke_screenshots.yaml \
+#     --device emulator-5554 \
+#     --test-output-dir screenshots/khatmah_app/tilawa_maestro
+
+appId: com.tilawa.app
+---
+
+- launchApp:
+    clearState: false
+
+- runFlow:
+    file: ../subflows/ensure_main_shell.yaml
+
+- tapOn:
+    text: "Allow"
+    optional: true
+
+- tapOn:
+    text: "ليس الآن"
+    optional: true
+
+- tapOn:
+    text: "Not now"
+    optional: true
+
+- waitForAnimationToEnd
+
+- takeScreenshot: 01_home_khatma_entry
+
+# Home → hub (AR or EN)
+- tapOn:
+    text: "ابدأ ختمة"
+    optional: true
+
+- tapOn:
+    text: "Start a Khatma"
+    optional: true
+
+- waitForAnimationToEnd
+
+- extendedWaitUntil:
+    visible: "Smart Khatma"
+    optional: true
+
+- extendedWaitUntil:
+    visible: "ختمة ذكية"
+    optional: true
+
+- takeScreenshot: 02_hub_empty
+
+- tapOn:
+    text: "إنشاء ختمة"
+    optional: true
+
+- tapOn:
+    text: "Create Khatma"
+    optional: true
+
+- waitForAnimationToEnd
+
+- takeScreenshot: 03_creation_boundaries
+
+# Default surah range is valid; pick 30-day duration preset
+- tapOn:
+    text: "٣٠ يومًا"
+    optional: true
+
+- tapOn:
+    text: "30 days"
+    optional: true
+
+- waitForAnimationToEnd
+
+- extendedWaitUntil:
+    visible: "راجع خطة الختمة"
+    optional: true
+    timeout: 15000
+
+- extendedWaitUntil:
+    visible: "Review your Khatma plan"
+    optional: true
+    timeout: 15000
+
+- takeScreenshot: 04_creation_review
+
+- tapOn:
+    text: "ابدأ هذه الختمة"
+    optional: true
+
+- tapOn:
+    text: "Start this Khatma"
+    optional: true
+
+- waitForAnimationToEnd
+
+- takeScreenshot: 05_active_hub
+
+# Start today's wird → reader
+- scrollUntilVisible:
+    element:
+      text: "ابدأ ورد اليوم"
+    optional: true
+
+- scrollUntilVisible:
+    element:
+      text: "Start today’s Wird"
+    optional: true
+
+- tapOn:
+    text: "ابدأ ورد اليوم"
+    optional: true
+
+- tapOn:
+    text: "Start today’s Wird"
+    optional: true
+
+- waitForAnimationToEnd
+
+- extendedWaitUntil:
+    visible: "Save progress"
+    optional: true
+    timeout: 20000
+
+- takeScreenshot: 06_quran_reader
+
+- pressKey: back
+
+- waitForAnimationToEnd
+
+- extendedWaitUntil:
+    visible: "احفظ تقدّم الختمة"
+    optional: true
+    timeout: 15000
+
+- extendedWaitUntil:
+    visible: "Save your Khatma progress"
+    optional: true
+    timeout: 15000
+
+- takeScreenshot: 07_save_progress_sheet
+
+- tapOn:
+    text: "Cancel"
+    optional: true
+
+- tapOn:
+    text: "إلغاء"
+    optional: true
+
+- waitForAnimationToEnd
+
+- takeScreenshot: 08_hub_after_reader_return

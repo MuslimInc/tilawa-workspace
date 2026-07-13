@@ -8,6 +8,7 @@ internal enum class WidgetType(val wireName: String) {
     AYAH("ayah"),
     ATHKAR("athkar"),
     HIJRI("hijri"),
+    WIRD("wird"),
     ;
 
     companion object {

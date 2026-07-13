@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:tilawa/features/home/presentation/widgets/home_dashboard_section.dart';
 import 'package:tilawa_ui_kit/tilawa_ui_kit.dart';
 
 /// Compact navigation row for grouped Home cards (More, pinned athkar).
@@ -95,8 +96,8 @@ class HomeGroupedListRow extends StatelessWidget {
                         maxLines: 1,
                         overflow: TextOverflow.ellipsis,
                         style: theme.textTheme.bodySmall?.copyWith(
-                          color: colorScheme.onSurfaceVariant.withValues(
-                            alpha: 0.9,
+                          color: HomeDashboardSection.secondaryTextColor(
+                            context,
                           ),
                           height: 1.35,
                         ),
@@ -119,9 +120,7 @@ class HomeGroupedListRow extends StatelessWidget {
                     child: Icon(
                       Icons.chevron_right_rounded,
                       size: tokens.iconSizeSmall,
-                      color: colorScheme.onSurfaceVariant.withValues(
-                        alpha: tokens.opacitySubtle * 3,
-                      ),
+                      color: HomeDashboardSection.secondaryTextColor(context),
                     ),
                   ),
                 ),

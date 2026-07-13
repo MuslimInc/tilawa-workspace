@@ -15,6 +15,7 @@ import 'package:flutter/foundation.dart';
 /// Example: `--dart-define=TILAWA_LAUNCH_SUPPORT_TILAWA_ENABLED=false`
 /// Example: `--dart-define=TILAWA_LAUNCH_RECITATION_PRACTICE_ENABLED=true`
 /// Example: `--dart-define=TILAWA_LAUNCH_SMART_KHATMA_ENABLED=true`
+/// Example: `--dart-define=TILAWA_LAUNCH_WIRD_WIDGET_ENABLED=true`
 /// Example: `--dart-define=TILAWA_LAUNCH_TODAY_PLAN_ENABLED=true`
 /// Example: `--dart-define=TILAWA_LAUNCH_TEACHER_APPLICATION_FORM_URL=https://…`
 /// Example: `--dart-define=TILAWA_LAUNCH_AGORA_APP_ID=your_agora_app_id`
@@ -148,6 +149,10 @@ abstract final class _LaunchEnvironment {
   );
   static const bool smartKhatmaEnabled = bool.fromEnvironment(
     'TILAWA_LAUNCH_SMART_KHATMA_ENABLED',
+    defaultValue: true,
+  );
+  static const bool wirdWidgetEnabled = bool.fromEnvironment(
+    'TILAWA_LAUNCH_WIRD_WIDGET_ENABLED',
     defaultValue: false,
   );
   static const bool todayPlanEnabled = bool.fromEnvironment(
@@ -222,6 +227,7 @@ class AppLaunchConfig extends Equatable {
     this.supportTilawaEnabled = true,
     this.recitationPracticeEnabled = false,
     this.smartKhatmaEnabled = false,
+    this.wirdWidgetEnabled = false,
     this.todayPlanEnabled = false,
     this.notificationPermissionRequest = true,
     this.teacherDashboardSummaryReadEnabled = false,
@@ -264,6 +270,7 @@ class AppLaunchConfig extends Equatable {
       supportTilawaEnabled: _LaunchEnvironment.supportTilawaEnabled,
       recitationPracticeEnabled: _LaunchEnvironment.recitationPracticeEnabled,
       smartKhatmaEnabled: _LaunchEnvironment.smartKhatmaEnabled,
+      wirdWidgetEnabled: _LaunchEnvironment.wirdWidgetEnabled,
       todayPlanEnabled: _LaunchEnvironment.todayPlanEnabled,
       notificationPermissionRequest:
           _LaunchEnvironment.notificationPermissionRequest,
@@ -307,6 +314,7 @@ class AppLaunchConfig extends Equatable {
   final bool supportTilawaEnabled;
   final bool recitationPracticeEnabled;
   final bool smartKhatmaEnabled;
+  final bool wirdWidgetEnabled;
   final bool todayPlanEnabled;
   final bool notificationPermissionRequest;
 
@@ -383,6 +391,7 @@ class AppLaunchConfig extends Equatable {
     supportTilawaEnabled,
     recitationPracticeEnabled,
     smartKhatmaEnabled,
+    wirdWidgetEnabled,
     todayPlanEnabled,
     notificationPermissionRequest,
     teacherDashboardSummaryReadEnabled,

@@ -21,6 +21,7 @@ class TilawaSettingsListRow extends StatelessWidget {
     this.semanticsIdentifier,
     this.toggled,
     this.selected,
+    this.crossAxisAlignment = CrossAxisAlignment.center,
   });
 
   final String semanticLabel;
@@ -35,6 +36,7 @@ class TilawaSettingsListRow extends StatelessWidget {
   final String? semanticsIdentifier;
   final bool? toggled;
   final bool? selected;
+  final CrossAxisAlignment crossAxisAlignment;
 
   @override
   Widget build(BuildContext context) {
@@ -43,7 +45,7 @@ class TilawaSettingsListRow extends StatelessWidget {
       child: Padding(
         padding: contentPadding,
         child: Row(
-          crossAxisAlignment: CrossAxisAlignment.center,
+          crossAxisAlignment: crossAxisAlignment,
           children: [
             if (leading != null) ...[
               leading!,

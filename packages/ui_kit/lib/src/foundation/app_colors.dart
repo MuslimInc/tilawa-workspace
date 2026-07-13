@@ -95,8 +95,8 @@ abstract final class AppColors {
   /// Medium-emphasis secondary copy (`#6B7F74`).
   static const Color tripGlideMuted = Color(0xFF6B7F74);
 
-  /// Idle tier for chips, search rests, and header bands (`#F0F7F2`).
-  static const Color tripGlideCanvasElevated = Color(0xFFF0F7F2);
+  /// Idle tier for chips, search rests, and header bands (`#E8F3EC`).
+  static const Color tripGlideCanvasElevated = Color(0xFFE8F3EC);
 
   /// Hairline / highest surface tier (`#E6EDE8`).
   static const Color tripGlideCanvasDusk = Color(0xFFE6EDE8);
@@ -198,23 +198,23 @@ abstract final class AppColors {
   /// Foreground on the Home hero night gradient — warm cream ink.
   static const Color homeNextPrayerGradientNightForeground = Color(0xFFF5F0E6);
 
-  /// Home screen canvas — porcelain-green off-white top stop.
-  static const Color homeBackgroundGradientStart = Color(0xFFF3F6F4);
+  /// Home screen canvas — modern light canvas (60-30-10 dominant).
+  static const Color homeBackgroundGradientStart = Color(0xFFF8F9FA);
 
-  /// Home screen canvas — porcelain-green off-white mid stop.
-  static const Color homeBackgroundGradientMiddle = Color(0xFFF3F6F4);
+  /// Home screen canvas — modern light canvas mid stop.
+  static const Color homeBackgroundGradientMiddle = Color(0xFFF8F9FA);
 
-  /// Home screen canvas — porcelain-green dashboard bottom.
-  static const Color homeBackgroundGradientEnd = Color(0xFFF3F6F4);
+  /// Home screen canvas — modern light canvas bottom.
+  static const Color homeBackgroundGradientEnd = Color(0xFFF8F9FA);
 
   /// Radial glow accent behind the Home hero / next-prayer area.
   static const Color homeBackgroundGlow = Color(0xFFEAF1EC);
 
   /// Home screen canvas — dark theme top.
-  static const Color homeBackgroundGradientStartDark = Color(0xFF1E2826);
+  static const Color homeBackgroundGradientStartDark = Color(0xFF121212);
 
   /// Home screen canvas — dark theme middle.
-  static const Color homeBackgroundGradientMiddleDark = Color(0xFF161F1D);
+  static const Color homeBackgroundGradientMiddleDark = Color(0xFF121212);
 
   /// Home screen canvas — dark theme bottom.
   static const Color homeBackgroundGradientEndDark = darkBackground;
@@ -458,9 +458,9 @@ abstract final class AppColors {
   // Dark neutral ramp.
   // ---------------------------------------------------------------------------
 
-  static const Color darkBackground = Color(0xFF0E1413);
-  static const Color darkSurface = Color(0xFF141D1B);
-  static const Color darkSurfaceContainer = Color(0xFF1A2624);
+  static const Color darkBackground = Color(0xFF121212);
+  static const Color darkSurface = Color(0xFF1A2421);
+  static const Color darkSurfaceContainer = Color(0xFF1E2825);
 
   /// Dark upper container tier (neutral; no primary harmonization in [AppTheme]).
   static const Color darkSurfaceContainerHighBase = catalogFilterUnselectedDark;
@@ -480,12 +480,11 @@ abstract final class AppColors {
   // AppTheme — light ColorScheme roles (brand-locked M3 palette).
   // ---------------------------------------------------------------------------
 
-  /// Light [ColorScheme.onPrimary] on brand green — deep green ink (`#003317`).
+  /// Light [ColorScheme.onPrimary] on brand green — white.
   ///
-  /// Brand green `#1DAB61` is too light for white foregrounds (~3.0:1), so
-  /// on-primary labels/icons use dark green ink instead (≥4.5:1 AA on
-  /// [brandActionGreen], higher on [darkDefaultPrimary]).
-  static const Color lightSchemeOnPrimary = Color(0xFF003317);
+  /// Note: Brand green `#1DAB61` has ~3.0:1 contrast with white foregrounds.
+  /// Reverted to white per user request.
+  static const Color lightSchemeOnPrimary = Color(0xFFFFFFFF);
 
   /// Light [ColorScheme.secondary] — neutral chrome (`#F0F7F2`).
   static const Color lightSchemeSecondary = lightSurfaceContainerHighBase;
@@ -521,8 +520,8 @@ abstract final class AppColors {
   // AppTheme — dark Flex scheme refinement.
   // ---------------------------------------------------------------------------
 
-  /// Lifted green companion of [brandActionGreen] for contrast on dark surfaces.
-  static const Color darkDefaultPrimary = Color(0xFF6BC992);
+  /// Bright, accessible green companion of [brandActionGreen] for dark surfaces (60-30-10 accent).
+  static const Color darkDefaultPrimary = Color(0xFF4ADE80);
 
   /// Historical reference: dark primary container paired with
   /// [darkDefaultPrimary]. [AppTheme] derives it from selected primary instead.

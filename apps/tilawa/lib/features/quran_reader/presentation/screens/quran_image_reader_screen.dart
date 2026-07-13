@@ -24,7 +24,6 @@ import '../../../recitation_practice/presentation/cubit/recitation_practice_cubi
 import '../../../recitation_practice/presentation/widgets/recitation_practice_host.dart';
 import '../../../recitation_practice/recitation_practice_feature_flags.dart';
 import '../../../share/presentation/widgets/share_options_sheet.dart';
-import '../../../smart_khatma/smart_khatma.dart';
 import '../../domain/ports/quran_image_preload_status.dart';
 import '../../domain/usecases/load_quran_fonts_to_engine_use_case.dart';
 import '../../domain/usecases/save_last_read_position_use_case.dart';
@@ -51,6 +50,7 @@ class QuranImageReaderScreen extends StatefulWidget {
     super.key,
     required this.surahNumber,
     this.initialAyah,
+    this.initialPage,
     this.openPracticeOnLaunch = false,
     this.onActiveSurahChanged,
     this.viewSwitchAction,
@@ -61,6 +61,9 @@ class QuranImageReaderScreen extends StatefulWidget {
 
   /// Optional ayah to jump to within the surah.
   final int? initialAyah;
+
+  /// Optional plan-owned Mushaf page. Takes precedence over [surahNumber].
+  final int? initialPage;
 
   /// Opens the recitation practice panel after the reader is ready.
   final bool openPracticeOnLaunch;
@@ -81,7 +84,6 @@ class _QuranImageReaderScreenState extends State<QuranImageReaderScreen>
   bool _isPreloaded = false;
   NavigationBloc? _navigationBloc;
   late final SaveLastReadPositionUseCase _saveLastReadPosition;
-  UpdateKhatmaProgressUseCase? _updateKhatmaProgress;
   late final ValueNotifier<int> _currentPageNotifier = ValueNotifier<int>(1);
   bool _didSchedulePracticeLaunch = false;
 
@@ -96,9 +98,6 @@ class _QuranImageReaderScreenState extends State<QuranImageReaderScreen>
   void initState() {
     super.initState();
     _saveLastReadPosition = getIt<SaveLastReadPositionUseCase>();
-    if (isSmartKhatmaEnabled()) {
-      _updateKhatmaProgress = SmartKhatmaDependencies.updateProgress();
-    }
     WidgetsBinding.instance.addObserver(this);
     unawaited(AppOrientationService.allowReaderOrientations());
     _checkPreloadStatus();
@@ -131,10 +130,11 @@ class _QuranImageReaderScreenState extends State<QuranImageReaderScreen>
   void _initNavigationBloc() {
     if (_navigationBloc != null) return;
 
-    int? initialPage;
-    if (widget.surahNumber > 0) {
-      initialPage = getPageNumber(widget.surahNumber, widget.initialAyah ?? 1);
-    }
+    final int? initialPage =
+        widget.initialPage ??
+        (widget.surahNumber > 0
+            ? getPageNumber(widget.surahNumber, widget.initialAyah ?? 1)
+            : null);
 
     _navigationBloc = NavigationBloc()
       ..add(NavigationInitialized(initialPage: initialPage));
@@ -329,11 +329,6 @@ class _QuranImageReaderScreenState extends State<QuranImageReaderScreen>
       page: currentPage,
     );
     widget.onActiveSurahChanged?.call(pageData.first.surah);
-    final UpdateKhatmaProgressUseCase? updateKhatmaProgress =
-        _updateKhatmaProgress;
-    if (updateKhatmaProgress != null) {
-      await updateKhatmaProgress(currentPage: currentPage);
-    }
   }
 
   @override

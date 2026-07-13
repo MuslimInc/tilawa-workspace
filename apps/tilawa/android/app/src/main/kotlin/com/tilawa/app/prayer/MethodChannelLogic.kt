@@ -1,6 +1,7 @@
 package com.tilawa.app.prayer
 import android.content.ComponentName
 import android.content.Intent
+import android.content.pm.PackageManager
 import android.os.Build
 import android.util.Log
 import androidx.core.content.ContextCompat
@@ -278,7 +279,16 @@ internal class MethodChannelLogic(
                     try {
                         val context = scheduler.getContext()
                         // Write to the shared atomic store
-                        com.tilawa.app.widget.WidgetSnapshotStore(context).write(json)
+                        val accepted = com.tilawa.app.widget.WidgetSnapshotStore(context)
+                            .write(json)
+                        if (!accepted) {
+                            result.error(
+                                "WIDGET_SNAPSHOT_REJECTED",
+                                "Snapshot failed schema or payload validation",
+                                null,
+                            )
+                            return
+                        }
                         // Broadcast update to the specific provider
                         val action = "com.tilawa.app.widget.${type.uppercase()}.ACTION_REFRESH"
                         context.sendBroadcast(Intent(action).apply {
@@ -289,6 +299,28 @@ internal class MethodChannelLogic(
                         Log.e("MethodChannelLogic", "updateIslamicWidgetSnapshot failed", t)
                         result.error("WIDGET_UPDATE_FAILED", t.message, null)
                     }
+                }
+            }
+            "setWirdWidgetEnabled" -> {
+                val enabled = arguments?.get("enabled") as? Boolean
+                if (enabled == null) {
+                    result.error("BAD_ARGS", "enabled required", null)
+                } else {
+                    val context = scheduler.getContext()
+                    val component = ComponentName(
+                        context,
+                        com.tilawa.app.widget.wird.WirdProgressWidgetProvider::class.java,
+                    )
+                    context.packageManager.setComponentEnabledSetting(
+                        component,
+                        if (enabled) {
+                            PackageManager.COMPONENT_ENABLED_STATE_ENABLED
+                        } else {
+                            PackageManager.COMPONENT_ENABLED_STATE_DISABLED
+                        },
+                        PackageManager.DONT_KILL_APP,
+                    )
+                    result.success(true)
                 }
             }
             "isAdhanPlaying" -> {

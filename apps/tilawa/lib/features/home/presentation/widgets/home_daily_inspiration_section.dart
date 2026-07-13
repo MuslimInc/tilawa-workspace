@@ -148,7 +148,7 @@ class _DailyInspirationRow extends StatelessWidget {
     final colorScheme = theme.colorScheme;
 
     final TextStyle bodyStyle = theme.textTheme.bodyMedium!.copyWith(
-      color: colorScheme.onSurfaceVariant.withValues(alpha: 0.88),
+      color: HomeDashboardSection.secondaryTextColor(context),
       height: useArabicTypography
           ? tokens.textHeightLoose + 0.08
           : (theme.textTheme.bodyMedium?.height ?? 1.4) + 0.05,
@@ -218,7 +218,9 @@ class _DailyInspirationRow extends StatelessWidget {
                         maxLines: 1,
                         overflow: TextOverflow.ellipsis,
                         style: theme.textTheme.bodySmall?.copyWith(
-                          color: colorScheme.onSurfaceVariant,
+                          color: HomeDashboardSection.secondaryTextColor(
+                            context,
+                          ),
                           fontWeight: FontWeight.w500,
                         ),
                       ),

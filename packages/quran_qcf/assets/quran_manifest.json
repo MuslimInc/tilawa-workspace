@@ -1,0 +1,27 @@
+{
+  "version": "1.0.0-qcf4",
+  "source": "King Fahd Complex QCF v4",
+  "generated_at": "2026-07-12T00:00:00.000Z",
+  "files": {
+    "qpc-v4.json": {
+      "sha256": "40964a1b7932e9a69e0dfc0d58dce3b73e30a803febda119fd6828bcb75fac98",
+      "byte_length": 7824904,
+      "required": true
+    },
+    "quran_page_index.json": {
+      "sha256": "67210869839835b6344ac9bf941249852ac37e8ce2ee0ea7dc5b634dbeecb1aa",
+      "byte_length": 913406,
+      "required": true
+    },
+    "quran_page_line_map.json": {
+      "sha256": "96c8bfa8557449df9682322ddb5f7b2ebc8f7dc22100c6db1f35b86c303e5543",
+      "byte_length": 2208658,
+      "required": true
+    },
+    "QCF4_QBSML-Regular.ttf": {
+      "sha256": "6c8199ea5c3dc68fcc84ec467ccfd49892a099f73dd4f1fe3d5ee61bee2d9205",
+      "byte_length": 219860,
+      "required": true
+    }
+  }
+}

@@ -7,9 +7,10 @@ import 'package:tilawa/core/bootstrap/startup_blur_shader_warmup.dart';
 import 'package:tilawa/features/home/domain/entities/home_dashboard.dart';
 import 'package:tilawa/features/home/domain/home_hijri_date_formatter.dart';
 import 'package:tilawa/features/home/presentation/bloc/home_dashboard_state.dart';
-import 'package:tilawa/features/home/presentation/widgets/home_dashboard_content_sliver.dart';
 import 'package:tilawa/features/home/presentation/widgets/home_dashboard_card.dart';
+import 'package:tilawa/features/home/presentation/widgets/home_dashboard_content_sliver.dart';
 import 'package:tilawa/features/home/presentation/widgets/home_next_prayer_time.dart';
+import 'package:tilawa/features/home/presentation/widgets/home_prayer_hero_image_backdrop.dart';
 import 'package:tilawa/features/prayer_times/domain/entities/prayer_time_entity.dart';
 import 'package:tilawa/l10n/generated/app_localizations.dart';
 import 'package:tilawa_ui_kit/tilawa_ui_kit.dart';
@@ -173,15 +174,15 @@ void main() {
     expect(find.text(l10n.nextPrayer), findsOneWidget);
     expect(find.byType(SliverPersistentHeader), findsNothing);
     expect(find.byType(SliverToBoxAdapter), findsWidgets);
-    expect(find.byIcon(Icons.mosque_outlined), findsNothing);
     expect(find.byIcon(FluentIcons.location_24_regular), findsOneWidget);
 
     expect(find.byType(HomeDashboardCard), findsOneWidget);
     final HomeDashboardCard prayerCard = tester.widget<HomeDashboardCard>(
       find.byType(HomeDashboardCard).first,
     );
-    expect(prayerCard.padding, isNotNull);
+    expect(prayerCard.padding, EdgeInsets.zero);
     expect(find.byType(TilawaCard), findsOneWidget);
+    expect(find.byType(HomePrayerHeroImageBackdrop), findsOneWidget);
   });
 
   testWidgets('hero has no collapse scroll extent', (tester) async {
