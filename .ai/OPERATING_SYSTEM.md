@@ -106,11 +106,12 @@ Run from the **workspace root** unless noted. Use only what the task touches.
 
 **Dart / Flutter (apps + packages)**
 ```sh
-melos run fix:format        # dart fix + format — run after edits, before finishing
-melos run analyze           # dart analyze --fatal-infos across packages
-melos run bloc:lint         # bloc_tools lint (state-management changes)
-melos run test              # all package/app tests
-melos run gen               # l10n + build_runner (only if you changed generated inputs)
+dart run melos bootstrap          # link workspace packages (once per clone / pubspec change)
+dart run melos run fix:format     # dart fix + format — run after edits, before finishing
+dart run melos run analyze        # dart analyze --fatal-infos across packages
+dart run melos run bloc:lint      # bloc_tools lint (state-management changes)
+dart run melos run test           # all package/app tests
+dart run melos run gen            # l10n + build_runner (only if you changed generated inputs)
 ```
 App-scoped (faster, from `apps/tilawa/`):
 ```sh
@@ -128,7 +129,7 @@ npm run test:rules      # firestore.rules tests only
 
 **Build / release (only in Release/build mode, when authorized)**
 ```sh
-melos run tilawa:build:android:production   # signed-ready production AAB (arm64)
+dart run melos run tilawa:build:android:production   # signed-ready production AAB (arm64)
 ```
 CI reference: `.github/workflows/` — `pr-checks.yml`, `android-release.yml`,
 `firebase-app-distribution.yml`, `firebase-admin-hosting.yml`.

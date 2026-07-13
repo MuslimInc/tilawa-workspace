@@ -16,8 +16,8 @@ Workflow files:
 - Job prompts → [`.ai/prompts/`](.ai/prompts/): `bug-fix`, `ui-ux`, `refactor`,
   `test-coverage`, `release-build`, `diff-review`.
 
-**Verify (workspace root):** `melos run fix:format` · `melos run analyze` ·
-`melos run test` (or `flutter test test/features/<feature>`) · functions:
+**Verify (workspace root):** `dart run melos run fix:format` · `dart run melos run analyze` ·
+`dart run melos run test` (or `flutter test test/features/<feature>`) · functions:
 `npm run build` / `npm run test:emulator`. Full command list in the OS file §5.
 
 Tilawa architecture, repo layout, testing, and common commands:
@@ -41,7 +41,7 @@ with verifiable checks.
 
 When editing Dart (`apps/tilawa/`, `packages/`), also apply
 [`.cursor/rules/tilawa-dart.mdc`](.cursor/rules/tilawa-dart.mdc) — run
-`melos run fix:format` from the workspace root after edits and before commit,
+`dart run melos run fix:format` from the workspace root after edits and before commit,
 then `dart analyze` and targeted `flutter test` from `apps/tilawa/` before finishing.
 
 See [`.cursor/README.md`](.cursor/README.md) for the rules index.

@@ -49,27 +49,18 @@ jobs:
       - name: Resolve workspace dependencies
         run: flutter pub get
 
-      - name: Activate melos
-        run: dart pub global activate melos 8.0.0
-
-      # The melos scripts call `melos exec` internally, so melos must be on PATH
-      # as a global executable. Export it once for every step that needs it.
       - name: Generate code (melos run gen)
-        run: |
-          export PATH="$HOME/.pub-cache/bin:$PATH"
-          melos run gen
+        run: dart run melos run gen
 
       - name: Analyze (dart analyze --fatal-infos)
         run: |
-          export PATH="$HOME/.pub-cache/bin:$PATH"
           # flex_color_scheme is a vendored third-party fork — don't gate our
           # PRs on its lint infos. Every first-party package still runs under
-          # the strict --fatal-infos so real errors (undefined symbols, invalid
-          # overrides, …) fail the check.
-          melos exec --ignore="flex_color_scheme" -- dart analyze --fatal-infos
+          # the strict --fatal-infos so real errors fail the check.
+          dart run melos exec --ignore="flex_color_scheme" -- dart analyze --fatal-infos
 
       - name: Repository lint (analyze + UI Kit policy + format)
-        run: melos run lint
+        run: dart run melos run lint
 
       # Advisory for now: master has pre-existing test failures (golden /
       # rendering tests in quran_qcf & tilawa_ui_kit that need real baseline
@@ -78,9 +69,7 @@ jobs:
       # the suite is green; flip this to a hard gate afterwards.
       - name: Test (melos run test) [advisory]
         continue-on-error: true
-        run: |
-          export PATH="$HOME/.pub-cache/bin:$PATH"
-          melos run test
+        run: dart run melos run test
 
   design-md-lint:
     runs-on: ubuntu-latest
@@ -128,14 +117,8 @@ jobs:
       - name: Resolve workspace dependencies
         run: flutter pub get
 
-      - name: Activate melos
-        run: dart pub global activate melos 8.0.0
-
-      # Preflight dart analyze touches gitignored *.freezed.dart / *.g.dart.
       - name: Generate code (melos run gen)
-        run: |
-          export PATH="$HOME/.pub-cache/bin:$PATH"
-          melos run gen
+        run: dart run melos run gen
 
       - name: Install functions dependencies
         working-directory: functions

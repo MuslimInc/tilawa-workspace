@@ -1,0 +1,6 @@
+#!/usr/bin/env sh
+# Workspace melos wrapper — uses the repo dev_dependency, not `pub global`.
+# Replaces deprecated global `melos` (Dart 3.12+): use this or `dart run melos`.
+set -e
+cd "$(dirname "$0")/.." || exit 1
+exec dart run melos "$@"

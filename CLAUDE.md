@@ -114,8 +114,9 @@ Existing examples of the sibling pattern:
 Run from the workspace root (or `apps/tilawa/` for app-only commands):
 
 ```sh
-melos run fix:format                  # dart fix + format (workspace root; after edits, before commit)
-melos run gen                         # l10n + build_runner (--workspace)
+dart run melos bootstrap              # link workspace packages (or: ./tool/melos bs)
+dart run melos run fix:format         # dart fix + format (workspace root; after edits, before commit)
+dart run melos run gen                # l10n + build_runner (--workspace)
 flutter test                          # all tests (from apps/tilawa)
 flutter test test/features/athkar     # single feature
 dart analyze                          # static analysis

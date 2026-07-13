@@ -68,14 +68,14 @@ melos:
     fix:format:
       description: Apply dart fix suggestions then auto-format across all packages.
       run: |
-        melos run fix
-        melos run format:fix
+        dart run melos run fix
+        dart run melos run format:fix
 
     lint:
       description: Run analyze, UI Kit policy, and format checks (CI gate).
       run: |
-        melos run analyze
-        melos run format
+        dart run melos run analyze
+        dart run melos run format
 
     bloc:lint:
       description: Run official bloc_lint rules via bloc_tools.
@@ -111,12 +111,12 @@ melos:
     gen:
       description: Run l10n generation then build_runner for the workspace.
       run: |
-        melos run gen:l10n
+        dart run melos run gen:l10n
         dart run build_runner build --workspace
 
     build_runner:
       description: Alias for gen.
-      run: melos run gen
+      run: dart run melos run gen
 
     build_runner:watch:
       description: Run build_runner in watch mode across the workspace.
