@@ -1,28 +1,29 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
     <string name="app_name">MeMuslim</string>
+
+    <!-- Adhan playback notifications -->
     <string name="adhan_notification_title">%1$s · %2$s</string>
     <string name="adhan_notification_body">Adhan is playing…</string>
     <string name="adhan_notification_body_with_location">Adhan is playing for %1$s</string>
     <string name="adhan_is_playing">Adhan is playing…</string>
     <string name="stop_adhan">Stop Adhan</string>
+
+    <!-- Prayer names -->
     <string name="prayer_fajr">Fajr</string>
     <string name="prayer_dhuhr">Dhuhr</string>
     <string name="prayer_asr">Asr</string>
     <string name="prayer_maghrib">Maghrib</string>
     <string name="prayer_isha">Isha</string>
     <string name="prayer_sunrise">Sunrise</string>
+
+    <!-- Prayer Times widget -->
     <string name="widget_prayer_label">Prayer Times</string>
     <string name="widget_prayer_description">Today\'s five prayers with a live countdown to the next one</string>
     <string name="widget_prayer_title">Prayer Times</string>
     <string name="widget_next_prayer">%1$s in</string>
     <string name="widget_empty_hint">Open the app to load prayer times</string>
     <string name="widget_stale_hint">Open the app to refresh</string>
-    <string name="widget_wird_label">Daily Wird</string>
-    <string name="widget_wird_description">Today’s Khatma reading progress</string>
-    <string name="widget_wird_setup">Start a Wird in Tilawa</string>
-    <string name="widget_wird_preview_subtitle">Your daily reading progress</string>
-    <string name="widget_wird_setup_accessibility">Daily Wird. Start a Wird in Tilawa.</string>
     <string name="widget_setup_hint">Tap to set location</string>
     <!-- Widget-picker preview placeholders; overwritten at runtime. -->
     <string name="widget_preview_next">Fajr in 2:10</string>
@@ -36,11 +37,13 @@
     <string name="widget_preview_time_asr">4:37</string>
     <string name="widget_preview_time_maghrib">8:00</string>
     <string name="widget_preview_time_isha">9:31</string>
+
     <!-- Ayah of the Day widget (spec 041, US2) -->
     <string name="widget_ayah_label">Ayah of the Day</string>
     <string name="widget_ayah_description">A daily verse in the authentic Mushaf script</string>
     <string name="widget_ayah_preview_glyph">﷽</string>
     <string name="widget_ayah_preview_caption">Ayah of the Day</string>
+
     <!-- Athkar widget (spec 041, US3) -->
     <string name="widget_athkar_label">Morning &amp; Evening Athkar</string>
     <string name="widget_athkar_description">The applicable athkar set with tap-to-advance progress</string>
@@ -51,7 +54,12 @@
     <string name="widget_athkar_preview_progress">١/٢٥</string>
     <string name="widget_athkar_preview_text">أَصْبَحْنَا وَأَصْبَحَ الْمُلْكُ لِلَّهِ، وَالْحَمْدُ لِلَّهِ</string>
     <string name="widget_athkar_preview_count">×٣</string>
-    <string name="widget_wird_empty_hint">Open the app to start your Wird</string>
-    <string name="widget_wird_preview_title">Today\'s Wird</string>
+
+    <!-- Daily Wird widget -->
+    <string name="widget_wird_label">Daily Wird</string>
+    <string name="widget_wird_description">Today\'s Khatma reading progress</string>
+    <string name="widget_wird_setup">Start a Wird in MeMuslim</string>
+    <string name="widget_wird_setup_accessibility">Daily Wird. Start a Wird in MeMuslim.</string>
+    <!-- Widget-picker preview placeholder; overwritten at runtime. -->
     <string name="widget_wird_preview_subtitle">5 of 20 pages completed · 15 remaining</string>
 </resources>

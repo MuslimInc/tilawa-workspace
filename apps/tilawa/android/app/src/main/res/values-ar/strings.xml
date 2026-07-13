@@ -1,28 +1,29 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
     <string name="app_name">أنا مسلم</string>
+
+    <!-- Adhan playback notifications -->
     <string name="adhan_notification_title">%1$s · %2$s</string>
     <string name="adhan_notification_body">الأذان قيد التشغيل…</string>
     <string name="adhan_notification_body_with_location">الأذان قيد التشغيل في %1$s</string>
     <string name="adhan_is_playing">الأذان قيد التشغيل…</string>
     <string name="stop_adhan">إيقاف الأذان</string>
+
+    <!-- Prayer names -->
     <string name="prayer_fajr">الفجر</string>
     <string name="prayer_dhuhr">الظهر</string>
     <string name="prayer_asr">العصر</string>
     <string name="prayer_maghrib">المغرب</string>
     <string name="prayer_isha">العشاء</string>
     <string name="prayer_sunrise">الشروق</string>
+
+    <!-- Prayer Times widget -->
     <string name="widget_prayer_label">مواقيت الصلاة</string>
     <string name="widget_prayer_description">الصلوات الخمس اليوم مع عدّ تنازلي للصلاة القادمة</string>
     <string name="widget_prayer_title">مواقيت الصلاة</string>
     <string name="widget_next_prayer">%1$s بعد</string>
     <string name="widget_empty_hint">افتح التطبيق لتحميل مواقيت الصلاة</string>
     <string name="widget_stale_hint">افتح التطبيق للتحديث</string>
-    <string name="widget_wird_label">ورد اليوم</string>
-    <string name="widget_wird_description">تقدّم قراءة ختمة اليوم</string>
-    <string name="widget_wird_setup">ابدأ وردًا في تلاوة</string>
-    <string name="widget_wird_preview_subtitle">تقدّم قراءتك اليومية</string>
-    <string name="widget_wird_setup_accessibility">ورد اليوم. ابدأ وردًا في تلاوة.</string>
     <string name="widget_setup_hint">انقر لتحديد الموقع</string>
     <!-- Widget-picker preview placeholders; overwritten at runtime. -->
     <string name="widget_preview_next">الفجر بعد ٢:١٠</string>
@@ -36,11 +37,13 @@
     <string name="widget_preview_time_asr">٤:٣٧</string>
     <string name="widget_preview_time_maghrib">٨:٠٠</string>
     <string name="widget_preview_time_isha">٩:٣١</string>
+
     <!-- Ayah of the Day widget (spec 041, US2) -->
     <string name="widget_ayah_label">آية اليوم</string>
     <string name="widget_ayah_description">آية يومية بخط المصحف الشريف</string>
     <string name="widget_ayah_preview_glyph">﷽</string>
     <string name="widget_ayah_preview_caption">آية اليوم</string>
+
     <!-- Athkar widget (spec 041, US3) -->
     <string name="widget_athkar_label">أذكار الصباح والمساء</string>
     <string name="widget_athkar_description">الأذكار المناسبة للوقت مع التقدّم بلمسة</string>
@@ -51,4 +54,12 @@
     <string name="widget_athkar_preview_progress">١/٢٥</string>
     <string name="widget_athkar_preview_text">أَصْبَحْنَا وَأَصْبَحَ الْمُلْكُ لِلَّهِ، وَالْحَمْدُ لِلَّهِ</string>
     <string name="widget_athkar_preview_count">×٣</string>
+
+    <!-- Daily Wird widget -->
+    <string name="widget_wird_label">ورد اليوم</string>
+    <string name="widget_wird_description">تقدّم قراءة ختمة اليوم</string>
+    <string name="widget_wird_setup">ابدأ وردًا في تطبيق أنا مسلم</string>
+    <string name="widget_wird_setup_accessibility">ورد اليوم. ابدأ وردًا في تطبيق أنا مسلم.</string>
+    <!-- Widget-picker preview placeholder; overwritten at runtime. -->
+    <string name="widget_wird_preview_subtitle">٥ من ٢٠ صفحة مكتملة · ١٥ متبقي</string>
 </resources>
