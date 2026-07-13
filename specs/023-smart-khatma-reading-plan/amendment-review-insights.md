@@ -1,5 +1,9 @@
 # Amendment: Review-Insight Gaps for Smart Khatma (023-A)
 
+> **Superseded for release progress semantics:** listening, adherence, pause,
+> and high-water-mark requirements in this research amendment are post-release.
+> `amendment-production-readiness.md` is the normative release contract.
+
 **Status**: Proposed (documentation only — do not implement yet)
 **Parent**: `specs/023-smart-khatma-reading-plan/spec.md` (active; MVP shipped)
 **Source evidence**: Khatmah review sample, `docs/khatmah_reviews_deep_analysis_for_memuslim.xlsx`

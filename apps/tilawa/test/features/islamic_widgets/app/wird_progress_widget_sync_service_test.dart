@@ -71,9 +71,9 @@ void main() {
       durationDays: 30,
       startPage: 1,
       targetPage: 604,
-      currentPage: currentPage,
-      progressDate: withProgress ? DateTime(2026, 7, 12) : null,
-      progressStartPage: withProgress ? 1 : null,
+      assignmentDate: DateTime(2026, 7, 12),
+      assignmentStartPage: 1,
+      assignmentEndPage: 6,
     );
   }
 

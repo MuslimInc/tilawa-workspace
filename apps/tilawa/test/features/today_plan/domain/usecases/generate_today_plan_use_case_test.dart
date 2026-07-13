@@ -184,7 +184,10 @@ void main() {
           durationDays: 30,
           startPage: 1,
           targetPage: 604,
-          currentPage: 303,
+          confirmedCompletedThroughPage: 302,
+          assignmentDate: DateTime(2026, 6, 14),
+          assignmentStartPage: 303,
+          assignmentEndPage: 313,
         ),
       );
       const quranRepository = _FakeQuranReaderRepository(303);
@@ -193,7 +196,7 @@ void main() {
         const _FakeHistoryRepository([]),
         _MemoryTodayPlanRepository(),
         _FakeHiveReadiness(),
-        GetKhatmaTodayTargetUseCase(khatmaRepository, quranRepository),
+        GetKhatmaTodayTargetUseCase(khatmaRepository),
       );
 
       final result = await useCase(now: DateTime(2026, 6, 14));

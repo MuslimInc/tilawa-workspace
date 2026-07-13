@@ -19,7 +19,7 @@ class SmartKhatmaHomeEntryCard extends StatelessWidget {
     return BlocBuilder<KhatmaPlanBloc, KhatmaPlanState>(
       builder: (context, state) {
         return switch (state) {
-          KhatmaPlanLoaded(:final plan, :final todayTarget) =>
+          KhatmaPlanLoaded(:final plan) =>
             plan == null
                 ? _KhatmaHomeEmptyEntry(onOpenHub: () => _openHub(context))
                 : plan.isCompleted
@@ -30,9 +30,11 @@ class SmartKhatmaHomeEntryCard extends StatelessWidget {
                       plan.currentDay(DateTime.now()),
                       plan.durationDays,
                     ),
-                    todayPages:
-                        todayTarget?.pages ??
-                        plan.todayTargetPages(DateTime.now()),
+                    todayCompletedPages: plan.confirmedTodayPages,
+                    todayRemainingPages: plan.remainingTodayPages,
+                    rangeStart: plan.assignmentStartPage,
+                    rangeEnd: plan.assignmentEndPage,
+                    isTodayCompleted: plan.isTodayCompleted,
                     onOpenHub: () => _openHub(context),
                   ),
           KhatmaPlanFailure() => HomeTravelDestinationCard(
@@ -54,7 +56,7 @@ class SmartKhatmaHomeEntryCard extends StatelessWidget {
   }
 
   Future<void> _openHub(BuildContext context) async {
-    await const SmartKhatmaHubRoute().push(context);
+    await const SmartKhatmaHubRoute().push<void>(context);
     if (!context.mounted) {
       return;
     }
@@ -106,13 +108,21 @@ class _KhatmaHomeActiveEntry extends StatelessWidget {
   const _KhatmaHomeActiveEntry({
     required this.planProgress,
     required this.subtitle,
-    required this.todayPages,
+    required this.todayCompletedPages,
+    required this.todayRemainingPages,
+    required this.rangeStart,
+    required this.rangeEnd,
+    required this.isTodayCompleted,
     required this.onOpenHub,
   });
 
   final int planProgress;
   final String subtitle;
-  final int todayPages;
+  final int todayCompletedPages;
+  final int todayRemainingPages;
+  final int rangeStart;
+  final int rangeEnd;
+  final bool isTodayCompleted;
   final VoidCallback onOpenHub;
 
   @override
@@ -120,9 +130,13 @@ class _KhatmaHomeActiveEntry extends StatelessWidget {
     final theme = Theme.of(context);
     final tokens = theme.tokens;
     final colorScheme = theme.colorScheme;
-    final String detail =
-        '${context.l10n.khatmaTodayGoal}: '
-        '${context.l10n.khatmaPagesShort(todayPages)} · $planProgress%';
+    final String detail = isTodayCompleted
+        ? context.l10n.khatmaTodayCompletedTitle
+        : '${context.l10n.khatmaRangePages(rangeStart, rangeEnd)} · '
+              '${context.l10n.khatmaConfirmedAndRemaining(
+                todayCompletedPages,
+                todayRemainingPages,
+              )} · $planProgress%';
 
     return HomeTravelDestinationCard(
       tintIndex: 2,

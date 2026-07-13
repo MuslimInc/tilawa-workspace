@@ -608,6 +608,26 @@ class QuranLastReadRoute extends GoRouteData
   }
 }
 
+@TypedGoRoute<KhatmaReaderRoute>(path: '/khatma-reader/:initialPage')
+class KhatmaReaderRoute extends GoRouteData
+    with $KhatmaReaderRoute, TilawaRouteData {
+  const KhatmaReaderRoute({required this.initialPage});
+
+  final int initialPage;
+
+  @override
+  Widget build(BuildContext context, GoRouterState state) {
+    return AppReviewSacredFlowScope(
+      flow: AppReviewBlockedFlow.quranReading,
+      child: QuranReaderHostScreen(
+        surahNumber: 1,
+        initialPage: initialPage,
+        showSaveProgressAction: true,
+      ),
+    );
+  }
+}
+
 @TypedGoRoute<QuranReaderRoute>(path: '/quran-reader/:surahNumber')
 class QuranReaderRoute extends GoRouteData
     with $QuranReaderRoute, TilawaRouteData {

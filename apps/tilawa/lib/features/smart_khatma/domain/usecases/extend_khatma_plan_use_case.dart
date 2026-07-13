@@ -30,7 +30,7 @@ final class ExtendKhatmaPlanUseCase {
         adjustmentDate: _dateOnly(today),
       );
       await _repository.saveActivePlan(updated);
-      await _logAdjustment(plan, updated, today);
+      await _logAdjustment(updated);
       return Right(updated);
     } on Exception catch (error) {
       return Left(CacheFailure(error.toString()));
@@ -40,27 +40,13 @@ final class ExtendKhatmaPlanUseCase {
   DateTime _dateOnly(DateTime date) =>
       DateTime(date.year, date.month, date.day);
 
-  Future<void> _logAdjustment(
-    KhatmaPlan previous,
-    KhatmaPlan updated,
-    DateTime today,
-  ) async {
+  Future<void> _logAdjustment(KhatmaPlan updated) async {
     await _analyticsService.logEvent(
       AnalyticsEvents.khatmaExtendSelected,
       parameters: <String, Object>{
-        'plan_id': updated.id,
-        'new_duration_days': updated.durationDays,
-        'new_daily_target_pages': updated.todayTargetPages(today),
+        'duration_bucket': updated.durationDays,
       },
     );
-    await _analyticsService.logEvent(
-      AnalyticsEvents.khatmaPlanAdjusted,
-      parameters: <String, Object>{
-        'plan_id': updated.id,
-        'old_daily_target_pages': previous.todayTargetPages(today),
-        'new_daily_target_pages': updated.todayTargetPages(today),
-        'missed_days': previous.missedDays(today),
-      },
-    );
+    await _analyticsService.logEvent(AnalyticsEvents.khatmaPlanAdjusted);
   }
 }

@@ -1,5 +1,19 @@
 # Master Roadmap: MeMuslim Daily Companion Initiative
 
+## Al-Khatmah immediate release sequence
+
+```text
+confirmed progress correctness
+→ stable daily assignment
+→ Khatmah reader entry
+→ confirmation UX
+→ Home integration
+→ release validation
+```
+
+Widget rollout, reminders, adherence, listening progress, and architecture
+refactoring are post-release and cannot block this core sequence.
+
 ## Vision
 Transform MeMuslim from a standard Islamic utility into an ad-free, high-trust, daily companion app with the industry's most reliable Athan, flawless Quranic integrity, and a sticky daily Khatmah habit.
 

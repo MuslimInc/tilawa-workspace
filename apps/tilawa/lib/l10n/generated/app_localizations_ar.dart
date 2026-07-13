@@ -591,6 +591,148 @@ class AppLocalizationsAr extends AppLocalizations {
   String get khatmaUnavailable => 'خطة الختمة غير متاحة مؤقتًا. حاول مرة أخرى.';
 
   @override
+  String get khatmaStartFromBeginning => 'من البداية';
+
+  @override
+  String get khatmaContinueCurrentPosition => 'من موضعي الحالي في القرآن';
+
+  @override
+  String get khatmaReviewPlanTitle => 'راجع خطة الختمة';
+
+  @override
+  String khatmaRangePages(int startPage, int endPage) {
+    return 'من الصفحة $startPage إلى $endPage';
+  }
+
+  @override
+  String khatmaDailyPages(int pages) {
+    return '$pages صفحات يوميًا';
+  }
+
+  @override
+  String khatmaStartPage(int page) {
+    return 'تبدأ من الصفحة $page';
+  }
+
+  @override
+  String khatmaTargetPage(int page) {
+    return 'تنتهي عند الصفحة $page';
+  }
+
+  @override
+  String khatmaExpectedCompletionDate(String date) {
+    return 'موعد الإتمام المتوقع: $date';
+  }
+
+  @override
+  String get khatmaConfirmPlanAction => 'ابدأ هذه الختمة';
+
+  @override
+  String get khatmaStartTodayAction => 'ابدأ ورد اليوم';
+
+  @override
+  String get khatmaResumeTodayAction => 'تابع ورد اليوم';
+
+  @override
+  String get khatmaTodayCompletedTitle => 'اكتمل ورد اليوم';
+
+  @override
+  String get khatmaTodayCompletedSubtitle => 'سيكون وردك التالي جاهزًا غدًا.';
+
+  @override
+  String khatmaConfirmedAndRemaining(int confirmed, int remaining) {
+    return 'أكملت $confirmed · متبقي $remaining';
+  }
+
+  @override
+  String get khatmaSaveProgressTitle => 'احفظ تقدّم الختمة';
+
+  @override
+  String khatmaCompletedThroughPage(int page) {
+    return 'أتممت القراءة حتى الصفحة $page';
+  }
+
+  @override
+  String get khatmaProgressPageSelector => 'اختر آخر صفحة أتممت قراءتها';
+
+  @override
+  String get khatmaCompleteTodayAction => 'أتممت ورد اليوم';
+
+  @override
+  String khatmaSaveThroughPageAction(int page) {
+    return 'حفظ التقدّم حتى الصفحة $page';
+  }
+
+  @override
+  String get khatmaExtendReviewTitle => 'راجع تمديد الخطة';
+
+  @override
+  String khatmaExtendReviewMessage(
+    int oldPages,
+    int newPages,
+    String oldDate,
+    String newDate,
+  ) {
+    return 'الصفحات يوميًا: $oldPages ← $newPages\nموعد الإتمام: $oldDate ← $newDate';
+  }
+
+  @override
+  String get khatmaCreateAction => 'إنشاء ختمة';
+
+  @override
+  String get khatmaBoundaryBySurah => 'نطاق السور';
+
+  @override
+  String get khatmaBoundaryByPage => 'نطاق الصفحات';
+
+  @override
+  String get khatmaStartSurah => 'سورة البداية';
+
+  @override
+  String get khatmaEndSurah => 'سورة النهاية';
+
+  @override
+  String get khatmaStartPageInput => 'صفحة البداية';
+
+  @override
+  String get khatmaEndPageInput => 'صفحة النهاية';
+
+  @override
+  String get khatmaPageBoundsHelp => 'أدخل صفحة من ١ إلى ٦٠٤';
+
+  @override
+  String get khatmaChooseDuration => 'اختر المدة';
+
+  @override
+  String khatmaTotalPages(int pages) {
+    return 'المجموع: $pages صفحات';
+  }
+
+  @override
+  String khatmaAssignedPages(int pages) {
+    return 'ورد اليوم: $pages';
+  }
+
+  @override
+  String khatmaConfirmedPages(int pages) {
+    return 'المؤكد اليوم: $pages';
+  }
+
+  @override
+  String khatmaRemainingTodayPages(int pages) {
+    return 'المتبقي اليوم: $pages';
+  }
+
+  @override
+  String get khatmaSaveProgressAction => 'حفظ التقدّم';
+
+  @override
+  String get khatmaReturnToQuranAction => 'العودة إلى القرآن';
+
+  @override
+  String get khatmaResetCorruptAction => 'إعادة ضبط الختمة';
+
+  @override
   String get todayPlanTitle => 'خطة اليوم';
 
   @override

@@ -5,69 +5,49 @@ import 'package:tilawa_core/constants/analytics_constants.dart';
 import '../entities/khatma_plan.dart';
 import '../repositories/khatma_plan_repository.dart';
 
+/// Persists progress explicitly confirmed by the user.
 final class UpdateKhatmaProgressUseCase {
   UpdateKhatmaProgressUseCase(
     this._repository,
     this._analyticsService, {
-    DateTime Function()? now,
     this.onProgressChanged,
-  }) : _now = now ?? DateTime.now;
+  });
 
   final KhatmaPlanRepository _repository;
   final AnalyticsService _analyticsService;
-  final DateTime Function() _now;
   final Future<void> Function()? onProgressChanged;
 
   Future<Either<Failure, KhatmaPlan?>> call({
-    required int currentPage,
-    DateTime? now,
+    required int confirmedThroughPage,
   }) async {
     try {
       final KhatmaPlan? plan = await _repository.getActivePlan();
-      if (plan == null) {
-        return const Right(null);
-      }
-      final int visitedPage = currentPage.clamp(
-        KhatmaPlan.firstQuranPage,
-        KhatmaPlan.lastQuranPage,
-      );
-      if (visitedPage <= plan.currentPage) {
+      if (plan == null) return const Right(null);
+      final int? previous = plan.confirmedCompletedThroughPage;
+      if (previous != null && confirmedThroughPage <= previous) {
         return Right(plan);
       }
-      if (visitedPage > plan.currentPage + 1) {
-        return Right(plan);
+      if (confirmedThroughPage < plan.assignmentStartPage ||
+          confirmedThroughPage > plan.assignmentEndPage) {
+        return const Left(
+          CacheFailure('Confirmed page is outside today’s assignment'),
+        );
       }
-      final int nextPage = visitedPage;
-      final DateTime today = now ?? _now();
-      final bool continuesToday = _isSameDate(plan.progressDate, today);
       final KhatmaPlan updated = plan.copyWith(
-        currentPage: nextPage,
-        status: nextPage >= plan.targetPage
-            ? KhatmaPlanStatus.completed
-            : KhatmaPlanStatus.active,
-        progressDate: continuesToday ? plan.progressDate : _dateOnly(today),
-        progressStartPage: continuesToday
-            ? plan.progressStartPage
-            : plan.currentPage,
+        confirmedCompletedThroughPage: confirmedThroughPage,
       );
       await _repository.saveActivePlan(updated);
       await _analyticsService.logEvent(
         AnalyticsEvents.khatmaProgressUpdated,
-        parameters: <String, Object>{
-          'plan_id': updated.id,
-          'current_page': updated.currentPage,
-          'progress_percent': (updated.progress * 100).round(),
-          'remaining_pages': updated.remainingPages,
-        },
+        parameters: const <String, Object>{'source': 'user_confirmation'},
       );
-      if (updated.isCompleted) {
+      if (updated.isTodayCompleted) {
         await _analyticsService.logEvent(
-          AnalyticsEvents.khatmaCompleted,
-          parameters: <String, Object>{
-            'plan_id': updated.id,
-            'duration_days': updated.durationDays,
-          },
+          AnalyticsEvents.khatmaGoalCompleted,
         );
+      }
+      if (updated.isCompleted) {
+        await _analyticsService.logEvent(AnalyticsEvents.khatmaCompleted);
       }
       await onProgressChanged?.call();
       return Right(updated);
@@ -75,13 +55,4 @@ final class UpdateKhatmaProgressUseCase {
       return Left(CacheFailure(error.toString()));
     }
   }
-
-  bool _isSameDate(DateTime? first, DateTime second) {
-    return first?.year == second.year &&
-        first?.month == second.month &&
-        first?.day == second.day;
-  }
-
-  DateTime _dateOnly(DateTime date) =>
-      DateTime(date.year, date.month, date.day);
 }

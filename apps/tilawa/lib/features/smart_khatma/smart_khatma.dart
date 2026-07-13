@@ -9,7 +9,6 @@ export 'domain/usecases/get_active_khatma_plan_use_case.dart';
 export 'domain/usecases/get_khatma_today_target_use_case.dart';
 export 'domain/usecases/get_wird_progress_summary_use_case.dart';
 export 'domain/usecases/reset_khatma_plan_use_case.dart';
-export 'domain/usecases/select_khatma_catch_up_use_case.dart';
 export 'domain/usecases/update_khatma_progress_use_case.dart';
 export 'presentation/bloc/khatma_plan_bloc.dart';
 export 'presentation/bloc/khatma_plan_event.dart';

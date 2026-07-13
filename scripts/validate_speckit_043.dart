@@ -176,7 +176,7 @@ void main() {
     }
   }
   // 10b. Widget payload (041) MUST contain the display-specific fields.
-  const requiredPayloadKeys = ['locale', 'textDirection', 'localizedTitle', 'accessibilityLabel', 'deepLink', 'expiresAt'];
+  const requiredPayloadKeys = ['locale', 'textDirection', 'localizedTitle', 'accessibilityLabel', 'action', 'expiresAt'];
   for (final k in requiredPayloadKeys) {
     if (!payloadJson.contains('"$k"')) {
       failures.add('Widget payload (041) must contain display field "$k"');

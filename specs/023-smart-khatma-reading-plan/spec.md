@@ -2,8 +2,14 @@
 
 **Feature Branch**: `023-smart-khatma-reading-plan`  
 **Created**: 2026-06-15  
-**Status**: Draft  
+**Status**: Release-candidate implementation; normative progress contract is
+`amendment-production-readiness.md`  
 **Input**: Phase 2 engagement engine behind Today Plan.
+
+> Release note: wherever this original MVP document mentions `currentPage`,
+> automatic reader progress, mutable daily targets, catch-up metadata, or a
+> stored completion status, the confirmed-progress release amendment and
+> contract supersede it.
 
 ## Product Specification
 
@@ -11,7 +17,8 @@ Smart Khatma helps users complete the Quran through a calm adaptive plan. Today
 Plan answers "what should I do today?"; Smart Khatma answers "where am I going?"
 
 The MVP supports one active plan, generated from a duration preset or custom
-duration, and uses the reader's last page as the continuation point. The plan
+duration, and uses an explicit Surah-range or page-range boundary chosen by the
+user. The plan
 feeds Today Plan so the daily reading recommendation becomes the active Khatma
 target rather than a generic fallback.
 
@@ -19,11 +26,14 @@ target rather than a generic fallback.
 
 1. User sees a Khatma card on Home.
 2. If no plan exists, user chooses a quick duration: 7, 15, 30, or 60 days.
-3. App creates a plan from the current/last read page.
-4. Home shows progress, day count, remaining pages, remaining days, and today's
+3. User chooses ordered start/end Surahs or ordered start/end pages.
+4. User chooses duration and reviews calculated boundaries, total pages, daily
+   target, and expected completion date.
+5. App creates the plan only after explicit confirmation.
+6. Home shows progress, day count, remaining pages, remaining days, and today's
    target.
-5. Today Plan reads the Khatma target automatically.
-6. If the user falls behind, the domain computes an adjusted daily target. Phase
+7. Today Plan integration remains release-default off until reconciled.
+8. If the user falls behind, the domain computes an adjusted daily target. Phase
    2.1 exposes the catch-up/extend choice as a dedicated bottom sheet.
 
 ## User Stories
@@ -76,7 +86,8 @@ Premium:
 
 ## Database Schema
 
-MVP local key: `smart_khatma.active_plan.v1`
+Release MVP local key: `smart_khatma.active_plan.v2`. The prior v1 key was
+development-only and is ignored without deletion.
 
 ```json
 {

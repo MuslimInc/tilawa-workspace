@@ -17,6 +17,15 @@ final class KhatmaPlanLoading extends KhatmaPlanState {
   const KhatmaPlanLoading();
 }
 
+final class KhatmaPlanCreationReview extends KhatmaPlanState {
+  const KhatmaPlanCreationReview(this.plan);
+
+  final KhatmaPlan plan;
+
+  @override
+  List<Object?> get props => [plan];
+}
+
 final class KhatmaPlanLoaded extends KhatmaPlanState {
   const KhatmaPlanLoaded({required this.plan, required this.todayTarget});
 

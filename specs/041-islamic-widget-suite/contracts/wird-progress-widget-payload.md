@@ -10,6 +10,10 @@ summary (`specs/023-smart-khatma-reading-plan/contracts/wird-progress-summary.md
 > only place localization and digit formatting happen. The native widget renders this payload
 > verbatim and never recomputes plan math.
 
+**Release disposition:** optional and default-off. Widget rollout does not
+block the core Flutter Al-Khatmah release and must consume confirmed-progress
+summaries only.
+
 ## Production path
 ```
 KhatmaPlan domain (023)

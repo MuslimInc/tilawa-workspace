@@ -1,6 +1,7 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:tilawa/core/extensions.dart';
-import 'package:tilawa/features/smart_khatma/smart_khatma_feature_flags.dart';
 import 'package:tilawa/router/app_router_config.dart';
 import 'package:tilawa_ui_kit/tilawa_ui_kit.dart';
 
@@ -11,7 +12,7 @@ import 'home_grouped_list_row.dart';
 /// Flat grouped list of secondary non-nav destinations — More zone.
 ///
 /// Holds the less-frequent library/account destinations (History, Favorites,
-/// Downloads, Smart Khatma, Support). One flat card with hairline dividers —
+/// Downloads, Support). One flat card with hairline dividers —
 /// calm density, one surface.
 class HomeMoreActionsGroup extends StatelessWidget {
   const HomeMoreActionsGroup({super.key});
@@ -75,32 +76,25 @@ abstract final class _MoreActionsCatalog {
         icon: TilawaIcons.history,
         title: l10n.listeningHistory,
         subtitle: l10n.homeHistoryCarouselSubtitle,
-        onTap: () => const HistoryRoute().push(context),
+        onTap: () => unawaited(const HistoryRoute().push<void>(context)),
       ),
       _MoreActionsItem(
         icon: TilawaIcons.favorite,
         title: l10n.favorites,
         subtitle: l10n.homeFavoritesCarouselSubtitle,
-        onTap: () => const FavoritesRoute().push(context),
+        onTap: () => unawaited(const FavoritesRoute().push<void>(context)),
       ),
       _MoreActionsItem(
         icon: TilawaIcons.download,
         title: l10n.downloads,
         subtitle: l10n.homeDownloadsCarouselSubtitle,
-        onTap: () => const DownloadsRoute().push(context),
+        onTap: () => unawaited(const DownloadsRoute().push<void>(context)),
       ),
-      if (isSmartKhatmaEnabled())
-        _MoreActionsItem(
-          icon: Icons.auto_stories_outlined,
-          title: l10n.khatmaHubTitle,
-          subtitle: l10n.homeKhatmaCarouselSubtitle,
-          onTap: () => const SmartKhatmaHubRoute().push(context),
-        ),
       _MoreActionsItem(
         icon: TilawaIcons.support,
         title: l10n.supportTilawa,
         subtitle: l10n.homeSupportCarouselSubtitle,
-        onTap: () => const SupportRoute().push(context),
+        onTap: () => unawaited(const SupportRoute().push<void>(context)),
       ),
     ];
   }

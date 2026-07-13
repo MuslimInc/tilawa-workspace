@@ -593,6 +593,149 @@ class AppLocalizationsEn extends AppLocalizations {
       'Your Khatma plan is temporarily unavailable. Try again.';
 
   @override
+  String get khatmaStartFromBeginning => 'From the beginning';
+
+  @override
+  String get khatmaContinueCurrentPosition => 'From my current Quran page';
+
+  @override
+  String get khatmaReviewPlanTitle => 'Review your Khatma plan';
+
+  @override
+  String khatmaRangePages(int startPage, int endPage) {
+    return 'Pages $startPage–$endPage';
+  }
+
+  @override
+  String khatmaDailyPages(int pages) {
+    return '$pages pages each day';
+  }
+
+  @override
+  String khatmaStartPage(int page) {
+    return 'Starts at page $page';
+  }
+
+  @override
+  String khatmaTargetPage(int page) {
+    return 'Finishes at page $page';
+  }
+
+  @override
+  String khatmaExpectedCompletionDate(String date) {
+    return 'Expected completion: $date';
+  }
+
+  @override
+  String get khatmaConfirmPlanAction => 'Start this Khatma';
+
+  @override
+  String get khatmaStartTodayAction => 'Start today’s Wird';
+
+  @override
+  String get khatmaResumeTodayAction => 'Resume today’s Wird';
+
+  @override
+  String get khatmaTodayCompletedTitle => 'Today’s Wird is complete';
+
+  @override
+  String get khatmaTodayCompletedSubtitle =>
+      'Your next assignment will be ready tomorrow.';
+
+  @override
+  String khatmaConfirmedAndRemaining(int confirmed, int remaining) {
+    return '$confirmed confirmed · $remaining remaining';
+  }
+
+  @override
+  String get khatmaSaveProgressTitle => 'Save your Khatma progress';
+
+  @override
+  String khatmaCompletedThroughPage(int page) {
+    return 'I completed through page $page';
+  }
+
+  @override
+  String get khatmaProgressPageSelector => 'Choose the last page you completed';
+
+  @override
+  String get khatmaCompleteTodayAction => 'I completed today’s Wird';
+
+  @override
+  String khatmaSaveThroughPageAction(int page) {
+    return 'Save through page $page';
+  }
+
+  @override
+  String get khatmaExtendReviewTitle => 'Review plan extension';
+
+  @override
+  String khatmaExtendReviewMessage(
+    int oldPages,
+    int newPages,
+    String oldDate,
+    String newDate,
+  ) {
+    return 'Daily pages: $oldPages → $newPages\nCompletion date: $oldDate → $newDate';
+  }
+
+  @override
+  String get khatmaCreateAction => 'Create Khatma';
+
+  @override
+  String get khatmaBoundaryBySurah => 'Surah range';
+
+  @override
+  String get khatmaBoundaryByPage => 'Page range';
+
+  @override
+  String get khatmaStartSurah => 'Start Surah';
+
+  @override
+  String get khatmaEndSurah => 'End Surah';
+
+  @override
+  String get khatmaStartPageInput => 'Start page';
+
+  @override
+  String get khatmaEndPageInput => 'End page';
+
+  @override
+  String get khatmaPageBoundsHelp => 'Enter a page from 1 to 604';
+
+  @override
+  String get khatmaChooseDuration => 'Choose a duration';
+
+  @override
+  String khatmaTotalPages(int pages) {
+    return 'Total: $pages pages';
+  }
+
+  @override
+  String khatmaAssignedPages(int pages) {
+    return 'Assigned today: $pages';
+  }
+
+  @override
+  String khatmaConfirmedPages(int pages) {
+    return 'Confirmed today: $pages';
+  }
+
+  @override
+  String khatmaRemainingTodayPages(int pages) {
+    return 'Remaining today: $pages';
+  }
+
+  @override
+  String get khatmaSaveProgressAction => 'Save progress';
+
+  @override
+  String get khatmaReturnToQuranAction => 'Return to Quran';
+
+  @override
+  String get khatmaResetCorruptAction => 'Reset Khatma';
+
+  @override
   String get todayPlanTitle => 'Today’s Plan';
 
   @override

@@ -154,7 +154,8 @@ class _HomeKhatmaPlanSyncListener extends StatelessWidget {
         }
         return previous.plan?.id != current.plan?.id ||
             previous.todayTarget?.pages != current.todayTarget?.pages ||
-            previous.plan?.currentPage != current.plan?.currentPage;
+            previous.plan?.confirmedCompletedThroughPage !=
+                current.plan?.confirmedCompletedThroughPage;
       },
       listener: (context, state) {
         context.read<TodayPlanBloc>().add(const TodayPlanSourceChanged());

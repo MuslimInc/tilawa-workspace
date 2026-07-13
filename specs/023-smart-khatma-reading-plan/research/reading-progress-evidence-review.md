@@ -2,6 +2,9 @@
 
 **Date:** 2026-07-12  
 **Decision:** use a hybrid contiguous verified model  
+**Disposition:** historical research; the simplified implemented release
+contract in `../amendment-production-readiness.md` is normative. Persisted
+session drafts described here are deferred.  
 **Confidence:** high  
 **Implementation status:** blocked pending acceptance of this decision and the
 v2 migration contract
