@@ -400,7 +400,7 @@ void main() {
         for (var i = 1; i < progressUpdates.length; i++) {
           expect(
             progressUpdates[i]['progress'],
-            greaterThanOrEqualTo(progressUpdates[i - 1]['progress']),
+            greaterThanOrEqualTo(progressUpdates[i - 1]['progress'] as num),
             reason: 'Progress should be non-decreasing',
           );
         }

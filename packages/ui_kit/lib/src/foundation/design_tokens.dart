@@ -385,7 +385,7 @@ class MeMuslimDesignTokens extends ThemeExtension<MeMuslimDesignTokens> {
   factory MeMuslimDesignTokens.dark() => MeMuslimDesignTokens._create();
 
   factory MeMuslimDesignTokens._create() {
-    return MeMuslimDesignTokens(
+    return const MeMuslimDesignTokens(
       spaceTiny: 2.0,
       spaceExtraSmall: 4.0,
       spaceSmall: 8.0,
@@ -419,9 +419,9 @@ class MeMuslimDesignTokens extends ThemeExtension<MeMuslimDesignTokens> {
       iconSizeLargePlus: 42.0,
       iconSizeExtraLarge: 44.0,
       textHeightLoose: 2.0,
-      durationFast: const Duration(milliseconds: 200),
-      durationMedium: const Duration(milliseconds: 400),
-      durationSlow: const Duration(milliseconds: 600),
+      durationFast: Duration(milliseconds: 200),
+      durationMedium: Duration(milliseconds: 400),
+      durationSlow: Duration(milliseconds: 600),
       curveStandard: Curves.easeOut,
       curveEmphasized: Curves.easeOutCubic,
       curveSymmetric: Curves.easeInOut,
@@ -996,4 +996,62 @@ extension MeMuslimSegmentedRadiusX on MeMuslimDesignTokens {
     );
     return (containerRadius: containerRadius, itemRadius: itemRadius);
   }
+}
+
+/// Layered elevation — the kit's premium depth language.
+///
+/// A single soft shadow at 4% alpha disappears on the near-white canvas and
+/// the UI reads flat. Depth that reads as intentional pairs a tight
+/// **contact** shadow (grounds the surface at its edge) with a wide, soft
+/// **ambient** bloom (lifts it off the canvas). Pass [ColorScheme.shadow] as
+/// `tint` so depth stays in the brand ink family instead of photocopier
+/// gray; each tier owns its alphas via `withValues`.
+///
+/// Tiers:
+/// - [elevationRaised] — resting content surfaces ([TilawaCard] raised,
+///   settings group panels, capability action cards).
+/// - [elevationFloating] — chrome floating above content (hero summaries,
+///   pinned bars, dialogs, FAB-adjacent panels).
+///
+/// All values scale with [kElevationMultiplier].
+extension MeMuslimElevationX on MeMuslimDesignTokens {
+  /// Soft two-layer shadow for resting cards on the scaffold canvas.
+  List<BoxShadow> elevationRaised(Color tint) => <BoxShadow>[
+    BoxShadow(
+      color: tint.withValues(alpha: 0.05 * kElevationMultiplier),
+      blurRadius: 3.0 * kElevationMultiplier,
+      offset: const Offset(0, 1.0 * kElevationMultiplier),
+    ),
+    BoxShadow(
+      color: tint.withValues(alpha: 0.07 * kElevationMultiplier),
+      blurRadius: 24.0 * kElevationMultiplier,
+      spreadRadius: -2.0,
+      offset: const Offset(0, 10.0 * kElevationMultiplier),
+    ),
+  ];
+
+  /// Deeper two-layer shadow for chrome floating above content.
+  List<BoxShadow> elevationFloating(Color tint) => <BoxShadow>[
+    BoxShadow(
+      color: tint.withValues(alpha: 0.06 * kElevationMultiplier),
+      blurRadius: 6.0 * kElevationMultiplier,
+      offset: const Offset(0, 2.0 * kElevationMultiplier),
+    ),
+    BoxShadow(
+      color: tint.withValues(alpha: 0.11 * kElevationMultiplier),
+      blurRadius: 32.0 * kElevationMultiplier,
+      spreadRadius: -4.0,
+      offset: const Offset(0, 14.0 * kElevationMultiplier),
+    ),
+  ];
+
+  /// Single soft shadow for compact Home quick-tool tiles and light chrome.
+  List<BoxShadow> elevationSubtle(Color tint) => <BoxShadow>[
+    BoxShadow(
+      color: tint.withValues(alpha: 0.04 * kElevationMultiplier),
+      blurRadius: 10.0 * kElevationMultiplier,
+      spreadRadius: -2.0,
+      offset: const Offset(0, 3.0 * kElevationMultiplier),
+    ),
+  ];
 }

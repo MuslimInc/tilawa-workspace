@@ -1,4 +1,4 @@
-import '../datasources/market_scheduling_config_remote_data_source.dart';
+import 'market_scheduling_config_remote_data_source.dart';
 import '../dtos/market_scheduling_config_dto.dart';
 import '../mappers/market_scheduling_config_mapper.dart';
 

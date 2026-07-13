@@ -59,6 +59,37 @@ class WidgetSnapshotStoreTest {
         assertEquals(1000L, store.read(WidgetType.AYAH)?.generatedAtMs)
     }
 
+    @Test
+    fun wirdSnapshotIsStoredForItsWidgetType() {
+        assertTrue(store.write(validWirdSnapshot(generatedAtMs = 1000L)))
+
+        val stored = store.read(WidgetType.WIRD)
+        assertEquals(WidgetType.WIRD, stored?.widgetType)
+        assertEquals(1000L, stored?.generatedAtMs)
+        assertEquals("openTodayWird", stored?.payload?.getString("action"))
+        assertNull(store.read(WidgetType.AYAH))
+    }
+
+    private fun validWirdSnapshot(generatedAtMs: Long): String =
+        """{
+            "schemaVersion":1,
+            "widgetType":"wird",
+            "generatedAtMs":$generatedAtMs,
+            "validUntilMs":3000,
+            "payload":{
+                "locale":"en",
+                "textDirection":"ltr",
+                "localizedTitle":"Today's Wird",
+                "localizedSubtitle":"5 of 20 pages completed · 15 remaining",
+                "formattedAssignedAmount":"20",
+                "formattedCompletedAmount":"5",
+                "formattedRemainingAmount":"15",
+                "progressValue":0.25,
+                "accessibilityLabel":"Today's Wird. 5 of 20 pages completed",
+                "action":"openTodayWird"
+            }
+        }""".trimIndent()
+
     private fun validAyahSnapshot(generatedAtMs: Long): String =
         """{
             "schemaVersion":1,

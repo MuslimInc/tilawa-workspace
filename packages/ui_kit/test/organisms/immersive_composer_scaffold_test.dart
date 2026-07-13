@@ -25,14 +25,14 @@ void main() {
     testWidgets('renders preview content and bottom panel', (tester) async {
       await tester.pumpWidget(
         _wrap(
-          ImmersiveComposerScaffold(
+          const ImmersiveComposerScaffold(
             title: 'Test Title',
             disableBlur: true,
-            preview: const ColoredBox(
+            preview: ColoredBox(
               color: Colors.black,
               child: SizedBox.expand(),
             ),
-            bottomPanel: const Text('bottom-panel'),
+            bottomPanel: Text('bottom-panel'),
           ),
         ),
       );
@@ -48,14 +48,14 @@ void main() {
       (tester) async {
         await tester.pumpWidget(
           _wrap(
-            ImmersiveComposerScaffold(
+            const ImmersiveComposerScaffold(
               title: 'Title',
               disableBlur: true,
-              preview: const ColoredBox(
+              preview: ColoredBox(
                 color: Colors.blue,
                 child: SizedBox.expand(),
               ),
-              bottomPanel: const Text('bottom-panel'),
+              bottomPanel: Text('bottom-panel'),
             ),
           ),
         );
@@ -84,17 +84,17 @@ void main() {
       (tester) async {
         await tester.pumpWidget(
           _wrap(
-            ImmersiveComposerScaffold(
+            const ImmersiveComposerScaffold(
               title: 'Hidden Title',
               disableBlur: true,
               // overlaysVisible: false → _hasBeenShown = false on first frame,
               // so overlay children render SizedBox.shrink().
               overlaysVisible: false,
-              preview: const ColoredBox(
+              preview: ColoredBox(
                 color: Colors.black,
                 child: SizedBox.expand(),
               ),
-              bottomPanel: const Text('bottom-panel-hidden'),
+              bottomPanel: Text('bottom-panel-hidden'),
             ),
           ),
         );
@@ -110,12 +110,12 @@ void main() {
       (tester) async {
         await tester.pumpWidget(
           _wrap(
-            ImmersiveComposerScaffold(
+            const ImmersiveComposerScaffold(
               title: 'Visible Title',
               disableBlur: true,
               overlaysVisible: true,
-              preview: const SizedBox.shrink(),
-              bottomPanel: const Text('bottom-panel-visible'),
+              preview: SizedBox.shrink(),
+              bottomPanel: Text('bottom-panel-visible'),
             ),
           ),
         );
@@ -159,12 +159,12 @@ void main() {
     ) async {
       await tester.pumpWidget(
         _wrap(
-          ImmersiveComposerScaffold(
+          const ImmersiveComposerScaffold(
             title: 'No Blur',
             disableBlur: true,
             overlaysVisible: true,
-            preview: const SizedBox.shrink(),
-            bottomPanel: const SizedBox.shrink(),
+            preview: SizedBox.shrink(),
+            bottomPanel: SizedBox.shrink(),
           ),
         ),
       );
@@ -178,12 +178,12 @@ void main() {
       (tester) async {
         await tester.pumpWidget(
           _wrap(
-            ImmersiveComposerScaffold(
+            const ImmersiveComposerScaffold(
               title: 'Media',
               backgroundIntent: BackgroundIntent.media,
               overlaysVisible: true,
-              preview: const SizedBox.shrink(),
-              bottomPanel: const SizedBox.shrink(),
+              preview: SizedBox.shrink(),
+              bottomPanel: SizedBox.shrink(),
             ),
           ),
         );
@@ -198,11 +198,11 @@ void main() {
       (tester) async {
         await tester.pumpWidget(
           _wrap(
-            ImmersiveComposerScaffold(
+            const ImmersiveComposerScaffold(
               title: 'UI',
               overlaysVisible: true,
-              preview: const SizedBox.shrink(),
-              bottomPanel: const SizedBox.shrink(),
+              preview: SizedBox.shrink(),
+              bottomPanel: SizedBox.shrink(),
             ),
           ),
         );
@@ -217,13 +217,13 @@ void main() {
     ) async {
       await tester.pumpWidget(
         _wrap(
-          ImmersiveComposerScaffold(
+          const ImmersiveComposerScaffold(
             title: 'Override',
             backgroundIntent: BackgroundIntent.media,
             disableBlur: false,
             overlaysVisible: true,
-            preview: const SizedBox.shrink(),
-            bottomPanel: const SizedBox.shrink(),
+            preview: SizedBox.shrink(),
+            bottomPanel: SizedBox.shrink(),
           ),
         ),
       );
@@ -237,13 +237,13 @@ void main() {
     ) async {
       await tester.pumpWidget(
         _wrap(
-          ImmersiveComposerScaffold(
+          const ImmersiveComposerScaffold(
             title: 'FAB Test',
             disableBlur: true,
             overlaysVisible: true,
-            floatingActionButton: const Icon(Icons.play_arrow, key: Key('fab')),
-            preview: const SizedBox.shrink(),
-            bottomPanel: const SizedBox.shrink(),
+            floatingActionButton: Icon(Icons.play_arrow, key: Key('fab')),
+            preview: SizedBox.shrink(),
+            bottomPanel: SizedBox.shrink(),
           ),
         ),
       );

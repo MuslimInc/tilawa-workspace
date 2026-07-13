@@ -85,9 +85,9 @@ class NotificationsRepositoryImpl implements NotificationsRepository {
     _remoteDataSource.onMessage.listen(_handleForegroundMessage);
 
     // 2. Listen for app opens from background state
-    _remoteDataSource.onMessageOpenedApp.listen((RemoteMessage message) {
-      _handler.handleRemoteMessageTap(message);
-    });
+    _remoteDataSource.onMessageOpenedApp.listen(
+      _handler.handleRemoteMessageTap,
+    );
 
     // 4. Register for global notification actions via Dispatcher
     _dispatcher.registerPayloadHandler(
@@ -103,7 +103,7 @@ class NotificationsRepositoryImpl implements NotificationsRepository {
           return false;
         }
       },
-      handler: (response) => _handler.handleNotificationResponse(response),
+      handler: _handler.handleNotificationResponse,
     );
   }
 

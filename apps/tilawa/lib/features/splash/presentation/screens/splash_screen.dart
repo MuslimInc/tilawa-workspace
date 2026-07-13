@@ -29,7 +29,7 @@ class SplashScreen extends StatefulWidget {
 }
 
 class _SplashScreenState extends State<SplashScreen> {
-  static final Color _launchBackground = AppColors.launchSplashBackground;
+  static const Color _launchBackground = AppColors.launchSplashBackground;
   static final SystemUiOverlayStyle _launchOverlayStyle =
       AppSystemChromeStyle.buildColoredScreenStyle(
         backgroundColor: _launchBackground,
@@ -71,19 +71,16 @@ class _SplashScreenState extends State<SplashScreen> {
   }
 
   Future<void> _showAuthErrorDialog(BuildContext context, String message) {
-    return showDialog<void>(
+    return showTilawaFormDialog<void>(
       context: context,
-      barrierDismissible: false,
-      builder: (ctx) => AlertDialog(
-        title: Text(ctx.l10n.error),
-        content: Text(message),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.of(ctx).pop(),
-            child: Text(ctx.l10n.close),
-          ),
-        ],
+      title: context.l10n.error,
+      trailingClose: false,
+      bodyBuilder: (dialogContext) => Text(
+        message,
+        style: Theme.of(dialogContext).textTheme.bodyLarge,
       ),
+      primaryLabel: context.l10n.close,
+      onPrimary: (dialogContext) => Navigator.of(dialogContext).pop(),
     );
   }
 

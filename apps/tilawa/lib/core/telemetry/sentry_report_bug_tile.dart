@@ -20,7 +20,7 @@ class SentryReportBugTile extends StatelessWidget {
     return TilawaSettingsTile(
       title: l10n.reportBugSettingsTileTitle,
       showDivider: showDivider,
-      onTap: () => SentryUserFeedback.showManualReportBugForm(),
+      onTap: SentryUserFeedback.showManualReportBugForm,
     );
   }
 }

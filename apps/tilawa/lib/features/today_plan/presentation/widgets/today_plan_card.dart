@@ -309,7 +309,9 @@ class _TodayPlanFooter extends StatelessWidget {
           ),
         ),
         SizedBox(width: tokens.spaceSmall),
-        FilledButton.icon(
+        TilawaButton(
+          text: context.l10n.todayPlanContinue,
+          leadingIcon: const Icon(Icons.arrow_forward_rounded),
           onPressed: plan.isCompleted
               ? null
               : () {
@@ -318,8 +320,6 @@ class _TodayPlanFooter extends StatelessWidget {
                   );
                   _openReaderAndRefreshPlans(context);
                 },
-          icon: const Icon(Icons.arrow_forward_rounded),
-          label: Text(context.l10n.todayPlanContinue),
         ),
       ],
     );
@@ -342,9 +342,9 @@ class _TodayPlanLoadingCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return HomeDashboardCard(
+    return const HomeDashboardCard(
       surface: TilawaCardSurface.raised,
-      child: const Center(
+      child: Center(
         child: TilawaLoadingIndicator(centered: false),
       ),
     );

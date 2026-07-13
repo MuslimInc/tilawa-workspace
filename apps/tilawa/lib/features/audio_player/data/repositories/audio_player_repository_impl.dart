@@ -258,7 +258,7 @@ class AudioPlayerRepositoryImpl implements AudioPlayerRepository {
       id: item.id,
       title: item.title,
       url:
-          item.extras?['url'] ??
+          (item.extras?['url'] as String?) ??
           '', // Assuming URL is in extras or handled elsewhere
       duration: item.duration ?? Duration.zero,
       artist: item.artist,

@@ -149,7 +149,7 @@ class TilawaMediaPlayerBar extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return LayoutBuilder(
-      builder: (context, constraints) => _buildBar(context, constraints),
+      builder: _buildBar,
     );
   }
 

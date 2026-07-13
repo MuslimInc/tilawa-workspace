@@ -116,7 +116,7 @@ class FirestoreTeacherDataSource implements TeacherRemoteDataSource {
           }
         }
         final snapshot = await query.get();
-        var teachers = snapshot.docs.map((d) => _mapProfile(d)).toList();
+        var teachers = snapshot.docs.map(_mapProfile).toList();
         teachers = teachers
             .where((t) => ValidateTeacherPublicName.isValid(t.displayName))
             .toList();

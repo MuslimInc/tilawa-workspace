@@ -40,7 +40,7 @@ extension FailureExtensions on Failure {
     return switch (this) {
       ServerActionFailure(reason: ServerActionFailureReason.offline) =>
         l10n.serverActionOfflineMessage,
-      OfflinePlaybackFailure(reason: final reason) => switch (reason) {
+      OfflinePlaybackFailure(:final reason) => switch (reason) {
         OfflinePlaybackReason.notDownloaded => l10n.offlinePlaybackError,
         OfflinePlaybackReason.fileMissing => l10n.offlineFileMissingError,
         OfflinePlaybackReason.downloadIncomplete =>
@@ -50,7 +50,7 @@ extension FailureExtensions on Failure {
       ServerFailure() => l10n.serverError,
       CacheFailure() => l10n.cacheError,
       AudioFailure() => l10n.audioError,
-      VideoGenerationFailure(reason: final reason) => switch (reason) {
+      VideoGenerationFailure(:final reason) => switch (reason) {
         VideoGenerationFailureReason.invalidFrameFormat =>
           l10n.reelGenerationFailedInvalidFrame,
         VideoGenerationFailureReason.missingScreenshot =>
@@ -66,13 +66,13 @@ extension FailureExtensions on Failure {
       PersistenceFailure() => l10n.persistenceError,
       UIError() => l10n.uiError,
       UserCancelledFailure() => null,
-      NotificationFailure(reason: final reason) => switch (reason) {
+      NotificationFailure(:final reason) => switch (reason) {
         NotificationFailureReason.missingPayload =>
           l10n.errorMissingNotificationPayload,
         NotificationFailureReason.invalidPayload =>
           l10n.errorInvalidNotificationPayload,
       },
-      PurchaseFailure(reason: final reason) => switch (reason) {
+      PurchaseFailure(:final reason) => switch (reason) {
         PurchaseFailureReason.billingUnavailable =>
           l10n.purchaseBillingUnavailable,
         PurchaseFailureReason.productNotFound => l10n.purchaseProductNotFound,
@@ -83,7 +83,7 @@ extension FailureExtensions on Failure {
         PurchaseFailureReason.alreadyOwned => l10n.purchaseAlreadyOwned,
         PurchaseFailureReason.network => l10n.networkError,
       },
-      AppReviewFailure(reason: final reason) => switch (reason) {
+      AppReviewFailure(:final reason) => switch (reason) {
         AppReviewFailureReason.unavailable => l10n.appReviewUnavailable,
         AppReviewFailureReason.requestFailed => l10n.appReviewRequestFailed,
         AppReviewFailureReason.storeListingFailed =>

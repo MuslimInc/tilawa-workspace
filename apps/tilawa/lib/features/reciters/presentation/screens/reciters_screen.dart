@@ -17,15 +17,15 @@ import 'package:tilawa/features/reciters/presentation/widgets/reciter_card.dart'
 import 'package:tilawa/features/reciters/presentation/widgets/reciters_catalog_search_field.dart';
 import 'package:tilawa/features/reciters/presentation/widgets/reciters_favorites_tab.dart';
 import 'package:tilawa/features/settings/presentation/cubit/settings_cubit.dart';
+import 'package:tilawa/features/shell/application/shell_tab_reselect.dart';
 import 'package:tilawa/features/tour_guide/presentation/widgets/tour_target.dart';
+import 'package:tilawa/screens/app_shell_nav_destinations.dart';
 import 'package:tilawa_core/entities/reciter_entity.dart';
 import 'package:tilawa_ui_kit/tilawa_ui_kit.dart';
 
 import '../../../../router/app_router_config.dart';
 import '../../../../screens/cubit/main_screen_cubit.dart';
 import '../../../../screens/cubit/main_screen_state.dart';
-import 'package:tilawa/features/shell/application/shell_tab_reselect.dart';
-import 'package:tilawa/screens/app_shell_nav_destinations.dart';
 import '../../../../shared/widgets/quran_player_chrome.dart';
 import '../../../../shared/widgets/quran_player_system_back.dart';
 import '../../../localization/presentation/bloc/localization_bloc.dart';
@@ -576,19 +576,18 @@ class _RecitersScreenState extends State<RecitersScreen>
       return Scaffold(
         resizeToAvoidBottomInset: false,
         appBar: TilawaCatalogAppBar.titleOnly(
-          context,
           title: context.l10n.reciters,
           showBottomHairline: false,
           showElevationShadow: false,
         ),
-        body: Stack(
+        body: const Stack(
           fit: StackFit.expand,
           children: [
-            const _RecitersAmbientBackground(),
+            _RecitersAmbientBackground(),
             CustomScrollView(
-              physics: const NeverScrollableScrollPhysics(),
+              physics: NeverScrollableScrollPhysics(),
               slivers: [
-                const _DryLayoutSafeFillSliver(
+                _DryLayoutSafeFillSliver(
                   child: _RecitersStartupLitePane(),
                 ),
               ],
@@ -769,7 +768,7 @@ class _RecitersScreenState extends State<RecitersScreen>
                   final bool isRtl =
                       Directionality.of(context) == TextDirection.rtl;
                   final bool letterIndexAvailable = switch (state) {
-                    RecitersLoaded loaded when _allowHeavyLoadedResults =>
+                    final RecitersLoaded loaded when _allowHeavyLoadedResults =>
                       loaded.filteredReciters.isNotEmpty,
                     _ => false,
                   };
@@ -793,7 +792,6 @@ class _RecitersScreenState extends State<RecitersScreen>
                   return Scaffold(
                     resizeToAvoidBottomInset: false,
                     appBar: TilawaCatalogAppBar.titleOnly(
-                      context,
                       title: context.l10n.reciters,
                       showBottomHairline: false,
                       showElevationShadow: false,
@@ -906,7 +904,7 @@ class _RecitersSliverScreen extends StatelessWidget {
     PerfLogger.markBuild('_RecitersSliverScreen');
     final bool isRtl = Directionality.of(context) == TextDirection.rtl;
     final bool letterIndexAvailable = switch (state) {
-      RecitersLoaded loaded when allowHeavyLoadedResults =>
+      final RecitersLoaded loaded when allowHeavyLoadedResults =>
         loaded.filteredReciters.isNotEmpty,
       _ => false,
     };
@@ -1289,7 +1287,7 @@ class _RecitersEmptyStateContent extends StatelessWidget {
     final MeMuslimDesignTokens tokens = theme.tokens;
     final bool showClearAll = _hasActiveFilters(state);
     final String title = context.l10n.noRecitersFound;
-    final IconData icon = Icons.person_off_outlined;
+    const IconData icon = Icons.person_off_outlined;
 
     final Widget? primaryAction = showClearAll
         ? TilawaButton(

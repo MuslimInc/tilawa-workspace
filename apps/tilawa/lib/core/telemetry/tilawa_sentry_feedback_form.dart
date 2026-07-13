@@ -123,8 +123,8 @@ class _TilawaSentryFeedbackFormState extends State<TilawaSentryFeedbackForm> {
 
     return Scaffold(
       resizeToAvoidBottomInset: feedback.resizeToAvoidBottomInset,
-      appBar: AppBar(
-        title: Text(feedback.title),
+      appBar: TilawaAppBar(
+        title: feedback.title,
       ),
       body: TilawaFormScreenScaffold(
         body: Form(
@@ -521,8 +521,8 @@ class TilawaSentryScreenshotPreview extends StatelessWidget {
     final MeMuslimDesignTokens tokens = Theme.of(context).tokens;
 
     return Scaffold(
-      appBar: AppBar(
-        title: Text(context.l10n.reportBugScreenshotPreviewTitle),
+      appBar: TilawaAppBar(
+        title: context.l10n.reportBugScreenshotPreviewTitle,
       ),
       body: SafeArea(
         child: Padding(

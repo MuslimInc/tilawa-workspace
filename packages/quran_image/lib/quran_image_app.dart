@@ -151,17 +151,17 @@ class _QuranReaderHome extends StatelessWidget {
                     Text(
                       state.appMessage.localize(l10n),
                       textAlign: TextAlign.center,
-                      style: TextStyle(
+                      style: const TextStyle(
                         fontSize: 16,
                         color: AppVideoReelDesignDefaults.frameStrongTextColor,
                       ),
                     ),
                     const SizedBox(height: 24),
-                    ElevatedButton(
+                    TilawaButton(
                       onPressed: () => context.read<NavigationBloc>().add(
                         const NavigationRetryRequested(),
                       ),
-                      child: Text(const RetryMessage().localize(l10n)),
+                      text: const RetryMessage().localize(l10n),
                     ),
                   ],
                 ),

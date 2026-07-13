@@ -88,7 +88,7 @@ class SettingsTeachingOnMemuslimSection extends StatelessWidget {
     }
 
     final tokens = Theme.of(context).tokens;
-    final tile = SettingsTeachingOnMemuslimTile(
+    const tile = SettingsTeachingOnMemuslimTile(
       showDivider: false,
       standaloneLayout: true,
     );
@@ -101,7 +101,7 @@ class SettingsTeachingOnMemuslimSection extends StatelessWidget {
       child: TilawaSettingsGroupHorizontalInset(
         child: capability.showsPremiumSettingsCapabilityCard
             ? tile
-            : TilawaSettingsGroupPanel(children: [tile]),
+            : const TilawaSettingsGroupPanel(children: [tile]),
       ),
     );
   }

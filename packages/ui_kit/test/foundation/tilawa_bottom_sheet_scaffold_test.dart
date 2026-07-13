@@ -57,11 +57,11 @@ void main() {
         theme: AppTheme.getLightTheme(
           primaryColor: AppColors.defaultPrimary,
         ),
-        home: Scaffold(
+        home: const Scaffold(
           body: TilawaBottomSheetScaffold(
-            topBar: const Text('Title'),
-            betweenTopBarAndBody: const <Widget>[Divider(height: 1)],
-            children: const <Widget>[Text('Content')],
+            topBar: Text('Title'),
+            betweenTopBarAndBody: <Widget>[Divider(height: 1)],
+            children: <Widget>[Text('Content')],
           ),
         ),
       ),
@@ -129,13 +129,13 @@ void main() {
                 onPressed: () {
                   Navigator.of(context).push(
                     MaterialPageRoute<void>(
-                      builder: (_) => Scaffold(
+                      builder: (_) => const Scaffold(
                         body: TilawaBottomSheetScaffold(
-                          topBar: const TilawaBottomSheetTitleRow(
+                          topBar: TilawaBottomSheetTitleRow(
                             title: 'Sheet',
                             trailingClose: true,
                           ),
-                          children: const [Text('Body')],
+                          children: [Text('Body')],
                         ),
                       ),
                     ),

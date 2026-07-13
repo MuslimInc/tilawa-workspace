@@ -563,7 +563,7 @@ void _openTeacherApply(BuildContext context) {
   context.push(QuranSessionsRoutes.teacherApply);
 }
 
-void _openProfileCompletion(BuildContext context) async {
+Future<void> _openProfileCompletion(BuildContext context) async {
   await context.push(QuranSessionsRoutes.profileCompletion);
 }
 

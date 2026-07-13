@@ -1,5 +1,3 @@
-// ignore_for_file: public_member_api_docs
-
 /// Centralised constants for calculating dimensions and scaling for the
 /// Surah header banners within a Quran page overlay.
 ///

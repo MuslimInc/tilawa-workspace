@@ -21,7 +21,7 @@ import 'localization_bloc_test.mocks.dart';
 // Provide dummy values for Either types
 @visibleForTesting
 Either<Failure, String> provideDummyEitherFailureString() =>
-    Right(LanguageConfig.defaultLanguageCode);
+    const Right(LanguageConfig.defaultLanguageCode);
 
 @visibleForTesting
 Either<Failure, void> provideDummyEitherFailureVoid() => const Right(null);
@@ -56,7 +56,7 @@ void main() {
     setUp(() async {
       // Provide dummy values for Either types
       provideDummy<Either<Failure, String>>(
-        Right(LanguageConfig.defaultLanguageCode),
+        const Right(LanguageConfig.defaultLanguageCode),
       );
       provideDummy<Either<Failure, void>>(const Right(null));
 
@@ -71,7 +71,9 @@ void main() {
       // Mock GetCurrentLanguageUseCase to return default language
       when(
         mockGetCurrentLanguageUseCase(),
-      ).thenAnswer((_) async => Right(LanguageConfig.defaultLanguageCode));
+      ).thenAnswer(
+        (_) async => const Right(LanguageConfig.defaultLanguageCode),
+      );
 
       // Mock SetLanguageUseCase to return success
       when(
@@ -95,7 +97,9 @@ void main() {
       test('should have initial state with default locale', () {
         expect(
           bloc.state,
-          LocalizationState(locale: Locale(LanguageConfig.defaultLanguageCode)),
+          const LocalizationState(
+            locale: Locale(LanguageConfig.defaultLanguageCode),
+          ),
         );
       });
     });
@@ -113,7 +117,9 @@ void main() {
           // Mock GetCurrentLanguageUseCase to return default language
           when(
             mockGetCurrentLanguageUseCase(),
-          ).thenAnswer((_) async => Right(LanguageConfig.defaultLanguageCode));
+          ).thenAnswer(
+            (_) async => const Right(LanguageConfig.defaultLanguageCode),
+          );
 
           // Mock SetLanguageUseCase to return success
           when(
@@ -233,7 +239,9 @@ void main() {
 
         expect(
           result,
-          LocalizationState(locale: Locale(LanguageConfig.defaultLanguageCode)),
+          const LocalizationState(
+            locale: Locale(LanguageConfig.defaultLanguageCode),
+          ),
         );
       });
 
@@ -245,7 +253,9 @@ void main() {
 
         expect(
           result,
-          LocalizationState(locale: Locale(LanguageConfig.defaultLanguageCode)),
+          const LocalizationState(
+            locale: Locale(LanguageConfig.defaultLanguageCode),
+          ),
         );
       });
     });
@@ -357,7 +367,9 @@ void main() {
 
         when(
           firstMockGetCurrentLanguageUseCase(),
-        ).thenAnswer((_) async => Right(LanguageConfig.defaultLanguageCode));
+        ).thenAnswer(
+          (_) async => const Right(LanguageConfig.defaultLanguageCode),
+        );
         when(
           firstMockSetLanguageUseCase(any),
         ).thenAnswer((_) async => const Right(null));
@@ -408,7 +420,7 @@ void main() {
           newBloc.state,
           anyOf(
             const LocalizationState(locale: Locale('en')),
-            LocalizationState(
+            const LocalizationState(
               locale: Locale(LanguageConfig.defaultLanguageCode),
             ),
           ),

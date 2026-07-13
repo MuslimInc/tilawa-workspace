@@ -77,7 +77,7 @@ class _TasbeehView extends StatelessWidget {
             );
           case TasbeehViewMode.selectedCounting:
             switch (session) {
-              case TasbeehSavedDhikrCountingSession saved:
+              case final TasbeehSavedDhikrCountingSession saved:
                 content = TasbeehSavedDhikrCountingView(
                   cubit: cubit,
                   session: saved,

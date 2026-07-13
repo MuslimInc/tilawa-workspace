@@ -168,7 +168,7 @@ void main() {
     act: (cubit) => cubit.loadSavedDhikr(),
     expect: () => [
       const TasbeehState(status: TasbeehStatus.loading),
-      TasbeehState(
+      const TasbeehState(
         status: TasbeehStatus.loaded,
         draftTargetText: '',
       ),
@@ -323,7 +323,7 @@ void main() {
     ),
     act: (cubit) => cubit.showCreateView(),
     expect: () => [
-      TasbeehState(
+      const TasbeehState(
         status: TasbeehStatus.loaded,
         viewMode: TasbeehViewMode.create,
         draftText: '',

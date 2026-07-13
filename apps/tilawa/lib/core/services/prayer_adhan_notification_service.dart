@@ -231,7 +231,7 @@ class PrayerAdhanNotificationService
         l10n.prayerNotificationsAdhanChannelName,
         description: l10n.prayerNotificationsAdhanChannelDescription,
         importance: Importance.high,
-        sound: RawResourceAndroidNotificationSound(
+        sound: const RawResourceAndroidNotificationSound(
           PrayerNotificationConfig.adhanSoundRawName,
         ),
         playSound: true,
@@ -852,7 +852,7 @@ class PrayerAdhanNotificationService
     try {
       final DateTime now = DateTime.now();
       final DateTime triggerAt = now.add(const Duration(seconds: 10));
-      final int testId = PrayerNotificationConfig.debugManualTestId;
+      const int testId = PrayerNotificationConfig.debugManualTestId;
 
       final bool hasPermission = await _notificationPermissionService
           .isPermissionGranted();
@@ -1199,7 +1199,7 @@ class PrayerAdhanNotificationService
         icon: NotificationConfig.androidSmallIcon,
         color: AppColors.notificationAccent,
         sound: playAdhan && !adhanHandledNatively
-            ? RawResourceAndroidNotificationSound(
+            ? const RawResourceAndroidNotificationSound(
                 PrayerNotificationConfig.adhanSoundRawName,
               )
             : null,
@@ -1344,8 +1344,8 @@ class PrayerAdhanNotificationService
     required String languageCode,
   }) {
     final Map<String, dynamic> json = settings.toJson();
-    final double lat = (prayerTimesForDays.first.latitude ?? 0).toDouble();
-    final double lon = (prayerTimesForDays.first.longitude ?? 0).toDouble();
+    final double lat = prayerTimesForDays.first.latitude ?? 0;
+    final double lon = prayerTimesForDays.first.longitude ?? 0;
     final String fingerprint = [
       jsonEncode(json),
       lat.toStringAsFixed(4),

@@ -9,7 +9,7 @@ import '../../lib/src/domain/entities/teacher_verification_status.dart';
 void main() {
   group('QuranTeacherDtoMapper', () {
     test('maps verified teacher with market price correctly', () {
-      final dto = QuranTeacherDto(
+      const dto = QuranTeacherDto(
         id: 'teacher_1',
         displayName: 'Sheikh Ahmed',
         bio: 'Bio',
@@ -18,7 +18,7 @@ void main() {
         verificationStatus: 'verified',
         supportedCallTypes: ['external_meeting'],
         pricingType: 'fixed_per_session',
-        marketPrice: const SessionPriceDto(
+        marketPrice: SessionPriceDto(
           amount: 600,
           currencyCode: 'EGP',
           countryCode: 'EG',
@@ -45,7 +45,7 @@ void main() {
     });
 
     test('maps manualPaymentPrice without changing free pricing type', () {
-      final dto = QuranTeacherDto(
+      const dto = QuranTeacherDto(
         id: 'founding_1',
         displayName: 'Sheikh Founding',
         bio: '',
@@ -55,7 +55,7 @@ void main() {
         supportedCallTypes: ['voice_call'],
         pricingType: 'free',
         marketPrice: null,
-        manualPaymentPrice: const ManualPaymentPriceDto(
+        manualPaymentPrice: ManualPaymentPriceDto(
           amountMinor: 10000,
           currencyCode: 'EGP',
         ),
@@ -78,7 +78,7 @@ void main() {
     });
 
     test('maps free teacher with no market price', () {
-      final dto = QuranTeacherDto(
+      const dto = QuranTeacherDto(
         id: 't',
         displayName: 'X',
         bio: '',

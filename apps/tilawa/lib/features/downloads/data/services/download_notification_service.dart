@@ -103,7 +103,7 @@ class DownloadNotificationService implements IDownloadNotificationService {
       return false;
     }
     try {
-      final Map<String, dynamic> data = jsonDecode(payload);
+      final data = jsonDecode(payload) as Map<String, dynamic>;
       return data.containsKey('reciterId') ||
           data.containsKey('reciterName') ||
           data['type'] == 'download';
@@ -434,7 +434,7 @@ class DownloadNotificationService implements IDownloadNotificationService {
     }
 
     try {
-      final Map<String, dynamic> data = jsonDecode(payload);
+      final data = jsonDecode(payload) as Map<String, dynamic>;
       final String? reciterId = switch (data['reciterId']) {
         final int value => value.toString(),
         final String value when value.isNotEmpty => value,
@@ -504,7 +504,7 @@ class DownloadNotificationService implements IDownloadNotificationService {
     for (final int unit in stableId.codeUnits) {
       hash = (hash * 31 + unit) & 0x7FFFFFFF;
     }
-    final int range = notificationIdRangeEndExclusive - notificationIdOffset;
+    const int range = notificationIdRangeEndExclusive - notificationIdOffset;
     return notificationIdOffset + (hash % range);
   }
 

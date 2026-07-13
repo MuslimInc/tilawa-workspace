@@ -7,7 +7,7 @@ import 'package:tilawa/shared/widgets/quran_player_chrome.dart';
 import 'package:tilawa_core/entities/reciter_entity.dart';
 import 'package:tilawa_ui_kit/tilawa_ui_kit.dart';
 
-import '../../../../features/surah/domain/entities/surah_entity.dart';
+import '../../../surah/domain/entities/surah_entity.dart';
 import '../bloc/reciter_download_bloc.dart';
 import '../reciter_semantics_ids.dart';
 

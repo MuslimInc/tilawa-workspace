@@ -8,6 +8,13 @@ class WidgetSnapshotBridge {
 
   final MethodChannel _channel;
 
+  /// Enables or disables launcher discovery of the staged Daily Wird widget.
+  Future<void> setWirdWidgetEnabled({required bool enabled}) =>
+      _channel.invokeMethod<void>(
+        'setWirdWidgetEnabled',
+        <String, bool>{'enabled': enabled},
+      );
+
   /// Serializes and sends a snapshot to the native Android storage.
   /// The generic type [T] must be JSON-encodable (e.g., via `toJson()`).
   Future<void> dispatchSnapshot<T extends Object>(

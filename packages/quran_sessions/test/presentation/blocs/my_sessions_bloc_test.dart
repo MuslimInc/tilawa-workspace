@@ -289,9 +289,9 @@ void main() {
     blocTest<MySessionsBloc, MySessionsState>(
       'MySessionsJoinCompletedAcknowledged clears joinCompletedSessionId',
       build: () => bloc,
-      seed: () => MySessionsSuccess(
-        upcoming: const [],
-        past: const [],
+      seed: () => const MySessionsSuccess(
+        upcoming: [],
+        past: [],
         joinCompletedSessionId: 'session_join',
       ),
       act: (b) => b.add(const MySessionsJoinCompletedAcknowledged()),

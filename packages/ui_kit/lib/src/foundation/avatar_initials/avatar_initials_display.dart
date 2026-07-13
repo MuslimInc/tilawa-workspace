@@ -24,8 +24,8 @@ abstract final class AvatarInitialsDisplay {
   static String resolveArabicSeparator(TextStyle style) {
     const probeFirst = 'م';
     const probeSecond = 'ا';
-    final hair = AvatarInitialsSeparators.hairSpace;
-    final thin = AvatarInitialsSeparators.thinSpace;
+    const hair = AvatarInitialsSeparators.hairSpace;
+    const thin = AvatarInitialsSeparators.thinSpace;
 
     final withHair = TextPainter(
       text: TextSpan(text: '$probeFirst$hair$probeSecond', style: style),

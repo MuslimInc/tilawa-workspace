@@ -1,5 +1,5 @@
-import '../entities/session_lifecycle_status.dart';
-import '../entities/session_aggregate.dart';
+import 'session_lifecycle_status.dart';
+import 'session_aggregate.dart';
 
 /// Server booking creation result including optional sandbox checkout token.
 final class SessionBookingOutcome {

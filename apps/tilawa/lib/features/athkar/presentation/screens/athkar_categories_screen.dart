@@ -22,7 +22,6 @@ class AthkarCategoriesScreen extends StatelessWidget {
         QuranPlayerWidget.fabBottomOffset(context) + tokens.spaceLarge;
     return Scaffold(
       appBar: TilawaCatalogAppBar.titleOnly(
-        context,
         title: context.l10n.athkar,
       ),
       body: Stack(

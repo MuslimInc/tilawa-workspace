@@ -48,8 +48,8 @@ void main() {
     });
 
     test('transport failure surfaces a ServerFailure', () async {
-      final repo = GenUiRepositoryImpl(
-        transport: const GenUiFakeTransport(
+      const repo = GenUiRepositoryImpl(
+        transport: GenUiFakeTransport(
           failure: GenUiTransportFailure('offline'),
         ),
       );

@@ -190,7 +190,7 @@ void main() {
         MockGetCurrentLanguageUseCase();
     when(
       mockGetCurrentLanguage(),
-    ).thenAnswer((_) async => Right(LanguageConfig.defaultLanguageCode));
+    ).thenAnswer((_) async => const Right(LanguageConfig.defaultLanguageCode));
     when(mockSetLanguage(any)).thenAnswer((_) async => const Right(null));
     when(mockGetReciters.invalidateCache()).thenReturn(null);
 

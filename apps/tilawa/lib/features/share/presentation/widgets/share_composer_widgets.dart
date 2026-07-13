@@ -71,7 +71,7 @@ class ShareControlTileShell extends StatelessWidget {
     );
 
     if (onTap == null) return content;
-    var borderRadius = BorderRadius.vertical(
+    final borderRadius = BorderRadius.vertical(
       top: Radius.circular(tokens.radiusLarge),
     );
     return Material(

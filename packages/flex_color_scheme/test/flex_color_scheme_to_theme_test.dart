@@ -1,4 +1,4 @@
-// ignore_for_file: lines_longer_than_80_chars, for commented tests.
+// ignore_for_file: for commented tests.
 
 import 'package:flex_color_scheme/flex_color_scheme.dart';
 import 'package:flex_color_scheme/src/flex_constants.dart';
@@ -5238,7 +5238,7 @@ void main() {
     });
     test('FCS9.2: GIVEN a FlexColorScheme test pageTransitionsTheme '
         'pass-through.', () {
-      PageTransitionsTheme transitionsTheme = PageTransitionsTheme(
+      const PageTransitionsTheme transitionsTheme = PageTransitionsTheme(
         builders: <TargetPlatform, PageTransitionsBuilder>{
           TargetPlatform.android: FadeUpwardsPageTransitionsBuilder(),
           TargetPlatform.iOS: CupertinoPageTransitionsBuilder(),

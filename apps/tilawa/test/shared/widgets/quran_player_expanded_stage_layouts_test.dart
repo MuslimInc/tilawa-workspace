@@ -144,7 +144,7 @@ void main() {
               onVerticalDragStart: (_) {},
               onVerticalDragUpdate: (_) {},
               onVerticalDragEnd: (_) {},
-              centeredChrome: Column(
+              centeredChrome: const Column(
                 mainAxisSize: MainAxisSize.min,
                 spacing: 24,
                 children: [
@@ -152,7 +152,7 @@ void main() {
                     aspectRatio: 16 / 9,
                     child: ColoredBox(color: Colors.grey),
                   ),
-                  const SizedBox(height: 56, child: Text('Surah')),
+                  SizedBox(height: 56, child: Text('Surah')),
                 ],
               ),
               playbackCluster: const SizedBox(height: 112),

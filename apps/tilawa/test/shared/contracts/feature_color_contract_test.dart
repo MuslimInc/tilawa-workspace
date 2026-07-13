@@ -71,7 +71,7 @@ void main() {
 }
 
 String _libRelativePath(String entityPath) {
-  final normalizedPath = entityPath.replaceAll('\\', '/');
+  final normalizedPath = entityPath.replaceAll(r'\', '/');
   return normalizedPath.replaceFirst(RegExp(r'^lib/'), '');
 }
 
@@ -85,6 +85,6 @@ bool _isAllowlisted(String relativePath, List<String> prefixes) {
 }
 
 String _stripDartComments(String source) {
-  var withoutBlocks = source.replaceAll(RegExp(r'/\*[\s\S]*?\*/'), '');
+  final withoutBlocks = source.replaceAll(RegExp(r'/\*[\s\S]*?\*/'), '');
   return withoutBlocks.replaceAll(RegExp(r'//.*'), '');
 }

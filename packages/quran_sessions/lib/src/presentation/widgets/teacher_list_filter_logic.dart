@@ -4,7 +4,7 @@ import '../../domain/entities/quran_teacher.dart';
 import '../../domain/entities/session_price.dart';
 import '../../utils/price_formatter.dart';
 import '../models/teacher_availability_summary.dart';
-import '../widgets/teacher_list_filter_bar.dart';
+import 'teacher_list_filter_bar.dart';
 
 /// Default budget ceiling when no paid prices are loaded (EGP-scale markets).
 const double kTeacherListDefaultBudgetThreshold = 500;

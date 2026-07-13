@@ -51,9 +51,9 @@ void main() {
     ) async {
       await _pumpShell(
         tester,
-        QuranSessionsScaffold(
+        const QuranSessionsScaffold(
           title: 'جلساتي',
-          body: const SizedBox.shrink(),
+          body: SizedBox.shrink(),
         ),
         locale: const Locale('ar'),
         textDirection: TextDirection.rtl,
@@ -69,9 +69,9 @@ void main() {
     ) async {
       await _pumpShell(
         tester,
-        QuranSessionsScaffold(
+        const QuranSessionsScaffold(
           title: 'Teacher profile',
-          body: const SizedBox.shrink(),
+          body: SizedBox.shrink(),
         ),
       );
 
@@ -82,9 +82,9 @@ void main() {
     testWidgets('Booking AppBar uses compact localized title', (tester) async {
       await _pumpShell(
         tester,
-        QuranSessionsScaffold(
+        const QuranSessionsScaffold(
           title: 'Book a session',
-          body: const SizedBox.shrink(),
+          body: SizedBox.shrink(),
         ),
       );
 
@@ -97,9 +97,9 @@ void main() {
     ) async {
       await pumpInApp(
         tester,
-        QuranSessionsScaffold(
+        const QuranSessionsScaffold(
           title: 'المحفظون',
-          body: const QuranSessionsPageHeader(
+          body: QuranSessionsPageHeader(
             title: 'تعلّم القرآن مع محفظك',
             subtitle: 'اختر المحفظ المناسب وابدأ رحلتك في تحسين التلاوة',
           ),
@@ -124,9 +124,9 @@ void main() {
     testWidgets('Wallet AppBar uses short title key', (tester) async {
       await _pumpShell(
         tester,
-        QuranSessionsScaffold(
+        const QuranSessionsScaffold(
           title: 'Wallet',
-          body: const SizedBox.shrink(),
+          body: SizedBox.shrink(),
         ),
       );
 
@@ -139,9 +139,9 @@ void main() {
     ) async {
       await pumpInApp(
         tester,
-        QuranSessionsScaffold(
+        const QuranSessionsScaffold(
           title: 'المحفظون',
-          body: const QuranSessionsPageHeader(
+          body: QuranSessionsPageHeader(
             title: 'تعلّم القرآن مع محفظك',
             subtitle: 'اختر المحفظ المناسب وابدأ رحلتك في تحسين التلاوة',
           ),
@@ -200,9 +200,9 @@ void main() {
         '(titleLarge w700)', (tester) async {
       await _pumpShell(
         tester,
-        QuranSessionsScaffold(
+        const QuranSessionsScaffold(
           title: 'Tutors',
-          body: const SizedBox.shrink(),
+          body: SizedBox.shrink(),
         ),
       );
 

@@ -29,10 +29,10 @@ colors:
   on-error: "#FFFFFF"
 
   # Light surfaces (60-30-10)
-  canvas: "#F4F2EE"
+  canvas: "#F3F6F4"
   surface: "#FFFFFF"
   surface-container-high: "#F0F7F2"
-  surface-container-highest: "#EEEEEE"
+  surface-container-highest: "#DFE8E2"
   ink: "#1A2E24"
   body: "#1A2E24"
   mute: "#6B7F74"
@@ -121,11 +121,18 @@ rounded:
   pill: 9999px
 
 elevation:
+  # Layered tiers (MeMuslimElevationX) — contact + ambient, tinted by ColorScheme.shadow
+  raised-contact: "alpha 0.05, blur 3, offset 0 1"
+  raised-ambient: "alpha 0.07, blur 24, offset 0 10"
+  floating-contact: "alpha 0.06, blur 6, offset 0 2"
+  floating-ambient: "alpha 0.11, blur 32, offset 0 14"
+  elevation-multiplier: 1.0
+  # Legacy single-shadow tokens (existing chrome only)
   shadow-alpha: 0.04
   shadow-strong-alpha: 0.08
-  shadow-offset-small: "0 1"
-  shadow-offset-medium: "0 2"
-  blur-shadow: 8
+  shadow-offset-small: "0 1.5"
+  shadow-offset-medium: "0 3"
+  blur-shadow: 12
   border-width-thin: 0.5
 
 motion:
@@ -156,11 +163,11 @@ Design system for **MeMuslim / أنا مسلم** (internal package name `tilawa`
 ## Visual theme and atmosphere
 
 - **Material 3** via **FlexColorScheme**, refined in `AppTheme` with palette from `AppColors`.
-- **Calm, content-first:** small palette, warm parchment canvas (`#F4F2EE`), white cards (`#FFFFFF`), one **green global accent** (`#1DAB61`) for CTAs and active chrome. No legacy purple. Brown/warm tones appear only as approved secondary micro-accents (gold featured cards, warm hero gradients, metadata browns) — never as a new primary.
+- **Calm, content-first:** small palette, porcelain-green canvas (`#F3F6F4`), white cards (`#FFFFFF`), one **green global accent** (`#1DAB61`) for CTAs and active chrome. No legacy purple. Brown/warm tones appear only as approved secondary micro-accents (gold featured cards, warm hero gradients, metadata browns) — never as a new primary.
 - **Not e-commerce / admin:** avoid dense data grids, heavy gradients on chrome, stacked shadows, or crowded multi-accent layouts.
 - **Readable Arabic:** `textHeightLoose` (2.0) for dense script; bundled **IBM Plex Sans Arabic** on all M3 roles.
 - **Comfortable density:** `FlexColorScheme.comfortablePlatformDensity` — not compact.
-- **Premium but quiet depth:** low-alpha shadows (`opacityShadow` 0.04, `opacityShadowStrong` 0.08); optional glass tokens for floating chrome only.
+- **Premium but quiet depth:** layered elevation tiers (`tokens.elevationRaised` / `elevationFloating` — tight contact shadow + soft ambient bloom, ink-tinted via `ColorScheme.shadow`); legacy low-alpha singles (`opacityShadow` 0.04, `opacityShadowStrong` 0.08) remain on existing chrome; optional glass tokens for floating chrome only.
 - **Surface tint off:** `surfaceTintColor` → transparent on cards, dialogs, sheets, app bars so user primary does not wash neutrals.
 
 ---
@@ -194,7 +201,7 @@ Dev/QA only (`TILAWA_SHOW_COLOR_PICKER=true`): coral, teal, sage, forest presets
 
 | Role | Hex | `ColorScheme` / API |
 |------|-----|-------------------|
-| Canvas / scaffold | `#F4F2EE` | `surfaceContainerLowest` |
+| Canvas / scaffold | `#F3F6F4` | `surfaceContainerLowest` |
 | Cards, sheets | `#FFFFFF` | `surface` |
 | Ink / onSurface | `#1A2E24` | `onSurface` |
 | Muted labels | `#6B7F74` | `onSurfaceVariant` |
@@ -346,9 +353,9 @@ Host: `TilawaFeedbackHost` wraps `MaterialApp.builder` child.
 
 ## Depth and elevation
 
-- **Shadows:** alpha **0.04** default, **0.08** floating chrome; offsets `(0,1)` and `(0,2)`; blur **8**.
+- **Layered elevation:** resting cards use `tokens.elevationRaised(colorScheme.shadow)` — contact (0.05 / blur 3 / y1) + ambient (0.07 / blur 24 / y10); floating chrome uses `elevationFloating` — contact (0.06 / blur 6 / y2) + ambient (0.11 / blur 32 / y14). Shadows tint with brand ink via `ColorScheme.shadow`, never gray-black. Global tuning knob: `kElevationMultiplier` (1.0, safe ≈ 0.8–1.3).
 - **Borders:** `borderWidthThin` **0.5** hairlines where tokens apply.
-- **No heavy elevation stacks** or decorative gradients on standard chrome.
+- **No heavy elevation stacks** or decorative gradients on standard chrome — depth comes from the two calibrated layers, not stacked effects.
 
 ---
 
@@ -454,7 +461,7 @@ Calm parchment surfaces; one green CTA per screen; no gold pay chrome; no worshi
 - Add purple, random accent colors, or e-commerce-style dense dashboards.
 - Use heavy gradients, excessive shadows, or primary-tinted catalog backgrounds.
 - Toast field validation errors.
-- Flatten scaffold to pure white — use warm canvas `#F4F2EE` so white cards lift.
+- Flatten scaffold to pure white — use porcelain canvas `#F3F6F4` so white cards lift.
 - Put support/donation UI on worship surfaces (reader, prayer, athkar).
 
 ---

@@ -57,7 +57,6 @@ void main() {
             child: Builder(
               builder: (context) => Scaffold(
                 appBar: TilawaCatalogAppBar.titleOnly(
-                  context,
                   title: 'الإعدادات',
                 ),
                 body: const SizedBox.shrink(),
@@ -95,14 +94,14 @@ void main() {
           home: Builder(
             builder: (context) {
               hostContext = context;
-              return Scaffold(
+              return const Scaffold(
                 appBar: TilawaCatalogAppBar(
                   title: 'Bookmarks',
-                  bottomContent: const TilawaSearchField(
+                  bottomContent: TilawaSearchField(
                     hintText: 'Search',
                   ),
                 ),
-                body: const SizedBox.shrink(),
+                body: SizedBox.shrink(),
               );
             },
           ),

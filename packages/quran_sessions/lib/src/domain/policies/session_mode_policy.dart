@@ -1,4 +1,4 @@
-import '../../domain/entities/session_call_type.dart';
+import '../entities/session_call_type.dart';
 
 /// Which session modes students may select when booking (host-configured).
 ///

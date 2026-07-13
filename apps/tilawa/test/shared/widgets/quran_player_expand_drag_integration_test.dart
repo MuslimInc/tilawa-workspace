@@ -123,7 +123,7 @@ void main() {
 
       late _ShellExpandDragHarnessState state;
       await tester.pumpWidget(
-        MaterialApp(
+        const MaterialApp(
           home: SizedBox(
             height: 800,
             child: _ShellExpandDragHarness(
@@ -163,7 +163,7 @@ void main() {
 
       late _ShellExpandDragHarnessState state;
       await tester.pumpWidget(
-        MaterialApp(
+        const MaterialApp(
           home: _ShellExpandDragHarness(
             viewportHeight: 800,
             anchorHeight: 108,
@@ -196,7 +196,7 @@ void main() {
 
       late _ShellExpandDragHarnessState state;
       await tester.pumpWidget(
-        MaterialApp(
+        const MaterialApp(
           home: _ShellExpandDragHarness(
             viewportHeight: 800,
             anchorHeight: 108,
@@ -226,7 +226,7 @@ void main() {
 
       late _ShellExpandDragHarnessState state;
       await tester.pumpWidget(
-        MaterialApp(
+        const MaterialApp(
           home: _ShellExpandDragHarness(
             viewportHeight: 800,
             anchorHeight: 108,

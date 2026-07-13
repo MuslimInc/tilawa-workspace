@@ -680,7 +680,7 @@ void main() {
       );
       expect(tokens.bottomNavIconOnlyVerticalMargin, 2.0);
       expect(
-        tokens.phoneBottomNavIconOnlyLayoutHeight(TextScaler.linear(1)),
+        tokens.phoneBottomNavIconOnlyLayoutHeight(const TextScaler.linear(1)),
         closeTo(28.0, 0.05),
       );
       expect(tokens.bottomNavHorizontalMargin, 0.0);
@@ -699,9 +699,11 @@ void main() {
       final tokens = TilawaAdaptiveShellTokens.defaults(
         MeMuslimDesignTokens.light(),
       );
-      final unit = tokens.phoneBottomNavLayoutHeight(TextScaler.linear(1));
+      final unit = tokens.phoneBottomNavLayoutHeight(
+        const TextScaler.linear(1),
+      );
       final scaled = tokens.phoneBottomNavLayoutHeight(
-        TextScaler.linear(2),
+        const TextScaler.linear(2),
       );
       expect(unit, closeTo(48.0, 0.1));
       expect(scaled, greaterThan(unit));
@@ -729,10 +731,10 @@ void main() {
         MeMuslimDesignTokens.light(),
       );
       final unit = tokens.phoneBottomNavIconOnlyLayoutHeight(
-        TextScaler.linear(1),
+        const TextScaler.linear(1),
       );
       final scaled = tokens.phoneBottomNavIconOnlyLayoutHeight(
-        TextScaler.linear(2),
+        const TextScaler.linear(2),
       );
       expect(unit, closeTo(28.0, 0.05));
       expect(scaled, greaterThan(unit));
@@ -786,13 +788,13 @@ void main() {
     test(
       'fromColorScheme light bottom nav ignores scheme container colors',
       () {
-        final tealScheme = ColorScheme.light(
+        const tealScheme = ColorScheme.light(
           primary: Color(0xFF006A60),
           primaryContainer: Color(0xFFD8F0EC),
           surfaceContainerHigh: Color(0xFFFF0000),
           surfaceContainerHighest: Color(0xFF00FF00),
         );
-        final purpleScheme = ColorScheme.light(
+        const purpleScheme = ColorScheme.light(
           primary: AppColors.defaultPrimary,
           primaryContainer: Color(0xFFE3D4E9),
           surfaceContainerHigh: Color(0xFF0000FF),
@@ -1129,11 +1131,7 @@ void main() {
 
   group('TilawaHomeDashboardCardTokens', () {
     test('fromColorScheme uses Tilawa warm featured card stops', () {
-      final ColorScheme scheme = ColorScheme.fromSeed(
-        seedColor: AppColors.defaultPrimary,
-        primary: AppColors.defaultPrimary,
-      );
-      final tokens = TilawaHomeDashboardCardTokens.fromColorScheme(scheme);
+      final tokens = TilawaHomeDashboardCardTokens.fromColorScheme();
 
       expect(tokens.gradientStart, AppColors.featuredGradientStart);
       expect(tokens.gradientEnd, AppColors.featuredGradientEnd);

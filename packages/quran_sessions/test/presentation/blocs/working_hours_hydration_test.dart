@@ -32,7 +32,9 @@ AvailabilityCubit _build(FakeScheduleRepository repo) => AvailabilityCubit(
     repo,
     const WeeklyScheduleValidator(),
   ),
-  repository: repo,
+  getOverrides: GetAvailabilityOverridesUseCase(repo),
+  saveOverride: SaveAvailabilityOverrideUseCase(repo),
+  removeOverride: RemoveAvailabilityOverrideUseCase(repo),
   defaultTimezone: 'Africa/Cairo',
 );
 
@@ -45,7 +47,7 @@ Future<AvailabilityCubit> _reopen(FakeScheduleRepository repo) async {
 void main() {
   late FakeScheduleRepository repo;
 
-  setUpAll(() => tz_data.initializeTimeZones());
+  setUpAll(tz_data.initializeTimeZones);
 
   setUp(() => repo = FakeScheduleRepository());
 
@@ -166,15 +168,15 @@ void main() {
     test(
       'teacher dashboard open-day count matches working hours selection',
       () async {
-        repo.schedule = WeeklySchedule(
+        repo.schedule = const WeeklySchedule(
           teacherId: 'teacher_1',
           timezone: 'Africa/Cairo',
           slotDuration: SlotDuration.thirty,
           rules: {
-            Weekday.monday: const [
+            Weekday.monday: [
               TimeRange(start: LocalTime(9, 0), end: LocalTime(12, 0)),
             ],
-            Weekday.wednesday: const [
+            Weekday.wednesday: [
               TimeRange(start: LocalTime(14, 0), end: LocalTime(16, 0)),
             ],
           },
@@ -228,7 +230,9 @@ void main() {
             delayingRepo,
             const WeeklyScheduleValidator(),
           ),
-          repository: delayingRepo,
+          getOverrides: GetAvailabilityOverridesUseCase(delayingRepo),
+          saveOverride: SaveAvailabilityOverrideUseCase(delayingRepo),
+          removeOverride: RemoveAvailabilityOverrideUseCase(delayingRepo),
           defaultTimezone: 'Africa/Cairo',
         );
 
@@ -246,12 +250,12 @@ void main() {
         delayingRepo.delay = const Duration(milliseconds: 50);
 
         final slow = cubit.load('teacher_1');
-        delayingRepo.schedule = WeeklySchedule(
+        delayingRepo.schedule = const WeeklySchedule(
           teacherId: 'teacher_1',
           timezone: 'Africa/Cairo',
           slotDuration: SlotDuration.thirty,
           rules: {
-            Weekday.monday: const [
+            Weekday.monday: [
               TimeRange(start: LocalTime(9, 0), end: LocalTime(17, 0)),
             ],
           },

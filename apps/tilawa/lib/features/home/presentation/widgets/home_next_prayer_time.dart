@@ -10,6 +10,7 @@ import 'package:tilawa/features/home/presentation/bloc/home_dashboard_state.dart
 import 'package:tilawa/features/home/presentation/models/home_dashboard_ui_state.dart';
 import 'package:tilawa/features/home/presentation/widgets/home_dashboard_card.dart';
 import 'package:tilawa/features/home/presentation/widgets/home_prayer_hero_context_row.dart';
+import 'package:tilawa/features/home/presentation/widgets/home_prayer_hero_image_backdrop.dart';
 import 'package:tilawa/features/prayer_times/domain/entities/prayer_time_entity.dart';
 import 'package:tilawa_ui_kit/tilawa_ui_kit.dart';
 
@@ -55,10 +56,10 @@ abstract final class HomeNextPrayerTime {
         TilawaHomeScreenTokens.screenHorizontalPadding(tokens) * 2;
     final bool tightCard =
         MediaQuery.sizeOf(context).width - horizontalGutter < 320;
-    final double contextRow = 36 * textScale;
-    final double cardVerticalPadding = tokens.spaceLarge * 2;
-    final double contextToMetricsGap = tokens.spaceMedium;
-    final double prayerBlock = 172 * textScale;
+    final double contextRow = 34 * textScale;
+    final double cardVerticalPadding = tokens.spaceLarge + tokens.spaceMedium;
+    final double contextToMetricsGap = tokens.spaceSmall;
+    final double prayerBlock = 148 * textScale;
     final double tightSlack = tightCard ? tokens.spaceExtraLarge : 0;
 
     // Mirrors [_HomeNextPrayerTimeSliver] padding + card layout, plus small
@@ -68,10 +69,10 @@ abstract final class HomeNextPrayerTime {
         contextRow +
         contextToMetricsGap +
         prayerBlock +
-        tokens.spaceMedium +
+        tokens.spaceSmall +
         (tokens.borderWidthThin * 2) +
         tightSlack +
-        18;
+        12;
   }
 }
 
@@ -99,7 +100,7 @@ class _HomeNextPrayerTimeSliver extends StatelessWidget {
           horizontalInset,
           tokens.spaceSmall,
           horizontalInset,
-          tokens.spaceMedium,
+          tokens.spaceSmall,
         ),
         child: _HomeNextPrayerTimeCard(
           locationName: locationName,
@@ -161,59 +162,76 @@ class _HomeNextPrayerTimeCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final ThemeData theme = Theme.of(context);
-    final ColorScheme colorScheme = theme.colorScheme;
     final MeMuslimDesignTokens tokens = theme.tokens;
-    final Color ink = colorScheme.onSurface;
-    final Color muted = colorScheme.onSurfaceVariant;
-
-    final Widget metricsChild = showFailure
-        ? _HomeNextPrayerTimeFailure(
-            onCard: ink,
-            onRetry: onRetryDashboard,
-            message: failureIsOffline
-                ? context.l10n.homeDashboardOfflineError
-                : context.l10n.homeDashboardLoadError,
-          )
-        : _HomeNextPrayerTimeFocus(
-            nextPrayer: nextPrayer,
-            onCard: ink,
-            onMuted: muted,
-            accent: theme.componentTokens.homeScreen.homePrayerHeroAccent,
-            onOpenPrayer: onOpenPrayer,
-          );
+    final double cardRadius = tokens.resolveRadius(
+      family: TilawaRadiusFamily.hero,
+    );
 
     return Semantics(
       button: !showFailure && !showFullSkeleton,
       label: context.l10n.nextPrayer,
       child: HomeDashboardCard(
-        surface: TilawaCardSurface.raised,
-        padding: EdgeInsets.all(tokens.spaceLarge),
+        surface: TilawaCardSurface.floating,
+        backgroundColor: Colors.transparent,
+        padding: EdgeInsets.zero,
         onTap: showFailure || showFullSkeleton ? null : onOpenPrayer,
-        child: showFullSkeleton
-            ? _HomeHeroSkeletonScope(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.stretch,
-                  spacing: tokens.spaceMedium,
-                  children: const [
-                    _HomePrayerHeroContextRowSkeleton(),
-                    _HomeNextPrayerTimeMetricsSkeleton(),
-                  ],
-                ),
-              )
-            : Column(
-                crossAxisAlignment: CrossAxisAlignment.stretch,
-                spacing: tokens.spaceMedium,
-                children: [
-                  HomePrayerHeroContextRow(
-                    locationName: locationName,
-                    isRefreshingLocation: isRefreshingLocation,
-                    onRefreshLocation: onRefreshLocation,
-                    ink: ink,
-                    muted: muted,
-                  ),
-                  metricsChild,
-                ],
-              ),
+        child: ClipRRect(
+          borderRadius: BorderRadius.circular(cardRadius),
+          child: HomePrayerHeroImageBackdrop(
+            showImage: !showFullSkeleton,
+            builder:
+                (BuildContext context, HomePrayerHeroForegroundStyle style) {
+                  final Widget metricsChild = showFailure
+                      ? _HomeNextPrayerTimeFailure(
+                          onCard: style.ink,
+                          onRetry: onRetryDashboard,
+                          message: failureIsOffline
+                              ? context.l10n.homeDashboardOfflineError
+                              : context.l10n.homeDashboardLoadError,
+                        )
+                      : _HomeNextPrayerTimeFocus(
+                          nextPrayer: nextPrayer,
+                          onCard: style.ink,
+                          onMuted: style.muted,
+                          onOpenPrayer: onOpenPrayer,
+                        );
+
+                  return Padding(
+                    padding: EdgeInsets.symmetric(
+                      horizontal: tokens.spaceLarge,
+                      vertical: tokens.spaceMedium + tokens.spaceExtraSmall,
+                    ),
+                    child: showFullSkeleton
+                        ? _HomeHeroSkeletonScope(
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.stretch,
+                              spacing: tokens.spaceMedium,
+                              children: const [
+                                _HomePrayerHeroContextRowSkeleton(),
+                                _HomeNextPrayerTimeMetricsSkeleton(),
+                              ],
+                            ),
+                          )
+                        : Column(
+                            crossAxisAlignment: CrossAxisAlignment.stretch,
+                            spacing: tokens.spaceSmall + tokens.spaceExtraSmall,
+                            children: [
+                              HomePrayerHeroContextRow(
+                                locationName: locationName,
+                                isRefreshingLocation: isRefreshingLocation,
+                                onRefreshLocation: onRefreshLocation,
+                                ink: style.ink,
+                                muted: style.muted,
+                                chipBackground: style.chipBackground,
+                                chipBorder: style.chipBorder,
+                              ),
+                              metricsChild,
+                            ],
+                          ),
+                  );
+                },
+          ),
+        ),
       ),
     );
   }
@@ -248,14 +266,12 @@ class _HomeNextPrayerTimeFocus extends StatelessWidget {
     required this.nextPrayer,
     required this.onCard,
     required this.onMuted,
-    required this.accent,
     required this.onOpenPrayer,
   });
 
   final HomeNextPrayer? nextPrayer;
   final Color onCard;
   final Color onMuted;
-  final Color accent;
   final VoidCallback onOpenPrayer;
 
   @override
@@ -283,12 +299,12 @@ class _HomeNextPrayerTimeFocus extends StatelessWidget {
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
-      spacing: tokens.spaceMedium,
+      spacing: tokens.spaceSmall + tokens.spaceExtraSmall,
       children: [
         Text(
           context.l10n.nextPrayer,
           style: theme.textTheme.labelSmall?.copyWith(
-            color: onMuted.withValues(alpha: 0.88),
+            color: onMuted,
             fontWeight: FontWeight.w600,
             letterSpacing: 0.4,
           ),
@@ -321,7 +337,8 @@ class _HomeNextPrayerTimeFocus extends StatelessWidget {
         _HomeNextPrayerTimeRemainingText(
           prayerType: prayer.type,
           prayerTime: prayer.time,
-          color: accent,
+          backgroundColor: theme.colorScheme.primary,
+          foregroundColor: theme.colorScheme.onPrimary,
         ),
       ],
     );
@@ -332,12 +349,14 @@ class _HomeNextPrayerTimeRemainingText extends StatefulWidget {
   const _HomeNextPrayerTimeRemainingText({
     required this.prayerType,
     required this.prayerTime,
-    required this.color,
+    required this.backgroundColor,
+    required this.foregroundColor,
   });
 
   final PrayerType prayerType;
   final DateTime prayerTime;
-  final Color color;
+  final Color backgroundColor;
+  final Color foregroundColor;
 
   @override
   State<_HomeNextPrayerTimeRemainingText> createState() =>
@@ -405,12 +424,8 @@ class _HomeNextPrayerTimeRemainingTextState
       alignment: AlignmentDirectional.centerStart,
       child: DecoratedBox(
         decoration: BoxDecoration(
-          color: widget.color.withValues(alpha: 0.08),
+          color: widget.backgroundColor,
           borderRadius: BorderRadius.circular(tokens.radiusLarge),
-          border: Border.all(
-            color: widget.color.withValues(alpha: 0.18),
-            width: tokens.borderWidthThin,
-          ),
         ),
         child: Padding(
           padding: EdgeInsetsDirectional.symmetric(
@@ -422,7 +437,7 @@ class _HomeNextPrayerTimeRemainingTextState
             maxLines: 1,
             overflow: TextOverflow.ellipsis,
             style: theme.textTheme.labelLarge?.copyWith(
-              color: widget.color,
+              color: widget.foregroundColor,
               fontWeight: FontWeight.w600,
               height: 1.1,
             ),
@@ -535,24 +550,17 @@ class _HomeNextPrayerTimeFailure extends StatelessWidget {
         ),
         Align(
           alignment: AlignmentDirectional.centerStart,
-          child: TextButton(
+          child: TilawaButton(
+            text: context.l10n.retry,
+            variant: TilawaButtonVariant.ghost,
+            shrinkWrapTapTarget: true,
+            foregroundColor: onCard,
+            padding: EdgeInsets.symmetric(horizontal: tokens.spaceSmall),
+            textStyle: theme.textTheme.labelLarge?.copyWith(
+              color: onCard,
+              fontWeight: FontWeight.w600,
+            ),
             onPressed: onRetry,
-            style: TextButton.styleFrom(
-              foregroundColor: onCard,
-              padding: EdgeInsets.symmetric(horizontal: tokens.spaceSmall),
-              minimumSize: Size(
-                tokens.minInteractiveDimension,
-                tokens.minInteractiveDimension,
-              ),
-              tapTargetSize: MaterialTapTargetSize.shrinkWrap,
-            ),
-            child: Text(
-              context.l10n.retry,
-              style: theme.textTheme.labelLarge?.copyWith(
-                color: onCard,
-                fontWeight: FontWeight.w600,
-              ),
-            ),
           ),
         ),
       ],

@@ -237,7 +237,7 @@ class BookingBloc extends Bloc<BookingEvent, BookingState> {
     }
     if (fetched.failureBlockReason != null) {
       return current.copyWith(
-        blockReason: fetched.failureBlockReason!,
+        blockReason: fetched.failureBlockReason,
         isQuoteLoading: false,
       );
     }

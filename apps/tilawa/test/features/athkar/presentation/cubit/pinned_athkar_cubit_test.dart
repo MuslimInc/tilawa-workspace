@@ -37,10 +37,10 @@ void main() {
       act: (cubit) => cubit.load(),
       expect: () => [
         const PinnedAthkarState(status: PinnedAthkarStatus.loading),
-        PinnedAthkarState(
+        const PinnedAthkarState(
           status: PinnedAthkarStatus.ready,
           categories: _categories,
-          pinnedCategoryIds: const [1, 2],
+          pinnedCategoryIds: [1, 2],
         ),
       ],
     );
@@ -48,23 +48,23 @@ void main() {
     blocTest<PinnedAthkarCubit, PinnedAthkarState>(
       'adds, removes, and persists selected categories',
       build: buildCubit,
-      seed: () => PinnedAthkarState(
+      seed: () => const PinnedAthkarState(
         status: PinnedAthkarStatus.ready,
         categories: _categories,
-        pinnedCategoryIds: const [1, 2],
+        pinnedCategoryIds: [1, 2],
       ),
       act: (cubit) => cubit.toggleCategory(3),
       expect: () => [
-        PinnedAthkarState(
+        const PinnedAthkarState(
           status: PinnedAthkarStatus.saving,
           categories: _categories,
-          pinnedCategoryIds: const [1, 2, 3],
+          pinnedCategoryIds: [1, 2, 3],
           isCustomized: true,
         ),
-        PinnedAthkarState(
+        const PinnedAthkarState(
           status: PinnedAthkarStatus.ready,
           categories: _categories,
-          pinnedCategoryIds: const [1, 2, 3],
+          pinnedCategoryIds: [1, 2, 3],
           isCustomized: true,
         ),
       ],
@@ -76,23 +76,23 @@ void main() {
     blocTest<PinnedAthkarCubit, PinnedAthkarState>(
       'reorders pinned category IDs',
       build: buildCubit,
-      seed: () => PinnedAthkarState(
+      seed: () => const PinnedAthkarState(
         status: PinnedAthkarStatus.ready,
         categories: _categories,
-        pinnedCategoryIds: const [1, 2, 3],
+        pinnedCategoryIds: [1, 2, 3],
       ),
       act: (cubit) => cubit.movePinnedCategory(oldIndex: 2, newIndex: 0),
       expect: () => [
-        PinnedAthkarState(
+        const PinnedAthkarState(
           status: PinnedAthkarStatus.saving,
           categories: _categories,
-          pinnedCategoryIds: const [3, 1, 2],
+          pinnedCategoryIds: [3, 1, 2],
           isCustomized: true,
         ),
-        PinnedAthkarState(
+        const PinnedAthkarState(
           status: PinnedAthkarStatus.ready,
           categories: _categories,
-          pinnedCategoryIds: const [3, 1, 2],
+          pinnedCategoryIds: [3, 1, 2],
           isCustomized: true,
         ),
       ],

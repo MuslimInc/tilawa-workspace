@@ -33,7 +33,6 @@ class LoggingAudioHandler extends CompositeAudioHandler {
     });
   }
 
-  // ignore: avoid_print
   void _log(String s) => logger.d('----- LOG: $s');
 
   @override

@@ -17,7 +17,7 @@ class _FakePlatform implements AppReviewPlatformDataSource {
   Future<void> requestReview() async {
     requestCount++;
     if (throwOnRequest) {
-      throw AppReviewFailure.requestFailed('platform');
+      throw const AppReviewFailure.requestFailed('platform');
     }
   }
 

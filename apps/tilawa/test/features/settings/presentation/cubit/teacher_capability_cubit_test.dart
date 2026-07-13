@@ -23,7 +23,7 @@ class _StubTeacherCapabilityUseCase
       );
 
   final List<TeacherCapability> _capabilities;
-  var callCount = 0;
+  int callCount = 0;
 
   @override
   Future<Either<QuranSessionsFailure, TeacherCapability>> call(
@@ -68,7 +68,7 @@ class _ControllableCapabilityUseCase
         profileRepository: _UnimplementedProfileRepository(),
       );
 
-  var callCount = 0;
+  int callCount = 0;
 
   /// Completer controlling the most recent [call] future. A new completer is
   /// created on each invocation so async sequences can be driven deterministically.
@@ -111,7 +111,7 @@ void main() {
     );
     scopeGetIt().registerSingleton<QuranSessionsPlatformConfigStore>(
       QuranSessionsPlatformConfigStore()..setConfig(
-        QuranSessionsPlatformConfig(
+        const QuranSessionsPlatformConfig(
           quranSessionsEnabled: true,
           studentEntryEnabled: false,
           bookingEnabled: true,
@@ -173,7 +173,7 @@ void main() {
       );
       scopeGetIt().registerSingleton<QuranSessionsPlatformConfigStore>(
         QuranSessionsPlatformConfigStore()..setConfig(
-          QuranSessionsPlatformConfig(
+          const QuranSessionsPlatformConfig(
             quranSessionsEnabled: true,
             studentEntryEnabled: false,
             bookingEnabled: true,

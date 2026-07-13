@@ -373,7 +373,7 @@ void main() {
         bloc.add(const LanguageChanged('en'));
         await bloc.stream.firstWhere(
           (RecitersState state) =>
-              state is RecitersLoaded && (state).filteredReciters.length == 3,
+              state is RecitersLoaded && state.filteredReciters.length == 3,
         );
       },
       expect: () => [

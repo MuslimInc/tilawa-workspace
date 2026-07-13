@@ -173,7 +173,8 @@ abstract final class TilawaIcons {
   static const IconData doneAll = Icons.done_all_rounded;
 
   // ── Settings / Profile ──────────────────────────────────────────────────────
-  static const IconData settings = Icons.settings;
+  static const IconData settings = FluentIcons.settings_24_regular;
+  static const IconData settingsActive = FluentIcons.settings_24_filled;
   static const IconData color = FluentIcons.color_24_regular;
   static const IconData storage = FluentIcons.storage_24_regular;
   static const IconData code = FluentIcons.code_24_regular;

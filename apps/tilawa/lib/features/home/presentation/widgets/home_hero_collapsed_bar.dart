@@ -77,7 +77,7 @@ class HomeHeroCollapsedBar extends StatelessWidget {
                       chromeAlpha,
                 ),
                 offset: tokens.shadowOffsetSmall,
-                blurRadius: tokens.spaceSmall.toDouble(),
+                blurRadius: tokens.spaceSmall,
               ),
             ]
           : null,

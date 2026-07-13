@@ -79,11 +79,8 @@ class _RescheduleSessionScreenState extends State<RescheduleSessionScreen> {
                   crossAxisAlignment: CrossAxisAlignment.stretch,
                   spacing: Theme.of(context).tokens.spaceSmall,
                   children: [
-                    TextField(
-                      decoration: InputDecoration(
-                        labelText: l10n.rescheduleReasonLabel,
-                        hintText: l10n.rescheduleReasonHint,
-                      ),
+                    TilawaTextField(
+                      maxLines: 3,
                       onChanged: (value) => context.read<RescheduleBloc>().add(
                         RescheduleReasonChanged(value),
                       ),

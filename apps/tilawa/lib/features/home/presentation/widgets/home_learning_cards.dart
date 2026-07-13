@@ -10,6 +10,7 @@ import 'package:tilawa/router/app_router_config.dart';
 import 'package:tilawa_ui_kit/tilawa_ui_kit.dart';
 import 'home_dashboard_card.dart';
 import 'home_dashboard_icon_well.dart';
+import 'home_dashboard_section.dart';
 import 'home_learn_quran_analytics.dart';
 
 /// Card requesting tutoring interest with Yes/Not Now buttons.
@@ -24,7 +25,10 @@ class HomeLearningInterestCard extends StatelessWidget {
 
     return HomeDashboardCard(
       surface: TilawaCardSurface.raised,
-      padding: EdgeInsets.all(tokens.spaceMedium),
+      padding: EdgeInsets.symmetric(
+        horizontal: tokens.spaceMedium,
+        vertical: tokens.spaceSmall + tokens.spaceExtraSmall,
+      ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         mainAxisSize: MainAxisSize.min,
@@ -36,7 +40,7 @@ class HomeLearningInterestCard extends StatelessWidget {
                 accent: accent,
                 child: Icon(
                   TilawaIcons.teacherCapability,
-                  size: tokens.iconSizeLarge,
+                  size: tokens.iconSizeMedium,
                   color: accent,
                 ),
               ),
@@ -45,7 +49,7 @@ class HomeLearningInterestCard extends StatelessWidget {
                   context.l10n.homeLearningInterestPromptTitle,
                   maxLines: 1,
                   overflow: TextOverflow.ellipsis,
-                  style: theme.textTheme.titleMedium?.copyWith(
+                  style: theme.textTheme.titleSmall?.copyWith(
                     color: theme.colorScheme.onSurface,
                     fontWeight: FontWeight.w700,
                     height: 1.15,
@@ -60,11 +64,11 @@ class HomeLearningInterestCard extends StatelessWidget {
             maxLines: 2,
             overflow: TextOverflow.ellipsis,
             style: theme.textTheme.bodySmall?.copyWith(
-              color: theme.colorScheme.onSurfaceVariant,
+              color: HomeDashboardSection.secondaryTextColor(context),
               height: 1.3,
             ),
           ),
-          SizedBox(height: tokens.spaceMedium),
+          SizedBox(height: tokens.spaceSmall),
           Row(
             spacing: tokens.spaceSmall,
             children: [
@@ -72,6 +76,7 @@ class HomeLearningInterestCard extends StatelessWidget {
                 child: TilawaButton(
                   text: context.l10n.homeLearningInterestPromptNo,
                   variant: TilawaButtonVariant.secondary,
+                  size: TilawaButtonSize.small,
                   onPressed: () {
                     logHomeLearnQuranCardAction(
                       action: 'dismiss_interest',
@@ -87,6 +92,7 @@ class HomeLearningInterestCard extends StatelessWidget {
                 child: TilawaButton(
                   text: context.l10n.homeLearningInterestPromptYes,
                   variant: TilawaButtonVariant.primary,
+                  size: TilawaButtonSize.small,
                   onPressed: () {
                     logHomeLearnQuranCardAction(
                       action: 'accept_interest',
@@ -126,7 +132,10 @@ class HomeLearningBrowseCard extends StatelessWidget {
 
     return HomeDashboardCard(
       surface: TilawaCardSurface.raised,
-      padding: EdgeInsets.all(tokens.spaceMedium),
+      padding: EdgeInsets.symmetric(
+        horizontal: tokens.spaceMedium,
+        vertical: tokens.spaceSmall + tokens.spaceExtraSmall,
+      ),
       onTap: openLearnQuran,
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -139,7 +148,7 @@ class HomeLearningBrowseCard extends StatelessWidget {
                 accent: accent,
                 child: Icon(
                   TilawaIcons.teacherCapability,
-                  size: tokens.iconSizeLarge,
+                  size: tokens.iconSizeMedium,
                   color: accent,
                 ),
               ),
@@ -148,12 +157,17 @@ class HomeLearningBrowseCard extends StatelessWidget {
                   context.l10n.homeLearningBrowseTitle,
                   maxLines: 1,
                   overflow: TextOverflow.ellipsis,
-                  style: theme.textTheme.titleMedium?.copyWith(
+                  style: theme.textTheme.titleSmall?.copyWith(
                     color: theme.colorScheme.onSurface,
                     fontWeight: FontWeight.w700,
                     height: 1.15,
                   ),
                 ),
+              ),
+              Icon(
+                Icons.chevron_right_rounded,
+                size: tokens.iconSizeSmall,
+                color: HomeDashboardSection.secondaryTextColor(context),
               ),
             ],
           ),
@@ -163,16 +177,17 @@ class HomeLearningBrowseCard extends StatelessWidget {
             maxLines: 2,
             overflow: TextOverflow.ellipsis,
             style: theme.textTheme.bodySmall?.copyWith(
-              color: theme.colorScheme.onSurfaceVariant,
+              color: HomeDashboardSection.secondaryTextColor(context),
               height: 1.3,
             ),
           ),
-          SizedBox(height: tokens.spaceMedium),
-          SizedBox(
-            width: double.infinity,
+          SizedBox(height: tokens.spaceSmall),
+          Align(
+            alignment: AlignmentDirectional.centerStart,
             child: TilawaButton(
               text: context.l10n.homeLearningBrowseCta,
-              variant: TilawaButtonVariant.primary,
+              variant: TilawaButtonVariant.secondary,
+              size: TilawaButtonSize.small,
               onPressed: openLearnQuran,
             ),
           ),
@@ -237,7 +252,7 @@ class _HomeLearningNextSessionCardState
         QuranSessionsMvpStore.instance.resolveTeacherName(
           widget.session.teacherId,
         ) ??
-        widget.session.teacherId;
+        context.quranSessionsL10n.quranTeacherFallbackName;
 
     return HomeDashboardCard(
       surface: TilawaCardSurface.raised,
@@ -367,7 +382,7 @@ class HomeLearningPendingBookingCard extends StatelessWidget {
 
     final tutorName =
         QuranSessionsMvpStore.instance.resolveTeacherName(session.teacherId) ??
-        session.teacherId;
+        context.quranSessionsL10n.quranTeacherFallbackName;
 
     final isPendingPayment =
         session.effectiveLifecycleStatus ==
@@ -425,7 +440,9 @@ class HomeLearningPendingBookingCard extends StatelessWidget {
                     Text(
                       statusText,
                       style: theme.textTheme.labelMedium?.copyWith(
-                        color: theme.colorScheme.onSurfaceVariant,
+                        color: isPendingPayment
+                            ? HomeDashboardSection.secondaryTextColor(context)
+                            : HomeDashboardSection.secondaryTextColor(context),
                         fontWeight: FontWeight.w500,
                       ),
                     ),
@@ -489,7 +506,10 @@ class HomeLearningRevisionCard extends StatelessWidget {
 
     return HomeDashboardCard(
       surface: TilawaCardSurface.raised,
-      padding: EdgeInsets.all(tokens.spaceMedium),
+      padding: EdgeInsets.symmetric(
+        horizontal: tokens.spaceMedium,
+        vertical: tokens.spaceSmall + tokens.spaceExtraSmall,
+      ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         mainAxisSize: MainAxisSize.min,
@@ -530,7 +550,7 @@ class HomeLearningRevisionCard extends StatelessWidget {
             maxLines: 2,
             overflow: TextOverflow.ellipsis,
             style: theme.textTheme.bodySmall?.copyWith(
-              color: theme.colorScheme.onSurfaceVariant,
+              color: HomeDashboardSection.secondaryTextColor(context),
               height: 1.3,
             ),
           ),

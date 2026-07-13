@@ -301,5 +301,5 @@ double _scaledGap(
   required double min,
   required double max,
 }) {
-  return (lineHeight * factor).clamp(min, max).toDouble();
+  return (lineHeight * factor).clamp(min, max);
 }

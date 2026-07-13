@@ -66,7 +66,6 @@ class _DownloadsScreenState extends State<DownloadsScreen>
       },
       child: Scaffold(
         appBar: _DownloadsScreenAppBar.fromContext(
-          context,
           totalBytes: totalBytes,
           onRefresh: _loadDownloads,
         ),
@@ -178,8 +177,7 @@ class _DownloadsScreenAppBar extends StatelessWidget
     required this.onRefresh,
   });
 
-  factory _DownloadsScreenAppBar.fromContext(
-    BuildContext context, {
+  factory _DownloadsScreenAppBar.fromContext({
     required int totalBytes,
     required VoidCallback onRefresh,
   }) {

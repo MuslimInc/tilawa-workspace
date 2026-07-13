@@ -6,43 +6,43 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
 import 'package:tilawa/core/app_legal_urls.dart';
-import 'package:tilawa/core/telemetry/sentry_debug_verify_tile.dart';
-import 'package:tilawa/core/telemetry/sentry_report_bug_tile.dart';
 import 'package:tilawa/core/extensions.dart';
 import 'package:tilawa/core/layout/list_scroll_bottom_padding.dart';
+import 'package:tilawa/core/telemetry/sentry_debug_verify_tile.dart';
+import 'package:tilawa/core/telemetry/sentry_report_bug_tile.dart';
 import 'package:tilawa/core/utils/legal_url_launcher.dart';
+import 'package:tilawa/features/shell/application/shell_tab_reselect.dart';
+import 'package:tilawa/features/shell/presentation/shell_tab_reselect_listener.dart';
+import 'package:tilawa/screens/app_shell_nav_destinations.dart';
 import 'package:tilawa_ui_kit/tilawa_ui_kit.dart';
 
 import '../../../../core/di/injection.dart';
 import '../../../../core/env.dart';
 import '../../../../router/app_router_config.dart';
-import '../../../whats_new/whats_new.dart';
 import '../../../auth/application/account_deletion_flow_tracker.dart';
 import '../../../auth/presentation/bloc/auth_bloc.dart';
 import '../../../auth/presentation/services/auth_error_messages.dart';
+import '../../../home/presentation/widgets/home_hero_phase_debug_tile.dart';
+import '../../../home/presentation/widgets/home_skeleton_debug_tile.dart';
 import '../../../localization/presentation/bloc/localization_bloc.dart';
+import '../../../notifications/debug/notification_debug_lab_tile.dart';
+import '../../../prayer_times/presentation/widgets/adhan_debug_test_tile.dart';
+import '../../../quran_sessions/debug/quran_sessions_debug_tools.dart';
+import '../../../quran_sessions/presentation/widgets/debug_livekit_call_tile.dart';
+import '../../../quran_sessions/quran_sessions_feature_flags.dart';
 import '../../../share/domain/entities/share_content.dart';
 import '../../../share/domain/usecases/share_content_use_case.dart';
 import '../../../theme/presentation/cubit/theme_cubit.dart';
 import '../../../theme/presentation/theme_state_material.dart';
-import '../../../home/presentation/widgets/home_hero_phase_debug_tile.dart';
-import '../../../home/presentation/widgets/home_skeleton_debug_tile.dart';
-import '../../../notifications/debug/notification_debug_lab_tile.dart';
-import '../../../prayer_times/presentation/widgets/adhan_debug_test_tile.dart';
-import '../../../ui_kit_debug/tilawa_card_nested_tap_demo_tile.dart';
 import '../../../tour_guide/presentation/widgets/tour_guide_debug_reset_tile.dart';
-import '../../../quran_sessions/debug/quran_sessions_debug_tools.dart';
-import '../../../quran_sessions/presentation/widgets/debug_livekit_call_tile.dart';
+import '../../../ui_kit_debug/tilawa_card_nested_tap_demo_tile.dart';
+import '../../../whats_new/whats_new.dart';
 import '../cubit/settings_cubit.dart';
 import '../formatters/settings_share_text_formatter.dart';
-import '../../../quran_sessions/quran_sessions_feature_flags.dart';
+import '../widgets/settings_picker_sheets.dart';
 import '../widgets/settings_teacher_capability_scope.dart';
 import '../widgets/settings_teaching_on_memuslim_tile.dart';
-import '../widgets/settings_picker_sheets.dart';
 import '../widgets/settings_widgets.dart';
-import 'package:tilawa/features/shell/application/shell_tab_reselect.dart';
-import 'package:tilawa/features/shell/presentation/shell_tab_reselect_listener.dart';
-import 'package:tilawa/screens/app_shell_nav_destinations.dart';
 
 class SettingsScreen extends StatefulWidget {
   const SettingsScreen({
@@ -118,7 +118,6 @@ class _SettingsScreenState extends State<SettingsScreen> {
         onReselect: _onShellTabReselect,
         child: Scaffold(
           appBar: TilawaCatalogAppBar.titleOnly(
-            context,
             title: l10n.settings,
             automaticallyImplyLeading: false,
           ),
@@ -310,10 +309,10 @@ class _SettingsScreenState extends State<SettingsScreen> {
                         ),
                   ),
                   if (isQuranSessionsDebugToolsVisible())
-                    TilawaSettingsGroup(
+                    const TilawaSettingsGroup(
                       title: 'QA Tools',
                       leadingIcon: FluentIcons.beaker_24_regular,
-                      children: const [
+                      children: [
                         DebugLiveKitCallTile(isLast: true),
                       ],
                     ),

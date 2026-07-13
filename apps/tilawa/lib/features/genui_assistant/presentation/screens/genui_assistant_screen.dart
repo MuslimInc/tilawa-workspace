@@ -36,7 +36,7 @@ class GenUiAssistantScreen extends StatelessWidget {
     return BlocProvider<GenUiAssistantCubit>.value(
       value: cubit..load(request),
       child: Scaffold(
-        appBar: AppBar(title: const Text('Smart Quran Plan')),
+        appBar: const TilawaAppBar(title: 'Smart Quran Plan'),
         body: SafeArea(
           child: Padding(
             padding: EdgeInsets.all(Theme.of(context).tokens.spaceMedium),

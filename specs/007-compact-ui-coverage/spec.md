@@ -55,7 +55,7 @@ As a user with compact UI preference enabled, all components should have proport
 
 ### User Story 2 - Preserved touch accessibility (still true as engineering rule)
 
-Interactive elements should respect `kTilawaMinInteractiveDimension` / Material guidance; shrinking unsafe controls was always avoided.
+Interactive elements should respect `kMeMuslimMinInteractiveDimension` / Material guidance; shrinking unsafe controls was always avoided.
 
 ### User Story 3 - Comfortable mode (historical)
 

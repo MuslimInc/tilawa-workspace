@@ -44,12 +44,17 @@ void main() {
     CancelSessionViaServerUseCase? cancelSession,
     AuthSessionProvider? authSession,
   }) {
+    final resolvedGetSessionDetail =
+        getSessionDetail ??
+        GetSessionDetailUseCase(
+          sessionRepository: sessionRepository,
+          cacheStore: MemoryCacheStore(),
+        );
     return SessionDetailBloc(
       getSessionAggregate: GetSessionAggregateUseCase(aggregateRepository),
       getTimeline: GetSessionTimelineUseCase(auditRepository),
-      sessionDetailUseCase: getSessionDetail,
-      cacheInvalidator: invalidateCache,
-      sessionRepository: sessionRepository,
+      getSessionDetail: resolvedGetSessionDetail,
+      invalidateCache: invalidateCache,
       joinSession: joinSession,
       reportConcern: reportConcern,
       openDispute: openDispute,
@@ -218,7 +223,10 @@ void main() {
       return SessionDetailBloc(
         getSessionAggregate: GetSessionAggregateUseCase(aggregateRepository),
         getTimeline: GetSessionTimelineUseCase(auditRepository),
-        sessionRepository: sessionRepository,
+        getSessionDetail: GetSessionDetailUseCase(
+          sessionRepository: sessionRepository,
+          cacheStore: MemoryCacheStore(),
+        ),
       );
     },
     act: (bloc) => bloc.add(

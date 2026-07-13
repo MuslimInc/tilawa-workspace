@@ -48,7 +48,7 @@ class FlutterCompass {
   /// Provides a [Stream] of compass events that can be listened to.
   static Stream<CompassEvent>? get events {
     if (kIsWeb) {
-      return Stream.empty();
+      return const Stream.empty();
     }
     _stream ??= _compassChannel.receiveBroadcastStream().map((Object? data) {
       if (data == null) {

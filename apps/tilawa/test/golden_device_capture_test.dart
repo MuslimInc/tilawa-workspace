@@ -26,12 +26,12 @@ void main() {
           // 2. Build the widget under test.
           // Replace this Container with the actual QuranReaderScreen or QuranPageView
           // loaded with proper dependencies via your DI/AppRouter.
-          final widgetUnderTest = MaterialApp(
+          const widgetUnderTest = MaterialApp(
             home: Scaffold(
               body: Center(
                 child: Text(
                   'Replace with QuranPageView for Page 207',
-                  style: const TextStyle(fontFamily: 'QCF4001_X-Regular'),
+                  style: TextStyle(fontFamily: 'QCF4001_X-Regular'),
                 ),
               ),
             ),

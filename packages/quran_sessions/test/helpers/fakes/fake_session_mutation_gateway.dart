@@ -82,7 +82,7 @@ class FakeSessionMutationGateway implements SessionMutationGateway {
     required DateTime newStartsAt,
     required String reason,
     required ActorRole actorRole,
-  }) async => Left(NotFoundFailure('stub'));
+  }) async => const Left(NotFoundFailure('stub'));
 
   @override
   Future<Either<QuranSessionsFailure, SessionAggregate>> confirmReschedule({
@@ -133,7 +133,7 @@ class FakeSessionMutationGateway implements SessionMutationGateway {
     required String sessionId,
     required ActorRole actorRole,
     required String reason,
-  }) async => Left(NotFoundFailure('stub'));
+  }) async => const Left(NotFoundFailure('stub'));
 
   @override
   Future<Either<QuranSessionsFailure, SessionReportResult>>

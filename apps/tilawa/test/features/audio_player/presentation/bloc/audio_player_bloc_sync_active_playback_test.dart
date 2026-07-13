@@ -101,12 +101,12 @@ void main() {
     artist: 'Akram Al-Alaqmi',
   );
 
-  final PlaybackStateEntity handlerPlayback = PlaybackStateEntity(
+  const PlaybackStateEntity handlerPlayback = PlaybackStateEntity(
     isPlaying: true,
     processingState: AudioProcessingStateStatus.ready,
-    position: const Duration(minutes: 3),
-    bufferedPosition: const Duration(minutes: 10),
-    duration: const Duration(hours: 1),
+    position: Duration(minutes: 3),
+    bufferedPosition: Duration(minutes: 10),
+    duration: Duration(hours: 1),
     currentIndex: 0,
     queue: <AudioEntity>[handlerSurah],
     queueGeneration: 2,
@@ -234,7 +234,7 @@ void main() {
     positionSubject.close();
   });
 
-  final PlaybackStateEntity idlePlayback = PlaybackStateEntity(
+  const PlaybackStateEntity idlePlayback = PlaybackStateEntity(
     isPlaying: false,
     processingState: AudioProcessingStateStatus.idle,
     position: Duration.zero,
@@ -261,7 +261,7 @@ void main() {
       'manual sync aligns bloc with handler surah and clears dismiss',
       () async {
         when(mockSyncActivePlayback.call()).thenAnswer(
-          (_) async => Right(
+          (_) async => const Right(
             ActivePlaybackSnapshot(
               currentAudio: handlerSurah,
               playbackState: handlerPlayback,
@@ -308,7 +308,7 @@ void main() {
 
     test('inactive handler snapshot dismisses mini player', () async {
       when(mockSyncActivePlayback.call()).thenAnswer(
-        (_) async => Right(
+        (_) async => const Right(
           ActivePlaybackSnapshot(
             currentAudio: hydratedSurah,
             playbackState: idlePlayback,
@@ -331,7 +331,7 @@ void main() {
 
     test('sync failure clears unconfirmed success state', () async {
       when(mockSyncActivePlayback.call()).thenAnswer(
-        (_) async => Left(ServerFailure('sync failed')),
+        (_) async => const Left(ServerFailure('sync failed')),
       );
       final AudioPlayerBloc bloc = buildBloc();
       bloc.emit(
@@ -351,20 +351,20 @@ void main() {
 
     test('sync failure preserves state with live playback', () async {
       when(mockSyncActivePlayback.call()).thenAnswer(
-        (_) async => Left(ServerFailure('sync failed')),
+        (_) async => const Left(ServerFailure('sync failed')),
       );
-      final PlaybackStateEntity activePlayback = PlaybackStateEntity(
+      const PlaybackStateEntity activePlayback = PlaybackStateEntity(
         isPlaying: true,
         processingState: AudioProcessingStateStatus.ready,
-        position: const Duration(seconds: 30),
-        bufferedPosition: const Duration(seconds: 45),
-        duration: const Duration(minutes: 5),
+        position: Duration(seconds: 30),
+        bufferedPosition: Duration(seconds: 45),
+        duration: Duration(minutes: 5),
         currentIndex: 0,
         queue: <AudioEntity>[hydratedSurah],
       );
       final AudioPlayerBloc bloc = buildBloc();
       bloc.emit(
-        AudioPlayerState(
+        const AudioPlayerState(
           status: AudioPlayerStatus.success,
           currentAudio: hydratedSurah,
           playbackState: activePlayback,
@@ -478,21 +478,22 @@ void main() {
   });
 
   group('hot restart mini player visibility', () {
-    final PlaybackStateEntity pausedHandlerPlayback = PlaybackStateEntity(
+    const PlaybackStateEntity pausedHandlerPlayback = PlaybackStateEntity(
       isPlaying: false,
       processingState: AudioProcessingStateStatus.ready,
-      position: const Duration(seconds: 30),
-      bufferedPosition: const Duration(minutes: 2),
-      duration: const Duration(minutes: 1),
+      position: Duration(seconds: 30),
+      bufferedPosition: Duration(minutes: 2),
+      duration: Duration(minutes: 1),
       currentIndex: 0,
       queue: <AudioEntity>[hydratedSurah],
       queueGeneration: 1,
     );
 
-    ActivePlaybackSnapshot activeHandlerSnapshot() => ActivePlaybackSnapshot(
-      currentAudio: hydratedSurah,
-      playbackState: pausedHandlerPlayback,
-    );
+    ActivePlaybackSnapshot activeHandlerSnapshot() =>
+        const ActivePlaybackSnapshot(
+          currentAudio: hydratedSurah,
+          playbackState: pausedHandlerPlayback,
+        );
 
     test(
       'documents pre-stream hydrated mismatch before handler events arrive',

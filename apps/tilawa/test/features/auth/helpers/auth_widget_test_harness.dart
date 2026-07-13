@@ -34,7 +34,7 @@ class AuthWidgetTestHarness {
 
     when(
       mockGetCurrentLanguage(),
-    ).thenAnswer((_) async => Right(LanguageConfig.defaultLanguageCode));
+    ).thenAnswer((_) async => const Right(LanguageConfig.defaultLanguageCode));
     when(mockSyncUserLanguagePreference(any)).thenAnswer((_) async {});
     when(mockSyncDeviceToken(any)).thenAnswer(
       (_) async => const Right(null),
@@ -100,6 +100,6 @@ class AuthWidgetTestHarness {
 void provideAuthBlocDummies() {
   provideDummy<Either<Failure, void>>(const Right(null));
   provideDummy<Either<Failure, String>>(
-    Right(LanguageConfig.defaultLanguageCode),
+    const Right(LanguageConfig.defaultLanguageCode),
   );
 }

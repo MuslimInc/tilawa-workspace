@@ -190,11 +190,11 @@ class _ShareAudioConfigSheetState extends State<ShareAudioConfigSheet> {
                         AppShareComposerColors.forestGreen,
                       ],
                     ),
-                    boxShadow: [
+                    boxShadow: const [
                       BoxShadow(
                         color: AppShareComposerColors.shellElevationShadow,
                         blurRadius: 26,
-                        offset: const Offset(0, 16),
+                        offset: Offset(0, 16),
                       ),
                     ],
                   ),
@@ -324,8 +324,7 @@ class _ShareAudioConfigSheetState extends State<ShareAudioConfigSheet> {
                                                   context.l10n.sharedViaTilawa,
                                               handles: _videoContentKeys
                                                   .map(
-                                                    (k) =>
-                                                        WidgetCaptureHandle(k),
+                                                    WidgetCaptureHandle.new,
                                                   )
                                                   .toList(),
                                             );

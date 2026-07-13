@@ -34,9 +34,9 @@ import 'package:tilawa_ui_kit/tilawa_ui_kit.dart';
 import '../../firebase_options.dart';
 import '../../router/app_router.dart';
 import '../../tilawa_app.dart';
+import '../config/notification_config.dart';
 import '../di/injection.dart';
 import '../di/quran_image_dependencies_module.dart';
-import '../config/notification_config.dart';
 import '../logging/app_logger.dart';
 
 part 'app_bootstrapper_phases.dart';
@@ -90,8 +90,10 @@ Future<void> firebaseMessagingBackgroundHandler(RemoteMessage message) async {
 
 Future<void> _showIncomingCallNotification(RemoteMessage message) async {
   final data = message.data;
-  final title = data['title'] ?? 'Incoming Quran Session call';
-  final body = data['body'] ?? 'The other participant is waiting for you.';
+  final String title =
+      (data['title'] as String?) ?? 'Incoming Quran Session call';
+  final String body =
+      (data['body'] as String?) ?? 'The other participant is waiting for you.';
   final sessionId = data['sessionId'];
 
   if (sessionId == null) return;
@@ -111,7 +113,7 @@ Future<void> _showIncomingCallNotification(RemoteMessage message) async {
     settings: initSettings,
   );
 
-  final androidDetails = local_notifications.AndroidNotificationDetails(
+  const androidDetails = local_notifications.AndroidNotificationDetails(
     'quran_session_calls',
     'Incoming Calls',
     channelDescription: 'Incoming Quran Session calls',
@@ -135,7 +137,7 @@ Future<void> _showIncomingCallNotification(RemoteMessage message) async {
     ],
   );
 
-  final platformDetails = local_notifications.NotificationDetails(
+  const platformDetails = local_notifications.NotificationDetails(
     android: androidDetails,
   );
 

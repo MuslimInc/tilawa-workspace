@@ -57,7 +57,7 @@
 ### Accessibility contracts
 
 - [ ] **T-D01**: Add `test/widgets/interaction_scale_contract_test.dart` — pump widget set at 1.0× and 1.4×; assert no overflow.
-- [ ] **T-D02**: Assert `kTilawaMinInteractiveDimension` on audited interactive widgets in same test file.
+- [ ] **T-D02**: Assert `kMeMuslimMinInteractiveDimension` on audited interactive widgets in same test file.
 - [ ] **T-D03**: Fix `TilawaSettingsTile` chevron mirroring for RTL if contract test or manual QA fails.
 - [ ] **T-D04**: Extend `accessibility_audit_contracts_test.dart` for `TilawaIconActionButton` label requirement and chip semantics rules.
 - [ ] **T-D05**: Grep `.maestro/` and document no identifier changes in PR notes.

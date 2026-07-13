@@ -107,7 +107,7 @@ void main() {
       when(
         () => mock.load(force: any(named: 'force')),
       ).thenAnswer((_) async {});
-      when(() => mock.close()).thenAnswer((_) async {});
+      when(mock.close).thenAnswer((_) async {});
       GetIt.I.registerSingleton<HomeLearningCubit>(mock);
     }
     if (!GetIt.I.isRegistered<TeacherCapabilityCubit>()) {
@@ -119,8 +119,8 @@ void main() {
         ),
       );
       when(() => mock.stream).thenAnswer((_) => const Stream.empty());
-      when(() => mock.load()).thenAnswer((_) async {});
-      when(() => mock.close()).thenAnswer((_) async {});
+      when(mock.load).thenAnswer((_) async {});
+      when(mock.close).thenAnswer((_) async {});
       GetIt.I.registerSingleton<TeacherCapabilityCubit>(mock);
     }
   });

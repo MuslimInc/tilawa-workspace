@@ -2319,7 +2319,7 @@ void main() {
           final dqm = GetIt.instance<DownloadQueueManager>();
           dqm.initialize();
 
-          final url = 'http://example.com/file';
+          const url = 'http://example.com/file';
           when(
             mockDownloader.enqueue(
               url: anyNamed('url'),
@@ -2383,11 +2383,11 @@ void main() {
             mockDownloader.loadTasks(),
           ).thenAnswer((_) async => [completedTask]);
 
-          final weirdUrl = 'http://example.com//file';
+          const weirdUrl = 'http://example.com//file';
           (GetIt.instance<DownloadServiceInterface>() as DownloadServiceImpl)
               .globalProgressControllerInternal
               .add(
-                DownloadProgress(
+                const DownloadProgress(
                   id: weirdUrl,
                   status: DownloadStatus.completed,
                   progress: 1.0,

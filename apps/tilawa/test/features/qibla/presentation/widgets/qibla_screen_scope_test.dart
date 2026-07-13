@@ -71,7 +71,7 @@ void main() {
     scopeGetIt().registerFactory<QiblaBloc>(() {
       createCount++;
       final mock = _MockQiblaBloc();
-      when(() => mock.close()).thenAnswer((_) async {});
+      when(mock.close).thenAnswer((_) async {});
       when(() => mock.state).thenReturn(const QiblaState());
       when(() => mock.stream).thenAnswer((_) => const Stream.empty());
       return mock;

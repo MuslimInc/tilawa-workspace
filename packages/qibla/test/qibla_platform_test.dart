@@ -77,31 +77,31 @@ void main() {
     final mockGeolocator =
         GeolocatorPlatform.instance as MockGeolocatorPlatform;
     when(
-      () => mockGeolocator.requestPermission(),
+      mockGeolocator.requestPermission,
     ).thenAnswer((_) async => LocationPermission.whileInUse);
 
     final LocationPermission result = await Qibla.requestPermissions();
 
     expect(result, LocationPermission.whileInUse);
-    verify(() => mockGeolocator.requestPermission()).called(1);
+    verify(mockGeolocator.requestPermission).called(1);
   });
 
   test('checkLocationStatus calls Geolocator methods', () async {
     final mockGeolocator =
         GeolocatorPlatform.instance as MockGeolocatorPlatform;
     when(
-      () => mockGeolocator.checkPermission(),
+      mockGeolocator.checkPermission,
     ).thenAnswer((_) async => LocationPermission.denied);
     when(
-      () => mockGeolocator.isLocationServiceEnabled(),
+      mockGeolocator.isLocationServiceEnabled,
     ).thenAnswer((_) async => false);
 
     final LocationStatus result = await Qibla.checkLocationStatus();
 
     expect(result.enabled, isFalse);
     expect(result.status, LocationPermission.denied);
-    verify(() => mockGeolocator.checkPermission()).called(1);
-    verify(() => mockGeolocator.isLocationServiceEnabled()).called(1);
+    verify(mockGeolocator.checkPermission).called(1);
+    verify(mockGeolocator.isLocationServiceEnabled).called(1);
   });
 
   group('locationStream initial fix strategy', () {
@@ -112,14 +112,14 @@ void main() {
 
       final lastKnown = FakePosition(fakeLatitude: 24.7, fakeLongitude: 46.6);
       when(
-        () => mockGeolocator.getLastKnownPosition(),
+        mockGeolocator.getLastKnownPosition,
       ).thenAnswer((_) async => lastKnown);
 
       final Position result = await instance.locationStream.first;
 
       expect(result.latitude, 24.7);
       expect(result.longitude, 46.6);
-      verify(() => mockGeolocator.getLastKnownPosition()).called(1);
+      verify(mockGeolocator.getLastKnownPosition).called(1);
       verifyNever(
         () => mockGeolocator.getCurrentPosition(
           locationSettings: any(named: 'locationSettings'),
@@ -134,7 +134,7 @@ void main() {
 
       final quickFix = FakePosition(fakeLatitude: 21.4, fakeLongitude: 39.8);
       when(
-        () => mockGeolocator.getLastKnownPosition(),
+        mockGeolocator.getLastKnownPosition,
       ).thenAnswer((_) async => null);
       when(
         () => mockGeolocator.getCurrentPosition(
@@ -146,7 +146,7 @@ void main() {
 
       expect(result.latitude, 21.4);
       expect(result.longitude, 39.8);
-      verify(() => mockGeolocator.getLastKnownPosition()).called(1);
+      verify(mockGeolocator.getLastKnownPosition).called(1);
       verify(
         () => mockGeolocator.getCurrentPosition(
           locationSettings: any(named: 'locationSettings'),
@@ -166,7 +166,7 @@ void main() {
 
       final streamFix = FakePosition(fakeLatitude: 40.7, fakeLongitude: -74.0);
       when(
-        () => mockGeolocator.getLastKnownPosition(),
+        mockGeolocator.getLastKnownPosition,
       ).thenAnswer((_) async => null);
       when(
         () => mockGeolocator.getCurrentPosition(
@@ -183,7 +183,7 @@ void main() {
 
       expect(result.latitude, 40.7);
       expect(result.longitude, -74.0);
-      verify(() => mockGeolocator.getLastKnownPosition()).called(1);
+      verify(mockGeolocator.getLastKnownPosition).called(1);
       verify(
         () => mockGeolocator.getCurrentPosition(
           locationSettings: any(named: 'locationSettings'),

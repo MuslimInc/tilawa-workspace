@@ -16,19 +16,19 @@ class GetStudentSessionsUseCase {
     String? pastCursor,
     int limit = kDefaultSessionPageSize,
   }) async {
-    final upcomingResult = await _repository.getStudentUpcomingSessions(
-      studentId,
-      limit: limit,
-    );
+    // Upcoming and past are independent reads; run them concurrently so the
+    // screen waits max(upcoming, past) instead of their sum.
+    final (upcomingResult, pastResult) = await (
+      _repository.getStudentUpcomingSessions(studentId, limit: limit),
+      _repository.getStudentPastSessions(
+        studentId,
+        cursor: pastCursor,
+        limit: limit,
+      ),
+    ).wait;
     if (upcomingResult.isLeft()) {
       return upcomingResult.map((_) => throw StateError('unreachable'));
     }
-
-    final pastResult = await _repository.getStudentPastSessions(
-      studentId,
-      cursor: pastCursor,
-      limit: limit,
-    );
     if (pastResult.isLeft()) {
       return pastResult.map((_) => throw StateError('unreachable'));
     }

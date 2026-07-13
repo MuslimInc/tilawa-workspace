@@ -1,3 +1,5 @@
+import '../boundaries/scheduling/availability_provider.dart';
+import '../boundaries/scheduling/friday_review_reminder_store.dart';
 import '../data/datasources/availability_remote_data_source.dart';
 import '../data/datasources/booked_slot_lock_remote_data_source.dart';
 import '../data/datasources/booking_remote_data_source.dart';
@@ -26,8 +28,6 @@ import '../data/repositories/teacher_profile_repository_impl.dart';
 import '../data/repositories/teacher_repository_impl.dart';
 import '../data/repositories/user_profile_repository_impl.dart';
 import '../data/repositories/wallet_repository_impl.dart';
-import '../boundaries/scheduling/availability_provider.dart';
-import '../boundaries/scheduling/friday_review_reminder_store.dart';
 import '../data/stores/in_memory_friday_review_reminder_store.dart';
 import '../domain/repositories/booked_slot_lock_repository.dart';
 import '../domain/repositories/booking_repository.dart';
@@ -42,42 +42,45 @@ import '../domain/repositories/teacher_profile_repository.dart';
 import '../domain/repositories/teacher_repository.dart';
 import '../domain/repositories/user_profile_repository.dart';
 import '../domain/repositories/wallet_repository.dart';
+import '../domain/services/slot_generator.dart';
+import '../domain/services/weekly_schedule_validator.dart';
 import '../domain/usecases/approve_teacher_application_usecase.dart';
 import '../domain/usecases/block_account_usecase.dart';
+import '../domain/usecases/block_generated_slot_usecase.dart';
 import '../domain/usecases/cancel_booking_usecase.dart';
 import '../domain/usecases/complete_student_profile_usecase.dart';
 import '../domain/usecases/complete_teacher_profile_usecase.dart';
 import '../domain/usecases/create_booking_usecase.dart';
+import '../domain/usecases/get_availability_overrides_usecase.dart';
+import '../domain/usecases/get_current_user_teacher_capability_usecase.dart';
 import '../domain/usecases/get_market_config_usecase.dart';
+import '../domain/usecases/get_market_scheduling_config_usecase.dart';
 import '../domain/usecases/get_session_policy_usecase.dart';
 import '../domain/usecases/get_student_sessions_usecase.dart';
-import '../domain/usecases/get_current_user_teacher_capability_usecase.dart';
 import '../domain/usecases/get_teacher_application_status_usecase.dart';
-import '../domain/usecases/get_market_scheduling_config_usecase.dart';
 import '../domain/usecases/get_teacher_availability_usecase.dart';
 import '../domain/usecases/get_teacher_profile_usecase.dart';
 import '../domain/usecases/get_teacher_sessions_usecase.dart';
-import '../domain/usecases/is_slot_booked_usecase.dart';
 import '../domain/usecases/get_teachers_usecase.dart';
 import '../domain/usecases/get_user_profile_usecase.dart';
 import '../domain/usecases/get_wallet_snapshot_usecase.dart';
-import '../domain/usecases/resolve_teacher_application_access_usecase.dart';
+import '../domain/usecases/get_weekly_schedule_usecase.dart';
+import '../domain/usecases/is_slot_booked_usecase.dart';
 import '../domain/usecases/reject_teacher_application_usecase.dart';
+import '../domain/usecases/remove_availability_override_usecase.dart';
+import '../domain/usecases/resolve_teacher_application_access_usecase.dart';
 import '../domain/usecases/revoke_teacher_profile_usecase.dart';
+import '../domain/usecases/save_availability_override_usecase.dart';
 import '../domain/usecases/save_teacher_application_draft_usecase.dart';
 import '../domain/usecases/save_teacher_public_profile_usecase.dart';
-import '../domain/usecases/update_teacher_meeting_link_usecase.dart';
+import '../domain/usecases/save_weekly_schedule_usecase.dart';
 import '../domain/usecases/start_teacher_application_usecase.dart';
 import '../domain/usecases/submit_review_usecase.dart';
 import '../domain/usecases/submit_teacher_application_usecase.dart';
 import '../domain/usecases/suspend_teacher_profile_usecase.dart';
 import '../domain/usecases/update_teacher_eligibility_policy_usecase.dart';
+import '../domain/usecases/update_teacher_meeting_link_usecase.dart';
 import '../domain/usecases/validate_booking_eligibility_usecase.dart';
-import '../domain/usecases/block_generated_slot_usecase.dart';
-import '../domain/usecases/get_weekly_schedule_usecase.dart';
-import '../domain/usecases/save_weekly_schedule_usecase.dart';
-import '../domain/services/weekly_schedule_validator.dart';
-import '../domain/services/slot_generator.dart';
 
 /// Registration helper for the `quran_sessions` package.
 ///
@@ -241,9 +244,12 @@ class QuranSessionsModule {
     const scheduleValidator = WeeklyScheduleValidator();
     registerSingleton(scheduleValidator);
     registerSingleton(GetWeeklyScheduleUseCase(scheduleRepo));
+    registerSingleton(GetAvailabilityOverridesUseCase(scheduleRepo));
     registerSingleton(
       SaveWeeklyScheduleUseCase(scheduleRepo, scheduleValidator),
     );
+    registerSingleton(SaveAvailabilityOverrideUseCase(scheduleRepo));
+    registerSingleton(RemoveAvailabilityOverrideUseCase(scheduleRepo));
     registerSingleton(BlockGeneratedSlotUseCase(scheduleRepo));
   }
 }

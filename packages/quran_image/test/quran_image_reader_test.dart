@@ -105,10 +105,10 @@ void main() {
     sl.registerLazySingleton<QuranImagePrewarmer>(() => imagePrewarmer);
     sl.registerLazySingleton<QuranImageCacheRepository>(() => imageRepository);
     sl.registerLazySingleton<VerseMarkerRepository>(
-      () => _EmptyVerseMarkerRepository(),
+      _EmptyVerseMarkerRepository.new,
     );
     sl.registerLazySingleton<SurahHeaderRepository>(
-      () => _EmptySurahHeaderRepository(),
+      _EmptySurahHeaderRepository.new,
     );
     sl.registerLazySingleton<DecodedQuranImageCache>(
       _ReaderTestDecodedQuranImageCache.new,
@@ -259,7 +259,7 @@ void main() {
           () => markerRepository,
         );
         sl.registerLazySingleton<SurahHeaderRepository>(
-          () => _EmptySurahHeaderRepository(),
+          _EmptySurahHeaderRepository.new,
         );
         sl.registerLazySingleton<DecodedQuranImageCache>(
           _ReaderTestDecodedQuranImageCache.new,

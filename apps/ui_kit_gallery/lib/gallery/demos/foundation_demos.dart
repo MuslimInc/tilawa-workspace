@@ -145,12 +145,12 @@ abstract final class FoundationDemos {
       shape: TilawaBottomSheetScaffold.modalShape(context),
       sheetSemanticsLabel: 'Example sheet',
       builder: (sheetContext) {
-        return TilawaBottomSheetScaffold(
-          topBar: const TilawaBottomSheetTitleRow(
+        return const TilawaBottomSheetScaffold(
+          topBar: TilawaBottomSheetTitleRow(
             title: 'Modal sheet',
             trailingClose: true,
           ),
-          children: const [
+          children: [
             Padding(
               padding: EdgeInsets.all(16),
               child: Text('Foundation helper + scaffold composition.'),

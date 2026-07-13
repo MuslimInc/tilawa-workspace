@@ -13,7 +13,7 @@ class ShareFileManager {
   static const _shareDirName = 'tilawa_share';
   static const _exportDirName = 'tilawa_exports';
   static const _verseCacheDirName = 'verse_cache';
-  static const _maxCacheSizeBytes = 100 * 1024 * 1024; // 100 MB
+  static const int _maxCacheSizeBytes = 100 * 1024 * 1024; // 100 MB
 
   /// Returns the share temp directory, creating it if needed.
   Future<Directory> getShareDirectory() async {

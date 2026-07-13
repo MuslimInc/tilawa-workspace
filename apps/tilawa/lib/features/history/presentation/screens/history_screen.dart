@@ -94,7 +94,6 @@ class _HistoryScreenState extends State<HistoryScreen> {
                 ),
               )
             : TilawaCatalogAppBar.titleOnly(
-                context,
                 title: context.l10n.listeningHistory,
               );
 

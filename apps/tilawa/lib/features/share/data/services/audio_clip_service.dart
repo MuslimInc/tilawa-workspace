@@ -32,7 +32,7 @@ class AudioClipService {
   final FFmpegRunner _runner;
 
   /// Maximum number of verses allowed per clip.
-  static const maxVerses = ShareLimits.maxVersesPerClip;
+  static const int maxVerses = ShareLimits.maxVersesPerClip;
 
   /// Maximum concurrent downloads.
   static const _maxConcurrency = 5;

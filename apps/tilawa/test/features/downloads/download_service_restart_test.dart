@@ -55,10 +55,13 @@ void main() {
     ).thenReturn(DownloadStatus.completed);
 
     when(mockFileHelper.getDirectoryName(any)).thenAnswer(
-      (inv) => DownloadPathUtils.getDirectoryName(inv.positionalArguments[0]),
+      (inv) => DownloadPathUtils.getDirectoryName(
+        inv.positionalArguments[0] as String,
+      ),
     );
     when(mockFileHelper.getFileName(any)).thenAnswer(
-      (inv) => DownloadPathUtils.getFileName(inv.positionalArguments[0]),
+      (inv) =>
+          DownloadPathUtils.getFileName(inv.positionalArguments[0] as String),
     );
     when(mockFileHelper.ensureDirectoryExists(any)).thenReturn(true);
     when(mockFileHelper.isFileExists(any)).thenReturn(false);

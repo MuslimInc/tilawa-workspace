@@ -1,10 +1,10 @@
 import 'package:flutter/material.dart';
 
 import '../app_colors.dart';
+import '../design_tokens.dart';
 import 'atoms_tokens.dart';
 import 'molecules_tokens.dart';
 import 'organisms_tokens.dart';
-import '../design_tokens.dart';
 
 @immutable
 class MeMuslimComponentTokens extends ThemeExtension<MeMuslimComponentTokens> {
@@ -153,9 +153,7 @@ class MeMuslimComponentTokens extends ThemeExtension<MeMuslimComponentTokens> {
       homeScreen: brightness == Brightness.dark
           ? TilawaHomeScreenTokens.dark()
           : TilawaHomeScreenTokens.light(),
-      homeDashboardCard: TilawaHomeDashboardCardTokens.fromColorScheme(
-        effectiveColorScheme,
-      ),
+      homeDashboardCard: TilawaHomeDashboardCardTokens.fromColorScheme(),
       capabilityActionCard: TilawaCapabilityActionCardTokens.fromColorScheme(
         effectiveColorScheme,
       ),

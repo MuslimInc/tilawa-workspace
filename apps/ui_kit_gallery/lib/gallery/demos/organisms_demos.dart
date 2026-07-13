@@ -166,7 +166,7 @@ abstract final class OrganismsDemos {
   }
 
   static Widget shareFooterBar(BuildContext context) {
-    return GalleryDemoFrame(
+    return const GalleryDemoFrame(
       child: SizedBox(
         width: 360,
         child: TilawaShareFooterBar(
@@ -182,15 +182,15 @@ abstract final class OrganismsDemos {
   }
 
   static Widget heroSummaryCard(BuildContext context) {
-    return GalleryDemoFrame(
+    return const GalleryDemoFrame(
       padding: EdgeInsets.zero,
       child: TilawaHeroSummaryCard(
         label: 'Pages read this week',
         metric: '42',
-        badges: const [
+        badges: [
           TilawaHeroSummaryBadge(label: 'On track'),
         ],
-        footer: const TilawaHeroSummaryProgress(
+        footer: TilawaHeroSummaryProgress(
           progress: 0.72,
           label: 'Weekly goal',
           valueLabel: '72%',

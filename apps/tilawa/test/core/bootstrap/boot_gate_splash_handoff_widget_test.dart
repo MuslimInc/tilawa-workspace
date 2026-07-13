@@ -30,7 +30,7 @@ class _BootGateHandoffFixture extends StatelessWidget {
               if (showOverlay)
                 DecoratedBox(
                   key: overlayKey,
-                  decoration: BoxDecoration(
+                  decoration: const BoxDecoration(
                     color: AppColors.launchSplashBackground,
                   ),
                   child: const SizedBox.expand(),

@@ -3,8 +3,9 @@ import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:get_it/get_it.dart';
 import 'package:quran_sessions/quran_sessions.dart';
+import 'package:tilawa_ui_kit/tilawa_ui_kit.dart';
 
-import '../../../quran_sessions/domain/services/session_taken_over_notifier.dart';
+import '../../domain/services/session_taken_over_notifier.dart';
 
 /// Shows a "Moved to another device" dialog when a live Quran session the user
 /// is in is taken over by the same user from another device (ADR-008 Phase 2).
@@ -43,19 +44,15 @@ class _SessionTakenOverListenerState extends State<SessionTakenOverListener> {
   void _handleTakenOver(String sessionId) {
     if (!mounted) return;
     final l10n = context.quranSessionsL10n;
-    showDialog<void>(
+    showTilawaFormDialog<void>(
       context: context,
-      barrierDismissible: true,
-      builder: (dialogContext) => AlertDialog(
-        title: Text(l10n.liveSessionTakenOverTitle),
-        content: Text(l10n.liveSessionTakenOverBody),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.of(dialogContext).pop(),
-            child: Text(l10n.liveSessionTakenOverDismiss),
-          ),
-        ],
+      title: l10n.liveSessionTakenOverTitle,
+      bodyBuilder: (dialogContext) => Text(
+        l10n.liveSessionTakenOverBody,
+        style: Theme.of(dialogContext).textTheme.bodyLarge,
       ),
+      primaryLabel: l10n.liveSessionTakenOverDismiss,
+      onPrimary: (dialogContext) => Navigator.of(dialogContext).pop(),
     );
   }
 

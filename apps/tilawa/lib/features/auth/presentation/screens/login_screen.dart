@@ -568,11 +568,13 @@ class _LoginEmailAuthLinks extends StatelessWidget {
                   ? null
                   : () => context.push(const EmailLoginRoute().location),
             ),
-            TextButton(
+            TilawaButton(
+              text: context.l10n.noAccountYet,
+              variant: TilawaButtonVariant.ghost,
+              isFullWidth: true,
               onPressed: isLoading
                   ? null
                   : () => context.push(const RegisterRoute().location),
-              child: Text(context.l10n.noAccountYet),
             ),
           ],
         );

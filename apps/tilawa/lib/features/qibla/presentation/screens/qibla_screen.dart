@@ -79,7 +79,6 @@ class _QiblaScreenState extends State<QiblaScreen> {
           },
           child: Scaffold(
             appBar: TilawaCatalogAppBar.titleOnly(
-              context,
               title: context.l10n.qiblaFinderTitle,
             ),
             body: SafeArea(
@@ -204,15 +203,15 @@ class _LandscapeContent extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Row(
+    return const Row(
       children: [
-        const Spacer(),
+        Spacer(),
         Expanded(flex: kLandscapeCompassFlex, child: _CompassArea()),
         Expanded(
           flex: kLandscapeTextFlex,
           child: Center(child: _QiblaInstructionFooter()),
         ),
-        const Spacer(),
+        Spacer(),
       ],
     );
   }
@@ -402,7 +401,7 @@ class _QiblaInstructionChip extends StatelessWidget {
     final tokens = theme.tokens;
 
     return Padding(
-      padding: EdgeInsets.symmetric(
+      padding: const EdgeInsets.symmetric(
         horizontal: kTipHorizontalPadding,
         vertical: kTipVerticalPadding,
       ).copyWith(bottom: bottomPadding),

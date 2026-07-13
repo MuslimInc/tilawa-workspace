@@ -237,23 +237,23 @@ class RecitationPracticePanel extends StatelessWidget {
                       mainAxisAlignment: MainAxisAlignment.center,
                       children: [
                         if (state.isSessionActive)
-                          FilledButton.icon(
+                          TilawaButton(
+                            text: l10n.recitationPracticeStop,
+                            leadingIcon: const Icon(Icons.stop_rounded),
                             onPressed: state.isInitializing
                                 ? null
-                                : () => cubit.endSession(),
-                            icon: const Icon(Icons.stop_rounded),
-                            label: Text(l10n.recitationPracticeStop),
+                                : cubit.endSession,
                           )
                         else if (isSessionComplete || state.failure != null)
-                          FilledButton(
+                          TilawaButton(
+                            text: l10n.done,
                             onPressed: cubit.closePanel,
-                            child: Text(l10n.done),
                           )
                         else if (!state.isInitializing)
-                          FilledButton.icon(
+                          TilawaButton(
+                            text: l10n.recitationPracticeStart,
+                            leadingIcon: const Icon(Icons.mic_rounded),
                             onPressed: cubit.startSession,
-                            icon: const Icon(Icons.mic_rounded),
-                            label: Text(l10n.recitationPracticeStart),
                           )
                         else if (state.isInitializing)
                           const SizedBox(

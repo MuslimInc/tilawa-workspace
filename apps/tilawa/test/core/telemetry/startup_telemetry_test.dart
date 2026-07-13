@@ -37,7 +37,7 @@ void main() {
   test('resetForTesting clears test configuration', () {
     StartupTelemetry.resetForTesting();
     expect(
-      () => StartupTelemetry.resetForTesting(),
+      StartupTelemetry.resetForTesting,
       returnsNormally,
     );
   });

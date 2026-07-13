@@ -90,8 +90,14 @@ void main() {
         expect(light.opacityGlass, 0.8);
         expect(light.blurGlass, 12.0);
         expect(light.blurShadow, 12.0 * kElevationMultiplier);
-        expect(light.shadowOffsetSmall, Offset(0, 1.5 * kElevationMultiplier));
-        expect(light.shadowOffsetMedium, Offset(0, 3.0 * kElevationMultiplier));
+        expect(
+          light.shadowOffsetSmall,
+          const Offset(0, 1.5 * kElevationMultiplier),
+        );
+        expect(
+          light.shadowOffsetMedium,
+          const Offset(0, 3.0 * kElevationMultiplier),
+        );
         expect(light.borderWidthThin, 0.5);
         expect(light.progressHeight, 3.0);
         expect(light.iconSizeExtraSmall, 12.0);

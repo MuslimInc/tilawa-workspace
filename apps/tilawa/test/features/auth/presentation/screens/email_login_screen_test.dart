@@ -25,7 +25,7 @@ void main() {
     TilawaInteractionFeedback.enabled = false;
     authHarness = AuthWidgetTestHarness();
     await getIt.reset();
-    getIt.registerFactory<EmailAuthFormCubit>(() => EmailAuthFormCubit());
+    getIt.registerFactory<EmailAuthFormCubit>(EmailAuthFormCubit.new);
   });
 
   tearDown(() {
@@ -137,9 +137,13 @@ void main() {
       });
       await tester.pump();
 
+      // The primary sign-in button is the only one that enters the loading
+      // state; the ghost email-auth links never do.
       expect(
-        tester.widget<TilawaButton>(find.byType(TilawaButton)).isLoading,
-        isTrue,
+        tester
+            .widgetList<TilawaButton>(find.byType(TilawaButton))
+            .where((TilawaButton button) => button.isLoading),
+        hasLength(1),
       );
     });
 

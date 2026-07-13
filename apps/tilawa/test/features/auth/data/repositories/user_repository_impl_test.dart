@@ -76,7 +76,7 @@ void main() {
     test(
       'saveCompleteEmailRegistration writes general profile and incomplete quran shell',
       () async {
-        final EmailRegistrationDraft draft = EmailRegistrationDraft(
+        const EmailRegistrationDraft draft = EmailRegistrationDraft(
           displayName: 'Complete User',
           preferredLanguageCode: 'ar',
         );

@@ -109,9 +109,9 @@ void main() {
 
     await tester.pumpWidget(
       _wrap(
-        SingleChildScrollView(
+        const SingleChildScrollView(
           scrollDirection: Axis.horizontal,
-          child: const QiblaCompassWidget(
+          child: QiblaCompassWidget(
             qiblaDirection: QiblaDirectionEntity(
               qibla: 0,
               direction: 136,

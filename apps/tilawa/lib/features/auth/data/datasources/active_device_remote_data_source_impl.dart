@@ -12,6 +12,10 @@ class ActiveDeviceRemoteDataSourceImpl implements ActiveDeviceRemoteDataSource {
 
   final FirebaseFunctions _functions;
 
+  /// Bounded so a dead or captive network (e.g. an exhausted data plan whose
+  /// carrier blackholes traffic) fails fast instead of hanging the sync.
+  static const Duration _callTimeout = Duration(seconds: 15);
+
   @override
   Future<SessionRegistration> registerActiveDevice({
     required String deviceId,
@@ -22,7 +26,10 @@ class ActiveDeviceRemoteDataSourceImpl implements ActiveDeviceRemoteDataSource {
     DeviceInfoSnapshot? deviceInfo,
     bool signOut = false,
   }) async {
-    final callable = _functions.httpsCallable('registerActiveDevice');
+    final callable = _functions.httpsCallable(
+      'registerActiveDevice',
+      options: HttpsCallableOptions(timeout: _callTimeout),
+    );
     final deviceInfoJson = _deviceInfoJson(deviceInfo);
     // ADR-008 Phase 0: opt into the additive device-registry write when the
     // launch flag is on. Never sent on sign-out (the server ignores it anyway).

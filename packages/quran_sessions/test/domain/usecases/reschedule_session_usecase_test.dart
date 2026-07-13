@@ -22,7 +22,7 @@ void main() {
         );
       useCase = RequestRescheduleUseCase(
         aggregateRepository: repository,
-        lifecycleGuard: SessionLifecycleGuard(),
+        lifecycleGuard: const SessionLifecycleGuard(),
         reschedulePolicy: ConfigurableReschedulePolicy(now: () => now),
         notificationGateway: FakeSessionNotificationGateway(),
         auditRepository: FakeAuditRepository(),
@@ -78,7 +78,7 @@ void main() {
       commandGateway = FakeSessionCommandGateway();
       useCase = ConfirmRescheduleUseCase(
         aggregateRepository: repository,
-        lifecycleGuard: SessionLifecycleGuard(),
+        lifecycleGuard: const SessionLifecycleGuard(),
         commandGateway: commandGateway,
         notificationGateway: FakeSessionNotificationGateway(),
         auditRepository: FakeAuditRepository(),

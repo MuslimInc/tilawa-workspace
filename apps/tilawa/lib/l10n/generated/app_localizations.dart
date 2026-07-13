@@ -1016,16 +1016,16 @@ abstract class AppLocalizations {
   /// **'Reset plan'**
   String get khatmaResetAction;
 
-  /// Confirmation dialog title for resetting Smart Khatma
+  /// Confirmation dialog title for deleting Smart Khatma
   ///
   /// In en, this message translates to:
-  /// **'Reset Khatma plan?'**
+  /// **'Delete Khatma plan?'**
   String get khatmaResetTitle;
 
-  /// Confirmation dialog message for resetting Smart Khatma
+  /// Confirmation dialog message for deleting Smart Khatma
   ///
   /// In en, this message translates to:
-  /// **'This clears your current Khatma plan. Your last-read Quran page and bookmarks stay saved.'**
+  /// **'This deletes your current plan only. Your last-read page and bookmarks stay saved.'**
   String get khatmaResetMessage;
 
   /// Continue reading action for Smart Khatma
@@ -1049,8 +1049,343 @@ abstract class AppLocalizations {
   /// Subtitle for the reset-plan row on the Smart Khatma hub
   ///
   /// In en, this message translates to:
-  /// **'Clear the current plan. Your bookmarks stay saved.'**
+  /// **'Deletes plan only; bookmarks stay saved.'**
   String get khatmaHubResetSubtitle;
+
+  /// No description provided for @khatmaCompletedTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Khatma complete'**
+  String get khatmaCompletedTitle;
+
+  /// No description provided for @khatmaProgressCompleteMetric.
+  ///
+  /// In en, this message translates to:
+  /// **'100%'**
+  String get khatmaProgressCompleteMetric;
+
+  /// No description provided for @khatmaCompletedSubtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'May Allah accept it. Begin another plan whenever you are ready.'**
+  String get khatmaCompletedSubtitle;
+
+  /// No description provided for @khatmaStartAnotherAction.
+  ///
+  /// In en, this message translates to:
+  /// **'Start another Khatma'**
+  String get khatmaStartAnotherAction;
+
+  /// No description provided for @khatmaUnavailable.
+  ///
+  /// In en, this message translates to:
+  /// **'Your Khatma plan is temporarily unavailable. Try again.'**
+  String get khatmaUnavailable;
+
+  /// No description provided for @khatmaStartFromBeginning.
+  ///
+  /// In en, this message translates to:
+  /// **'From the beginning'**
+  String get khatmaStartFromBeginning;
+
+  /// No description provided for @khatmaContinueCurrentPosition.
+  ///
+  /// In en, this message translates to:
+  /// **'From my current Quran page'**
+  String get khatmaContinueCurrentPosition;
+
+  /// No description provided for @khatmaReviewPlanTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Review your Khatma plan'**
+  String get khatmaReviewPlanTitle;
+
+  /// No description provided for @khatmaRangePages.
+  ///
+  /// In en, this message translates to:
+  /// **'Pages {startPage}–{endPage}'**
+  String khatmaRangePages(int startPage, int endPage);
+
+  /// No description provided for @khatmaRangePagesFormatted.
+  ///
+  /// In en, this message translates to:
+  /// **'Pages {range}'**
+  String khatmaRangePagesFormatted(String range);
+
+  /// No description provided for @khatmaDailyPages.
+  ///
+  /// In en, this message translates to:
+  /// **'{pages} pages each day'**
+  String khatmaDailyPages(int pages);
+
+  /// No description provided for @khatmaStartPage.
+  ///
+  /// In en, this message translates to:
+  /// **'Starts at page {page}'**
+  String khatmaStartPage(int page);
+
+  /// No description provided for @khatmaTargetPage.
+  ///
+  /// In en, this message translates to:
+  /// **'Finishes at page {page}'**
+  String khatmaTargetPage(int page);
+
+  /// No description provided for @khatmaExpectedCompletionDate.
+  ///
+  /// In en, this message translates to:
+  /// **'Expected completion: {date}'**
+  String khatmaExpectedCompletionDate(String date);
+
+  /// No description provided for @khatmaConfirmPlanAction.
+  ///
+  /// In en, this message translates to:
+  /// **'Start this Khatma'**
+  String get khatmaConfirmPlanAction;
+
+  /// No description provided for @khatmaStartTodayAction.
+  ///
+  /// In en, this message translates to:
+  /// **'Start today’s Wird'**
+  String get khatmaStartTodayAction;
+
+  /// No description provided for @khatmaResumeTodayAction.
+  ///
+  /// In en, this message translates to:
+  /// **'Resume today’s Wird'**
+  String get khatmaResumeTodayAction;
+
+  /// No description provided for @khatmaTodayCompletedTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Today’s Wird is complete'**
+  String get khatmaTodayCompletedTitle;
+
+  /// No description provided for @khatmaTodayCompletedSubtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Your next assignment will be ready tomorrow.'**
+  String get khatmaTodayCompletedSubtitle;
+
+  /// No description provided for @khatmaConfirmedAndRemaining.
+  ///
+  /// In en, this message translates to:
+  /// **'{confirmed} confirmed · {remaining} remaining'**
+  String khatmaConfirmedAndRemaining(int confirmed, int remaining);
+
+  /// No description provided for @khatmaSaveProgressTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Save your Khatma progress'**
+  String get khatmaSaveProgressTitle;
+
+  /// No description provided for @khatmaCompletedThroughPage.
+  ///
+  /// In en, this message translates to:
+  /// **'I completed through page {page}'**
+  String khatmaCompletedThroughPage(int page);
+
+  /// No description provided for @khatmaProgressPageSelector.
+  ///
+  /// In en, this message translates to:
+  /// **'Choose the last page you completed'**
+  String get khatmaProgressPageSelector;
+
+  /// No description provided for @khatmaCompleteTodayAction.
+  ///
+  /// In en, this message translates to:
+  /// **'I completed today’s Wird'**
+  String get khatmaCompleteTodayAction;
+
+  /// No description provided for @khatmaSaveThroughPageAction.
+  ///
+  /// In en, this message translates to:
+  /// **'Save through page {page}'**
+  String khatmaSaveThroughPageAction(int page);
+
+  /// No description provided for @khatmaExtendReviewTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Review plan extension'**
+  String get khatmaExtendReviewTitle;
+
+  /// No description provided for @khatmaExtendReviewMessage.
+  ///
+  /// In en, this message translates to:
+  /// **'Daily pages: {oldPages} → {newPages}\nCompletion date: {oldDate} → {newDate}'**
+  String khatmaExtendReviewMessage(
+    int oldPages,
+    int newPages,
+    String oldDate,
+    String newDate,
+  );
+
+  /// No description provided for @khatmaCreateAction.
+  ///
+  /// In en, this message translates to:
+  /// **'Create Khatma'**
+  String get khatmaCreateAction;
+
+  /// No description provided for @khatmaBoundaryBySurah.
+  ///
+  /// In en, this message translates to:
+  /// **'Surah range'**
+  String get khatmaBoundaryBySurah;
+
+  /// No description provided for @khatmaBoundaryByPage.
+  ///
+  /// In en, this message translates to:
+  /// **'Page range'**
+  String get khatmaBoundaryByPage;
+
+  /// No description provided for @khatmaStartSurah.
+  ///
+  /// In en, this message translates to:
+  /// **'Start Surah'**
+  String get khatmaStartSurah;
+
+  /// No description provided for @khatmaEndSurah.
+  ///
+  /// In en, this message translates to:
+  /// **'End Surah'**
+  String get khatmaEndSurah;
+
+  /// No description provided for @khatmaStartPageInput.
+  ///
+  /// In en, this message translates to:
+  /// **'Start page'**
+  String get khatmaStartPageInput;
+
+  /// No description provided for @khatmaEndPageInput.
+  ///
+  /// In en, this message translates to:
+  /// **'End page'**
+  String get khatmaEndPageInput;
+
+  /// No description provided for @khatmaPageBoundsHelp.
+  ///
+  /// In en, this message translates to:
+  /// **'Enter a page from 1 to 604'**
+  String get khatmaPageBoundsHelp;
+
+  /// No description provided for @khatmaChooseDuration.
+  ///
+  /// In en, this message translates to:
+  /// **'Choose a duration'**
+  String get khatmaChooseDuration;
+
+  /// No description provided for @khatmaTotalPages.
+  ///
+  /// In en, this message translates to:
+  /// **'Total: {pages} pages'**
+  String khatmaTotalPages(int pages);
+
+  /// No description provided for @khatmaAssignedPages.
+  ///
+  /// In en, this message translates to:
+  /// **'Assigned today: {pages}'**
+  String khatmaAssignedPages(int pages);
+
+  /// No description provided for @khatmaConfirmedPages.
+  ///
+  /// In en, this message translates to:
+  /// **'Confirmed today: {pages}'**
+  String khatmaConfirmedPages(int pages);
+
+  /// No description provided for @khatmaRemainingTodayPages.
+  ///
+  /// In en, this message translates to:
+  /// **'Remaining today: {pages}'**
+  String khatmaRemainingTodayPages(int pages);
+
+  /// No description provided for @khatmaSaveProgressAction.
+  ///
+  /// In en, this message translates to:
+  /// **'Save progress'**
+  String get khatmaSaveProgressAction;
+
+  /// No description provided for @khatmaReturnToQuranAction.
+  ///
+  /// In en, this message translates to:
+  /// **'Return to Quran'**
+  String get khatmaReturnToQuranAction;
+
+  /// No description provided for @khatmaStartAyah.
+  ///
+  /// In en, this message translates to:
+  /// **'Start Ayah'**
+  String get khatmaStartAyah;
+
+  /// No description provided for @khatmaEndAyah.
+  ///
+  /// In en, this message translates to:
+  /// **'End Ayah'**
+  String get khatmaEndAyah;
+
+  /// No description provided for @khatmaAyahNumber.
+  ///
+  /// In en, this message translates to:
+  /// **'Ayah {number}'**
+  String khatmaAyahNumber(int number);
+
+  /// No description provided for @khatmaScheduleByDuration.
+  ///
+  /// In en, this message translates to:
+  /// **'Duration'**
+  String get khatmaScheduleByDuration;
+
+  /// No description provided for @khatmaScheduleByTargetDate.
+  ///
+  /// In en, this message translates to:
+  /// **'Target date'**
+  String get khatmaScheduleByTargetDate;
+
+  /// No description provided for @khatmaChooseTargetDate.
+  ///
+  /// In en, this message translates to:
+  /// **'Choose a completion date'**
+  String get khatmaChooseTargetDate;
+
+  /// No description provided for @khatmaPreviewPlanAction.
+  ///
+  /// In en, this message translates to:
+  /// **'Preview plan'**
+  String get khatmaPreviewPlanAction;
+
+  /// No description provided for @khatmaEditPlanAction.
+  ///
+  /// In en, this message translates to:
+  /// **'Edit plan'**
+  String get khatmaEditPlanAction;
+
+  /// No description provided for @khatmaEditPlanTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Review plan changes'**
+  String get khatmaEditPlanTitle;
+
+  /// No description provided for @khatmaEditPlanSubtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Adjust duration or end date; progress stays saved.'**
+  String get khatmaEditPlanSubtitle;
+
+  /// No description provided for @khatmaSavePlanChangesAction.
+  ///
+  /// In en, this message translates to:
+  /// **'Save changes'**
+  String get khatmaSavePlanChangesAction;
+
+  /// No description provided for @khatmaDeletePlanAction.
+  ///
+  /// In en, this message translates to:
+  /// **'Delete plan'**
+  String get khatmaDeletePlanAction;
+
+  /// No description provided for @khatmaResetCorruptAction.
+  ///
+  /// In en, this message translates to:
+  /// **'Reset Khatma'**
+  String get khatmaResetCorruptAction;
 
   /// Title for the daily Quran engagement plan card
   ///
@@ -5222,6 +5557,24 @@ abstract class AppLocalizations {
   /// **'Play Adhan'**
   String get playAdhan;
 
+  /// Label for the first adhan sound option
+  ///
+  /// In en, this message translates to:
+  /// **'Sound 1'**
+  String get adhanSound1;
+
+  /// Label for the second adhan sound option
+  ///
+  /// In en, this message translates to:
+  /// **'Sound 2'**
+  String get adhanSound2;
+
+  /// Label for the third adhan sound option
+  ///
+  /// In en, this message translates to:
+  /// **'Sound 3'**
+  String get adhanSound3;
+
   /// Label for the 0-minutes-before notification offset option
   ///
   /// In en, this message translates to:
@@ -6805,6 +7158,40 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Security'**
   String get settingsSecuritySection;
+
+  /// Title of the Daily Wird home-screen widget
+  ///
+  /// In en, this message translates to:
+  /// **'Today\'s Wird'**
+  String get wirdWidgetTitle;
+
+  /// Daily Wird widget copy when no plan exists
+  ///
+  /// In en, this message translates to:
+  /// **'Start a calm Quran reading plan'**
+  String get wirdWidgetNoPlanSubtitle;
+
+  /// Daily Wird widget progress summary using preformatted numbers
+  ///
+  /// In en, this message translates to:
+  /// **'{completed} of {assigned} pages completed · {remaining} remaining'**
+  String wirdWidgetProgressSubtitle(
+    String completed,
+    String assigned,
+    String remaining,
+  );
+
+  /// Daily Wird widget copy when today's target is complete
+  ///
+  /// In en, this message translates to:
+  /// **'Today\'s Wird is complete'**
+  String get wirdWidgetDayCompletedSubtitle;
+
+  /// Daily Wird widget copy when the entire plan is complete
+  ///
+  /// In en, this message translates to:
+  /// **'Khatma complete'**
+  String get wirdWidgetPlanCompletedSubtitle;
 
   /// Badge on Settings profile when the signed-in user has the Firebase admin custom claim
   ///

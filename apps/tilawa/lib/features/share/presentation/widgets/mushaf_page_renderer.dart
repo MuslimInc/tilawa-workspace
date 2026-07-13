@@ -149,8 +149,7 @@ class _QcfPageState extends State<_QcfPage> {
                             (bodyConstraints.maxHeight -
                                     safeZoneTop -
                                     safeZoneBottom)
-                                .clamp(0.0, bodyConstraints.maxHeight)
-                                .toDouble();
+                                .clamp(0.0, bodyConstraints.maxHeight);
                         final contentConstraints = kReelComposerV2
                             ? BoxConstraints.tightFor(
                                 width: bodyConstraints.maxWidth,
@@ -361,19 +360,15 @@ class _QcfPageState extends State<_QcfPage> {
 
     final double lineHeight = metrics.fontSize * metrics.fontHeight;
     final double headerToBismillahGap =
-        (lineHeight * VideoReelDesign.surahHeaderToBismillahGapFactor)
-            .clamp(
-              VideoReelDesign.surahHeaderToBismillahMinGap,
-              VideoReelDesign.surahHeaderToBismillahMaxGap,
-            )
-            .toDouble();
+        (lineHeight * VideoReelDesign.surahHeaderToBismillahGapFactor).clamp(
+          VideoReelDesign.surahHeaderToBismillahMinGap,
+          VideoReelDesign.surahHeaderToBismillahMaxGap,
+        );
     final double bismillahToTextGap =
-        (lineHeight * VideoReelDesign.bismillahToTextGapFactor)
-            .clamp(
-              VideoReelDesign.bismillahToTextMinGap,
-              VideoReelDesign.bismillahToTextMaxGap,
-            )
-            .toDouble();
+        (lineHeight * VideoReelDesign.bismillahToTextGapFactor).clamp(
+          VideoReelDesign.bismillahToTextMinGap,
+          VideoReelDesign.bismillahToTextMaxGap,
+        );
 
     final List<PreparedPageBlock> result = <PreparedPageBlock>[];
 
@@ -504,8 +499,10 @@ class _ReelTopBar extends StatelessWidget {
     final theme = Theme.of(context);
     final palette = VideoReelPalette.fromContext(context);
     final double height = (pageHeight * VideoReelDesign.topBarHeightFactor)
-        .clamp(VideoReelDesign.topBarMinHeight, VideoReelDesign.topBarMaxHeight)
-        .toDouble();
+        .clamp(
+          VideoReelDesign.topBarMinHeight,
+          VideoReelDesign.topBarMaxHeight,
+        );
     final String localizedJuzNumber = _localizedQuranNumber(context, juzNumber);
     // Material 3 base sizes — titleMedium=16, bodyMedium=14 — match the
     // values previously held in VideoReelDesign.topBar*FontSize literals.

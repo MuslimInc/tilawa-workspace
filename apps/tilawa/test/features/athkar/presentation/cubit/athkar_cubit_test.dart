@@ -74,7 +74,7 @@ void main() {
       },
       act: (cubit) => cubit.loadCategories(),
       expect: () => [
-        AthkarLoading(),
+        const AthkarLoading(),
         const AthkarCategoriesLoaded(tCategories),
       ],
       verify: (_) {
@@ -109,7 +109,7 @@ void main() {
       },
       act: (cubit) => cubit.loadAthkar(1),
       expect: () => [
-        AthkarLoading(),
+        const AthkarLoading(),
         AthkarItemsLoaded(items: tAthkarItems, currentCounts: const {1: 3}),
       ],
       verify: (_) {

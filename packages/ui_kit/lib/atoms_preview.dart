@@ -15,11 +15,11 @@ PreviewThemeData atomsPreviewTheme() {
 
 @Preview(name: 'TilawaCard', group: 'Atoms', theme: atomsPreviewTheme)
 Widget previewTilawaCard() {
-  return Scaffold(
+  return const Scaffold(
     body: Padding(
-      padding: const EdgeInsets.all(16),
+      padding: EdgeInsets.all(16),
       child: Center(
-        child: TilawaCard(child: const Text('Tilawa card content')),
+        child: TilawaCard(child: Text('Tilawa card content')),
       ),
     ),
   );
@@ -46,12 +46,12 @@ Widget previewTilawaCardTappable() {
 
 @Preview(name: 'TilawaDivider', group: 'Atoms', theme: atomsPreviewTheme)
 Widget previewTilawaDivider() {
-  return Scaffold(
+  return const Scaffold(
     body: Padding(
-      padding: const EdgeInsets.all(24),
+      padding: EdgeInsets.all(24),
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
-        children: const [Text('Above'), TilawaDivider(), Text('Below')],
+        children: [Text('Above'), TilawaDivider(), Text('Below')],
       ),
     ),
   );
@@ -161,9 +161,9 @@ Widget previewTilawaSectionTitle() {
   theme: atomsPreviewTheme,
 )
 Widget previewTilawaSectionTitleDark() {
-  return Scaffold(
+  return const Scaffold(
     backgroundColor: Colors.black,
-    body: const Padding(
+    body: Padding(
       padding: EdgeInsets.all(24),
       child: Align(
         alignment: AlignmentDirectional.centerStart,

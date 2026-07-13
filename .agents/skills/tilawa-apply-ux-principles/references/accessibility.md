@@ -2,7 +2,7 @@
 
 ## Touch & motor
 
-- Minimum interactive size: **44 dp** (`kTilawaMinInteractiveDimension` /
+- Minimum interactive size: **44 dp** (`kMeMuslimMinInteractiveDimension` /
   `tokens.minInteractiveDimension` in `design_tokens.dart`)
 - Prefer wide tap zones on daily actions (athkar shortcuts, player controls)
 - Do not rely on hover-only affordances (mobile-first)

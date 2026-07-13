@@ -11,9 +11,9 @@ void main() {
   setUp(() {
     const TextNormalizationServiceImpl textNormalizer =
         TextNormalizationServiceImpl();
-    useCase = CompareRecitationUseCase(
+    useCase = const CompareRecitationUseCase(
       RecitationSpeechNormalizer(textNormalizer),
-      const RecitationTextAligner(),
+      RecitationTextAligner(),
     );
   });
 

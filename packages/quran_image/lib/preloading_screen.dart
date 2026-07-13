@@ -2,11 +2,11 @@ import 'dart:async';
 
 import 'package:flutter/material.dart';
 import 'package:quran_image/core/perf_logger.dart';
-import 'package:tilawa_ui_kit/tilawa_ui_kit.dart';
 import 'package:quran_image/data/repositories/asset_verse_marker_repository.dart';
 import 'package:quran_image/domain/repositories/quran_image_cache_repository.dart';
 import 'package:quran_image/domain/services/decoded_quran_image_cache.dart';
 import 'package:quran_image/verse_marker.dart';
+import 'package:tilawa_ui_kit/tilawa_ui_kit.dart';
 
 import 'core/di/dependency_injection.dart';
 import 'domain/entities/app_message.dart';
@@ -338,9 +338,9 @@ class _PreloadingScreenState extends State<PreloadingScreen> {
                 ),
               ),
               const SizedBox(height: 20),
-              ElevatedButton(
+              TilawaButton(
                 onPressed: _waitForPreload,
-                child: Text(const RetryMessage().localize(l10n)),
+                text: const RetryMessage().localize(l10n),
               ),
             ] else if (!_cacheStatus.isReady) ...[
               Text(

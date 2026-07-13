@@ -375,7 +375,7 @@ void main() {
       // "Practice Surah 18..." is from intl_en: sessionRevisionPracticeBody
       expect(
         find.text(
-          'Practice Surah 18 in Tilawa\'s Quran reader before or after your session.',
+          "Practice Surah 18 in Tilawa's Quran reader before or after your session.",
         ),
         findsOneWidget,
       );

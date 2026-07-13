@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:tilawa_ui_kit/tilawa_ui_kit.dart';
 
-import '../../../l10n/quran_image_localizations.dart';
+import '../../l10n/quran_image_localizations.dart';
 import '../../core/perf_logger.dart';
 import '../../domain/domain.dart';
 

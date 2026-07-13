@@ -106,7 +106,6 @@ void main() {
       final draft = _draft();
       repo.application = draft;
       editingState = TeacherApplicationEditing(application: draft);
-      // ignore: invalid_use_of_visible_for_testing_member
       bloc.emit(editingState);
     });
 
@@ -130,7 +129,6 @@ void main() {
       build: () {
         final draft = _draft(phoneCountryCode: 'KW');
         repo.application = draft;
-        // ignore: invalid_use_of_visible_for_testing_member
         bloc.emit(TeacherApplicationEditing(application: draft));
         return bloc;
       },
@@ -158,7 +156,6 @@ void main() {
       build: () {
         final draft = _draft(phoneCountryCode: 'KW');
         repo.application = draft;
-        // ignore: invalid_use_of_visible_for_testing_member
         bloc.emit(TeacherApplicationEditing(application: draft));
         return bloc;
       },
@@ -229,7 +226,6 @@ void main() {
       build: () {
         final draft = _draft();
         repo.application = draft;
-        // ignore: invalid_use_of_visible_for_testing_member
         bloc.emit(
           TeacherApplicationEditing(
             application: draft,
@@ -253,7 +249,6 @@ void main() {
       build: () {
         final draft = _draft();
         repo.application = draft;
-        // ignore: invalid_use_of_visible_for_testing_member
         bloc.emit(
           TeacherApplicationEditing(
             application: draft,
@@ -284,7 +279,6 @@ void main() {
       build: () {
         final draft = _draft();
         repo.application = draft;
-        // ignore: invalid_use_of_visible_for_testing_member
         bloc.emit(TeacherApplicationEditing(application: draft));
         return bloc;
       },
@@ -306,7 +300,6 @@ void main() {
       build: () {
         final draft = _draft(phoneNumber: '+201012345678');
         repo.application = draft;
-        // ignore: invalid_use_of_visible_for_testing_member
         bloc.emit(
           TeacherApplicationEditing(
             application: draft.copyWith(
@@ -339,7 +332,6 @@ void main() {
       build: () {
         final draft = _draft();
         repo.application = draft;
-        // ignore: invalid_use_of_visible_for_testing_member
         bloc.emit(
           TeacherApplicationEditing(
             application: draft,
@@ -367,7 +359,6 @@ void main() {
       build: () {
         final draft = _draft(phoneNumber: '+201012345678');
         repo.application = draft;
-        // ignore: invalid_use_of_visible_for_testing_member
         bloc.emit(
           TeacherApplicationEditing(
             application: draft,
@@ -398,7 +389,6 @@ void main() {
           publicDisplayName: '',
         ).copyWith(publicDisplayName: null);
         repo.application = draft;
-        // ignore: invalid_use_of_visible_for_testing_member
         bloc.emit(
           TeacherApplicationEditing(
             application: draft,
@@ -429,7 +419,6 @@ void main() {
         final draft = _draft(phoneNumber: '+201012345678');
         repo.application = draft;
         repo.submitFailure = const NetworkFailure();
-        // ignore: invalid_use_of_visible_for_testing_member
         bloc.emit(
           TeacherApplicationEditing(
             application: draft,

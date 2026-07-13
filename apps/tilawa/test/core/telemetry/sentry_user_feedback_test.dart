@@ -319,11 +319,11 @@ void main() {
               SentryUserFeedback.applyLocalizedLabels(
                 AppLocalizations.of(context),
               );
-              return Scaffold(
+              return const Scaffold(
                 body: Center(
                   child: ElevatedButton(
                     onPressed: SentryUserFeedback.showManualReportBugForm,
-                    child: const Text('open-report'),
+                    child: Text('open-report'),
                   ),
                 ),
               );

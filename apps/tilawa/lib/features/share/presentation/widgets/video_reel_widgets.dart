@@ -128,13 +128,24 @@ class ComposerControls extends StatelessWidget {
   });
 
   final ShareDurationPreset durationPreset;
-  final int fromAyah, toAyah, minAyah, maxAyah;
-  final bool isBusy, rangeIsValid, isLoadingReciters, canSelectReciter;
-  final String reciterName, arabicSurahName;
-  final String? errorMessage, progressLabel;
-  final VoidCallback onReciterTap, onPrimaryAction, onCancel;
+  final int fromAyah;
+  final int toAyah;
+  final int minAyah;
+  final int maxAyah;
+  final bool isBusy;
+  final bool rangeIsValid;
+  final bool isLoadingReciters;
+  final bool canSelectReciter;
+  final String reciterName;
+  final String arabicSurahName;
+  final String? errorMessage;
+  final String? progressLabel;
+  final VoidCallback onReciterTap;
+  final VoidCallback onPrimaryAction;
+  final VoidCallback onCancel;
   final ValueChanged<ShareDurationPreset> onDurationChanged;
-  final ValueChanged<int> onFromChanged, onToChanged;
+  final ValueChanged<int> onFromChanged;
+  final ValueChanged<int> onToChanged;
 
   @override
   Widget build(BuildContext context) {

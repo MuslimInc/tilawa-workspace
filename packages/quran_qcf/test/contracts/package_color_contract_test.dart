@@ -58,6 +58,6 @@ void main() {
 }
 
 String _libRelativePath(String entityPath) {
-  final normalizedPath = entityPath.replaceAll('\\', '/');
+  final normalizedPath = entityPath.replaceAll(r'\', '/');
   return normalizedPath.replaceFirst(RegExp(r'^lib/'), '');
 }

@@ -252,7 +252,7 @@ void registerHomeScreenScopeGetIt(GetIt getIt) {
   );
   getIt.registerFactory<QiblaBloc>(() {
     final mock = _MockQiblaBloc();
-    when(() => mock.close()).thenAnswer((_) async {});
+    when(mock.close).thenAnswer((_) async {});
     when(() => mock.state).thenReturn(const QiblaState());
     when(() => mock.stream).thenAnswer((_) => const Stream.empty());
     when(() => mock.add(any())).thenReturn(null);
@@ -290,7 +290,7 @@ void registerHomeScreenScopeGetIt(GetIt getIt) {
     );
     when(() => mock.stream).thenAnswer((_) => const Stream.empty());
     when(() => mock.load(force: any(named: 'force'))).thenAnswer((_) async {});
-    when(() => mock.close()).thenAnswer((_) async {});
+    when(mock.close).thenAnswer((_) async {});
     getIt.registerSingleton<HomeLearningCubit>(mock);
   }
   if (!getIt.isRegistered<TeacherCapabilityCubit>()) {
@@ -302,8 +302,8 @@ void registerHomeScreenScopeGetIt(GetIt getIt) {
       ),
     );
     when(() => mock.stream).thenAnswer((_) => const Stream.empty());
-    when(() => mock.load()).thenAnswer((_) async {});
-    when(() => mock.close()).thenAnswer((_) async {});
+    when(mock.load).thenAnswer((_) async {});
+    when(mock.close).thenAnswer((_) async {});
     getIt.registerSingleton<TeacherCapabilityCubit>(mock);
   }
 }

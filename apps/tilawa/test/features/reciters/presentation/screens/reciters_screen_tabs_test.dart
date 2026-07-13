@@ -711,7 +711,7 @@ void main() {
 
     testWidgets('pull-to-refresh places favorites first', (tester) async {
       final MockGetRecitersUseCase mockGetReciters = MockGetRecitersUseCase();
-      when(() => mockGetReciters.call()).thenAnswer(
+      when(mockGetReciters.call).thenAnswer(
         (_) async => const Right<Failure, List<ReciterEntity>>(
           kRecitersTestReciters,
         ),

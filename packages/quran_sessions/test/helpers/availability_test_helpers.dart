@@ -202,27 +202,27 @@ TeacherDashboardBloc buildTestTeacherDashboardBloc({
     currentTime: now,
   );
   return TeacherDashboardBloc(
-    dashboardUseCase: getDashboard,
-    cacheInvalidator: InvalidateQuranSessionCacheUseCase(cacheStore),
-    slotBookedUseCase: IsSlotBookedUseCase(
+    getTeacherDashboard: getDashboard,
+    invalidateCache: InvalidateQuranSessionCacheUseCase(cacheStore),
+    isSlotBooked: IsSlotBookedUseCase(
       bookedSlotLockRepository ?? FakeBookedSlotLockRepository(),
     ),
-    availabilityUseCase: getAvailability,
-    blockSlotUseCase: blockGeneratedSlot,
-    availabilityGateway: availabilityProvider,
-    cancelSessionUseCase: cancelSession,
-    respondToBookingRequestUseCase:
+    getAvailability: getAvailability,
+    blockGeneratedSlot: blockGeneratedSlot,
+    availabilityProvider: availabilityProvider,
+    cancelSession: cancelSession,
+    respondToBookingRequest:
         respondToBookingRequest ?? buildRespondToBookingRequestUseCase(),
-    completeSessionUseCase: completeSession,
-    joinSessionUseCase:
+    completeSession: completeSession,
+    joinSession:
         joinSession ??
         buildJoinSessionUseCase(
           sessionRepository: sessionRepo,
           teacherProfileRepository: teacherProfiles,
           userId: teacherId,
         ),
-    fridayReminderStore: reminders,
-    teacherUserId: teacherId,
+    fridayReviewReminderStore: reminders,
+    teacherId: teacherId,
     commitTimerFactory: commitTimerFactory,
     commitDelay: commitDelay,
     now: now,

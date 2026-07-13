@@ -278,7 +278,7 @@ void main() {
 
         expect(catalogAfter?.pixels ?? 0, closeTo(0, 1.5));
         expect(
-          (headerAfter?.pixels ?? 0),
+          headerAfter?.pixels ?? 0,
           closeTo(pinnedHeader, 1.5),
           reason: 'header collapse should survive scrub release',
         );

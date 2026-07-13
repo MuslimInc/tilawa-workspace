@@ -155,7 +155,7 @@ class AudioPlayerHandlerImpl extends audio_service.BaseAudioHandler
     return AudioEntity(
       id: item.id,
       title: item.title,
-      url: item.extras?['url'] ?? item.id,
+      url: (item.extras?['url'] as String?) ?? item.id,
       duration: item.duration ?? Duration.zero,
       artist: item.artist,
       album: item.album,
@@ -352,7 +352,7 @@ class AudioPlayerHandlerImpl extends audio_service.BaseAudioHandler
   Future<AudioSource> _itemToSource(audio_service.MediaItem mediaItem) async {
     // Extract reciter name and URL from mediaItem
     final String? reciterName = mediaItem.artist;
-    final String url = mediaItem.extras?['url'] ?? mediaItem.id;
+    final String url = (mediaItem.extras?['url'] as String?) ?? mediaItem.id;
 
     final Uri audioUri = await _playbackUriResolver.resolve(
       url: url,

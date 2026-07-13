@@ -403,7 +403,7 @@ void main() {
     ) async {
       whenListen(
         mockSessionCubit,
-        Stream<SessionValidityState>.empty(),
+        const Stream<SessionValidityState>.empty(),
         initialState: const SessionValidityState(),
       );
       when(() => mockAuthBloc.state).thenReturn(const AuthState.initial());

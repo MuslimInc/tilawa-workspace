@@ -1066,7 +1066,6 @@ class _ColorPickerInputState extends State<ColorPickerInput> {
   @override
   Widget build(BuildContext context) {
     if (inputColor != widget.color.toARGB32()) {
-      // ignore: prefer_interpolation_to_compose_strings
       textEditingController.text =
           '#${(widget.color.r * 255).round().toRadixString(16).toUpperCase().padLeft(2, '0')}${(widget.color.g * 255).round().toRadixString(16).toUpperCase().padLeft(2, '0')}${(widget.color.b * 255).round().toRadixString(16).toUpperCase().padLeft(2, '0')}${widget.enableAlpha ? (widget.color.a * 255).round().toRadixString(16).toUpperCase().padLeft(2, '0') : ''}';
     }
@@ -1428,7 +1427,7 @@ class ColorPickerArea extends StatelessWidget {
             _AlwaysWinPanGestureRecognizer:
                 GestureRecognizerFactoryWithHandlers<
                   _AlwaysWinPanGestureRecognizer
-                >(() => _AlwaysWinPanGestureRecognizer(), (
+                >(_AlwaysWinPanGestureRecognizer.new, (
                   _AlwaysWinPanGestureRecognizer instance,
                 ) {
                   instance
@@ -1552,7 +1551,7 @@ class ColorPickerHueRing extends StatelessWidget {
             _AlwaysWinPanGestureRecognizer:
                 GestureRecognizerFactoryWithHandlers<
                   _AlwaysWinPanGestureRecognizer
-                >(() => _AlwaysWinPanGestureRecognizer(), (
+                >(_AlwaysWinPanGestureRecognizer.new, (
                   _AlwaysWinPanGestureRecognizer instance,
                 ) {
                   instance

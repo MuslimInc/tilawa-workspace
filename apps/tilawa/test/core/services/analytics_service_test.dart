@@ -91,7 +91,7 @@ void main() {
       ).thenAnswer((_) async {});
       final debugService = FirebaseAnalyticsService(mock);
       await debugService.resetAnalyticsData();
-      verifyNever(() => mock.resetAnalyticsData());
+      verifyNever(mock.resetAnalyticsData);
     });
 
     test('logEvent calls underlying SDK when debugMode is false', () async {

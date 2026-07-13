@@ -82,14 +82,9 @@ class _ReportConcernSheetBodyState extends State<_ReportConcernSheetBody> {
                     },
                   ),
                   SizedBox(height: tokens.spaceMedium),
-                  TextField(
+                  TilawaTextField(
                     controller: _controller,
                     maxLines: 4,
-                    decoration: InputDecoration(
-                      labelText: l10n.reportConcernDescriptionLabel,
-                      hintText: l10n.reportConcernDescriptionHint,
-                      errorText: _error,
-                    ),
                     onChanged: (_) => setState(() => _error = null),
                   ),
                 ],
@@ -118,14 +113,16 @@ class _ReportConcernSheetBodyState extends State<_ReportConcernSheetBody> {
 
   String _categoryLabel(dynamic l10n, SessionReportCategory category) {
     return switch (category) {
-      SessionReportCategory.safetyConcern => l10n.reportCategorySafetyConcern,
-      SessionReportCategory.abuseOrHarassment =>
-        l10n.reportCategoryAbuseOrHarassment,
-      SessionReportCategory.inappropriateContent =>
-        l10n.reportCategoryInappropriateContent,
-      SessionReportCategory.childSafety => l10n.reportCategoryChildSafety,
-      SessionReportCategory.fraudOrScam => l10n.reportCategoryFraudOrScam,
-      SessionReportCategory.other => l10n.reportCategoryOther,
-    };
+          SessionReportCategory.safetyConcern =>
+            l10n.reportCategorySafetyConcern,
+          SessionReportCategory.abuseOrHarassment =>
+            l10n.reportCategoryAbuseOrHarassment,
+          SessionReportCategory.inappropriateContent =>
+            l10n.reportCategoryInappropriateContent,
+          SessionReportCategory.childSafety => l10n.reportCategoryChildSafety,
+          SessionReportCategory.fraudOrScam => l10n.reportCategoryFraudOrScam,
+          SessionReportCategory.other => l10n.reportCategoryOther,
+        }
+        as String;
   }
 }

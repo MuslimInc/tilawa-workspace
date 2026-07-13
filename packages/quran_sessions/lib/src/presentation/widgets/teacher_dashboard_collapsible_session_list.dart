@@ -51,30 +51,16 @@ class TeacherDashboardCollapsibleSessionList extends StatelessWidget {
               ),
               child: Align(
                 alignment: AlignmentDirectional.centerStart,
-                child: TextButton(
+                child: TilawaButton(
                   key: ValueKey(
                     expanded
                         ? 'teacher-dashboard-$sectionKey-sessions-collapse'
                         : 'teacher-dashboard-$sectionKey-sessions-expand',
                   ),
                   onPressed: onToggleExpanded,
-                  style: TextButton.styleFrom(
-                    foregroundColor: scheme.primary,
-                    padding: EdgeInsets.symmetric(
-                      horizontal: tokens.spaceExtraSmall,
-                      vertical: tokens.spaceExtraSmall,
-                    ),
-                    minimumSize: Size(
-                      tokens.minInteractiveDimension,
-                      tokens.minInteractiveDimension,
-                    ),
-                    tapTargetSize: MaterialTapTargetSize.shrinkWrap,
-                  ),
-                  child: Text(
-                    expanded
-                        ? l10n.teacherDashboardShowLessSessions
-                        : l10n.teacherDashboardShowAllSessions(itemCount),
-                  ),
+                  text: expanded
+                      ? l10n.teacherDashboardShowLessSessions
+                      : l10n.teacherDashboardShowAllSessions(itemCount),
                 ),
               ),
             ),

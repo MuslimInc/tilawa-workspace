@@ -2017,7 +2017,7 @@ void main() {
       // Just calling it to ensure line coverage.
       // Since it calls a static method on DownloadIsolateManager, we assume that class handles it content.
       // Ideally we would verify the static call, but that requires more complex mocking.
-      DownloadServiceImpl.downloadCallback("id", 3, 100);
+      DownloadServiceImpl.downloadCallback('id', 3, 100);
     });
   });
 }

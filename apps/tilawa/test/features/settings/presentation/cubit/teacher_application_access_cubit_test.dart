@@ -18,7 +18,7 @@ class _StubAccessUseCase extends ResolveTeacherApplicationAccessUseCase {
     : super(_FakeTeacherApplicationAccessRepository());
 
   final List<Either<QuranSessionsFailure, TeacherApplicationAccess>> _results;
-  var callCount = 0;
+  int callCount = 0;
 
   @override
   Future<Either<QuranSessionsFailure, TeacherApplicationAccess>> call(
@@ -78,7 +78,7 @@ void main() {
     );
     scopeGetIt().registerSingleton<QuranSessionsPlatformConfigStore>(
       QuranSessionsPlatformConfigStore()..setConfig(
-        QuranSessionsPlatformConfig(
+        const QuranSessionsPlatformConfig(
           quranSessionsEnabled: true,
           studentEntryEnabled: false,
           bookingEnabled: true,
@@ -149,7 +149,7 @@ void main() {
       );
       scopeGetIt().registerSingleton<QuranSessionsPlatformConfigStore>(
         QuranSessionsPlatformConfigStore()..setConfig(
-          QuranSessionsPlatformConfig(
+          const QuranSessionsPlatformConfig(
             quranSessionsEnabled: true,
             studentEntryEnabled: false,
             bookingEnabled: true,

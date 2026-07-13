@@ -31,7 +31,7 @@ class SchedulePrayerNotificationsUseCase {
       final DateTime now = DateTime.now();
       final DateTime startDate = DateTime(now.year, now.month, now.day);
       final DateTime endDate = startDate.add(
-        Duration(days: PrayerNotificationConfig.scheduleDaysAhead - 1),
+        const Duration(days: PrayerNotificationConfig.scheduleDaysAhead - 1),
       );
 
       final List<PrayerTimeEntity> days = await _repository

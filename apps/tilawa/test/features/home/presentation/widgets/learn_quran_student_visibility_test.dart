@@ -24,7 +24,7 @@ void main() {
       );
       getIt.registerSingleton<QuranSessionsPlatformConfigStore>(
         QuranSessionsPlatformConfigStore()..setConfig(
-          QuranSessionsPlatformConfig(
+          const QuranSessionsPlatformConfig(
             quranSessionsEnabled: true,
             studentEntryEnabled: true,
             bookingEnabled: true,
@@ -52,7 +52,7 @@ void main() {
       );
       getIt.registerSingleton<QuranSessionsPlatformConfigStore>(
         QuranSessionsPlatformConfigStore()..setConfig(
-          QuranSessionsPlatformConfig(
+          const QuranSessionsPlatformConfig(
             quranSessionsEnabled: true,
             studentEntryEnabled: true,
             bookingEnabled: true,
@@ -82,7 +82,7 @@ void main() {
       );
       getIt.registerSingleton<QuranSessionsPlatformConfigStore>(
         QuranSessionsPlatformConfigStore()..setConfig(
-          QuranSessionsPlatformConfig(
+          const QuranSessionsPlatformConfig(
             quranSessionsEnabled: true,
             studentEntryEnabled: true,
             bookingEnabled: true,

@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:tilawa/l10n/generated/app_localizations.dart';
 import 'package:tilawa/screens/app_shell_nav_destinations.dart';
+import 'package:tilawa_ui_kit/tilawa_ui_kit.dart';
 
 void main() {
   testWidgets('phone shell nav lists four Tilawa shell items', (
@@ -48,8 +49,14 @@ void main() {
     );
 
     expect(
-      destinations.singleWhere((d) => d.usesProfileAvatar).tabIndex,
-      kAppShellSettingsTabIndex,
+      destinations
+          .singleWhere((d) => d.tabIndex == kAppShellSettingsTabIndex)
+          .icon,
+      TilawaIcons.settings,
+    );
+    expect(
+      destinations.where((d) => d.usesProfileAvatar),
+      isEmpty,
     );
 
     expect(

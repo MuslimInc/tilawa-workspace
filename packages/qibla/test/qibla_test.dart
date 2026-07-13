@@ -65,26 +65,26 @@ void main() {
       Qibla.instance = mock;
 
       when(
-        () => mock.requestLocationPermission(),
+        mock.requestLocationPermission,
       ).thenAnswer((_) async => LocationPermission.always);
 
       final LocationPermission result = await Qibla.requestPermissions();
       expect(result, LocationPermission.always);
-      verify(() => mock.requestLocationPermission()).called(1);
+      verify(mock.requestLocationPermission).called(1);
     });
 
     test('checkLocationStatus calls instance method', () async {
       final mock = MockFlutterQibla();
       Qibla.instance = mock;
 
-      when(() => mock.getLocationStatus()).thenAnswer(
+      when(mock.getLocationStatus).thenAnswer(
         (_) async => const LocationStatus(true, LocationPermission.whileInUse),
       );
 
       final LocationStatus result = await Qibla.checkLocationStatus();
       expect(result.enabled, isTrue);
       expect(result.status, LocationPermission.whileInUse);
-      verify(() => mock.getLocationStatus()).called(1);
+      verify(mock.getLocationStatus).called(1);
     });
 
     test('qiblaStream merges compass and location correctly', () async {

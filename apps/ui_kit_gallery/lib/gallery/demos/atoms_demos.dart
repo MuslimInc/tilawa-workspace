@@ -231,9 +231,9 @@ abstract final class AtomsDemos {
   }
 
   static Widget sectionTitle(BuildContext context) {
-    return GalleryDemoFrame(
+    return const GalleryDemoFrame(
       alignment: Alignment.centerLeft,
-      child: const TilawaSectionTitle(title: 'Section title'),
+      child: TilawaSectionTitle(title: 'Section title'),
     );
   }
 
@@ -304,10 +304,10 @@ abstract final class AtomsDemos {
   }
 
   static Widget textField(BuildContext context) {
-    return GalleryDemoFrame(
+    return const GalleryDemoFrame(
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
-        children: const [
+        children: [
           TilawaTextField(label: 'Default', hintText: 'Enter text'),
           SizedBox(height: 16),
           TilawaTextField(

@@ -6,5 +6,16 @@ void main() {
     const AppLaunchConfig config = AppLaunchConfig();
 
     expect(config.smartKhatmaEnabled, isFalse);
+    expect(config.wirdWidgetEnabled, isFalse);
+  });
+
+  test('Wird widget has a separate rollout switch', () {
+    const AppLaunchConfig config = AppLaunchConfig(
+      smartKhatmaEnabled: true,
+      wirdWidgetEnabled: true,
+    );
+
+    expect(config.smartKhatmaEnabled, isTrue);
+    expect(config.wirdWidgetEnabled, isTrue);
   });
 }

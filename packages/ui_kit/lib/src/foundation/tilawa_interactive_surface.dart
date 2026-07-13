@@ -330,7 +330,7 @@ class _TilawaInteractiveSurfaceState extends State<TilawaInteractiveSurface> {
         ? tokens.stateLayerFocused
         : 0;
 
-    Widget surfaceStack = Stack(
+    final Widget surfaceStack = Stack(
       // Pass the incoming constraints straight to the resting child so the
       // wrapper stays layout-transparent: a tight cell (e.g. a fixed-height
       // grid tile) makes the child fill it, exactly as the old Material+InkWell

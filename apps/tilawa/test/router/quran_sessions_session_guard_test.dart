@@ -292,7 +292,7 @@ void main() {
     testWidgets('returns null for non-protected routes', (tester) async {
       whenListen(
         mockSessionCubit,
-        Stream<SessionValidityState>.empty(),
+        const Stream<SessionValidityState>.empty(),
         initialState: const SessionValidityState(),
       );
       when(() => mockAuthBloc.state).thenReturn(const AuthState.initial());
@@ -304,7 +304,7 @@ void main() {
     testWidgets('redirects revoked users to login', (tester) async {
       whenListen(
         mockSessionCubit,
-        Stream<SessionValidityState>.empty(),
+        const Stream<SessionValidityState>.empty(),
         initialState: const SessionValidityState(revoked: true),
       );
       when(() => mockAuthBloc.state).thenReturn(
@@ -333,7 +333,7 @@ void main() {
         // put, not get bounced to login.
         whenListen(
           mockSessionCubit,
-          Stream<SessionValidityState>.empty(),
+          const Stream<SessionValidityState>.empty(),
           initialState: const SessionValidityState(verificationUnknown: true),
         );
         when(() => mockAuthBloc.state).thenReturn(
@@ -363,7 +363,7 @@ void main() {
         // transient App Check sign-out bounced /sessions/teachers to /login.
         whenListen(
           mockSessionCubit,
-          Stream<SessionValidityState>.empty(),
+          const Stream<SessionValidityState>.empty(),
           initialState: const SessionValidityState(),
         );
         when(() => mockAuthBloc.state).thenReturn(
@@ -392,7 +392,7 @@ void main() {
     testWidgets('redirects unauthenticated users to login', (tester) async {
       whenListen(
         mockSessionCubit,
-        Stream<SessionValidityState>.empty(),
+        const Stream<SessionValidityState>.empty(),
         initialState: const SessionValidityState(),
       );
       when(() => mockAuthBloc.state).thenReturn(
@@ -408,7 +408,7 @@ void main() {
     ) async {
       whenListen(
         mockSessionCubit,
-        Stream<SessionValidityState>.empty(),
+        const Stream<SessionValidityState>.empty(),
         initialState: const SessionValidityState(),
       );
       when(() => mockAuthBloc.state).thenReturn(const AuthState.initial());
@@ -420,7 +420,7 @@ void main() {
     testWidgets('allows authenticated active session through', (tester) async {
       whenListen(
         mockSessionCubit,
-        Stream<SessionValidityState>.empty(),
+        const Stream<SessionValidityState>.empty(),
         initialState: const SessionValidityState(),
       );
       when(() => mockAuthBloc.state).thenReturn(
@@ -536,7 +536,7 @@ void main() {
     ) async {
       whenListen(
         mockSessionCubit,
-        Stream<SessionValidityState>.empty(),
+        const Stream<SessionValidityState>.empty(),
         initialState: const SessionValidityState(revoked: true),
       );
 

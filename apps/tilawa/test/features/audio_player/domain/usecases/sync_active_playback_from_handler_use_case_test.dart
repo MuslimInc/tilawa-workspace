@@ -23,12 +23,12 @@ void main() {
     artist: 'Akram Al-Alaqmi',
   );
 
-  final PlaybackStateEntity playingState = PlaybackStateEntity(
+  const PlaybackStateEntity playingState = PlaybackStateEntity(
     isPlaying: true,
     processingState: AudioProcessingStateStatus.ready,
-    position: const Duration(minutes: 2),
-    bufferedPosition: const Duration(minutes: 5),
-    duration: const Duration(hours: 1),
+    position: Duration(minutes: 2),
+    bufferedPosition: Duration(minutes: 5),
+    duration: Duration(hours: 1),
     currentIndex: 0,
     queue: <AudioEntity>[surahBaqarah],
     queueGeneration: 1,
@@ -53,7 +53,7 @@ void main() {
   });
 
   test('returns handler snapshot when session is active', () async {
-    final ActivePlaybackSnapshot snapshot = ActivePlaybackSnapshot(
+    const ActivePlaybackSnapshot snapshot = ActivePlaybackSnapshot(
       currentAudio: surahBaqarah,
       playbackState: playingState,
     );

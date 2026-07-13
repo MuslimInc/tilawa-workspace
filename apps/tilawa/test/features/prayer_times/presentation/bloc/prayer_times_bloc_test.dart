@@ -126,7 +126,7 @@ void main() {
     ),
   );
   provideDummy<Either<Failure, List<PrayerTimeEntity>>>(
-    Right(<PrayerTimeEntity>[]),
+    const Right(<PrayerTimeEntity>[]),
   );
   // End of provideDummy block
 

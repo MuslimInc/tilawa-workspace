@@ -23,7 +23,7 @@ void main() {
     PrayerTimesClock.overrideForTesting(() => DateTime(2030, 2, 14, 9));
 
     final bloc = _MockPrayerTimesBloc();
-    when(() => bloc.close()).thenAnswer((_) async {});
+    when(bloc.close).thenAnswer((_) async {});
     when(() => bloc.add(any())).thenReturn(null);
     when(
       () => bloc.stream,

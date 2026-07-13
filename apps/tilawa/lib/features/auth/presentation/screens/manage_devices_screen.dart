@@ -26,7 +26,7 @@ class ManageDevicesScreen extends StatelessWidget {
 
     if (userId == null) {
       return Scaffold(
-        appBar: AppBar(title: Text(context.l10n.manageDevicesTitle)),
+        appBar: TilawaAppBar(title: context.l10n.manageDevicesTitle),
         body: const SizedBox.shrink(),
       );
     }
@@ -46,22 +46,12 @@ class _ManageDevicesView extends StatelessWidget {
   Future<void> _confirmSignOutOthers(BuildContext context) async {
     final l10n = context.l10n;
     final cubit = context.read<ManageDevicesCubit>();
-    final confirmed = await showDialog<bool>(
+    final confirmed = await showTilawaConfirmDialog(
       context: context,
-      builder: (dialogContext) => AlertDialog(
-        title: Text(l10n.manageDevicesSignOutOthers),
-        content: Text(l10n.manageDevicesSignOutOthersConfirm),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.of(dialogContext).pop(false),
-            child: Text(l10n.cancel),
-          ),
-          TextButton(
-            onPressed: () => Navigator.of(dialogContext).pop(true),
-            child: Text(l10n.manageDevicesSignOutOthers),
-          ),
-        ],
-      ),
+      title: l10n.manageDevicesSignOutOthers,
+      message: l10n.manageDevicesSignOutOthersConfirm,
+      confirmLabel: l10n.manageDevicesSignOutOthers,
+      cancelLabel: l10n.cancel,
     );
     if (confirmed != true || !context.mounted) return;
     await cubit.signOutOtherDevices(userId);
@@ -92,7 +82,7 @@ class _ManageDevicesView extends StatelessWidget {
     final l10n = context.l10n;
 
     return Scaffold(
-      appBar: AppBar(title: Text(l10n.manageDevicesTitle)),
+      appBar: TilawaAppBar(title: l10n.manageDevicesTitle),
       body: BlocBuilder<ManageDevicesCubit, ManageDevicesState>(
         builder: (context, state) {
           return switch (state.status) {
@@ -221,12 +211,14 @@ class _DeviceRow extends StatelessWidget {
     return TilawaCard(
       child: Row(
         crossAxisAlignment: CrossAxisAlignment.center,
+        spacing: tokens.spaceSmall,
+        mainAxisSize: .min,
         children: [
           Icon(_platformIcon, color: scheme.primary),
-          SizedBox(width: tokens.spaceMedium),
           Expanded(
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
+              spacing: tokens.spaceExtraSmall,
               children: [
                 Text(
                   label,
@@ -234,9 +226,10 @@ class _DeviceRow extends StatelessWidget {
                   overflow: TextOverflow.ellipsis,
                   style: theme.textTheme.titleSmall,
                 ),
-                SizedBox(height: tokens.spaceExtraSmall),
                 Text(
                   _statusLine(context, l10n),
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
                   style: theme.textTheme.bodySmall?.copyWith(
                     color: device.isRevoked
                         ? scheme.error
@@ -246,7 +239,6 @@ class _DeviceRow extends StatelessWidget {
               ],
             ),
           ),
-          SizedBox(width: tokens.spaceSmall),
           _trailing(context, l10n),
         ],
       ),

@@ -95,7 +95,7 @@ void main() {
 
   group('tasbeeh notification cold start', () {
     test('sets tasbeeh route and kicks off hive init', () async {
-      AppRouter.pendingLocalNotificationResponse = NotificationResponse(
+      AppRouter.pendingLocalNotificationResponse = const NotificationResponse(
         notificationResponseType: NotificationResponseType.selectedNotification,
         payload: '${TasbeehConstants.reminderPayloadPrefix}abc',
       );
@@ -116,7 +116,7 @@ void main() {
     test(
       'pending launch without resolvable data flags startup notification',
       () {
-        AppRouter.pendingLocalNotificationResponse = NotificationResponse(
+        AppRouter.pendingLocalNotificationResponse = const NotificationResponse(
           notificationResponseType:
               NotificationResponseType.selectedNotification,
           payload: 'not-json-and-not-tasbeeh',
@@ -131,8 +131,8 @@ void main() {
     );
 
     test('resolves cold start route from pending FCM message', () {
-      AppRouter.pendingFcmMessage = RemoteMessage(
-        data: const <String, dynamic>{'type': 'settings'},
+      AppRouter.pendingFcmMessage = const RemoteMessage(
+        data: <String, dynamic>{'type': 'settings'},
       );
 
       startupTasks.applyColdStartRouteFromPendingLaunchForTesting();
@@ -145,7 +145,7 @@ void main() {
     });
 
     test('non-tasbeeh cold start does not require tasbeeh box', () async {
-      AppRouter.pendingLocalNotificationResponse = NotificationResponse(
+      AppRouter.pendingLocalNotificationResponse = const NotificationResponse(
         notificationResponseType: NotificationResponseType.selectedNotification,
         payload: '{"type":"settings"}',
       );

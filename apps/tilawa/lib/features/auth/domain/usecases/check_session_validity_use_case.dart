@@ -8,7 +8,7 @@ import 'package:tilawa/core/network/network_error_message.dart';
 import 'package:tilawa_core/errors/failures.dart';
 
 import '../entities/session_validity_result.dart';
-import '../../domain/services/token_sync_cache.dart';
+import '../services/token_sync_cache.dart';
 
 @injectable
 class CheckSessionValidityUseCase {

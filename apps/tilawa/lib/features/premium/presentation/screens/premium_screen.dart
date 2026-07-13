@@ -32,7 +32,6 @@ class _PremiumScreenState extends State<PremiumScreen> {
       children: [
         Scaffold(
           appBar: TilawaCatalogAppBar.titleOnly(
-            context,
             title: context.l10n.premium,
           ),
           body: BlocConsumer<PremiumBloc, PremiumState>(

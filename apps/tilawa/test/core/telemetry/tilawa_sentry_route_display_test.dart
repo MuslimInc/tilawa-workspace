@@ -6,11 +6,11 @@ void main() {
   group('TilawaSentryRouteDisplay', () {
     testWidgets('reporter child stays mounted while waiting', (tester) async {
       await tester.pumpWidget(
-        MaterialApp(
+        const MaterialApp(
           home: TilawaSentryRouteDisplay(
             child: TilawaSentryRouteReporter(
               when: false,
-              child: const Text('content'),
+              child: Text('content'),
             ),
           ),
         ),

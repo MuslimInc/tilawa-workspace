@@ -29,8 +29,7 @@ class WeeklyScheduleDto {
   final String? updatedAt;
 
   factory WeeklyScheduleDto.fromJson(Map<String, dynamic> json) {
-    final rawRules =
-        (json['weekly_rules'] as Map<String, dynamic>? ?? const {});
+    final rawRules = json['weekly_rules'] as Map<String, dynamic>? ?? const {};
     final rules = <String, List<Map<String, String>>>{};
     for (final entry in rawRules.entries) {
       rules[entry.key] = (entry.value as List<dynamic>? ?? const [])

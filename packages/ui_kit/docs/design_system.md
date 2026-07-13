@@ -44,6 +44,20 @@ organisms/      TilawaMediaPlayerBar, TilawaSettingsGroup, …
 4. **No parallel palettes** — category hues, decorative gradients, and
    per-screen hex are forbidden in product chrome (see colours doc).
 
+### Automated component boundary
+
+Product code must use the UI Kit component whenever one exists. In particular,
+use `TilawaAppBar`, `TilawaCatalogAppBar`, or `TilawaSliverAppBar` instead of
+Flutter's raw `AppBar` and `SliverAppBar`. The UI Kit package may use framework
+widgets internally to implement those abstractions.
+
+Run `melos run ui:lint` locally. The same guard is blocking in pull requests.
+It scans production Dart sources, reports the file and line, and rejects new
+raw component usage. Pre-existing violations are tracked by a non-increasing
+baseline in `tool/ui_kit_guard.dart`; remove baseline entries as those screens
+are migrated. If the UI Kit lacks a suitable component, add and test one at the
+smallest correct Atomic Design level instead of bypassing the guard.
+
 ---
 
 ## 2. Theme freeze — calm catalog chrome (light)
@@ -61,11 +75,11 @@ switch ON. **Not** for scaffold fills (use the neutral canvas).
 
 ### Light neutral ramp (warm near-white canvas + white cards)
 
-60-30-10: canvas ~60% (`lightCanvas`), elevated surfaces ~30% (`lightSurface`, chips), accent ~10% (`primary`). Scaffold stays warm near-white — not pure white.
+60-30-10: canvas ~60% (`lightCanvas`), elevated surfaces ~30% (`lightSurface`, chips), accent ~10% (`primary`). Scaffold stays porcelain-green near-white — not pure white.
 
 | `AppColors` | Hex | `ColorScheme` / usage |
 |-------------|-----|------------------------|
-| `lightCanvas` / `lightBackground` | `#F4F2EE` | Scaffold, `surfaceContainerLowest` |
+| `lightCanvas` / `lightBackground` | `#F3F6F4` | Scaffold, `surfaceContainerLowest` |
 | `lightSurface` | `#FFFFFF` | Cards, sheets, dialogs |
 | `lightInk` | `#1A2E24` | `onSurface` |
 | `lightMute` | `#6B7F74` | Muted labels (`onSurfaceVariant`) |
@@ -98,12 +112,28 @@ lifted in the same hue family for WCAG 3:1 on green-tinted surfaces.
 
 ### Depth and touch (`MeMuslimDesignTokens`)
 
+**Layered elevation (added 2026-07-11):** raised surfaces take a
+`MeMuslimElevationX` tier — a tight *contact* shadow plus a soft *ambient*
+bloom, tinted with `ColorScheme.shadow` (brand ink, not gray). Do not
+hand-roll `BoxShadow` lists on new surfaces.
+
+| Tier | Layers (alpha / blur / y-offset) | Use |
+|------|----------------------------------|-----|
+| `elevationRaised(colorScheme.shadow)` | 0.05 / 3 / 1 + 0.07 / 24 / 10 | Resting cards — `TilawaCard` raised, settings group panels, capability action cards |
+| `elevationFloating(colorScheme.shadow)` | 0.06 / 6 / 2 + 0.11 / 32 / 14 | Floating chrome — hero summaries, pinned bars, dialogs |
+
+Every shadow value (legacy and tiers) scales with `kElevationMultiplier`
+(currently `1.0`) — a single device-tuning knob; safe range ≈ 0.8–1.3.
+
+Legacy single-shadow tokens stay for existing chrome (search field, collapsed
+header); prefer the tiers for new work:
+
 | Token | Value | Use |
 |-------|-------|-----|
-| `opacityShadow` | 0.04 | Raised cards, chips |
-| `opacityShadowStrong` | 0.08 | Floating chrome (nav, player) |
-| `shadowOffsetSmall` / `shadowOffsetMedium` | `(0, 1)` / `(0, 2)` | Shadow offsets |
-| `blurShadow` | 8 | Shadow blur |
+| `opacityShadow` | 0.04 | Legacy single shadow on raised chips |
+| `opacityShadowStrong` | 0.08 | Legacy floating chrome (nav, player) |
+| `shadowOffsetSmall` / `shadowOffsetMedium` | `(0, 1.5)` / `(0, 3)` | Legacy shadow offsets |
+| `blurShadow` | 12 | Legacy shadow blur |
 | `borderWidthThin` | 0.5 | Hairlines |
 | `minInteractiveDimension` | 48 dp | Minimum hit target (`kMeMuslimMinInteractiveDimension`) |
 
@@ -258,4 +288,3 @@ Previews and goldens set `AppTheme.useGoogleFonts = false` and
 | [`feedback_system.md`](feedback_system.md) | Toast vs inline validation channel rules |
 | [`specs/017-catalog-theme-freeze/`](../../../specs/017-catalog-theme-freeze/spec.md) | Freeze acceptance criteria |
 | [`specs/006-ui-kit-expansion/ui-kit-inventory.md`](../../../specs/006-ui-kit-expansion/ui-kit-inventory.md) | Component inventory |
-

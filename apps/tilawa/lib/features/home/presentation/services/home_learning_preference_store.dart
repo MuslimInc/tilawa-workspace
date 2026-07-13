@@ -56,7 +56,7 @@ class SharedPreferencesHomeLearningPreferenceStore
 
   @override
   Future<String?> getLastPracticedSessionId() async {
-    return await _prefs.getString(_keyLastPracticed);
+    return _prefs.getString(_keyLastPracticed);
   }
 
   @override

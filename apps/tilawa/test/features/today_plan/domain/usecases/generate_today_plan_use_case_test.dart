@@ -143,7 +143,7 @@ void main() {
 
     test('returns cache failure when dependencies throw', () async {
       final useCase = GenerateTodayPlanUseCase(
-        _FakeQuranReaderRepository(null),
+        const _FakeQuranReaderRepository(null),
         _ThrowingHistoryRepository(),
         _MemoryTodayPlanRepository(),
         _FakeHiveReadiness(),
@@ -184,16 +184,19 @@ void main() {
           durationDays: 30,
           startPage: 1,
           targetPage: 604,
-          currentPage: 303,
+          confirmedCompletedThroughPage: 302,
+          assignmentDate: DateTime(2026, 6, 14),
+          assignmentStartPage: 303,
+          assignmentEndPage: 313,
         ),
       );
-      final quranRepository = const _FakeQuranReaderRepository(303);
+      const quranRepository = _FakeQuranReaderRepository(303);
       final useCase = GenerateTodayPlanUseCase(
         quranRepository,
         const _FakeHistoryRepository([]),
         _MemoryTodayPlanRepository(),
         _FakeHiveReadiness(),
-        GetKhatmaTodayTargetUseCase(khatmaRepository, quranRepository),
+        GetKhatmaTodayTargetUseCase(khatmaRepository),
       );
 
       final result = await useCase(now: DateTime(2026, 6, 14));

@@ -65,9 +65,8 @@ class RecitersBloc extends Bloc<RecitersEvent, RecitersState> {
     final String? selectedLetter = state is RecitersLoaded
         ? (state as RecitersLoaded).selectedLetter
         : null;
-    final bool showFavoritesOnly = state is RecitersLoaded
-        ? (state as RecitersLoaded).showFavoritesOnly
-        : false;
+    final bool showFavoritesOnly =
+        state is RecitersLoaded && (state as RecitersLoaded).showFavoritesOnly;
     if (state is RecitersLoaded) {
       _favoriteIds = (state as RecitersLoaded).favoriteIds;
     }

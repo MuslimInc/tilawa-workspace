@@ -4,7 +4,7 @@ import 'package:flutter/material.dart';
 
 import '../foundation/design_tokens.dart';
 import '../foundation/tilawa_text_roles.dart';
-import './tilawa_loading_indicator.dart';
+import 'tilawa_loading_indicator.dart';
 
 // Material 3 state opacities (m3.material.io — interaction states):
 // disabled container 12%, disabled content 38%, pressed state layer 10%.
@@ -206,6 +206,20 @@ class TilawaButton extends StatelessWidget {
         ? 0
         : math.max(height, kMeMuslimMinInteractiveDimension);
 
+    final bool isLight = theme.brightness == Brightness.light;
+    final bool useGradient =
+        variant == TilawaButtonVariant.primary && backgroundColor == null;
+    final Gradient? resolvedGradient = useGradient
+        ? LinearGradient(
+            colors: [
+              Color.lerp(resolvedBg, Colors.white, 0.12) ?? resolvedBg,
+              resolvedBg,
+            ],
+            begin: Alignment.topLeft,
+            end: Alignment.bottomRight,
+          )
+        : null;
+
     final buttonStyle = ButtonStyle(
       minimumSize: WidgetStateProperty.all(
         Size(
@@ -227,6 +241,9 @@ class TilawaButton extends StatelessWidget {
           return colorScheme.onSurface.withValues(
             alpha: _disabledContainerOpacity,
           );
+        }
+        if (resolvedGradient != null) {
+          return Colors.transparent;
         }
         return resolvedBg;
       }),
@@ -291,20 +308,30 @@ class TilawaButton extends StatelessWidget {
       iconSize: iconSize,
     );
 
-    final TextButton textButton = TextButton(
+    Widget buttonWidget = TextButton(
       onPressed: _isDisabled ? null : onPressed,
       style: buttonStyle,
       child: content,
     );
 
+    if (resolvedGradient != null && !_isDisabled) {
+      buttonWidget = DecoratedBox(
+        decoration: BoxDecoration(
+          gradient: resolvedGradient,
+          borderRadius: BorderRadius.circular(resolvedRadius),
+        ),
+        child: buttonWidget,
+      );
+    }
+
     final Widget sizedButton = shrinkWrapTapTarget
-        ? textButton
+        ? buttonWidget
         : ConstrainedBox(
             constraints: const BoxConstraints(
               minHeight: kMeMuslimMinInteractiveDimension,
               minWidth: kMeMuslimMinInteractiveDimension,
             ),
-            child: textButton,
+            child: buttonWidget,
           );
 
     return Semantics(

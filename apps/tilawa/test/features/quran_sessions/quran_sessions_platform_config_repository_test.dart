@@ -49,7 +49,7 @@ void main() {
 
   test('refreshRemoteConfig updates store and local cache', () async {
     final remote = MockFirestorePlatformConfigDataSource();
-    when(() => remote.getGlobalConfig()).thenAnswer((_) async => remoteConfig);
+    when(remote.getGlobalConfig).thenAnswer((_) async => remoteConfig);
     final prefs = MapBackedSharedPreferencesAsync();
     final local = SharedPreferencesPlatformConfigDataSource(prefs.prefs);
     final store = QuranSessionsPlatformConfigStore();
@@ -69,7 +69,7 @@ void main() {
     'refreshRemoteConfig clears stale cache when remote config is missing',
     () async {
       final remote = MockFirestorePlatformConfigDataSource();
-      when(() => remote.getGlobalConfig()).thenAnswer((_) async => null);
+      when(remote.getGlobalConfig).thenAnswer((_) async => null);
       final prefs = MapBackedSharedPreferencesAsync();
       final local = SharedPreferencesPlatformConfigDataSource(prefs.prefs);
       await local.save(cachedConfig);

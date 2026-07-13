@@ -707,13 +707,13 @@
     "@khatmaResetAction": {
         "description": "Action for resetting the active Khatma plan"
     },
-    "khatmaResetTitle": "Reset Khatma plan?",
+    "khatmaResetTitle": "Delete Khatma plan?",
     "@khatmaResetTitle": {
-        "description": "Confirmation dialog title for resetting Smart Khatma"
+        "description": "Confirmation dialog title for deleting Smart Khatma"
     },
-    "khatmaResetMessage": "This clears your current Khatma plan. Your last-read Quran page and bookmarks stay saved.",
+    "khatmaResetMessage": "This deletes your current plan only. Your last-read page and bookmarks stay saved.",
     "@khatmaResetMessage": {
-        "description": "Confirmation dialog message for resetting Smart Khatma"
+        "description": "Confirmation dialog message for deleting Smart Khatma"
     },
     "khatmaContinueReading": "Continue Reading",
     "@khatmaContinueReading": {
@@ -727,7 +727,77 @@
     "@khatmaHomeViewPlan": {
         "description": "Home dashboard affordance to open the Smart Khatma hub"
     },
-    "khatmaHubResetSubtitle": "Clear the current plan. Your bookmarks stay saved.",
+    "khatmaHubResetSubtitle": "Deletes plan only; bookmarks stay saved.",
+    "khatmaCompletedTitle": "Khatma complete",
+    "khatmaProgressCompleteMetric": "100%",
+    "khatmaCompletedSubtitle": "May Allah accept it. Begin another plan whenever you are ready.",
+    "khatmaStartAnotherAction": "Start another Khatma",
+    "khatmaUnavailable": "Your Khatma plan is temporarily unavailable. Try again.",
+    "khatmaStartFromBeginning": "From the beginning",
+    "khatmaContinueCurrentPosition": "From my current Quran page",
+    "khatmaReviewPlanTitle": "Review your Khatma plan",
+    "khatmaRangePages": "Pages {startPage}–{endPage}",
+    "@khatmaRangePages": {"placeholders": {"startPage": {"type": "int"}, "endPage": {"type": "int"}}},
+    "khatmaRangePagesFormatted": "Pages {range}",
+    "@khatmaRangePagesFormatted": {"placeholders": {"range": {"type": "String"}}},
+    "khatmaDailyPages": "{pages} pages each day",
+    "@khatmaDailyPages": {"placeholders": {"pages": {"type": "int"}}},
+    "khatmaStartPage": "Starts at page {page}",
+    "@khatmaStartPage": {"placeholders": {"page": {"type": "int"}}},
+    "khatmaTargetPage": "Finishes at page {page}",
+    "@khatmaTargetPage": {"placeholders": {"page": {"type": "int"}}},
+    "khatmaExpectedCompletionDate": "Expected completion: {date}",
+    "@khatmaExpectedCompletionDate": {"placeholders": {"date": {"type": "String"}}},
+    "khatmaConfirmPlanAction": "Start this Khatma",
+    "khatmaStartTodayAction": "Start today’s Wird",
+    "khatmaResumeTodayAction": "Resume today’s Wird",
+    "khatmaTodayCompletedTitle": "Today’s Wird is complete",
+    "khatmaTodayCompletedSubtitle": "Your next assignment will be ready tomorrow.",
+    "khatmaConfirmedAndRemaining": "{confirmed} confirmed · {remaining} remaining",
+    "@khatmaConfirmedAndRemaining": {"placeholders": {"confirmed": {"type": "int"}, "remaining": {"type": "int"}}},
+    "khatmaSaveProgressTitle": "Save your Khatma progress",
+    "khatmaCompletedThroughPage": "I completed through page {page}",
+    "@khatmaCompletedThroughPage": {"placeholders": {"page": {"type": "int"}}},
+    "khatmaProgressPageSelector": "Choose the last page you completed",
+    "khatmaCompleteTodayAction": "I completed today’s Wird",
+    "khatmaSaveThroughPageAction": "Save through page {page}",
+    "@khatmaSaveThroughPageAction": {"placeholders": {"page": {"type": "int"}}},
+    "khatmaExtendReviewTitle": "Review plan extension",
+    "khatmaExtendReviewMessage": "Daily pages: {oldPages} → {newPages}\nCompletion date: {oldDate} → {newDate}",
+    "@khatmaExtendReviewMessage": {"placeholders": {"oldPages": {"type": "int"}, "newPages": {"type": "int"}, "oldDate": {"type": "String"}, "newDate": {"type": "String"}}},
+    "khatmaCreateAction": "Create Khatma",
+    "khatmaBoundaryBySurah": "Surah range",
+    "khatmaBoundaryByPage": "Page range",
+    "khatmaStartSurah": "Start Surah",
+    "khatmaEndSurah": "End Surah",
+    "khatmaStartPageInput": "Start page",
+    "khatmaEndPageInput": "End page",
+    "khatmaPageBoundsHelp": "Enter a page from 1 to 604",
+    "khatmaChooseDuration": "Choose a duration",
+    "khatmaTotalPages": "Total: {pages} pages",
+    "@khatmaTotalPages": {"placeholders": {"pages": {"type": "int"}}},
+    "khatmaAssignedPages": "Assigned today: {pages}",
+    "@khatmaAssignedPages": {"placeholders": {"pages": {"type": "int"}}},
+    "khatmaConfirmedPages": "Confirmed today: {pages}",
+    "@khatmaConfirmedPages": {"placeholders": {"pages": {"type": "int"}}},
+    "khatmaRemainingTodayPages": "Remaining today: {pages}",
+    "@khatmaRemainingTodayPages": {"placeholders": {"pages": {"type": "int"}}},
+    "khatmaSaveProgressAction": "Save progress",
+    "khatmaReturnToQuranAction": "Return to Quran",
+    "khatmaStartAyah": "Start Ayah",
+    "khatmaEndAyah": "End Ayah",
+    "khatmaAyahNumber": "Ayah {number}",
+    "@khatmaAyahNumber": {"placeholders": {"number": {"type": "int"}}},
+    "khatmaScheduleByDuration": "Duration",
+    "khatmaScheduleByTargetDate": "Target date",
+    "khatmaChooseTargetDate": "Choose a completion date",
+    "khatmaPreviewPlanAction": "Preview plan",
+    "khatmaEditPlanAction": "Edit plan",
+    "khatmaEditPlanTitle": "Review plan changes",
+    "khatmaEditPlanSubtitle": "Adjust duration or end date; progress stays saved.",
+    "khatmaSavePlanChangesAction": "Save changes",
+    "khatmaDeletePlanAction": "Delete plan",
+    "khatmaResetCorruptAction": "Reset Khatma",
     "@khatmaHubResetSubtitle": {
         "description": "Subtitle for the reset-plan row on the Smart Khatma hub"
     },
@@ -3936,6 +4006,18 @@
     "@playAdhan": {
         "description": "Toggle label for adhan sound playback on prayer notification"
     },
+    "adhanSound1": "Sound 1",
+    "@adhanSound1": {
+        "description": "Label for the first adhan sound option"
+    },
+    "adhanSound2": "Sound 2",
+    "@adhanSound2": {
+        "description": "Label for the second adhan sound option"
+    },
+    "adhanSound3": "Sound 3",
+    "@adhanSound3": {
+        "description": "Label for the third adhan sound option"
+    },
     "atPrayerTime": "At prayer time",
     "@atPrayerTime": {
         "description": "Label for the 0-minutes-before notification offset option"
@@ -4850,6 +4932,23 @@
     "@settingsManageDevicesTile": { "description": "Settings entry that opens Manage Devices" },
     "settingsSecuritySection": "Security",
     "@settingsSecuritySection": { "description": "Settings group title for security/session options" },
+    "wirdWidgetTitle": "Today's Wird",
+    "@wirdWidgetTitle": { "description": "Title of the Daily Wird home-screen widget" },
+    "wirdWidgetNoPlanSubtitle": "Start a calm Quran reading plan",
+    "@wirdWidgetNoPlanSubtitle": { "description": "Daily Wird widget copy when no plan exists" },
+    "wirdWidgetProgressSubtitle": "{completed} of {assigned} pages completed · {remaining} remaining",
+    "@wirdWidgetProgressSubtitle": {
+        "description": "Daily Wird widget progress summary using preformatted numbers",
+        "placeholders": {
+            "completed": { "type": "String" },
+            "assigned": { "type": "String" },
+            "remaining": { "type": "String" }
+        }
+    },
+    "wirdWidgetDayCompletedSubtitle": "Today's Wird is complete",
+    "@wirdWidgetDayCompletedSubtitle": { "description": "Daily Wird widget copy when today's target is complete" },
+    "wirdWidgetPlanCompletedSubtitle": "Khatma complete",
+    "@wirdWidgetPlanCompletedSubtitle": { "description": "Daily Wird widget copy when the entire plan is complete" },
     "settingsAdminUserBadge": "Admin User",
     "@settingsAdminUserBadge": {
         "description": "Badge on Settings profile when the signed-in user has the Firebase admin custom claim"

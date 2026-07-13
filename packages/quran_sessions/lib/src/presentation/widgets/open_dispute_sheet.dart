@@ -54,14 +54,9 @@ class _OpenDisputeSheetBodyState extends State<_OpenDisputeSheetBody> {
             children: [
               Text(l10n.openDisputeSubtitle),
               SizedBox(height: tokens.spaceLarge),
-              TextField(
+              TilawaTextField(
                 controller: _controller,
                 maxLines: 4,
-                decoration: InputDecoration(
-                  labelText: l10n.openDisputeReasonLabel,
-                  hintText: l10n.openDisputeReasonHint,
-                  errorText: _error,
-                ),
                 onChanged: (_) => setState(() => _error = null),
               ),
             ],

@@ -110,7 +110,7 @@ class _SentryDebugVerifyTileState extends State<SentryDebugVerifyTile> {
       }
 
       final String message;
-      if (eventId == SentryId.empty()) {
+      if (eventId == const SentryId.empty()) {
         message =
             'Issue was dropped or failed to send. '
             'Check logcat for [sentry]. Filter Issues by sentry.verify:true.';
@@ -123,7 +123,7 @@ class _SentryDebugVerifyTileState extends State<SentryDebugVerifyTile> {
       TilawaFeedback.showToast(
         context,
         message: message,
-        variant: eventId == SentryId.empty()
+        variant: eventId == const SentryId.empty()
             ? TilawaFeedbackVariant.warning
             : TilawaFeedbackVariant.success,
       );

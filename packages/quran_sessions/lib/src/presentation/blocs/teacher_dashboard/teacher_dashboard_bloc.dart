@@ -4,24 +4,24 @@ import 'package:bloc_concurrency/bloc_concurrency.dart';
 import 'package:dartz_plus/dartz_plus.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
+import '../../../application/usecases/get_teacher_dashboard_usecase.dart';
+import '../../../application/usecases/invalidate_quran_session_cache_usecase.dart';
 import '../../../boundaries/scheduling/availability_provider.dart';
 import '../../../boundaries/scheduling/friday_review_reminder_store.dart';
 import '../../../domain/entities/generated_slot.dart';
 import '../../../domain/entities/market_scheduling_config.dart';
-import '../../../domain/mappers/quran_session_lifecycle_mapper.dart';
 import '../../../domain/entities/teacher_availability.dart';
 import '../../../domain/failures/quran_sessions_failure.dart';
+import '../../../domain/mappers/quran_session_lifecycle_mapper.dart';
 import '../../../domain/services/scheduling_policy_resolver.dart';
 import '../../../domain/services/teacher_availability_sort.dart';
 import '../../../domain/services/week_calendar.dart';
 import '../../../domain/usecases/block_generated_slot_usecase.dart';
 import '../../../domain/usecases/cancel_session_via_server_usecase.dart';
 import '../../../domain/usecases/complete_session_via_server_usecase.dart';
-import '../../../domain/usecases/join_session_usecase.dart';
-import '../../../application/usecases/get_teacher_dashboard_usecase.dart';
-import '../../../application/usecases/invalidate_quran_session_cache_usecase.dart';
 import '../../../domain/usecases/get_teacher_availability_usecase.dart';
 import '../../../domain/usecases/is_slot_booked_usecase.dart';
+import '../../../domain/usecases/join_session_usecase.dart';
 import '../../../domain/usecases/respond_to_booking_request_usecase.dart';
 import '../../../domain/value_objects/actor_role.dart';
 import 'teacher_dashboard_event.dart';
@@ -39,37 +39,25 @@ CommitTimerFactory _defaultCommitTimerFactory = (delay, onFire) {
 class TeacherDashboardBloc
     extends Bloc<TeacherDashboardEvent, TeacherDashboardState> {
   TeacherDashboardBloc({
-    required GetTeacherDashboardUseCase dashboardUseCase,
-    required InvalidateQuranSessionCacheUseCase cacheInvalidator,
-    required IsSlotBookedUseCase slotBookedUseCase,
-    required GetTeacherAvailabilityUseCase availabilityUseCase,
-    required BlockGeneratedSlotUseCase blockSlotUseCase,
-    required AvailabilityProvider availabilityGateway,
-    required CancelSessionViaServerUseCase cancelSessionUseCase,
-    required RespondToBookingRequestUseCase respondToBookingRequestUseCase,
-    required CompleteSessionViaServerUseCase completeSessionUseCase,
-    required JoinSessionUseCase joinSessionUseCase,
-    required FridayReviewReminderStore fridayReminderStore,
-    required String teacherUserId,
+    required this._getTeacherDashboard,
+    required this._invalidateCache,
+    required this._isSlotBooked,
+    required this._getAvailability,
+    required this._blockGeneratedSlot,
+    required this._availabilityProvider,
+    required this._cancelSession,
+    required this._respondToBookingRequest,
+    required this._completeSession,
+    required this._joinSession,
+    required this._fridayReviewReminderStore,
+    required this._teacherId,
     SchedulingPolicyResolver? schedulingPolicyResolver,
     WeekCalendar? weekCalendar,
     CommitTimerFactory? commitTimerFactory,
     DateTime Function()? now,
     Future<bool> Function()? isConnected,
     this._commitDelay = const Duration(seconds: 5),
-  }) : _getTeacherDashboard = dashboardUseCase,
-       _invalidateCache = cacheInvalidator,
-       _isSlotBooked = slotBookedUseCase,
-       _getAvailability = availabilityUseCase,
-       _blockGeneratedSlot = blockSlotUseCase,
-       _availabilityProvider = availabilityGateway,
-       _cancelSession = cancelSessionUseCase,
-       _respondToBookingRequest = respondToBookingRequestUseCase,
-       _completeSession = completeSessionUseCase,
-       _joinSession = joinSessionUseCase,
-       _fridayReviewReminderStore = fridayReminderStore,
-       _teacherId = teacherUserId,
-       _schedulingPolicyResolver =
+  }) : _schedulingPolicyResolver =
            schedulingPolicyResolver ?? const SchedulingPolicyResolver(),
        _weekCalendar = weekCalendar ?? const WeekCalendar(),
        _now = now ?? DateTime.now,
@@ -333,7 +321,7 @@ class TeacherDashboardBloc
     );
 
     final showBanner = bannerDecision is FridayReviewBannerVisible;
-    final bannerWeekKey = showBanner ? (bannerDecision).nextWeekKey : null;
+    final bannerWeekKey = showBanner ? bannerDecision.nextWeekKey : null;
 
     return (
       thisWeekAvailability: partition.thisWeek,
@@ -384,7 +372,7 @@ class TeacherDashboardBloc
       thisWeekAvailability: partition.thisWeek,
       nextWeekAvailability: partition.nextWeek,
       showFridayReviewBanner: showBanner,
-      fridayReviewNextWeekKey: showBanner ? (bannerDecision).nextWeekKey : null,
+      fridayReviewNextWeekKey: showBanner ? bannerDecision.nextWeekKey : null,
       clearFridayReviewNextWeekKey: !showBanner,
       dismissedFridayReminderWeekKey: dismissedKey,
     );

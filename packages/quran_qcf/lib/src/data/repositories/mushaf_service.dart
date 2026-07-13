@@ -186,7 +186,7 @@ class MushafService extends ChangeNotifier implements QuranMushafService {
 
   @override
   PageMetadata getPageMetadata(int pageNumber) {
-    final List<dynamic>? pageData = getPageData(pageNumber);
+    final List<List<WordData>>? pageData = getPageData(pageNumber);
     if (pageData == null) {
       return const PageMetadata(surahNumbers: [], hizb: 0, juz: 0);
     }
@@ -221,7 +221,7 @@ class MushafService extends ChangeNotifier implements QuranMushafService {
       return _specialLinesCache[pageNumber]!;
     }
 
-    final List<dynamic>? pageData = getPageData(pageNumber);
+    final List<List<WordData>>? pageData = getPageData(pageNumber);
     if (pageData == null) return {};
 
     final Map<int, QuranSpecialLine> special = {};

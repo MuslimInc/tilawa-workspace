@@ -55,7 +55,7 @@ abstract final class PriceFormatter {
     'EGP' => 'ج.م.',
     'SAR' => 'ر.س.',
     'AED' => 'د.إ.',
-    'USD' => '\$',
+    'USD' => r'$',
     'GBP' => '£',
     'EUR' => '€',
     _ => currencyCode,

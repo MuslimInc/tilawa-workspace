@@ -33,7 +33,7 @@ class TilawaSwitch extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
-    final hitSize = kMeMuslimMinInteractiveDimension;
+    const hitSize = kMeMuslimMinInteractiveDimension;
 
     final Widget switchControl = Theme(
       data: theme.copyWith(

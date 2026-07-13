@@ -76,7 +76,7 @@ void main() {
 
     test('sets recitersDataReady false when fetch fails', () async {
       when(mockGetReciters.call()).thenAnswer(
-        (_) async => Left<Failure, List<ReciterEntity>>(
+        (_) async => const Left<Failure, List<ReciterEntity>>(
           UnexpectedFailure('network'),
         ),
       );
@@ -94,7 +94,7 @@ void main() {
       );
       when(mockGetFavorites.call(any)).thenAnswer(
         (_) async =>
-            Left<Failure, List<ReciterEntity>>(CacheFailure('no auth')),
+            const Left<Failure, List<ReciterEntity>>(CacheFailure('no auth')),
       );
 
       await readiness.waitUntilReady(prepareShell: true);

@@ -84,11 +84,10 @@ List<AppShellNavDestination> buildPhoneShellNavDestinations(
     ),
     AppShellNavDestination(
       tabIndex: kAppShellSettingsTabIndex,
-      icon: TilawaIcons.profile,
-      activeIcon: TilawaIcons.profileActive,
+      icon: TilawaIcons.settings,
+      activeIcon: TilawaIcons.settingsActive,
       label: l10n.bottomNavSettings,
       semanticsIdentifier: 'settings_tab',
-      usesProfileAvatar: true,
     ),
   ];
 }

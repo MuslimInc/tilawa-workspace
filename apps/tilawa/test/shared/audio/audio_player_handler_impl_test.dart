@@ -1804,12 +1804,12 @@ void main() {
         clearInteractions(mockPlayer);
 
         // 1. Setup queue with 2 items
-        final item1 = const MediaItem(
+        const item1 = MediaItem(
           id: '1',
           title: 'Track 1',
           extras: <String, dynamic>{'url': 'https://1.mp3'},
         );
-        final item2 = const MediaItem(
+        const item2 = MediaItem(
           id: '2',
           title: 'Track 2',
           extras: <String, dynamic>{'url': 'https://2.mp3'},

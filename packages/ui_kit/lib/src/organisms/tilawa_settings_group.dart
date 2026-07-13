@@ -72,22 +72,7 @@ class TilawaSettingsGroupPanel extends StatelessWidget {
             width: tokens.tileDividerThickness,
           ),
           boxShadow: tokens.groupShadowOpacity > 0
-              ? [
-                  BoxShadow(
-                    color: colorScheme.shadow.withValues(
-                      alpha: tokens.groupShadowOpacity * 0.5,
-                    ),
-                    blurRadius: 2,
-                    offset: const Offset(0, 1),
-                  ),
-                  BoxShadow(
-                    color: colorScheme.shadow.withValues(
-                      alpha: tokens.groupShadowOpacity,
-                    ),
-                    blurRadius: tokens.groupShadowBlur,
-                    offset: tokens.groupShadowOffset,
-                  ),
-                ]
+              ? designTokens.elevationRaised(colorScheme.shadow)
               : const <BoxShadow>[],
         ),
         child: Column(
@@ -160,7 +145,6 @@ class TilawaSettingsGroup extends StatelessWidget {
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
             TilawaSectionHeader.settings(
-              context,
               title: title,
               leadingIcon: leadingIcon,
             ),

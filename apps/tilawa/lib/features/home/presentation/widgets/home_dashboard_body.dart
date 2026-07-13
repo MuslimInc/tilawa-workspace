@@ -3,6 +3,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:tilawa/core/extensions.dart';
 import 'package:tilawa/core/widgets/deferred_after_first_frame.dart';
 import 'package:tilawa/features/today_plan/today_plan.dart';
+import 'package:tilawa/features/smart_khatma/smart_khatma.dart';
 import 'package:tilawa_ui_kit/tilawa_ui_kit.dart';
 
 import '../cubit/home_listening_resume_cubit.dart';
@@ -55,6 +56,10 @@ class HomeDashboardBody extends StatelessWidget {
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
         const HomePrimaryActionsSection(),
+        if (isSmartKhatmaEnabled()) ...[
+          SizedBox(height: zoneGap),
+          const SmartKhatmaHomeEntryCard(),
+        ],
         SizedBox(height: sectionGap + tokens.spaceExtraSmall),
         const HomeQuickToolsSection(),
         DeferredAfterFirstFrame(
@@ -120,7 +125,7 @@ class _HomeDashboardClosingMark extends StatelessWidget {
     return Padding(
       padding: EdgeInsets.only(
         top: tokens.spaceExtraLarge,
-        bottom: tokens.spaceLarge,
+        bottom: tokens.spaceSmall,
       ),
       child: Center(
         child: Column(

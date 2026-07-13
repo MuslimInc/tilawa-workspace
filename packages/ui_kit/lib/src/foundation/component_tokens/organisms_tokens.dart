@@ -89,7 +89,7 @@ class TilawaFooterBarTokens {
   final double secondaryLabelOpacity;
 
   factory TilawaFooterBarTokens.defaults() {
-    return TilawaFooterBarTokens(
+    return const TilawaFooterBarTokens(
       height: 56,
       horizontalPadding: 16,
       contentGap: 12,
@@ -616,7 +616,7 @@ class TilawaAdaptiveShellTokens {
       sideRailOutlineColor: shellChromeOutline,
       sideRailShadowOpacity: 0.05,
       sideRailShadowBlur: 12,
-      sideRailShadowOffset: Offset(2, 0),
+      sideRailShadowOffset: const Offset(2, 0),
       navButtonMinHeight: navButtonMinHeight,
       navButtonVerticalPadding: navButtonVerticalPadding,
       navButtonGap: navButtonGap,

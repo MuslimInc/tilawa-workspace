@@ -330,7 +330,7 @@ class _PrayerTimesScreenState extends State<PrayerTimesScreen>
                         0,
                       ),
                     ),
-                    _CountdownCardSection(),
+                    const _CountdownCardSection(),
                     _TodayPrayerList(
                       prayerTimes: state.todayPrayerTimes!,
                       settings: state.settings,

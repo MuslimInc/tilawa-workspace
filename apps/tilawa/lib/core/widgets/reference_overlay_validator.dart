@@ -180,11 +180,11 @@ class _ReferenceOverlayValidatorState extends State<ReferenceOverlayValidator> {
                             ),
                           ],
                         ),
-                        TextButton(
-                          style: TextButton.styleFrom(
-                            foregroundColor: scheme.onInverseSurface.withValues(
-                              alpha: 0.7,
-                            ),
+                        TilawaButton(
+                          text: 'Reset Overlay',
+                          variant: TilawaButtonVariant.ghost,
+                          foregroundColor: scheme.onInverseSurface.withValues(
+                            alpha: 0.7,
                           ),
                           onPressed: () {
                             setState(() {
@@ -193,7 +193,6 @@ class _ReferenceOverlayValidatorState extends State<ReferenceOverlayValidator> {
                               _opacity = 0.5;
                             });
                           },
-                          child: const Text('Reset Overlay'),
                         ),
                       ],
                     ),

@@ -280,7 +280,9 @@ void main() {
           );
           when(
             mockGetSplashNextRoute.call(),
-          ).thenAnswer((_) async => SplashRouteResult(SplashDestination.home));
+          ).thenAnswer(
+            (_) async => const SplashRouteResult(SplashDestination.home),
+          );
 
           splashBloc.add(const SplashStarted());
           await expectLater(
@@ -405,7 +407,9 @@ void main() {
 
           when(
             mockGetSplashNextRoute.call(),
-          ).thenAnswer((_) async => SplashRouteResult(SplashDestination.home));
+          ).thenAnswer(
+            (_) async => const SplashRouteResult(SplashDestination.home),
+          );
 
           splashBloc.add(const SplashStarted());
           final SplashState splashOutcome = await splashBloc.stream.firstWhere(

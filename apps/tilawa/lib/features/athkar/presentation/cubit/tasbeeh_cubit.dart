@@ -363,7 +363,7 @@ class TasbeehCubit extends Cubit<TasbeehState> {
           errorMessage: failure.message,
         ),
       ),
-      (updated) => _upsertSavedDhikr(updated),
+      _upsertSavedDhikr,
     );
   }
 

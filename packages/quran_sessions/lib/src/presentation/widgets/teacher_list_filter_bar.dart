@@ -63,7 +63,7 @@ class TeacherListFilterBar extends StatelessWidget {
   /// Formatted ceiling for [TeacherListFilter.budget], e.g. `500 ج.م.`.
   final String? budgetPriceLabel;
 
-  static const filters = TeacherListFilter.values;
+  static const List<TeacherListFilter> filters = TeacherListFilter.values;
 
   @override
   Widget build(BuildContext context) {

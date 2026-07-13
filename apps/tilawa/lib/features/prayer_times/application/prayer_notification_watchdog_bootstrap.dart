@@ -22,11 +22,6 @@ const MethodChannel _watchdogBackgroundChannel = MethodChannel(
 
 /// Minimal DI graph for the Android prayer notification watchdog isolate.
 class PrayerNotificationWatchdogBootstrap {
-  PrayerNotificationWatchdogBootstrap._({
-    required this._adhanPlayer,
-    required this._ensureScheduled,
-  });
-
   /// Builds the default background graph (used by the VM entrypoint).
   factory PrayerNotificationWatchdogBootstrap() {
     final SharedPreferencesAsync prefs = SharedPreferencesAsync();
@@ -60,6 +55,10 @@ class PrayerNotificationWatchdogBootstrap {
       ensureScheduled: ensureScheduled,
     );
   }
+  PrayerNotificationWatchdogBootstrap._({
+    required this._adhanPlayer,
+    required this._ensureScheduled,
+  });
 
   final AndroidAdhanAlarmPlayer _adhanPlayer;
   final EnsurePrayerNotificationsScheduledUseCase _ensureScheduled;

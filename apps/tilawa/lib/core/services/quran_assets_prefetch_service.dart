@@ -98,7 +98,7 @@ class QuranAssetsPrefetchService {
     final performance = getIt<PerformanceMonitoringService>();
     final status = await performance.traceOperation(
       'prepare_quran_images',
-      () async => await _prepareQuranImageCacheUseCase(),
+      () async => _prepareQuranImageCacheUseCase(),
     );
 
     if (status.isReady) {

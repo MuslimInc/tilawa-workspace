@@ -12,6 +12,7 @@ workspace:
   - packages/core
   - packages/qibla
   - packages/ui_kit
+  - packages/tilawa_lints
   - packages/quran_qcf
   - packages/quran_image
   - packages/flex_color_scheme
@@ -24,9 +25,10 @@ workspace:
 
 dev_dependencies:
   sentry_dart_plugin: ^3.4.0
-  melos: ^8.0.0
+  melos: ^8.2.1
   bloc_lint: ^0.4.1
   bloc_tools: ^0.1.0-dev.24
+  very_good_analysis: 10.3.0
 
 dependency_overrides:
   ffi: ^2.1.4
@@ -70,7 +72,7 @@ melos:
         melos run format:fix
 
     lint:
-      description: Run analyze + format check (CI gate).
+      description: Run analyze, UI Kit policy, and format checks (CI gate).
       run: |
         melos run analyze
         melos run format
@@ -78,6 +80,10 @@ melos:
     bloc:lint:
       description: Run official bloc_lint rules via bloc_tools.
       run: dart run bloc_tools:bloc lint .
+
+    ui:lint:
+      description: Enforce Tilawa UI Kit components in product code.
+      run: dart analyze --fatal-infos
 
     # -- Testing -------------------------------------------------------
     test:

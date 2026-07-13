@@ -218,7 +218,7 @@ void main() {
             return MediaQuery(
               data: MediaQuery.of(
                 context,
-              ).copyWith(textScaler: TextScaler.linear(1.4)),
+              ).copyWith(textScaler: const TextScaler.linear(1.4)),
               child: child!,
             );
           },
@@ -263,7 +263,7 @@ void main() {
             return MediaQuery(
               data: MediaQuery.of(
                 context,
-              ).copyWith(textScaler: TextScaler.linear(1.4)),
+              ).copyWith(textScaler: const TextScaler.linear(1.4)),
               child: child!,
             );
           },

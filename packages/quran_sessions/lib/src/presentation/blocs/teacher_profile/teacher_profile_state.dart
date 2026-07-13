@@ -89,15 +89,13 @@ final class TeacherProfileSuccess extends TeacherProfileState {
     isLoadingMoreReviews: isLoadingMoreReviews ?? this.isLoadingMoreReviews,
     hasMoreReviews: hasMoreReviews ?? this.hasMoreReviews,
     nextReviewCursor: nextReviewCursor ?? this.nextReviewCursor,
-    reportInProgress: clearReportInProgress
-        ? false
-        : reportInProgress ?? this.reportInProgress,
+    reportInProgress:
+        !clearReportInProgress && (reportInProgress ?? this.reportInProgress),
     reportFailure: clearReportFailure
         ? null
         : reportFailure ?? this.reportFailure,
-    reportSubmitted: clearReportSubmitted
-        ? false
-        : reportSubmitted ?? this.reportSubmitted,
+    reportSubmitted:
+        !clearReportSubmitted && (reportSubmitted ?? this.reportSubmitted),
     pricingQuote: pricingQuote ?? this.pricingQuote,
   );
 }

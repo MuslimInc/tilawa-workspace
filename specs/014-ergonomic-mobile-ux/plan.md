@@ -18,7 +18,7 @@ These three FRs are the mechanical, no-API-change subset of the spec:
 
 | Finding | File | Notes |
 | ------- | ---- | ----- |
-| Doc-comment says "44 dp" but value is `kTilawaMinInteractiveDimension` (48 dp) | [molecules_tokens.dart:285-286](../../packages/ui_kit/lib/src/foundation/component_tokens/molecules_tokens.dart#L285-L286) | One comment line; cosmetic drift left over from before the 44→48 floor decision. |
+| Doc-comment says "44 dp" but value is `kMeMuslimMinInteractiveDimension` (48 dp) | [molecules_tokens.dart:285-286](../../packages/ui_kit/lib/src/foundation/component_tokens/molecules_tokens.dart#L285-L286) | One comment line; cosmetic drift left over from before the 44→48 floor decision. |
 | `HitTestBehavior.opaque` rule for visible-surface `GestureDetector`s is implicit | [tilawa_media_player_bar.dart:147](../../packages/ui_kit/lib/src/organisms/tilawa_media_player_bar.dart#L147) | The behaviour is set correctly in the only place it currently matters; the spec asks us to *codify* the rule so future contributors don't drift. |
 | `AnimationController(duration: 300 ms)` in `initState` | [tilawa_icon_action_button.dart:59-62](../../packages/ui_kit/lib/src/molecules/tilawa_icon_action_button.dart#L59-L62) | Press animation. Should consume `tokens.durationMedium` (400 ms) for kit-wide motion consistency. |
 
@@ -33,7 +33,7 @@ Three sub-tasks, each independently committable. I'll run `dart analyze` between
 
 ### 1. FR-002 — doc-comment drift
 
-Update the `// Size = Tilawa hit-target floor (44 dp).` comment to read 48 dp, matching the actual value `kTilawaMinInteractiveDimension`. Single-line edit. No code path changes.
+Update the `// Size = Tilawa hit-target floor (44 dp).` comment to read 48 dp, matching the actual value `kMeMuslimMinInteractiveDimension`. Single-line edit. No code path changes.
 
 ### 2. FR-007 — IconActionButton press motion → tokens.durationMedium
 
@@ -49,7 +49,7 @@ The press animation is a forward/reverse scale (1.0 ↔ 0.92). Going 300 → 400
 
 Two parts:
 
-- **Doc**: add a paragraph to the dartdoc of `kTilawaMinInteractiveDimension` in [design_tokens.dart:1-18](../../packages/ui_kit/lib/src/foundation/design_tokens.dart#L1-L18) stating the rule: "Every `GestureDetector` in the kit that wraps a visible interactive surface must declare `behavior: HitTestBehavior.opaque` so transparent padding still registers taps. Bare detectors are reserved for non-visible regions (pan handlers, pan-to-dismiss layers)."
+- **Doc**: add a paragraph to the dartdoc of `kMeMuslimMinInteractiveDimension` in [design_tokens.dart:1-18](../../packages/ui_kit/lib/src/foundation/design_tokens.dart#L1-L18) stating the rule: "Every `GestureDetector` in the kit that wraps a visible interactive surface must declare `behavior: HitTestBehavior.opaque` so transparent padding still registers taps. Bare detectors are reserved for non-visible regions (pan handlers, pan-to-dismiss layers)."
 - **Lint-equivalent check**: extend the existing `accessibility_audit_contracts_test.dart` (or a new lightweight contract test) to grep the kit source for `GestureDetector(` and assert the only call sites are in: `tilawa_media_player_bar.dart`, `alphabet_scrollbar.dart`, `immersive_composer_scaffold.dart`. Future contributors adding a new detector trigger the test until they justify it.
 
 The text-based contract test is the cheap way to keep the rule honest without writing a custom analyzer plugin. If the audit-contracts test isn't a good fit (it might be widget-tree-based), add a new file `test/foundation/kit_contracts_test.dart` instead.

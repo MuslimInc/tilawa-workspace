@@ -450,7 +450,7 @@ void main() {
           ),
           GoldenTestScenario(
             name: 'Disabled',
-            child: TilawaPreviewWrapper(
+            child: const TilawaPreviewWrapper(
               child: TilawaSearchField(
                 hintText: 'Search surahs',
                 enabled: false,
@@ -793,7 +793,10 @@ void main() {
             name: 'With leading',
             child: TilawaPreviewWrapper(
               child: TilawaSelectionTile(
-                leading: CircleAvatar(backgroundColor: Colors.blue, radius: 12),
+                leading: const CircleAvatar(
+                  backgroundColor: Colors.blue,
+                  radius: 12,
+                ),
                 title: 'Blue',
                 isSelected: true,
                 onTap: () {},
@@ -854,12 +857,12 @@ void main() {
           ),
           GoldenTestScenario(
             name: 'With verified badge',
-            child: TilawaPreviewWrapper(
+            child: const TilawaPreviewWrapper(
               child: Center(
                 child: Column(
                   mainAxisSize: MainAxisSize.min,
                   spacing: 8,
-                  children: const [
+                  children: [
                     TilawaProfileAvatar(
                       size: 72,
                       displayName: 'Ahmad Ali',

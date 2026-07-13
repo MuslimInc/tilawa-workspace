@@ -408,7 +408,7 @@ const List<Map<String, dynamic>> juzData = [
 
 /// Returns all Juz as [Juz] objects.
 List<Juz> getAllJuz() {
-  return juzData.map((map) => Juz.fromMap(map)).toList();
+  return juzData.map(Juz.fromMap).toList();
 }
 
 /// Returns a specific Juz by its number (1-30).
@@ -424,7 +424,7 @@ int? getJuzForVerse(int surah, int verse) {
   for (final Map<String, dynamic> juzMap in juzData) {
     final verses = juzMap['verses'] as Map<dynamic, dynamic>;
     if (verses.containsKey(surah)) {
-      final range = verses[surah] as List;
+      final range = (verses[surah] as List).cast<num>();
       if (verse >= range[0] && verse <= range[1]) {
         return juzMap['id'] as int;
       }

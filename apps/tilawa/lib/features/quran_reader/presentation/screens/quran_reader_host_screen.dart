@@ -3,6 +3,7 @@ import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:tilawa/core/di/injection.dart';
+import 'package:tilawa/core/extensions.dart';
 import 'package:tilawa/features/quran_reader/domain/entities/entities.dart';
 import 'package:tilawa/features/quran_reader/domain/usecases/get_last_read_position_use_case.dart';
 import 'package:tilawa/features/quran_reader/presentation/cubit/quran_settings_cubit.dart';
@@ -21,6 +22,8 @@ class QuranReaderHostScreen extends StatefulWidget {
     super.key,
     required this.surahNumber,
     this.initialAyah,
+    this.initialPage,
+    this.showSaveProgressAction = false,
     this.openPracticeOnLaunch = false,
   });
 
@@ -28,6 +31,8 @@ class QuranReaderHostScreen extends StatefulWidget {
   final int surahNumber;
 
   final int? initialAyah;
+  final int? initialPage;
+  final bool showSaveProgressAction;
   final bool openPracticeOnLaunch;
 
   @override
@@ -111,15 +116,34 @@ class _QuranReaderHostScreenState extends State<QuranReaderHostScreen> {
         builder: (context, settings) {
           final bool showAyahList =
               settings.viewMode == QuranReaderViewMode.ayahList;
-          return IndexedStack(
-            index: showAyahList ? 1 : 0,
-            sizing: StackFit.expand,
+          return Stack(
             children: [
-              _buildMushafLayer(settings),
-              if (_ayahListVisited || showAyahList)
-                _buildAyahListLayer()
-              else
-                const SizedBox.shrink(),
+              Positioned.fill(
+                child: IndexedStack(
+                  index: showAyahList ? 1 : 0,
+                  sizing: StackFit.expand,
+                  children: [
+                    _buildMushafLayer(settings),
+                    if (_ayahListVisited || showAyahList)
+                      _buildAyahListLayer()
+                    else
+                      const SizedBox.shrink(),
+                  ],
+                ),
+              ),
+              if (widget.showSaveProgressAction)
+                SafeArea(
+                  child: Align(
+                    alignment: AlignmentDirectional.bottomEnd,
+                    child: Padding(
+                      padding: EdgeInsets.all(context.tokens.spaceLarge),
+                      child: TilawaButton(
+                        text: context.l10n.khatmaSaveProgressAction,
+                        onPressed: () => Navigator.of(context).pop(),
+                      ),
+                    ),
+                  ),
+                ),
             ],
           );
         },
@@ -133,6 +157,7 @@ class _QuranReaderHostScreenState extends State<QuranReaderHostScreen> {
     return QuranImageReaderScreen(
       surahNumber: _activeSurah,
       initialAyah: _activeAyah,
+      initialPage: widget.initialPage,
       openPracticeOnLaunch: widget.openPracticeOnLaunch,
       onActiveSurahChanged: _onActiveSurahChanged,
       viewSwitchAction: QuranReaderViewToggle(

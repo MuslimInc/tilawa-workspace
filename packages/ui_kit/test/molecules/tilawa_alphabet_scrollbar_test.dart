@@ -147,7 +147,7 @@ void main() {
           (w) =>
               w is Container &&
               w.decoration is BoxDecoration &&
-              (w.decoration as BoxDecoration).shape == BoxShape.circle,
+              (w.decoration! as BoxDecoration).shape == BoxShape.circle,
         ),
       );
       expect(selectedContainer, findsOneWidget);
@@ -159,7 +159,7 @@ void main() {
           (w) =>
               w is Container &&
               w.decoration is BoxDecoration &&
-              (w.decoration as BoxDecoration).shape == BoxShape.circle,
+              (w.decoration! as BoxDecoration).shape == BoxShape.circle,
         ),
       );
       expect(unselectedContainer, findsNothing);
@@ -376,7 +376,7 @@ void main() {
             (w) =>
                 w is Container &&
                 w.decoration is BoxDecoration &&
-                (w.decoration as BoxDecoration).shape == BoxShape.circle,
+                (w.decoration! as BoxDecoration).shape == BoxShape.circle,
           ),
         );
 
@@ -420,7 +420,7 @@ void main() {
             (w) =>
                 w is Container &&
                 w.decoration is BoxDecoration &&
-                (w.decoration as BoxDecoration).shape == BoxShape.circle,
+                (w.decoration! as BoxDecoration).shape == BoxShape.circle,
           ),
         );
 
@@ -481,7 +481,7 @@ void main() {
             (w) =>
                 w is Container &&
                 w.decoration is BoxDecoration &&
-                (w.decoration as BoxDecoration).shape == BoxShape.circle,
+                (w.decoration! as BoxDecoration).shape == BoxShape.circle,
           ),
         );
         expect(circleFor('ا'), findsOneWidget);
@@ -609,8 +609,8 @@ void main() {
       );
 
       final BoxDecoration idleDecoration =
-          (tester.widget<AnimatedContainer>(trackFinder).decoration
-              as BoxDecoration);
+          tester.widget<AnimatedContainer>(trackFinder).decoration!
+              as BoxDecoration;
       expect(idleDecoration.borderRadius, isNotNull);
       expect(
         idleDecoration.border!.top.width,
@@ -628,8 +628,8 @@ void main() {
       await tester.pump();
 
       final BoxDecoration scrubDecoration =
-          (tester.widget<AnimatedContainer>(trackFinder).decoration
-              as BoxDecoration);
+          tester.widget<AnimatedContainer>(trackFinder).decoration!
+              as BoxDecoration;
       expect(
         scrubDecoration.border!.top.width,
         theme.tokens.borderWidthThin * 2,

@@ -536,9 +536,7 @@ class _QuranImageReaderState extends State<QuranImageReader>
     final navTimer = Stopwatch()..start();
     final requestGeneration = ++_navigationRequestGeneration;
     _jumpTransitionSnapshotNotifier.value = null;
-    final safePageNumber = pageNumber
-        .clamp(1, PageState.quranPageCount)
-        .toInt();
+    final safePageNumber = pageNumber.clamp(1, PageState.quranPageCount);
     final targetIndex = safePageNumber - 1;
     if (targetIndex == _lastSettledPageIndex) {
       _clearPreviewPage();

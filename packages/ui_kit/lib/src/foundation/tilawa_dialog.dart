@@ -42,6 +42,8 @@ Future<bool?> showTilawaConfirmDialog({
   String cancelLabel = 'Cancel',
   TilawaButtonVariant confirmVariant = TilawaButtonVariant.danger,
   bool trailingClose = true,
+  bool compactCloseButton = false,
+  bool compactActions = false,
   String? dialogSemanticsLabel,
 }) async {
   final bool? result = await _showTilawaDialog<bool>(
@@ -49,6 +51,8 @@ Future<bool?> showTilawaConfirmDialog({
     title: title,
     dialogSemanticsLabel: dialogSemanticsLabel,
     trailingClose: trailingClose,
+    compactCloseButton: compactCloseButton,
+    compactActions: compactActions,
     // Close (X / barrier) resolves to "not confirmed".
     onClose: (dialogContext) => Navigator.of(dialogContext).pop(false),
     primaryLabel: confirmLabel,
@@ -97,6 +101,8 @@ Future<T?> showTilawaFormDialog<T>({
   TilawaDialogAction? onSecondary,
   TilawaButtonVariant primaryVariant = TilawaButtonVariant.primary,
   bool trailingClose = true,
+  bool compactCloseButton = false,
+  bool compactActions = false,
   TilawaDialogAction? onClose,
   String? dialogSemanticsLabel,
 }) {
@@ -110,6 +116,8 @@ Future<T?> showTilawaFormDialog<T>({
     onSecondary: onSecondary,
     primaryVariant: primaryVariant,
     trailingClose: trailingClose,
+    compactCloseButton: compactCloseButton,
+    compactActions: compactActions,
     onClose: onClose,
     dialogSemanticsLabel: dialogSemanticsLabel,
   );
@@ -131,6 +139,8 @@ Future<T?> _showTilawaDialog<T>({
   TilawaDialogAction? onSecondary,
   TilawaButtonVariant primaryVariant = TilawaButtonVariant.primary,
   bool trailingClose = true,
+  bool compactCloseButton = false,
+  bool compactActions = false,
   TilawaDialogAction? onClose,
   String? dialogSemanticsLabel,
 }) {
@@ -159,6 +169,8 @@ Future<T?> _showTilawaDialog<T>({
           child: _TilawaDialogContent(
             title: title,
             trailingClose: trailingClose,
+            compactCloseButton: compactCloseButton,
+            compactActions: compactActions,
             onClose: onClose,
             body: bodyBuilder?.call(dialogContext),
             primaryLabel: primaryLabel,
@@ -177,6 +189,8 @@ class _TilawaDialogContent extends StatelessWidget {
   const _TilawaDialogContent({
     required this.title,
     required this.trailingClose,
+    required this.compactCloseButton,
+    required this.compactActions,
     required this.onClose,
     required this.body,
     required this.primaryLabel,
@@ -188,6 +202,8 @@ class _TilawaDialogContent extends StatelessWidget {
 
   final String title;
   final bool trailingClose;
+  final bool compactCloseButton;
+  final bool compactActions;
   final TilawaDialogAction? onClose;
   final Widget? body;
   final String? primaryLabel;
@@ -219,6 +235,7 @@ class _TilawaDialogContent extends StatelessWidget {
           child: _TilawaDialogTitleRow(
             title: title,
             trailingClose: trailingClose,
+            compactCloseButton: compactCloseButton,
             onClose: onClose == null
                 ? () => Navigator.of(context).maybePop()
                 : () => onClose!(context),
@@ -241,7 +258,7 @@ class _TilawaDialogContent extends StatelessWidget {
                   end: tightBody ? 0 : inset,
                   bottom: hasActions ? 0 : inset,
                 ),
-                child: body!,
+                child: body,
               ),
             ),
           ),
@@ -253,7 +270,11 @@ class _TilawaDialogContent extends StatelessWidget {
               mainAxisSize: MainAxisSize.min,
               crossAxisAlignment: CrossAxisAlignment.stretch,
               children: [
-                SizedBox(height: tokens.spaceExtraLarge),
+                SizedBox(
+                  height: compactActions
+                      ? tokens.spaceMedium
+                      : tokens.spaceExtraLarge,
+                ),
                 TilawaButton(
                   text: primaryLabel!,
                   variant: primaryVariant,
@@ -285,11 +306,13 @@ class _TilawaDialogTitleRow extends StatelessWidget {
   const _TilawaDialogTitleRow({
     required this.title,
     required this.trailingClose,
+    required this.compactCloseButton,
     required this.onClose,
   });
 
   final String title;
   final bool trailingClose;
+  final bool compactCloseButton;
   final VoidCallback onClose;
 
   @override
@@ -312,7 +335,10 @@ class _TilawaDialogTitleRow extends StatelessWidget {
         ),
         if (trailingClose) ...[
           SizedBox(width: theme.tokens.spaceSmall),
-          _TilawaDialogCloseButton(onClose: onClose),
+          _TilawaDialogCloseButton(
+            compact: compactCloseButton,
+            onClose: onClose,
+          ),
         ],
       ],
     );
@@ -320,8 +346,12 @@ class _TilawaDialogTitleRow extends StatelessWidget {
 }
 
 class _TilawaDialogCloseButton extends StatelessWidget {
-  const _TilawaDialogCloseButton({required this.onClose});
+  const _TilawaDialogCloseButton({
+    required this.compact,
+    required this.onClose,
+  });
 
+  final bool compact;
   final VoidCallback onClose;
 
   @override
@@ -340,16 +370,18 @@ class _TilawaDialogCloseButton extends StatelessWidget {
         minimumSize: Size.square(tokens.minInteractiveDimension),
         padding: EdgeInsets.zero,
         foregroundColor: colorScheme.onSurfaceVariant,
-        backgroundColor: colorScheme.surfaceContainerHigh,
-        shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(
-            tokens.resolveRadius(
-              family: TilawaRadiusFamily.icon,
-              width: tokens.minInteractiveDimension,
-              height: tokens.minInteractiveDimension,
-            ),
-          ),
-        ),
+        backgroundColor: compact ? null : colorScheme.surfaceContainerHigh,
+        shape: compact
+            ? null
+            : RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(
+                  tokens.resolveRadius(
+                    family: TilawaRadiusFamily.icon,
+                    width: tokens.minInteractiveDimension,
+                    height: tokens.minInteractiveDimension,
+                  ),
+                ),
+              ),
       ),
     );
   }

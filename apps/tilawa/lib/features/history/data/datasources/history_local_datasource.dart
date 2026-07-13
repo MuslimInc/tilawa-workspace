@@ -75,7 +75,9 @@ class HistoryLocalDataSourceImpl implements HistoryLocalDataSource {
     final box = await _getBox();
     final jsonString = box.get(id);
     if (jsonString != null && jsonString is String) {
-      return HistoryEntity.fromJson(jsonDecode(jsonString));
+      return HistoryEntity.fromJson(
+        jsonDecode(jsonString) as Map<String, dynamic>,
+      );
     }
     return null;
   }
@@ -154,7 +156,7 @@ class HistoryLocalDataSourceImpl implements HistoryLocalDataSource {
     await box.deleteAll(keysToDelete);
 
     final Map<dynamic, String> entries = {
-      for (var h in historyList) h.id: jsonEncode(h.toJson()),
+      for (final h in historyList) h.id: jsonEncode(h.toJson()),
     };
     await box.putAll(entries);
   }
@@ -197,7 +199,9 @@ class HistoryLocalDataSourceImpl implements HistoryLocalDataSource {
     final box = await _getBox();
     final jsonString = box.get(compositeKey);
     if (jsonString != null && jsonString is String) {
-      return HistoryEntity.fromJson(jsonDecode(jsonString));
+      return HistoryEntity.fromJson(
+        jsonDecode(jsonString) as Map<String, dynamic>,
+      );
     }
     return null;
   }

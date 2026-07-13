@@ -15,7 +15,7 @@ void main() {
       );
     final useCase = CompleteSessionUseCase(
       aggregateRepository: repository,
-      lifecycleGuard: SessionLifecycleGuard(),
+      lifecycleGuard: const SessionLifecycleGuard(),
       auditRepository: FakeAuditRepository(),
       now: () => now,
     );

@@ -12,7 +12,7 @@ final class GetActiveKhatmaPlanUseCase {
   Future<Either<Failure, KhatmaPlan?>> call() async {
     try {
       return Right(await _repository.getActivePlan());
-    } catch (error) {
+    } on Exception catch (error) {
       return Left(CacheFailure(error.toString()));
     }
   }

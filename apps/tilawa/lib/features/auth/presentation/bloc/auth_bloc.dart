@@ -416,29 +416,80 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
     // Firebase Auth restores the persisted session asynchronously on cold
     // start; `currentUser` is transiently null until it finishes. Wait for
     // restoration (gated by a persisted hint) before reading it, so a startup
-    // race is never mis-emitted as `unauthenticated`.
-    final UserEntity? hint = await _getPersistedAuthenticatedUser();
-    await _awaitAuthRestoration(sessionUser: hint);
+    // race is never mis-emitted as `unauthenticated`. Both steps are
+    // best-effort: a storage or stream failure must never strand the bloc in
+    // `initial` or fabricate a logout.
+    UserEntity? hint;
+    try {
+      hint = await _getPersistedAuthenticatedUser();
+    } catch (error, stackTrace) {
+      logger.w(
+        'Reading persisted auth hint failed',
+        error: error,
+        stackTrace: stackTrace,
+      );
+    }
+    try {
+      await _awaitAuthRestoration(sessionUser: hint);
+    } catch (error, stackTrace) {
+      logger.w(
+        'Awaiting auth restoration failed',
+        error: error,
+        stackTrace: stackTrace,
+      );
+    }
 
     final UserEntity? user = _liveOrInMemoryUser() ?? hint;
-    if (user != null) {
-      final Either<Failure, void> registration = await _syncDeviceToken(
+    if (user == null) {
+      emit(const AuthState.unauthenticated());
+      return;
+    }
+
+    // Local-first session: trust the restored session immediately so startup
+    // never blocks on the network (a dead or captive connection can hang the
+    // device-registration callable for minutes). Verification runs in the
+    // background and demotes only on a definitive stale-device rejection.
+    unawaited(_syncLanguagePreferenceAfterAuth());
+    emit(AuthState.authenticated(user: user));
+    unawaited(
+      _verifyDeviceRegistrationInBackground(
         user.id,
+        _interactiveSignInGeneration,
+      ),
+    );
+  }
+
+  Future<void> _verifyDeviceRegistrationInBackground(
+    String userId,
+    int generation,
+  ) async {
+    try {
+      final Either<Failure, void> registration = await _syncDeviceToken(
+        userId,
       );
+      // The session changed while the sync was in flight (interactive
+      // sign-in, sign-out, deletion): a late stale verdict belongs to the
+      // old session and must not demote the new one.
+      if (generation != _interactiveSignInGeneration) {
+        return;
+      }
       final bool staleDevice = registration.fold(
         _isStaleDeviceFailure,
         (_) => false,
       );
       if (staleDevice && !_multiDeviceLoginEnabled()) {
         await _signOut(skipServerTokenClear: true);
-        emit(const AuthState.unauthenticated());
-        return;
+        if (!isClosed) {
+          add(const SessionInvalidatedEvent());
+        }
       }
-      unawaited(_syncLanguagePreferenceAfterAuth());
-      emit(AuthState.authenticated(user: user));
-      return;
+    } catch (error, stackTrace) {
+      logger.e(
+        'Background device sync after auth restore threw',
+        error: error,
+        stackTrace: stackTrace,
+      );
     }
-    emit(const AuthState.unauthenticated());
   }
 
   bool _isStaleDeviceFailure(Failure failure) {

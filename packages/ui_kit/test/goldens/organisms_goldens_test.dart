@@ -197,7 +197,7 @@ void main() {
           ),
           GoldenTestScenario(
             name: 'Skeleton light',
-            child: TilawaPreviewWrapper(
+            child: const TilawaPreviewWrapper(
               child: SizedBox(
                 width: 360,
                 child: TilawaCapabilityActionCardSkeleton(
@@ -230,7 +230,7 @@ void main() {
           ),
           GoldenTestScenario(
             name: 'Skeleton dark',
-            child: TilawaPreviewWrapper(
+            child: const TilawaPreviewWrapper(
               isDark: true,
               child: SizedBox(
                 width: 360,
@@ -274,7 +274,7 @@ void main() {
         children: [
           GoldenTestScenario(
             name: 'Default',
-            child: TilawaPreviewWrapper(
+            child: const TilawaPreviewWrapper(
               child: SizedBox(
                 width: 360,
                 child: TilawaShareFooterBar(
@@ -286,7 +286,7 @@ void main() {
           ),
           GoldenTestScenario(
             name: 'Dark',
-            child: TilawaPreviewWrapper(
+            child: const TilawaPreviewWrapper(
               isDark: true,
               child: SizedBox(
                 width: 360,

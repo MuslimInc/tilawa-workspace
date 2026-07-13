@@ -2,9 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:tilawa_ui_kit/tilawa_ui_kit.dart';
 
 /// Shared title → subtitle → content rhythm for Home dashboard zones.
-///
-/// Set [compact] to `true` for secondary sections (More) to tighten subtitle
-/// and content spacing — section titles stay the same size across zones.
 class HomeDashboardSection extends StatelessWidget {
   const HomeDashboardSection({
     super.key,
@@ -12,6 +9,7 @@ class HomeDashboardSection extends StatelessWidget {
     this.subtitle,
     this.trailing,
     this.contentSpacing,
+    @Deprecated('Spacing is unified across Home sections.')
     this.compact = false,
     required this.child,
   });
@@ -21,15 +19,29 @@ class HomeDashboardSection extends StatelessWidget {
   final Widget? trailing;
   final double? contentSpacing;
 
-  /// When true, tightens subtitle/content spacing for secondary sections.
+  /// Deprecated — spacing is now unified; kept for call-site compatibility.
   final bool compact;
 
   final Widget child;
+
+  /// WCAG-friendly secondary copy on dashboard cards and section subtitles.
+  static Color secondaryTextColor(BuildContext context) =>
+      Theme.of(context).componentTokens.homeScreen.homeHeaderSecondaryText;
 
   @override
   Widget build(BuildContext context) {
     final tokens = context.tokens;
     final theme = Theme.of(context);
+    final Color secondaryText = secondaryTextColor(context);
+    final double subtitleGap = tokens.spaceSmall;
+    final double afterHeaderGap = contentSpacing ?? tokens.spaceLarge;
+    final TextStyle subtitleStyle = theme.textTheme.bodySmall!.copyWith(
+      color: secondaryText,
+      height: 1.35,
+    );
+    final double subtitleLineHeight =
+        (subtitleStyle.fontSize ?? tokens.iconSizeSmall) *
+        (subtitleStyle.height ?? 1.35);
 
     final Widget titleWidget = Semantics(
       header: true,
@@ -57,24 +69,13 @@ class HomeDashboardSection extends StatelessWidget {
             ],
           ),
         if (subtitle != null) ...[
-          SizedBox(
-            height: compact ? tokens.spaceExtraSmall : tokens.spaceSmall,
-          ),
+          SizedBox(height: subtitleGap),
           Text(
             subtitle!,
-            style: theme.textTheme.bodySmall?.copyWith(
-              color: theme.colorScheme.onSurfaceVariant,
-              height: 1.35,
-            ),
+            style: subtitleStyle,
           ),
         ],
-        SizedBox(
-          height:
-              contentSpacing ??
-              (compact
-                  ? tokens.spaceMedium + tokens.spaceExtraSmall
-                  : tokens.spaceLarge + tokens.spaceExtraSmall),
-        ),
+        SizedBox(height: afterHeaderGap),
         child,
       ],
     );
@@ -108,7 +109,7 @@ class HomeDashboardSubsectionHeader extends StatelessWidget {
         TilawaSectionTitle(title: title),
         Align(
           alignment: AlignmentDirectional.centerEnd,
-          child: trailing!,
+          child: trailing,
         ),
       ],
     );

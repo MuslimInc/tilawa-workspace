@@ -12,16 +12,10 @@ final class ResetKhatmaPlanUseCase {
 
   Future<Either<Failure, void>> call() async {
     try {
-      final plan = await _repository.getActivePlan();
       await _repository.clearActivePlan();
-      await _analyticsService.logEvent(
-        AnalyticsEvents.khatmaReset,
-        parameters: <String, Object>{
-          if (plan != null) 'plan_id': plan.id,
-        },
-      );
+      await _analyticsService.logEvent(AnalyticsEvents.khatmaReset);
       return const Right(null);
-    } catch (error) {
+    } on Exception catch (error) {
       return Left(CacheFailure(error.toString()));
     }
   }

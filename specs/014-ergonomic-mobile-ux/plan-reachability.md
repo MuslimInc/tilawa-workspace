@@ -27,7 +27,7 @@ from `TilawaBottomSheetScaffold`. Optional `onDismiss` override for tests.
 
 ### FR-001 — self-sized 48 dp switch (F-004)
 
-New `TilawaSwitch` atom guarantees `kTilawaMinInteractiveDimension` on both
+New `TilawaSwitch` atom guarantees `kMeMuslimMinInteractiveDimension` on both
 axes. `TilawaSettingsSwitchTile` now composes it; Maestro identifier surface
 unchanged (no new semantics identifiers on the tile).
 

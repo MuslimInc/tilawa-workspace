@@ -68,6 +68,9 @@ jobs:
           # overrides, …) fail the check.
           melos exec --ignore="flex_color_scheme" -- dart analyze --fatal-infos
 
+      - name: Repository lint (analyze + UI Kit policy + format)
+        run: melos run lint
+
       # Advisory for now: master has pre-existing test failures (golden /
       # rendering tests in quran_qcf & tilawa_ui_kit that need real baseline
       # images, plus a few in tilawa). continue-on-error keeps the suite

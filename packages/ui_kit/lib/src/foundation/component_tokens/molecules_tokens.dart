@@ -479,8 +479,8 @@ class TilawaChipTokens {
         _selectionUnselectedBackgroundColor(colorScheme);
     final defaultBorderColor = _defaultBorderColor(colorScheme);
     return TilawaChipTokens(
-      padding: EdgeInsets.symmetric(horizontal: 16, vertical: 10),
-      inlinePadding: EdgeInsets.symmetric(horizontal: 4, vertical: 2),
+      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
+      inlinePadding: const EdgeInsets.symmetric(horizontal: 4, vertical: 2),
       backgroundColor: backgroundColor,
       defaultBorderColor: defaultBorderColor,
       catalogSelectedBackgroundColor: catalogFilterSelectedBackground(
@@ -521,7 +521,7 @@ class TilawaChipTokens {
     if (colorScheme.brightness == Brightness.light) {
       return colorScheme.primary;
     }
-    final blendAmount = 0.12;
+    const blendAmount = 0.12;
     return Color.lerp(
       colorScheme.primaryContainer,
       colorScheme.primary,
@@ -704,8 +704,8 @@ class TilawaSegmentedControlTokens {
     final selectedBackgroundColor = _selectedBackgroundColor(colorScheme);
     final containerBorderColor = _containerBorderColor(colorScheme);
     return TilawaSegmentedControlTokens(
-      containerPadding: EdgeInsets.all(4),
-      itemPadding: EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+      containerPadding: const EdgeInsets.all(4),
+      itemPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
       itemSpacing: 4,
       containerBackgroundColor: containerBackgroundColor,
       selectedBackgroundColor: selectedBackgroundColor,
@@ -724,7 +724,7 @@ class TilawaSegmentedControlTokens {
     if (colorScheme.brightness == Brightness.light) {
       return colorScheme.surfaceContainerHigh;
     }
-    final blendAmount = 0.18;
+    const blendAmount = 0.18;
     return Color.lerp(
       colorScheme.surface,
       colorScheme.surfaceContainer,
@@ -1010,7 +1010,7 @@ class TilawaSearchFieldTokens {
       hintOpacity: hintOpacity,
       iconOpacity: iconOpacity,
       shadowBlur: 12,
-      shadowOffset: Offset(0, 4),
+      shadowOffset: const Offset(0, 4),
       focusedBorderColor: focusedBorderColor,
       unfocusedBorderColor: unfocusedBorderColor,
       boxShadowColor: boxShadowColor,
@@ -1157,7 +1157,7 @@ class TilawaCountProgressRingTokens {
   final double progressLabelBackgroundOpacity;
 
   factory TilawaCountProgressRingTokens.defaults() {
-    return TilawaCountProgressRingTokens(
+    return const TilawaCountProgressRingTokens(
       outerSize: 56,
       innerSize: 56,
       ringStrokeWidth: 0,
@@ -1635,7 +1635,7 @@ class TilawaHomeScreenTokens {
                   alpha: homeContentSheetShadowOpacity,
                 ),
                 offset: Offset(0, -tokens.shadowOffsetSmall.dy.abs()),
-                blurRadius: tokens.spaceMedium.toDouble(),
+                blurRadius: tokens.spaceMedium,
               ),
             ]
           : null,
@@ -1667,8 +1667,8 @@ class TilawaHomeScreenTokens {
           ? <BoxShadow>[
               BoxShadow(
                 color: homePrayerHeroShadow.withValues(alpha: opacity),
-                offset: Offset(0, tokens.spaceExtraSmall.toDouble()),
-                blurRadius: tokens.spaceLarge.toDouble(),
+                offset: Offset(0, tokens.spaceExtraSmall),
+                blurRadius: tokens.spaceLarge,
               ),
             ]
           : null,
@@ -2093,9 +2093,7 @@ class TilawaHomeDashboardCardTokens {
         featureCategoryTileTints.length];
   }
 
-  factory TilawaHomeDashboardCardTokens.fromColorScheme(
-    ColorScheme colorScheme,
-  ) {
+  factory TilawaHomeDashboardCardTokens.fromColorScheme() {
     return TilawaHomeDashboardCardTokens(
       gradientStart: AppColors.featuredGradientStart,
       gradientEnd: AppColors.featuredGradientEnd,

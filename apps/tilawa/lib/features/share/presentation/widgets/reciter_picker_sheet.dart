@@ -12,7 +12,8 @@ class ReciterPickerSheet extends StatefulWidget {
   });
 
   final List<ShareReciterOption> options;
-  final String selectedReciterName, selectedServerUrl;
+  final String selectedReciterName;
+  final String selectedServerUrl;
 
   @override
   State<ReciterPickerSheet> createState() => _ReciterPickerSheetState();

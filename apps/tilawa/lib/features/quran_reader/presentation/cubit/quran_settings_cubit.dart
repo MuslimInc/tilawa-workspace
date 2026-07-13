@@ -20,7 +20,7 @@ class QuranSettingsCubit extends Cubit<ReaderSettingsEntity> {
 
   Future<void> load() async {
     final result = await _loadSettings();
-    result.fold((_) {}, (settings) => emit(settings));
+    result.fold((_) {}, emit);
   }
 
   Future<void> update(ReaderSettingsEntity settings) async {

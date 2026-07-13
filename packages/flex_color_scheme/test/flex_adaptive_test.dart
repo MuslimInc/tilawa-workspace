@@ -101,13 +101,13 @@ void main() {
     test('FA1.09d: GIVEN named constructors created at runtime '
         'EXPECT constructors to create their documented presets.', () {
       final List<FlexAdaptive> presets = <FlexAdaptive>[
-        FlexAdaptive.all(),
-        FlexAdaptive.apple(),
-        FlexAdaptive.appleWeb(),
-        FlexAdaptive.desktop(),
-        FlexAdaptive.iOSAndDesktop(),
-        FlexAdaptive.excludeAndroidFuchsia(),
-        FlexAdaptive.excludeWebAndroidFuchsia(),
+        const FlexAdaptive.all(),
+        const FlexAdaptive.apple(),
+        const FlexAdaptive.appleWeb(),
+        const FlexAdaptive.desktop(),
+        const FlexAdaptive.iOSAndDesktop(),
+        const FlexAdaptive.excludeAndroidFuchsia(),
+        const FlexAdaptive.excludeWebAndroidFuchsia(),
       ];
 
       expect(presets[0], const FlexAdaptive.all());
@@ -131,7 +131,7 @@ void main() {
         m1.toString(),
         //
         equalsIgnoringHashCodes(
-          // ignore: lines_longer_than_80_chars, for testing
+          // ignore: for testing
           'FlexAdaptive#00000(android: false, androidWeb: false, fuchsia: false, fuchsiaWeb: false, iOS: false, iOSWeb: false, linux: false, linuxWeb: false, macOS: false, macOSWeb: false, windows: false, windowsWeb: false, overrideIsWeb: false)',
         ),
       );

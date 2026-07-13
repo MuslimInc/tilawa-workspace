@@ -36,7 +36,7 @@ class BatchDownloadManager implements IBatchDownloadService {
   bool _isDisposed = false;
 
   /// Current locale for localized notification messages.
-  Locale locale = Locale(LanguageConfig.defaultLanguageCode);
+  Locale locale = const Locale(LanguageConfig.defaultLanguageCode);
 
   // Stream subscription for progress updates
   StreamSubscription? _progressSubscription;
@@ -49,7 +49,7 @@ class BatchDownloadManager implements IBatchDownloadService {
         return;
       }
 
-      final Map<String, dynamic> decoded = jsonDecode(data);
+      final decoded = jsonDecode(data) as Map<String, dynamic>;
       for (final entry in decoded.entries) {
         final String batchId = entry.key;
         final _BatchInfo batchInfo = _BatchInfo.fromJson(
@@ -233,9 +233,7 @@ class BatchDownloadManager implements IBatchDownloadService {
     }
 
     _progressSubscription = _downloadService.globalProgressStream.listen(
-      (progress) {
-        _handleProgressUpdate(progress);
-      },
+      _handleProgressUpdate,
       onError: (e) {
         logger.e('[BatchDownloadManager] Error in progress stream: $e');
       },

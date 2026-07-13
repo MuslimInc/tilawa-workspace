@@ -74,7 +74,7 @@ class FirestoreTeacherDashboardSummaryDataSource
           : null,
       overrides: _decodeEntries(
         data['overrides'],
-        (id, map) => availabilityOverrideDtoFromDocData(id, map),
+        availabilityOverrideDtoFromDocData,
         idField: 'date',
       ),
       sessions: _decodeEntries(

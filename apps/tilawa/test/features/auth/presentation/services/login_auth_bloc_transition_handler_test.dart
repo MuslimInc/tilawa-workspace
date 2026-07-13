@@ -68,7 +68,7 @@ void main() {
   final List<(String message, TilawaFeedbackVariant variant)> toasts =
       <(String, TilawaFeedbackVariant)>[];
 
-  final LoginAuthBlocTransitionMessages messages =
+  const LoginAuthBlocTransitionMessages messages =
       LoginAuthBlocTransitionMessages(
         authErrorFallback: 'fallback',
         noGoogleAccounts: 'no accounts',

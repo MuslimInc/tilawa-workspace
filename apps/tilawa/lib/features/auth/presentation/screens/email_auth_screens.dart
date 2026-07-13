@@ -80,7 +80,7 @@ class _EmailLoginBody extends StatelessWidget {
         }
       },
       child: Scaffold(
-        appBar: AppBar(title: Text(context.l10n.signInWithEmail)),
+        appBar: TilawaAppBar(title: context.l10n.signInWithEmail),
         body: Column(
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: <Widget>[
@@ -114,11 +114,12 @@ class _EmailLoginBody extends StatelessWidget {
                           ),
                           Align(
                             alignment: AlignmentDirectional.centerEnd,
-                            child: TextButton(
+                            child: TilawaButton(
+                              text: context.l10n.forgotPassword,
+                              variant: TilawaButtonVariant.ghost,
                               onPressed: () => context.push(
                                 const ForgotPasswordRoute().location,
                               ),
-                              child: Text(context.l10n.forgotPassword),
                             ),
                           ),
                         ],
@@ -146,11 +147,13 @@ class _EmailLoginBody extends StatelessWidget {
                       );
                     },
                   ),
-                  TextButton(
+                  TilawaButton(
+                    text: context.l10n.noAccountYet,
+                    variant: TilawaButtonVariant.ghost,
+                    isFullWidth: true,
                     onPressed: () => context.push(
                       const RegisterRoute().location,
                     ),
-                    child: Text(context.l10n.noAccountYet),
                   ),
                 ],
               ),
@@ -276,8 +279,8 @@ class _RegisterBodyState extends State<_RegisterBody> {
       child: BlocBuilder<EmailRegistrationCubit, EmailRegistrationState>(
         builder: (BuildContext context, EmailRegistrationState regState) {
           return Scaffold(
-            appBar: AppBar(
-              title: Text(context.l10n.createAccount),
+            appBar: TilawaAppBar(
+              title: context.l10n.createAccount,
               leading: regState.canGoBack
                   ? BackButton(
                       onPressed: regState.isSubmitting
@@ -373,11 +376,13 @@ class _RegisterBodyState extends State<_RegisterBody> {
                           );
                         },
                       ),
-                      TextButton(
+                      TilawaButton(
+                        text: context.l10n.alreadyHaveAccount,
+                        variant: TilawaButtonVariant.ghost,
+                        isFullWidth: true,
                         onPressed: () => context.push(
                           const EmailLoginRoute().location,
                         ),
-                        child: Text(context.l10n.alreadyHaveAccount),
                       ),
                     ],
                   ),
@@ -498,7 +503,7 @@ class _ForgotPasswordBody extends StatelessWidget {
         ),
       ],
       child: Scaffold(
-        appBar: AppBar(title: Text(context.l10n.forgotPassword)),
+        appBar: TilawaAppBar(title: context.l10n.forgotPassword),
         body: Column(
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: <Widget>[

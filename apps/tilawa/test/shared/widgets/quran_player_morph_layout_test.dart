@@ -21,7 +21,7 @@ void main() {
     });
 
     test('art rect lerps between mini and expanded anchors', () {
-      final Rect miniBar = const Rect.fromLTWH(0, 600, 400, 72);
+      const Rect miniBar = Rect.fromLTWH(0, 600, 400, 72);
       const Size viewport = Size(400, 800);
       final collapsed = QuranPlayerMorphLayout.compute(
         progress: 0,
@@ -42,7 +42,7 @@ void main() {
     });
 
     test('mid progress produces intermediate art size', () {
-      final Rect miniBar = const Rect.fromLTWH(0, 600, 400, 72);
+      const Rect miniBar = Rect.fromLTWH(0, 600, 400, 72);
       final mid = QuranPlayerMorphLayout.compute(
         progress: 0.5,
         viewport: const Size(400, 800),
@@ -71,7 +71,7 @@ void main() {
     });
 
     test('LTR progress 0 matches media bar artwork expectations', () {
-      final Rect miniBar = const Rect.fromLTWH(0, 600, 400, 72);
+      const Rect miniBar = Rect.fromLTWH(0, 600, 400, 72);
       final QuranPlayerMorphLayout collapsed = QuranPlayerMorphLayout.compute(
         progress: 0,
         viewport: const Size(400, 800),
@@ -91,7 +91,7 @@ void main() {
     });
 
     test('RTL progress 0 places artwork on trailing edge', () {
-      final Rect miniBar = const Rect.fromLTWH(16, 600, 368, 72);
+      const Rect miniBar = Rect.fromLTWH(16, 600, 368, 72);
       final QuranPlayerMorphLayout collapsed = QuranPlayerMorphLayout.compute(
         progress: 0,
         viewport: const Size(400, 800),
@@ -113,7 +113,7 @@ void main() {
     test(
       'collapse mid-progress uses horizontal identity not vertical stack',
       () {
-        final Rect miniBar = const Rect.fromLTWH(16, 620, 368, 76);
+        const Rect miniBar = Rect.fromLTWH(16, 620, 368, 76);
         final QuranPlayerMorphLayout mid = QuranPlayerMorphLayout.compute(
           progress: 0.25,
           viewport: const Size(400, 800),
@@ -143,7 +143,7 @@ void main() {
     );
 
     test('compute uses default optional parameters', () {
-      final Rect miniBar = const Rect.fromLTWH(0, 600, 400, 72);
+      const Rect miniBar = Rect.fromLTWH(0, 600, 400, 72);
       final QuranPlayerMorphLayout layout = QuranPlayerMorphLayout.compute(
         progress: 0.9,
         viewport: const Size(400, 800),
@@ -157,7 +157,7 @@ void main() {
     });
 
     test('late expand progress uses vertical metadata under artwork', () {
-      final Rect miniBar = const Rect.fromLTWH(16, 620, 368, 76);
+      const Rect miniBar = Rect.fromLTWH(16, 620, 368, 76);
       final QuranPlayerMorphLayout late = QuranPlayerMorphLayout.compute(
         progress: 0.85,
         viewport: const Size(400, 800),

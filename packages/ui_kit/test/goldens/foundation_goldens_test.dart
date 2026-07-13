@@ -82,7 +82,6 @@ void main() {
               child: Builder(
                 builder: (context) => Scaffold(
                   appBar: TilawaCatalogAppBar.titleOnly(
-                    context,
                     title: 'Reciters',
                   ),
                   body: const SizedBox.shrink(),
@@ -118,7 +117,6 @@ void main() {
               child: Builder(
                 builder: (context) => Scaffold(
                   appBar: TilawaCatalogAppBar.titleOnly(
-                    context,
                     title: 'History',
                   ),
                   body: const SizedBox.shrink(),

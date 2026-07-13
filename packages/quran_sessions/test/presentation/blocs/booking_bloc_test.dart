@@ -256,9 +256,9 @@ void main() {
     blocTest<BookingBloc, BookingState>(
       'CallTypeSelected updates selectedCallType',
       build: () => bloc,
-      seed: () => BookingSelecting(
+      seed: () => const BookingSelecting(
         teacherId: 'teacher_1',
-        availableSlots: const [],
+        availableSlots: [],
       ),
       act: (b) => b.add(const CallTypeSelected(SessionCallType.videoCall)),
       expect: () => [isA<BookingSelecting>()],

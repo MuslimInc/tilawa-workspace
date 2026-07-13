@@ -117,9 +117,13 @@ void main() {
           blocks: [
             _multiVerseTextBlock(
               entries: [
-                _VerseText(surah: 41, verse: 46, text: 'before'),
-                _VerseText(surah: 41, verse: 47, text: 'selected_ayah_marker'),
-                _VerseText(surah: 41, verse: 48, text: 'after'),
+                const _VerseText(surah: 41, verse: 46, text: 'before'),
+                const _VerseText(
+                  surah: 41,
+                  verse: 47,
+                  text: 'selected_ayah_marker',
+                ),
+                const _VerseText(surah: 41, verse: 48, text: 'after'),
               ],
             ),
           ],

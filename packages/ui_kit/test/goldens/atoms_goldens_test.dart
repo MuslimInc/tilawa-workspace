@@ -133,7 +133,7 @@ void main() {
         children: [
           GoldenTestScenario(
             name: 'Default',
-            child: TilawaPreviewWrapper(
+            child: const TilawaPreviewWrapper(
               child: TilawaEmptyState(
                 icon: Icons.inbox_outlined,
                 title: 'No Data',
@@ -143,7 +143,7 @@ void main() {
           ),
           GoldenTestScenario(
             name: 'Scale 1.5',
-            child: TilawaPreviewWrapper(
+            child: const TilawaPreviewWrapper(
               textScale: 1.5,
               child: TilawaEmptyState(
                 icon: Icons.inbox_outlined,
@@ -309,7 +309,7 @@ void main() {
           ),
           GoldenTestScenario(
             name: 'No retry',
-            child: TilawaPreviewWrapper(
+            child: const TilawaPreviewWrapper(
               child: TilawaErrorState(
                 icon: Icons.signal_wifi_off_rounded,
                 title: 'No connection',
@@ -673,19 +673,19 @@ class _SkeletonGoldenLayout extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return TilawaSkeleton(
+    return const TilawaSkeleton(
       animate: false,
       child: Row(
         spacing: 12,
         children: [
-          const TilawaSkeletonBone.circle(dimension: 40),
+          TilawaSkeletonBone.circle(dimension: 40),
           Expanded(
             child: Column(
               spacing: 8,
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                const TilawaSkeletonLine(width: 140),
-                const TilawaSkeletonLine(),
+                TilawaSkeletonLine(width: 140),
+                TilawaSkeletonLine(),
               ],
             ),
           ),

@@ -577,7 +577,7 @@ class PageNavigationBarTheme extends ThemeExtension<PageNavigationBarTheme> {
   final Duration pagePreviewDuration;
   final double blurSigma;
 
-  static final PageNavigationBarTheme standard = PageNavigationBarTheme(
+  static const PageNavigationBarTheme standard = PageNavigationBarTheme(
     barMarginHorizontal: 20.0,
     barMarginBottom: 16.0,
     barBorderRadius: 36.0,

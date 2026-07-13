@@ -423,18 +423,18 @@ class _GlobalSoundSelector extends StatelessWidget {
           ),
           SizedBox(height: tokens.spaceSmall),
           SegmentedButton<String>(
-            segments: const [
+            segments: [
               ButtonSegment<String>(
                 value: 'adhan_1',
-                label: Text('Sound 1'),
+                label: Text(context.l10n.adhanSound1),
               ),
               ButtonSegment<String>(
                 value: 'adhan_2',
-                label: Text('Sound 2'),
+                label: Text(context.l10n.adhanSound2),
               ),
               ButtonSegment<String>(
                 value: 'adhan_3',
-                label: Text('Sound 3'),
+                label: Text(context.l10n.adhanSound3),
               ),
             ],
             selected: {normalizedSound},

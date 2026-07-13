@@ -307,9 +307,9 @@ class QuranPlayerExpandedStageQueueFocusedLayout extends StatelessWidget {
               ),
             ),
           ),
-          Expanded(
+          const Expanded(
             child: IgnorePointer(
-              child: const SizedBox.shrink(),
+              child: SizedBox.shrink(),
             ),
           ),
         ],

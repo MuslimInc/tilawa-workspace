@@ -245,7 +245,7 @@ abstract final class PhoneNormalizer {
 
     final prefixes = _localStartsWith[countryCode];
     if (prefixes != null) {
-      if (!prefixes.any((p) => localPart.startsWith(p))) return false;
+      if (!prefixes.any(localPart.startsWith)) return false;
     }
     return true;
   }

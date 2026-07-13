@@ -248,9 +248,9 @@ final class TeacherDashboardSuccess extends TeacherDashboardState {
     sessionCancelFailure: clearSessionCancelFailure
         ? null
         : (sessionCancelFailure ?? this.sessionCancelFailure),
-    sessionCancelSucceeded: clearSessionCancelSucceeded
-        ? false
-        : (sessionCancelSucceeded ?? this.sessionCancelSucceeded),
+    sessionCancelSucceeded:
+        !clearSessionCancelSucceeded &&
+        (sessionCancelSucceeded ?? this.sessionCancelSucceeded),
     joinInProgress: clearJoinInProgress
         ? null
         : (joinInProgress ?? this.joinInProgress),

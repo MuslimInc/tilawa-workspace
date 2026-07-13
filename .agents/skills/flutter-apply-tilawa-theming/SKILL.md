@@ -79,7 +79,7 @@ Column(
 ### Touch targets
 
 Follow kit tokens: `tokens.minInteractiveDimension` = **44 dp**
-(`kTilawaMinInteractiveDimension` in `design_tokens.dart`). Do not shrink
+(`kMeMuslimMinInteractiveDimension` in `design_tokens.dart`). Do not shrink
 tappable chrome below this floor.
 
 ## Catalog chrome

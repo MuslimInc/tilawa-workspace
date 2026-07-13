@@ -12,7 +12,7 @@ class MockAuthRepository extends Mock implements AuthRepository {}
 class _RecordingAwaitAuthRestoration extends AwaitAuthRestorationUseCase {
   _RecordingAwaitAuthRestoration(super.repository);
 
-  var callCount = 0;
+  int callCount = 0;
   @override
   Future<AuthRestorationOutcome> call({UserEntity? sessionUser}) async {
     callCount++;

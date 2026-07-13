@@ -125,7 +125,7 @@ As a user scanning reciter filters or prayer status rows, I want passive metadat
 
 #### Pillar D — Accessibility & large text
 
-- **FR-D01**: Add **`test/widgets/interaction_scale_contract_test.dart`** (or extend accessibility audit): pump representative interactive widgets at text scale **1.0** and **1.4**; assert no overflow; assert `kTilawaMinInteractiveDimension` on interactive atoms.
+- **FR-D01**: Add **`test/widgets/interaction_scale_contract_test.dart`** (or extend accessibility audit): pump representative interactive widgets at text scale **1.0** and **1.4**; assert no overflow; assert `kMeMuslimMinInteractiveDimension` on interactive atoms.
 - **FR-D02**: **`TilawaCountProgressRing`**, **`TilawaSelectionPill`**, and **`TilawaMetadataChip`** document semantics rules in dartdoc; icon-only **`TilawaIconActionButton`** requires `tooltip` or `semanticLabel` (assert in debug mode or test).
 - **FR-D03**: **`TilawaSettingsTile`** trailing chevron mirrors in RTL (`Directionality`); fix if current chevron is LTR-locked (inventory gap).
 - **FR-D04**: No regression to Maestro **`Semantics.identifier`** values from spec 014 FR-008.

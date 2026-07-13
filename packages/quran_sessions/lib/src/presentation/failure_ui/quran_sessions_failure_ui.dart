@@ -96,13 +96,13 @@ extension QuranSessionsFailureUi on QuranSessionsFailure {
       ExternalMeetingLaunchFailure(linkCopiedToClipboard: true) =>
         loc.externalMeetingLinkCopied,
       ExternalMeetingLaunchFailure() => loc.externalMeetingLaunchFailed,
-      InvalidTransitionFailure(action: final action) => loc.validationError(
+      InvalidTransitionFailure(:final action) => loc.validationError(
         'invalid_transition',
         action,
       ),
-      UnauthorizedActorFailure(action: final action, actorRole: final actor) =>
+      UnauthorizedActorFailure(:final action, actorRole: final actor) =>
         loc.validationError('unauthorized_actor', '$action:$actor'),
-      ReasonRequiredFailure(action: final action) => loc.validationError(
+      ReasonRequiredFailure(:final action) => loc.validationError(
         'reason_required',
         action,
       ),

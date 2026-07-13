@@ -30,7 +30,7 @@ void main() {
   Future<void> pumpHeader(WidgetTester tester, AuthState state) async {
     whenListen(
       authBloc,
-      Stream<AuthState>.empty(),
+      const Stream<AuthState>.empty(),
       initialState: state,
     );
 

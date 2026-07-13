@@ -16,8 +16,8 @@ CancelSessionViaServerUseCase buildCancelSessionViaServerUseCase({
   return CancelSessionViaServerUseCase(
     cancelSession: CancelSessionUseCase(
       aggregateRepository: repository,
-      lifecycleGuard: SessionLifecycleGuard(),
-      cancellationPolicy: ConfigurableCancellationPolicy(),
+      lifecycleGuard: const SessionLifecycleGuard(),
+      cancellationPolicy: const ConfigurableCancellationPolicy(),
       commandGateway: commandGateway,
       notificationGateway: FakeSessionNotificationGateway(),
       auditRepository: FakeAuditRepository(),

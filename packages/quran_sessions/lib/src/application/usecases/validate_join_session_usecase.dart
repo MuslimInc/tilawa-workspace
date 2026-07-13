@@ -21,7 +21,7 @@ class ValidateJoinSessionUseCase {
   }) async {
     final freshSessionRes = await sessionRepository.getSessionById(sessionId);
     return freshSessionRes.fold(
-      (failure) => Left(failure),
+      Left.new,
       (session) {
         final canJoin = joinPolicy.canJoin(
           session: session,

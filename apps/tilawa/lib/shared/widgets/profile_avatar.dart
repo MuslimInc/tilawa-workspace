@@ -2,12 +2,6 @@ import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:tilawa_ui_kit/tilawa_ui_kit.dart';
 
-export 'package:tilawa_ui_kit/src/molecules/tilawa_profile_avatar.dart'
-    show
-        TilawaProfileAvatar,
-        TilawaProfileAvatarFallbackStyle,
-        TilawaProfileAvatarImageBuilder;
-
 typedef ProfileAvatarFallbackStyle = TilawaProfileAvatarFallbackStyle;
 
 /// Profile avatar for the phone bottom nav settings tab.

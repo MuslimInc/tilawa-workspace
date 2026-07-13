@@ -12,7 +12,7 @@ double prayerTimesScrollBottomPadding(BuildContext context) {
     return tokens.spaceExtraLarge;
   }
 
-  return tokens.spaceExtraLarge + MediaQuery.paddingOf(context).bottom;
+  return tokens.spaceExtraLarge + context.effectiveSystemBottomSafeArea;
 }
 
 /// Narrow-width thresholds for Prayer Times presentation layout.

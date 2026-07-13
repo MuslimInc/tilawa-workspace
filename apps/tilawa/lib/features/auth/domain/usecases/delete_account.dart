@@ -111,10 +111,10 @@ class DeleteAccount {
       'not-found' => ValidationFailure(message),
       'unavailable' ||
       'deadline-exceeded' => const ServerActionFailure.offline(),
-      'internal' => ServerFailure(
+      'internal' => const ServerFailure(
         DeleteAccountErrorKey.failed,
       ),
-      _ => UnexpectedFailure(DeleteAccountErrorKey.failed),
+      _ => const UnexpectedFailure(DeleteAccountErrorKey.failed),
     };
   }
 

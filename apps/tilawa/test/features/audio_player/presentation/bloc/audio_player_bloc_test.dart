@@ -304,7 +304,7 @@ void main() {
 
     blocTest<AudioPlayerBloc, AudioPlayerState>(
       'emits playbackState when handler queue order changes',
-      build: () => buildBloc(),
+      build: buildBloc,
       act: (bloc) async {
         const AudioEntity first = AudioEntity(
           id: '1',
@@ -319,27 +319,27 @@ void main() {
           duration: Duration(minutes: 3),
         );
         playbackStateSubject.add(
-          PlaybackStateEntity(
+          const PlaybackStateEntity(
             isPlaying: true,
             processingState: AudioProcessingStateStatus.ready,
             position: Duration.zero,
             bufferedPosition: Duration.zero,
             duration: Duration(minutes: 3),
             currentIndex: 0,
-            queue: const [first, second],
+            queue: [first, second],
             queueGeneration: 1,
           ),
         );
         await Future.delayed(Duration.zero);
         playbackStateSubject.add(
-          PlaybackStateEntity(
+          const PlaybackStateEntity(
             isPlaying: true,
             processingState: AudioProcessingStateStatus.ready,
             position: Duration.zero,
             bufferedPosition: Duration.zero,
             duration: Duration(minutes: 3),
             currentIndex: 0,
-            queue: const [second, first],
+            queue: [second, first],
             queueGeneration: 2,
           ),
         );
@@ -366,7 +366,7 @@ void main() {
   group('AudioPlayerBloc - History Saving', () {
     blocTest<AudioPlayerBloc, AudioPlayerState>(
       'should emit PositionData immediately when currentAudio changes (initial sync)',
-      build: () => buildBloc(),
+      build: buildBloc,
       act: (bloc) async {
         const audio = AudioEntity(
           id: 'initial-sync',
@@ -396,7 +396,7 @@ void main() {
 
     blocTest<AudioPlayerBloc, AudioPlayerState>(
       'should emit PositionData immediately when playbackState duration is discovered',
-      build: () => buildBloc(),
+      build: buildBloc,
       act: (bloc) async {
         const zeroAudio = AudioEntity(
           id: 'discovery',
@@ -407,18 +407,20 @@ void main() {
         bloc.add(const AudioPlayerEvent.updateAudio(zeroAudio));
         await Future.delayed(Duration.zero);
 
-        final discoveredState = PlaybackStateEntity(
+        const discoveredState = PlaybackStateEntity(
           isPlaying: true,
           processingState: AudioProcessingStateStatus.ready,
           position: Duration.zero,
           bufferedPosition: Duration.zero,
-          duration: const Duration(seconds: 45),
+          duration: Duration(seconds: 45),
           currentIndex: 0,
-          queue: const [zeroAudio],
+          queue: [zeroAudio],
         );
 
         // This should trigger immediate PositionData update with the new duration
-        bloc.add(AudioPlayerEvent.updatePlaybackStateEntity(discoveredState));
+        bloc.add(
+          const AudioPlayerEvent.updatePlaybackStateEntity(discoveredState),
+        );
         await Future.delayed(Duration.zero);
       },
       expect: () => [
@@ -451,7 +453,7 @@ void main() {
 
     blocTest<AudioPlayerBloc, AudioPlayerState>(
       'positionData duration should use playbackState duration if currentAudio duration is zero',
-      build: () => buildBloc(),
+      build: buildBloc,
       act: (bloc) async {
         const zeroDurationAudio = AudioEntity(
           id: '1',
@@ -459,14 +461,14 @@ void main() {
           url: 'url',
           duration: Duration.zero,
         );
-        final playbackState = PlaybackStateEntity(
+        const playbackState = PlaybackStateEntity(
           isPlaying: true,
           processingState: AudioProcessingStateStatus.ready,
           position: Duration.zero,
           bufferedPosition: Duration.zero,
-          duration: const Duration(minutes: 5),
+          duration: Duration(minutes: 5),
           currentIndex: 0,
-          queue: const [zeroDurationAudio],
+          queue: [zeroDurationAudio],
         );
 
         // 1. Set current audio (duration 0)
@@ -474,7 +476,9 @@ void main() {
         await Future.delayed(Duration.zero);
 
         // 2. Set playback state (duration 5 min)
-        bloc.add(AudioPlayerEvent.updatePlaybackStateEntity(playbackState));
+        bloc.add(
+          const AudioPlayerEvent.updatePlaybackStateEntity(playbackState),
+        );
         await Future.delayed(Duration.zero);
 
         // 3. Trigger position update (this used to use currentAudio.duration)
@@ -531,7 +535,7 @@ void main() {
       setUp: () {
         // Seed playback state with "stale" duration
         playbackStateSubject.add(
-          PlaybackStateEntity(
+          const PlaybackStateEntity(
             isPlaying: true,
             processingState: AudioProcessingStateStatus.ready,
             position: Duration(seconds: 10),
@@ -542,7 +546,7 @@ void main() {
           ),
         );
       },
-      build: () => buildBloc(),
+      build: buildBloc,
       act: (bloc) => bloc.add(
         const AudioPlayerEvent.updateAudio(
           AudioEntity(
@@ -583,7 +587,7 @@ void main() {
         status: AudioPlayerStatus.success,
         currentAudio: historyAudio, // The track causing the transition
       ),
-      build: () => buildBloc(),
+      build: buildBloc,
       act: (bloc) => bloc.add(
         const AudioPlayerEvent.updateAudio(
           AudioEntity(
@@ -638,7 +642,7 @@ void main() {
 
     blocTest<AudioPlayerBloc, AudioPlayerState>(
       'should NOT save history when audio is first set (not played yet)',
-      build: () => buildBloc(),
+      build: buildBloc,
       act: (bloc) => bloc.add(const AudioPlayerEvent.updateAudio(historyAudio)),
       verify: (_) {
         // Should NOT save history until the audio is actually played
@@ -663,7 +667,7 @@ void main() {
 
     blocTest<AudioPlayerBloc, AudioPlayerState>(
       'should NOT save history when extras are missing',
-      build: () => buildBloc(),
+      build: buildBloc,
       act: (bloc) => bloc.add(
         const AudioPlayerEvent.updateAudio(
           AudioEntity(
@@ -703,7 +707,7 @@ void main() {
         status: AudioPlayerStatus.success,
         currentAudio: historyAudio,
       ),
-      build: () => buildBloc(),
+      build: buildBloc,
       act: (bloc) => bloc.add(const AudioPlayerEvent.pauseAudio()),
       verify: (_) {
         verify(
@@ -734,7 +738,7 @@ void main() {
         status: AudioPlayerStatus.success,
         currentAudio: historyAudio,
       ),
-      build: () => buildBloc(),
+      build: buildBloc,
       act: (bloc) => bloc.add(const AudioPlayerEvent.stopAudio()),
       verify: (_) {
         verify(
@@ -762,7 +766,7 @@ void main() {
         status: AudioPlayerStatus.success,
         currentAudio: historyAudio,
       ),
-      build: () => buildBloc(),
+      build: buildBloc,
       act: (bloc) async {
         await Future<void>.delayed(const Duration(milliseconds: 250));
         bloc.add(
@@ -811,9 +815,9 @@ void main() {
       seed: () => AudioPlayerState(
         status: AudioPlayerStatus.success,
         currentAudio: historyAudio,
-        sleepTimerTargetTime: DateTime.now().add(Duration(minutes: 15)),
+        sleepTimerTargetTime: DateTime.now().add(const Duration(minutes: 15)),
       ),
-      build: () => buildBloc(),
+      build: buildBloc,
       act: (bloc) => bloc.add(const AudioPlayerEvent.audioTimerExpired()),
       expect: () => [
         isA<AudioPlayerState>().having(
@@ -892,7 +896,7 @@ void main() {
           ),
         ).thenAnswer((_) async => Right(testHistoryEntity));
       },
-      build: () => buildBloc(),
+      build: buildBloc,
       act: (bloc) async {
         const historyAudio = AudioEntity(
           id: '1',
@@ -969,7 +973,7 @@ void main() {
         status: AudioPlayerStatus.success,
         currentAudio: historyAudio,
       ),
-      build: () => buildBloc(),
+      build: buildBloc,
       act: (bloc) async {
         // Simulate position updates
         positionSubject.add(const Duration(minutes: 2, seconds: 30));
@@ -1010,7 +1014,7 @@ void main() {
         status: AudioPlayerStatus.success,
         currentAudio: historyAudio,
       ),
-      build: () => buildBloc(),
+      build: buildBloc,
       act: (bloc) async {
         // Simulate position updates
         positionSubject.add(const Duration(minutes: 1, seconds: 45));
@@ -1045,7 +1049,7 @@ void main() {
       setUp: () {
         when(mockPauseAudio.call()).thenAnswer((_) async => const Right(null));
       },
-      build: () => buildBloc(),
+      build: buildBloc,
       act: (bloc) async {
         const zeroDurationAudio = AudioEntity(
           id: 'zero-duration',
@@ -1057,14 +1061,14 @@ void main() {
           extras: {'reciterId': '1', 'moshafId': 2, 'surahId': 3},
         );
 
-        final playbackState = PlaybackStateEntity(
+        const playbackState = PlaybackStateEntity(
           isPlaying: true,
           processingState: AudioProcessingStateStatus.ready,
-          position: const Duration(seconds: 5),
-          bufferedPosition: const Duration(seconds: 5),
-          duration: const Duration(seconds: 34),
+          position: Duration(seconds: 5),
+          bufferedPosition: Duration(seconds: 5),
+          duration: Duration(seconds: 34),
           currentIndex: 0,
-          queue: const [zeroDurationAudio],
+          queue: [zeroDurationAudio],
         );
 
         currentAudioSubject.add(zeroDurationAudio);

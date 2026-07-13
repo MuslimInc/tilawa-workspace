@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:tilawa_ui_kit/tilawa_ui_kit.dart';
 
 import '../../../core/l10n_extensions.dart';
 import '../../domain/failures/quran_sessions_failure.dart';
@@ -22,16 +23,16 @@ Future<void> showLiveSessionTakeoverDialog(
       title: Text(l10n.liveSessionTakeoverTitle),
       content: Text(l10n.liveSessionTakeoverBody),
       actions: [
-        TextButton(
+        TilawaButton(
           onPressed: () => Navigator.of(dialogContext).pop(),
-          child: Text(l10n.liveSessionTakeoverCancel),
+          text: l10n.liveSessionTakeoverCancel,
         ),
-        FilledButton(
+        TilawaButton(
           onPressed: () {
             Navigator.of(dialogContext).pop();
             onSwitch();
           },
-          child: Text(l10n.liveSessionTakeoverSwitch),
+          text: l10n.liveSessionTakeoverSwitch,
         ),
       ],
     ),
