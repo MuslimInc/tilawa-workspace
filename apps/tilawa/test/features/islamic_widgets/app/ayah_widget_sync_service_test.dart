@@ -27,17 +27,21 @@ class _FakePrefs implements SharedPreferencesAsync {
 /// Records publish calls instead of rendering; the real repository needs the
 /// QCF font pipeline, which is out of scope for the dedup-gate contract.
 class _RecordingRepository implements DailyAyahWidgetRepository {
-  _RecordingRepository({this.shouldThrow = false});
+  _RecordingRepository({this.shouldThrow = false, this.fontsNotReady = false});
 
   final bool shouldThrow;
+  final bool fontsNotReady;
   final List<DateTime> publishCalls = <DateTime>[];
 
   @override
-  Future<AyahWidgetPayload> publishFor(DateTime now) async {
+  Future<AyahWidgetPayload?> publishFor(DateTime now) async {
     if (shouldThrow) {
       throw StateError('render failed');
     }
     publishCalls.add(now);
+    if (fontsNotReady) {
+      return null;
+    }
     return const AyahWidgetPayload(
       dateKey: '2026-07-11',
       surahNumber: 2,
@@ -104,6 +108,28 @@ void main() {
       await service.syncIfNeeded(now: DateTime(2026, 7, 11, 6));
 
       check(repository.publishCalls).isEmpty();
+    });
+
+    test('skips stamping when fonts are not downloaded yet', () async {
+      final notReady = _RecordingRepository(fontsNotReady: true);
+      final service = AyahWidgetSyncService(
+        repository: notReady,
+        prefs: prefs,
+        isSupportedOverride: true,
+      );
+
+      await service.syncIfNeeded(now: DateTime(2026, 7, 11, 6));
+      check(notReady.publishCalls.length).equals(1);
+
+      // Not stamped → a later launch (once fonts arrive) retries and publishes.
+      final recovering = _RecordingRepository();
+      final retryService = AyahWidgetSyncService(
+        repository: recovering,
+        prefs: prefs,
+        isSupportedOverride: true,
+      );
+      await retryService.syncIfNeeded(now: DateTime(2026, 7, 11, 8));
+      check(recovering.publishCalls.length).equals(1);
     });
 
     test('swallows publish failures and retries next call', () async {

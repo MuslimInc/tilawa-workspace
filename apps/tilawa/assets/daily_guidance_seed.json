@@ -1,0 +1,197 @@
+[
+  {
+    "id": "quran_002_152",
+    "type": "quran",
+    "status": "published",
+    "original_arabic_text": "فَٱذۡكُرُونِيٓ أَذۡكُرۡكُمۡ وَٱشۡكُرُواْ لِي وَلَا تَكۡفُرُونِ",
+    "notification_excerpt": "فَٱذۡكُرُونِيٓ أَذۡكُرۡكُمۡ",
+    "short_explanation": {
+      "ar": "تذكر الله يذكرك، واشكره على نعمه ولا تكفر بها.",
+      "en": "Remember Allah, and He will remember you. Be grateful to Him and do not deny His favors."
+    },
+    "translations": {
+      "en": "So remember Me; I will remember you. And be grateful to Me and do not deny Me."
+    },
+    "short_explanation_source_ids": {"ar": "tilawa:editorial:v1", "en": "tilawa:editorial:v1"},
+    "translation_source_ids": {"en": "quran.com:sahih-international"},
+    "topic_tags": ["remembrance", "gratitude"],
+    "available_locales": ["ar", "en"],
+    "revision": 1,
+    "quran_source": {
+      "surah_number": 2,
+      "surah_name_arabic": "البقرة",
+      "surah_name_localized": {
+        "en": "Al-Baqarah"
+      },
+      "ayah_start": 152,
+      "quran_text_source_id": "uthmani_hafs"
+    },
+    "review_metadata": {
+      "source_validation_complete": true,
+      "translation_validation_complete": true,
+      "approved_for_notification": true,
+      "approved_for_sharing": true
+    }
+  },
+  {
+    "id": "hadith_bukhari_6412",
+    "type": "hadith",
+    "status": "published",
+    "original_arabic_text": "نِعْمَتَانِ مَغْبُونٌ فِيهِمَا كَثِيرٌ مِنَ النَّاسِ: الصِّحَّةُ وَالْفَرَاغُ.",
+    "notification_excerpt": "نِعْمَتَانِ مَغْبُونٌ فِيهِمَا كَثِيرٌ مِنَ النَّاسِ",
+    "short_explanation": {
+      "ar": "الصحة ووقت الفراغ نعمتان عظيمتان يغفل الكثيرون عن استغلالهما في طاعة الله.",
+      "en": "Health and free time are two great blessings that many people fail to utilize in the obedience of Allah."
+    },
+    "translations": {
+      "en": "There are two blessings which many people lose: (They are) health and free time for doing good."
+    },
+    "short_explanation_source_ids": {"ar": "tilawa:editorial:v1", "en": "tilawa:editorial:v1"},
+    "translation_source_ids": {"en": "sunnah.com:bukhari:6412"},
+    "topic_tags": ["time", "health", "gratitude"],
+    "available_locales": ["ar", "en"],
+    "revision": 1,
+    "hadith_source": {
+      "collection": "Sahih al-Bukhari",
+      "reference_number": "6412",
+      "grading": "sahih",
+      "grading_authority": "Al-Bukhari"
+    },
+    "review_metadata": {
+      "source_validation_complete": true,
+      "translation_validation_complete": true,
+      "approved_for_notification": true,
+      "approved_for_sharing": true
+    }
+  },
+  {
+    "id": "quran_013_028",
+    "type": "quran",
+    "status": "published",
+    "original_arabic_text": "ٱلَّذِينَ ءَامَنُواْ وَتَطۡمَئِنُّ قُلُوبُهُم بِذِكۡرِ ٱللَّهِۗ أَلَا بِذِكۡرِ ٱللَّهِ تَطۡمَئِنُّ ٱلۡقُلُوبُ",
+    "notification_excerpt": "أَلَا بِذِكۡرِ ٱللَّهِ تَطۡمَئِنُّ ٱلۡقُلُوبُ",
+    "short_explanation": {
+      "ar": "ذكر الله يمنح القلب المؤمن سكينة وطمأنينة.",
+      "en": "Remembering Allah brings reassurance and tranquility to the believing heart."
+    },
+    "translations": {
+      "en": "Those who believe and whose hearts find comfort in the remembrance of Allah. Surely in the remembrance of Allah do hearts find comfort."
+    },
+    "short_explanation_source_ids": {"ar": "tilawa:editorial:v1", "en": "tilawa:editorial:v1"},
+    "translation_source_ids": {"en": "quran.com:clear-quran"},
+    "topic_tags": ["remembrance", "peace", "faith"],
+    "available_locales": ["ar", "en"],
+    "revision": 1,
+    "quran_source": {
+      "surah_number": 13,
+      "surah_name_arabic": "الرعد",
+      "surah_name_localized": {
+        "en": "Ar-Ra'd"
+      },
+      "ayah_start": 28,
+      "quran_text_source_id": "uthmani_hafs"
+    },
+    "review_metadata": {
+      "source_validation_complete": true,
+      "translation_validation_complete": true,
+      "approved_for_notification": true,
+      "approved_for_sharing": true
+    }
+  },
+  {
+    "id": "quran_053_039",
+    "type": "quran",
+    "status": "published",
+    "original_arabic_text": "وَأَن لَّيۡسَ لِلۡإِنسَٰنِ إِلَّا مَا سَعَىٰ",
+    "notification_excerpt": "وَأَن لَّيۡسَ لِلۡإِنسَٰنِ إِلَّا مَا سَعَىٰ",
+    "short_explanation": {
+      "ar": "للإنسان ثمرة سعيه، فليجتهد في العمل الصالح.",
+      "en": "A person receives the outcome of their striving, so they should pursue righteous deeds."
+    },
+    "translations": {
+      "en": "Each person will only have what they endeavoured towards."
+    },
+    "short_explanation_source_ids": {"ar": "tilawa:editorial:v1", "en": "tilawa:editorial:v1"},
+    "translation_source_ids": {"en": "quran.com:clear-quran"},
+    "topic_tags": ["effort", "deeds", "responsibility"],
+    "available_locales": ["ar", "en"],
+    "revision": 1,
+    "quran_source": {
+      "surah_number": 53,
+      "surah_name_arabic": "النجم",
+      "surah_name_localized": {
+        "en": "An-Najm"
+      },
+      "ayah_start": 39,
+      "quran_text_source_id": "uthmani_hafs"
+    },
+    "review_metadata": {
+      "source_validation_complete": true,
+      "translation_validation_complete": true,
+      "approved_for_notification": true,
+      "approved_for_sharing": true
+    }
+  },
+  {
+    "id": "hadith_bukhari_1",
+    "type": "hadith",
+    "status": "published",
+    "original_arabic_text": "إِنَّمَا الأَعْمَالُ بِالنِّيَّاتِ، وَإِنَّمَا لِكُلِّ امْرِئٍ مَا نَوَى.",
+    "notification_excerpt": "إِنَّمَا الأَعْمَالُ بِالنِّيَّاتِ",
+    "short_explanation": {
+      "ar": "صلاح العمل وقبوله مرتبطان بالنية التي يحملها صاحبه.",
+      "en": "The worth of an action is connected to the intention behind it."
+    },
+    "translations": {
+      "en": "The reward of deeds depends upon the intentions, and every person will get the reward according to what they intended."
+    },
+    "short_explanation_source_ids": {"ar": "tilawa:editorial:v1", "en": "tilawa:editorial:v1"},
+    "translation_source_ids": {"en": "sunnah.com:bukhari:1"},
+    "topic_tags": ["intention", "deeds", "sincerity"],
+    "available_locales": ["ar", "en"],
+    "revision": 1,
+    "hadith_source": {
+      "collection": "Sahih al-Bukhari",
+      "reference_number": "1",
+      "grading": "sahih",
+      "grading_authority": "Al-Bukhari"
+    },
+    "review_metadata": {
+      "source_validation_complete": true,
+      "translation_validation_complete": true,
+      "approved_for_notification": true,
+      "approved_for_sharing": true
+    }
+  },
+  {
+    "id": "hadith_bukhari_6118",
+    "type": "hadith",
+    "status": "published",
+    "original_arabic_text": "دَعْهُ فَإِنَّ الْحَيَاءَ مِنَ الإِيمَانِ.",
+    "notification_excerpt": "الْحَيَاءُ مِنَ الإِيمَانِ",
+    "short_explanation": {
+      "ar": "الحياء المحمود خُلُق إيماني يحجز صاحبه عن القبيح.",
+      "en": "Praiseworthy modesty is a quality of faith that restrains a person from wrongdoing."
+    },
+    "translations": {
+      "en": "Leave him, for modesty is a part of faith."
+    },
+    "short_explanation_source_ids": {"ar": "tilawa:editorial:v1", "en": "tilawa:editorial:v1"},
+    "translation_source_ids": {"en": "sunnah.com:bukhari:6118"},
+    "topic_tags": ["modesty", "faith", "character"],
+    "available_locales": ["ar", "en"],
+    "revision": 1,
+    "hadith_source": {
+      "collection": "Sahih al-Bukhari",
+      "reference_number": "6118",
+      "grading": "sahih",
+      "grading_authority": "Al-Bukhari"
+    },
+    "review_metadata": {
+      "source_validation_complete": true,
+      "translation_validation_complete": true,
+      "approved_for_notification": true,
+      "approved_for_sharing": true
+    }
+  }
+]

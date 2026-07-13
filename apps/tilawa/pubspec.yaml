@@ -142,9 +142,9 @@ flutter:
 
   assets:
     - assets/images/
+    - assets/daily_guidance_seed.json
     - assets/json/
     - assets/data/
     - assets/data/translations/
     - assets/icons/
     - assets/audio/
-    - assets/changelog/

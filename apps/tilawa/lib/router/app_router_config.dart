@@ -50,6 +50,7 @@ import '../features/smart_khatma/presentation/widgets/smart_khatma_hub_scope.dar
 import '../features/smart_khatma/smart_khatma_feature_flags.dart';
 import '../features/splash/presentation/screens/splash_screen.dart';
 import '../features/support/presentation/screens/support_tilawa_screen.dart';
+import '../features/daily_guidance/presentation/screens/daily_guidance_screen.dart';
 import '../features/ui_kit_debug/tilawa_card_nested_tap_demo_screen.dart';
 import '../screens/app_shell_screen.dart';
 import '../screens/main_screen.dart';
@@ -91,6 +92,7 @@ part 'app_router_config.g.dart';
     TypedGoRoute<QuranRenderDemoRoute>(path: '/render-demo'),
     TypedGoRoute<SmartQuranPlanRoute>(path: '/smart-quran-plan'),
     TypedGoRoute<WidgetActionRoute>(path: '/widget/:action'),
+    TypedGoRoute<DailyGuidanceRoute>(path: '/daily-guidance'),
   ],
 )
 class AppShellRoute extends ShellRouteData {
@@ -130,6 +132,15 @@ class _HomeRouteDisplayHost extends StatefulWidget {
 class _HomeRouteDisplayHostState extends State<_HomeRouteDisplayHost> {
   @override
   Widget build(BuildContext context) => const MainScreen();
+}
+
+class DailyGuidanceRoute extends GoRouteData with $DailyGuidanceRoute {
+  const DailyGuidanceRoute();
+
+  @override
+  Widget build(BuildContext context, GoRouterState state) {
+    return const DailyGuidanceScreen();
+  }
 }
 
 class RecitersSearchRoute extends GoRouteData with $RecitersSearchRoute {

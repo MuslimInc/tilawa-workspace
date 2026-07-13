@@ -7198,6 +7198,90 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Admin User'**
   String get settingsAdminUserBadge;
+
+  /// Title of the Daily Guidance screen
+  ///
+  /// In en, this message translates to:
+  /// **'Daily Guidance'**
+  String get dailyGuidanceTitle;
+
+  /// Message shown when there is no daily guidance
+  ///
+  /// In en, this message translates to:
+  /// **'No guidance available for today.'**
+  String get dailyGuidanceEmpty;
+
+  /// Safe error shown when trusted daily guidance cannot be loaded
+  ///
+  /// In en, this message translates to:
+  /// **'Daily Guidance could not be loaded. Please try again.'**
+  String get dailyGuidanceError;
+
+  /// Label for the daily guidance notification toggle
+  ///
+  /// In en, this message translates to:
+  /// **'Daily Reminder'**
+  String get dailyGuidanceEnableNotifications;
+
+  /// Subtitle for the daily guidance notification toggle
+  ///
+  /// In en, this message translates to:
+  /// **'Receive a Quran verse or authentic Hadith at your preferred time'**
+  String get dailyGuidanceNotificationSubtitle;
+
+  /// Settings section for faith reminders
+  ///
+  /// In en, this message translates to:
+  /// **'Daily Guidance'**
+  String get dailyGuidanceSettingsSection;
+
+  /// Title for the Daily Guidance settings tile
+  ///
+  /// In en, this message translates to:
+  /// **'Daily Guidance'**
+  String get dailyGuidanceSettings;
+
+  /// Subtitle for the Daily Guidance settings row
+  ///
+  /// In en, this message translates to:
+  /// **'A Quran verse or authentic Hadith each day'**
+  String get dailyGuidanceSettingsSubtitle;
+
+  /// Notification title for daily guidance
+  ///
+  /// In en, this message translates to:
+  /// **'Daily Guidance 🌿'**
+  String get dailyGuidanceNotificationTitle;
+
+  /// Notification body for daily guidance
+  ///
+  /// In en, this message translates to:
+  /// **'Open to see today\'s guidance'**
+  String get dailyGuidanceNotificationBody;
+
+  /// Label for Quran item type
+  ///
+  /// In en, this message translates to:
+  /// **'Quran Verse'**
+  String get dailyGuidanceTypeQuran;
+
+  /// Label for Hadith item type
+  ///
+  /// In en, this message translates to:
+  /// **'Prophetic Hadith'**
+  String get dailyGuidanceTypeHadith;
+
+  /// Source format for Quran item
+  ///
+  /// In en, this message translates to:
+  /// **'Surah {surahName}, Ayah {ayahNumber}'**
+  String dailyGuidanceQuranSource(String surahName, int ayahNumber);
+
+  /// Source format for an authentic Hadith item
+  ///
+  /// In en, this message translates to:
+  /// **'{collection}, Hadith {referenceNumber}'**
+  String dailyGuidanceHadithSource(String collection, String referenceNumber);
 }
 
 class _AppLocalizationsDelegate

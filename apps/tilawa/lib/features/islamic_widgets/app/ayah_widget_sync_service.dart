@@ -5,6 +5,7 @@ import 'package:shared_preferences/shared_preferences.dart';
 
 import '../../../core/logging/app_logger.dart';
 import '../data/daily_ayah_widget_repository.dart';
+import '../domain/entities/ayah_widget_payload.dart';
 
 /// Startup/date-change gate for the Ayah widget snapshot (spec 041, T022).
 ///
@@ -44,7 +45,14 @@ class AyahWidgetSyncService {
       if (lastPublished == publishStamp) {
         return;
       }
-      await _repository.publishFor(instant);
+      final AyahWidgetPayload? published = await _repository.publishFor(
+        instant,
+      );
+      if (published == null) {
+        // Fonts not downloaded yet — leave the stamp unset so the next launch
+        // retries once the QCF bundle has streamed in.
+        return;
+      }
       await _prefs.setString(_lastPublishedDateKey, publishStamp);
     } catch (e, stackTrace) {
       logger.w(

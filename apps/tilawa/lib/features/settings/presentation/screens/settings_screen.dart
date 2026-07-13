@@ -224,6 +224,18 @@ class _SettingsScreenState extends State<SettingsScreen> {
                     ],
                   ),
                   TilawaSettingsGroup(
+                    title: l10n.dailyGuidanceSettingsSection,
+                    leadingIcon: Icons.local_florist,
+                    children: [
+                      TilawaSettingsTile(
+                        title: l10n.dailyGuidanceSettings,
+                        subtitle: l10n.dailyGuidanceSettingsSubtitle,
+                        onTap: () => const DailyGuidanceRoute().push(context),
+                        showDivider: false,
+                      ),
+                    ],
+                  ),
+                  TilawaSettingsGroup(
                     title: l10n.settingsPlaybackAndStorage,
                     leadingIcon: FluentIcons.storage_24_regular,
                     children: [

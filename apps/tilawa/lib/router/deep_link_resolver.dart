@@ -35,6 +35,9 @@ class DeepLinkResolver {
   static const String tasbeehReminderPayloadPrefix =
       TasbeehConstants.reminderPayloadPrefix;
 
+  /// Prefix for Daily Guidance local notifications.
+  static const String dailyGuidancePayloadPrefix = 'daily_guidance_payload';
+
   // ---------------------------------------------------------------------------
   // Map (FCM / generic deep-link) resolution
   // ---------------------------------------------------------------------------
@@ -96,6 +99,8 @@ class DeepLinkResolver {
           return QuranReaderRoute(surahNumber: surahNumber).location;
         }
         return const QuranIndexRoute().location;
+      case 'daily_guidance':
+        return '/daily-guidance'; // Or whatever route name we use in app_router_config.dart
       case 'settings':
         return const SettingsRoute().location;
       case 'prayer':
@@ -239,6 +244,12 @@ class DeepLinkResolver {
     if (tasbeeh != null) {
       return tasbeeh;
     }
+    final Map<String, dynamic>? dailyGuidance = _dailyGuidanceDataFromPayload(
+      payload,
+    );
+    if (dailyGuidance != null) {
+      return dailyGuidance;
+    }
     try {
       return Map<String, dynamic>.from(jsonDecode(payload) as Map);
     } catch (_) {
@@ -248,6 +259,13 @@ class DeepLinkResolver {
 
   /// Maps a plain-string athkar payload to the normalized `athkar` data map
   /// consumed by [resolveLocation], or `null` when [payload] is not athkar.
+  static Map<String, dynamic>? _dailyGuidanceDataFromPayload(String payload) {
+    if (payload.startsWith(dailyGuidancePayloadPrefix)) {
+      return <String, dynamic>{'type': 'daily_guidance'};
+    }
+    return null;
+  }
+
   static Map<String, dynamic>? _tasbeehDataFromPayload(String payload) {
     if (!payload.startsWith(TasbeehConstants.reminderPayloadPrefix)) {
       return null;

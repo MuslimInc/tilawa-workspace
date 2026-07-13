@@ -105,6 +105,7 @@ class MainActivity : AudioServiceActivity() {
                 }
             }.toString()
             PrayerAdhanMethodChannel.notifyNotificationTapped(prayerKey, payload)
+            intent.action = null
         }
     }
 

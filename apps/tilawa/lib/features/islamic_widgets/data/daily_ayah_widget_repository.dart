@@ -73,7 +73,11 @@ class DailyAyahWidgetRepository {
   }
 
   /// Renders and publishes the snapshot for [now]'s local calendar day.
-  Future<AyahWidgetPayload> publishFor(DateTime now) async {
+  ///
+  /// Returns `null` when the QCF page font for today's verse has not been
+  /// downloaded yet — a benign, retry-next-launch state (fonts stream in on a
+  /// background job), not a failure. Throws only on genuine render/IO errors.
+  Future<AyahWidgetPayload?> publishFor(DateTime now) async {
     final List<CuratedAyah> catalog = await _loadCatalog();
     final int seed = await _installationSeed();
     final CuratedAyah ayah = _selector.select(
@@ -84,7 +88,14 @@ class DailyAyahWidgetRepository {
 
     final String pageFamily =
         'QCF_P${ayah.pageNumber.toString().padLeft(3, '0')}';
-    await _ensureFontRegistered(pageFamily);
+    if (!await _ensureFontRegistered(pageFamily)) {
+      logger.d(
+        '[DailyAyahWidgetRepository] Skipped ${ayah.surahNumber}:'
+        '${ayah.ayahNumber} — page font $pageFamily not downloaded yet; '
+        'will retry next launch',
+      );
+      return null;
+    }
     // Yield between the heavy pipeline stages so the UI isolate keeps
     // pumping input/frames — an unbroken run of font IO + text layout +
     // double PNG encode blocked the main thread into an ANR under load.
@@ -149,12 +160,16 @@ class DailyAyahWidgetRepository {
   ///
   /// File-name resolution mirrors `QuranFontService._resolvePageFontFamily`
   /// (QCF4001_X-Regular.woff, QCF4_163.woff, 163.woff, p001.ttf …).
-  Future<void> _ensureFontRegistered(String family) async {
-    if (_registeredFontFamilies.contains(family)) return;
+  ///
+  /// Returns `false` when the font is not yet on disk (download pending) — a
+  /// benign precondition the caller skips on. Throws only on genuine IO or
+  /// registration failures.
+  Future<bool> _ensureFontRegistered(String family) async {
+    if (_registeredFontFamilies.contains(family)) return true;
     final Directory docs = await _documentsDirectory();
     final Directory fontsDir = Directory('${docs.path}/qcf4_fonts');
     if (!fontsDir.existsSync()) {
-      throw StateError('QCF fonts are not downloaded yet');
+      return false;
     }
     File? fontFile;
     for (final FileSystemEntity entity in fontsDir.listSync()) {
@@ -164,7 +179,7 @@ class DailyAyahWidgetRepository {
       }
     }
     if (fontFile == null) {
-      throw StateError('No downloaded font file resolves to $family');
+      return false;
     }
     // Async IO: this runs on the UI isolate during app usage — sync reads
     // here contributed to an input-dispatch ANR under load.
@@ -173,6 +188,7 @@ class DailyAyahWidgetRepository {
       ..addFont(Future<ByteData>.value(ByteData.sublistView(bytes)));
     await loader.load();
     _registeredFontFamilies.add(family);
+    return true;
   }
 
   static String? _familyForFontFile(String path) {
