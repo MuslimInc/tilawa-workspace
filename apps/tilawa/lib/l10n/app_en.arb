@@ -707,13 +707,13 @@
     "@khatmaResetAction": {
         "description": "Action for resetting the active Khatma plan"
     },
-    "khatmaResetTitle": "Reset Khatma plan?",
+    "khatmaResetTitle": "Delete Khatma plan?",
     "@khatmaResetTitle": {
-        "description": "Confirmation dialog title for resetting Smart Khatma"
+        "description": "Confirmation dialog title for deleting Smart Khatma"
     },
-    "khatmaResetMessage": "This clears your current Khatma plan. Your last-read Quran page and bookmarks stay saved.",
+    "khatmaResetMessage": "This deletes your current plan only. Your last-read page and bookmarks stay saved.",
     "@khatmaResetMessage": {
-        "description": "Confirmation dialog message for resetting Smart Khatma"
+        "description": "Confirmation dialog message for deleting Smart Khatma"
     },
     "khatmaContinueReading": "Continue Reading",
     "@khatmaContinueReading": {
@@ -727,7 +727,7 @@
     "@khatmaHomeViewPlan": {
         "description": "Home dashboard affordance to open the Smart Khatma hub"
     },
-    "khatmaHubResetSubtitle": "Clear the current plan. Your bookmarks stay saved.",
+    "khatmaHubResetSubtitle": "Deletes plan only; bookmarks stay saved.",
     "khatmaCompletedTitle": "Khatma complete",
     "khatmaProgressCompleteMetric": "100%",
     "khatmaCompletedSubtitle": "May Allah accept it. Begin another plan whenever you are ready.",
@@ -738,6 +738,8 @@
     "khatmaReviewPlanTitle": "Review your Khatma plan",
     "khatmaRangePages": "Pages {startPage}–{endPage}",
     "@khatmaRangePages": {"placeholders": {"startPage": {"type": "int"}, "endPage": {"type": "int"}}},
+    "khatmaRangePagesFormatted": "Pages {range}",
+    "@khatmaRangePagesFormatted": {"placeholders": {"range": {"type": "String"}}},
     "khatmaDailyPages": "{pages} pages each day",
     "@khatmaDailyPages": {"placeholders": {"pages": {"type": "int"}}},
     "khatmaStartPage": "Starts at page {page}",
@@ -792,7 +794,7 @@
     "khatmaPreviewPlanAction": "Preview plan",
     "khatmaEditPlanAction": "Edit plan",
     "khatmaEditPlanTitle": "Review plan changes",
-    "khatmaEditPlanSubtitle": "Adjust duration or completion date. Progress stays saved.",
+    "khatmaEditPlanSubtitle": "Adjust duration or end date; progress stays saved.",
     "khatmaSavePlanChangesAction": "Save changes",
     "khatmaDeletePlanAction": "Delete plan",
     "khatmaResetCorruptAction": "Reset Khatma",

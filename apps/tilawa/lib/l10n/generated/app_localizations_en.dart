@@ -556,11 +556,11 @@ class AppLocalizationsEn extends AppLocalizations {
   String get khatmaResetAction => 'Reset plan';
 
   @override
-  String get khatmaResetTitle => 'Reset Khatma plan?';
+  String get khatmaResetTitle => 'Delete Khatma plan?';
 
   @override
   String get khatmaResetMessage =>
-      'This clears your current Khatma plan. Your last-read Quran page and bookmarks stay saved.';
+      'This deletes your current plan only. Your last-read page and bookmarks stay saved.';
 
   @override
   String get khatmaContinueReading => 'Continue Reading';
@@ -573,7 +573,7 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get khatmaHubResetSubtitle =>
-      'Clear the current plan. Your bookmarks stay saved.';
+      'Deletes plan only; bookmarks stay saved.';
 
   @override
   String get khatmaCompletedTitle => 'Khatma complete';
@@ -604,6 +604,11 @@ class AppLocalizationsEn extends AppLocalizations {
   @override
   String khatmaRangePages(int startPage, int endPage) {
     return 'Pages $startPage–$endPage';
+  }
+
+  @override
+  String khatmaRangePagesFormatted(String range) {
+    return 'Pages $range';
   }
 
   @override
@@ -763,7 +768,7 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get khatmaEditPlanSubtitle =>
-      'Adjust duration or completion date. Progress stays saved.';
+      'Adjust duration or end date; progress stays saved.';
 
   @override
   String get khatmaSavePlanChangesAction => 'Save changes';

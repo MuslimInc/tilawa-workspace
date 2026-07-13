@@ -119,8 +119,10 @@ Future<void> confirmKhatmaPlanReset(BuildContext context) async {
     context: context,
     title: context.l10n.khatmaResetTitle,
     message: context.l10n.khatmaResetMessage,
-    confirmLabel: context.l10n.reset,
+    confirmLabel: context.l10n.khatmaDeletePlanAction,
     cancelLabel: context.l10n.cancel,
+    compactCloseButton: true,
+    compactActions: true,
   );
   if (confirmed != true || !context.mounted) {
     return;

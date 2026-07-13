@@ -13,6 +13,7 @@ import '../../domain/khatma_plan_boundaries.dart';
 import '../bloc/khatma_plan_bloc.dart';
 import '../bloc/khatma_plan_event.dart';
 import '../bloc/khatma_plan_state.dart';
+import '../formatters/khatma_page_range_text.dart';
 import '../widgets/smart_khatma_plan_actions.dart';
 
 /// Feature hub for Smart Khatma — hero summary, plan actions, and navigation.
@@ -492,7 +493,8 @@ class _KhatmaCreationReviewBody extends StatelessWidget {
             spacing: tokens.spaceMedium,
             children: [
               Text(
-                context.l10n.khatmaRangePages(
+                formatKhatmaPageRange(
+                  context.l10n,
                   isEditing ? plan.startPage : plan.assignmentStartPage,
                   isEditing ? plan.targetPage : plan.assignmentEndPage,
                 ),
@@ -616,7 +618,7 @@ class _KhatmaHubActiveBody extends StatelessWidget {
               crossAxisAlignment: CrossAxisAlignment.start,
               spacing: tokens.spaceSmall,
               children: [
-                Text(context.l10n.khatmaRangePages(startPage, endPage)),
+                Text(formatKhatmaPageRange(context.l10n, startPage, endPage)),
                 Text(context.l10n.khatmaAssignedPages(targetPages)),
                 Text(
                   context.l10n.khatmaConfirmedPages(plan.confirmedTodayPages),
@@ -684,15 +686,21 @@ class _KhatmaHubActiveBody extends StatelessWidget {
           children: [
             if (!plan.isTodayCompleted)
               TilawaNavigationRow(
+                emphasis: TilawaNavigationRowEmphasis.primary,
                 icon: Icons.menu_book_rounded,
                 title: plan.confirmedTodayPages == 0
                     ? context.l10n.khatmaStartTodayAction
                     : context.l10n.khatmaResumeTodayAction,
-                subtitle: context.l10n.khatmaRangePages(startPage, endPage),
+                subtitle: formatKhatmaPageRange(
+                  context.l10n,
+                  startPage,
+                  endPage,
+                ),
                 semanticTint: TilawaSemanticTint.ink,
                 onTap: () => openKhatmaReaderAndRefresh(context, plan),
               ),
             TilawaNavigationRow(
+              emphasis: TilawaNavigationRowEmphasis.secondary,
               icon: Icons.edit_outlined,
               title: context.l10n.khatmaEditPlanAction,
               subtitle: context.l10n.khatmaEditPlanSubtitle,
@@ -700,10 +708,12 @@ class _KhatmaHubActiveBody extends StatelessWidget {
               onTap: () => showKhatmaEditPlanSheet(context, plan),
             ),
             TilawaNavigationRow(
-              icon: Icons.restart_alt_rounded,
+              emphasis: TilawaNavigationRowEmphasis.tertiary,
+              icon: Icons.delete_outline_rounded,
               title: context.l10n.khatmaDeletePlanAction,
               subtitle: context.l10n.khatmaHubResetSubtitle,
               semanticTint: TilawaSemanticTint.neutral,
+              showsNavigationChevron: false,
               onTap: () => confirmKhatmaPlanReset(context),
               showDivider: false,
             ),
@@ -787,7 +797,7 @@ class _KhatmaHubErrorBody extends StatelessWidget {
             ),
           ),
           TilawaButton(
-            text: context.l10n.khatmaResetCorruptAction,
+            text: context.l10n.khatmaDeletePlanAction,
             variant: TilawaButtonVariant.outline,
             onPressed: () => confirmKhatmaPlanReset(context),
           ),

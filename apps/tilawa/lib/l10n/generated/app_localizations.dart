@@ -1016,16 +1016,16 @@ abstract class AppLocalizations {
   /// **'Reset plan'**
   String get khatmaResetAction;
 
-  /// Confirmation dialog title for resetting Smart Khatma
+  /// Confirmation dialog title for deleting Smart Khatma
   ///
   /// In en, this message translates to:
-  /// **'Reset Khatma plan?'**
+  /// **'Delete Khatma plan?'**
   String get khatmaResetTitle;
 
-  /// Confirmation dialog message for resetting Smart Khatma
+  /// Confirmation dialog message for deleting Smart Khatma
   ///
   /// In en, this message translates to:
-  /// **'This clears your current Khatma plan. Your last-read Quran page and bookmarks stay saved.'**
+  /// **'This deletes your current plan only. Your last-read page and bookmarks stay saved.'**
   String get khatmaResetMessage;
 
   /// Continue reading action for Smart Khatma
@@ -1049,7 +1049,7 @@ abstract class AppLocalizations {
   /// Subtitle for the reset-plan row on the Smart Khatma hub
   ///
   /// In en, this message translates to:
-  /// **'Clear the current plan. Your bookmarks stay saved.'**
+  /// **'Deletes plan only; bookmarks stay saved.'**
   String get khatmaHubResetSubtitle;
 
   /// No description provided for @khatmaCompletedTitle.
@@ -1105,6 +1105,12 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Pages {startPage}–{endPage}'**
   String khatmaRangePages(int startPage, int endPage);
+
+  /// No description provided for @khatmaRangePagesFormatted.
+  ///
+  /// In en, this message translates to:
+  /// **'Pages {range}'**
+  String khatmaRangePagesFormatted(String range);
 
   /// No description provided for @khatmaDailyPages.
   ///
@@ -1360,7 +1366,7 @@ abstract class AppLocalizations {
   /// No description provided for @khatmaEditPlanSubtitle.
   ///
   /// In en, this message translates to:
-  /// **'Adjust duration or completion date. Progress stays saved.'**
+  /// **'Adjust duration or end date; progress stays saved.'**
   String get khatmaEditPlanSubtitle;
 
   /// No description provided for @khatmaSavePlanChangesAction.

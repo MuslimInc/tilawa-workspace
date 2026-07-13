@@ -68,6 +68,106 @@ void main() {
 
       expect(find.byType(TilawaInteractiveSurface), findsOneWidget);
     });
+
+    testWidgets('keeps subtitle rows within the hub navigation height band', (
+      WidgetTester tester,
+    ) async {
+      await tester.pumpWidget(
+        _app(
+          SizedBox(
+            width: 360,
+            child: TilawaNavigationRow(
+              icon: Icons.auto_stories_outlined,
+              title: 'Daily plan',
+              subtitle: 'Track daily reading goals and progress.',
+              onTap: () {},
+              showDivider: false,
+            ),
+          ),
+        ),
+      );
+
+      final rowBox = tester.getSize(find.byType(TilawaNavigationRow));
+      expect(rowBox.height, inInclusiveRange(72, 80));
+    });
+
+    testWidgets('limits subtitle to one line with ellipsis', (
+      WidgetTester tester,
+    ) async {
+      const subtitle =
+          'This supporting copy is intentionally long and should truncate '
+          'after the first line with an ellipsis at the end.';
+
+      await tester.pumpWidget(
+        _app(
+          SizedBox(
+            width: 280,
+            child: TilawaNavigationRow(
+              icon: Icons.auto_stories_outlined,
+              title: 'Daily plan',
+              subtitle: subtitle,
+              onTap: () {},
+              showDivider: false,
+            ),
+          ),
+        ),
+      );
+
+      final subtitleFinder = find.text(subtitle);
+      expect(subtitleFinder, findsOneWidget);
+
+      final subtitleWidget = tester.widget<Text>(subtitleFinder);
+      expect(subtitleWidget.maxLines, 1);
+      expect(subtitleWidget.overflow, TextOverflow.ellipsis);
+    });
+
+    testWidgets('renders tertiary emphasis with outline icon treatment', (
+      WidgetTester tester,
+    ) async {
+      await tester.pumpWidget(
+        _app(
+          SizedBox(
+            width: 360,
+            child: TilawaNavigationRow(
+              emphasis: TilawaNavigationRowEmphasis.tertiary,
+              icon: Icons.delete_outline_rounded,
+              title: 'Delete plan',
+              subtitle: 'Deletes plan only.',
+              onTap: () {},
+              showDivider: false,
+            ),
+          ),
+        ),
+      );
+
+      final iconBox = tester.widget<TilawaIconBox>(find.byType(TilawaIconBox));
+      expect(iconBox.variant, TilawaIconBoxVariant.outline);
+    });
+
+    testWidgets(
+      'omits navigation chevron when showsNavigationChevron is false',
+      (
+        WidgetTester tester,
+      ) async {
+        await tester.pumpWidget(
+          _app(
+            SizedBox(
+              width: 360,
+              child: TilawaNavigationRow(
+                icon: Icons.delete_outline_rounded,
+                title: 'Delete plan',
+                subtitle: 'Deletes plan only.',
+                showsNavigationChevron: false,
+                onTap: () {},
+                showDivider: false,
+              ),
+            ),
+          ),
+        );
+
+        expect(find.byIcon(TilawaIcons.chevronRightSmall), findsNothing);
+      },
+    );
   });
 
   group('TilawaHubNavigationGroup', () {

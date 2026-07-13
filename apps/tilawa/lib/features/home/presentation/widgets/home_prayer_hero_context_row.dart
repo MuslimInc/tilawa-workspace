@@ -25,15 +25,17 @@ class HomePrayerHeroContextRow extends StatelessWidget {
     required this.onRefreshLocation,
     this.ink,
     this.muted,
+    this.chipBackground,
+    this.chipBorder,
   });
 
   final String? locationName;
   final bool isRefreshingLocation;
   final VoidCallback? onRefreshLocation;
-
-  /// When null, uses [ColorScheme.onSurface] / header secondary tokens.
   final Color? ink;
   final Color? muted;
+  final Color? chipBackground;
+  final Color? chipBorder;
 
   @override
   Widget build(BuildContext context) {
@@ -44,6 +46,14 @@ class HomePrayerHeroContextRow extends StatelessWidget {
     final ColorScheme colorScheme = theme.colorScheme;
     final Color resolvedInk = ink ?? colorScheme.onSurface;
     final Color resolvedMuted = muted ?? screenTokens.homeHeaderSecondaryText;
+    final Color resolvedChipBackground =
+        chipBackground ?? screenTokens.homeHeaderChipBackground;
+    final Color resolvedChipBorder =
+        chipBorder ??
+        _homeDashboardHairlineBorder(
+          screenTokens,
+          colorScheme,
+        );
     final String locationLabel =
         PrayerLocationLabelFormatter.abbreviatedLocationLabel(
           locationName: locationName,
@@ -65,11 +75,8 @@ class HomePrayerHeroContextRow extends StatelessWidget {
               label: locationLabel,
               ink: resolvedInk,
               muted: resolvedMuted,
-              chipBackground: screenTokens.homeHeaderChipBackground,
-              chipBorder: _homeDashboardHairlineBorder(
-                screenTokens,
-                colorScheme,
-              ),
+              chipBackground: resolvedChipBackground,
+              chipBorder: resolvedChipBorder,
               isRefreshingLocation: isRefreshingLocation,
               onRefreshLocation: onRefreshLocation,
             ),

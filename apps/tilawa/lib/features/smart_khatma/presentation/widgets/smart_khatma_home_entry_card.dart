@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:tilawa/core/extensions.dart';
+import '../formatters/khatma_page_range_text.dart';
 import 'package:tilawa/router/app_router_config.dart';
 import 'package:tilawa/features/home/presentation/widgets/home_dashboard_card.dart';
 import 'package:tilawa_ui_kit/tilawa_ui_kit.dart';
@@ -129,7 +130,7 @@ class _KhatmaHomeActiveEntry extends StatelessWidget {
     final colorScheme = theme.colorScheme;
     final String detail = isTodayCompleted
         ? context.l10n.khatmaTodayCompletedTitle
-        : '${context.l10n.khatmaRangePages(rangeStart, rangeEnd)} · '
+        : '${formatKhatmaPageRange(context.l10n, rangeStart, rangeEnd)} · '
               '${context.l10n.khatmaConfirmedAndRemaining(
                 todayCompletedPages,
                 todayRemainingPages,

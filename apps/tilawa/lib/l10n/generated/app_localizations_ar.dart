@@ -555,11 +555,11 @@ class AppLocalizationsAr extends AppLocalizations {
   String get khatmaResetAction => 'إعادة ضبط الخطة';
 
   @override
-  String get khatmaResetTitle => 'إعادة ضبط خطة الختمة؟';
+  String get khatmaResetTitle => 'حذف خطة الختمة؟';
 
   @override
   String get khatmaResetMessage =>
-      'سيتم حذف خطة الختمة الحالية فقط. ستبقى آخر صفحة قرأتها والعلامات المرجعية محفوظة.';
+      'سيتم حذف الخطة الحالية فقط. ستظل آخر صفحة قرأتها وعلاماتك المرجعية محفوظة.';
 
   @override
   String get khatmaContinueReading => 'تابع القراءة';
@@ -571,8 +571,7 @@ class AppLocalizationsAr extends AppLocalizations {
   String get khatmaHomeViewPlan => 'عرض الخطة';
 
   @override
-  String get khatmaHubResetSubtitle =>
-      'يمسح الخطة الحالية فقط. علاماتك المرجعية تبقى محفوظة.';
+  String get khatmaHubResetSubtitle => 'يحذف الخطة فقط، وتبقى علاماتك محفوظة';
 
   @override
   String get khatmaCompletedTitle => 'اكتملت الختمة';
@@ -601,7 +600,12 @@ class AppLocalizationsAr extends AppLocalizations {
 
   @override
   String khatmaRangePages(int startPage, int endPage) {
-    return 'من الصفحة $startPage إلى $endPage';
+    return 'الصفحات $startPage–$endPage';
+  }
+
+  @override
+  String khatmaRangePagesFormatted(String range) {
+    return 'الصفحات $range';
   }
 
   @override
@@ -760,7 +764,7 @@ class AppLocalizationsAr extends AppLocalizations {
 
   @override
   String get khatmaEditPlanSubtitle =>
-      'عدّل المدة أو تاريخ الإنهاء. تقدّمك يبقى محفوظًا.';
+      'عدّل المدة أو تاريخ الإنهاء مع حفظ التقدّم';
 
   @override
   String get khatmaSavePlanChangesAction => 'حفظ التغييرات';
