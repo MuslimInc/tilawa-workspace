@@ -1303,6 +1303,78 @@ abstract class AppLocalizations {
   /// **'Return to Quran'**
   String get khatmaReturnToQuranAction;
 
+  /// No description provided for @khatmaStartAyah.
+  ///
+  /// In en, this message translates to:
+  /// **'Start Ayah'**
+  String get khatmaStartAyah;
+
+  /// No description provided for @khatmaEndAyah.
+  ///
+  /// In en, this message translates to:
+  /// **'End Ayah'**
+  String get khatmaEndAyah;
+
+  /// No description provided for @khatmaAyahNumber.
+  ///
+  /// In en, this message translates to:
+  /// **'Ayah {number}'**
+  String khatmaAyahNumber(int number);
+
+  /// No description provided for @khatmaScheduleByDuration.
+  ///
+  /// In en, this message translates to:
+  /// **'Duration'**
+  String get khatmaScheduleByDuration;
+
+  /// No description provided for @khatmaScheduleByTargetDate.
+  ///
+  /// In en, this message translates to:
+  /// **'Target date'**
+  String get khatmaScheduleByTargetDate;
+
+  /// No description provided for @khatmaChooseTargetDate.
+  ///
+  /// In en, this message translates to:
+  /// **'Choose a completion date'**
+  String get khatmaChooseTargetDate;
+
+  /// No description provided for @khatmaPreviewPlanAction.
+  ///
+  /// In en, this message translates to:
+  /// **'Preview plan'**
+  String get khatmaPreviewPlanAction;
+
+  /// No description provided for @khatmaEditPlanAction.
+  ///
+  /// In en, this message translates to:
+  /// **'Edit plan'**
+  String get khatmaEditPlanAction;
+
+  /// No description provided for @khatmaEditPlanTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Review plan changes'**
+  String get khatmaEditPlanTitle;
+
+  /// No description provided for @khatmaEditPlanSubtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Adjust duration or completion date. Progress stays saved.'**
+  String get khatmaEditPlanSubtitle;
+
+  /// No description provided for @khatmaSavePlanChangesAction.
+  ///
+  /// In en, this message translates to:
+  /// **'Save changes'**
+  String get khatmaSavePlanChangesAction;
+
+  /// No description provided for @khatmaDeletePlanAction.
+  ///
+  /// In en, this message translates to:
+  /// **'Delete plan'**
+  String get khatmaDeletePlanAction;
+
   /// No description provided for @khatmaResetCorruptAction.
   ///
   /// In en, this message translates to:

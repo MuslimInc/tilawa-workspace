@@ -1,140 +1,93 @@
 # Feature Specification: Smart Khatma & Reading Plan
 
-**Feature Branch**: `023-smart-khatma-reading-plan`  
+**Feature Branch**: `feature/khatmah`  
 **Created**: 2026-06-15  
-**Status**: Release-candidate implementation; normative progress contract is
-`amendment-production-readiness.md`  
-**Input**: Phase 2 engagement engine behind Today Plan.
-
-> Release note: wherever this original MVP document mentions `currentPage`,
-> automatic reader progress, mutable daily targets, catch-up metadata, or a
-> stored completion status, the confirmed-progress release amendment and
-> contract supersede it.
+**Updated**: 2026-07-13  
+**Status**: Shipped MVP — normative progress contract in
+`amendment-production-readiness.md`
 
 ## Product Specification
 
-Smart Khatma helps users complete the Quran through a calm adaptive plan. Today
-Plan answers "what should I do today?"; Smart Khatma answers "where am I going?"
+Smart Khatma helps users complete the Quran through a calm adaptive plan. One
+active plan at a time, explicit user-selected boundaries, and user-confirmed
+progress only.
 
-The MVP supports one active plan, generated from a duration preset or custom
-duration, and uses an explicit Surah-range or page-range boundary chosen by the
-user. The plan
-feeds Today Plan so the daily reading recommendation becomes the active Khatma
-target rather than a generic fallback.
+## Mandatory Capabilities (MVP)
+
+1. **Range selection**
+   - Ordered start/end Surah with Ayah selectors resolved to inclusive Mushaf
+     pages via `quran_qcf`.
+   - Ordered start/end Mushaf page inputs (1…604).
+   - All plan math uses only the selected range.
+
+2. **Schedule selection**
+   - Duration presets: 7, 15, 30, 60 days.
+   - Target completion date (derives duration days).
+
+3. **Preview before persist**
+   - Shows boundaries, total pages, daily target, expected completion date.
+   - Nothing saved until explicit confirm.
+
+4. **Daily assignment**
+   - Frozen start/end pages per local day.
+   - Start opens assignment start; Resume opens first unconfirmed page.
+
+5. **Progress**
+   - Reader navigation never writes progress.
+   - Save Progress sheet confirms “completed through page N” within today’s
+     assignment.
+
+6. **Lifecycle**
+   - Edit plan duration/schedule (progress preserved).
+   - Delete plan (confirmed reset).
+   - Daily completion and full Khatmah completion states.
+   - Start another Khatmah after full completion.
 
 ## UX Flow
 
-1. User sees a Khatma card on Home.
-2. If no plan exists, user chooses a quick duration: 7, 15, 30, or 60 days.
-3. User chooses ordered start/end Surahs or ordered start/end pages.
-4. User chooses duration and reviews calculated boundaries, total pages, daily
-   target, and expected completion date.
-5. App creates the plan only after explicit confirmation.
-6. Home shows progress, day count, remaining pages, remaining days, and today's
-   target.
-7. Today Plan integration remains release-default off until reconciled.
-8. If the user falls behind, the domain computes an adjusted daily target. Phase
-   2.1 exposes the catch-up/extend choice as a dedicated bottom sheet.
+1. Home contextual card → Smart Khatma hub.
+2. No plan → Create Khatma → boundary mode → schedule → preview → confirm.
+3. Active hub → today’s range, assigned/confirmed/remaining, Start/Resume.
+4. Reader → Save Progress → hub refresh.
+5. Behind schedule → extend plan (catch-up hidden).
+6. Complete → Start another / Return to Quran.
 
-## User Stories
+## Canonical States
 
-- As a reader, I can start a Khatma without manually calculating pages per day.
-- As a returning reader, I can see how far I am through my current Khatma.
-- As an inconsistent reader, I see a calm adjusted target instead of failure.
-- As a Today Plan user, my reading task reflects my long-term Khatma goal.
+1. No Plan  
+2. Create Plan (boundary + schedule + preview)  
+3. Active / No progress today  
+4. Active / Partial progress  
+5. Today completed  
+6. Full Khatmah completed  
+7. Recoverable error / malformed data  
 
 ## Edge Cases
 
-- No last-read page: start at page 1.
-- Last-read page beyond 604: clamp to page 604 and mark complete when needed.
-- Duration shorter than remaining pages: daily pages can be high but explicit.
-- Missed days: target increases using remaining pages / remaining days.
-- Expired plan with remaining pages: MVP uses catch-up target; later UX offers
-  extend or catch-up selection.
-- Storage missing/corrupt: ignore corrupt plan and show empty state.
+- Invalid or reversed boundaries → creation controls disabled; preview rejected.
+- Same-day partial confirmation → assignment end frozen.
+- Next local day → new assignment from first unconfirmed page.
+- Malformed v2 JSON → error state; raw value not overwritten.
+- Duration edit shorter than elapsed days → rejected.
 
-## Premium Strategy
+## Persistence (v2)
 
-Free:
-- One active Khatma plan.
-- Standard progress tracking.
-- Today Plan integration.
+Key: `smart_khatma.active_plan.v2`
 
-Premium:
-- Multiple plans.
-- Custom schedules.
-- Smart recovery choice UI.
-- Reading analytics and insights.
-- Historical completions.
-- Completion prediction and adaptive plans.
+Fields: `start_page`, `target_page`, `duration_days`, frozen
+`assignment_*`, nullable `confirmed_completed_through_page`, optional
+`adjustment`.
 
-## Analytics Plan
+## Analytics (privacy-minimized)
 
-- `khatma_created`: `plan_id`, `duration_days`, `start_page`,
-  `target_page`, `daily_target_pages`, `reading_style`.
-- `khatma_started`: same as created, emitted when first shown as active.
-- `khatma_progress_updated`: `plan_id`, `current_page`, `progress_percent`,
-  `remaining_pages`.
-- `khatma_goal_completed`: `plan_id`, `date_key`, `pages_completed`.
-- `khatma_plan_adjusted`: `plan_id`, `old_daily_target_pages`,
-  `new_daily_target_pages`, `missed_days`.
-- `khatma_catchup_selected`: `plan_id`, `new_daily_target_pages`.
-- `khatma_extend_selected`: `plan_id`, `new_target_date`.
-- `khatma_completed`: `plan_id`, `duration_days`, `completed_days`.
-- `khatma_dashboard_viewed`: `plan_id`, `progress_percent`, `current_day`.
-- `khatma_continue_reading`: `plan_id`, `start_page`, `today_target_pages`.
+- `khatma_created`: duration bucket only.
+- `khatma_progress_updated`: source = user_confirmation.
+- `khatma_goal_completed`, `khatma_completed`, `khatma_plan_adjusted`,
+  `khatma_reset`, `khatma_extend_selected`.
+- No raw page coordinates or plan ids in shipped events.
 
-## Database Schema
+## Deferred (post-MVP)
 
-Release MVP local key: `smart_khatma.active_plan.v2`. The prior v1 key was
-development-only and is ignored without deletion.
-
-```json
-{
-  "id": "local_2026-06-15T09:00:00.000",
-  "created_at": "2026-06-15T09:00:00.000",
-  "start_date": "2026-06-15T00:00:00.000",
-  "duration_days": 30,
-  "start_page": 1,
-  "target_page": 604,
-  "current_page": 1,
-  "reading_style": "pages",
-  "preferred_minutes_per_day": null,
-  "status": "active"
-}
-```
-
-Migration strategy: keep versioned keys; when adding multiple plans, migrate
-the active-plan object into a list table/key and preserve active `id`.
-
-## Domain Models
-
-- `KhatmaPlan`: active long-term plan.
-- `KhatmaTodayTarget`: computed today's target for Home and Today Plan.
-- `KhatmaReadingStyle`: pages or minutes.
-- `KhatmaPlanStatus`: active or completed.
-
-## Flutter Architecture Design
-
-- `features/smart_khatma/domain`: entities, repository interface, use cases.
-- `features/smart_khatma/data`: SharedPreferences datasource and repository.
-- `features/smart_khatma/presentation`: Bloc and Home card.
-- Home composes `SmartKhatmaCard`.
-- Today Plan receives `GetKhatmaTodayTargetUseCase` and uses it for the reading
-  task when an active plan exists.
-
-## Implementation Roadmap
-
-1. MVP: one active plan, Home card, Today Plan integration.
-2. Recovery UX: catch up faster vs extend plan bottom sheet.
-3. Progress write-back from reader session completion.
-4. Premium analytics and historical insights.
-5. Multiple plans and custom weekly schedules.
-
-## Two-Week Smallest Premium Version
-
-Ship one active Smart Khatma plan with duration presets, a polished Home
-dashboard card, Today Plan integration, and calm recovery math that adjusts the
-daily page target. This is small enough for two weeks, feels premium because it
-is adaptive and integrated, and directly improves retention by giving every
-opening session a long-term purpose.
+- Today Plan Khatma-backed read-only integration (flag default-off).
+- Android Wird widget (flag default-off).
+- Reminders, pause, history archive, multiple concurrent plans.

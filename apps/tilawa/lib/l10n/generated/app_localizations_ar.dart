@@ -730,6 +730,45 @@ class AppLocalizationsAr extends AppLocalizations {
   String get khatmaReturnToQuranAction => 'العودة إلى القرآن';
 
   @override
+  String get khatmaStartAyah => 'آية البداية';
+
+  @override
+  String get khatmaEndAyah => 'آية النهاية';
+
+  @override
+  String khatmaAyahNumber(int number) {
+    return 'آية $number';
+  }
+
+  @override
+  String get khatmaScheduleByDuration => 'المدة';
+
+  @override
+  String get khatmaScheduleByTargetDate => 'تاريخ الإنهاء';
+
+  @override
+  String get khatmaChooseTargetDate => 'اختر تاريخ الإنهاء';
+
+  @override
+  String get khatmaPreviewPlanAction => 'معاينة الخطة';
+
+  @override
+  String get khatmaEditPlanAction => 'تعديل الخطة';
+
+  @override
+  String get khatmaEditPlanTitle => 'راجع تغييرات الخطة';
+
+  @override
+  String get khatmaEditPlanSubtitle =>
+      'عدّل المدة أو تاريخ الإنهاء. تقدّمك يبقى محفوظًا.';
+
+  @override
+  String get khatmaSavePlanChangesAction => 'حفظ التغييرات';
+
+  @override
+  String get khatmaDeletePlanAction => 'حذف الخطة';
+
+  @override
   String get khatmaResetCorruptAction => 'إعادة ضبط الختمة';
 
   @override

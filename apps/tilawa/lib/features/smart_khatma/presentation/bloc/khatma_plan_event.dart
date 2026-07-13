@@ -53,3 +53,29 @@ final class KhatmaPlanExtendSelected extends KhatmaPlanEvent {
 final class KhatmaPlanResetRequested extends KhatmaPlanEvent {
   const KhatmaPlanResetRequested();
 }
+
+final class KhatmaPlanEditPreviewRequested extends KhatmaPlanEvent {
+  const KhatmaPlanEditPreviewRequested({
+    required this.plan,
+    required this.durationDays,
+  });
+
+  final KhatmaPlan plan;
+  final int durationDays;
+
+  @override
+  List<Object?> get props => [plan, durationDays];
+}
+
+final class KhatmaPlanEditConfirmed extends KhatmaPlanEvent {
+  const KhatmaPlanEditConfirmed({
+    required this.plan,
+    required this.durationDays,
+  });
+
+  final KhatmaPlan plan;
+  final int durationDays;
+
+  @override
+  List<Object?> get props => [plan, durationDays];
+}

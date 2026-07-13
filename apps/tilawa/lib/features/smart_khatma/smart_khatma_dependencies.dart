@@ -19,6 +19,7 @@ import 'domain/usecases/get_active_khatma_plan_use_case.dart';
 import 'domain/usecases/get_khatma_today_target_use_case.dart';
 import 'domain/usecases/get_wird_progress_summary_use_case.dart';
 import 'domain/usecases/reset_khatma_plan_use_case.dart';
+import 'domain/usecases/update_khatma_plan_use_case.dart';
 import 'domain/usecases/update_khatma_progress_use_case.dart';
 import 'presentation/bloc/khatma_plan_bloc.dart';
 import 'presentation/bloc/khatma_plan_event.dart';
@@ -57,6 +58,7 @@ final class SmartKhatmaDependencies {
         planRepository,
         analyticsService,
       ),
+      UpdateKhatmaPlanUseCase(planRepository, analyticsService),
       UpdateKhatmaProgressUseCase(
         planRepository,
         analyticsService,

@@ -733,6 +733,45 @@ class AppLocalizationsEn extends AppLocalizations {
   String get khatmaReturnToQuranAction => 'Return to Quran';
 
   @override
+  String get khatmaStartAyah => 'Start Ayah';
+
+  @override
+  String get khatmaEndAyah => 'End Ayah';
+
+  @override
+  String khatmaAyahNumber(int number) {
+    return 'Ayah $number';
+  }
+
+  @override
+  String get khatmaScheduleByDuration => 'Duration';
+
+  @override
+  String get khatmaScheduleByTargetDate => 'Target date';
+
+  @override
+  String get khatmaChooseTargetDate => 'Choose a completion date';
+
+  @override
+  String get khatmaPreviewPlanAction => 'Preview plan';
+
+  @override
+  String get khatmaEditPlanAction => 'Edit plan';
+
+  @override
+  String get khatmaEditPlanTitle => 'Review plan changes';
+
+  @override
+  String get khatmaEditPlanSubtitle =>
+      'Adjust duration or completion date. Progress stays saved.';
+
+  @override
+  String get khatmaSavePlanChangesAction => 'Save changes';
+
+  @override
+  String get khatmaDeletePlanAction => 'Delete plan';
+
+  @override
   String get khatmaResetCorruptAction => 'Reset Khatma';
 
   @override

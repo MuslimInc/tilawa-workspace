@@ -9,6 +9,7 @@ import 'package:tilawa/router/app_router_config.dart';
 import 'package:tilawa_ui_kit/tilawa_ui_kit.dart';
 
 import '../../domain/entities/khatma_plan.dart';
+import '../../domain/khatma_plan_boundaries.dart';
 import '../bloc/khatma_plan_bloc.dart';
 import '../bloc/khatma_plan_event.dart';
 import '../bloc/khatma_plan_state.dart';
@@ -35,9 +36,11 @@ class SmartKhatmaHubScreen extends StatelessWidget {
                   : plan.isCompleted
                   ? const _KhatmaHubCompletedBody()
                   : _KhatmaHubActiveBody(plan: plan, todayTarget: todayTarget),
-            KhatmaPlanCreationReview(:final plan) => _KhatmaCreationReviewBody(
-              plan: plan,
-            ),
+            KhatmaPlanCreationReview(:final plan, :final isEditing) =>
+              _KhatmaCreationReviewBody(
+                plan: plan,
+                isEditing: isEditing,
+              ),
             KhatmaPlanFailure() => const _KhatmaHubErrorBody(),
             _ => const Center(child: TilawaLoadingIndicator()),
           };
@@ -101,8 +104,12 @@ class _KhatmaHubEmptyBody extends StatefulWidget {
 class _KhatmaHubEmptyBodyState extends State<_KhatmaHubEmptyBody> {
   bool _showCreation = false;
   _KhatmaBoundaryMode _mode = _KhatmaBoundaryMode.surah;
+  _KhatmaScheduleMode _scheduleMode = _KhatmaScheduleMode.duration;
   int _startSurah = 1;
+  int _startAyah = 1;
   int _endSurah = 114;
+  int _endAyah = getVerseCount(114);
+  DateTime _targetDate = DateTime.now().add(const Duration(days: 30));
   final TextEditingController _startPageController = TextEditingController(
     text: '1',
   );
@@ -118,26 +125,56 @@ class _KhatmaHubEmptyBodyState extends State<_KhatmaHubEmptyBody> {
   }
 
   int? get _startPage => switch (_mode) {
-    _KhatmaBoundaryMode.surah => getPageNumber(_startSurah, 1),
+    _KhatmaBoundaryMode.surah => KhatmaPlanBoundaries.pageForSurahAyah(
+      _startSurah,
+      _startAyah,
+    ),
     _KhatmaBoundaryMode.page => int.tryParse(_startPageController.text),
   };
 
   int? get _targetPage => switch (_mode) {
-    _KhatmaBoundaryMode.surah =>
-      _endSurah == 114
-          ? KhatmaPlan.lastQuranPage
-          : getPageNumber(_endSurah + 1, 1) - 1,
+    _KhatmaBoundaryMode.surah => KhatmaPlanBoundaries.pageForSurahAyah(
+      _endSurah,
+      _endAyah,
+    ),
     _KhatmaBoundaryMode.page => int.tryParse(_endPageController.text),
   };
 
   bool get _hasValidBoundaries {
     final int? start = _startPage;
     final int? end = _targetPage;
-    return start != null &&
-        end != null &&
-        start >= KhatmaPlan.firstQuranPage &&
-        end <= KhatmaPlan.lastQuranPage &&
-        start <= end;
+    if (start == null || end == null) return false;
+    if (_mode == _KhatmaBoundaryMode.surah) {
+      return KhatmaPlanBoundaries.isOrderedSurahRange(
+        startSurah: _startSurah,
+        startAyah: _startAyah,
+        endSurah: _endSurah,
+        endAyah: _endAyah,
+      );
+    }
+    return KhatmaPlanBoundaries.isValidPageRange(start, end);
+  }
+
+  int? _durationDaysForPreview() {
+    if (_scheduleMode == _KhatmaScheduleMode.duration) return null;
+    final int days = KhatmaPlanBoundaries.durationDaysFromTargetDate(
+      startDate: DateTime.now(),
+      targetDate: _targetDate,
+    );
+    return days.clamp(1, 365);
+  }
+
+  void _requestPreview(int durationDays) {
+    final int? start = _startPage;
+    final int? end = _targetPage;
+    if (start == null || end == null) return;
+    context.read<KhatmaPlanBloc>().add(
+      KhatmaPlanPreviewRequested(
+        durationDays: durationDays,
+        startPage: start,
+        targetPage: end,
+      ),
+    );
   }
 
   @override
@@ -193,12 +230,22 @@ class _KhatmaHubEmptyBodyState extends State<_KhatmaHubEmptyBody> {
           if (_mode == _KhatmaBoundaryMode.surah)
             _KhatmaSurahBoundaryFields(
               startSurah: _startSurah,
+              startAyah: _startAyah,
               endSurah: _endSurah,
-              onStartChanged: (value) => setState(() {
-                _startSurah = value;
-                if (_endSurah < value) _endSurah = value;
+              endAyah: _endAyah,
+              onStartChanged: (surah, ayah) => setState(() {
+                _startSurah = surah;
+                _startAyah = ayah;
+                if (_endSurah < surah ||
+                    (_endSurah == surah && _endAyah < ayah)) {
+                  _endSurah = surah;
+                  _endAyah = ayah;
+                }
               }),
-              onEndChanged: (value) => setState(() => _endSurah = value),
+              onEndChanged: (surah, ayah) => setState(() {
+                _endSurah = surah;
+                _endAyah = ayah;
+              }),
             )
           else
             _KhatmaPageBoundaryFields(
@@ -207,31 +254,76 @@ class _KhatmaHubEmptyBodyState extends State<_KhatmaHubEmptyBody> {
               onChanged: () => setState(() {}),
             ),
           SizedBox(height: tokens.spaceLarge),
-          Text(
-            context.l10n.khatmaChooseDuration,
-            style: Theme.of(context).textTheme.titleMedium,
-          ),
-          SizedBox(height: tokens.spaceSmall),
-          Wrap(
-            spacing: tokens.spaceSmall,
-            runSpacing: tokens.spaceSmall,
-            children: [
-              for (final days in const [7, 15, 30, 60])
-                TilawaButton(
-                  text: context.l10n.khatmaDurationDays(days),
-                  variant: TilawaButtonVariant.outline,
-                  onPressed: isLoading || !_hasValidBoundaries
-                      ? null
-                      : () => context.read<KhatmaPlanBloc>().add(
-                          KhatmaPlanPreviewRequested(
-                            durationDays: days,
-                            startPage: _startPage!,
-                            targetPage: _targetPage!,
-                          ),
-                        ),
-                ),
+          TilawaSegmentedControl<_KhatmaScheduleMode>(
+            segments: [
+              TilawaSegment(
+                value: _KhatmaScheduleMode.duration,
+                label: context.l10n.khatmaScheduleByDuration,
+              ),
+              TilawaSegment(
+                value: _KhatmaScheduleMode.targetDate,
+                label: context.l10n.khatmaScheduleByTargetDate,
+              ),
             ],
+            selectedValue: _scheduleMode,
+            onValueChanged: (selection) =>
+                setState(() => _scheduleMode = selection),
           ),
+          SizedBox(height: tokens.spaceLarge),
+          if (_scheduleMode == _KhatmaScheduleMode.duration) ...[
+            Text(
+              context.l10n.khatmaChooseDuration,
+              style: Theme.of(context).textTheme.titleMedium,
+            ),
+            SizedBox(height: tokens.spaceSmall),
+            Wrap(
+              spacing: tokens.spaceSmall,
+              runSpacing: tokens.spaceSmall,
+              children: [
+                for (final days in const [7, 15, 30, 60])
+                  TilawaButton(
+                    text: context.l10n.khatmaDurationDays(days),
+                    variant: TilawaButtonVariant.outline,
+                    onPressed: isLoading || !_hasValidBoundaries
+                        ? null
+                        : () => _requestPreview(days),
+                  ),
+              ],
+            ),
+          ] else ...[
+            Text(
+              context.l10n.khatmaChooseTargetDate,
+              style: Theme.of(context).textTheme.titleMedium,
+            ),
+            SizedBox(height: tokens.spaceSmall),
+            TilawaButton(
+              text: MaterialLocalizations.of(context).formatMediumDate(
+                _targetDate,
+              ),
+              variant: TilawaButtonVariant.outline,
+              onPressed: () async {
+                final DateTime? picked = await showDatePicker(
+                  context: context,
+                  initialDate: _targetDate,
+                  firstDate: DateTime.now(),
+                  lastDate: DateTime.now().add(const Duration(days: 365)),
+                );
+                if (picked != null) {
+                  setState(() => _targetDate = picked);
+                }
+              },
+            ),
+            SizedBox(height: tokens.spaceSmall),
+            TilawaButton(
+              text: context.l10n.khatmaPreviewPlanAction,
+              onPressed: isLoading || !_hasValidBoundaries
+                  ? null
+                  : () {
+                      final int? days = _durationDaysForPreview();
+                      if (days != null) _requestPreview(days);
+                    },
+            ),
+          ],
           SizedBox(height: tokens.spaceSmall),
           TilawaButton(
             text: context.l10n.cancel,
@@ -246,18 +338,24 @@ class _KhatmaHubEmptyBodyState extends State<_KhatmaHubEmptyBody> {
 
 enum _KhatmaBoundaryMode { surah, page }
 
+enum _KhatmaScheduleMode { duration, targetDate }
+
 class _KhatmaSurahBoundaryFields extends StatelessWidget {
   const _KhatmaSurahBoundaryFields({
     required this.startSurah,
+    required this.startAyah,
     required this.endSurah,
+    required this.endAyah,
     required this.onStartChanged,
     required this.onEndChanged,
   });
 
   final int startSurah;
+  final int startAyah;
   final int endSurah;
-  final ValueChanged<int> onStartChanged;
-  final ValueChanged<int> onEndChanged;
+  final int endAyah;
+  final void Function(int surah, int ayah) onStartChanged;
+  final void Function(int surah, int ayah) onEndChanged;
 
   @override
   Widget build(BuildContext context) {
@@ -277,10 +375,23 @@ class _KhatmaSurahBoundaryFields extends StatelessWidget {
                 label: '$surah. ${name(surah)}',
               ),
           ],
-          onChanged: onStartChanged,
+          onChanged: (surah) => onStartChanged(surah, 1),
         ),
         TilawaDropdownField<int>(
           key: ValueKey<int>(startSurah),
+          value: startAyah,
+          semanticLabel: context.l10n.khatmaStartAyah,
+          items: [
+            for (int ayah = 1; ayah <= getVerseCount(startSurah); ayah++)
+              TilawaDropdownItem(
+                value: ayah,
+                label: context.l10n.khatmaAyahNumber(ayah),
+              ),
+          ],
+          onChanged: (ayah) => onStartChanged(startSurah, ayah),
+        ),
+        TilawaDropdownField<int>(
+          key: ValueKey<int>(startSurah * 1000 + startAyah),
           value: endSurah,
           semanticLabel: context.l10n.khatmaEndSurah,
           items: [
@@ -290,7 +401,24 @@ class _KhatmaSurahBoundaryFields extends StatelessWidget {
                 label: '$surah. ${name(surah)}',
               ),
           ],
-          onChanged: onEndChanged,
+          onChanged: (surah) => onEndChanged(surah, getVerseCount(surah)),
+        ),
+        TilawaDropdownField<int>(
+          key: ValueKey<int>(endSurah),
+          value: endAyah,
+          semanticLabel: context.l10n.khatmaEndAyah,
+          items: [
+            for (
+              int ayah = endSurah == startSurah ? startAyah : 1;
+              ayah <= getVerseCount(endSurah);
+              ayah++
+            )
+              TilawaDropdownItem(
+                value: ayah,
+                label: context.l10n.khatmaAyahNumber(ayah),
+              ),
+          ],
+          onChanged: (ayah) => onEndChanged(endSurah, ayah),
         ),
       ],
     );
@@ -331,9 +459,13 @@ class _KhatmaPageBoundaryFields extends StatelessWidget {
 }
 
 class _KhatmaCreationReviewBody extends StatelessWidget {
-  const _KhatmaCreationReviewBody({required this.plan});
+  const _KhatmaCreationReviewBody({
+    required this.plan,
+    this.isEditing = false,
+  });
 
   final KhatmaPlan plan;
+  final bool isEditing;
 
   @override
   Widget build(BuildContext context) {
@@ -348,7 +480,9 @@ class _KhatmaCreationReviewBody extends StatelessWidget {
       ),
       children: [
         Text(
-          context.l10n.khatmaReviewPlanTitle,
+          isEditing
+              ? context.l10n.khatmaEditPlanTitle
+              : context.l10n.khatmaReviewPlanTitle,
           style: Theme.of(context).textTheme.headlineSmall,
         ),
         SizedBox(height: tokens.spaceLarge),
@@ -359,14 +493,20 @@ class _KhatmaCreationReviewBody extends StatelessWidget {
             children: [
               Text(
                 context.l10n.khatmaRangePages(
-                  plan.assignmentStartPage,
-                  plan.assignmentEndPage,
+                  isEditing ? plan.startPage : plan.assignmentStartPage,
+                  isEditing ? plan.targetPage : plan.assignmentEndPage,
                 ),
               ),
-              Text(context.l10n.khatmaDailyPages(plan.assignedTodayPages)),
+              if (!isEditing)
+                Text(context.l10n.khatmaDailyPages(plan.assignedTodayPages))
+              else
+                Text(context.l10n.khatmaDailyPages(plan.plannedDailyPages())),
               Text(context.l10n.khatmaTotalPages(plan.totalPages)),
-              Text(context.l10n.khatmaStartPage(plan.startPage)),
-              Text(context.l10n.khatmaTargetPage(plan.targetPage)),
+              if (!isEditing) ...[
+                Text(context.l10n.khatmaStartPage(plan.startPage)),
+                Text(context.l10n.khatmaTargetPage(plan.targetPage)),
+              ] else
+                Text(context.l10n.khatmaDurationDays(plan.durationDays)),
               Text(
                 context.l10n.khatmaExpectedCompletionDate(
                   MaterialLocalizations.of(context).formatMediumDate(
@@ -379,10 +519,23 @@ class _KhatmaCreationReviewBody extends StatelessWidget {
         ),
         SizedBox(height: tokens.spaceLarge),
         TilawaButton(
-          text: context.l10n.khatmaConfirmPlanAction,
-          onPressed: () => context.read<KhatmaPlanBloc>().add(
-            KhatmaPlanCreationConfirmed(plan),
-          ),
+          text: isEditing
+              ? context.l10n.khatmaSavePlanChangesAction
+              : context.l10n.khatmaConfirmPlanAction,
+          onPressed: () {
+            if (isEditing) {
+              context.read<KhatmaPlanBloc>().add(
+                KhatmaPlanEditConfirmed(
+                  plan: plan,
+                  durationDays: plan.durationDays,
+                ),
+              );
+            } else {
+              context.read<KhatmaPlanBloc>().add(
+                KhatmaPlanCreationConfirmed(plan),
+              );
+            }
+          },
         ),
         SizedBox(height: tokens.spaceSmall),
         TilawaButton(
@@ -540,8 +693,15 @@ class _KhatmaHubActiveBody extends StatelessWidget {
                 onTap: () => openKhatmaReaderAndRefresh(context, plan),
               ),
             TilawaNavigationRow(
+              icon: Icons.edit_outlined,
+              title: context.l10n.khatmaEditPlanAction,
+              subtitle: context.l10n.khatmaEditPlanSubtitle,
+              semanticTint: TilawaSemanticTint.scholar,
+              onTap: () => showKhatmaEditPlanSheet(context, plan),
+            ),
+            TilawaNavigationRow(
               icon: Icons.restart_alt_rounded,
-              title: context.l10n.khatmaResetAction,
+              title: context.l10n.khatmaDeletePlanAction,
               subtitle: context.l10n.khatmaHubResetSubtitle,
               semanticTint: TilawaSemanticTint.neutral,
               onTap: () => confirmKhatmaPlanReset(context),

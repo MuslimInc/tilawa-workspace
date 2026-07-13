@@ -1,16 +1,17 @@
 # Amendment: Al-Khatmah release-now MVP
 
-**Status:** normative and implemented; final release verdict depends on tests
-and production App Bundle validation.
+**Status:** normative and implemented; release verdict depends on App Bundle
+build and physical-device smoke (see `tasks.md` T042–T043).
 
 ## Canonical release UX
 
 1. Home/Quran exposes one contextual Al-Khatmah entry.
 2. No Plan shows one **Create Khatmah** action.
 3. Create Plan asks for exactly one boundary mode:
-   - Surah start + Surah end; or
+   - Surah start + Surah end with Ayah selectors; or
    - Page start + Page end.
-4. After valid ordered boundaries, the user chooses 7, 15, 30, or 60 days.
+4. After valid ordered boundaries, the user chooses duration presets (7/15/30/60)
+   **or** a target completion date.
 5. Preview shows start, end, total pages, daily target, and expected completion
    date. Nothing is persisted before Confirm.
 6. Active Hub shows today’s frozen range, assigned/confirmed/remaining pages,
@@ -123,15 +124,16 @@ migration, and architecture refactoring are post-release.
 
 - [x] Replace navigation progress with explicit confirmation.
 - [x] Freeze today’s assignment in the v2 plan.
-- [ ] Add Surah/page boundary-mode selectors and remove fixed-page-604 creation.
-- [ ] Complete preview/confirmation for arbitrary selected boundaries.
+- [x] Add Surah/Ayah and page boundary-mode selectors.
+- [x] Complete preview/confirmation for arbitrary selected boundaries.
+- [x] Add duration presets and target-date scheduling.
 - [x] Add plan-owned reader page and editable confirmation.
 - [x] Add one contextual Home card; remove duplicate entry/action.
 - [x] Hide ineffective catch-up; retain real extension.
+- [x] Add edit plan (duration/schedule) and delete (confirmed reset).
 - [x] Keep Today Plan and Android widget default-off.
 - [x] Scrub page/range/plan identifiers from changed Khatma analytics.
 - [x] Add release-critical domain, persistence, summary, and Home tests.
-- [ ] Complete active facts, in-flow Save Progress, Return to Quran, and error
-  reset actions.
-- [ ] Pass final analyzer, affected regressions, Spec Kit validator, and AAB.
+- [x] Complete active facts, in-flow Save Progress, Return to Quran, and error reset actions.
+- [ ] Pass final production App Bundle build.
 - [ ] Complete physical-device validation before external widget activation.

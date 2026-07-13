@@ -4,10 +4,115 @@ import 'package:tilawa/core/extensions.dart';
 import 'package:tilawa/router/app_router_config.dart';
 import 'package:tilawa_ui_kit/tilawa_ui_kit.dart';
 
+import '../../domain/khatma_plan_boundaries.dart';
 import '../../domain/entities/khatma_plan.dart';
 import '../../smart_khatma_dependencies.dart';
 import '../bloc/khatma_plan_bloc.dart';
 import '../bloc/khatma_plan_event.dart';
+
+Future<void> showKhatmaEditPlanSheet(
+  BuildContext context,
+  KhatmaPlan plan,
+) async {
+  final DateTime initialTarget = plan.expectedCompletionDate;
+  DateTime targetDate = initialTarget;
+  await showTilawaModalBottomSheet<void>(
+    context: context,
+    useSafeArea: true,
+    builder: (sheetContext) {
+      return StatefulBuilder(
+        builder: (context, setState) {
+          final theme = Theme.of(context);
+          final tokens = theme.tokens;
+          final int targetDuration =
+              KhatmaPlanBoundaries.durationDaysFromTargetDate(
+                startDate: plan.startDate,
+                targetDate: targetDate,
+              ).clamp(plan.currentDay(DateTime.now()), 365);
+          return TilawaBottomSheetScaffold(
+            topBar: TilawaBottomSheetTitleRow(
+              title: context.l10n.khatmaEditPlanAction,
+              trailingClose: true,
+            ),
+            footer: TilawaBottomSheetActions(
+              primaryLabel: context.l10n.khatmaPreviewPlanAction,
+              onPrimary: () {
+                Navigator.of(context).pop();
+                context.read<KhatmaPlanBloc>().add(
+                  KhatmaPlanEditPreviewRequested(
+                    plan: plan,
+                    durationDays: targetDuration,
+                  ),
+                );
+              },
+              secondaryLabel: context.l10n.cancel,
+              onSecondary: () => Navigator.of(context).pop(),
+            ),
+            children: [
+              Padding(
+                padding: EdgeInsetsDirectional.symmetric(
+                  horizontal: theme
+                      .componentTokens
+                      .settingsGroup
+                      .groupHorizontalPadding,
+                ),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.stretch,
+                  spacing: tokens.spaceMedium,
+                  children: [
+                    Text(
+                      context.l10n.khatmaEditPlanSubtitle,
+                      style: theme.textTheme.bodyMedium,
+                    ),
+                    Wrap(
+                      spacing: tokens.spaceSmall,
+                      runSpacing: tokens.spaceSmall,
+                      children: [
+                        for (final days in const [7, 15, 30, 60])
+                          TilawaButton(
+                            text: context.l10n.khatmaDurationDays(days),
+                            variant: TilawaButtonVariant.outline,
+                            onPressed: () {
+                              Navigator.of(context).pop();
+                              context.read<KhatmaPlanBloc>().add(
+                                KhatmaPlanEditPreviewRequested(
+                                  plan: plan,
+                                  durationDays: days,
+                                ),
+                              );
+                            },
+                          ),
+                      ],
+                    ),
+                    TilawaButton(
+                      text: MaterialLocalizations.of(context).formatMediumDate(
+                        targetDate,
+                      ),
+                      variant: TilawaButtonVariant.outline,
+                      onPressed: () async {
+                        final DateTime? picked = await showDatePicker(
+                          context: context,
+                          initialDate: targetDate,
+                          firstDate: DateTime.now(),
+                          lastDate: DateTime.now().add(
+                            const Duration(days: 365),
+                          ),
+                        );
+                        if (picked != null) {
+                          setState(() => targetDate = picked);
+                        }
+                      },
+                    ),
+                  ],
+                ),
+              ),
+            ],
+          );
+        },
+      );
+    },
+  );
+}
 
 Future<void> confirmKhatmaPlanReset(BuildContext context) async {
   final confirmed = await showTilawaConfirmDialog(

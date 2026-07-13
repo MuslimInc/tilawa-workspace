@@ -44,6 +44,35 @@ void main() {
       expect(result.isLeft(), isTrue);
     });
 
+    test('previews surah-derived page boundaries', () async {
+      final int startPage = KhatmaPlanBoundaries.pageForSurahAyah(2, 142)!;
+      final int targetPage = KhatmaPlanBoundaries.pageForSurahAyah(6, 94)!;
+
+      final plan = (await _useCase(_Repository()).preview(
+        durationDays: 5,
+        startPage: startPage,
+        targetPage: targetPage,
+        now: DateTime(2026, 7, 12),
+      )).getOrElse(() => throw StateError('expected preview'));
+
+      expect(plan.startPage, startPage);
+      expect(plan.targetPage, targetPage);
+      expect(plan.totalPages, targetPage - startPage + 1);
+    });
+
+    test('allocates first-day pages from selected range only', () async {
+      final plan = (await _useCase(_Repository()).preview(
+        durationDays: 5,
+        startPage: 22,
+        targetPage: 139,
+        now: DateTime(2026, 7, 12),
+      )).getOrElse(() => throw StateError('expected preview'));
+
+      expect(plan.assignmentStartPage, 22);
+      expect(plan.assignedTodayPages, 24);
+      expect(plan.assignmentEndPage, 45);
+    });
+
     test('one-page range saves only after confirmation', () async {
       final repository = _Repository();
       final useCase = _useCase(repository);

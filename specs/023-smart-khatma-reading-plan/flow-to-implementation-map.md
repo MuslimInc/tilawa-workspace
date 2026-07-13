@@ -8,9 +8,11 @@
 | Home entry | `SmartKhatmaHomeEntryCard` | `SmartKhatmaHubRoute` (`/smart-khatma`) | `KhatmaPlanBloc`, `GetActiveKhatmaPlanUseCase` | v2 active plan | Implemented in worktree; duplicate More entry and hub FAB removed |
 | No plan | `_KhatmaHubEmptyBody`, `KhatmaPlanLoaded(plan: null)` | Hub | Bloc load | none | Implemented: one Create CTA |
 | Choose boundary mode | Create Plan | Hub | local creation draft + preview event | none | Implemented |
-| Select Surah start/end | Create Plan, Surah mode | Hub | existing Quran metadata resolves inclusive pages | none | Implemented |
+| Select Surah start/end | Create Plan, Surah mode | Hub | Ayah selectors + `KhatmaPlanBoundaries` | none | Implemented |
 | Select page start/end | Create Plan, Page mode | Hub | bounded ordered page validation | none | Implemented |
-| Choose duration | `_KhatmaHubEmptyBody` | Hub | `KhatmaPlanPreviewRequested` | none | Implemented presets; must move after valid boundaries |
+| Choose duration / target date | `_KhatmaHubEmptyBody` | Hub | `KhatmaPlanPreviewRequested` | none | Implemented: presets + target date |
+| Edit plan | Active hub sheet | Hub | `KhatmaPlanEditPreviewRequested` / `UpdateKhatmaPlanUseCase` | v2 plan | Implemented |
+| Delete plan | confirmed reset row | Hub | `ResetKhatmaPlanUseCase` | clears v2 | Implemented |
 | Preview | `_KhatmaCreationReviewBody`, `KhatmaPlanCreationReview` | Hub | `CreateKhatmaPlanUseCase.preview` | none | Implemented for selected boundaries |
 | Confirm/cancel | Creation review | Hub | `KhatmaPlanCreationConfirmed`; `CreateKhatmaPlanUseCase.confirm` | `smart_khatma.active_plan.v2` | Implemented |
 | Active/no progress | `_KhatmaHubActiveBody`, `KhatmaPlanLoaded` | Hub | `GetKhatmaTodayTargetUseCase` | frozen assignment in v2 plan | Implemented with required facts |
@@ -29,9 +31,9 @@
 
 ## Remaining validation gaps
 
-1. Complete the full Arabic/English seven-state widget matrix.
-2. Complete route/lifecycle integration coverage for the reader Save action.
-3. Run final analyzer, regressions, and production App Bundle build.
+1. Production App Bundle build on release lane.
+2. Physical-device smoke for reader Save Progress return path.
+3. Optional: automated route/integration test for `KhatmaReaderRoute`.
 
 These are release gaps. They do not justify range ledgers, event histories,
 another reader, another progress store, or Android work.

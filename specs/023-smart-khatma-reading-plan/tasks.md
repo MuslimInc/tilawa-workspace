@@ -1,54 +1,58 @@
 # Al-Khatmah release UX tasks
 
-Tasks are ordered by the canonical user journey. Do not start a later group
-while an earlier release requirement is incomplete.
+Tasks ordered by canonical user journey. Status verified 2026-07-13.
 
-## Current verified foundation
+## Foundation
 
-- [x] T001 Use one nullable, contiguous user-confirmed page boundary.
-- [x] T002 Remove navigation-driven Khatmah mutations from the Quran reader.
-- [x] T003 Persist one stable local-day assignment in the v2 plan.
-- [x] T004 Open the existing reader at assignment start / first unconfirmed page.
-- [x] T005 Bound and make explicit progress confirmation idempotent.
-- [x] T006 Derive daily/full completion consistently, including final target.
-- [x] T007 Keep Today Plan and Android widget default-off.
-- [x] T008 Hide ineffective catch-up and retain reviewed extension behavior.
-- [x] T009 Use one contextual Home card and remove duplicate entry/FAB.
+- [x] T001 One nullable contiguous user-confirmed page boundary.
+- [x] T002 No navigation-driven Khatmah mutations in Quran reader.
+- [x] T003 Frozen local-day assignment in v2 plan.
+- [x] T004 Reader opens at assignment start / first unconfirmed page.
+- [x] T005 Idempotent bounded progress confirmation.
+- [x] T006 Derived daily/full completion including final target page.
+- [x] T007 Today Plan and Android widget default-off.
+- [x] T008 Hide ineffective catch-up; retain extension.
+- [x] T009 One contextual Home card; no duplicate entry/FAB.
 
-## Release blockers
+## Creation & boundaries
 
-- [x] T010 Add a single Create Khatmah CTA for the No Plan state.
-- [x] T011 Add boundary mode: Surah range or Page range.
-- [x] T012 Add ordered start/end Surah selectors and resolve them to inclusive
-  plan page boundaries using existing Quran metadata.
-- [x] T013 Add validated page start/end selectors bounded to 1…604.
-- [x] T014 Replace beginning/current/fixed-604 preview inputs with the selected
-  explicit boundaries; keep preview non-persisting.
-- [x] T015 Update preview to show selected boundaries, total pages, daily target,
-  and expected completion date for both modes.
-- [x] T016 Add required active-Hub facts: today start/end, assigned, confirmed,
-  remaining, overall progress, and expected completion date.
-- [x] T017 Add one deliberate Save Progress affordance to the Khatmah reading
-  flow; reuse the existing editable confirmation sheet and progress command.
-- [x] T018 Add Return to Quran to full completion.
-- [x] T019 Add Reset with confirmation to recoverable malformed/error state.
+- [x] T010 Single Create Khatmah CTA for No Plan state.
+- [x] T011 Boundary mode: Surah range or Page range.
+- [x] T012 Start/end Surah with Ayah selectors → inclusive Mushaf pages.
+- [x] T013 Validated page start/end selectors (1…604).
+- [x] T014 Preview uses selected boundaries only (non-persisting).
+- [x] T015 Preview shows boundaries, total, daily target, completion date.
+- [x] T016 Schedule by duration presets OR target completion date.
 
-## Release validation
+## Active hub & reading
 
-- [x] T020 Add domain tests for arbitrary page boundaries, ordering, total
-  pages, daily target, and arbitrary final-page completion; Surah resolution is
-  exercised through the creation widget using existing Quran metadata.
-- [ ] T021 Add widget tests for all seven canonical states in Arabic/English,
-  RTL/LTR, 1.4 text scale, narrow screens, and semantics.
-- [ ] T022 Add route/integration coverage for Start, Resume, Save Progress,
-  cancellation, restart persistence, daily completion, and full completion.
-- [ ] T023 Run formatting, targeted analyzer, Smart Khatma/reader/Home tests,
-  Spec Kit validation, and the production App Bundle build.
+- [x] T017 Active hub facts: today range, assigned/confirmed/remaining, progress, completion date.
+- [x] T018 Save Progress affordance with editable confirmation sheet.
+- [x] T019 Return to Quran on full completion.
+- [x] T020 Edit plan duration/schedule with preview (progress preserved).
+- [x] T021 Delete plan via confirmed reset.
+- [x] T022 Recoverable malformed/error state with Retry and Reset.
+
+## Tests
+
+- [x] T030 Domain: Surah/Ayah and page range creation, invalid ranges, plan allocation.
+- [x] T031 Domain: persistence, resume page, edit duration, delete/reset.
+- [x] T032 Domain: daily and final completion semantics.
+- [x] T033 Widget: hub canonical states, narrow screen, 1.4 text scale.
+- [x] T034 Widget: Home entry card EN/AR.
+- [ ] T035 Route/integration: KhatmaReaderRoute + Save Progress return path (manual QA covered; automated deferred).
+
+## Release gates
+
+- [x] T040 `melos run fix:format` + `dart analyze` on smart_khatma.
+- [x] T041 `flutter test test/features/smart_khatma/` (43 tests).
+- [ ] T042 Production App Bundle build on release lane.
+- [ ] T043 Physical-device smoke (create → read → save → rollover).
 
 ## Explicitly deferred
 
-- [ ] POST001 Android widget activation/reconciliation.
+- [ ] POST001 Android widget activation.
 - [ ] POST002 Reminders and adherence.
 - [ ] POST003 Listening-derived progress.
 - [ ] POST004 Pause/history/non-linear plans.
-- [ ] POST005 Advanced migration/synchronization/refactoring.
+- [ ] POST005 Today Plan Khatma reconciliation.

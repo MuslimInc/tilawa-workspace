@@ -8,6 +8,7 @@ import '../../domain/usecases/extend_khatma_plan_use_case.dart';
 import '../../domain/usecases/get_active_khatma_plan_use_case.dart';
 import '../../domain/usecases/get_khatma_today_target_use_case.dart';
 import '../../domain/usecases/reset_khatma_plan_use_case.dart';
+import '../../domain/usecases/update_khatma_plan_use_case.dart';
 import '../../domain/usecases/update_khatma_progress_use_case.dart';
 import 'khatma_plan_event.dart';
 import 'khatma_plan_state.dart';
@@ -17,6 +18,7 @@ final class KhatmaPlanBloc extends Bloc<KhatmaPlanEvent, KhatmaPlanState> {
     this._getActivePlan,
     this._getTodayTarget,
     this._createPlan,
+    this._updatePlan,
     this._confirmProgress,
     this._extendPlan,
     this._resetPlan,
@@ -25,6 +27,8 @@ final class KhatmaPlanBloc extends Bloc<KhatmaPlanEvent, KhatmaPlanState> {
     on<KhatmaPlanStarted>(_onStarted);
     on<KhatmaPlanPreviewRequested>(_onPreviewRequested);
     on<KhatmaPlanCreationConfirmed>(_onCreationConfirmed);
+    on<KhatmaPlanEditPreviewRequested>(_onEditPreviewRequested);
+    on<KhatmaPlanEditConfirmed>(_onEditConfirmed);
     on<KhatmaProgressConfirmed>(_onProgressConfirmed);
     on<KhatmaPlanExtendSelected>(_onExtendSelected);
     on<KhatmaPlanResetRequested>(_onResetRequested);
@@ -33,6 +37,7 @@ final class KhatmaPlanBloc extends Bloc<KhatmaPlanEvent, KhatmaPlanState> {
   final GetActiveKhatmaPlanUseCase _getActivePlan;
   final GetKhatmaTodayTargetUseCase _getTodayTarget;
   final CreateKhatmaPlanUseCase _createPlan;
+  final UpdateKhatmaPlanUseCase _updatePlan;
   final UpdateKhatmaProgressUseCase _confirmProgress;
   final ExtendKhatmaPlanUseCase _extendPlan;
   final ResetKhatmaPlanUseCase _resetPlan;
@@ -66,6 +71,36 @@ final class KhatmaPlanBloc extends Bloc<KhatmaPlanEvent, KhatmaPlanState> {
   ) async {
     emit(const KhatmaPlanLoading());
     await _completeMutation<KhatmaPlan>(_createPlan.confirm(event.plan), emit);
+  }
+
+  Future<void> _onEditPreviewRequested(
+    KhatmaPlanEditPreviewRequested event,
+    Emitter<KhatmaPlanState> emit,
+  ) async {
+    emit(const KhatmaPlanLoading());
+    final result = await _updatePlan.previewDurationChange(
+      plan: event.plan,
+      durationDays: event.durationDays,
+    );
+    result.fold(
+      (failure) =>
+          emit(KhatmaPlanFailure(failure.message ?? 'Khatma unavailable')),
+      (plan) => emit(KhatmaPlanCreationReview(plan, isEditing: true)),
+    );
+  }
+
+  Future<void> _onEditConfirmed(
+    KhatmaPlanEditConfirmed event,
+    Emitter<KhatmaPlanState> emit,
+  ) async {
+    emit(const KhatmaPlanLoading());
+    await _completeMutation<KhatmaPlan?>(
+      _updatePlan.confirmDurationChange(
+        plan: event.plan,
+        durationDays: event.durationDays,
+      ),
+      emit,
+    );
   }
 
   Future<void> _onProgressConfirmed(

@@ -1,5 +1,6 @@
 export 'data/datasources/khatma_plan_local_datasource.dart';
 export 'data/repositories/khatma_plan_repository_impl.dart';
+export 'domain/khatma_plan_boundaries.dart';
 export 'domain/entities/khatma_plan.dart';
 export 'domain/entities/wird_progress_summary.dart';
 export 'domain/repositories/khatma_plan_repository.dart';
@@ -9,6 +10,7 @@ export 'domain/usecases/get_active_khatma_plan_use_case.dart';
 export 'domain/usecases/get_khatma_today_target_use_case.dart';
 export 'domain/usecases/get_wird_progress_summary_use_case.dart';
 export 'domain/usecases/reset_khatma_plan_use_case.dart';
+export 'domain/usecases/update_khatma_plan_use_case.dart';
 export 'domain/usecases/update_khatma_progress_use_case.dart';
 export 'presentation/bloc/khatma_plan_bloc.dart';
 export 'presentation/bloc/khatma_plan_event.dart';

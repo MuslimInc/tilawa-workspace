@@ -18,12 +18,13 @@ final class KhatmaPlanLoading extends KhatmaPlanState {
 }
 
 final class KhatmaPlanCreationReview extends KhatmaPlanState {
-  const KhatmaPlanCreationReview(this.plan);
+  const KhatmaPlanCreationReview(this.plan, {this.isEditing = false});
 
   final KhatmaPlan plan;
+  final bool isEditing;
 
   @override
-  List<Object?> get props => [plan];
+  List<Object?> get props => [plan, isEditing];
 }
 
 final class KhatmaPlanLoaded extends KhatmaPlanState {

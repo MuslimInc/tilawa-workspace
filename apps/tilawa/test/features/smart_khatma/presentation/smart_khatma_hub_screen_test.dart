@@ -133,6 +133,7 @@ KhatmaPlanBloc _bloc(KhatmaPlanRepository repository) {
     GetActiveKhatmaPlanUseCase(repository),
     GetKhatmaTodayTargetUseCase(repository),
     CreateKhatmaPlanUseCase(repository, analytics),
+    UpdateKhatmaPlanUseCase(repository, analytics),
     UpdateKhatmaProgressUseCase(repository, analytics),
     ExtendKhatmaPlanUseCase(repository, analytics),
     ResetKhatmaPlanUseCase(repository, analytics),
