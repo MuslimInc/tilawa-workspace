@@ -34,7 +34,7 @@ class TilawaDropdownItem<T> {
 ///
 /// Everything visual is sourced from [MeMuslimDesignTokens] and the ambient
 /// [ThemeData]; nothing is hardcoded.
-class TilawaDropdownField<T> extends StatelessWidget {
+class TilawaDropdownField<T> extends StatefulWidget {
   const TilawaDropdownField({
     super.key,
     required this.items,
@@ -82,7 +82,25 @@ class TilawaDropdownField<T> extends StatelessWidget {
   final bool shrinkWrapWidth;
 
   @override
+  State<TilawaDropdownField<T>> createState() => _TilawaDropdownFieldState<T>();
+}
+
+class _TilawaDropdownFieldState<T> extends State<TilawaDropdownField<T>> {
+  final GlobalKey _anchorKey = GlobalKey();
+
+  @override
   Widget build(BuildContext context) {
+    final items = widget.items;
+    final value = widget.value;
+    final onChanged = widget.onChanged;
+    final hintText = widget.hintText;
+    final labelText = widget.labelText;
+    final errorText = widget.errorText;
+    final prefixIcon = widget.prefixIcon;
+    final enabled = widget.enabled;
+    final semanticLabel = widget.semanticLabel;
+    final shrinkWrapWidth = widget.shrinkWrapWidth;
+
     final theme = Theme.of(context);
     final tokens = theme.tokens;
     final colorScheme = theme.colorScheme;
@@ -103,7 +121,7 @@ class TilawaDropdownField<T> extends StatelessWidget {
       final item = items.first;
       if (value != item.value && onChanged != null && enabled) {
         WidgetsBinding.instance.addPostFrameCallback((_) {
-          onChanged!(item.value);
+          onChanged(item.value);
         });
       }
 
@@ -166,11 +184,16 @@ class TilawaDropdownField<T> extends StatelessWidget {
               : (constraints.maxWidth.isFinite ? constraints.maxWidth : null);
 
           final double radius = inputStyle.borderRadius();
+          final double safeAreaBottom = MediaQueryData.fromView(
+            View.of(context),
+          ).padding.bottom;
 
           final MenuStyle menuStyle = MenuStyle(
             alignment: AlignmentDirectional.bottomStart,
             elevation: const WidgetStatePropertyAll(0),
-            backgroundColor: WidgetStatePropertyAll(colorScheme.surface),
+            backgroundColor: WidgetStatePropertyAll(
+              inputStyle.colorScheme.surface,
+            ),
             surfaceTintColor: const WidgetStatePropertyAll(Colors.transparent),
             shadowColor: WidgetStatePropertyAll(
               colorScheme.shadow.withValues(alpha: 0.08),
@@ -179,11 +202,19 @@ class TilawaDropdownField<T> extends StatelessWidget {
               BorderSide(color: colorScheme.outlineVariant),
             ),
             shape: WidgetStatePropertyAll(
-              RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(radius),
+              _SafeAreaMarginBorder(
+                bottomInset: safeAreaBottom,
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(radius),
+                ),
               ),
             ),
-            padding: const WidgetStatePropertyAll(EdgeInsets.zero),
+            padding: WidgetStatePropertyAll(
+              EdgeInsets.only(
+                top: tokens.spaceSmall,
+                bottom: tokens.spaceSmall,
+              ),
+            ),
             minimumSize: menuWidth == null
                 ? null
                 : WidgetStatePropertyAll(Size(menuWidth, 0)),
@@ -212,7 +243,7 @@ class TilawaDropdownField<T> extends StatelessWidget {
               for (final item in items)
                 MenuItemButton(
                   style: menuItemStyle,
-                  onPressed: isEnabled ? () => onChanged!(item.value) : null,
+                  onPressed: isEnabled ? () => onChanged(item.value) : null,
                   leadingIcon: item.icon == null
                       ? null
                       : Icon(item.icon, size: tokens.iconSizeMedium),
@@ -221,6 +252,7 @@ class TilawaDropdownField<T> extends StatelessWidget {
                     overflow: TextOverflow.ellipsis,
                   ),
                 ),
+              if (safeAreaBottom > 0) SizedBox(height: safeAreaBottom),
             ],
             builder:
                 (
@@ -245,10 +277,10 @@ class TilawaDropdownField<T> extends StatelessWidget {
                     enabled: isEnabled,
                     expanded: controller.isOpen,
                     child: TilawaInteractiveSurface(
+                      key: _anchorKey,
                       onTap: isEnabled ? toggleMenu : null,
                       enabled: isEnabled,
                       button: false,
-                      // Form fields use stable state-layer press (default).
                       borderRadius: BorderRadius.circular(radius),
                       child: shrinkWrapWidth
                           ? ShrinkWrapInputShell(
@@ -421,7 +453,12 @@ class _FieldContent extends StatelessWidget {
           Icon(prefixIcon, size: tokens.iconSizeLarge, color: iconColor),
           SizedBox(width: tokens.spaceSmall),
         ],
-        if (shrinkWrapWidth) labelWidget else Flexible(child: labelWidget),
+        if (shrinkWrapWidth)
+          labelWidget
+        else
+          Expanded(
+            child: labelWidget,
+          ),
         SizedBox(width: tokens.spaceTiny),
         Icon(
           Icons.keyboard_arrow_down_rounded,
@@ -429,6 +466,60 @@ class _FieldContent extends StatelessWidget {
           color: iconColor,
         ),
       ],
+    );
+  }
+}
+
+class _SafeAreaMarginBorder extends OutlinedBorder {
+  const _SafeAreaMarginBorder({
+    required this.bottomInset,
+    required this.shape,
+  });
+
+  final double bottomInset;
+  final OutlinedBorder shape;
+
+  @override
+  EdgeInsetsGeometry get dimensions => EdgeInsets.zero;
+
+  @override
+  OutlinedBorder copyWith({BorderSide? side}) {
+    return _SafeAreaMarginBorder(
+      bottomInset: bottomInset,
+      shape: shape.copyWith(side: side),
+    );
+  }
+
+  @override
+  OutlinedBorder scale(double t) {
+    return _SafeAreaMarginBorder(
+      bottomInset: bottomInset * t,
+      shape: shape.scale(t) as OutlinedBorder,
+    );
+  }
+
+  @override
+  Path getInnerPath(Rect rect, {TextDirection? textDirection}) {
+    return shape.getInnerPath(
+      Rect.fromLTRB(rect.left, rect.top, rect.right, rect.bottom - bottomInset),
+      textDirection: textDirection,
+    );
+  }
+
+  @override
+  Path getOuterPath(Rect rect, {TextDirection? textDirection}) {
+    return shape.getOuterPath(
+      Rect.fromLTRB(rect.left, rect.top, rect.right, rect.bottom - bottomInset),
+      textDirection: textDirection,
+    );
+  }
+
+  @override
+  void paint(Canvas canvas, Rect rect, {TextDirection? textDirection}) {
+    shape.paint(
+      canvas,
+      Rect.fromLTRB(rect.left, rect.top, rect.right, rect.bottom - bottomInset),
+      textDirection: textDirection,
     );
   }
 }

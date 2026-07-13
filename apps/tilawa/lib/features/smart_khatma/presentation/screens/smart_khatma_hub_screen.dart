@@ -52,9 +52,15 @@ class _KhatmaHubCompletedBody extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final tokens = context.tokens;
+    final theme = Theme.of(context);
+    final tokens = theme.tokens;
     return ListView(
-      padding: EdgeInsets.all(tokens.spaceLarge),
+      padding: EdgeInsetsDirectional.fromSTEB(
+        theme.componentTokens.settingsGroup.groupHorizontalPadding,
+        tokens.spaceLarge,
+        theme.componentTokens.settingsGroup.groupHorizontalPadding,
+        tokens.spaceLarge,
+      ),
       children: [
         TilawaHeroSummaryCard(
           label: context.l10n.khatmaCompletedTitle,
@@ -136,16 +142,17 @@ class _KhatmaHubEmptyBodyState extends State<_KhatmaHubEmptyBody> {
 
   @override
   Widget build(BuildContext context) {
-    final tokens = context.tokens;
+    final theme = Theme.of(context);
+    final tokens = theme.tokens;
     final bool isLoading = context.select<KhatmaPlanBloc, bool>(
       (bloc) => bloc.state is KhatmaPlanLoading,
     );
 
     return ListView(
-      padding: EdgeInsets.fromLTRB(
-        tokens.spaceMedium,
+      padding: EdgeInsetsDirectional.fromSTEB(
+        theme.componentTokens.settingsGroup.groupHorizontalPadding,
         tokens.spaceSection,
-        tokens.spaceMedium,
+        theme.componentTokens.settingsGroup.groupHorizontalPadding,
         tokens.spaceHuge,
       ),
       children: [
@@ -168,20 +175,19 @@ class _KhatmaHubEmptyBodyState extends State<_KhatmaHubEmptyBody> {
             onPressed: () => setState(() => _showCreation = true),
           )
         else ...[
-          SegmentedButton<_KhatmaBoundaryMode>(
+          TilawaSegmentedControl<_KhatmaBoundaryMode>(
             segments: [
-              ButtonSegment(
+              TilawaSegment(
                 value: _KhatmaBoundaryMode.surah,
-                label: Text(context.l10n.khatmaBoundaryBySurah),
+                label: context.l10n.khatmaBoundaryBySurah,
               ),
-              ButtonSegment(
+              TilawaSegment(
                 value: _KhatmaBoundaryMode.page,
-                label: Text(context.l10n.khatmaBoundaryByPage),
+                label: context.l10n.khatmaBoundaryByPage,
               ),
             ],
-            selected: {_mode},
-            onSelectionChanged: (selection) =>
-                setState(() => _mode = selection.single),
+            selectedValue: _mode,
+            onValueChanged: (selection) => setState(() => _mode = selection),
           ),
           SizedBox(height: tokens.spaceLarge),
           if (_mode == _KhatmaBoundaryMode.surah)
@@ -261,36 +267,30 @@ class _KhatmaSurahBoundaryFields extends StatelessWidget {
     return Column(
       spacing: context.tokens.spaceMedium,
       children: [
-        DropdownButtonFormField<int>(
-          initialValue: startSurah,
-          isExpanded: true,
-          decoration: InputDecoration(labelText: context.l10n.khatmaStartSurah),
+        TilawaDropdownField<int>(
+          value: startSurah,
+          semanticLabel: context.l10n.khatmaStartSurah,
           items: [
             for (int surah = 1; surah <= 114; surah++)
-              DropdownMenuItem(
+              TilawaDropdownItem(
                 value: surah,
-                child: Text('$surah. ${name(surah)}'),
+                label: '$surah. ${name(surah)}',
               ),
           ],
-          onChanged: (value) {
-            if (value != null) onStartChanged(value);
-          },
+          onChanged: onStartChanged,
         ),
-        DropdownButtonFormField<int>(
+        TilawaDropdownField<int>(
           key: ValueKey<int>(startSurah),
-          initialValue: endSurah,
-          isExpanded: true,
-          decoration: InputDecoration(labelText: context.l10n.khatmaEndSurah),
+          value: endSurah,
+          semanticLabel: context.l10n.khatmaEndSurah,
           items: [
             for (int surah = startSurah; surah <= 114; surah++)
-              DropdownMenuItem(
+              TilawaDropdownItem(
                 value: surah,
-                child: Text('$surah. ${name(surah)}'),
+                label: '$surah. ${name(surah)}',
               ),
           ],
-          onChanged: (value) {
-            if (value != null) onEndChanged(value);
-          },
+          onChanged: onEndChanged,
         ),
       ],
     );
@@ -337,9 +337,15 @@ class _KhatmaCreationReviewBody extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final tokens = context.tokens;
+    final theme = Theme.of(context);
+    final tokens = theme.tokens;
     return ListView(
-      padding: EdgeInsets.all(tokens.spaceLarge),
+      padding: EdgeInsetsDirectional.fromSTEB(
+        theme.componentTokens.settingsGroup.groupHorizontalPadding,
+        tokens.spaceLarge,
+        theme.componentTokens.settingsGroup.groupHorizontalPadding,
+        tokens.spaceLarge,
+      ),
       children: [
         Text(
           context.l10n.khatmaReviewPlanTitle,
@@ -440,9 +446,9 @@ class _KhatmaHubActiveBody extends StatelessWidget {
               tint: TilawaSemanticTint.scholar,
             ),
           ],
-          footer: _KhatmaHubProgressBar(
-            value: plan.progress,
-            percent: progressPercent,
+          footer: TilawaHeroSummaryProgress(
+            progress: plan.progress,
+            valueLabel: '$progressPercent%',
           ),
         ),
         SizedBox(height: tokens.spaceLarge),
@@ -548,51 +554,6 @@ class _KhatmaHubActiveBody extends StatelessWidget {
   }
 }
 
-class _KhatmaHubProgressBar extends StatelessWidget {
-  const _KhatmaHubProgressBar({
-    required this.value,
-    required this.percent,
-  });
-
-  final double value;
-  final int percent;
-
-  @override
-  Widget build(BuildContext context) {
-    final theme = Theme.of(context);
-    final tokens = theme.tokens;
-
-    return Row(
-      children: [
-        Expanded(
-          child: ClipRRect(
-            borderRadius: BorderRadius.circular(
-              tokens.resolveRadius(
-                family: TilawaRadiusFamily.decorative,
-                height: 6,
-              ),
-            ),
-            child: LinearProgressIndicator(
-              value: value,
-              minHeight: 6,
-              backgroundColor: theme.colorScheme.surfaceContainerHighest,
-              color: theme.colorScheme.primary,
-            ),
-          ),
-        ),
-        SizedBox(width: tokens.spaceSmall),
-        Text(
-          '$percent%',
-          style: theme.textTheme.labelMedium?.copyWith(
-            color: theme.colorScheme.onSurfaceVariant,
-            fontWeight: FontWeight.w700,
-          ),
-        ),
-      ],
-    );
-  }
-}
-
 class _KhatmaHubRecoveryPanel extends StatelessWidget {
   const _KhatmaHubRecoveryPanel({
     required this.onExtend,
@@ -639,8 +600,14 @@ class _KhatmaHubErrorBody extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
     return Padding(
-      padding: EdgeInsets.all(context.tokens.spaceLarge),
+      padding: EdgeInsetsDirectional.fromSTEB(
+        theme.componentTokens.settingsGroup.groupHorizontalPadding,
+        context.tokens.spaceLarge,
+        theme.componentTokens.settingsGroup.groupHorizontalPadding,
+        context.tokens.spaceLarge,
+      ),
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
         spacing: context.tokens.spaceMedium,

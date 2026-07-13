@@ -117,49 +117,63 @@ class _KhatmaProgressConfirmationSheetState
 
   @override
   Widget build(BuildContext context) {
-    final tokens = context.tokens;
+    final theme = Theme.of(context);
+    final tokens = theme.tokens;
+    final colorScheme = theme.colorScheme;
     final bool completesToday = _page == widget.maximumPage;
-    return Padding(
-      padding: EdgeInsets.all(tokens.spaceLarge),
-      child: Column(
-        mainAxisSize: MainAxisSize.min,
-        crossAxisAlignment: CrossAxisAlignment.stretch,
-        spacing: tokens.spaceMedium,
-        children: [
-          Text(
-            context.l10n.khatmaSaveProgressTitle,
-            style: Theme.of(context).textTheme.titleLarge,
-          ),
-          Text(
-            context.l10n.khatmaCompletedThroughPage(_page),
-            style: Theme.of(context).textTheme.bodyLarge,
-            textAlign: TextAlign.center,
-          ),
-          if (widget.minimumPage < widget.maximumPage)
-            Semantics(
-              label: context.l10n.khatmaProgressPageSelector,
-              child: Slider(
-                value: _page.toDouble(),
-                min: widget.minimumPage.toDouble(),
-                max: widget.maximumPage.toDouble(),
-                divisions: widget.maximumPage - widget.minimumPage,
-                label: '$_page',
-                onChanged: (value) => setState(() => _page = value.round()),
-              ),
-            ),
-          TilawaButton(
-            text: completesToday
-                ? context.l10n.khatmaCompleteTodayAction
-                : context.l10n.khatmaSaveThroughPageAction(_page),
-            onPressed: () => Navigator.of(context).pop(_page),
-          ),
-          TilawaButton(
-            text: context.l10n.cancel,
-            variant: TilawaButtonVariant.outline,
-            onPressed: () => Navigator.of(context).pop(),
-          ),
-        ],
+    return TilawaBottomSheetScaffold(
+      topBar: TilawaBottomSheetTitleRow(
+        title: context.l10n.khatmaSaveProgressTitle,
+        trailingClose: true,
       ),
+      footer: TilawaBottomSheetActions(
+        primaryLabel: completesToday
+            ? context.l10n.khatmaCompleteTodayAction
+            : context.l10n.khatmaSaveThroughPageAction(_page),
+        onPrimary: () => Navigator.of(context).pop(_page),
+        secondaryLabel: context.l10n.cancel,
+        onSecondary: () => Navigator.of(context).pop(),
+      ),
+      children: [
+        Padding(
+          padding: EdgeInsetsDirectional.symmetric(
+            horizontal:
+                theme.componentTokens.settingsGroup.groupHorizontalPadding,
+          ),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            spacing: tokens.spaceMedium,
+            children: [
+              Text(
+                context.l10n.khatmaCompletedThroughPage(_page),
+                style: theme.textTheme.bodyLarge,
+                textAlign: TextAlign.center,
+              ),
+              if (widget.minimumPage < widget.maximumPage)
+                Semantics(
+                  label: context.l10n.khatmaProgressPageSelector,
+                  child: SliderTheme(
+                    data: SliderTheme.of(context).copyWith(
+                      trackHeight: 4,
+                      activeTrackColor: colorScheme.primary,
+                      inactiveTrackColor: colorScheme.surfaceContainerHighest,
+                      thumbColor: colorScheme.primary,
+                    ),
+                    child: Slider(
+                      value: _page.toDouble(),
+                      min: widget.minimumPage.toDouble(),
+                      max: widget.maximumPage.toDouble(),
+                      divisions: widget.maximumPage - widget.minimumPage,
+                      label: '$_page',
+                      onChanged: (value) =>
+                          setState(() => _page = value.round()),
+                    ),
+                  ),
+                ),
+            ],
+          ),
+        ),
+      ],
     );
   }
 }

@@ -480,12 +480,11 @@ abstract final class AppColors {
   // AppTheme — light ColorScheme roles (brand-locked M3 palette).
   // ---------------------------------------------------------------------------
 
-  /// Light [ColorScheme.onPrimary] on brand green — deep green ink (`#003317`).
+  /// Light [ColorScheme.onPrimary] on brand green — white.
   ///
-  /// Brand green `#1DAB61` is too light for white foregrounds (~3.0:1), so
-  /// on-primary labels/icons use dark green ink instead (≥4.5:1 AA on
-  /// [brandActionGreen], higher on [darkDefaultPrimary]).
-  static const Color lightSchemeOnPrimary = Color(0xFF003317);
+  /// Note: Brand green `#1DAB61` has ~3.0:1 contrast with white foregrounds.
+  /// Reverted to white per user request.
+  static const Color lightSchemeOnPrimary = Color(0xFFFFFFFF);
 
   /// Light [ColorScheme.secondary] — neutral chrome (`#F0F7F2`).
   static const Color lightSchemeSecondary = lightSurfaceContainerHighBase;
