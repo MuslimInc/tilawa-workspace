@@ -9,11 +9,10 @@ import 'home_dashboard_card.dart';
 import 'home_dashboard_section.dart';
 import 'home_grouped_list_row.dart';
 
-/// Flat grouped list of secondary non-nav destinations — More zone.
+/// Grouped list of secondary non-nav destinations — More zone.
 ///
 /// Holds the less-frequent library/account destinations (History, Favorites,
-/// Downloads, Support). One flat card with hairline dividers —
-/// calm density, one surface.
+/// Downloads, Support). One raised card with hairline dividers.
 class HomeMoreActionsGroup extends StatelessWidget {
   const HomeMoreActionsGroup({super.key});
 
@@ -31,7 +30,7 @@ class HomeMoreActionsGroup extends StatelessWidget {
       subtitle: l10n.homeMoreOptionsSubtitle,
       compact: true,
       child: HomeDashboardCard(
-        surface: TilawaCardSurface.flat,
+        surface: TilawaCardSurface.raised,
         padding: EdgeInsets.zero,
         child: Column(
           mainAxisSize: MainAxisSize.min,

@@ -72,42 +72,37 @@ class _QuickToolTile extends StatelessWidget {
 
     final BorderRadius borderRadius = BorderRadius.circular(radius);
 
-    return TilawaInteractiveSurface(
-      onTap: onTap,
+    return HomeDashboardElevatedSurface.interactive(
+      context: context,
       borderRadius: borderRadius,
+      onTap: onTap,
       semanticLabel: label,
       stateLayerColor: colorScheme.primary,
-      child: DecoratedBox(
-        decoration: HomeDashboardElevatedSurface.decoration(
-          context,
-          borderRadius: borderRadius,
+      child: Padding(
+        padding: EdgeInsets.symmetric(
+          vertical: tokens.spaceSmall + tokens.spaceExtraSmall,
+          horizontal: tokens.spaceExtraSmall,
         ),
-        child: Padding(
-          padding: EdgeInsets.symmetric(
-            vertical: tokens.spaceSmall + tokens.spaceExtraSmall,
-            horizontal: tokens.spaceExtraSmall,
-          ),
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            spacing: tokens.spaceMedium,
-            children: [
-              HomeDashboardIconWell(
-                accent: iconAccent,
-                child: icon,
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          spacing: tokens.spaceMedium,
+          children: [
+            HomeDashboardIconWell(
+              accent: iconAccent,
+              child: icon,
+            ),
+            Text(
+              label,
+              maxLines: 1,
+              overflow: TextOverflow.ellipsis,
+              textAlign: TextAlign.center,
+              style: theme.textTheme.labelSmall?.copyWith(
+                color: colorScheme.onSurface.withValues(alpha: 0.9),
+                fontWeight: FontWeight.w600,
+                height: 1.2,
               ),
-              Text(
-                label,
-                maxLines: 1,
-                overflow: TextOverflow.ellipsis,
-                textAlign: TextAlign.center,
-                style: theme.textTheme.labelSmall?.copyWith(
-                  color: colorScheme.onSurface.withValues(alpha: 0.9),
-                  fontWeight: FontWeight.w600,
-                  height: 1.2,
-                ),
-              ),
-            ],
-          ),
+            ),
+          ],
         ),
       ),
     );

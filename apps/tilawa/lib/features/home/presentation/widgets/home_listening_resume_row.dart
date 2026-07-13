@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:tilawa/core/extensions.dart';
 import 'package:tilawa/features/audio_player/presentation/bloc/audio_player_bloc.dart';
+import 'package:tilawa/features/home/presentation/widgets/home_dashboard_elevated_surface.dart';
 import 'package:tilawa/features/home/presentation/cubit/home_listening_resume_cubit.dart';
 import 'package:tilawa/features/home/presentation/cubit/home_listening_resume_state.dart';
 import 'package:tilawa_core/entities/entities.dart';
@@ -36,48 +37,44 @@ class HomeListeningResumeRow extends StatelessWidget {
             state.reciterName!,
             state.surahName!,
           ),
-          child: TilawaInteractiveSurface(
-            button: false,
-            onTap: () => _resumePlayback(context, state),
+          child: HomeDashboardElevatedSurface.interactive(
+            context: context,
             borderRadius: borderRadius,
+            onTap: () => _resumePlayback(context, state),
+            button: false,
             stateLayerColor: colorScheme.primary,
-            child: DecoratedBox(
-              decoration: BoxDecoration(
-                color: colorScheme.surfaceContainerLow,
-                borderRadius: borderRadius,
+            color: colorScheme.surfaceContainerLow,
+            child: Padding(
+              padding: EdgeInsets.symmetric(
+                horizontal: tokens.spaceMedium,
+                vertical: tokens.spaceSmall,
               ),
-              child: Padding(
-                padding: EdgeInsets.symmetric(
-                  horizontal: tokens.spaceMedium,
-                  vertical: tokens.spaceSmall,
-                ),
-                child: Row(
-                  children: [
-                    Icon(
-                      Icons.headphones_rounded,
-                      color: colorScheme.primary,
-                      size: tokens.iconSizeSmall,
-                    ),
-                    SizedBox(width: tokens.spaceSmall),
-                    Expanded(
-                      child: Text(
-                        context.l10n.homeListeningResumeSubtitle(
-                          state.reciterName!,
-                          state.surahName!,
-                        ),
-                        maxLines: 2,
-                        overflow: TextOverflow.ellipsis,
-                        style: theme.textTheme.bodyMedium?.copyWith(
-                          fontWeight: FontWeight.w600,
-                        ),
+              child: Row(
+                children: [
+                  Icon(
+                    Icons.headphones_rounded,
+                    color: colorScheme.primary,
+                    size: tokens.iconSizeSmall,
+                  ),
+                  SizedBox(width: tokens.spaceSmall),
+                  Expanded(
+                    child: Text(
+                      context.l10n.homeListeningResumeSubtitle(
+                        state.reciterName!,
+                        state.surahName!,
+                      ),
+                      maxLines: 2,
+                      overflow: TextOverflow.ellipsis,
+                      style: theme.textTheme.bodyMedium?.copyWith(
+                        fontWeight: FontWeight.w600,
                       ),
                     ),
-                    Icon(
-                      Icons.chevron_right_rounded,
-                      color: colorScheme.onSurfaceVariant,
-                    ),
-                  ],
-                ),
+                  ),
+                  Icon(
+                    Icons.chevron_right_rounded,
+                    color: colorScheme.onSurfaceVariant,
+                  ),
+                ],
               ),
             ),
           ),

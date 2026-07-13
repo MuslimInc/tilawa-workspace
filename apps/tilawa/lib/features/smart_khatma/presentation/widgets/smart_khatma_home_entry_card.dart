@@ -2,11 +2,11 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:tilawa/core/extensions.dart';
 import 'package:tilawa/router/app_router_config.dart';
-import 'package:tilawa/features/home/presentation/widgets/home_travel_destination_card.dart';
 import 'package:tilawa/features/home/presentation/widgets/home_dashboard_card.dart';
 import 'package:tilawa_ui_kit/tilawa_ui_kit.dart';
 
 import '../bloc/khatma_plan_bloc.dart';
+import 'khatma_home_destination_card.dart';
 import '../bloc/khatma_plan_event.dart';
 import '../bloc/khatma_plan_state.dart';
 
@@ -37,8 +37,7 @@ class SmartKhatmaHomeEntryCard extends StatelessWidget {
                     isTodayCompleted: plan.isTodayCompleted,
                     onOpenHub: () => _openHub(context),
                   ),
-          KhatmaPlanFailure() => HomeTravelDestinationCard(
-            tintIndex: 2,
+          KhatmaPlanFailure() => KhatmaHomeDestinationCard(
             icon: Icons.refresh_rounded,
             onTap: () => context.read<KhatmaPlanBloc>().add(
               const KhatmaPlanStarted(),
@@ -70,8 +69,7 @@ class _KhatmaHomeCompletedEntry extends StatelessWidget {
   final VoidCallback onOpenHub;
 
   @override
-  Widget build(BuildContext context) => HomeTravelDestinationCard(
-    tintIndex: 2,
+  Widget build(BuildContext context) => KhatmaHomeDestinationCard(
     icon: Icons.auto_awesome_rounded,
     onTap: onOpenHub,
     title: context.l10n.khatmaCompletedTitle,
@@ -89,15 +87,14 @@ class _KhatmaHomeEmptyEntry extends StatelessWidget {
     final theme = Theme.of(context);
     final tokens = theme.tokens;
 
-    return HomeTravelDestinationCard(
-      tintIndex: 2,
+    return KhatmaHomeDestinationCard(
       icon: Icons.auto_stories_outlined,
       onTap: onOpenHub,
       title: context.l10n.khatmaEmptyTitle,
       subtitle: context.l10n.khatmaEmptySubtitle,
       trailing: Icon(
         Icons.chevron_right_rounded,
-        color: theme.colorScheme.onSurfaceVariant,
+        color: theme.colorScheme.onPrimary.withValues(alpha: 0.86),
         size: tokens.iconSizeSmall,
       ),
     );
@@ -138,8 +135,7 @@ class _KhatmaHomeActiveEntry extends StatelessWidget {
                 todayRemainingPages,
               )} · $planProgress%';
 
-    return HomeTravelDestinationCard(
-      tintIndex: 2,
+    return KhatmaHomeDestinationCard(
       icon: Icons.auto_stories_outlined,
       onTap: onOpenHub,
       title: context.l10n.khatmaProgressTitle,
@@ -151,13 +147,13 @@ class _KhatmaHomeActiveEntry extends StatelessWidget {
           Text(
             context.l10n.khatmaHomeViewPlan,
             style: theme.textTheme.labelSmall?.copyWith(
-              color: colorScheme.primary,
+              color: colorScheme.onPrimary,
               fontWeight: FontWeight.w700,
             ),
           ),
           Icon(
             Icons.chevron_right_rounded,
-            color: colorScheme.onSurfaceVariant,
+            color: colorScheme.onPrimary.withValues(alpha: 0.86),
             size: tokens.iconSizeSmall,
           ),
         ],
