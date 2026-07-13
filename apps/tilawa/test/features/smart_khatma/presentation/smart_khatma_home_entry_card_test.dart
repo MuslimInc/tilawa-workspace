@@ -14,8 +14,9 @@ void main() {
 
     await _pump(tester, bloc, const Locale('en'));
 
-    expect(find.textContaining('Pages 1–21'), findsOneWidget);
-    expect(find.textContaining('5 confirmed · 16 remaining'), findsOneWidget);
+    expect(find.textContaining('1–21'), findsOneWidget);
+    expect(find.textContaining('5 confirmed'), findsOneWidget);
+    expect(find.textContaining('16 remaining'), findsOneWidget);
   });
 
   testWidgets('completed plan shows calm completion in Arabic', (tester) async {

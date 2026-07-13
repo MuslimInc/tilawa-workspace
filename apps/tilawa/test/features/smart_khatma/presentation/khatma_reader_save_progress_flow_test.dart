@@ -151,6 +151,8 @@ void main() {
     testWidgets('reader return can suggest completing today assignment', (
       tester,
     ) async {
+      plan = _plan(assignmentEndPage: 21);
+      repository.plan = plan;
       quranReader.page = 21;
       await pumpHarness(tester);
       await openReaderAndReturn(tester);
@@ -211,18 +213,19 @@ KhatmaPlanBloc _bloc(_MemoryRepository repository) {
   )..add(const KhatmaPlanStarted());
 }
 
-KhatmaPlan _plan({int? confirmedThrough}) => KhatmaPlan(
-  id: 'plan-1',
-  createdAt: DateTime(2026, 7, 13),
-  startDate: DateTime(2026, 7, 13),
-  durationDays: 30,
-  startPage: 1,
-  targetPage: 604,
-  confirmedCompletedThroughPage: confirmedThrough,
-  assignmentDate: DateTime(2026, 7, 13),
-  assignmentStartPage: 1,
-  assignmentEndPage: 604,
-);
+KhatmaPlan _plan({int? confirmedThrough, int assignmentEndPage = 604}) =>
+    KhatmaPlan(
+      id: 'plan-1',
+      createdAt: DateTime(2026, 7, 13),
+      startDate: DateTime(2026, 7, 13),
+      durationDays: 30,
+      startPage: 1,
+      targetPage: 604,
+      confirmedCompletedThroughPage: confirmedThrough,
+      assignmentDate: DateTime(2026, 7, 13),
+      assignmentStartPage: 1,
+      assignmentEndPage: assignmentEndPage,
+    );
 
 final class _MemoryRepository implements KhatmaPlanRepository {
   _MemoryRepository(this.plan);

@@ -37,8 +37,14 @@ void main() {
       tester.element(find.byType(HomePrimaryActionsSection)),
     );
 
-    double gapAfterTitle(String title, Finder sectionFinder) {
-      final Offset titleBottom = tester.getBottomLeft(find.text(title));
+    double gapAfterHeader({
+      required Finder sectionFinder,
+      required String title,
+      String? subtitle,
+    }) {
+      final Offset headerBottom = subtitle == null
+          ? tester.getBottomLeft(find.text(title))
+          : tester.getBottomLeft(find.text(subtitle));
       final Finder content = find.descendant(
         of: sectionFinder,
         matching: find.byWidgetPredicate(
@@ -48,20 +54,22 @@ void main() {
         ),
       );
       final Offset contentTop = tester.getTopLeft(content.first);
-      return contentTop.dy - titleBottom.dy;
+      return contentTop.dy - headerBottom.dy;
     }
 
-    final double primaryGap = gapAfterTitle(
-      l10n.homeMainActionsTitle,
-      find.byType(HomePrimaryActionsSection),
+    final double primaryGap = gapAfterHeader(
+      sectionFinder: find.byType(HomePrimaryActionsSection),
+      title: l10n.homeMainActionsTitle,
     );
-    final double moreGap = gapAfterTitle(
-      l10n.moreOptions,
-      find.byType(HomeMoreActionsGroup),
+    final double moreGap = gapAfterHeader(
+      sectionFinder: find.byType(HomeMoreActionsGroup),
+      title: l10n.moreOptions,
+      subtitle: l10n.homeMoreOptionsSubtitle,
     );
-    final double inspirationGap = gapAfterTitle(
-      l10n.homeInspirationTitle,
-      find.byType(HomeDailyInspirationSection),
+    final double inspirationGap = gapAfterHeader(
+      sectionFinder: find.byType(HomeDailyInspirationSection),
+      title: l10n.homeInspirationTitle,
+      subtitle: l10n.homeInspirationSubtitle,
     );
 
     expect((moreGap - primaryGap).abs(), lessThan(2));

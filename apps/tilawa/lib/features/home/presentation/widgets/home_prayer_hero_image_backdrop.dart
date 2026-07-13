@@ -192,10 +192,13 @@ class _HomePrayerHeroSurface extends StatelessWidget {
       direction,
     );
     const Color overlayGreen = AppColors.darkDefaultPrimaryContainer;
-    final int? cacheWidth = MediaQuery.sizeOf(context).width.isFinite
-        ? (MediaQuery.sizeOf(context).width *
-                  MediaQuery.devicePixelRatioOf(context))
-              .round()
+    final double width = MediaQuery.sizeOf(context).width;
+    final int? cacheWidth = width.isFinite && width > 0
+        ? () {
+            final int computed =
+                (width * MediaQuery.devicePixelRatioOf(context)).round();
+            return computed > 0 ? computed : null;
+          }()
         : null;
 
     return DecoratedBox(

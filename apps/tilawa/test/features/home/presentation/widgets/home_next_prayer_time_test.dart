@@ -336,6 +336,24 @@ void main() {
     );
 
     final MeMuslimDesignTokens tokens = Theme.of(scrollContext).tokens;
+    final double measuredHeroExtent =
+        tester
+            .getSize(
+              find
+                  .descendant(
+                    of: find.byType(CustomScrollView),
+                    matching: find.byType(HomeDashboardCard),
+                  )
+                  .first,
+            )
+            .height +
+        (tokens.spaceSmall * 2);
+
+    expect(
+      heroExtent,
+      closeTo(measuredHeroExtent, 2),
+      reason: 'expandedLayoutExtent should match rendered hero sliver height',
+    );
 
     controller.jumpTo(heroExtent);
     await tester.pump();

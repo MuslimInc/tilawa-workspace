@@ -305,7 +305,12 @@ void main() {
         findsOneWidget,
       );
 
-      await tester.tap(find.byType(CloseButton));
+      await tester.tap(
+        find.descendant(
+          of: find.byType(TilawaSentryScreenshotPreview),
+          matching: find.byType(IconButton),
+        ),
+      );
       await tester.pumpAndSettle();
 
       expect(find.byType(TilawaSentryScreenshotPreview), findsNothing);
