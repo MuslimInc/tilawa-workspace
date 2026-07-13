@@ -24,10 +24,10 @@ void main(List<String> args) {
       print('FAILED: Required asset $filename is missing.');
       exit(1);
     }
-
+    
     final bytes = file.readAsBytesSync();
     final digest = sha256.convert(bytes);
-
+    
     manifestFiles[filename] = {
       'sha256': digest.toString(),
       'byte_length': bytes.length,
@@ -38,16 +38,15 @@ void main(List<String> args) {
   final manifest = {
     'version': '1.0.0-qcf4',
     'source': 'King Fahd Complex QCF v4',
-    'generated_at':
-        '${DateTime.now().toUtc().toIso8601String().split('T').first}T00:00:00.000Z', // Deterministic enough for this example, usually would use a fixed env var or commit time.
+    'generated_at': DateTime.now().toUtc().toIso8601String().split('T').first + 'T00:00:00.000Z', // Deterministic enough for this example, usually would use a fixed env var or commit time.
     'files': manifestFiles,
   };
 
-  const encoder = JsonEncoder.withIndent('  ');
+  final encoder = JsonEncoder.withIndent('  ');
   final manifestJson = encoder.convert(manifest);
-
-  const outPath = 'packages/quran_qcf/assets/quran_manifest.json';
-  File(outPath).writeAsStringSync('$manifestJson\n');
-
+  
+  final outPath = 'packages/quran_qcf/assets/quran_manifest.json';
+  File(outPath).writeAsStringSync(manifestJson + '\n');
+  
   print('SUCCESS: Generated deterministic quran_manifest.json at $outPath');
 }
