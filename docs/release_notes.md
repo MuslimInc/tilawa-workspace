@@ -12,6 +12,58 @@ the changelog for full engineering detail.
 
 | Field | Value |
 |-------|--------|
+| Version | **2.1.4** (build **78**) |
+| Git tag | `v2.1.4+78` (pending) |
+| Date | 2026-07-13 |
+| Track | Production |
+
+### What's new (en-US) — copy for Play Console
+
+```text
+• Smart Khatma: paced reading plan and daily progress on Home
+• Daily Guidance: optional ayah notifications from Settings
+• Steadier sign-in when reopening the app
+• Calmer home dashboard and design polish across key screens
+```
+
+### ما الجديد (ar) — نص متجر Play
+
+```text
+• ختمة ذكية: خطّة قراءة موزّعة وتقدّم يومي في الرئيسية
+• إرشاد يومي: إشعارات آيات اختيارية من الإعدادات
+• تسجيل دخول أثبت عند إعادة فتح التطبيق
+• لوحة رئيسية أهدأ وتحسينات تصميم في الشاشات الأساسية
+```
+
+---
+
+## Previous current release (2.1.3+77)
+
+| Field | Value |
+|-------|--------|
+| Version | **2.1.3** (build **77**) |
+| Git tag | `v2.1.3+77` (pending) |
+| Date | 2026-07-12 |
+| Track | Production |
+
+### What's new (en-US) — copy for Play Console
+
+```text
+• Quran Sessions: fixed teacher availability scheduling
+```
+
+### ما الجديد (ar) — نص متجر Play
+
+```text
+• جلسات القرآن: إصلاح جدولة توفّر المعلّم
+```
+
+---
+
+## Previous current release (2.0.17+71)
+
+| Field | Value |
+|-------|--------|
 | Version | **2.0.17** (build **71**) |
 | Git tag | `v2.0.17+71` (pending) |
 | Date | 2026-07-01 |

@@ -1,7 +1,27 @@
 {
   "schemaVersion": 1,
-  "lastUpdatedAt": "2026-06-14T12:00:00Z",
+  "lastUpdatedAt": "2026-07-13T20:12:27Z",
   "releases": [
+    {
+      "id": "2.1.4+78",
+      "version": "2.1.4",
+      "buildNumber": 78,
+      "highlights": {
+        "en": [
+          "Smart Khatma: build a paced reading plan and follow daily progress from Home",
+          "Daily Guidance: optional ayah notifications you can schedule in Settings",
+          "Calmer home dashboard and steadier sign-in when reopening the app",
+          "Design polish across reading, prayer, and settings screens"
+        ],
+        "ar": [
+          "ختمة ذكية: خطّة قراءة موزّعة ومتابعة التقدّم اليومي من الرئيسية",
+          "إرشاد يومي: إشعارات آيات اختيارية يمكنك جدولتها من الإعدادات",
+          "لوحة رئيسية أهدأ وتسجيل دخول أثبت عند إعادة فتح التطبيق",
+          "تحسينات تصميم لشاشات القراءة والصلاة والإعدادات"
+        ]
+      },
+      "publishedAt": "2026-07-13T20:12:27Z"
+    },
     {
       "id": "2.1.2+76",
       "version": "2.1.2",

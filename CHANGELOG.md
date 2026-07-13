@@ -7,6 +7,26 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [2.1.4+78] - 2026-07-13 [Google Play Production]
+
+### Added
+
+- **Smart Khatma**: Paced Quran reading plan with home dashboard progress.
+- **Daily Guidance**: Optional scheduled ayah notifications from Settings
+  (permission-gated; off until the user enables them).
+- **Home**: Dashboard refinements for reading progress and prayer/wird context.
+
+### Changed
+
+- **UI**: Broader Tilawa design-system surfaces (app bars, cards, empty/error
+  states) for calmer, more consistent reading and settings flows.
+- **Auth**: Local-first session trust with background restoration so reopening
+  the app is less likely to bounce users to sign-in.
+
+### Fixed
+
+- Packaging and test/golden alignment for Android release candidates.
+
 ## [2.1.3+77] - 2026-07-12 [Google Play Production]
 
 ### Fixed
