@@ -1044,4 +1044,14 @@ extension MeMuslimElevationX on MeMuslimDesignTokens {
       offset: const Offset(0, 14.0 * kElevationMultiplier),
     ),
   ];
+
+  /// Single soft shadow for compact Home quick-tool tiles and light chrome.
+  List<BoxShadow> elevationSubtle(Color tint) => <BoxShadow>[
+    BoxShadow(
+      color: tint.withValues(alpha: 0.04 * kElevationMultiplier),
+      blurRadius: 10.0 * kElevationMultiplier,
+      spreadRadius: -2.0,
+      offset: const Offset(0, 3.0 * kElevationMultiplier),
+    ),
+  ];
 }

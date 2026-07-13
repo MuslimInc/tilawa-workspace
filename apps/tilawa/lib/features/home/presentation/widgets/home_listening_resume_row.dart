@@ -3,6 +3,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:tilawa/core/extensions.dart';
 import 'package:tilawa/features/audio_player/presentation/bloc/audio_player_bloc.dart';
 import 'package:tilawa/features/home/presentation/widgets/home_dashboard_elevated_surface.dart';
+import 'package:tilawa/features/home/presentation/widgets/home_dashboard_section.dart';
 import 'package:tilawa/features/home/presentation/cubit/home_listening_resume_cubit.dart';
 import 'package:tilawa/features/home/presentation/cubit/home_listening_resume_state.dart';
 import 'package:tilawa_core/entities/entities.dart';
@@ -44,6 +45,7 @@ class HomeListeningResumeRow extends StatelessWidget {
             button: false,
             stateLayerColor: colorScheme.primary,
             color: colorScheme.surfaceContainerLow,
+            tier: HomeDashboardElevationTier.inspiration,
             child: Padding(
               padding: EdgeInsets.symmetric(
                 horizontal: tokens.spaceMedium,
@@ -72,7 +74,7 @@ class HomeListeningResumeRow extends StatelessWidget {
                   ),
                   Icon(
                     Icons.chevron_right_rounded,
-                    color: colorScheme.onSurfaceVariant,
+                    color: HomeDashboardSection.secondaryTextColor(context),
                   ),
                 ],
               ),

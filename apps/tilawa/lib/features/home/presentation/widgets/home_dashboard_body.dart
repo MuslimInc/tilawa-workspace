@@ -125,7 +125,7 @@ class _HomeDashboardClosingMark extends StatelessWidget {
     return Padding(
       padding: EdgeInsets.only(
         top: tokens.spaceExtraLarge,
-        bottom: tokens.spaceLarge,
+        bottom: tokens.spaceSmall,
       ),
       child: Center(
         child: Column(

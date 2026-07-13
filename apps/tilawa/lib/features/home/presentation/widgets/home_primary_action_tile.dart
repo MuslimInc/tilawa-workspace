@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:tilawa/features/home/presentation/widgets/home_dashboard_elevated_surface.dart';
 import 'package:tilawa/features/home/presentation/widgets/home_dashboard_icon_well.dart';
+import 'package:tilawa/features/home/presentation/widgets/home_dashboard_section.dart';
 import 'package:tilawa_ui_kit/tilawa_ui_kit.dart';
 
 /// Premium primary action tile for the Home dashboard.
@@ -40,6 +41,7 @@ class HomePrimaryActionTile extends StatelessWidget {
       onTap: onTap,
       semanticLabel: label,
       stateLayerColor: iconAccent,
+      tier: HomeDashboardElevationTier.primary,
       child: Padding(
         padding: EdgeInsetsDirectional.fromSTEB(
           tokens.spaceMedium + accentRailWidth,
@@ -72,9 +74,7 @@ class HomePrimaryActionTile extends StatelessWidget {
               maxLines: 2,
               overflow: TextOverflow.ellipsis,
               style: theme.textTheme.bodySmall?.copyWith(
-                color: colorScheme.onSurfaceVariant.withValues(
-                  alpha: 0.92,
-                ),
+                color: HomeDashboardSection.secondaryTextColor(context),
                 height: 1.4,
               ),
             ),

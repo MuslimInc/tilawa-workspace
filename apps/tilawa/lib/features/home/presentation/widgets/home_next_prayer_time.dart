@@ -55,10 +55,10 @@ abstract final class HomeNextPrayerTime {
         TilawaHomeScreenTokens.screenHorizontalPadding(tokens) * 2;
     final bool tightCard =
         MediaQuery.sizeOf(context).width - horizontalGutter < 320;
-    final double contextRow = 36 * textScale;
-    final double cardVerticalPadding = tokens.spaceLarge * 2;
-    final double contextToMetricsGap = tokens.spaceMedium;
-    final double prayerBlock = 172 * textScale;
+    final double contextRow = 34 * textScale;
+    final double cardVerticalPadding = tokens.spaceLarge + tokens.spaceMedium;
+    final double contextToMetricsGap = tokens.spaceSmall;
+    final double prayerBlock = 148 * textScale;
     final double tightSlack = tightCard ? tokens.spaceExtraLarge : 0;
 
     // Mirrors [_HomeNextPrayerTimeSliver] padding + card layout, plus small
@@ -68,10 +68,10 @@ abstract final class HomeNextPrayerTime {
         contextRow +
         contextToMetricsGap +
         prayerBlock +
-        tokens.spaceMedium +
+        tokens.spaceSmall +
         (tokens.borderWidthThin * 2) +
         tightSlack +
-        18;
+        12;
   }
 }
 
@@ -99,7 +99,7 @@ class _HomeNextPrayerTimeSliver extends StatelessWidget {
           horizontalInset,
           tokens.spaceSmall,
           horizontalInset,
-          tokens.spaceMedium,
+          tokens.spaceSmall,
         ),
         child: _HomeNextPrayerTimeCard(
           locationName: locationName,
@@ -187,7 +187,10 @@ class _HomeNextPrayerTimeCard extends StatelessWidget {
       label: context.l10n.nextPrayer,
       child: HomeDashboardCard(
         surface: TilawaCardSurface.floating,
-        padding: EdgeInsets.all(tokens.spaceLarge),
+        padding: EdgeInsets.symmetric(
+          horizontal: tokens.spaceLarge,
+          vertical: tokens.spaceMedium + tokens.spaceExtraSmall,
+        ),
         onTap: showFailure || showFullSkeleton ? null : onOpenPrayer,
         child: showFullSkeleton
             ? _HomeHeroSkeletonScope(
@@ -202,7 +205,7 @@ class _HomeNextPrayerTimeCard extends StatelessWidget {
               )
             : Column(
                 crossAxisAlignment: CrossAxisAlignment.stretch,
-                spacing: tokens.spaceMedium,
+                spacing: tokens.spaceSmall + tokens.spaceExtraSmall,
                 children: [
                   HomePrayerHeroContextRow(
                     locationName: locationName,
@@ -283,12 +286,12 @@ class _HomeNextPrayerTimeFocus extends StatelessWidget {
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
-      spacing: tokens.spaceMedium,
+      spacing: tokens.spaceSmall + tokens.spaceExtraSmall,
       children: [
         Text(
           context.l10n.nextPrayer,
           style: theme.textTheme.labelSmall?.copyWith(
-            color: onMuted.withValues(alpha: 0.88),
+            color: onMuted,
             fontWeight: FontWeight.w600,
             letterSpacing: 0.4,
           ),

@@ -1,14 +1,53 @@
 import 'package:flutter/material.dart';
 import 'package:tilawa_ui_kit/tilawa_ui_kit.dart';
 
-/// Dashboard card surface — fill, hairline border, [TilawaCard] raised shadow tier.
+/// Home dashboard elevation tiers — one shadow language across zones.
+enum HomeDashboardElevationTier {
+  /// Prayer hero — deepest lift ([MeMuslimElevationX.elevationFloating]).
+  hero,
+
+  /// Primary action cards and Smart Khatma entry.
+  primary,
+
+  /// Inspiration and passive content cards.
+  inspiration,
+
+  /// Quick tools row — lightest resting shadow.
+  quickTool,
+
+  /// More list — hairline only, no shadow.
+  moreList,
+}
+
+/// Dashboard card surface — fill, hairline border, tiered shadow.
 abstract final class HomeDashboardElevatedSurface {
   const HomeDashboardElevatedSurface._();
+
+  static List<BoxShadow> shadows(
+    BuildContext context,
+    HomeDashboardElevationTier tier,
+  ) {
+    if (tier == HomeDashboardElevationTier.moreList) {
+      return const <BoxShadow>[];
+    }
+
+    final MeMuslimDesignTokens tokens = context.tokens;
+    final Color tint = Theme.of(context).colorScheme.shadow;
+
+    return switch (tier) {
+      HomeDashboardElevationTier.hero => tokens.elevationFloating(tint),
+      HomeDashboardElevationTier.primary ||
+      HomeDashboardElevationTier.inspiration => tokens.elevationRaised(tint),
+      HomeDashboardElevationTier.quickTool => tokens.elevationSubtle(tint),
+      HomeDashboardElevationTier.moreList => const <BoxShadow>[],
+    };
+  }
 
   static BoxDecoration decoration(
     BuildContext context, {
     BorderRadius? borderRadius,
     Color? color,
+    HomeDashboardElevationTier tier = HomeDashboardElevationTier.primary,
   }) {
     final ThemeData theme = Theme.of(context);
     final MeMuslimDesignTokens tokens = theme.tokens;
@@ -29,7 +68,7 @@ abstract final class HomeDashboardElevatedSurface {
           color: color,
         )
         .copyWith(
-          boxShadow: tokens.elevationRaised(colorScheme.shadow),
+          boxShadow: shadows(context, tier),
         );
   }
 
@@ -47,6 +86,7 @@ abstract final class HomeDashboardElevatedSurface {
     Color? stateLayerColor,
     Color? color,
     bool button = true,
+    HomeDashboardElevationTier tier = HomeDashboardElevationTier.primary,
   }) {
     final ThemeData theme = Theme.of(context);
     final MeMuslimDesignTokens tokens = theme.tokens;
@@ -73,7 +113,7 @@ abstract final class HomeDashboardElevatedSurface {
     return DecoratedBox(
       decoration: BoxDecoration(
         borderRadius: borderRadius,
-        boxShadow: tokens.elevationRaised(colorScheme.shadow),
+        boxShadow: shadows(context, tier),
       ),
       child: TilawaInteractiveSurface(
         onTap: onTap,

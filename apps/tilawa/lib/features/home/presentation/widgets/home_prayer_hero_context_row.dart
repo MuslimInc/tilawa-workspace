@@ -85,7 +85,7 @@ class HomePrayerHeroContextRow extends StatelessWidget {
             overflow: TextOverflow.ellipsis,
             textAlign: TextAlign.end,
             style: theme.textTheme.labelSmall?.copyWith(
-              color: resolvedMuted.withValues(alpha: 0.85),
+              color: resolvedMuted,
               fontWeight: FontWeight.w500,
             ),
           ),
@@ -160,11 +160,11 @@ class _HomePrayerHeroLocationChip extends StatelessWidget {
               ),
               if (isRefreshingLocation)
                 SizedBox(
-                  width: tokens.iconSizeSmall,
-                  height: tokens.iconSizeSmall,
+                  width: tokens.iconSizeExtraSmall,
+                  height: tokens.iconSizeExtraSmall,
                   child: TilawaLoadingIndicator(
                     centered: false,
-                    strokeWidth: 2,
+                    strokeWidth: 1.5,
                     color: ink,
                   ),
                 )

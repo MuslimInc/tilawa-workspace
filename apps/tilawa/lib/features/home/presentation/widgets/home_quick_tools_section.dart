@@ -78,6 +78,7 @@ class _QuickToolTile extends StatelessWidget {
       onTap: onTap,
       semanticLabel: label,
       stateLayerColor: colorScheme.primary,
+      tier: HomeDashboardElevationTier.quickTool,
       child: Padding(
         padding: EdgeInsets.symmetric(
           vertical: tokens.spaceSmall + tokens.spaceExtraSmall,
