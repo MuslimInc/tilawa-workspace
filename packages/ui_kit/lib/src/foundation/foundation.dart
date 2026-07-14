@@ -8,6 +8,8 @@ export 'color_scheme_ext.dart';
 export 'component_tokens.dart';
 export 'content_bounds.dart';
 export 'tilawa_thumb_reach_layout.dart';
+export 'tilawa_thumb_reach_actions.dart';
+export 'tilawa_reserved_text_lines.dart';
 export 'content_grid.dart';
 export 'design_tokens.dart';
 export 'semantic_tints.dart';

@@ -22,7 +22,6 @@ class LanguageWelcomeScreen extends StatelessWidget {
           statusBarBackgroundColor: theme.scaffoldBackgroundColor,
           navigationBarColor: theme.scaffoldBackgroundColor,
         );
-    // Fixed two-line slot keeps the language switcher from shifting on locale.
     final TextStyle? baseWelcomeStyle = theme.textTheme.headlineLarge;
     final double welcomeFontSize = baseWelcomeStyle?.fontSize ?? 32;
     final double welcomeHeightFactor = baseWelcomeStyle?.height ?? 1.25;
@@ -33,10 +32,6 @@ class LanguageWelcomeScreen extends StatelessWidget {
           fontSize: welcomeFontSize,
           height: welcomeHeightFactor,
         );
-    final double welcomeTwoLineHeight =
-        MediaQuery.textScalerOf(context).scale(welcomeFontSize) *
-        welcomeHeightFactor *
-        2;
 
     return AnnotatedRegion<SystemUiOverlayStyle>(
       value: overlayStyle,
@@ -54,23 +49,10 @@ class LanguageWelcomeScreen extends StatelessWidget {
                 children: <Widget>[
                   const Center(child: TilawaAppBrandBadge()),
                   SizedBox(height: tokens.spaceExtraLarge),
-                  SizedBox(
-                    height: welcomeTwoLineHeight,
-                    width: double.infinity,
-                    child: Align(
-                      alignment: Alignment.center,
-                      child: Text(
-                        context.l10n.welcomeToApp,
-                        style: welcomeStyle,
-                        textAlign: TextAlign.center,
-                        maxLines: 2,
-                        overflow: TextOverflow.ellipsis,
-                        strutStyle: StrutStyle.fromTextStyle(
-                          welcomeStyle,
-                          forceStrutHeight: true,
-                        ),
-                      ),
-                    ),
+                  TilawaReservedTextLines(
+                    text: context.l10n.welcomeToApp,
+                    style: welcomeStyle,
+                    maxLines: 2,
                   ),
                   SizedBox(height: tokens.spaceMedium),
                   Text(
@@ -86,13 +68,15 @@ class LanguageWelcomeScreen extends StatelessWidget {
               ),
             ),
           ),
-          actions: TilawaButton(
-            text: context.l10n.next,
-            variant: TilawaButtonVariant.primary,
-            semanticLabel: context.l10n.next,
-            foregroundColor: colorScheme.onPrimary,
-            isFullWidth: true,
-            onPressed: () => const OnboardingRoute().go(context),
+          actions: TilawaThumbReachActions(
+            primary: TilawaButton(
+              text: context.l10n.next,
+              variant: TilawaButtonVariant.primary,
+              semanticLabel: context.l10n.next,
+              foregroundColor: colorScheme.onPrimary,
+              isFullWidth: true,
+              onPressed: () => const OnboardingRoute().go(context),
+            ),
           ),
         ),
       ),

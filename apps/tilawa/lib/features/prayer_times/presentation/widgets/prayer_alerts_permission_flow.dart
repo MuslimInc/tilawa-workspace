@@ -136,7 +136,6 @@ class _PrayerAlertsPermissionFlowState
           isLoading: _isRequesting,
           onAllow: () => _onAllow(widget.steps[_currentPage]),
           onSkip: _onSkip,
-          tokens: tokens,
           theme: theme,
         ),
       ),
@@ -158,30 +157,55 @@ class _PermissionStepPage extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final _StepCopy copy = _stepCopy(context, step);
+    final ColorScheme colorScheme = theme.colorScheme;
+    final TextStyle titleStyle =
+        theme.textTheme.headlineSmall?.copyWith(
+          fontWeight: FontWeight.w800,
+        ) ??
+        const TextStyle(
+          fontWeight: FontWeight.w800,
+          fontSize: 24,
+          height: 1.25,
+        );
+    final TextStyle bodyStyle =
+        theme.textTheme.bodyLarge?.copyWith(
+          color: colorScheme.onSurfaceVariant,
+          height: tokens.textHeightLoose,
+        ) ??
+        TextStyle(
+          color: colorScheme.onSurfaceVariant,
+          height: tokens.textHeightLoose,
+          fontSize: 16,
+        );
 
     return Padding(
       padding: EdgeInsets.symmetric(horizontal: tokens.spaceLarge),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: <Widget>[
-          SizedBox(height: tokens.spaceXXL),
-          Icon(copy.icon, size: 40, color: theme.colorScheme.primary),
-          SizedBox(height: tokens.spaceLarge),
-          Text(
-            copy.title,
-            style: theme.textTheme.headlineSmall?.copyWith(
-              fontWeight: FontWeight.w800,
+      child: TilawaContentBounds(
+        kind: TilawaContentKind.form,
+        alignment: Alignment.center,
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          children: <Widget>[
+            Icon(
+              copy.icon,
+              size: tokens.iconSizeExtraLarge,
+              color: colorScheme.primary,
             ),
-          ),
-          SizedBox(height: tokens.spaceMedium),
-          Text(
-            copy.body,
-            style: theme.textTheme.bodyLarge?.copyWith(
-              color: theme.colorScheme.onSurfaceVariant,
-              height: tokens.textHeightLoose,
+            SizedBox(height: tokens.spaceLarge),
+            TilawaReservedTextLines(
+              text: copy.title,
+              style: titleStyle,
+              maxLines: 2,
             ),
-          ),
-        ],
+            SizedBox(height: tokens.spaceMedium),
+            TilawaReservedTextLines(
+              text: copy.body,
+              style: bodyStyle,
+              maxLines: 6,
+            ),
+          ],
+        ),
       ),
     );
   }
@@ -193,7 +217,6 @@ class _PermissionStepFooter extends StatelessWidget {
     required this.isLoading,
     required this.onAllow,
     required this.onSkip,
-    required this.tokens,
     required this.theme,
   });
 
@@ -201,7 +224,6 @@ class _PermissionStepFooter extends StatelessWidget {
   final bool isLoading;
   final VoidCallback onAllow;
   final VoidCallback onSkip;
-  final MeMuslimDesignTokens tokens;
   final ThemeData theme;
 
   @override
@@ -212,26 +234,21 @@ class _PermissionStepFooter extends StatelessWidget {
         ? context.l10n.prayerAlertsPermissionContinue
         : context.l10n.prayerAlertsPermissionAllow;
 
-    return Column(
-      mainAxisSize: MainAxisSize.min,
-      crossAxisAlignment: CrossAxisAlignment.stretch,
-      spacing: tokens.spaceLarge,
-      children: <Widget>[
-        TilawaButton(
-          text: primaryLabel,
-          variant: TilawaButtonVariant.primary,
-          foregroundColor: colorScheme.onPrimary,
-          isLoading: isLoading,
-          onPressed: isLoading ? null : onAllow,
-          isFullWidth: true,
-        ),
-        TilawaButton(
-          text: context.l10n.prayerAlertsPermissionSkip,
-          variant: TilawaButtonVariant.ghost,
-          onPressed: isLoading ? null : onSkip,
-          isFullWidth: true,
-        ),
-      ],
+    return TilawaThumbReachActions(
+      primary: TilawaButton(
+        text: primaryLabel,
+        variant: TilawaButtonVariant.primary,
+        foregroundColor: colorScheme.onPrimary,
+        isLoading: isLoading,
+        onPressed: isLoading ? null : onAllow,
+        isFullWidth: true,
+      ),
+      secondary: TilawaButton(
+        text: context.l10n.prayerAlertsPermissionSkip,
+        variant: TilawaButtonVariant.ghost,
+        onPressed: isLoading ? null : onSkip,
+        isFullWidth: true,
+      ),
     );
   }
 }

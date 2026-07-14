@@ -59,13 +59,19 @@ class OnboardingPage extends StatelessWidget {
                       lineSpacing: tokens.spaceSmall,
                     ),
                     SizedBox(height: stateTokens.subtitleSpacing),
-                    Text(
-                      content.description,
-                      textAlign: TextAlign.center,
-                      style: theme.textTheme.bodyMedium?.copyWith(
-                        color: colorScheme.onSurfaceVariant,
-                        height: tokens.textHeightLoose,
-                      ),
+                    TilawaReservedTextLines(
+                      text: content.description,
+                      style:
+                          theme.textTheme.bodyMedium?.copyWith(
+                            color: colorScheme.onSurfaceVariant,
+                            height: tokens.textHeightLoose,
+                          ) ??
+                          TextStyle(
+                            color: colorScheme.onSurfaceVariant,
+                            height: tokens.textHeightLoose,
+                            fontSize: 14,
+                          ),
+                      maxLines: 4,
                     ),
                   ],
                 ),

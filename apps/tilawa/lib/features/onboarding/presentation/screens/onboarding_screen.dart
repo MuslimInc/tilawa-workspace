@@ -16,6 +16,7 @@ import '../widgets/onboarding_content.dart';
 import '../widgets/onboarding_footer_bar.dart';
 import '../widgets/onboarding_hero_visual.dart';
 import '../widgets/onboarding_page.dart';
+import '../widgets/onboarding_page_indicator.dart';
 
 /// First-run onboarding carousel before sign-in.
 class OnboardingScreen extends StatefulWidget {
@@ -70,10 +71,12 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
   }
 
   void _goToPage(int index) {
-    _pageController.animateToPage(
-      index,
-      duration: Theme.of(context).tokens.durationMedium,
-      curve: Curves.easeOutCubic,
+    unawaited(
+      _pageController.animateToPage(
+        index,
+        duration: Theme.of(context).tokens.durationMedium,
+        curve: Curves.easeOutCubic,
+      ),
     );
   }
 
@@ -116,29 +119,48 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
             }
           },
           builder: (BuildContext context, OnboardingState state) {
+            final MeMuslimDesignTokens tokens = theme.tokens;
             return Scaffold(
               backgroundColor: pageBackground,
               body: TilawaThumbReachLayout(
-                content: PageView.builder(
-                  controller: _pageController,
-                  itemCount: pageCount,
-                  onPageChanged: (int index) {
-                    setState(() => _currentPage = index);
-                    _applyPageSystemChrome();
-                    context.read<OnboardingCubit>().pageChanged(index);
-                    if (index == pageCount - 1) {
-                      unawaited(getIt<PrepareGoogleSignInUseCase>()());
-                    }
-                  },
-                  itemBuilder: (BuildContext context, int index) {
-                    return OnboardingPage(
-                      content: pages[index],
-                      semanticsLabel: context.l10n.onboardingPageSemantics(
-                        index + 1,
-                        pageCount,
+                useSafeArea: true,
+                content: Column(
+                  children: <Widget>[
+                    Expanded(
+                      child: PageView.builder(
+                        controller: _pageController,
+                        itemCount: pageCount,
+                        onPageChanged: (int index) {
+                          setState(() => _currentPage = index);
+                          _applyPageSystemChrome();
+                          context.read<OnboardingCubit>().pageChanged(index);
+                          if (index == pageCount - 1) {
+                            unawaited(getIt<PrepareGoogleSignInUseCase>()());
+                          }
+                        },
+                        itemBuilder: (BuildContext context, int index) {
+                          return OnboardingPage(
+                            content: pages[index],
+                            semanticsLabel: context.l10n
+                                .onboardingPageSemantics(
+                                  index + 1,
+                                  pageCount,
+                                ),
+                          );
+                        },
                       ),
-                    );
-                  },
+                    ),
+                    Padding(
+                      padding: EdgeInsets.only(bottom: tokens.spaceMedium),
+                      child: Semantics(
+                        label: '${_currentPage + 1} / $pageCount',
+                        child: OnboardingPageIndicator(
+                          count: pageCount,
+                          currentIndex: _currentPage,
+                        ),
+                      ),
+                    ),
+                  ],
                 ),
                 actions: OnboardingFooterBar(
                   pageCount: pageCount,

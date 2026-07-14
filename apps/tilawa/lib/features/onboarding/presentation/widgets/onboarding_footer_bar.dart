@@ -1,11 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:tilawa_ui_kit/tilawa_ui_kit.dart';
 
-import 'onboarding_page_indicator.dart';
-
-/// Thumb-reach chrome: page indicator and navigation actions.
+/// Thumb-reach chrome: primary + reserved secondary (Back).
 ///
-/// Footer chrome for [OnboardingScreen] inside [TilawaThumbReachLayout].
+/// Page dots live in the content band so the primary CTA Y matches Welcome
+/// and PrayerAlerts. Footer for [OnboardingScreen] inside [TilawaThumbReachLayout].
 class OnboardingFooterBar extends StatelessWidget {
   const OnboardingFooterBar({
     super.key,
@@ -38,38 +37,25 @@ class OnboardingFooterBar extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final ThemeData theme = Theme.of(context);
-    final MeMuslimDesignTokens tokens = theme.tokens;
     final ColorScheme colorScheme = theme.colorScheme;
 
-    return Column(
-      mainAxisSize: MainAxisSize.min,
-      spacing: tokens.spaceLarge,
-      crossAxisAlignment: CrossAxisAlignment.stretch,
-      children: <Widget>[
-        Semantics(
-          label: '${currentPage + 1} / $pageCount',
-          child: OnboardingPageIndicator(
-            count: pageCount,
-            currentIndex: currentPage,
-          ),
-        ),
-        TilawaButton(
-          text: _primaryLabel,
-          variant: TilawaButtonVariant.primary,
-          semanticLabel: _primaryLabel,
-          foregroundColor: colorScheme.onPrimary,
-          onPressed: _onPrimary,
-          isFullWidth: true,
-        ),
-        if (_canGoBack)
-          TilawaButton(
-            text: backLabel,
-            variant: TilawaButtonVariant.ghost,
-            semanticLabel: backLabel,
-            onPressed: onBack,
-            isFullWidth: true,
-          ),
-      ],
+    return TilawaThumbReachActions(
+      showSecondary: _canGoBack,
+      primary: TilawaButton(
+        text: _primaryLabel,
+        variant: TilawaButtonVariant.primary,
+        semanticLabel: _primaryLabel,
+        foregroundColor: colorScheme.onPrimary,
+        onPressed: _onPrimary,
+        isFullWidth: true,
+      ),
+      secondary: TilawaButton(
+        text: backLabel,
+        variant: TilawaButtonVariant.ghost,
+        semanticLabel: backLabel,
+        onPressed: onBack,
+        isFullWidth: true,
+      ),
     );
   }
 }
