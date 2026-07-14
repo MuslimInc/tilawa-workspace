@@ -16,7 +16,9 @@ import org.json.JSONObject
  * receiver re-installs `setAlarmClock` entries whose trigger time is still in
  * the future — without bringing up Flutter at boot. The next app launch (or
  * the WorkManager watchdog the Dart side schedules at startup) performs a
- * full Dart reschedule and refreshes the persisted list.
+ * full Dart reschedule and refreshes the persisted list. The WorkManager
+ * watchdog also re-arms from this JSON natively (no FlutterEngine) so alarms
+ * survive long periods without an app open without main-thread ANRs.
  */
 internal class PrayerBootReceiver : BroadcastReceiver() {
     companion object {
