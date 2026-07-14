@@ -30,6 +30,7 @@ class AthkarCategoryCard extends StatelessWidget {
     final Color wash = athkarCategorySurfaceWash(
       accent: accent,
       colorScheme: colorScheme,
+      tintAlpha: athkarCategorySurfaceTintAlpha(icon),
     );
 
     return TilawaCard(
@@ -54,7 +55,7 @@ class AthkarCategoryCard extends StatelessWidget {
                 icon: iconData,
                 size: tokens.iconSizeLargePlus,
                 backgroundColor: accent.withValues(
-                  alpha: kAthkarCategoryIconWellTintAlpha,
+                  alpha: athkarCategoryIconWellTintAlpha(icon),
                 ),
                 iconColor: accent,
                 borderRadius: tokens.radiusLarge,

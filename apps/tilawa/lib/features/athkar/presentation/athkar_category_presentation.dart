@@ -55,8 +55,13 @@ Color athkarCategoryAccent(
     'nights_stay_rounded' => product.exploreFeatureIcon(
       HomeExploreFeature.bookmarks,
     ),
-    // Sleep — quiet blue-grey night.
-    'bedtime_rounded' => product.info,
+    // Sleep — night slate (blue-grey lifted with indigo) so tile doesn’t read
+    // as disabled next to stronger pastels.
+    'bedtime_rounded' => Color.lerp(
+      product.info,
+      product.exploreFeatureIcon(HomeExploreFeature.bookmarks),
+      0.55,
+    )!,
     // Wake — clear blue.
     'alarm_rounded' => product.exploreFeatureIcon(HomeExploreFeature.qibla),
     // After prayer — brand-adjacent green.
@@ -74,9 +79,24 @@ Color athkarCategoryAccent(
 Color athkarCategorySurfaceWash({
   required Color accent,
   required ColorScheme colorScheme,
+  double tintAlpha = kAthkarCategorySurfaceTintAlpha,
 }) {
   return Color.alphaBlend(
-    accent.withValues(alpha: kAthkarCategorySurfaceTintAlpha),
+    accent.withValues(alpha: tintAlpha),
     colorScheme.surface,
   );
+}
+
+/// Icon-well alpha; sleep gets a touch more presence.
+double athkarCategoryIconWellTintAlpha(String iconName) {
+  return iconName == 'bedtime_rounded'
+      ? kAthkarCategoryIconWellTintAlpha + 0.04
+      : kAthkarCategoryIconWellTintAlpha;
+}
+
+/// Card wash alpha; sleep wash slightly stronger for the same reason.
+double athkarCategorySurfaceTintAlpha(String iconName) {
+  return iconName == 'bedtime_rounded'
+      ? kAthkarCategorySurfaceTintAlpha + 0.04
+      : kAthkarCategorySurfaceTintAlpha;
 }
