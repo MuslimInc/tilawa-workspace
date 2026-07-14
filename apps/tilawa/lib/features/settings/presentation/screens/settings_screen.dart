@@ -22,6 +22,7 @@ import '../../../../router/app_router_config.dart';
 import '../../../auth/application/account_deletion_flow_tracker.dart';
 import '../../../auth/presentation/bloc/auth_bloc.dart';
 import '../../../auth/presentation/services/auth_error_messages.dart';
+import '../../../forced_update/presentation/widgets/forced_update_debug_tile.dart';
 import '../../../home/presentation/widgets/home_hero_phase_debug_tile.dart';
 import '../../../home/presentation/widgets/home_skeleton_debug_tile.dart';
 import '../../../localization/presentation/bloc/localization_bloc.dart';
@@ -343,7 +344,8 @@ class _SettingsScreenState extends State<SettingsScreen> {
                         const AdhanDebugTestTile(),
                         const NotificationDebugLabTile(),
                         const TilawaCardNestedTapDemoTile(),
-                        const TourGuideDebugResetTile(isLast: true),
+                        const TourGuideDebugResetTile(),
+                        const ForcedUpdateDebugTile(isLast: true),
                       ],
                     ),
                   const SettingsVersionFooter(),

@@ -108,5 +108,13 @@ void main() {
       check(evaluate.callCount).equals(1);
       check(presenter.showCount).equals(1);
     });
+
+    test('debugPreviewGate shows gate without evaluating', () {
+      coordinator.debugPreviewGate();
+
+      check(evaluate.callCount).equals(0);
+      check(presenter.showCount).equals(1);
+      check(presenter.showing).isTrue();
+    });
   });
 }

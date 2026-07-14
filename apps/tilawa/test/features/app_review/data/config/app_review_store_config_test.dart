@@ -20,4 +20,19 @@ void main() {
     );
     expect(config.microsoftStoreIdOrNull, isNull);
   });
+
+  test('playStoreListingUri uses production android package by default', () {
+    const AppReviewStoreConfig config = AppReviewStoreConfig();
+    expect(
+      config.playStoreListingUri.toString(),
+      'https://play.google.com/store/apps/details?id=com.tilawa.app',
+    );
+  });
+
+  test('playStoreListingUriFor falls back when package id is empty', () {
+    expect(
+      AppReviewStoreConfig.playStoreListingUriFor('').toString(),
+      'https://play.google.com/store/apps/details?id=com.tilawa.app',
+    );
+  });
 }

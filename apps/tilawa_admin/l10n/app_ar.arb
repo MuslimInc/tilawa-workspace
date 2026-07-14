@@ -649,5 +649,29 @@
   "resolvedConfigInspector_query": "فحص الإعدادات",
   "resolvedConfigInspector_studentId": "معرف الطالب",
   "resolvedConfigInspector_teacherId": "معرف المعلم",
-  "resolvedConfigInspector_result": "النتيجة النهائية"
+  "resolvedConfigInspector_result": "النتيجة النهائية",
+  "sidebar_appVersion": "إصدار التطبيق",
+  "@sidebar_appVersion": {
+    "description": "Sidebar link for forced-update min build management"
+  },
+  "forcedUpdate_title": "إدارة إصدار التطبيق",
+  "@forcedUpdate_title": {
+    "description": "Page title for forced update min build numbers"
+  },
+  "forcedUpdate_subtitle": "حدّد الحد الأدنى لرقم البناء على Android و iOS. التطبيق يمنع الاستخدام إذا كان رقم البناء أقل.",
+  "forcedUpdate_cardTitle": "الحد الأدنى لأرقام البناء",
+  "forcedUpdate_cardHint": "استخدم رقم البناء من Play Console / App Store Connect (تصاعدي)، وليس رقم الإصدار التسويقي. فشل القراءة على العميل لا يحظر المستخدم.",
+  "forcedUpdate_androidMin": "الحد الأدنى لبناء Android",
+  "forcedUpdate_iosMin": "الحد الأدنى لبناء iOS",
+  "forcedUpdate_invalidBuild": "أدخل عدداً صحيحاً أكبر من أو يساوي 0.",
+  "forcedUpdate_confirmTitle": "نشر سياسة التحديث الإجباري؟",
+  "forcedUpdate_confirmMessage": "ستُحظر أجهزة Android ذات البناء الأقل من {android} وأجهزة iOS ذات البناء الأقل من {ios} حتى التحديث من المتجر.",
+  "@forcedUpdate_confirmMessage": {
+    "description": "Confirm dialog before saving min builds",
+    "placeholders": {
+      "android": { "type": "String", "example": "79" },
+      "ios": { "type": "String", "example": "79" }
+    }
+  },
+  "forcedUpdate_saveSuccess": "تم حفظ سياسة التحديث الإجباري."
 }

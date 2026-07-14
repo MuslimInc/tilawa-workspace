@@ -36,6 +36,13 @@ export const routes: Routes = [
           import('./features/users/users.component').then((m) => m.UsersComponent),
       },
       {
+        path: 'app-version',
+        loadComponent: () =>
+          import('./features/app-version/app-version.component').then(
+            (m) => m.AppVersionComponent,
+          ),
+      },
+      {
         path: 'quran-sessions/teacher-applications',
         loadComponent: () =>
           import('./features/quran-sessions/teacher-applications/teacher-applications.component').then(

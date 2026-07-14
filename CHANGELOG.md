@@ -7,6 +7,26 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [2.1.5+79] - 2026-07-14 [Google Play Production]
+
+### Added
+
+- **Forced update**: Store-gated minimum Android/iOS versions with a blocking
+  update screen and admin App Version controls.
+- **App review**: Rate / open store actions always target the production Play
+  listing, including from non-production flavors.
+
+### Changed
+
+- **Updates**: Replaced Play in-app update flow with the forced-update gate.
+- **Release size**: Removed unused bundled images/icons and unused runtime
+  dependencies (smaller production AAB/APK).
+
+### Fixed
+
+- **What's New**: Bundled `changelog.json` so release highlights load after
+  update.
+
 ## [2.1.4+78] - 2026-07-13 [Google Play Production]
 
 ### Added

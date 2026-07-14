@@ -108,9 +108,10 @@ service cloud.firestore {
     }
 
     // Forced-update min-build policy (android_min_build_number / ios_min_build_number).
+    // Clients read publicly; only admin claims may write from the Admin Panel.
     match /app_config/in_app_update {
       allow read: if true;
-      allow write: if false;
+      allow write: if isAdmin();
     }
 
     // Subscription catalog — read-only for clients; seed via admin tools.

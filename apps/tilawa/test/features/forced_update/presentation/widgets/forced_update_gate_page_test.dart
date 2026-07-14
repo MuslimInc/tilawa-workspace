@@ -36,5 +36,6 @@ void main() {
 
     final PopScope popScope = tester.widget(find.byType(PopScope));
     expect(popScope.canPop, isFalse);
+    expect(find.text('Dismiss (debug)'), findsOneWidget);
   });
 }

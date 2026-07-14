@@ -1,5 +1,6 @@
 import 'dart:async';
 
+import 'package:flutter/foundation.dart';
 import 'package:injectable/injectable.dart';
 import 'package:tilawa/core/logging/app_logger.dart';
 import 'package:tilawa/features/app_review/domain/usecases/open_app_store_listing_use_case.dart';
@@ -54,6 +55,16 @@ class ForcedUpdateCoordinator {
       logger.d('[ForcedUpdateCoordinator] Check failed (fail open): $e');
       _gatePresenter.dismissGate();
     }
+  }
+
+  /// Debug-only: shows the gate without evaluating remote policy.
+  ///
+  /// No-op in release / profile when [kDebugMode] is false.
+  void debugPreviewGate() {
+    if (!kDebugMode) {
+      return;
+    }
+    _gatePresenter.showGate(onUpdate: _openStore);
   }
 
   Future<void> _openStore() async {

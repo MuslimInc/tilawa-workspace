@@ -1,0 +1,104 @@
+<app-page-header
+  [title]="'forcedUpdate_title' | t"
+  [subtitle]="'forcedUpdate_subtitle' | t"
+></app-page-header>
+
+<div class="max-w-2xl mx-auto space-y-4">
+  <app-tilawa-loading-state *ngIf="loading$ | async"></app-tilawa-loading-state>
+
+  <app-tilawa-error-state
+    *ngIf="error$ | async as error"
+    [message]="error"
+  ></app-tilawa-error-state>
+
+  <div
+    *ngIf="successMessage$ | async as successKey"
+    class="p-4 rounded-[var(--tilawa-radius-md)] border border-[var(--tilawa-success)]/30 bg-[var(--tilawa-success)]/10 text-[var(--tilawa-success)]"
+    role="status"
+  >
+    {{ successKey | t }}
+  </div>
+
+  <app-tilawa-card
+    *ngIf="!(loading$ | async)"
+    [title]="'forcedUpdate_cardTitle' | t"
+    [subtitle]="'forcedUpdate_cardHint' | t"
+  >
+    <form [formGroup]="form" class="space-y-5" (ngSubmit)="openSaveConfirm()">
+      <div>
+        <label
+          class="block text-sm font-medium text-[var(--tilawa-on-surface)] mb-1"
+          for="androidMinBuildNumber"
+        >
+          {{ 'forcedUpdate_androidMin' | t }}
+        </label>
+        <input
+          id="androidMinBuildNumber"
+          type="number"
+          min="0"
+          step="1"
+          inputmode="numeric"
+          formControlName="androidMinBuildNumber"
+          class="tilawa-field w-full"
+        />
+        <p
+          *ngIf="
+            form.get('androidMinBuildNumber')?.invalid &&
+            form.get('androidMinBuildNumber')?.touched
+          "
+          class="mt-1 text-xs text-[var(--tilawa-error)]"
+        >
+          {{ 'forcedUpdate_invalidBuild' | t }}
+        </p>
+      </div>
+
+      <div>
+        <label
+          class="block text-sm font-medium text-[var(--tilawa-on-surface)] mb-1"
+          for="iosMinBuildNumber"
+        >
+          {{ 'forcedUpdate_iosMin' | t }}
+        </label>
+        <input
+          id="iosMinBuildNumber"
+          type="number"
+          min="0"
+          step="1"
+          inputmode="numeric"
+          formControlName="iosMinBuildNumber"
+          class="tilawa-field w-full"
+        />
+        <p
+          *ngIf="
+            form.get('iosMinBuildNumber')?.invalid &&
+            form.get('iosMinBuildNumber')?.touched
+          "
+          class="mt-1 text-xs text-[var(--tilawa-error)]"
+        >
+          {{ 'forcedUpdate_invalidBuild' | t }}
+        </p>
+      </div>
+
+      <div class="flex justify-end pt-2">
+        <app-tilawa-button
+          variant="primary"
+          type="submit"
+          [disabled]="form.invalid || form.pristine || (saving$ | async) === true"
+          [loading]="(saving$ | async) === true"
+        >
+          {{ 'common_save' | t }}
+        </app-tilawa-button>
+      </div>
+    </form>
+  </app-tilawa-card>
+</div>
+
+<app-confirm-dialog
+  [isOpen]="confirmOpen"
+  [title]="'forcedUpdate_confirmTitle' | t"
+  [message]="confirmMessage()"
+  [confirmLabel]="'common_save' | t"
+  [loading]="(saving$ | async) === true"
+  (confirm)="confirmSave()"
+  (cancel)="cancelSave()"
+/>
