@@ -1,7 +1,27 @@
 {
   "schemaVersion": 1,
-  "lastUpdatedAt": "2026-07-13T20:12:27Z",
+  "lastUpdatedAt": "2026-07-14T19:49:00Z",
   "releases": [
+    {
+      "id": "2.1.5+79",
+      "version": "2.1.5",
+      "buildNumber": 79,
+      "highlights": {
+        "en": [
+          "Clearer prompts when a required update is available on the store",
+          "Rate the app opens the correct production Play Store listing",
+          "What's New highlights load reliably after each update",
+          "Smaller download size from unused assets and packages cleaned up"
+        ],
+        "ar": [
+          "تنبيهات أوضح عند وجوب التحديث من المتجر",
+          "تقييم التطبيق يفتح صفحة متجر Play الإنتاجية الصحيحة",
+          "نقاط «ما الجديد» تظهر بموثوقية بعد كل تحديث",
+          "حجم تنزيل أصغر بعد إزالة أصول وحزم غير مستخدمة"
+        ]
+      },
+      "publishedAt": "2026-07-14T19:49:00Z"
+    },
     {
       "id": "2.1.4+78",
       "version": "2.1.4",
@@ -249,3 +269,4 @@
     }
   ]
 }
+
