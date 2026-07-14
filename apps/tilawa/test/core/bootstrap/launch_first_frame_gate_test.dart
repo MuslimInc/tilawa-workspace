@@ -1,9 +1,22 @@
+import 'package:flutter/services.dart';
 import 'package:flutter/widgets.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:tilawa/core/bootstrap/launch_first_frame_gate.dart';
 
 void main() {
-  tearDown(LaunchFirstFrameGate.reset);
+  final TestWidgetsFlutterBinding binding =
+      TestWidgetsFlutterBinding.ensureInitialized();
+  const MethodChannel launchSplashChannel = MethodChannel(
+    'com.tilawa.app/launch_splash',
+  );
+
+  tearDown(() {
+    binding.defaultBinaryMessenger.setMockMethodCallHandler(
+      launchSplashChannel,
+      null,
+    );
+    LaunchFirstFrameGate.reset();
+  });
 
   test('release after defer allows frames', () {
     LaunchFirstFrameGate.defer();
@@ -24,4 +37,51 @@ void main() {
     await LaunchFirstFrameGate.notifyAndroidLaunchSplashReady();
     expect(LaunchFirstFrameGate.reset, returnsNormally);
   });
+
+  test(
+    'notifyAndroidLaunchSplashReady treats missing native handler as final',
+    () async {
+      LaunchFirstFrameGate.debugIsAndroidOverride = true;
+      var calls = 0;
+      binding.defaultBinaryMessenger.setMockMethodCallHandler(
+        launchSplashChannel,
+        (_) async {
+          calls++;
+          throw MissingPluginException();
+        },
+      );
+
+      await LaunchFirstFrameGate.notifyAndroidLaunchSplashReady();
+      await LaunchFirstFrameGate.notifyAndroidLaunchSplashReady();
+
+      expect(calls, 1);
+    },
+  );
+
+  testWidgets(
+    'scheduleReleaseAfterFirstFrame waits for non-zero Flutter view',
+    (WidgetTester tester) async {
+      var viewReady = false;
+      LaunchFirstFrameGate.debugHasNonZeroFlutterViewOverride = () => viewReady;
+
+      LaunchFirstFrameGate.defer();
+      expect(WidgetsBinding.instance.sendFramesToEngine, isFalse);
+
+      LaunchFirstFrameGate.scheduleReleaseAfterFirstFrame();
+      await tester.pump();
+      await tester.pump();
+
+      expect(
+        WidgetsBinding.instance.sendFramesToEngine,
+        isFalse,
+        reason: 'must not release while Flutter view reports 0×0',
+      );
+
+      viewReady = true;
+      binding.handleMetricsChanged();
+      await tester.pump();
+
+      expect(WidgetsBinding.instance.sendFramesToEngine, isTrue);
+    },
+  );
 }

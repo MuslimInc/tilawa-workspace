@@ -1,7 +1,8 @@
 import 'dart:async';
 import 'dart:io' show Platform;
+import 'dart:ui' show FlutterView;
 
-import 'package:flutter/foundation.dart' show kIsWeb;
+import 'package:flutter/foundation.dart' show kIsWeb, visibleForTesting;
 import 'package:flutter/services.dart';
 import 'package:flutter/scheduler.dart';
 import 'package:flutter/widgets.dart';
@@ -23,11 +24,17 @@ abstract final class LaunchFirstFrameGate {
   static bool _released = false;
   static bool _nativeSplashNotified = false;
   static Timer? _releaseFailsafeTimer;
+  static WidgetsBindingObserver? _metricsObserver;
 
   /// Overrides the Android platform check so host tests can exercise the
   /// native splash MethodChannel paths.
   @visibleForTesting
   static bool? debugIsAndroidOverride;
+
+  /// Overrides the Flutter-view size check used before releasing the first
+  /// frame (host tests for the 0×0 cold-start path).
+  @visibleForTesting
+  static bool Function()? debugHasNonZeroFlutterViewOverride;
 
   /// Call once before [runApp] during bootstrap.
   static void defer() {
@@ -63,14 +70,17 @@ abstract final class LaunchFirstFrameGate {
           phase: 'first_frame_gate',
         ),
       );
-      release();
+      // Avoid invoking the native splash channel from the failsafe path: the
+      // engine/activity handshake may still be incomplete (FLUTTER-A4 class).
+      release(notifyNativeSplash: false);
     });
   }
 
   /// Paints the first frame and dismisses the Android 12 splash without animation.
-  static void release() {
+  static void release({bool notifyNativeSplash = true}) {
     _releaseFailsafeTimer?.cancel();
     _releaseFailsafeTimer = null;
+    _detachMetricsObserver();
     if (_released) {
       firstFrameLog('allowFirstFrame skipped (already released)');
       return;
@@ -83,7 +93,9 @@ abstract final class LaunchFirstFrameGate {
     } else {
       firstFrameLog('allowFirstFrame skipped (defer was not used)');
     }
-    unawaited(notifyAndroidLaunchSplashReady());
+    if (notifyNativeSplash) {
+      unawaited(notifyAndroidLaunchSplashReady());
+    }
   }
 
   /// Dismisses the Android 12 splash after the Flutter launch UI is painted.
@@ -97,6 +109,10 @@ abstract final class LaunchFirstFrameGate {
   }
 
   /// Schedules [release] after the first frame containing [child] is built.
+  ///
+  /// On some OEM cold starts the first post-frame callback can run while the
+  /// Flutter view is still 0×0 (see FLUTTER-A4 breadcrumbs). In that case we
+  /// wait for [didChangeMetrics] before releasing.
   static void scheduleReleaseAfterFirstFrame() {
     firstFrameLog('scheduleReleaseAfterFirstFrame registered');
     StartupPerfLog.log('first_frame_release_scheduled');
@@ -106,9 +122,45 @@ abstract final class LaunchFirstFrameGate {
       SchedulerBinding.instance.addPostFrameCallback((_) {
         firstFrameLog('post-frame callback: BootGate splash built');
         StartupPerfLog.log('first_frame_boot_gate_built');
+        if (!_hasNonZeroFlutterView()) {
+          firstFrameLog(
+            'post-frame callback: Flutter view is 0×0; waiting for metrics',
+          );
+          _attachMetricsObserver();
+          return;
+        }
         release();
       });
     });
+  }
+
+  static bool _hasNonZeroFlutterView() {
+    final bool Function()? override = debugHasNonZeroFlutterViewOverride;
+    if (override != null) {
+      return override();
+    }
+    return WidgetsBinding.instance.platformDispatcher.views.any((
+      FlutterView view,
+    ) {
+      return view.physicalSize.width > 0 && view.physicalSize.height > 0;
+    });
+  }
+
+  static void _attachMetricsObserver() {
+    _detachMetricsObserver();
+    final _ReleaseOnNonZeroMetricsObserver observer =
+        _ReleaseOnNonZeroMetricsObserver();
+    _metricsObserver = observer;
+    WidgetsBinding.instance.addObserver(observer);
+  }
+
+  static void _detachMetricsObserver() {
+    final WidgetsBindingObserver? observer = _metricsObserver;
+    if (observer == null) {
+      return;
+    }
+    WidgetsBinding.instance.removeObserver(observer);
+    _metricsObserver = null;
   }
 
   static Future<void> _invokeAndroidLaunchSplashReady() async {
@@ -126,6 +178,10 @@ abstract final class LaunchFirstFrameGate {
         'com.tilawa.app/launch_splash',
       ).invokeMethod<void>('ready');
       firstFrameLog('native splash ready acknowledged');
+    } on MissingPluginException catch (error) {
+      // Channel not registered yet / engine tearing down — treat as final so
+      // we do not retry-spam. Android keep-on-screen failsafe still dismisses.
+      firstFrameLog('native splash ready unavailable: $error');
     } on Object catch (error) {
       firstFrameLog('native splash ready failed: $error');
       _nativeSplashNotified = false;
@@ -136,9 +192,22 @@ abstract final class LaunchFirstFrameGate {
   static void reset() {
     _releaseFailsafeTimer?.cancel();
     _releaseFailsafeTimer = null;
+    _detachMetricsObserver();
     _deferred = false;
     _released = false;
     _nativeSplashNotified = false;
     debugIsAndroidOverride = null;
+    debugHasNonZeroFlutterViewOverride = null;
+  }
+}
+
+class _ReleaseOnNonZeroMetricsObserver extends WidgetsBindingObserver {
+  @override
+  void didChangeMetrics() {
+    if (!LaunchFirstFrameGate._hasNonZeroFlutterView()) {
+      return;
+    }
+    firstFrameLog('metrics changed: Flutter view is non-zero; releasing frame');
+    LaunchFirstFrameGate.release();
   }
 }
