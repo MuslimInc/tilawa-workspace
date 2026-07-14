@@ -70,7 +70,9 @@ class _PrayerAlertsPermissionFlowState
         case PrayerAlertsPermissionStep.exactAlarm:
           await cubit.requestExactAlarmPermission();
         case PrayerAlertsPermissionStep.batteryOptimization:
-          await cubit.requestIgnoreBatteryOptimizations();
+          // Battery whitelist dialog disabled; step omitted from pending list.
+          // await cubit.requestIgnoreBatteryOptimizations();
+          break;
         case PrayerAlertsPermissionStep.oemAutostart:
           await cubit.checkCapability();
       }
@@ -286,6 +288,7 @@ _StepCopy _stepCopy(BuildContext context, PrayerAlertsPermissionStep step) {
       body: l10n.prayerAlertsPermissionExactAlarmBody,
       icon: Icons.alarm_rounded,
     ),
+    // Battery optimization step disabled in [prayerAlertsSetupPendingSteps].
     PrayerAlertsPermissionStep.batteryOptimization => _StepCopy(
       title: l10n.prayerAlertsPermissionBatteryTitle,
       body: l10n.prayerAlertsPermissionBatteryBody,

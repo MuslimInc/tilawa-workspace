@@ -290,14 +290,15 @@ class AndroidAdhanAlarmPlayer implements IAdhanAlarmPlayer {
 
   @override
   Future<void> requestIgnoreBatteryOptimizations() async {
-    if (!isSupported) return;
-    try {
-      await _channel.invokeMethod<bool>('requestIgnoreBatteryOptimizations');
-    } on PlatformException catch (e) {
-      logger.e(
-        '[AndroidAdhanAlarmPlayer] requestIgnoreBatteryOptimizations failed: ${e.message}',
-      );
-    }
+    // Battery-optimization whitelist dialog temporarily disabled for first-run.
+    // if (!isSupported) return;
+    // try {
+    //   await _channel.invokeMethod<bool>('requestIgnoreBatteryOptimizations');
+    // } on PlatformException catch (e) {
+    //   logger.e(
+    //     '[AndroidAdhanAlarmPlayer] requestIgnoreBatteryOptimizations failed: ${e.message}',
+    //   );
+    // }
   }
 
   @override

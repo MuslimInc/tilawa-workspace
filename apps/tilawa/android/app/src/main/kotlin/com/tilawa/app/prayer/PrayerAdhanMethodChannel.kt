@@ -84,7 +84,9 @@ internal object PrayerAdhanMethodChannel {
                     return pm.isIgnoringBatteryOptimizations(appContext.packageName)
                 }
                 override fun requestIgnoreBatteryOptimizations(result: MethodResultProxy) {
-                    requestIgnoreBatteryOptimizationsInternal(context, result)
+                    // Battery whitelist dialog temporarily disabled.
+                    // requestIgnoreBatteryOptimizationsInternal(context, result)
+                    result.success(false)
                 }
             },
             analytics = FirebasePrayerAnalytics(appContext)
@@ -186,3 +188,4 @@ internal object PrayerAdhanMethodChannel {
         }
     }
 }
+
