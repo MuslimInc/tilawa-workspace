@@ -65,14 +65,6 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "0.2.4"
-  android_id:
-    dependency: transitive
-    description:
-      name: android_id
-      sha256: "543bbfcf316de69d3ac36601d74eeaacd0248178a2671b00ad30d09f35bd3581"
-      url: "https://pub.dev"
-    source: hosted
-    version: "0.5.2+1"
   ansi_styles:
     dependency: transitive
     description:
@@ -1087,14 +1079,6 @@ packages:
     description: flutter
     source: sdk
     version: "0.0.0"
-  gap:
-    dependency: transitive
-    description:
-      name: gap
-      sha256: f19387d4e32f849394758b91377f9153a1b41d79513ef7668c088c77dbc6955d
-      url: "https://pub.dev"
-    source: hosted
-    version: "3.0.1"
   geoclue:
     dependency: transitive
     description:
@@ -1351,14 +1335,6 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "4.1.2"
-  hugeicons:
-    dependency: transitive
-    description:
-      name: hugeicons
-      sha256: "5a4bb3f3e0a34df5ab8c41f43eb8c63382af8b3dcb8d63e8231b3d4dda3433e5"
-      url: "https://pub.dev"
-    source: hosted
-    version: "1.1.7"
   hydrated_bloc:
     dependency: transitive
     description:
