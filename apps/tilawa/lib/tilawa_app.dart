@@ -360,10 +360,12 @@ class _ThemedMaterialApp extends StatelessWidget {
       },
       theme: AppTheme.getLightTheme(
         primaryColor: themeSnapshot.primaryColor,
+        locale: locale,
         extensions: const [QuranReaderTheme.light],
       ),
       darkTheme: AppTheme.getDarkTheme(
         primaryColor: themeSnapshot.primaryColor,
+        locale: locale,
         isDefaultPreset: themeSnapshot.isDefaultPreset,
         darkIsTrueBlack: themeSnapshot.darkIsTrueBlack,
         extensions: const [QuranReaderTheme.dark],

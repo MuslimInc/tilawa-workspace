@@ -76,5 +76,22 @@ void main() {
       expect(theme.extension<MeMuslimComponentTokens>(), isNotNull);
       expect(theme.colorScheme.brightness, Brightness.dark);
     });
+    test(
+      'fontFamilyForLanguageCode maps English to Poppins and Arabic to IBM Plex',
+      () {
+        expect(
+          AppTheme.fontFamilyForLanguageCode('en'),
+          contains('Poppins'),
+        );
+        expect(
+          AppTheme.fontFamilyForLanguageCode('ar'),
+          contains('IBMPlexSansArabic'),
+        );
+        expect(
+          AppTheme.fontFamilyForLanguageCode(null),
+          contains('IBMPlexSansArabic'),
+        );
+      },
+    );
   });
 }
