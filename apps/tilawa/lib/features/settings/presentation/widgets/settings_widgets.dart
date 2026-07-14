@@ -80,6 +80,7 @@ Widget settingsPickerTrailing(
   BuildContext context, {
   required String value,
   Widget? leading,
+  String? fontFamily,
 }) {
   final theme = Theme.of(context);
   final tokens = theme.tokens;
@@ -98,6 +99,7 @@ Widget settingsPickerTrailing(
             alpha: tokens.opacityEmphasis,
           ),
           fontWeight: FontWeight.w500,
+          fontFamily: fontFamily,
         ),
       ),
       SizedBox(width: tokens.spaceSmall),

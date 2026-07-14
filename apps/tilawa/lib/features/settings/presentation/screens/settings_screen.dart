@@ -183,6 +183,9 @@ class _SettingsScreenState extends State<SettingsScreen> {
                                 state.locale,
                                 l10n,
                               ),
+                              fontFamily: AppTheme.fontFamilyForLanguageCode(
+                                state.locale.languageCode,
+                              ),
                             ),
                             onTap: () => SettingsSheets.showLanguagePicker(
                               context,

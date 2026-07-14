@@ -19,6 +19,7 @@ class TilawaSelectionTile extends StatelessWidget {
     required this.onTap,
     this.showDivider = true,
     this.enabled = true,
+    this.fontFamily,
   });
 
   /// The text label to display.
@@ -39,6 +40,9 @@ class TilawaSelectionTile extends StatelessWidget {
   /// Whether the tile is interactive.
   final bool enabled;
 
+  /// Optional font family override (e.g. native script for language labels).
+  final String? fontFamily;
+
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
@@ -49,6 +53,7 @@ class TilawaSelectionTile extends StatelessWidget {
     final textStyle = theme.textTheme.bodyLarge?.copyWith(
       fontWeight: isSelected ? FontWeight.w700 : FontWeight.w500,
       color: colorScheme.onSurface,
+      fontFamily: fontFamily,
     );
 
     return Column(

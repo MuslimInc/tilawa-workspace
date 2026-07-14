@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 
 import '../atoms/tilawa_loading_indicator.dart';
+import '../foundation/app_theme.dart';
 import '../foundation/component_tokens.dart';
 import '../foundation/design_tokens.dart';
 import '../foundation/tilawa_interactive_surface.dart';
@@ -109,6 +110,9 @@ class TilawaLanguageSwitcher extends StatelessWidget {
                           label,
                           textAlign: TextAlign.center,
                           style: labelStyle.copyWith(
+                            fontFamily: AppTheme.fontFamilyForLanguageCode(
+                              lang,
+                            ),
                             color: isSelected
                                 ? colorScheme.primary
                                 : colorScheme.onPrimary,
