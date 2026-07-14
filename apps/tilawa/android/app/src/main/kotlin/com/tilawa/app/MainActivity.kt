@@ -3,8 +3,6 @@ package com.tilawa.app
 import android.content.Intent
 import android.os.Build
 import android.os.Bundle
-import android.os.Handler
-import android.os.Looper
 import android.util.Log
 import androidx.core.splashscreen.SplashScreen.Companion.installSplashScreen
 import com.ryanheise.audioservice.AudioServiceActivity
@@ -31,19 +29,26 @@ class MainActivity : AudioServiceActivity() {
         private const val GSIGNIN_TAG = "TilawaGSignIn"
         private const val FIRST_FRAME_TAG = "FirstFrame"
 
-        // Failsafe: must outlast the Dart-side LaunchFirstFrameGate failsafe
-        // (3s) so the graceful "ready" path wins on healthy launches. If Dart
-        // never sends "ready" (engine wedge, bad patch, crash before runApp),
-        // the splash is force-dismissed instead of holding the user forever.
-        private const val LAUNCH_SPLASH_FAILSAFE_MS = 6_000L
-
-        @Volatile
-        var keepLaunchSplashOnScreen: Boolean = true
-
         /** Updated on each [configureFlutterEngine]; used by credential UI lifecycle. */
         @Volatile
         var invokeCredentialUiDismissed: (() -> Unit)? = null
+
+        /**
+         * Mirrors [LaunchSplashController.keepOnScreen] for keep-on-screen
+         * polls and older call sites. Prefer the controller API for dismiss.
+         */
+        @Volatile
+        var keepLaunchSplashOnScreen: Boolean = true
     }
+
+    private val launchSplashController =
+        LaunchSplashController(
+            log = ::firstFrameLog,
+            onDismissed = {
+                keepLaunchSplashOnScreen = false
+                BootDeviceEventBreadcrumbs.markBootComplete()
+            },
+        )
 
     private fun firstFrameLog(message: String) {
         Log.d(FIRST_FRAME_TAG, message)
@@ -57,20 +62,17 @@ class MainActivity : AudioServiceActivity() {
             "MAIN_ACTIVITY_ON_CREATE_INTENT action=${intent?.action} extras=${intent?.extras?.keySet()} renderMode=texture"
         )
         firstFrameLog("MainActivity.onCreate installSplashScreen")
+        launchSplashController.resetForCreate()
+        keepLaunchSplashOnScreen = launchSplashController.keepOnScreen
         val splashScreen = installSplashScreen()
-        splashScreen.setKeepOnScreenCondition { keepLaunchSplashOnScreen }
-        splashScreen.setOnExitAnimationListener { splashScreenView ->
-            firstFrameLog("splash exit animation → remove() (no fade)")
-            splashScreenView.remove()
+        splashScreen.setKeepOnScreenCondition {
+            keepLaunchSplashOnScreen = launchSplashController.keepOnScreen
+            launchSplashController.keepOnScreen
         }
-        Handler(Looper.getMainLooper()).postDelayed({
-            if (keepLaunchSplashOnScreen) {
-                Log.w(TAG, "Launch splash failsafe fired — Flutter never sent 'ready'")
-                firstFrameLog("FAILSAFE: forcing keepLaunchSplashOnScreen=false")
-                keepLaunchSplashOnScreen = false
-                BootDeviceEventBreadcrumbs.markBootComplete()
-            }
-        }, LAUNCH_SPLASH_FAILSAFE_MS)
+        splashScreen.setOnExitAnimationListener { splashScreenViewProvider ->
+            firstFrameLog("splash exit animation → LaunchSplashController")
+            launchSplashController.onExitAnimation(splashScreenViewProvider)
+        }
         super.onCreate(savedInstanceState)
         firstFrameLog("MainActivity.onCreate complete")
         handleIntent(intent)
@@ -162,9 +164,9 @@ class MainActivity : AudioServiceActivity() {
             .setMethodCallHandler { call, result ->
                 when (call.method) {
                     "ready" -> {
-                        firstFrameLog("MethodChannel ready → keepLaunchSplashOnScreen=false")
-                        keepLaunchSplashOnScreen = false
-                        BootDeviceEventBreadcrumbs.markBootComplete()
+                        firstFrameLog("MethodChannel ready → LaunchSplashController.dismiss")
+                        launchSplashController.dismissFromFlutterReady()
+                        keepLaunchSplashOnScreen = launchSplashController.keepOnScreen
                         result.success(null)
                     }
                     else -> result.notImplemented()
@@ -220,6 +222,7 @@ class MainActivity : AudioServiceActivity() {
     }
 
     override fun onDestroy() {
+        launchSplashController.onDestroy()
         BootDeviceEventBreadcrumbs.unregister(this)
         super.onDestroy()
     }
@@ -253,3 +256,4 @@ class MainActivity : AudioServiceActivity() {
      */
     override fun getRenderMode(): RenderMode = RenderMode.texture
 }
+
