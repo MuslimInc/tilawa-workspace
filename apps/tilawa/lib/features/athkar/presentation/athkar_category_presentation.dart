@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:tilawa/core/extensions.dart';
+import 'package:tilawa_ui_kit/tilawa_ui_kit.dart';
 
 import '../domain/entities/athkar_category.dart';
 
@@ -33,4 +34,49 @@ IconData athkarCategoryIcon(String iconName) {
     default:
       return Icons.bookmark_added_rounded;
   }
+}
+
+/// Soft card wash alpha for Athkar category tiles (Behance-style pastel).
+const double kAthkarCategorySurfaceTintAlpha = 0.14;
+
+/// Icon-well wash — slightly stronger than [kAthkarCategorySurfaceTintAlpha].
+const double kAthkarCategoryIconWellTintAlpha = 0.22;
+
+/// Category accent from known Athkar icon keys — product colors only.
+Color athkarCategoryAccent(
+  String iconName, {
+  required MeMuslimProductColors product,
+  required ColorScheme colorScheme,
+}) {
+  return switch (iconName) {
+    // Morning — warm amber (sunrise).
+    'wb_sunny_rounded' => product.exploreFeatureIcon(HomeExploreFeature.quran),
+    // Evening — indigo dusk.
+    'nights_stay_rounded' => product.exploreFeatureIcon(
+      HomeExploreFeature.bookmarks,
+    ),
+    // Sleep — quiet blue-grey night.
+    'bedtime_rounded' => product.info,
+    // Wake — clear blue.
+    'alarm_rounded' => product.exploreFeatureIcon(HomeExploreFeature.qibla),
+    // After prayer — brand-adjacent green.
+    'mosque_rounded' => product.exploreFeatureIcon(HomeExploreFeature.reciters),
+    // Miscellaneous — soft teal.
+    'auto_stories_rounded' => product.exploreFeatureIcon(
+      HomeExploreFeature.support,
+    ),
+    'prayer_times_rounded' => colorScheme.primary,
+    'tasbeeh' => product.featuredGradientEnd,
+    _ => colorScheme.primary,
+  };
+}
+
+Color athkarCategorySurfaceWash({
+  required Color accent,
+  required ColorScheme colorScheme,
+}) {
+  return Color.alphaBlend(
+    accent.withValues(alpha: kAthkarCategorySurfaceTintAlpha),
+    colorScheme.surface,
+  );
 }

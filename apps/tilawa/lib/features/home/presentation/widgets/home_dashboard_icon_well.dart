@@ -11,6 +11,7 @@ class HomeDashboardIconWell extends StatelessWidget {
     required this.child,
     this.accent,
     this.extent,
+    this.fillAlpha = 0.10,
   });
 
   final Widget child;
@@ -18,6 +19,10 @@ class HomeDashboardIconWell extends StatelessWidget {
 
   /// Well width/height. Defaults to [TilawaDesignTokens.iconBoxSize].
   final double? extent;
+
+  /// Accent wash on the well fill. Keep above parent surface tint so the
+  /// badge reads slightly stronger than a tinted card background.
+  final double fillAlpha;
 
   @override
   Widget build(BuildContext context) {
@@ -32,7 +37,7 @@ class HomeDashboardIconWell extends StatelessWidget {
         borderRadius: BorderRadius.circular(
           tokens.resolveRadius(family: TilawaRadiusFamily.decorative),
         ),
-        color: iconAccent.withValues(alpha: 0.10),
+        color: iconAccent.withValues(alpha: fillAlpha),
       ),
       child: SizedBox(
         width: size,

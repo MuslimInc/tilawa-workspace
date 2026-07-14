@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:tilawa/features/home/presentation/widgets/home_dashboard_elevated_surface.dart';
 import 'package:tilawa/features/home/presentation/widgets/home_dashboard_icon_well.dart';
 import 'package:tilawa/features/home/presentation/widgets/home_dashboard_section.dart';
+import 'package:tilawa/features/home/presentation/widgets/home_feature_pastel.dart';
 import 'package:tilawa_ui_kit/tilawa_ui_kit.dart';
 
 /// Premium primary action tile for the Home dashboard.
@@ -12,6 +13,7 @@ class HomePrimaryActionTile extends StatelessWidget {
     required this.label,
     required this.subtitle,
     required this.onTap,
+    required this.accent,
     this.goldAccentOnStart = true,
   });
 
@@ -19,6 +21,7 @@ class HomePrimaryActionTile extends StatelessWidget {
   final String label;
   final String subtitle;
   final VoidCallback onTap;
+  final Color accent;
   final bool goldAccentOnStart;
 
   @override
@@ -26,8 +29,10 @@ class HomePrimaryActionTile extends StatelessWidget {
     final tokens = context.tokens;
     final theme = Theme.of(context);
     final colorScheme = theme.colorScheme;
-    final screenTokens = theme.componentTokens.homeScreen;
-    final Color iconAccent = screenTokens.homePrayerHeroAccent;
+    final Color wash = HomeFeaturePastel.wash(
+      accent: accent,
+      colorScheme: colorScheme,
+    );
     final double radius = tokens.resolveRadius(
       family: TilawaRadiusFamily.hero,
     );
@@ -40,7 +45,8 @@ class HomePrimaryActionTile extends StatelessWidget {
       borderRadius: borderRadius,
       onTap: onTap,
       semanticLabel: label,
-      stateLayerColor: iconAccent,
+      stateLayerColor: accent,
+      color: wash,
       tier: HomeDashboardElevationTier.primary,
       child: Padding(
         padding: EdgeInsetsDirectional.fromSTEB(
@@ -53,7 +59,8 @@ class HomePrimaryActionTile extends StatelessWidget {
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             HomeDashboardIconWell(
-              accent: iconAccent,
+              accent: accent,
+              fillAlpha: HomeFeaturePastel.iconWellFillAlpha,
               child: icon,
             ),
             SizedBox(height: tokens.spaceMedium + tokens.spaceExtraSmall),

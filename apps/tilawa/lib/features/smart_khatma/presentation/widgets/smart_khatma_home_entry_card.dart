@@ -75,6 +75,7 @@ class _KhatmaHomeCompletedEntry extends StatelessWidget {
     onTap: onOpenHub,
     title: context.l10n.khatmaCompletedTitle,
     subtitle: context.l10n.khatmaCompletedSubtitle,
+    showChevron: true,
   );
 }
 
@@ -85,19 +86,12 @@ class _KhatmaHomeEmptyEntry extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final theme = Theme.of(context);
-    final tokens = theme.tokens;
-
     return KhatmaHomeDestinationCard(
       icon: Icons.auto_stories_outlined,
       onTap: onOpenHub,
       title: context.l10n.khatmaEmptyTitle,
       subtitle: context.l10n.khatmaEmptySubtitle,
-      trailing: Icon(
-        Icons.chevron_right_rounded,
-        color: theme.colorScheme.onPrimary.withValues(alpha: 0.9),
-        size: tokens.iconSizeLarge,
-      ),
+      showChevron: true,
     );
   }
 }
@@ -125,16 +119,13 @@ class _KhatmaHomeActiveEntry extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final theme = Theme.of(context);
-    final tokens = theme.tokens;
-    final colorScheme = theme.colorScheme;
     final String detail = isTodayCompleted
         ? context.l10n.khatmaTodayCompletedTitle
         : '${formatKhatmaPageRange(context.l10n, rangeStart, rangeEnd)} · '
               '${context.l10n.khatmaConfirmedAndRemaining(
                 todayCompletedPages,
                 todayRemainingPages,
-              )} · $planProgress%';
+              )}';
 
     return KhatmaHomeDestinationCard(
       icon: Icons.auto_stories_outlined,
@@ -142,25 +133,8 @@ class _KhatmaHomeActiveEntry extends StatelessWidget {
       title: context.l10n.khatmaProgressTitle,
       subtitle: subtitle,
       detail: detail,
-      trailing: Column(
-        mainAxisSize: MainAxisSize.min,
-        crossAxisAlignment: CrossAxisAlignment.end,
-        spacing: tokens.spaceExtraSmall,
-        children: [
-          Text(
-            context.l10n.khatmaHomeViewPlan,
-            style: theme.textTheme.labelLarge?.copyWith(
-              color: colorScheme.onPrimary,
-              fontWeight: FontWeight.w700,
-            ),
-          ),
-          Icon(
-            Icons.chevron_right_rounded,
-            color: colorScheme.onPrimary.withValues(alpha: 0.9),
-            size: tokens.iconSizeLarge,
-          ),
-        ],
-      ),
+      progress: planProgress,
+      showChevron: true,
     );
   }
 }

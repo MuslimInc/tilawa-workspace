@@ -19,46 +19,57 @@ class AthkarCategoryCard extends StatelessWidget {
     final theme = Theme.of(context);
     final tokens = theme.tokens;
     final colorScheme = theme.colorScheme;
+    final product = theme.productColors;
 
     final IconData iconData = athkarCategoryIcon(icon);
+    final Color accent = athkarCategoryAccent(
+      icon,
+      product: product,
+      colorScheme: colorScheme,
+    );
+    final Color wash = athkarCategorySurfaceWash(
+      accent: accent,
+      colorScheme: colorScheme,
+    );
 
     return TilawaCard(
       onTap: onTap,
       borderRadius: tokens.radiusExtraLarge,
       surface: TilawaCardSurface.raised,
-      backgroundColor: colorScheme.surface,
+      backgroundColor: wash,
+      // Accent-tinted press ink so pastel cards still feel tappable.
+      // ignore: deprecated_member_use
+      splashColor: accent,
       padding: EdgeInsets.all(tokens.spaceLarge),
       // Whole card is one navigation target; let [TilawaCard.onTap] receive taps
       // from decorative children (icon box, label).
       child: IgnorePointer(
         child: Column(
           spacing: tokens.spaceMedium,
-          crossAxisAlignment: .stretch,
-          mainAxisSize: .min,
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          mainAxisSize: MainAxisSize.min,
           children: [
             Expanded(
               child: TilawaIconBox(
                 icon: iconData,
-                size: tokens.iconSizeLarge,
-                backgroundColor: colorScheme.primary.withValues(
-                  alpha: tokens.opacitySubtle,
+                size: tokens.iconSizeLargePlus,
+                backgroundColor: accent.withValues(
+                  alpha: kAthkarCategoryIconWellTintAlpha,
                 ),
-                iconColor: colorScheme.primary,
+                iconColor: accent,
                 borderRadius: tokens.radiusLarge,
               ),
             ),
-            Flexible(
-              child: Align(
-                alignment: Alignment.center,
-                child: Text(
-                  name,
-                  maxLines: 2,
-                  overflow: TextOverflow.ellipsis,
-                  textAlign: TextAlign.center,
-                  style: theme.textTheme.titleMedium?.copyWith(
-                    color: colorScheme.onSurface,
-                    fontWeight: FontWeight.w700,
-                  ),
+            Align(
+              alignment: Alignment.center,
+              child: Text(
+                name,
+                maxLines: 2,
+                overflow: TextOverflow.ellipsis,
+                textAlign: TextAlign.center,
+                style: theme.textTheme.titleMedium?.copyWith(
+                  color: colorScheme.onSurface,
+                  fontWeight: FontWeight.w700,
                 ),
               ),
             ),

@@ -353,13 +353,11 @@ class _AthkarDhikrText extends StatelessWidget {
               constraints: BoxConstraints(
                 minHeight: constraints.maxHeight,
               ),
-              child: Center(
-                child: Text(
-                  text,
-                  textDirection: TextDirection.rtl,
-                  textAlign: TextAlign.center,
-                  style: textStyle,
-                ),
+              child: Text(
+                text,
+                textDirection: TextDirection.rtl,
+                textAlign: TextAlign.center,
+                style: textStyle,
               ),
             ),
           ),

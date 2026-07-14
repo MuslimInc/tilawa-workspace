@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:tilawa/core/extensions.dart';
 import 'package:tilawa/features/home/presentation/widgets/home_dashboard_elevated_surface.dart';
 import 'package:tilawa/features/home/presentation/widgets/home_dashboard_icon_well.dart';
+import 'package:tilawa/features/home/presentation/widgets/home_feature_pastel.dart';
 import 'package:tilawa/router/app_router_config.dart';
 import 'package:tilawa_ui_kit/tilawa_ui_kit.dart';
 
@@ -9,22 +10,19 @@ import 'home_shell_tab_navigation.dart';
 
 /// Secondary tools row — Reciters, Qibla, Tasbeeh.
 ///
-/// Lighter than [HomePrimaryActionsSection], but sized for phone readability
-/// (badge icon well + labelLarge). Hierarchy stays Hero → primary → tools.
+/// Behance-style category pastels via [HomeFeaturePastel]; lighter than primary
+/// tiles, quieter than the prayer hero.
 class HomeQuickToolsSection extends StatelessWidget {
   const HomeQuickToolsSection({super.key});
 
   @override
   Widget build(BuildContext context) {
     final tokens = context.tokens;
-    final theme = Theme.of(context);
-    final screenTokens = theme.componentTokens.homeScreen;
-    final Color iconAccent = screenTokens.homePrayerHeroAccent;
     final double radius = tokens.resolveRadius(
       family: TilawaRadiusFamily.decorative,
     );
     final double iconSize = tokens.iconSizeLarge + tokens.spaceExtraSmall;
-
+    final product = Theme.of(context).productColors;
     final items = _QuickToolsCatalog.items(context);
 
     return IntrinsicHeight(
@@ -35,9 +33,12 @@ class HomeQuickToolsSection extends StatelessWidget {
           for (final item in items)
             Expanded(
               child: _QuickToolTile(
-                icon: item.buildIcon(iconAccent, iconSize),
+                icon: item.buildIcon(
+                  HomeFeaturePastel.accentFor(item.feature, product),
+                  iconSize,
+                ),
                 label: item.label,
-                iconAccent: iconAccent,
+                accent: HomeFeaturePastel.accentFor(item.feature, product),
                 radius: radius,
                 onTap: item.onTap,
               ),
@@ -52,14 +53,14 @@ class _QuickToolTile extends StatelessWidget {
   const _QuickToolTile({
     required this.icon,
     required this.label,
-    required this.iconAccent,
+    required this.accent,
     required this.radius,
     required this.onTap,
   });
 
   final Widget icon;
   final String label;
-  final Color iconAccent;
+  final Color accent;
   final double radius;
   final VoidCallback onTap;
 
@@ -68,7 +69,10 @@ class _QuickToolTile extends StatelessWidget {
     final tokens = context.tokens;
     final theme = Theme.of(context);
     final colorScheme = theme.colorScheme;
-
+    final Color wash = HomeFeaturePastel.wash(
+      accent: accent,
+      colorScheme: colorScheme,
+    );
     final BorderRadius borderRadius = BorderRadius.circular(radius);
 
     return HomeDashboardElevatedSurface.interactive(
@@ -76,7 +80,8 @@ class _QuickToolTile extends StatelessWidget {
       borderRadius: borderRadius,
       onTap: onTap,
       semanticLabel: label,
-      stateLayerColor: colorScheme.primary,
+      stateLayerColor: accent,
+      color: wash,
       tier: HomeDashboardElevationTier.quickTool,
       child: Padding(
         padding: EdgeInsets.symmetric(
@@ -89,7 +94,8 @@ class _QuickToolTile extends StatelessWidget {
           spacing: tokens.spaceSmall + tokens.spaceExtraSmall,
           children: [
             HomeDashboardIconWell(
-              accent: iconAccent,
+              accent: accent,
+              fillAlpha: HomeFeaturePastel.iconWellFillAlpha,
               extent: tokens.iconBadgeSize,
               child: icon,
             ),
@@ -114,11 +120,13 @@ class _QuickToolTile extends StatelessWidget {
 @immutable
 class _QuickToolItem {
   const _QuickToolItem({
+    required this.feature,
     required this.buildIcon,
     required this.label,
     required this.onTap,
   });
 
+  final HomeExploreFeature feature;
   final Widget Function(Color color, double size) buildIcon;
   final String label;
   final VoidCallback onTap;
@@ -129,6 +137,7 @@ abstract final class _QuickToolsCatalog {
     final l10n = context.l10n;
     return <_QuickToolItem>[
       _QuickToolItem(
+        feature: HomeExploreFeature.reciters,
         buildIcon: (color, size) => Icon(
           TilawaIcons.reciters,
           size: size,
@@ -138,6 +147,7 @@ abstract final class _QuickToolsCatalog {
         onTap: () => openHomeRecitersTab(context),
       ),
       _QuickToolItem(
+        feature: HomeExploreFeature.qibla,
         buildIcon: (color, size) => Icon(
           TilawaIcons.qibla,
           size: size,
@@ -147,6 +157,7 @@ abstract final class _QuickToolsCatalog {
         onTap: () => const QiblaRoute().push<void>(context),
       ),
       _QuickToolItem(
+        feature: HomeExploreFeature.tasbeeh,
         buildIcon: (color, size) => TilawaIcons.tasbih.svg(
           color: color,
           size: size,
