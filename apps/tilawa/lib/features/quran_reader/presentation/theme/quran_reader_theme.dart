@@ -89,6 +89,7 @@ class QuranReaderTheme extends ThemeExtension<QuranReaderTheme> {
     ),
     surahTileArabicNameTextStyle: TextStyle(
       color: AppQuranReaderLegacyColors.lightPrimary,
+      fontFamily: AppTheme.arabicFontFamily,
       fontSize: 18,
       fontWeight: FontWeight.w800,
     ),
@@ -176,6 +177,7 @@ class QuranReaderTheme extends ThemeExtension<QuranReaderTheme> {
     ),
     surahTileArabicNameTextStyle: TextStyle(
       color: AppQuranReaderLegacyColors.darkArabicAccent,
+      fontFamily: AppTheme.arabicFontFamily,
       fontSize: 18,
       fontWeight: FontWeight.w700,
     ),
