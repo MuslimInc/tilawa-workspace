@@ -35,22 +35,20 @@ class HomeDashboardSection extends StatelessWidget {
     final Color secondaryText = secondaryTextColor(context);
     final double subtitleGap = tokens.spaceSmall;
     final double afterHeaderGap = contentSpacing ?? tokens.spaceLarge;
-    final TextStyle subtitleStyle = theme.textTheme.bodySmall!.copyWith(
+    final TextStyle subtitleStyle = theme.textTheme.bodyLarge!.copyWith(
       color: secondaryText,
-      height: 1.35,
+      height: 1.45,
+      fontWeight: FontWeight.w500,
     );
-    final double subtitleLineHeight =
-        (subtitleStyle.fontSize ?? tokens.iconSizeSmall) *
-        (subtitleStyle.height ?? 1.35);
 
     final Widget titleWidget = Semantics(
       header: true,
       child: Text(
         title,
-        style: theme.textTheme.titleMedium?.copyWith(
+        style: theme.textTheme.titleLarge?.copyWith(
           fontWeight: FontWeight.w800,
           color: theme.colorScheme.onSurface,
-          height: 1.15,
+          height: 1.2,
           letterSpacing: -0.2,
         ),
       ),

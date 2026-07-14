@@ -479,11 +479,11 @@ class AppLocalizationsEn extends AppLocalizations {
   String get homeDailyDuaReference2 => 'Ibn Majah';
 
   @override
-  String get khatmaEmptyTitle => 'Start a Khatma';
+  String get khatmaEmptyTitle => 'Start a new Khatma';
 
   @override
   String get khatmaEmptySubtitle =>
-      'Choose a calm reading plan. We will adjust gently when life gets busy.';
+      'Set the start, end, and duration that suit you — we\'ll divide it into a daily wird.';
 
   @override
   String khatmaDurationDays(int days) {

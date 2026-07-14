@@ -266,8 +266,8 @@
     "homeDailyAyahReference2": "القرآن ٢٩:٤٥",
     "homeDailyDuaBody2": "اللهم إني أسألك علماً نافعاً، ورزقاً طيباً، وعملاً متقبلاً",
     "homeDailyDuaReference2": "ابن ماجه",
-    "khatmaEmptyTitle": "ابدأ ختمة",
-    "khatmaEmptySubtitle": "اختر خطة قراءة هادئة. سنعدّلها بلطف إذا انشغل يومك.",
+    "khatmaEmptyTitle": "ابدأ ختمة جديدة",
+    "khatmaEmptySubtitle": "حدّد بداية الختمة ونهايتها والمدة المناسبة لك، وسنقسّمها إلى ورد يومي.",
     "khatmaDurationDays": "{days, plural, =1{يوم واحد} =2{يومان} other{{days} يومًا}}",
     "@khatmaDurationDays": {
         "placeholders": {

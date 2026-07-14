@@ -7,11 +7,10 @@ import 'package:tilawa_ui_kit/tilawa_ui_kit.dart';
 
 import 'home_shell_tab_navigation.dart';
 
-/// Compact secondary tools row — Reciters, Qibla, Tasbeeh.
+/// Secondary tools row — Reciters, Qibla, Tasbeeh.
 ///
-/// Visually lighter than [HomePrimaryActionsSection] so the Home hierarchy
-/// reads Hero → primary cards → quick tools → featured tutor. Each tool is
-/// an equal-weight compact tile in a single row.
+/// Lighter than [HomePrimaryActionsSection], but sized for phone readability
+/// (badge icon well + labelLarge). Hierarchy stays Hero → primary → tools.
 class HomeQuickToolsSection extends StatelessWidget {
   const HomeQuickToolsSection({super.key});
 
@@ -24,7 +23,7 @@ class HomeQuickToolsSection extends StatelessWidget {
     final double radius = tokens.resolveRadius(
       family: TilawaRadiusFamily.decorative,
     );
-    final double iconSize = tokens.iconSizeLarge + tokens.spaceExtraSmall * 0.5;
+    final double iconSize = tokens.iconSizeLarge + tokens.spaceExtraSmall;
 
     final items = _QuickToolsCatalog.items(context);
 
@@ -81,15 +80,17 @@ class _QuickToolTile extends StatelessWidget {
       tier: HomeDashboardElevationTier.quickTool,
       child: Padding(
         padding: EdgeInsets.symmetric(
-          vertical: tokens.spaceSmall + tokens.spaceExtraSmall,
-          horizontal: tokens.spaceExtraSmall,
+          vertical: tokens.spaceMedium,
+          horizontal: tokens.spaceSmall,
         ),
         child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
           mainAxisSize: MainAxisSize.min,
-          spacing: tokens.spaceMedium,
+          spacing: tokens.spaceSmall + tokens.spaceExtraSmall,
           children: [
             HomeDashboardIconWell(
               accent: iconAccent,
+              extent: tokens.iconBadgeSize,
               child: icon,
             ),
             Text(
@@ -97,9 +98,9 @@ class _QuickToolTile extends StatelessWidget {
               maxLines: 1,
               overflow: TextOverflow.ellipsis,
               textAlign: TextAlign.center,
-              style: theme.textTheme.labelSmall?.copyWith(
-                color: colorScheme.onSurface.withValues(alpha: 0.9),
-                fontWeight: FontWeight.w600,
+              style: theme.textTheme.labelLarge?.copyWith(
+                color: colorScheme.onSurface.withValues(alpha: 0.92),
+                fontWeight: FontWeight.w700,
                 height: 1.2,
               ),
             ),
@@ -143,7 +144,7 @@ abstract final class _QuickToolsCatalog {
           color: color,
         ),
         label: l10n.homeQuickQibla,
-        onTap: () => const QiblaRoute().push(context),
+        onTap: () => const QiblaRoute().push<void>(context),
       ),
       _QuickToolItem(
         buildIcon: (color, size) => TilawaIcons.tasbih.svg(
@@ -151,7 +152,7 @@ abstract final class _QuickToolsCatalog {
           size: size,
         ),
         label: l10n.homeQuickTasbeeh,
-        onTap: () => const TasbeehRoute().push(context),
+        onTap: () => const TasbeehRoute().push<void>(context),
       ),
     ];
   }

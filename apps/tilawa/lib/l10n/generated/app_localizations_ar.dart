@@ -475,11 +475,11 @@ class AppLocalizationsAr extends AppLocalizations {
   String get homeDailyDuaReference2 => 'ابن ماجه';
 
   @override
-  String get khatmaEmptyTitle => 'ابدأ ختمة';
+  String get khatmaEmptyTitle => 'ابدأ ختمة جديدة';
 
   @override
   String get khatmaEmptySubtitle =>
-      'اختر خطة قراءة هادئة. سنعدّلها بلطف إذا انشغل يومك.';
+      'حدّد بداية الختمة ونهايتها والمدة المناسبة لك، وسنقسّمها إلى ورد يومي.';
 
   @override
   String khatmaDurationDays(int days) {

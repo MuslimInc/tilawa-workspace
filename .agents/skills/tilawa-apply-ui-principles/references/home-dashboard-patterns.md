@@ -45,7 +45,9 @@ quick tools, which load immediately under the sliver stack.
 **Spacing rhythm** (do not change casually without cause): within a zone
 `tokens.spaceLarge`; between unrelated zones `tokens.spaceExtraLarge`; More
 uses `HomeDashboardSection(compact: true)` for tighter subtitle/content gaps
-only — section titles share one `titleMedium` style across zones.
+only — section titles share one `titleLarge` style across zones; section
+subtitles use `bodyLarge`. More list rows use ~88dp min height
+(`minInteractiveDimension * 2`) with `titleLarge` + `bodyLarge` copy.
 
 This is **not** a multi-tab launcher grid. Preserve the calm, polished,
 RTL-first dashboard — two featured primary tiles, one compact tools row, flat
@@ -151,9 +153,10 @@ File: `home_quick_tools_section.dart`
 Files: `home_more_actions_group.dart`, `home_grouped_list_row.dart`
 
 - One flat `HomeDashboardCard` with hairline `TilawaDivider`s
-- Row: outline icon box + title + optional subtitle + RTL chevron
-- Min height: `tokens.minInteractiveDimension`
-- Items: History, Favorites, Downloads, Smart Khatma (flag), Support Tilawa
+- Row: tinted icon box (`iconSizeLarge`) + title + optional subtitle + RTL chevron
+- Min height: `tokens.minInteractiveDimension * 2` (~88dp)
+- Title: `titleLarge` w600; subtitle: `bodyLarge` on `onSurfaceVariant`
+- Items: History, Favorites, Downloads, Support Tilawa
 
 Reciters, Qibla, and Tasbeeh belong in quick tools — not in More.
 
@@ -178,8 +181,8 @@ Refresh on pull-to-refresh: `HomeListeningResumeCubit.load()` alongside
 File: `home_daily_inspiration_section.dart`
 
 - One raised `HomeDashboardCard`: ayah block, `TilawaDivider`, dua block
-- Arabic line height when `context.isArabic`
-- Reference labels: `bodySmall` w500 — not bold badges
+- Labels + body: `titleLarge`; Arabic reading height ~1.55 when `context.isArabic`
+- Reference labels: `bodyMedium` w500 on `onSurfaceVariant` — not bold badges
 - Entrance animation via `_EntranceAnimator`
 
 ---
@@ -188,8 +191,8 @@ File: `home_daily_inspiration_section.dart`
 
 Private widget in `home_dashboard_body.dart`.
 
-- Quiet Quran icon + app title at scroll bottom
-- Does not compete with content; supports peak-end UX
+- Quiet Quran icon + app title (`bodyLarge`) at scroll bottom
+- Readable contrast (~0.72 alpha on `onSurfaceVariant`); supports peak-end UX
 
 ---
 

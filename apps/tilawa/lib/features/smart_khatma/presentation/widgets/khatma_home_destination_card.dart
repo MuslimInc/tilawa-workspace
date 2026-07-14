@@ -4,6 +4,9 @@ import 'package:tilawa/features/home/presentation/widgets/home_dashboard_icon_we
 import 'package:tilawa_ui_kit/tilawa_ui_kit.dart';
 
 /// Smart Khatma home entry — full-card primary gradient.
+///
+/// Vertical featured layout for phone readability (taller tap target, larger
+/// title/body than the previous compact row).
 class KhatmaHomeDestinationCard extends StatelessWidget {
   const KhatmaHomeDestinationCard({
     super.key,
@@ -11,6 +14,7 @@ class KhatmaHomeDestinationCard extends StatelessWidget {
     required this.onTap,
     required this.title,
     this.subtitle,
+    this.detail,
     this.trailing,
     this.semanticLabel,
   });
@@ -19,6 +23,9 @@ class KhatmaHomeDestinationCard extends StatelessWidget {
   final VoidCallback onTap;
   final String title;
   final String? subtitle;
+
+  /// Optional second body line (e.g. today's page range / confirm count).
+  final String? detail;
   final Widget? trailing;
   final String? semanticLabel;
 
@@ -36,6 +43,10 @@ class KhatmaHomeDestinationCard extends StatelessWidget {
         colorScheme.surface,
       ),
     ];
+    final TextStyle? bodyStyle = theme.textTheme.bodyLarge?.copyWith(
+      color: colorScheme.onPrimary.withValues(alpha: 0.88),
+      height: isArabic ? tokens.textHeightLoose : 1.45,
+    );
 
     return Semantics(
       button: true,
@@ -55,50 +66,59 @@ class KhatmaHomeDestinationCard extends StatelessWidget {
             ),
           ),
           child: Padding(
-            padding: EdgeInsets.all(tokens.spaceMedium),
-            child: Row(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              spacing: tokens.spaceSmall,
+            padding: EdgeInsets.all(tokens.spaceLarge),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.stretch,
+              spacing: tokens.spaceMedium,
               children: [
-                HomeDashboardIconWell(
-                  accent: colorScheme.onPrimary,
-                  child: Icon(
-                    icon,
-                    size: tokens.iconSizeLarge,
-                    color: colorScheme.onPrimary,
-                  ),
+                Row(
+                  children: [
+                    HomeDashboardIconWell(
+                      accent: colorScheme.onPrimary,
+                      extent: tokens.iconBadgeSize,
+                      child: Icon(
+                        icon,
+                        size: tokens.iconSizeLarge + tokens.spaceExtraSmall,
+                        color: colorScheme.onPrimary,
+                      ),
+                    ),
+                    const Spacer(),
+                    ?trailing,
+                  ],
                 ),
-                Expanded(
-                  child: Column(
-                    mainAxisSize: MainAxisSize.min,
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    spacing: tokens.spaceExtraSmall,
-                    children: [
+                Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  spacing: tokens.spaceSmall,
+                  children: [
+                    Text(
+                      title,
+                      maxLines: 2,
+                      overflow: TextOverflow.ellipsis,
+                      style: theme.textTheme.titleLarge?.copyWith(
+                        color: colorScheme.onPrimary,
+                        fontWeight: FontWeight.w800,
+                        height: 1.2,
+                        letterSpacing: -0.2,
+                      ),
+                    ),
+                    if (subtitle case final String bodyText)
                       Text(
-                        title,
+                        bodyText,
+                        maxLines: 3,
+                        overflow: TextOverflow.ellipsis,
+                        style: bodyStyle,
+                      ),
+                    if (detail case final String detailText)
+                      Text(
+                        detailText,
                         maxLines: 2,
                         overflow: TextOverflow.ellipsis,
-                        style: theme.textTheme.titleSmall?.copyWith(
-                          color: colorScheme.onPrimary,
-                          fontWeight: FontWeight.w800,
+                        style: bodyStyle?.copyWith(
+                          color: colorScheme.onPrimary.withValues(alpha: 0.78),
                         ),
                       ),
-                      if (subtitle case final String bodyText)
-                        Text(
-                          bodyText,
-                          maxLines: 3,
-                          overflow: TextOverflow.ellipsis,
-                          style: theme.textTheme.bodySmall?.copyWith(
-                            color: colorScheme.onPrimary.withValues(
-                              alpha: 0.86,
-                            ),
-                            height: isArabic ? tokens.textHeightLoose : 1.45,
-                          ),
-                        ),
-                    ],
-                  ),
+                  ],
                 ),
-                ?trailing,
               ],
             ),
           ),

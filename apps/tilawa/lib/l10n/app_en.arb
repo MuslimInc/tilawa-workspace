@@ -615,11 +615,11 @@
     "@homeDailyDuaReference2": {
         "description": "Home daily dua reference variant 2"
     },
-    "khatmaEmptyTitle": "Start a Khatma",
+    "khatmaEmptyTitle": "Start a new Khatma",
     "@khatmaEmptyTitle": {
         "description": "Title for the empty Smart Khatma card"
     },
-    "khatmaEmptySubtitle": "Choose a calm reading plan. We will adjust gently when life gets busy.",
+    "khatmaEmptySubtitle": "Set the start, end, and duration that suit you — we'll divide it into a daily wird.",
     "@khatmaEmptySubtitle": {
         "description": "Subtitle for the empty Smart Khatma card"
     },

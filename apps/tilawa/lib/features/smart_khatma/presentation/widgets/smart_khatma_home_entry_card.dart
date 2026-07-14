@@ -11,7 +11,7 @@ import 'khatma_home_destination_card.dart';
 import '../bloc/khatma_plan_event.dart';
 import '../bloc/khatma_plan_state.dart';
 
-/// Compact home-dashboard entry that opens the Smart Khatma hub.
+/// Home-dashboard entry that opens the Smart Khatma hub.
 class SmartKhatmaHomeEntryCard extends StatelessWidget {
   const SmartKhatmaHomeEntryCard({super.key});
 
@@ -95,8 +95,8 @@ class _KhatmaHomeEmptyEntry extends StatelessWidget {
       subtitle: context.l10n.khatmaEmptySubtitle,
       trailing: Icon(
         Icons.chevron_right_rounded,
-        color: theme.colorScheme.onPrimary.withValues(alpha: 0.86),
-        size: tokens.iconSizeSmall,
+        color: theme.colorScheme.onPrimary.withValues(alpha: 0.9),
+        size: tokens.iconSizeLarge,
       ),
     );
   }
@@ -140,22 +140,24 @@ class _KhatmaHomeActiveEntry extends StatelessWidget {
       icon: Icons.auto_stories_outlined,
       onTap: onOpenHub,
       title: context.l10n.khatmaProgressTitle,
-      subtitle: '$subtitle\n$detail',
+      subtitle: subtitle,
+      detail: detail,
       trailing: Column(
+        mainAxisSize: MainAxisSize.min,
         crossAxisAlignment: CrossAxisAlignment.end,
         spacing: tokens.spaceExtraSmall,
         children: [
           Text(
             context.l10n.khatmaHomeViewPlan,
-            style: theme.textTheme.labelSmall?.copyWith(
+            style: theme.textTheme.labelLarge?.copyWith(
               color: colorScheme.onPrimary,
               fontWeight: FontWeight.w700,
             ),
           ),
           Icon(
             Icons.chevron_right_rounded,
-            color: colorScheme.onPrimary.withValues(alpha: 0.86),
-            size: tokens.iconSizeSmall,
+            color: colorScheme.onPrimary.withValues(alpha: 0.9),
+            size: tokens.iconSizeLarge,
           ),
         ],
       ),

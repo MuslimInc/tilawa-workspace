@@ -923,13 +923,13 @@ abstract class AppLocalizations {
   /// Title for the empty Smart Khatma card
   ///
   /// In en, this message translates to:
-  /// **'Start a Khatma'**
+  /// **'Start a new Khatma'**
   String get khatmaEmptyTitle;
 
   /// Subtitle for the empty Smart Khatma card
   ///
   /// In en, this message translates to:
-  /// **'Choose a calm reading plan. We will adjust gently when life gets busy.'**
+  /// **'Set the start, end, and duration that suit you — we\'ll divide it into a daily wird.'**
   String get khatmaEmptySubtitle;
 
   /// Duration preset label for Smart Khatma

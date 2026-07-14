@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:tilawa/features/home/presentation/widgets/home_dashboard_card.dart';
-import 'package:tilawa/features/home/presentation/widgets/home_dashboard_section.dart';
 import 'package:tilawa/features/home/presentation/widgets/home_more_actions_group.dart';
 import 'package:tilawa/features/home/presentation/widgets/home_daily_inspiration_section.dart';
 import 'package:tilawa/features/home/presentation/widgets/home_primary_actions_section.dart';
@@ -76,7 +75,7 @@ void main() {
     expect((inspirationGap - moreGap).abs(), lessThan(2));
   });
 
-  testWidgets('secondary text uses home header token at 1.4 text scale', (
+  testWidgets('more row subtitle stays readable at 1.4 text scale', (
     tester,
   ) async {
     await tester.pumpWidget(
@@ -100,13 +99,55 @@ void main() {
     final l10n = AppLocalizations.of(
       tester.element(find.byType(HomeMoreActionsGroup)),
     );
-    final Color expected = HomeDashboardSection.secondaryTextColor(
-      tester.element(find.byType(HomeMoreActionsGroup)),
+    final BuildContext rowContext = tester.element(
+      find.byType(HomeMoreActionsGroup),
     );
+    final Color expected = Theme.of(rowContext).colorScheme.onSurfaceVariant;
 
     final Text subtitle = tester.widget<Text>(
       find.text(l10n.homeHistoryCarouselSubtitle),
     );
     expect(subtitle.style?.color, expected);
+    expect(subtitle.style?.fontSize, isNotNull);
+    expect(subtitle.maxLines, 2);
+  });
+
+  testWidgets('lower-home typography survives text scales without overflow', (
+    tester,
+  ) async {
+    Future<void> pumpAtScale(double scale) async {
+      await tester.pumpWidget(
+        MaterialApp(
+          theme: AppTheme.getLightTheme(primaryColor: AppColors.defaultPrimary),
+          locale: const Locale('ar'),
+          localizationsDelegates: AppLocalizations.localizationsDelegates,
+          supportedLocales: AppLocalizations.supportedLocales,
+          home: MediaQuery(
+            data: MediaQueryData(
+              size: const Size(360, 800),
+              textScaler: TextScaler.linear(scale),
+            ),
+            child: const Scaffold(
+              body: SingleChildScrollView(
+                child: Column(
+                  children: [
+                    HomeMoreActionsGroup(),
+                    HomeDailyInspirationSection(),
+                  ],
+                ),
+              ),
+            ),
+          ),
+        ),
+      );
+      await tester.pumpAndSettle();
+    }
+
+    for (final double scale in <double>[1.0, 1.2, 1.4]) {
+      await pumpAtScale(scale);
+      expect(tester.takeException(), isNull);
+      expect(find.byType(HomeMoreActionsGroup), findsOneWidget);
+      expect(find.byType(HomeDailyInspirationSection), findsOneWidget);
+    }
   });
 }

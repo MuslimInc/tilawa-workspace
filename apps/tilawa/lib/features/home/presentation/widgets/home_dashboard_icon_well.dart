@@ -10,10 +10,14 @@ class HomeDashboardIconWell extends StatelessWidget {
     super.key,
     required this.child,
     this.accent,
+    this.extent,
   });
 
   final Widget child;
   final Color? accent;
+
+  /// Well width/height. Defaults to [TilawaDesignTokens.iconBoxSize].
+  final double? extent;
 
   @override
   Widget build(BuildContext context) {
@@ -21,6 +25,7 @@ class HomeDashboardIconWell extends StatelessWidget {
     final tokens = theme.tokens;
     final Color iconAccent =
         accent ?? theme.componentTokens.homeScreen.homePrayerHeroAccent;
+    final double size = extent ?? tokens.iconBoxSize;
 
     return DecoratedBox(
       decoration: BoxDecoration(
@@ -30,8 +35,8 @@ class HomeDashboardIconWell extends StatelessWidget {
         color: iconAccent.withValues(alpha: 0.10),
       ),
       child: SizedBox(
-        width: tokens.iconBoxSize,
-        height: tokens.iconBoxSize,
+        width: size,
+        height: size,
         child: Center(child: child),
       ),
     );
