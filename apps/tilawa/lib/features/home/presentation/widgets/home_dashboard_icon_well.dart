@@ -20,8 +20,8 @@ class HomeDashboardIconWell extends StatelessWidget {
   /// Well width/height. Defaults to [TilawaDesignTokens.iconBoxSize].
   final double? extent;
 
-  /// Accent wash on the well fill. Keep above parent surface tint so the
-  /// badge reads slightly stronger than a tinted card background.
+  /// Accent wash on the well fill. Parent Home cards are white surface;
+  /// the well carries the soft category tint.
   final double fillAlpha;
 
   @override
