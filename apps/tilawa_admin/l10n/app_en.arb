@@ -659,5 +659,29 @@
   "resolvedConfigInspector_query": "Inspect Configuration",
   "resolvedConfigInspector_studentId": "Student ID",
   "resolvedConfigInspector_teacherId": "Teacher ID",
-  "resolvedConfigInspector_result": "Resolved Result"
+  "resolvedConfigInspector_result": "Resolved Result",
+  "sidebar_appVersion": "App Version",
+  "@sidebar_appVersion": {
+    "description": "Sidebar link for forced-update min build management"
+  },
+  "forcedUpdate_title": "App Version Management",
+  "@forcedUpdate_title": {
+    "description": "Page title for forced update min build numbers"
+  },
+  "forcedUpdate_subtitle": "Set the minimum Android and iOS build numbers. Apps below these builds see a blocking update gate.",
+  "forcedUpdate_cardTitle": "Minimum build numbers",
+  "forcedUpdate_cardHint": "Use the Play Console / App Store Connect build number (monotonic), not the marketing version. Missing or failed reads fail open on clients.",
+  "forcedUpdate_androidMin": "Android min build number",
+  "forcedUpdate_iosMin": "iOS min build number",
+  "forcedUpdate_invalidBuild": "Enter a whole number that is 0 or greater.",
+  "forcedUpdate_confirmTitle": "Publish forced-update policy?",
+  "forcedUpdate_confirmMessage": "Devices on Android builds below {android} or iOS builds below {ios} will be blocked until they update from the store.",
+  "@forcedUpdate_confirmMessage": {
+    "description": "Confirm dialog before saving min builds",
+    "placeholders": {
+      "android": { "type": "String", "example": "79" },
+      "ios": { "type": "String", "example": "79" }
+    }
+  },
+  "forcedUpdate_saveSuccess": "Forced-update policy saved."
 }

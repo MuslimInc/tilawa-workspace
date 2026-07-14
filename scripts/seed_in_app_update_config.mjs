@@ -2,6 +2,9 @@
 /**
  * Seeds Firestore `app_config/in_app_update` for forced min-build gates.
  *
+ * Prefer the Admin Panel (App Version) for day-to-day changes:
+ *   docs/admin/forced_update_release.md
+ *
  * Auth: uses the local Firebase CLI session (`firebase login`) on this machine.
  *
  * Usage (from repo root):
