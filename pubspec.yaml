@@ -17,7 +17,6 @@ workspace:
   - packages/quran_image
   - packages/flex_color_scheme
   - packages/compass
-  - packages/in_app_update
   - packages/quran_sessions
   - packages/quran_sessions_rtc
   - packages/quran_sessions_rtc_sdk

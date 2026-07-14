@@ -233,35 +233,3 @@ final class AppReviewFailure extends Failure {
   @override
   List<Object?> get props => [message, reason];
 }
-
-enum InAppUpdateFailureReason {
-  platformUnsupported,
-  checkFailed,
-  updateFailed,
-  platformError,
-}
-
-/// Google Play in-app update failures.
-final class InAppUpdateFailure extends Failure {
-  const InAppUpdateFailure([
-    super.message,
-    this.reason = InAppUpdateFailureReason.platformError,
-  ]);
-
-  const InAppUpdateFailure.platformUnsupported()
-    : this(null, InAppUpdateFailureReason.platformUnsupported);
-
-  const InAppUpdateFailure.checkFailed([String? message])
-    : this(message, InAppUpdateFailureReason.checkFailed);
-
-  const InAppUpdateFailure.updateFailed([String? message])
-    : this(message, InAppUpdateFailureReason.updateFailed);
-
-  const InAppUpdateFailure.platformError([String? message])
-    : this(message, InAppUpdateFailureReason.platformError);
-
-  final InAppUpdateFailureReason reason;
-
-  @override
-  List<Object?> get props => [message, reason];
-}

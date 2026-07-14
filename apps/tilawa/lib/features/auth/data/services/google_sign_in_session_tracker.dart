@@ -1,7 +1,7 @@
 import 'package:injectable/injectable.dart';
 
 /// Tracks an in-flight interactive Google sign-in so other startup work
-/// (e.g. Play in-app update binding) can defer until CM / HiddenActivity finishes.
+/// (e.g. forced-update gate presentation) can defer until CM / HiddenActivity finishes.
 @lazySingleton
 class GoogleSignInSessionTracker {
   bool _inFlight = false;

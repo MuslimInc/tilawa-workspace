@@ -6937,35 +6937,23 @@ abstract class AppLocalizations {
   /// **'No debug events yet'**
   String get notificationDebugLogsEmpty;
 
-  /// Snackbar message when a flexible in-app update finished downloading
+  /// Title on the blocking forced-update gate screen
   ///
   /// In en, this message translates to:
-  /// **'Update downloaded. Restart when you are ready to install it.'**
-  String get inAppUpdateFlexibleRestartMessage;
+  /// **'Update required'**
+  String get forcedUpdateTitle;
 
-  /// Snackbar message when an optional app update is available
-  ///
-  /// In en, this message translates to:
-  /// **'A new version of MeMuslim is available.'**
-  String get inAppUpdateOptionalMessage;
-
-  /// Snackbar message when a forced update must go through the Play Store
+  /// Body copy on the blocking forced-update gate screen
   ///
   /// In en, this message translates to:
   /// **'An update is required to continue using MeMuslim.'**
-  String get inAppUpdateRequiredMessage;
+  String get forcedUpdateMessage;
 
-  /// Snackbar action to install a downloaded flexible update
-  ///
-  /// In en, this message translates to:
-  /// **'Restart'**
-  String get inAppUpdateRestartAction;
-
-  /// Snackbar action to open the Play Store for an optional update
+  /// Primary CTA on the forced-update gate that opens the app store
   ///
   /// In en, this message translates to:
   /// **'Update'**
-  String get inAppUpdateUpdateAction;
+  String get forcedUpdateAction;
 
   /// Title for the recitation practice panel
   ///

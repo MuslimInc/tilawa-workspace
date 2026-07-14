@@ -28,7 +28,7 @@ import 'features/auth/presentation/widgets/session_verification_banner.dart';
 import 'features/auth/data/services/google_sign_in_session_tracker.dart';
 import 'features/downloads/data/services/batch_download_manager.dart';
 import 'features/downloads/data/services/download_queue_manager.dart';
-import 'features/in_app_update/in_app_update.dart';
+import 'features/forced_update/forced_update.dart';
 import 'features/localization/presentation/bloc/localization_bloc.dart';
 import 'features/prayer_times/domain/entities/entities.dart';
 import 'features/prayer_times/domain/usecases/load_prayer_settings_use_case.dart';
@@ -162,11 +162,11 @@ class _TilawaAppState extends State<TilawaApp> with WidgetsBindingObserver {
 
   Future<void> _checkForUpdate() async {
     try {
-      if (getIt.isRegistered<InAppUpdateCoordinator>()) {
+      if (getIt.isRegistered<ForcedUpdateCoordinator>()) {
         // Run in background to not block UI
-        getIt<InAppUpdateCoordinator>().checkForUpdate();
+        unawaited(getIt<ForcedUpdateCoordinator>().checkForUpdate());
       }
-    } catch (e) {
+    } on Object catch (e) {
       logger.d('[QuranPlayerApp] Error checking for update: $e');
     }
   }

@@ -107,7 +107,7 @@ service cloud.firestore {
                 || ownsTeacherProfile(resource.data.teacherId)));
     }
 
-    // Remote in-app update policy (see InAppUpdateConfigDataSourceImpl).
+    // Forced-update min-build policy (android_min_build_number / ios_min_build_number).
     match /app_config/in_app_update {
       allow read: if true;
       allow write: if false;

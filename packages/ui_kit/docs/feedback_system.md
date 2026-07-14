@@ -54,8 +54,9 @@ RTL, scale with system text, and clear Comfortable Reach bottom chrome.
 
 ### Persistent prompts — actionable toast (`duration: null`)
 
-- Required store updates, long-running optional update prompts.
+- Long-running prompts that need an explicit user action.
 - Use `TilawaFeedback.showActionable` with `duration: null`.
+- Required app updates use a full-screen forced-update gate, not a toast.
 
 ---
 
@@ -102,9 +103,9 @@ TilawaFeedback.showActionable(
 ```dart
 TilawaFeedbackService.showActionable(
   AppRouter.navigatorKey,
-  message: l10n.inAppUpdateOptionalMessage,
+  message: localizedMessage,
   variant: TilawaFeedbackVariant.info,
-  duration: InAppUpdateFeedbackPresenter.promptDuration,
+  duration: const Duration(minutes: 5),
   actions: [...],
 );
 ```

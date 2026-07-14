@@ -3924,21 +3924,13 @@ class AppLocalizationsAr extends AppLocalizations {
   String get notificationDebugLogsEmpty => 'لا أحداث تصحيح بعد';
 
   @override
-  String get inAppUpdateFlexibleRestartMessage =>
-      'تم تنزيل التحديث. أعد التشغيل عندما تكون مستعدًا للتثبيت.';
+  String get forcedUpdateTitle => 'يلزم التحديث';
 
   @override
-  String get inAppUpdateOptionalMessage => 'يتوفر إصدار جديد من أنا مسلم.';
+  String get forcedUpdateMessage => 'يلزم التحديث لمتابعة استخدام أنا مسلم.';
 
   @override
-  String get inAppUpdateRequiredMessage =>
-      'يلزم التحديث لمتابعة استخدام أنا مسلم.';
-
-  @override
-  String get inAppUpdateRestartAction => 'إعادة التشغيل';
-
-  @override
-  String get inAppUpdateUpdateAction => 'تحديث';
+  String get forcedUpdateAction => 'تحديث';
 
   @override
   String recitationPracticeTitle(int surah, int ayah) {

@@ -3958,22 +3958,14 @@ class AppLocalizationsEn extends AppLocalizations {
   String get notificationDebugLogsEmpty => 'No debug events yet';
 
   @override
-  String get inAppUpdateFlexibleRestartMessage =>
-      'Update downloaded. Restart when you are ready to install it.';
+  String get forcedUpdateTitle => 'Update required';
 
   @override
-  String get inAppUpdateOptionalMessage =>
-      'A new version of MeMuslim is available.';
-
-  @override
-  String get inAppUpdateRequiredMessage =>
+  String get forcedUpdateMessage =>
       'An update is required to continue using MeMuslim.';
 
   @override
-  String get inAppUpdateRestartAction => 'Restart';
-
-  @override
-  String get inAppUpdateUpdateAction => 'Update';
+  String get forcedUpdateAction => 'Update';
 
   @override
   String recitationPracticeTitle(int surah, int ayah) {
