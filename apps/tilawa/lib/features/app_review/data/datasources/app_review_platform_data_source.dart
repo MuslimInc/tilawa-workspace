@@ -18,5 +18,6 @@ abstract class AppReviewPlatformDataSource {
   Future<void> openStoreListing({
     String? appStoreId,
     String? microsoftStoreId,
+    String? androidPackageId,
   });
 }
