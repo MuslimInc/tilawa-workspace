@@ -1,35 +1,47 @@
-import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:fake_cloud_firestore/fake_cloud_firestore.dart';
+import 'package:dartz_plus/dartz_plus.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:mocktail/mocktail.dart';
 import 'package:tilawa_core/errors/failures.dart';
+import 'package:tilawa/features/auth/domain/entities/server_session_snapshot.dart';
 import 'package:tilawa/features/auth/domain/entities/session_validity_result.dart';
+import 'package:tilawa/features/auth/domain/repositories/session_validity_repository.dart';
 import 'package:tilawa/features/auth/domain/services/token_sync_cache.dart';
 import 'package:tilawa/features/auth/domain/usecases/check_session_validity_use_case.dart';
 
 class MockTokenSyncCache extends Mock implements TokenSyncCache {}
 
+class MockSessionValidityRepository extends Mock
+    implements SessionValidityRepository {}
+
 void main() {
   late CheckSessionValidityUseCase useCase;
-  late FakeFirebaseFirestore fakeFirestore;
+  late MockSessionValidityRepository mockRepository;
   late MockTokenSyncCache mockCache;
 
   setUp(() {
-    fakeFirestore = FakeFirebaseFirestore();
+    mockRepository = MockSessionValidityRepository();
     mockCache = MockTokenSyncCache();
-    useCase = CheckSessionValidityUseCase(fakeFirestore, mockCache);
+    useCase = CheckSessionValidityUseCase(mockRepository, mockCache);
   });
+
+  void stubLocal({required int epoch, String? deviceId}) {
+    when(() => mockCache.getSessionEpoch()).thenAnswer((_) async => epoch);
+    when(() => mockCache.getActiveDeviceId()).thenAnswer((_) async => deviceId);
+  }
+
+  void stubServer({required int epoch, required String deviceId}) {
+    when(() => mockRepository.fetchServerSession(any())).thenAnswer(
+      (_) async => Right(
+        ServerSessionSnapshot(epoch: epoch, activeDeviceId: deviceId),
+      ),
+    );
+  }
 
   test(
     'returns valid when local epoch and active device match server',
     () async {
-      when(() => mockCache.getSessionEpoch()).thenAnswer((_) async => 3);
-      when(
-        () => mockCache.getActiveDeviceId(),
-      ).thenAnswer((_) async => 'device_1');
-      await fakeFirestore.collection('users').doc('user_1').set({
-        'session': {'epoch': 3, 'activeDeviceId': 'device_1'},
-      });
+      stubLocal(epoch: 3, deviceId: 'device_1');
+      stubServer(epoch: 3, deviceId: 'device_1');
 
       final result = await useCase('user_1');
 
@@ -41,13 +53,8 @@ void main() {
   );
 
   test('returns stale when local epoch is stale', () async {
-    when(() => mockCache.getSessionEpoch()).thenAnswer((_) async => 1);
-    when(
-      () => mockCache.getActiveDeviceId(),
-    ).thenAnswer((_) async => 'device_1');
-    await fakeFirestore.collection('users').doc('user_1').set({
-      'session': {'epoch': 4, 'activeDeviceId': 'device_1'},
-    });
+    stubLocal(epoch: 1, deviceId: 'device_1');
+    stubServer(epoch: 4, deviceId: 'device_1');
 
     final result = await useCase('user_1');
 
@@ -57,13 +64,8 @@ void main() {
   });
 
   test('returns stale when active device differs', () async {
-    when(() => mockCache.getSessionEpoch()).thenAnswer((_) async => 4);
-    when(
-      () => mockCache.getActiveDeviceId(),
-    ).thenAnswer((_) async => 'device_1');
-    await fakeFirestore.collection('users').doc('user_1').set({
-      'session': {'epoch': 4, 'activeDeviceId': 'device_2'},
-    });
+    stubLocal(epoch: 4, deviceId: 'device_1');
+    stubServer(epoch: 4, deviceId: 'device_2');
 
     final result = await useCase('user_1');
 
@@ -75,31 +77,23 @@ void main() {
   test(
     'returns verificationUnknown when local device registration is incomplete',
     () async {
-      when(() => mockCache.getSessionEpoch()).thenAnswer((_) async => 0);
-      when(() => mockCache.getActiveDeviceId()).thenAnswer((_) async => null);
-      await fakeFirestore.collection('users').doc('user_1').set({
-        'session': {'epoch': 1, 'activeDeviceId': 'device_1'},
-      });
+      stubLocal(epoch: 0, deviceId: null);
+      stubServer(epoch: 1, deviceId: 'device_1');
 
       final result = await useCase('user_1');
 
       result.fold((_) => fail('expected Right'), (validity) {
         expect(validity, SessionValidityResult.verificationUnknown);
       });
+      verifyNever(() => mockRepository.fetchServerSession(any()));
     },
   );
 
   test(
     'returns verificationUnknown when server session doc lags after first login',
     () async {
-      when(() => mockCache.getSessionEpoch()).thenAnswer((_) async => 2);
-      when(
-        () => mockCache.getActiveDeviceId(),
-      ).thenAnswer((_) async => 'device_1');
-      await fakeFirestore
-          .collection('users')
-          .doc('user_1')
-          .set(<String, dynamic>{});
+      stubLocal(epoch: 2, deviceId: 'device_1');
+      stubServer(epoch: 0, deviceId: '');
 
       final result = await useCase('user_1');
 
@@ -110,14 +104,12 @@ void main() {
   );
 
   test(
-    'returns verificationUnknown when the network is unavailable '
-    '(FirebaseException unavailable)',
+    'returns verificationUnknown when repository reports network failure',
     () async {
-      when(() => mockCache.getSessionEpoch()).thenThrow(
-        FirebaseException(
-          plugin: 'cloud_firestore',
-          code: 'unavailable',
-          message: 'The service is currently unavailable.',
+      stubLocal(epoch: 3, deviceId: 'device_1');
+      when(() => mockRepository.fetchServerSession(any())).thenAnswer(
+        (_) async => const Left(
+          ServerFailure(SessionValidityFailureKey.network),
         ),
       );
 
@@ -130,7 +122,7 @@ void main() {
   );
 
   test(
-    'returns verificationUnknown for raw connectivity errors',
+    'returns verificationUnknown for raw connectivity errors from cache',
     () async {
       when(() => mockCache.getSessionEpoch()).thenThrow(
         Exception(
@@ -147,14 +139,12 @@ void main() {
   );
 
   test(
-    'returns a typed ServerFailure for non-network Firestore errors '
-    'instead of silently reporting verificationUnknown',
+    'propagates typed ServerFailure from repository',
     () async {
-      when(() => mockCache.getSessionEpoch()).thenThrow(
-        FirebaseException(
-          plugin: 'cloud_firestore',
-          code: 'permission-denied',
-          message: 'Missing or insufficient permissions.',
+      stubLocal(epoch: 3, deviceId: 'device_1');
+      when(() => mockRepository.fetchServerSession(any())).thenAnswer(
+        (_) async => const Left(
+          ServerFailure('session_validity_check_permission-denied'),
         ),
       );
 
@@ -171,8 +161,7 @@ void main() {
   );
 
   test(
-    'returns a typed UnexpectedFailure for unknown errors '
-    'instead of a silent catch-all',
+    'returns a typed UnexpectedFailure for unknown cache errors',
     () async {
       when(() => mockCache.getSessionEpoch()).thenThrow(
         StateError('schema drift'),

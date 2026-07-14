@@ -3,27 +3,16 @@ import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:flutter/scheduler.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:shared_preferences/shared_preferences.dart';
 import 'package:tilawa/core/di/injection.dart';
-import 'package:tilawa/core/services/hive_readiness.dart';
 import 'package:tilawa/features/auth/domain/entities/user_entity.dart';
 import 'package:tilawa/features/auth/presentation/bloc/auth_bloc.dart';
-import 'package:tilawa/features/auth/domain/usecases/get_current_user_use_case.dart';
+import 'package:tilawa/features/home/di/home_screen_module.dart';
 import 'package:tilawa/features/home/presentation/cubit/home_listening_resume_cubit.dart';
-import 'package:tilawa/features/history/domain/repositories/history_repository.dart';
 import 'package:tilawa/features/home/home.dart';
 import 'package:tilawa/features/localization/presentation/bloc/localization_bloc.dart';
 import 'package:tilawa/features/prayer_times/application/prayer_location_update_notifier.dart';
-import 'package:tilawa/features/prayer_times/domain/usecases/get_current_location_use_case.dart';
-import 'package:tilawa/features/prayer_times/domain/usecases/get_location_name_use_case.dart';
-import 'package:tilawa/features/prayer_times/domain/usecases/get_prayer_times_use_case.dart';
-import 'package:tilawa/features/prayer_times/domain/usecases/load_prayer_settings_use_case.dart';
-import 'package:tilawa/features/prayer_times/domain/usecases/notify_prayer_location_updated_use_case.dart';
-import 'package:tilawa/features/prayer_times/domain/usecases/save_prayer_settings_use_case.dart';
-import 'package:tilawa/features/quran_reader/domain/repositories/quran_reader_repository.dart';
 import 'package:tilawa/features/smart_khatma/smart_khatma.dart';
 import 'package:tilawa/features/today_plan/today_plan.dart';
-import 'package:tilawa_core/services/analytics_service.dart';
 
 /// Composition root for the Home dashboard tab.
 class HomeScreenScope extends StatelessWidget {
@@ -38,48 +27,8 @@ class HomeScreenScope extends StatelessWidget {
   /// When set (e.g. in widget tests), replaces [HomeScreen].
   final Widget? child;
 
-  static HomeDashboardBloc _createHomeDashboardBloc() {
-    return HomeDashboardBloc(
-      GetHomeDashboardUseCase(
-        HomeDashboardRepositoryImpl(
-          getCurrentUser: getIt<GetCurrentUserUseCase>(),
-          loadPrayerSettings: getIt<LoadPrayerSettingsUseCase>(),
-          getCurrentLocation: getIt<GetCurrentLocationUseCase>(),
-          getLocationName: getIt<GetLocationNameUseCase>(),
-          getPrayerTimes: getIt<GetPrayerTimesUseCase>(),
-          savePrayerSettings: getIt<SavePrayerSettingsUseCase>(),
-        ),
-      ),
-      getIt<NotifyPrayerLocationUpdatedUseCase>(),
-    );
-  }
-
   static void _deferToNextFrame(VoidCallback action) {
     SchedulerBinding.instance.addPostFrameCallback((_) => action());
-  }
-
-  static TodayPlanBloc _createTodayPlanBloc() {
-    final localDataSource = SharedPreferencesTodayPlanLocalDataSource(
-      getIt<SharedPreferencesAsync>(),
-    );
-    final repository = TodayPlanRepositoryImpl(localDataSource);
-    final GetKhatmaTodayTargetUseCase? getKhatmaTodayTarget =
-        isSmartKhatmaEnabled()
-        ? SmartKhatmaDependencies.getTodayTarget(
-            SmartKhatmaDependencies.repository(),
-          )
-        : null;
-    return TodayPlanBloc(
-      GenerateTodayPlanUseCase(
-        getIt<QuranReaderRepository>(),
-        getIt<HistoryRepository>(),
-        repository,
-        getIt<HiveReadiness>(),
-        getKhatmaTodayTarget,
-      ),
-      SetTodayPlanTaskCompletedUseCase(repository),
-      getIt<AnalyticsService>(),
-    )..add(const TodayPlanStarted());
   }
 
   @override
@@ -91,7 +40,7 @@ class HomeScreenScope extends StatelessWidget {
     return MultiBlocProvider(
       providers: [
         BlocProvider(
-          create: (_) => _createHomeDashboardBloc(),
+          create: (_) => getIt<HomeDashboardBloc>(),
         ),
         BlocProvider(
           create: (_) {
@@ -104,7 +53,7 @@ class HomeScreenScope extends StatelessWidget {
         if (isSmartKhatmaEnabled())
           BlocProvider(create: (_) => SmartKhatmaDependencies.bloc()),
         if (isTodayPlanEnabled())
-          BlocProvider(create: (_) => _createTodayPlanBloc()),
+          BlocProvider(create: (_) => TodayPlanBlocFactory.create()),
       ],
       child: _HomeLocationSyncListener(
         child: _HomeAuthSyncListener(

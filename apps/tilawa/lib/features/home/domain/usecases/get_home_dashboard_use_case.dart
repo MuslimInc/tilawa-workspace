@@ -1,17 +1,20 @@
-import '../../data/datasources/home_dashboard_memory_cache.dart';
+import 'package:injectable/injectable.dart';
+
 import '../entities/home_dashboard.dart';
 import '../entities/home_dashboard_renderability.dart';
+import '../repositories/home_dashboard_cache.dart';
 import '../repositories/home_dashboard_repository.dart';
 
 /// Returns the current Home dashboard snapshot.
+@injectable
 final class GetHomeDashboardUseCase {
   GetHomeDashboardUseCase(
-    this._repository, [
-    HomeDashboardMemoryCache? cache,
-  ]) : _cache = cache ?? HomeDashboardMemoryCache.shared;
+    this._repository,
+    this._cache,
+  );
 
   final HomeDashboardRepository _repository;
-  final HomeDashboardMemoryCache _cache;
+  final HomeDashboardCache _cache;
 
   /// Last successful snapshot, when it is safe to render without skeleton.
   HomeDashboard? readCachedDashboard() {

@@ -3,6 +3,7 @@ import 'package:dartz_plus/dartz_plus.dart';
 import 'package:fake_cloud_firestore/fake_cloud_firestore.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:mocktail/mocktail.dart';
+import 'package:tilawa/features/auth/data/repositories/firestore_session_validity_repository.dart';
 import 'package:tilawa/features/auth/data/services/google_sign_in_session_tracker.dart';
 import 'package:tilawa/features/auth/data/services/pending_session_revoke_store.dart';
 import 'package:tilawa/features/auth/domain/entities/user_entity.dart';
@@ -85,7 +86,7 @@ void main() {
     tokenSyncCache = _InMemoryTokenSyncCache();
     firestore = FakeFirebaseFirestore();
     checkSessionValidityUseCase = CheckSessionValidityUseCase(
-      firestore,
+      FirestoreSessionValidityRepository(firestore),
       tokenSyncCache,
     );
     when(() => mockAuthRepository.currentUser).thenReturn(testUser);

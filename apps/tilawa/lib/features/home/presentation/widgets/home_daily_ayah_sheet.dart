@@ -1,9 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:share_plus/share_plus.dart';
-import 'package:shared_preferences/shared_preferences.dart';
 import 'package:tilawa/core/di/injection.dart';
 import 'package:tilawa/core/extensions.dart';
 import 'package:tilawa/features/home/domain/home_daily_inspiration_catalog.dart';
+import 'package:tilawa/features/home/domain/usecases/toggle_home_daily_ayah_bookmark_use_case.dart';
 import 'package:tilawa/l10n/generated/app_localizations.dart';
 import 'package:tilawa_ui_kit/tilawa_ui_kit.dart';
 
@@ -29,10 +29,11 @@ class _HomeDailyAyahSheet extends StatefulWidget {
 }
 
 class _HomeDailyAyahSheetState extends State<_HomeDailyAyahSheet> {
-  static const String _bookmarkStorageKey = 'home_daily_ayah_bookmarks';
-
   bool _isBookmarked = false;
   bool _loadedBookmark = false;
+
+  ToggleHomeDailyAyahBookmarkUseCase get _bookmarks =>
+      getIt<ToggleHomeDailyAyahBookmarkUseCase>();
 
   @override
   void initState() {
@@ -41,14 +42,12 @@ class _HomeDailyAyahSheetState extends State<_HomeDailyAyahSheet> {
   }
 
   Future<void> _loadBookmarkState() async {
-    final prefs = getIt<SharedPreferencesAsync>();
-    final Set<String> bookmarks =
-        (await prefs.getStringList(_bookmarkStorageKey))?.toSet() ?? {};
+    final bool isBookmarked = await _bookmarks.isBookmarked(_bookmarkKey);
     if (!mounted) {
       return;
     }
     setState(() {
-      _isBookmarked = bookmarks.contains(_bookmarkKey);
+      _isBookmarked = isBookmarked;
       _loadedBookmark = true;
     });
   }
@@ -76,19 +75,11 @@ class _HomeDailyAyahSheetState extends State<_HomeDailyAyahSheet> {
   }
 
   Future<void> _toggleBookmark() async {
-    final prefs = getIt<SharedPreferencesAsync>();
-    final Set<String> bookmarks =
-        (await prefs.getStringList(_bookmarkStorageKey))?.toSet() ?? {};
-    if (_isBookmarked) {
-      bookmarks.remove(_bookmarkKey);
-    } else {
-      bookmarks.add(_bookmarkKey);
-    }
-    await prefs.setStringList(_bookmarkStorageKey, bookmarks.toList());
+    final bool next = await _bookmarks.toggle(_bookmarkKey);
     if (!mounted) {
       return;
     }
-    setState(() => _isBookmarked = !_isBookmarked);
+    setState(() => _isBookmarked = next);
   }
 
   Future<void> _shareAyah(_DailyAyahSheetCopy copy) async {

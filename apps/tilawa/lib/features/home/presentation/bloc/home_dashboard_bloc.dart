@@ -1,6 +1,7 @@
 import 'dart:async';
 
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:injectable/injectable.dart';
 import 'package:tilawa/core/logging/app_logger.dart';
 import 'package:tilawa/core/network/network_error_message.dart';
 
@@ -11,6 +12,7 @@ import '../../domain/usecases/get_home_dashboard_use_case.dart';
 import 'home_dashboard_event.dart';
 import 'home_dashboard_state.dart';
 
+@injectable
 final class HomeDashboardBloc
     extends Bloc<HomeDashboardEvent, HomeDashboardState> {
   HomeDashboardBloc(

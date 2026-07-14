@@ -1,4 +1,3 @@
-import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:injectable/injectable.dart';
 import '../entities/notification_action.dart';
 
@@ -6,8 +5,7 @@ import '../entities/notification_action.dart';
 class HandleFcmNotificationUseCase {
   HandleFcmNotificationUseCase();
 
-  NotificationAction call(RemoteMessage message) {
-    final data = message.data;
+  NotificationAction call(Map<String, dynamic> data) {
     final String? typeStr = data['type'] as String?;
     final type = NotificationActionType.fromString(typeStr);
 

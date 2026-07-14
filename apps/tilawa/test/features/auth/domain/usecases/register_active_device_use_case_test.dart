@@ -1,12 +1,11 @@
-import 'package:cloud_functions/cloud_functions.dart';
+import 'package:dartz_plus/dartz_plus.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:mocktail/mocktail.dart';
 import 'package:tilawa/core/services/device_token_service.dart';
-import 'package:tilawa/features/auth/data/datasources/active_device_remote_data_source.dart';
-import 'package:tilawa/features/auth/data/services/device_identity_service.dart';
 import 'package:tilawa/features/auth/domain/entities/auth_error_key.dart';
 import 'package:tilawa/features/auth/domain/entities/device_info_snapshot.dart';
 import 'package:tilawa/features/auth/domain/entities/session_registration.dart';
+import 'package:tilawa/features/auth/domain/repositories/active_device_repository.dart';
 import 'package:tilawa/features/auth/domain/services/device_info_service.dart';
 import 'package:tilawa/features/auth/domain/services/token_sync_cache.dart';
 import 'package:tilawa/features/auth/domain/usecases/register_active_device_use_case.dart';
@@ -14,10 +13,8 @@ import 'package:tilawa_core/entities/app_info.dart';
 import 'package:tilawa_core/errors/failures.dart';
 import 'package:tilawa_core/services/interfaces/app_info_service.dart';
 
-class MockActiveDeviceRemoteDataSource extends Mock
-    implements ActiveDeviceRemoteDataSource {}
-
-class MockDeviceIdentityService extends Mock implements DeviceIdentityService {}
+class MockActiveDeviceRepository extends Mock
+    implements ActiveDeviceRepository {}
 
 class MockDeviceTokenService extends Mock implements DeviceTokenService {}
 
@@ -29,8 +26,7 @@ class MockDeviceInfoService extends Mock implements DeviceInfoService {}
 
 void main() {
   late RegisterActiveDeviceUseCase useCase;
-  late MockActiveDeviceRemoteDataSource mockRemote;
-  late MockDeviceIdentityService mockIdentity;
+  late MockActiveDeviceRepository mockRepository;
   late MockDeviceTokenService mockTokenService;
   late MockTokenSyncCache mockCache;
   late MockAppInfoService mockAppInfo;
@@ -58,24 +54,20 @@ void main() {
   });
 
   setUp(() {
-    mockRemote = MockActiveDeviceRemoteDataSource();
-    mockIdentity = MockDeviceIdentityService();
+    mockRepository = MockActiveDeviceRepository();
     mockTokenService = MockDeviceTokenService();
     mockCache = MockTokenSyncCache();
     mockAppInfo = MockAppInfoService();
     mockDeviceInfo = MockDeviceInfoService();
 
     useCase = RegisterActiveDeviceUseCase(
-      mockRemote,
-      mockIdentity,
+      mockRepository,
       mockTokenService,
       mockCache,
       mockAppInfo,
       mockDeviceInfo,
     );
 
-    when(() => mockIdentity.platform).thenReturn('android');
-    when(() => mockIdentity.getDeviceId()).thenAnswer((_) async => 'device_1');
     when(() => mockTokenService.getToken()).thenAnswer((_) async => tToken);
     when(() => mockDeviceInfo.getDeviceInfo()).thenAnswer((_) async {
       return tDeviceInfo;
@@ -98,29 +90,24 @@ void main() {
     'explicit sign-in registers with explicit mode and caches session',
     () async {
       when(
-        () => mockRemote.registerActiveDevice(
-          deviceId: any(named: 'deviceId'),
+        () => mockRepository.registerActiveDevice(
           fcmToken: any(named: 'fcmToken'),
           registrationMode: any(named: 'registrationMode'),
-          platform: any(named: 'platform'),
           appVersion: any(named: 'appVersion'),
           deviceInfo: any(named: 'deviceInfo'),
           signOut: any(named: 'signOut'),
         ),
-      ).thenAnswer((_) async => tRegistration);
+      ).thenAnswer((_) async => const Right(tRegistration));
 
       final result = await useCase.registerExplicitSignIn(tUserId);
 
       expect(result.isRight(), isTrue);
       verify(
-        () => mockRemote.registerActiveDevice(
-          deviceId: 'device_1',
+        () => mockRepository.registerActiveDevice(
           fcmToken: tToken,
           registrationMode: DeviceRegistrationMode.explicitSignIn,
-          platform: 'android',
           appVersion: '2.0.16',
           deviceInfo: tDeviceInfo,
-          signOut: false,
         ),
       ).called(1);
       verify(() => mockCache.saveSessionEpoch(2)).called(1);
@@ -131,20 +118,20 @@ void main() {
 
   test('passive sync uses passive mode', () async {
     when(
-      () => mockRemote.registerActiveDevice(
-        deviceId: any(named: 'deviceId'),
+      () => mockRepository.registerActiveDevice(
         fcmToken: any(named: 'fcmToken'),
         registrationMode: any(named: 'registrationMode'),
-        platform: any(named: 'platform'),
         appVersion: any(named: 'appVersion'),
         deviceInfo: any(named: 'deviceInfo'),
         signOut: any(named: 'signOut'),
       ),
     ).thenAnswer(
-      (_) async => const SessionRegistration(
-        status: SessionRegistrationStatus.updatedSameDevice,
-        sessionEpoch: 5,
-        activeDeviceId: 'device_1',
+      (_) async => const Right(
+        SessionRegistration(
+          status: SessionRegistrationStatus.updatedSameDevice,
+          sessionEpoch: 5,
+          activeDeviceId: 'device_1',
+        ),
       ),
     );
 
@@ -152,14 +139,11 @@ void main() {
 
     expect(result.isRight(), isTrue);
     verify(
-      () => mockRemote.registerActiveDevice(
-        deviceId: 'device_1',
+      () => mockRepository.registerActiveDevice(
         fcmToken: tToken,
         registrationMode: DeviceRegistrationMode.passiveSync,
-        platform: 'android',
         appVersion: '2.0.16',
         deviceInfo: tDeviceInfo,
-        signOut: false,
       ),
     ).called(1);
     verify(() => mockCache.saveSessionEpoch(5)).called(1);
@@ -169,20 +153,20 @@ void main() {
     'passive stale response clears local cache and returns stale failure',
     () async {
       when(
-        () => mockRemote.registerActiveDevice(
-          deviceId: any(named: 'deviceId'),
+        () => mockRepository.registerActiveDevice(
           fcmToken: any(named: 'fcmToken'),
           registrationMode: any(named: 'registrationMode'),
-          platform: any(named: 'platform'),
           appVersion: any(named: 'appVersion'),
           deviceInfo: any(named: 'deviceInfo'),
           signOut: any(named: 'signOut'),
         ),
       ).thenAnswer(
-        (_) async => const SessionRegistration(
-          status: SessionRegistrationStatus.staleDeviceRejected,
-          sessionEpoch: 5,
-          activeDeviceId: 'device_2',
+        (_) async => const Right(
+          SessionRegistration(
+            status: SessionRegistrationStatus.staleDeviceRejected,
+            sessionEpoch: 5,
+            activeDeviceId: 'device_2',
+          ),
         ),
       );
 
@@ -201,50 +185,40 @@ void main() {
   test('explicit sign-in still registers when FCM token is missing', () async {
     when(() => mockTokenService.getToken()).thenAnswer((_) async => null);
     when(
-      () => mockRemote.registerActiveDevice(
-        deviceId: any(named: 'deviceId'),
+      () => mockRepository.registerActiveDevice(
         fcmToken: any(named: 'fcmToken'),
         registrationMode: any(named: 'registrationMode'),
-        platform: any(named: 'platform'),
         appVersion: any(named: 'appVersion'),
         deviceInfo: any(named: 'deviceInfo'),
         signOut: any(named: 'signOut'),
       ),
-    ).thenAnswer((_) async => tRegistration);
+    ).thenAnswer((_) async => const Right(tRegistration));
 
     final result = await useCase.registerExplicitSignIn(tUserId);
 
     expect(result.isRight(), isTrue);
     verify(
-      () => mockRemote.registerActiveDevice(
-        deviceId: 'device_1',
+      () => mockRepository.registerActiveDevice(
         fcmToken: null,
         registrationMode: DeviceRegistrationMode.explicitSignIn,
-        platform: 'android',
         appVersion: '2.0.16',
         deviceInfo: tDeviceInfo,
-        signOut: false,
       ),
     ).called(1);
     verifyNever(() => mockCache.saveSync(any(), any()));
   });
 
-  test('returns server failure when callable throws', () async {
+  test('returns failure when repository returns Left', () async {
     when(
-      () => mockRemote.registerActiveDevice(
-        deviceId: any(named: 'deviceId'),
+      () => mockRepository.registerActiveDevice(
         fcmToken: any(named: 'fcmToken'),
         registrationMode: any(named: 'registrationMode'),
-        platform: any(named: 'platform'),
         appVersion: any(named: 'appVersion'),
         deviceInfo: any(named: 'deviceInfo'),
         signOut: any(named: 'signOut'),
       ),
-    ).thenThrow(
-      FirebaseFunctionsException(
-        code: 'internal',
-        message: 'boom',
-      ),
+    ).thenAnswer(
+      (_) async => const Left(ServerFailure('boom')),
     );
 
     final result = await useCase.registerExplicitSignIn(tUserId);
@@ -255,22 +229,17 @@ void main() {
     }, (_) => fail('expected Left'));
   });
 
-  test('maps App Check callable failure to auth app check key', () async {
+  test('maps App Check failure key from repository', () async {
     when(
-      () => mockRemote.registerActiveDevice(
-        deviceId: any(named: 'deviceId'),
+      () => mockRepository.registerActiveDevice(
         fcmToken: any(named: 'fcmToken'),
         registrationMode: any(named: 'registrationMode'),
-        platform: any(named: 'platform'),
         appVersion: any(named: 'appVersion'),
         deviceInfo: any(named: 'deviceInfo'),
         signOut: any(named: 'signOut'),
       ),
-    ).thenThrow(
-      FirebaseFunctionsException(
-        code: 'unauthenticated',
-        message: 'App Check token is invalid.',
-      ),
+    ).thenAnswer(
+      (_) async => const Left(ServerFailure(AuthErrorKey.appCheckFailed)),
     );
 
     final result = await useCase.registerExplicitSignIn(tUserId);
@@ -283,21 +252,18 @@ void main() {
 
   test('clearActiveDeviceOnSignOut clears local session cache', () async {
     when(
-      () => mockCache.getActiveDeviceId(),
-    ).thenAnswer((_) async => 'device_1');
-    when(
-      () => mockRemote.registerActiveDevice(
-        deviceId: any(named: 'deviceId'),
+      () => mockRepository.registerActiveDevice(
         fcmToken: any(named: 'fcmToken'),
         registrationMode: any(named: 'registrationMode'),
-        platform: any(named: 'platform'),
         signOut: true,
       ),
     ).thenAnswer(
-      (_) async => const SessionRegistration(
-        status: SessionRegistrationStatus.updatedSameDevice,
-        sessionEpoch: 2,
-        activeDeviceId: 'device_1',
+      (_) async => const Right(
+        SessionRegistration(
+          status: SessionRegistrationStatus.updatedSameDevice,
+          sessionEpoch: 2,
+          activeDeviceId: 'device_1',
+        ),
       ),
     );
 
@@ -305,11 +271,9 @@ void main() {
 
     expect(result.isRight(), isTrue);
     verify(
-      () => mockRemote.registerActiveDevice(
-        deviceId: 'device_1',
+      () => mockRepository.registerActiveDevice(
         fcmToken: '',
         registrationMode: DeviceRegistrationMode.passiveSync,
-        platform: 'android',
         signOut: true,
       ),
     ).called(1);
@@ -317,48 +281,17 @@ void main() {
   });
 
   test(
-    'clearActiveDeviceOnSignOut falls back to device identity when cache empty',
+    'clearActiveDeviceOnSignOut clears local session when remote fails',
     () async {
-      when(() => mockCache.getActiveDeviceId()).thenAnswer((_) async => null);
-      when(() => mockIdentity.getDeviceId()).thenAnswer((_) async => 'fid_2');
       when(
-        () => mockRemote.registerActiveDevice(
-          deviceId: any(named: 'deviceId'),
+        () => mockRepository.registerActiveDevice(
           fcmToken: any(named: 'fcmToken'),
           registrationMode: any(named: 'registrationMode'),
-          platform: any(named: 'platform'),
           signOut: true,
         ),
       ).thenAnswer(
-        (_) async => const SessionRegistration(
-          status: SessionRegistrationStatus.staleDeviceRejected,
-          sessionEpoch: 2,
-          activeDeviceId: 'device_1',
-        ),
+        (_) async => const Left(ServerFailure('network')),
       );
-
-      final result = await useCase.clearActiveDeviceOnSignOut(tUserId);
-
-      expect(result.isRight(), isTrue);
-      verify(() => mockCache.clearSession()).called(1);
-    },
-  );
-
-  test(
-    'clearActiveDeviceOnSignOut clears local session when remote throws',
-    () async {
-      when(
-        () => mockCache.getActiveDeviceId(),
-      ).thenAnswer((_) async => 'device_1');
-      when(
-        () => mockRemote.registerActiveDevice(
-          deviceId: any(named: 'deviceId'),
-          fcmToken: any(named: 'fcmToken'),
-          registrationMode: any(named: 'registrationMode'),
-          platform: any(named: 'platform'),
-          signOut: true,
-        ),
-      ).thenThrow(Exception('network'));
 
       final result = await useCase.clearActiveDeviceOnSignOut(tUserId);
 

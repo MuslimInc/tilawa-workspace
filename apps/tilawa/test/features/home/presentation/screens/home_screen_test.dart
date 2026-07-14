@@ -152,7 +152,7 @@ void main() {
   ) async {
     final repository = _PendingHomeDashboardRepository();
     final bloc = HomeDashboardBloc(
-      GetHomeDashboardUseCase(repository),
+      GetHomeDashboardUseCase(repository, HomeDashboardMemoryCache()),
       NotifyPrayerLocationUpdatedUseCase(PrayerLocationUpdateNotifier()),
     )..add(const HomeDashboardStarted(localeIdentifier: 'en'));
     addTearDown(bloc.close);
@@ -186,7 +186,10 @@ void main() {
     tester,
   ) async {
     final bloc = HomeDashboardBloc(
-      GetHomeDashboardUseCase(_FakeHomeDashboardRepository()),
+      GetHomeDashboardUseCase(
+        _FakeHomeDashboardRepository(),
+        HomeDashboardMemoryCache(),
+      ),
       NotifyPrayerLocationUpdatedUseCase(PrayerLocationUpdateNotifier()),
     )..add(const HomeDashboardStarted(localeIdentifier: 'en'));
     addTearDown(bloc.close);
@@ -316,7 +319,7 @@ void main() {
   ) async {
     final repository = _RefreshFailingHomeDashboardRepository();
     final bloc = HomeDashboardBloc(
-      GetHomeDashboardUseCase(repository),
+      GetHomeDashboardUseCase(repository, HomeDashboardMemoryCache()),
       NotifyPrayerLocationUpdatedUseCase(PrayerLocationUpdateNotifier()),
     )..add(const HomeDashboardStarted(localeIdentifier: 'en'));
     addTearDown(bloc.close);
@@ -353,7 +356,10 @@ void main() {
     addTearDown(view.resetPhysicalSize);
 
     final bloc = HomeDashboardBloc(
-      GetHomeDashboardUseCase(_FakeHomeDashboardRepository()),
+      GetHomeDashboardUseCase(
+        _FakeHomeDashboardRepository(),
+        HomeDashboardMemoryCache(),
+      ),
       NotifyPrayerLocationUpdatedUseCase(PrayerLocationUpdateNotifier()),
     )..add(const HomeDashboardStarted(localeIdentifier: 'ar'));
     addTearDown(bloc.close);
@@ -386,7 +392,10 @@ void main() {
   ) async {
     const double topInset = 44;
     final bloc = HomeDashboardBloc(
-      GetHomeDashboardUseCase(_FakeHomeDashboardRepository()),
+      GetHomeDashboardUseCase(
+        _FakeHomeDashboardRepository(),
+        HomeDashboardMemoryCache(),
+      ),
       NotifyPrayerLocationUpdatedUseCase(PrayerLocationUpdateNotifier()),
     )..add(const HomeDashboardStarted(localeIdentifier: 'en'));
     addTearDown(bloc.close);
@@ -421,7 +430,10 @@ void main() {
   ) async {
     const double topInset = 44;
     final bloc = HomeDashboardBloc(
-      GetHomeDashboardUseCase(_FakeHomeDashboardRepository()),
+      GetHomeDashboardUseCase(
+        _FakeHomeDashboardRepository(),
+        HomeDashboardMemoryCache(),
+      ),
       NotifyPrayerLocationUpdatedUseCase(PrayerLocationUpdateNotifier()),
     )..add(const HomeDashboardStarted(localeIdentifier: 'en'));
     addTearDown(bloc.close);
@@ -445,7 +457,10 @@ void main() {
 
   testWidgets('Home avoids bottom-nav duplicate shortcuts', (tester) async {
     final bloc = HomeDashboardBloc(
-      GetHomeDashboardUseCase(_FakeHomeDashboardRepository()),
+      GetHomeDashboardUseCase(
+        _FakeHomeDashboardRepository(),
+        HomeDashboardMemoryCache(),
+      ),
       NotifyPrayerLocationUpdatedUseCase(PrayerLocationUpdateNotifier()),
     )..add(const HomeDashboardStarted(localeIdentifier: 'en'));
     addTearDown(bloc.close);
@@ -477,7 +492,10 @@ void main() {
 
   testWidgets('Home contains no layout toggle button', (tester) async {
     final bloc = HomeDashboardBloc(
-      GetHomeDashboardUseCase(_FakeHomeDashboardRepository()),
+      GetHomeDashboardUseCase(
+        _FakeHomeDashboardRepository(),
+        HomeDashboardMemoryCache(),
+      ),
       NotifyPrayerLocationUpdatedUseCase(PrayerLocationUpdateNotifier()),
     )..add(const HomeDashboardStarted(localeIdentifier: 'en'));
     addTearDown(bloc.close);
@@ -498,7 +516,10 @@ void main() {
       tester,
     ) async {
       final bloc = HomeDashboardBloc(
-        GetHomeDashboardUseCase(_FakeHomeDashboardRepository()),
+        GetHomeDashboardUseCase(
+          _FakeHomeDashboardRepository(),
+          HomeDashboardMemoryCache(),
+        ),
         NotifyPrayerLocationUpdatedUseCase(PrayerLocationUpdateNotifier()),
       )..add(const HomeDashboardStarted(localeIdentifier: 'en'));
       addTearDown(bloc.close);
@@ -559,7 +580,10 @@ void main() {
       addTearDown(view.resetPhysicalSize);
 
       final bloc = HomeDashboardBloc(
-        GetHomeDashboardUseCase(_FakeHomeDashboardRepository()),
+        GetHomeDashboardUseCase(
+          _FakeHomeDashboardRepository(),
+          HomeDashboardMemoryCache(),
+        ),
         NotifyPrayerLocationUpdatedUseCase(PrayerLocationUpdateNotifier()),
       )..add(const HomeDashboardStarted(localeIdentifier: 'en'));
       addTearDown(bloc.close);
