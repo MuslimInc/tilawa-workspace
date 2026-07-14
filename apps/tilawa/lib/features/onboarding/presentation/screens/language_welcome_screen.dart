@@ -22,6 +22,21 @@ class LanguageWelcomeScreen extends StatelessWidget {
           statusBarBackgroundColor: theme.scaffoldBackgroundColor,
           navigationBarColor: theme.scaffoldBackgroundColor,
         );
+    // Fixed two-line slot keeps the language switcher from shifting on locale.
+    final TextStyle? baseWelcomeStyle = theme.textTheme.headlineLarge;
+    final double welcomeFontSize = baseWelcomeStyle?.fontSize ?? 32;
+    final double welcomeHeightFactor = baseWelcomeStyle?.height ?? 1.25;
+    final TextStyle welcomeStyle = (baseWelcomeStyle ?? const TextStyle())
+        .copyWith(
+          color: colorScheme.onSurface,
+          fontWeight: FontWeight.bold,
+          fontSize: welcomeFontSize,
+          height: welcomeHeightFactor,
+        );
+    final double welcomeTwoLineHeight =
+        MediaQuery.textScalerOf(context).scale(welcomeFontSize) *
+        welcomeHeightFactor *
+        2;
 
     return AnnotatedRegion<SystemUiOverlayStyle>(
       value: overlayStyle,
@@ -39,13 +54,23 @@ class LanguageWelcomeScreen extends StatelessWidget {
                 children: <Widget>[
                   const Center(child: TilawaAppBrandBadge()),
                   SizedBox(height: tokens.spaceExtraLarge),
-                  Text(
-                    context.l10n.welcomeToApp,
-                    style: theme.textTheme.headlineLarge?.copyWith(
-                      color: colorScheme.onSurface,
-                      fontWeight: FontWeight.bold,
+                  SizedBox(
+                    height: welcomeTwoLineHeight,
+                    width: double.infinity,
+                    child: Align(
+                      alignment: Alignment.center,
+                      child: Text(
+                        context.l10n.welcomeToApp,
+                        style: welcomeStyle,
+                        textAlign: TextAlign.center,
+                        maxLines: 2,
+                        overflow: TextOverflow.ellipsis,
+                        strutStyle: StrutStyle.fromTextStyle(
+                          welcomeStyle,
+                          forceStrutHeight: true,
+                        ),
+                      ),
                     ),
-                    textAlign: TextAlign.center,
                   ),
                   SizedBox(height: tokens.spaceMedium),
                   Text(
