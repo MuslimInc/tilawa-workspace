@@ -54,8 +54,7 @@ class HomePrimaryActionsSection extends StatelessWidget {
                 ),
                 label: context.l10n.homeQuickAthkar,
                 subtitle: context.l10n.homeQuickAthkarSubtitle,
-                onTap: () =>
-                    const AthkarCategoriesRoute().push<void>(context),
+                onTap: () => const AthkarCategoriesRoute().push<void>(context),
               ),
             ),
           ],
