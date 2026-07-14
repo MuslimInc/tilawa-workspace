@@ -109,7 +109,7 @@ class _PrayerNotificationImmersiveScaffold extends StatelessWidget {
     final tokens = context.tokens;
     final heroTokens = Theme.of(context).componentTokens.homeNextPrayerHero;
 
-    return Scaffold(
+    return TilawaShellChildScaffold(
       extendBodyBehindAppBar: true,
       body: DecoratedBox(
         decoration: BoxDecoration(gradient: heroTokens.backgroundGradient),

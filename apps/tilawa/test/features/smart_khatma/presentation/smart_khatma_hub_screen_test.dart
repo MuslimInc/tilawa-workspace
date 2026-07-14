@@ -10,6 +10,24 @@ import 'package:tilawa_ui_kit/tilawa_ui_kit.dart';
 
 void main() {
   testWidgets(
+    'hub uses TilawaShellChildScaffold under the app shell contract',
+    (
+      tester,
+    ) async {
+      await _pumpHub(tester, _bloc(_Repository()));
+
+      expect(find.byType(TilawaShellChildScaffold), findsOneWidget);
+      final Scaffold scaffold = tester.widget<Scaffold>(
+        find.descendant(
+          of: find.byType(TilawaShellChildScaffold),
+          matching: find.byType(Scaffold),
+        ),
+      );
+      expect(scaffold.resizeToAvoidBottomInset, isFalse);
+    },
+  );
+
+  testWidgets(
     'creation review is usable on a narrow screen at 1.4 text scale',
     (tester) async {
       final semantics = tester.ensureSemantics();

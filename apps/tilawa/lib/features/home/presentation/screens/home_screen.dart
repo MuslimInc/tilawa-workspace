@@ -131,7 +131,7 @@ class _HomeScreenState extends State<HomeScreen> {
               ),
             );
           },
-          child: Scaffold(
+          child: TilawaShellChildScaffold(
             backgroundColor: canvasBottom,
             body: Stack(
               fit: StackFit.expand,

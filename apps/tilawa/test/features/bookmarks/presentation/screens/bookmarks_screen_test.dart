@@ -87,6 +87,27 @@ Future<void> _pumpBookmarksScreen(
 }
 
 void main() {
+  testWidgets('shell child scaffold opts out of nested keyboard resize', (
+    tester,
+  ) async {
+    await _pumpBookmarksScreen(
+      tester,
+      state: const BookmarksState.loaded(
+        bookmarks: <BookmarkEntity>[],
+        filteredBookmarks: <BookmarkEntity>[],
+      ),
+    );
+
+    expect(find.byType(TilawaShellChildScaffold), findsOneWidget);
+    final Scaffold scaffold = tester.widget<Scaffold>(
+      find.descendant(
+        of: find.byType(TilawaShellChildScaffold),
+        matching: find.byType(Scaffold),
+      ),
+    );
+    expect(scaffold.resizeToAvoidBottomInset, isFalse);
+  });
+
   testWidgets('empty bookmarks body scrolls and stays visible with keyboard', (
     tester,
   ) async {

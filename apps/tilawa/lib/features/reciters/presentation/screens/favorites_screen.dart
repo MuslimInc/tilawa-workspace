@@ -45,7 +45,7 @@ class FavoritesScreen extends StatelessWidget {
         },
         child: Stack(
           children: [
-            Scaffold(
+            TilawaShellChildScaffold(
               appBar: TilawaCatalogAppBar.titleOnly(
                 title: context.l10n.favorites,
               ),

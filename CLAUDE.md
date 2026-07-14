@@ -70,6 +70,13 @@ Localisation strings: `context.l10n` (extension on `BuildContext`).
 visual tokens: `flutter-apply-tilawa-theming`. Canonical human specs: `DESIGN.md`,
 `docs/tilawa_brand.md`.
 
+**Shell keyboard ownership:** Feature screens under `TilawaAdaptiveShell` must
+use `TilawaShellChildScaffold` (nested `resizeToAvoidBottomInset: false`). Do
+not re-apply full keyboard height with `effectiveKeyboardInset` on already-
+resized shell children. Lint: `tilawa_shell_child_scaffold` in
+`packages/tilawa_lints`. See
+[ADR-009](docs/adr/009-shell-owns-keyboard-resize.md).
+
 ## Known pitfall — TilawaCard and interactive children
 
 `TilawaInteractiveSurface` routes card taps and state-layer press feedback on

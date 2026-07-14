@@ -144,4 +144,22 @@ const uiKitExceptions = <UiKitException>[
         'tokens exist, so TilawaButton (token-dependent) cannot be used.',
     trackingReference: 'docs/TODO.md#ui-kit-button-migration',
   ),
+  UiKitException(
+    id: 'SHELL-SCAFFOLD-ERROR-ROUTE',
+    pathSuffix: 'apps/tilawa/lib/router/app_router_config.dart',
+    component: 'Scaffold',
+    reason:
+        'Inline ErrorRoute placeholder is not a full feature screen; keep a '
+        'minimal Material Scaffold until the error surface is redesigned.',
+    trackingReference: 'docs/adr/009-shell-owns-keyboard-resize.md',
+  ),
+  UiKitException(
+    id: 'SHELL-SCAFFOLD-GENUI-UNAVAILABLE',
+    pathSuffix: 'apps/tilawa/lib/router/app_router_config.dart',
+    component: 'Scaffold',
+    reason:
+        'SmartQuranPlanRoute unavailable fallback renders before GenUI deps '
+        'are registered; temporary bare Scaffold only.',
+    trackingReference: 'docs/adr/009-shell-owns-keyboard-resize.md',
+  ),
 ];

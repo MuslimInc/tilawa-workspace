@@ -19,8 +19,7 @@ class ReciterDetailsLoader extends StatelessWidget {
   Widget build(BuildContext context) {
     return BlocProvider(
       create: (_) => getIt<ReciterDetailsLoaderCubit>()..loadReciter(reciterId),
-      child: Scaffold(
-        resizeToAvoidBottomInset: false,
+      child: TilawaShellChildScaffold(
         body: BlocBuilder<ReciterDetailsLoaderCubit, ReciterDetailsLoaderState>(
           builder: (context, state) {
             if (state is ReciterDetailsLoaderLoading) {

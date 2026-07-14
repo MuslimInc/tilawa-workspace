@@ -23,9 +23,7 @@ class BookmarksScreen extends StatelessWidget {
   Widget build(BuildContext context) {
     final double keyboardInset = context.keyboardInset;
 
-    return Scaffold(
-      // Search lives in the app bar; inset the list instead of resizing.
-      resizeToAvoidBottomInset: false,
+    return TilawaShellChildScaffold(
       appBar: TilawaCatalogAppBar(
         title: context.l10n.bookmarks,
         automaticallyImplyLeading: true,

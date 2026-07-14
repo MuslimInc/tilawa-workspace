@@ -224,11 +224,7 @@ class _ReciterDetailsScreenState extends State<ReciterDetailsScreen> {
 
     return Stack(
       children: [
-        Scaffold(
-          // Shell [TilawaAdaptiveShell] already shrinks for the keyboard; a
-          // nested resize here double-applies [viewInsets] and collapses the
-          // surah list to zero height (white gap above keyboard).
-          resizeToAvoidBottomInset: false,
+        TilawaShellChildScaffold(
           // Scroll-to-top uses [AnimatedSlide]/[AnimatedOpacity]; disable the
           // scaffold scaling animator so rebuilds do not shrink the FAB.
           floatingActionButtonAnimator:

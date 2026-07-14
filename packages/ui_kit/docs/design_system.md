@@ -245,6 +245,24 @@ bones matching loaded copy heights).
 
 ---
 
+## 4.4 Keyboard insets under `TilawaAdaptiveShell`
+
+**Rule:** One owner for IME geometry — the shell. Nested feature scaffolds do
+not resize again.
+
+| Layer | Contract |
+|-------|----------|
+| `TilawaAdaptiveShell` | `resizeToAvoidBottomInset: true` (sole owner) |
+| Shell-hosted screens | `TilawaShellChildScaffold` (default `resize: false`) |
+| Outside shell | Material `Scaffold` with default resize (or immersive override) |
+| Sticky form footers | `TilawaComfortableReachPadding(..., keyboardAware: false)` when parent already resized |
+| Field `scrollPadding` | MediaQuery `keyboardInset` + small buffer — **not** a second full `effectiveKeyboardInset` pad |
+| Lint | `tilawa_shell_child_scaffold` (`packages/tilawa_lints`) — shell-hosted paths only |
+
+See [ADR-009](../../../docs/adr/009-shell-owns-keyboard-resize.md).
+
+---
+
 ## 5. Testing contract
 
 | Suite | Path | Purpose |

@@ -21,6 +21,7 @@ export 'tilawa_bottom_sheet_actions.dart';
 export 'tilawa_comfortable_reach_padding.dart';
 export 'tilawa_form_field_anchor.dart';
 export 'tilawa_form_screen_scaffold.dart';
+export 'tilawa_shell_child_scaffold.dart';
 export 'tilawa_form_submit_footer.dart';
 export 'tilawa_form_validation.dart';
 export 'tilawa_bottom_sheet_scaffold.dart';

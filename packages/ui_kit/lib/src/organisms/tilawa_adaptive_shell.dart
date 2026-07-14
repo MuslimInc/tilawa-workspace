@@ -84,6 +84,16 @@ class TilawaNavDestination {
 /// the bar (e.g. full-screen player).
 ///
 /// Respects [DisplayFeature]s (hinges/folds) on foldable devices.
+///
+/// ## Keyboard / [MediaQuery.viewInsets] ownership
+///
+/// This shell [Scaffold] is the **sole** owner of IME geometry under the app
+/// navigation shell (`resizeToAvoidBottomInset: true`). Feature screens nested
+/// in [child] must not resize again — use [TilawaShellChildScaffold] (default
+/// `resizeToAvoidBottomInset: false`). Re-applying full keyboard height via
+/// [TilawaSafeAreaX.effectiveKeyboardInset] on top of this shrink causes white
+/// gaps and crushed layouts; prefer scroll + light field [scrollPadding] using
+/// [TilawaSafeAreaX.keyboardInset] after the shell consumes insets.
 class TilawaAdaptiveShell extends StatelessWidget {
   const TilawaAdaptiveShell({
     super.key,
@@ -163,6 +173,8 @@ class TilawaAdaptiveShell extends StatelessWidget {
         }
 
         return Scaffold(
+          // Exclusive IME owner under the app shell — see class dartdoc.
+          resizeToAvoidBottomInset: true,
           backgroundColor: bodyColor,
           extendBody: false,
           body: MediaQuery.removeViewPadding(

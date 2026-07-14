@@ -22,7 +22,7 @@ class SmartKhatmaHubScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
+    return TilawaShellChildScaffold(
       appBar: TilawaCatalogAppBar.titleOnly(
         title: context.l10n.khatmaHubTitle,
         automaticallyImplyLeading: true,
@@ -187,6 +187,7 @@ class _KhatmaHubEmptyBodyState extends State<_KhatmaHubEmptyBody> {
     );
 
     return ListView(
+      keyboardDismissBehavior: ScrollViewKeyboardDismissBehavior.onDrag,
       padding: EdgeInsetsDirectional.fromSTEB(
         theme.componentTokens.settingsGroup.groupHorizontalPadding,
         tokens.spaceSection,
@@ -438,25 +439,32 @@ class _KhatmaPageBoundaryFields extends StatelessWidget {
   final VoidCallback onChanged;
 
   @override
-  Widget build(BuildContext context) => Column(
-    spacing: context.tokens.spaceMedium,
-    children: [
-      TilawaTextField(
-        controller: startController,
-        keyboardType: TextInputType.number,
-        label: context.l10n.khatmaStartPageInput,
-        helperText: context.l10n.khatmaPageBoundsHelp,
-        onChanged: (_) => onChanged(),
-      ),
-      TilawaTextField(
-        controller: endController,
-        keyboardType: TextInputType.number,
-        label: context.l10n.khatmaEndPageInput,
-        helperText: context.l10n.khatmaPageBoundsHelp,
-        onChanged: (_) => onChanged(),
-      ),
-    ],
-  );
+  Widget build(BuildContext context) {
+    final EdgeInsets scrollPadding = EdgeInsets.only(
+      bottom: context.keyboardInset + 24,
+    );
+    return Column(
+      spacing: context.tokens.spaceMedium,
+      children: [
+        TilawaTextField(
+          controller: startController,
+          keyboardType: TextInputType.number,
+          label: context.l10n.khatmaStartPageInput,
+          helperText: context.l10n.khatmaPageBoundsHelp,
+          scrollPadding: scrollPadding,
+          onChanged: (_) => onChanged(),
+        ),
+        TilawaTextField(
+          controller: endController,
+          keyboardType: TextInputType.number,
+          label: context.l10n.khatmaEndPageInput,
+          helperText: context.l10n.khatmaPageBoundsHelp,
+          scrollPadding: scrollPadding,
+          onChanged: (_) => onChanged(),
+        ),
+      ],
+    );
+  }
 }
 
 class _KhatmaCreationReviewBody extends StatelessWidget {

@@ -33,7 +33,7 @@ class _PlaylistsScreenState extends State<PlaylistsScreen> {
     final double fabBottomOffset =
         QuranPlayerWidget.fabBottomOffset(context) + tokens.spaceLarge;
 
-    return Scaffold(
+    return TilawaShellChildScaffold(
       appBar: TilawaCatalogAppBar(
         title: l10n.playlists,
         actions: [

@@ -39,6 +39,8 @@ class _HistoryScreenState extends State<HistoryScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final double keyboardInset = context.keyboardInset;
+
     return BlocBuilder<HistoryBloc, HistoryState>(
       buildWhen: (previous, current) =>
           previous.historyList.isEmpty != current.historyList.isEmpty,
@@ -80,6 +82,7 @@ class _HistoryScreenState extends State<HistoryScreen> {
                 ).componentTokens.searchField.height,
                 bottomContent: HistorySearchBar(
                   controller: _searchController,
+                  scrollPadding: EdgeInsets.only(bottom: keyboardInset + 24),
                   onChanged: (query) {
                     context.read<HistoryBloc>().add(
                       HistoryEvent.searchHistory(query),
@@ -97,7 +100,7 @@ class _HistoryScreenState extends State<HistoryScreen> {
                 title: context.l10n.listeningHistory,
               );
 
-        return Scaffold(
+        return TilawaShellChildScaffold(
           appBar: appBar,
           body: Stack(
             children: [
@@ -111,6 +114,8 @@ class _HistoryScreenState extends State<HistoryScreen> {
                       );
                     },
                     child: CustomScrollView(
+                      keyboardDismissBehavior:
+                          ScrollViewKeyboardDismissBehavior.onDrag,
                       slivers: [
                         // Stats card
                         if (state.historyList.isNotEmpty)
@@ -272,6 +277,10 @@ class _HistoryScreenState extends State<HistoryScreen> {
   }
 
   double _calculateBottomPadding(BuildContext context) {
+    if (context.isKeyboardVisible) {
+      // Shell already resized; mini-player is hidden while the IME is open.
+      return Theme.of(context).tokens.spaceSmall;
+    }
     final audioPlayerState = context.read<AudioPlayerBloc>().state;
     if (audioPlayerState.shouldShowBottomPlayer) {
       return QuranPlayerWidget.collapsedFootprint(context);

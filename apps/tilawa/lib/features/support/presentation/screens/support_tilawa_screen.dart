@@ -45,7 +45,7 @@ class _SupportTilawaScreenState extends State<SupportTilawaScreen>
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
+    return TilawaShellChildScaffold(
       appBar: TilawaCatalogAppBar.titleOnly(
         title: context.l10n.supportTilawa,
         leading: TilawaAppBarChrome.catalogBackButton(

@@ -37,7 +37,8 @@ or visual appearance are similar.
 Temporary exceptions require both:
 
 1. A unique `// tilawa-ui-exception: ID` marker next to an
-   `// ignore: tilawa_ui_component` directive.
+   `// ignore: tilawa_lints/<rule_name>` directive (e.g.
+   `tilawa_ui_component` or `tilawa_shell_child_scaffold`).
 2. A matching `UiKitException` registry entry with the exact file suffix,
    component name, concrete reason, and cleanup issue or tracking reference.
 

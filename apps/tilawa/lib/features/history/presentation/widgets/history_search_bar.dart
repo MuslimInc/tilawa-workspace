@@ -9,11 +9,13 @@ class HistorySearchBar extends StatelessWidget {
     required this.controller,
     required this.onChanged,
     required this.onClear,
+    this.scrollPadding,
   });
 
   final TextEditingController controller;
   final ValueChanged<String> onChanged;
   final VoidCallback onClear;
+  final EdgeInsets? scrollPadding;
 
   @override
   Widget build(BuildContext context) {
@@ -23,6 +25,7 @@ class HistorySearchBar extends StatelessWidget {
       onChanged: onChanged,
       onClear: onClear,
       showShadow: false,
+      scrollPadding: scrollPadding,
     );
   }
 }

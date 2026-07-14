@@ -116,7 +116,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
       child: ShellTabReselectListener(
         tabIndex: kAppShellSettingsTabIndex,
         onReselect: _onShellTabReselect,
-        child: Scaffold(
+        child: TilawaShellChildScaffold(
           appBar: TilawaCatalogAppBar.titleOnly(
             title: l10n.settings,
             automaticallyImplyLeading: false,

@@ -105,7 +105,7 @@ class _QuranRenderDemoScreenState extends State<QuranRenderDemoScreen> {
     final readerTheme = QuranReaderTheme.of(context);
     final tokens = Theme.of(context).tokens;
 
-    return Scaffold(
+    return TilawaShellChildScaffold(
       backgroundColor: readerTheme.pageBackground,
       appBar: const TilawaAppBar(
         title: 'PageView Render Benchmark (5-20)',

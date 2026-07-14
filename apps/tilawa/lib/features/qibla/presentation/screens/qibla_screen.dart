@@ -77,7 +77,7 @@ class _QiblaScreenState extends State<QiblaScreen> {
               variant: TilawaFeedbackVariant.warning,
             );
           },
-          child: Scaffold(
+          child: TilawaShellChildScaffold(
             appBar: TilawaCatalogAppBar.titleOnly(
               title: context.l10n.qiblaFinderTitle,
             ),
