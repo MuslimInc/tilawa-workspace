@@ -1,3 +1,4 @@
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:tilawa/core/extensions.dart';
 import 'package:tilawa_ui_kit/tilawa_ui_kit.dart';
@@ -56,6 +57,18 @@ class ForcedUpdateGatePage extends StatelessWidget {
                   isFullWidth: true,
                   size: TilawaButtonSize.large,
                 ),
+                if (kDebugMode) ...[
+                  SizedBox(height: tokens.spaceMedium),
+                  TilawaButton(
+                    onPressed: () {
+                      Navigator.of(context, rootNavigator: true).pop();
+                    },
+                    text: 'Dismiss (debug)',
+                    variant: TilawaButtonVariant.ghost,
+                    isFullWidth: true,
+                    size: TilawaButtonSize.large,
+                  ),
+                ],
               ],
             ),
           ),
