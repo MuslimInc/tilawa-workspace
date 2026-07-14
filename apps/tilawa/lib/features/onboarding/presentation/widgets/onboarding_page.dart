@@ -64,14 +64,15 @@ class OnboardingPage extends StatelessWidget {
                       style:
                           theme.textTheme.bodyMedium?.copyWith(
                             color: colorScheme.onSurfaceVariant,
-                            height: tokens.textHeightLoose,
+                            height: 1.4,
                           ) ??
                           TextStyle(
                             color: colorScheme.onSurfaceVariant,
-                            height: tokens.textHeightLoose,
+                            height: 1.4,
                             fontSize: 14,
                           ),
-                      maxLines: 4,
+                      maxLines: 3,
+                      alignment: Alignment.topCenter,
                     ),
                   ],
                 ),

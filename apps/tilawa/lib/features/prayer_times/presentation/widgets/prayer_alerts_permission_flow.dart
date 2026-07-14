@@ -161,6 +161,7 @@ class _PermissionStepPage extends StatelessWidget {
     final TextStyle titleStyle =
         theme.textTheme.headlineSmall?.copyWith(
           fontWeight: FontWeight.w800,
+          height: 1.25,
         ) ??
         const TextStyle(
           fontWeight: FontWeight.w800,
@@ -170,11 +171,11 @@ class _PermissionStepPage extends StatelessWidget {
     final TextStyle bodyStyle =
         theme.textTheme.bodyLarge?.copyWith(
           color: colorScheme.onSurfaceVariant,
-          height: tokens.textHeightLoose,
+          height: 1.4,
         ) ??
         TextStyle(
           color: colorScheme.onSurfaceVariant,
-          height: tokens.textHeightLoose,
+          height: 1.4,
           fontSize: 16,
         );
 
@@ -197,12 +198,14 @@ class _PermissionStepPage extends StatelessWidget {
               text: copy.title,
               style: titleStyle,
               maxLines: 2,
+              alignment: Alignment.bottomCenter,
             ),
             SizedBox(height: tokens.spaceMedium),
             TilawaReservedTextLines(
               text: copy.body,
               style: bodyStyle,
-              maxLines: 6,
+              maxLines: 5,
+              alignment: Alignment.topCenter,
             ),
           ],
         ),

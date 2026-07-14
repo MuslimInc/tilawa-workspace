@@ -124,6 +124,8 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
               backgroundColor: pageBackground,
               body: TilawaThumbReachLayout(
                 useSafeArea: true,
+                // Dots stay in the content band so primary CTA Y matches
+                // Welcome / PrayerAlerts. Top padding separates copy from dots.
                 content: Column(
                   children: <Widget>[
                     Expanded(
@@ -151,7 +153,9 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
                       ),
                     ),
                     Padding(
-                      padding: EdgeInsets.only(bottom: tokens.spaceMedium),
+                      padding: EdgeInsets.symmetric(
+                        vertical: tokens.spaceSmall,
+                      ),
                       child: Semantics(
                         label: '${_currentPage + 1} / $pageCount',
                         child: OnboardingPageIndicator(
