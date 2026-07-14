@@ -145,7 +145,7 @@ class _PrayerTimesScreenState extends State<PrayerTimesScreen>
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
+    return TilawaShellChildScaffold(
       body: Stack(
         fit: StackFit.expand,
         children: [

@@ -9,6 +9,7 @@ class _FakePlatform implements AppReviewPlatformDataSource {
   int requestCount = 0;
   int storeCount = 0;
   bool throwOnRequest = false;
+  String? lastAndroidPackageId;
 
   @override
   Future<bool> isAvailable() async => available;
@@ -25,8 +26,10 @@ class _FakePlatform implements AppReviewPlatformDataSource {
   Future<void> openStoreListing({
     String? appStoreId,
     String? microsoftStoreId,
+    String? androidPackageId,
   }) async {
     storeCount++;
+    lastAndroidPackageId = androidPackageId;
   }
 }
 
@@ -60,9 +63,13 @@ void main() {
     expect(platform.requestCount, 1);
   });
 
-  test('openStoreListing delegates to platform', () async {
+  test('openStoreListing forwards production android package id', () async {
     await repository.openStoreListing();
     expect(platform.storeCount, 1);
+    expect(
+      platform.lastAndroidPackageId,
+      AppReviewStoreConfig.kProductionAndroidPackageId,
+    );
   });
 
   test('requestReview propagates platform failures', () async {

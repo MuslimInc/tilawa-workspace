@@ -64,7 +64,7 @@ class _DownloadsScreenState extends State<DownloadsScreen>
       listener: (BuildContext context, DownloadsState state) {
         context.read<DownloadsBloc>().add(const ClearDownloadsUiNotification());
       },
-      child: Scaffold(
+      child: TilawaShellChildScaffold(
         appBar: _DownloadsScreenAppBar.fromContext(
           totalBytes: totalBytes,
           onRefresh: _loadDownloads,

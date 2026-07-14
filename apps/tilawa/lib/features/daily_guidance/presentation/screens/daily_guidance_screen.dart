@@ -25,7 +25,7 @@ class DailyGuidanceScreen extends StatelessWidget {
         );
         return cubit;
       },
-      child: Scaffold(
+      child: TilawaShellChildScaffold(
         appBar: TilawaAppBar(
           title: AppLocalizations.of(context).dailyGuidanceTitle,
         ),

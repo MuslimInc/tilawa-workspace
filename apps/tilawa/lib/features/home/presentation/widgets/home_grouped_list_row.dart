@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:tilawa/core/extensions.dart';
 import 'package:tilawa/features/home/presentation/widgets/home_dashboard_section.dart';
 import 'package:tilawa_ui_kit/tilawa_ui_kit.dart';
 
@@ -48,6 +49,9 @@ class HomeGroupedListRow extends StatelessWidget {
     final tokens = theme.tokens;
     final colorScheme = theme.colorScheme;
     final cardTokens = theme.componentTokens.homeDashboardCard;
+    final bool isArabic = context.isArabic;
+    final double titleHeight = isArabic ? 1.35 : 1.25;
+    final double subtitleHeight = isArabic ? 1.5 : 1.4;
 
     return TilawaInteractiveSurface(
       onTap: onTap,
@@ -56,19 +60,20 @@ class HomeGroupedListRow extends StatelessWidget {
       stateLayerColor: cardTokens.splashColor,
       child: ConstrainedBox(
         constraints: BoxConstraints(
-          minHeight: tokens.minInteractiveDimension,
+          // Comfortable phone row (~88dp) without competing with primary tiles.
+          minHeight: tokens.minInteractiveDimension * 2,
         ),
         child: Padding(
           padding: EdgeInsetsDirectional.symmetric(
             horizontal: tokens.spaceMedium,
-            vertical: tokens.spaceSmall + tokens.spaceExtraSmall,
+            vertical: tokens.spaceMedium,
           ),
           child: Row(
             spacing: tokens.spaceMedium,
             children: [
               TilawaIconBox(
                 icon: icon,
-                size: tokens.iconSizeMedium,
+                size: tokens.iconSizeLarge,
                 variant: TilawaIconBoxVariant.tinted,
                 semanticTint: iconTint,
                 backgroundColor: iconBackgroundColor,
@@ -84,22 +89,21 @@ class HomeGroupedListRow extends StatelessWidget {
                       title,
                       maxLines: 1,
                       overflow: TextOverflow.ellipsis,
-                      style: theme.textTheme.titleSmall?.copyWith(
+                      style: theme.textTheme.titleLarge?.copyWith(
                         color: colorScheme.onSurface,
-                        fontWeight: FontWeight.w700,
-                        height: 1.2,
+                        fontWeight: FontWeight.w600,
+                        height: titleHeight,
                       ),
                     ),
                     if (subtitle != null)
                       Text(
                         subtitle!,
-                        maxLines: 1,
+                        maxLines: 2,
                         overflow: TextOverflow.ellipsis,
-                        style: theme.textTheme.bodySmall?.copyWith(
-                          color: HomeDashboardSection.secondaryTextColor(
-                            context,
-                          ),
-                          height: 1.35,
+                        style: theme.textTheme.bodyLarge?.copyWith(
+                          color: colorScheme.onSurfaceVariant,
+                          height: subtitleHeight,
+                          fontWeight: FontWeight.w500,
                         ),
                       ),
                   ],
@@ -119,7 +123,7 @@ class HomeGroupedListRow extends StatelessWidget {
                     padding: EdgeInsets.all(tokens.spaceExtraSmall * 0.5),
                     child: Icon(
                       Icons.chevron_right_rounded,
-                      size: tokens.iconSizeSmall,
+                      size: tokens.iconSizeMedium,
                       color: HomeDashboardSection.secondaryTextColor(context),
                     ),
                   ),

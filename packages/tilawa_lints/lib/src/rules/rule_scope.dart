@@ -49,3 +49,42 @@ bool isProductDartFile(String path) {
       !normalized.contains('/packages/tilawa_lints/lib/') &&
       !normalized.contains('/packages/flex_color_scheme/lib/');
 }
+
+/// Path markers for screens hosted under TilawaAdaptiveShell /
+/// `AppShellRoute` — raw Material Scaffold must be TilawaShellChildScaffold
+/// (ADR-009).
+///
+/// Outside-shell / immersive routes (auth login, Athkar, Quran reader,
+/// splash, share composers, root overlays) intentionally omit these markers.
+const shellHostedScaffoldPathMarkers = <String>[
+  '/apps/tilawa/lib/features/home/presentation/screens/',
+  '/apps/tilawa/lib/features/bookmarks/presentation/screens/',
+  '/apps/tilawa/lib/features/history/presentation/screens/',
+  '/apps/tilawa/lib/features/downloads/presentation/screens/',
+  '/apps/tilawa/lib/features/settings/presentation/screens/',
+  '/apps/tilawa/lib/features/support/presentation/screens/',
+  '/apps/tilawa/lib/features/daily_guidance/presentation/screens/',
+  '/apps/tilawa/lib/features/smart_khatma/presentation/screens/',
+  '/apps/tilawa/lib/features/qibla/presentation/screens/',
+  '/apps/tilawa/lib/features/reciters/presentation/screens/',
+  '/apps/tilawa/lib/features/genui_assistant/presentation/screens/',
+  '/apps/tilawa/lib/features/prayer_times/presentation/screens/prayer_times_screen.dart',
+  '/apps/tilawa/lib/features/prayer_times/presentation/screens/prayer_notification_status_screen.dart',
+  '/apps/tilawa/lib/features/auth/presentation/screens/manage_devices_screen.dart',
+  '/apps/tilawa/lib/features/quran_reader/presentation/screens/quran_index_screen.dart',
+  '/apps/tilawa/lib/features/quran_reader/presentation/screens/quran_render_demo_screen.dart',
+  '/apps/tilawa/lib/screens/main_screen.dart',
+  '/apps/tilawa/lib/screens/route_list_screen.dart',
+  '/apps/tilawa/lib/screens/playlists_screen.dart',
+  '/apps/tilawa/lib/router/app_router_config.dart',
+];
+
+/// Whether [path] is a shell-hosted product file that must not nest a raw
+/// Scaffold under TilawaAdaptiveShell.
+bool isShellHostedScaffoldScope(String path) {
+  if (!isProductDartFile(path)) {
+    return false;
+  }
+  final normalized = path.replaceAll(r'\', '/');
+  return shellHostedScaffoldPathMarkers.any(normalized.contains);
+}

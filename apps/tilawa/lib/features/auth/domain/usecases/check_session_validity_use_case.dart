@@ -1,6 +1,5 @@
 import 'dart:async';
 
-import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:dartz_plus/dartz_plus.dart';
 import 'package:injectable/injectable.dart';
 import 'package:tilawa/core/logging/app_logger.dart';
@@ -8,13 +7,14 @@ import 'package:tilawa/core/network/network_error_message.dart';
 import 'package:tilawa_core/errors/failures.dart';
 
 import '../entities/session_validity_result.dart';
+import '../repositories/session_validity_repository.dart';
 import '../services/token_sync_cache.dart';
 
 @injectable
 class CheckSessionValidityUseCase {
-  CheckSessionValidityUseCase(this._firestore, this._tokenSyncCache);
+  CheckSessionValidityUseCase(this._repository, this._tokenSyncCache);
 
-  final FirebaseFirestore _firestore;
+  final SessionValidityRepository _repository;
   final TokenSyncCache _tokenSyncCache;
 
   /// Returns [SessionValidityResult.valid] when local session matches server.
@@ -25,37 +25,30 @@ class CheckSessionValidityUseCase {
       if (localActiveDeviceId == null || localActiveDeviceId.isEmpty) {
         return const Right(SessionValidityResult.verificationUnknown);
       }
-      final snap = await _firestore.collection('users').doc(userId).get();
-      final rawEpoch = snap.data()?['session']?['epoch'];
-      final serverEpoch = rawEpoch is num ? rawEpoch.toInt() : 0;
-      final rawActiveDeviceId = snap.data()?['session']?['activeDeviceId'];
-      final serverActiveDeviceId = rawActiveDeviceId is String
-          ? rawActiveDeviceId
-          : '';
-      final isValid =
-          localEpoch == serverEpoch &&
-          localActiveDeviceId == serverActiveDeviceId;
-      if (isValid) {
-        return const Right(SessionValidityResult.valid);
-      }
-      if (localEpoch > 0 && serverEpoch == 0 && serverActiveDeviceId.isEmpty) {
-        return const Right(SessionValidityResult.verificationUnknown);
-      }
-      return const Right(SessionValidityResult.stale);
-    } on FirebaseException catch (error, stackTrace) {
-      if (_isNetworkIssue(error)) {
-        logger.d(
-          'Session validity check skipped: network unavailable',
-          error: error,
-        );
-        return const Right(SessionValidityResult.verificationUnknown);
-      }
-      logger.w(
-        'Session validity check failed (${error.code})',
-        error: error,
-        stackTrace: stackTrace,
+
+      final serverResult = await _repository.fetchServerSession(userId);
+      return serverResult.fold(
+        (failure) {
+          if (failure.message == SessionValidityFailureKey.network) {
+            return const Right(SessionValidityResult.verificationUnknown);
+          }
+          return Left(failure);
+        },
+        (server) {
+          final isValid =
+              localEpoch == server.epoch &&
+              localActiveDeviceId == server.activeDeviceId;
+          if (isValid) {
+            return const Right(SessionValidityResult.valid);
+          }
+          if (localEpoch > 0 &&
+              server.epoch == 0 &&
+              server.activeDeviceId.isEmpty) {
+            return const Right(SessionValidityResult.verificationUnknown);
+          }
+          return const Right(SessionValidityResult.stale);
+        },
       );
-      return Left(ServerFailure('session_validity_check_${error.code}'));
     } on TimeoutException catch (error) {
       logger.d('Session validity check timed out', error: error);
       return const Right(SessionValidityResult.verificationUnknown);
@@ -78,11 +71,5 @@ class CheckSessionValidityUseCase {
         ),
       );
     }
-  }
-
-  bool _isNetworkIssue(FirebaseException error) {
-    return error.code == 'unavailable' ||
-        error.code == 'deadline-exceeded' ||
-        isNetworkConnectivityErrorMessage(error.message ?? '');
   }
 }

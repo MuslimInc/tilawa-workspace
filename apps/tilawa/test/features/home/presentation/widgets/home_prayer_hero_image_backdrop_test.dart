@@ -5,9 +5,7 @@ import 'package:tilawa/features/home/presentation/widgets/home_prayer_hero_image
 import 'package:tilawa_ui_kit/tilawa_ui_kit.dart';
 
 void main() {
-  testWidgets('loads spiritual wallpaper with monochrome treatment', (
-    tester,
-  ) async {
+  testWidgets('loads wallpaper with desaturate treatment', (tester) async {
     await tester.pumpWidget(
       MaterialApp(
         locale: const Locale('ar'),
@@ -31,16 +29,20 @@ void main() {
     );
     await tester.pump();
     await tester.pumpAndSettle();
-    await tester.pump();
 
+    expect(find.byType(ColorFiltered), findsOneWidget);
     expect(find.byType(Image), findsOneWidget);
     expect(find.text('prayer'), findsOneWidget);
   });
 
   testWidgets('skeleton path skips the photo layer', (tester) async {
+    final theme = AppTheme.getLightTheme(
+      primaryColor: AppColors.defaultPrimary,
+    );
+
     await tester.pumpWidget(
       MaterialApp(
-        theme: AppTheme.getLightTheme(primaryColor: AppColors.defaultPrimary),
+        theme: theme,
         home: Scaffold(
           body: SizedBox(
             height: 220,
@@ -49,7 +51,7 @@ void main() {
               showImage: false,
               builder: (context, style) {
                 expect(style.imageVisible, isFalse);
-                expect(style.ink, AppColors.tripGlideInk);
+                expect(style.ink, theme.colorScheme.onSurface);
                 return const SizedBox.shrink();
               },
             ),
@@ -60,6 +62,7 @@ void main() {
     await tester.pump();
 
     expect(find.byType(Image), findsNothing);
+    expect(find.byType(ColorFiltered), findsNothing);
   });
 
   test(
@@ -76,31 +79,7 @@ void main() {
     },
   );
 
-  testWidgets('does not paint decorative mosque watermark over architecture', (
-    tester,
-  ) async {
-    await tester.pumpWidget(
-      MaterialApp(
-        theme: AppTheme.getLightTheme(primaryColor: AppColors.defaultPrimary),
-        home: Scaffold(
-          body: SizedBox(
-            height: 220,
-            width: 360,
-            child: HomePrayerHeroImageBackdrop(
-              builder: (context, style) => const SizedBox.shrink(),
-            ),
-          ),
-        ),
-      ),
-    );
-    await tester.pump();
-    await tester.pumpAndSettle();
-    await tester.pump();
-
-    expect(find.byIcon(Icons.mosque_outlined), findsNothing);
-  });
-
-  test('image foreground style uses cream ink for contrast on green wash', () {
+  test('image foreground style uses cream ink for contrast on photo', () {
     final theme = AppTheme.getLightTheme(
       primaryColor: AppColors.defaultPrimary,
     );

@@ -11,7 +11,7 @@ import 'khatma_home_destination_card.dart';
 import '../bloc/khatma_plan_event.dart';
 import '../bloc/khatma_plan_state.dart';
 
-/// Compact home-dashboard entry that opens the Smart Khatma hub.
+/// Home-dashboard entry that opens the Smart Khatma hub.
 class SmartKhatmaHomeEntryCard extends StatelessWidget {
   const SmartKhatmaHomeEntryCard({super.key});
 
@@ -75,6 +75,7 @@ class _KhatmaHomeCompletedEntry extends StatelessWidget {
     onTap: onOpenHub,
     title: context.l10n.khatmaCompletedTitle,
     subtitle: context.l10n.khatmaCompletedSubtitle,
+    showChevron: true,
   );
 }
 
@@ -85,19 +86,12 @@ class _KhatmaHomeEmptyEntry extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final theme = Theme.of(context);
-    final tokens = theme.tokens;
-
     return KhatmaHomeDestinationCard(
       icon: Icons.auto_stories_outlined,
       onTap: onOpenHub,
       title: context.l10n.khatmaEmptyTitle,
       subtitle: context.l10n.khatmaEmptySubtitle,
-      trailing: Icon(
-        Icons.chevron_right_rounded,
-        color: theme.colorScheme.onPrimary.withValues(alpha: 0.86),
-        size: tokens.iconSizeSmall,
-      ),
+      showChevron: true,
     );
   }
 }
@@ -125,40 +119,22 @@ class _KhatmaHomeActiveEntry extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final theme = Theme.of(context);
-    final tokens = theme.tokens;
-    final colorScheme = theme.colorScheme;
     final String detail = isTodayCompleted
         ? context.l10n.khatmaTodayCompletedTitle
         : '${formatKhatmaPageRange(context.l10n, rangeStart, rangeEnd)} · '
               '${context.l10n.khatmaConfirmedAndRemaining(
                 todayCompletedPages,
                 todayRemainingPages,
-              )} · $planProgress%';
+              )}';
 
     return KhatmaHomeDestinationCard(
       icon: Icons.auto_stories_outlined,
       onTap: onOpenHub,
       title: context.l10n.khatmaProgressTitle,
-      subtitle: '$subtitle\n$detail',
-      trailing: Column(
-        crossAxisAlignment: CrossAxisAlignment.end,
-        spacing: tokens.spaceExtraSmall,
-        children: [
-          Text(
-            context.l10n.khatmaHomeViewPlan,
-            style: theme.textTheme.labelSmall?.copyWith(
-              color: colorScheme.onPrimary,
-              fontWeight: FontWeight.w700,
-            ),
-          ),
-          Icon(
-            Icons.chevron_right_rounded,
-            color: colorScheme.onPrimary.withValues(alpha: 0.86),
-            size: tokens.iconSizeSmall,
-          ),
-        ],
-      ),
+      subtitle: subtitle,
+      detail: detail,
+      progress: planProgress,
+      showChevron: true,
     );
   }
 }

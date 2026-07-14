@@ -38,6 +38,29 @@ class BootLogicTest {
     }
 
     @Test
+    fun `reArmPendingAlarmsForWatchdog re-arms without enqueuing watchdog`() {
+        val json = """[{"id": 2, "name": "dhuhr", "trigger": 1500}]"""
+        every { mockStorage.getPendingAlarmsJson() } returns json
+        every {
+            mockScheduler.schedule(any(), any(), any(), any(), any(), any(), any())
+        } returns true
+
+        val scheduled = logic.reArmPendingAlarmsForWatchdog(1000L)
+
+        assertEquals(1, scheduled)
+        verify { mockStorage.setNeedsReschedule(true) }
+        verify(exactly = 0) { mockWatchdog.enqueuePeriodic() }
+        verify(exactly = 0) { mockWatchdog.enqueueOneTime() }
+        verify { mockScheduler.schedule(2, "dhuhr", "dhuhr", 1500L, "adhan") }
+        verify {
+            mockAnalytics.logEvent(
+                PrayerEvents.SCHEDULE_SUCCESS,
+                match { it["context"] == "watchdog_rearm" },
+            )
+        }
+    }
+
+    @Test
     fun `reArmAlarms schedules future alarms from JSON`() {
         val now = 1000L
         val json = """

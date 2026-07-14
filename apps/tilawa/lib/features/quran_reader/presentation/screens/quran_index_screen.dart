@@ -77,7 +77,7 @@ class _QuranIndexScreenState extends State<QuranIndexScreen> {
     final double segmentBarHeight = TilawaSegmentedControl.layoutHeight(
       context,
     );
-    return Scaffold(
+    return TilawaShellChildScaffold(
       appBar: TilawaCatalogAppBar(
         title: context.l10n.quranHubTitle,
         bottomContentHeight: segmentBarHeight + tokens.spaceSmall,

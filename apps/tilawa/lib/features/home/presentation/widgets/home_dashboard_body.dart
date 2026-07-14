@@ -119,7 +119,7 @@ class _HomeDashboardClosingMark extends StatelessWidget {
     final tokens = context.tokens;
     final theme = Theme.of(context);
     final Color markColor = theme.colorScheme.onSurfaceVariant.withValues(
-      alpha: 0.35,
+      alpha: 0.72,
     );
 
     return Padding(
@@ -133,15 +133,16 @@ class _HomeDashboardClosingMark extends StatelessWidget {
           spacing: tokens.spaceExtraSmall,
           children: [
             TilawaIcons.quran.svg(
-              size: tokens.iconSizeSmall,
+              size: tokens.iconSizeMedium,
               color: markColor,
             ),
             Text(
               context.l10n.appTitle,
-              style: theme.textTheme.labelSmall?.copyWith(
+              style: theme.textTheme.bodyLarge?.copyWith(
                 color: markColor,
-                fontWeight: FontWeight.w500,
-                letterSpacing: 1.2,
+                fontWeight: FontWeight.w600,
+                letterSpacing: 0.4,
+                height: 1.3,
               ),
             ),
           ],

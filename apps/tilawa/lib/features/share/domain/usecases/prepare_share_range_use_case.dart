@@ -1,6 +1,6 @@
 import 'package:injectable/injectable.dart';
-import '../../presentation/utils/share_ayah_range_utils.dart';
-import '../../presentation/utils/video_page_specs.dart';
+import '../utils/share_ayah_range_utils.dart';
+import '../utils/video_page_specs.dart';
 import '../entities/share_range_result.dart';
 
 @injectable

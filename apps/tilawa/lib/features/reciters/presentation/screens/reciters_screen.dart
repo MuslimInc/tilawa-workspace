@@ -573,8 +573,7 @@ class _RecitersScreenState extends State<RecitersScreen>
   Widget build(BuildContext context) {
     PerfLogger.markBuild('RecitersScreen');
     if (_isStartupLiteUi) {
-      return Scaffold(
-        resizeToAvoidBottomInset: false,
+      return TilawaShellChildScaffold(
         appBar: TilawaCatalogAppBar.titleOnly(
           title: context.l10n.reciters,
           showBottomHairline: false,
@@ -789,8 +788,7 @@ class _RecitersScreenState extends State<RecitersScreen>
                           child: nestedScrollView,
                         );
 
-                  return Scaffold(
-                    resizeToAvoidBottomInset: false,
+                  return TilawaShellChildScaffold(
                     appBar: TilawaCatalogAppBar.titleOnly(
                       title: context.l10n.reciters,
                       showBottomHairline: false,

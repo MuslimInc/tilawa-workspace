@@ -60,6 +60,11 @@ Interactive surfaces ([`TilawaInteractiveSurface`](packages/ui_kit/lib/src/found
 use **soft Material ink (splash/highlight) plus stable state-layer press feedback**.
 See [`packages/ui_kit/docs/design_system.md`](packages/ui_kit/docs/design_system.md) §4.1.
 
+**Shell keyboard ownership:** Screens under [`TilawaAdaptiveShell`](packages/ui_kit/lib/src/organisms/tilawa_adaptive_shell.dart)
+use [`TilawaShellChildScaffold`](packages/ui_kit/lib/src/foundation/tilawa_shell_child_scaffold.dart)
+(nested `resizeToAvoidBottomInset: false`). See
+[ADR-009](docs/adr/009-shell-owns-keyboard-resize.md) and design_system §4.4.
+
 **TilawaCard nested taps:** parent `onTap` fires from blank areas only; enabled
 nested controls keep their own action; disabled nested controls are dead zones.
 Conflicting actions → sibling `Row` pattern (see [`CLAUDE.md`](CLAUDE.md)).

@@ -31,5 +31,6 @@ class AppReviewRepositoryImpl implements AppReviewRepository {
   Future<void> openStoreListing() => _platform.openStoreListing(
     appStoreId: _storeConfig.appStoreIdOrNull,
     microsoftStoreId: _storeConfig.microsoftStoreIdOrNull,
+    androidPackageId: _storeConfig.androidPackageId,
   );
 }

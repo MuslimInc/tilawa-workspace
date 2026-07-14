@@ -1,12 +1,15 @@
 #!/usr/bin/env node
 /**
- * Seeds Firestore `app_config/in_app_update` for optional/forced in-app updates.
+ * Seeds Firestore `app_config/in_app_update` for forced min-build gates.
+ *
+ * Prefer the Admin Panel (App Version) for day-to-day changes:
+ *   docs/admin/forced_update_release.md
  *
  * Auth: uses the local Firebase CLI session (`firebase login`) on this machine.
  *
  * Usage (from repo root):
  *   node scripts/seed_in_app_update_config.mjs
- *   node scripts/seed_in_app_update_config.mjs --force
+ *   node scripts/seed_in_app_update_config.mjs --android=79 --ios=79
  */
 
 import fs from 'node:fs';
@@ -22,7 +25,21 @@ const CONFIG_PATH = path.join(
   'firebase-tools.json',
 );
 
-const forceUpdate = process.argv.includes('--force');
+function parseIntFlag(name, fallback) {
+  const prefix = `--${name}=`;
+  const arg = process.argv.find((value) => value.startsWith(prefix));
+  if (!arg) {
+    return fallback;
+  }
+  const parsed = Number.parseInt(arg.slice(prefix.length), 10);
+  if (!Number.isFinite(parsed)) {
+    throw new Error(`Invalid --${name} value: ${arg}`);
+  }
+  return parsed;
+}
+
+const androidMinBuildNumber = parseIntFlag('android', 0);
+const iosMinBuildNumber = parseIntFlag('ios', 0);
 
 function readFirebaseAccessToken() {
   if (!fs.existsSync(CONFIG_PATH)) {
@@ -41,14 +58,15 @@ function readFirebaseAccessToken() {
   return accessToken;
 }
 
-async function seedInAppUpdateConfig(accessToken) {
+async function seedForcedUpdateConfig(accessToken) {
   const url =
     `https://firestore.googleapis.com/v1/projects/${PROJECT_ID}` +
     `/databases/(default)/documents/${DOCUMENT_PATH}`;
 
   const body = {
     fields: {
-      force_update: { booleanValue: forceUpdate },
+      android_min_build_number: { integerValue: String(androidMinBuildNumber) },
+      ios_min_build_number: { integerValue: String(iosMinBuildNumber) },
       updated_at: { timestampValue: new Date().toISOString() },
     },
   };
@@ -76,13 +94,16 @@ async function seedInAppUpdateConfig(accessToken) {
 
 async function main() {
   console.log(
-    `Seeding ${DOCUMENT_PATH} (force_update=${forceUpdate}) on ${PROJECT_ID}…`,
+    `Seeding ${DOCUMENT_PATH} ` +
+      `(android_min_build_number=${androidMinBuildNumber}, ` +
+      `ios_min_build_number=${iosMinBuildNumber}) on ${PROJECT_ID}…`,
   );
   const accessToken = readFirebaseAccessToken();
-  const document = await seedInAppUpdateConfig(accessToken);
+  const document = await seedForcedUpdateConfig(accessToken);
   console.log('Document ready:');
   console.log(`  path: ${document.name}`);
-  console.log(`  force_update: ${forceUpdate}`);
+  console.log(`  android_min_build_number: ${androidMinBuildNumber}`);
+  console.log(`  ios_min_build_number: ${iosMinBuildNumber}`);
 }
 
 main().catch((error) => {

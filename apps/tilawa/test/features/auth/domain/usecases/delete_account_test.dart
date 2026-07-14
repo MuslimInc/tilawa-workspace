@@ -1,13 +1,12 @@
 import 'dart:async';
 
-import 'package:cloud_functions/cloud_functions.dart';
 import 'package:dartz_plus/dartz_plus.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:mockito/annotations.dart';
 import 'package:mockito/mockito.dart';
 import 'package:tilawa/core/domain/server_action_guard.dart';
-import 'package:tilawa/features/auth/data/datasources/account_deletion_remote_data_source.dart';
 import 'package:tilawa/features/auth/domain/entities/user_entity.dart';
+import 'package:tilawa/features/auth/domain/repositories/account_deletion_repository.dart';
 import 'package:tilawa/features/auth/domain/repositories/auth_repository.dart';
 import 'package:tilawa/features/auth/domain/entities/auth_error_key.dart';
 import 'package:tilawa/features/auth/domain/usecases/await_auth_restoration_use_case.dart';
@@ -34,23 +33,18 @@ class _FakeResolveAuthenticatedUser extends ResolveAuthenticatedUserUseCase {
 
 @GenerateMocks([
   AuthRepository,
-  AccountDeletionRemoteDataSource,
+  AccountDeletionRepository,
   SyncDeviceTokenUseCase,
   PremiumRepository,
 ])
 void main() {
   late DeleteAccount useCase;
   late MockAuthRepository mockAuthRepository;
-  late MockAccountDeletionRemoteDataSource mockAccountDeletionRemoteDataSource;
+  late MockAccountDeletionRepository mockAccountDeletionRepository;
   late MockSyncDeviceTokenUseCase mockSyncDeviceTokenUseCase;
   late MockPremiumRepository mockPremiumRepository;
   late FakeNetworkInfo networkInfo;
   late _FakeResolveAuthenticatedUser resolveAuthenticatedUser;
-
-  const tResult = AccountDeletionRequestResult(
-    status: 'pending_deletion',
-    purgeAfter: '2026-02-01T00:00:00.000Z',
-  );
 
   final tUser = UserEntity(
     id: 'user-1',
@@ -60,8 +54,9 @@ void main() {
   );
 
   setUp(() {
+    provideDummy<Either<Failure, void>>(const Right(null));
     mockAuthRepository = MockAuthRepository();
-    mockAccountDeletionRemoteDataSource = MockAccountDeletionRemoteDataSource();
+    mockAccountDeletionRepository = MockAccountDeletionRepository();
     mockSyncDeviceTokenUseCase = MockSyncDeviceTokenUseCase();
     mockPremiumRepository = MockPremiumRepository();
     networkInfo = FakeNetworkInfo();
@@ -72,7 +67,7 @@ void main() {
 
     useCase = DeleteAccount(
       mockAuthRepository,
-      mockAccountDeletionRemoteDataSource,
+      mockAccountDeletionRepository,
       mockSyncDeviceTokenUseCase,
       mockPremiumRepository,
       ServerActionGuard(networkInfo),
@@ -84,11 +79,11 @@ void main() {
     ).thenAnswer((_) async {});
     when(mockPremiumRepository.clearPremiumStatus()).thenAnswer((_) async {});
     when(
-      mockAccountDeletionRemoteDataSource.requestSelfAccountDeletion(
+      mockAccountDeletionRepository.requestSelfAccountDeletion(
         reason: anyNamed('reason'),
         confirmEmail: anyNamed('confirmEmail'),
       ),
-    ).thenAnswer((_) async => tResult);
+    ).thenAnswer((_) async => const Right(null));
     when(mockAuthRepository.signOut()).thenAnswer((_) async {});
   });
 
@@ -103,7 +98,7 @@ void main() {
     );
     useCase = DeleteAccount(
       mockAuthRepository,
-      mockAccountDeletionRemoteDataSource,
+      mockAccountDeletionRepository,
       mockSyncDeviceTokenUseCase,
       mockPremiumRepository,
       ServerActionGuard(networkInfo),
@@ -118,7 +113,7 @@ void main() {
       (_) => fail('expected left'),
     );
     verifyNever(
-      mockAccountDeletionRemoteDataSource.requestSelfAccountDeletion(
+      mockAccountDeletionRepository.requestSelfAccountDeletion(
         reason: anyNamed('reason'),
         confirmEmail: anyNamed('confirmEmail'),
       ),
@@ -130,7 +125,7 @@ void main() {
 
     expect(result.isRight(), isTrue);
     verifyInOrder([
-      mockAccountDeletionRemoteDataSource.requestSelfAccountDeletion(
+      mockAccountDeletionRepository.requestSelfAccountDeletion(
         reason: 'Self-service account deletion from mobile app',
         confirmEmail: 'test@example.com',
       ),
@@ -151,7 +146,7 @@ void main() {
       expect(failure.message, ServerActionFailureKey.offline);
     }, (_) => fail('expected left'));
     verifyNever(
-      mockAccountDeletionRemoteDataSource.requestSelfAccountDeletion(
+      mockAccountDeletionRepository.requestSelfAccountDeletion(
         reason: anyNamed('reason'),
         confirmEmail: anyNamed('confirmEmail'),
       ),
@@ -173,7 +168,7 @@ void main() {
     );
     useCase = DeleteAccount(
       mockAuthRepository,
-      mockAccountDeletionRemoteDataSource,
+      mockAccountDeletionRepository,
       mockSyncDeviceTokenUseCase,
       mockPremiumRepository,
       ServerActionGuard(networkInfo),
@@ -184,7 +179,7 @@ void main() {
 
     expect(result.isRight(), isTrue);
     verify(
-      mockAccountDeletionRemoteDataSource.requestSelfAccountDeletion(
+      mockAccountDeletionRepository.requestSelfAccountDeletion(
         reason: 'Self-service account deletion from mobile app',
         confirmEmail: 'user-1',
       ),
@@ -192,17 +187,16 @@ void main() {
   });
 
   test(
-    'maps permission-denied callable errors without clearing session side effects',
+    'does not clear session side effects when repository returns failure',
     () async {
       when(
-        mockAccountDeletionRemoteDataSource.requestSelfAccountDeletion(
+        mockAccountDeletionRepository.requestSelfAccountDeletion(
           reason: anyNamed('reason'),
           confirmEmail: anyNamed('confirmEmail'),
         ),
-      ).thenThrow(
-        FirebaseFunctionsException(
-          code: 'permission-denied',
-          message: 'Admin accounts must be deleted from the admin panel.',
+      ).thenAnswer(
+        (_) async => const Left(
+          PermissionFailure(DeleteAccountErrorKey.adminMustUseAdminPanel),
         ),
       );
 
@@ -222,167 +216,6 @@ void main() {
     },
   );
 
-  test(
-    'maps failed-precondition callable errors to ValidationFailure',
-    () async {
-      when(
-        mockAccountDeletionRemoteDataSource.requestSelfAccountDeletion(
-          reason: anyNamed('reason'),
-          confirmEmail: anyNamed('confirmEmail'),
-        ),
-      ).thenThrow(
-        FirebaseFunctionsException(
-          code: 'failed-precondition',
-          message: 'Wallet balance is not zero',
-        ),
-      );
-
-      final Either<Failure, void> result = await useCase();
-
-      expect(result.isLeft(), isTrue);
-      result.fold((failure) {
-        expect(failure, isA<ValidationFailure>());
-        expect(failure.message, DeleteAccountErrorKey.walletNotEmpty);
-      }, (_) => fail('expected left'));
-      verifyNever(mockAuthRepository.signOut());
-      verifyNever(mockSyncDeviceTokenUseCase.removeCurrentTokenForUser(any));
-      verifyNever(mockPremiumRepository.clearPremiumStatus());
-    },
-  );
-
-  test('maps undeployed callable not-found to ServerFailure', () async {
-    when(
-      mockAccountDeletionRemoteDataSource.requestSelfAccountDeletion(
-        reason: anyNamed('reason'),
-        confirmEmail: anyNamed('confirmEmail'),
-      ),
-    ).thenThrow(
-      FirebaseFunctionsException(
-        code: 'not-found',
-        message: 'NOT_FOUND',
-      ),
-    );
-
-    final Either<Failure, void> result = await useCase();
-
-    expect(result.isLeft(), isTrue);
-    result.fold((failure) {
-      expect(failure, isA<ServerFailure>());
-      expect(
-        failure.message,
-        DeleteAccountErrorKey.serviceUnavailable,
-      );
-    }, (_) => fail('expected left'));
-    verifyNever(mockAuthRepository.signOut());
-  });
-
-  test('maps backend target-not-found to ValidationFailure', () async {
-    when(
-      mockAccountDeletionRemoteDataSource.requestSelfAccountDeletion(
-        reason: anyNamed('reason'),
-        confirmEmail: anyNamed('confirmEmail'),
-      ),
-    ).thenThrow(
-      FirebaseFunctionsException(
-        code: 'not-found',
-        message: 'Target user not found.',
-      ),
-    );
-
-    final Either<Failure, void> result = await useCase();
-
-    expect(result.isLeft(), isTrue);
-    result.fold((failure) {
-      expect(failure, isA<ValidationFailure>());
-      expect(failure.message, 'Target user not found.');
-    }, (_) => fail('expected left'));
-  });
-
-  test('maps internal callable errors to ServerFailure', () async {
-    when(
-      mockAccountDeletionRemoteDataSource.requestSelfAccountDeletion(
-        reason: anyNamed('reason'),
-        confirmEmail: anyNamed('confirmEmail'),
-      ),
-    ).thenThrow(
-      FirebaseFunctionsException(
-        code: 'internal',
-        message: 'boom',
-      ),
-    );
-
-    final Either<Failure, void> result = await useCase();
-
-    expect(result.isLeft(), isTrue);
-    result.fold((failure) {
-      expect(failure, isA<ServerFailure>());
-      expect(failure.message, DeleteAccountErrorKey.failed);
-    }, (_) => fail('expected left'));
-  });
-
-  test('returns UnexpectedFailure for unrecognised errors', () async {
-    when(
-      mockAccountDeletionRemoteDataSource.requestSelfAccountDeletion(
-        reason: anyNamed('reason'),
-        confirmEmail: anyNamed('confirmEmail'),
-      ),
-    ).thenThrow(StateError('boom'));
-
-    final Either<Failure, void> result = await useCase();
-
-    expect(result.isLeft(), isTrue);
-    result.fold((failure) {
-      expect(failure, isA<UnexpectedFailure>());
-      expect(failure.message, contains('boom'));
-    }, (_) => fail('expected left'));
-  });
-
-  test('maps unavailable callable errors to offline failure', () async {
-    when(
-      mockAccountDeletionRemoteDataSource.requestSelfAccountDeletion(
-        reason: anyNamed('reason'),
-        confirmEmail: anyNamed('confirmEmail'),
-      ),
-    ).thenThrow(
-      FirebaseFunctionsException(
-        code: 'unavailable',
-        message: 'Service unavailable',
-      ),
-    );
-
-    final Either<Failure, void> result = await useCase();
-
-    expect(result.isLeft(), isTrue);
-    result.fold((failure) {
-      expect(failure, isA<ServerActionFailure>());
-      expect(failure.message, ServerActionFailureKey.offline);
-    }, (_) => fail('expected left'));
-    verifyNever(mockAuthRepository.signOut());
-  });
-
-  test('maps unexpected network exceptions to offline failure', () async {
-    when(
-      mockAccountDeletionRemoteDataSource.requestSelfAccountDeletion(
-        reason: anyNamed('reason'),
-        confirmEmail: anyNamed('confirmEmail'),
-      ),
-    ).thenThrow(
-      Exception(
-        'A network error (such as timeout, interrupted connection or '
-        'unreachable host) has occurred.',
-      ),
-    );
-
-    final Either<Failure, void> result = await useCase();
-
-    expect(result.isLeft(), isTrue);
-    result.fold((failure) {
-      expect(failure, isA<ServerActionFailure>());
-      expect(failure.message, ServerActionFailureKey.offline);
-    }, (_) => fail('expected left'));
-    verifyNever(mockAuthRepository.signOut());
-  });
-
   group('first-login session sync', () {
     late ResolveAuthenticatedUserUseCase resolveAuthenticatedUserUseCase;
 
@@ -393,7 +226,7 @@ void main() {
       );
       useCase = DeleteAccount(
         mockAuthRepository,
-        mockAccountDeletionRemoteDataSource,
+        mockAccountDeletionRepository,
         mockSyncDeviceTokenUseCase,
         mockPremiumRepository,
         ServerActionGuard(networkInfo),
@@ -423,7 +256,7 @@ void main() {
 
         expect(result.isRight(), isTrue);
         verify(
-          mockAccountDeletionRemoteDataSource.requestSelfAccountDeletion(
+          mockAccountDeletionRepository.requestSelfAccountDeletion(
             reason: 'Self-service account deletion from mobile app',
             confirmEmail: 'test@example.com',
           ),
@@ -445,7 +278,7 @@ void main() {
 
         expect(result.isRight(), isTrue);
         verify(
-          mockAccountDeletionRemoteDataSource.requestSelfAccountDeletion(
+          mockAccountDeletionRepository.requestSelfAccountDeletion(
             reason: 'Self-service account deletion from mobile app',
             confirmEmail: 'test@example.com',
           ),
@@ -469,7 +302,7 @@ void main() {
           expect(failure.message, DeleteAccountErrorKey.notSignedIn);
         }, (_) => fail('expected left'));
         verifyNever(
-          mockAccountDeletionRemoteDataSource.requestSelfAccountDeletion(
+          mockAccountDeletionRepository.requestSelfAccountDeletion(
             reason: anyNamed('reason'),
             confirmEmail: anyNamed('confirmEmail'),
           ),

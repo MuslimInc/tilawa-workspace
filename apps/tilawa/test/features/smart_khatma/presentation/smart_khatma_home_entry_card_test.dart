@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:tilawa/features/smart_khatma/presentation/widgets/khatma_home_destination_card.dart';
 import 'package:tilawa/features/smart_khatma/smart_khatma.dart';
 import 'package:tilawa/l10n/generated/app_localizations.dart';
 import 'package:tilawa_core/services/analytics_service.dart';
@@ -17,6 +18,11 @@ void main() {
     expect(find.textContaining('1–21'), findsOneWidget);
     expect(find.textContaining('5 confirmed'), findsOneWidget);
     expect(find.textContaining('16 remaining'), findsOneWidget);
+
+    final Size cardSize = tester.getSize(
+      find.byType(KhatmaHomeDestinationCard),
+    );
+    expect(cardSize.height, greaterThanOrEqualTo(140));
   });
 
   testWidgets('completed plan shows calm completion in Arabic', (tester) async {

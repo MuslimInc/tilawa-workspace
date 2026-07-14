@@ -22,7 +22,7 @@ class RouteListScreen extends StatelessWidget {
     final tokens = theme.tokens;
     final colorScheme = theme.colorScheme;
 
-    return Scaffold(
+    return TilawaShellChildScaffold(
       appBar: const TilawaAppBar(title: 'All Routes'),
       floatingActionButton: FloatingActionButton.extended(
         heroTag: 'route_list_fajr_adhan_fab',

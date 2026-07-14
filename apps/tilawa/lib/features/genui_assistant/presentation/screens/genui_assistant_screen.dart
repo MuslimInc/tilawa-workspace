@@ -35,7 +35,7 @@ class GenUiAssistantScreen extends StatelessWidget {
   Widget build(BuildContext context) {
     return BlocProvider<GenUiAssistantCubit>.value(
       value: cubit..load(request),
-      child: Scaffold(
+      child: TilawaShellChildScaffold(
         appBar: const TilawaAppBar(title: 'Smart Quran Plan'),
         body: SafeArea(
           child: Padding(

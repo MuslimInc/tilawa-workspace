@@ -1,5 +1,5 @@
 import 'package:flutter/foundation.dart';
-import '../../presentation/utils/video_page_specs.dart';
+import '../utils/video_page_specs.dart';
 
 @immutable
 class ShareRangeResult {

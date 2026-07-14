@@ -1,9 +1,13 @@
 import 'package:flutter/material.dart';
-import 'package:tilawa/features/home/presentation/widgets/home_dashboard_card.dart';
+import 'package:tilawa/features/home/presentation/widgets/home_dashboard_elevated_surface.dart';
 import 'package:tilawa/features/home/presentation/widgets/home_dashboard_icon_well.dart';
+import 'package:tilawa/features/home/presentation/widgets/home_dashboard_section.dart';
 import 'package:tilawa_ui_kit/tilawa_ui_kit.dart';
 
-/// Smart Khatma home entry — full-card primary gradient.
+/// Smart Khatma home entry — raised surface with quiet primary wash.
+///
+/// Green stays in the accent lane (icon well, chevron, optional progress ring).
+/// Full-bleed primary fills are avoided so the prayer hero stays strongest.
 class KhatmaHomeDestinationCard extends StatelessWidget {
   const KhatmaHomeDestinationCard({
     super.key,
@@ -11,7 +15,10 @@ class KhatmaHomeDestinationCard extends StatelessWidget {
     required this.onTap,
     required this.title,
     this.subtitle,
+    this.detail,
     this.trailing,
+    this.progress,
+    this.showChevron = false,
     this.semanticLabel,
   });
 
@@ -19,90 +26,166 @@ class KhatmaHomeDestinationCard extends StatelessWidget {
   final VoidCallback onTap;
   final String title;
   final String? subtitle;
+
+  /// Optional second body line (e.g. today's page range / confirm count).
+  final String? detail;
   final Widget? trailing;
+
+  /// Optional 0–100 plan progress for the green micro-ring.
+  final int? progress;
+
+  /// Quiet trailing chevron affordance (RTL-mirrored by Flutter icons).
+  final bool showChevron;
   final String? semanticLabel;
+
+  static const double _surfaceTintAlpha = 0.10;
+  static const double _iconWellFillAlpha = 0.16;
+  static const double _chevronAlpha = 0.72;
 
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     final tokens = theme.tokens;
     final colorScheme = theme.colorScheme;
-    final radius = tokens.resolveRadius(family: TilawaRadiusFamily.hero);
+    final screenTokens = theme.componentTokens.homeScreen;
+    final Color accent = screenTokens.homePrayerHeroAccent;
+    final double radius = tokens.resolveRadius(family: TilawaRadiusFamily.hero);
+    final BorderRadius borderRadius = BorderRadius.circular(radius);
     final bool isArabic = Localizations.localeOf(context).languageCode == 'ar';
-    final List<Color> gradientColors = <Color>[
-      colorScheme.primary,
-      Color.alphaBlend(
-        colorScheme.primary.withValues(alpha: 0.80),
-        colorScheme.surface,
-      ),
-    ];
+    final Color wash = Color.alphaBlend(
+      accent.withValues(alpha: _surfaceTintAlpha),
+      colorScheme.surface,
+    );
+    final TextStyle? bodyStyle = theme.textTheme.bodyLarge?.copyWith(
+      color: HomeDashboardSection.secondaryTextColor(context),
+      height: isArabic ? tokens.textHeightLoose : 1.45,
+    );
 
-    return Semantics(
-      button: true,
-      label: semanticLabel ?? title,
-      child: HomeDashboardCard(
-        padding: EdgeInsets.zero,
-        borderRadius: radius,
-        backgroundColor: Colors.transparent,
-        onTap: onTap,
-        child: DecoratedBox(
-          decoration: BoxDecoration(
-            borderRadius: BorderRadius.circular(radius),
-            gradient: LinearGradient(
-              begin: AlignmentDirectional.topStart,
-              end: AlignmentDirectional.bottomEnd,
-              colors: gradientColors,
-            ),
-          ),
-          child: Padding(
-            padding: EdgeInsets.all(tokens.spaceMedium),
-            child: Row(
-              crossAxisAlignment: CrossAxisAlignment.start,
+    return HomeDashboardElevatedSurface.interactive(
+      context: context,
+      borderRadius: borderRadius,
+      onTap: onTap,
+      semanticLabel: semanticLabel ?? title,
+      stateLayerColor: accent,
+      color: wash,
+      tier: HomeDashboardElevationTier.primary,
+      child: Padding(
+        // ~8–12dp shorter than all-sides [spaceLarge] + [spaceMedium] gap.
+        padding: EdgeInsetsDirectional.fromSTEB(
+          tokens.spaceLarge,
+          tokens.spaceMedium,
+          tokens.spaceLarge,
+          tokens.spaceMedium,
+        ),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          spacing: tokens.spaceSmall,
+          children: [
+            Row(
               spacing: tokens.spaceSmall,
               children: [
                 HomeDashboardIconWell(
-                  accent: colorScheme.onPrimary,
+                  accent: accent,
+                  fillAlpha: _iconWellFillAlpha,
+                  extent: tokens.iconBadgeSize,
                   child: Icon(
                     icon,
                     size: tokens.iconSizeLarge,
-                    color: colorScheme.onPrimary,
+                    color: accent,
                   ),
                 ),
-                Expanded(
-                  child: Column(
-                    mainAxisSize: MainAxisSize.min,
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    spacing: tokens.spaceExtraSmall,
-                    children: [
-                      Text(
-                        title,
-                        maxLines: 2,
-                        overflow: TextOverflow.ellipsis,
-                        style: theme.textTheme.titleSmall?.copyWith(
-                          color: colorScheme.onPrimary,
-                          fontWeight: FontWeight.w800,
-                        ),
-                      ),
-                      if (subtitle case final String bodyText)
-                        Text(
-                          bodyText,
-                          maxLines: 3,
-                          overflow: TextOverflow.ellipsis,
-                          style: theme.textTheme.bodySmall?.copyWith(
-                            color: colorScheme.onPrimary.withValues(
-                              alpha: 0.86,
-                            ),
-                            height: isArabic ? tokens.textHeightLoose : 1.45,
-                          ),
-                        ),
-                    ],
+                const Spacer(),
+                if (progress case final int value)
+                  _KhatmaProgressRing(progress: value, accent: accent),
+                if (trailing case final Widget trailingWidget) trailingWidget,
+                if (showChevron)
+                  Icon(
+                    Icons.chevron_right_rounded,
+                    color: accent.withValues(alpha: _chevronAlpha),
+                    size: tokens.iconSizeLarge,
                   ),
-                ),
-                ?trailing,
               ],
             ),
-          ),
+            Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              spacing: tokens.spaceExtraSmall,
+              children: [
+                Text(
+                  title,
+                  maxLines: 2,
+                  overflow: TextOverflow.ellipsis,
+                  style: theme.textTheme.titleLarge?.copyWith(
+                    color: colorScheme.onSurface,
+                    fontWeight: FontWeight.w800,
+                    height: 1.2,
+                    letterSpacing: -0.2,
+                  ),
+                ),
+                if (subtitle case final String bodyText)
+                  Text(
+                    bodyText,
+                    maxLines: 3,
+                    overflow: TextOverflow.ellipsis,
+                    style: bodyStyle,
+                  ),
+                if (detail case final String detailText)
+                  Text(
+                    detailText,
+                    maxLines: 2,
+                    overflow: TextOverflow.ellipsis,
+                    style: bodyStyle?.copyWith(
+                      color: colorScheme.onSurfaceVariant,
+                    ),
+                  ),
+              ],
+            ),
+          ],
         ),
+      ),
+    );
+  }
+}
+
+class _KhatmaProgressRing extends StatelessWidget {
+  const _KhatmaProgressRing({
+    required this.progress,
+    required this.accent,
+  });
+
+  final int progress;
+  final Color accent;
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final tokens = theme.tokens;
+    final double size = tokens.iconBadgeSize;
+    final double clamped = (progress.clamp(0, 100)) / 100;
+
+    return SizedBox(
+      width: size,
+      height: size,
+      child: Stack(
+        alignment: Alignment.center,
+        children: [
+          Positioned.fill(
+            child: CircularProgressIndicator(
+              value: clamped,
+              strokeWidth: tokens.borderWidthThin * 3,
+              backgroundColor: accent.withValues(alpha: 0.14),
+              color: accent,
+              strokeCap: StrokeCap.round,
+            ),
+          ),
+          Text(
+            '$progress%',
+            style: theme.textTheme.labelSmall?.copyWith(
+              color: accent,
+              fontWeight: FontWeight.w700,
+              height: 1,
+            ),
+          ),
+        ],
       ),
     );
   }

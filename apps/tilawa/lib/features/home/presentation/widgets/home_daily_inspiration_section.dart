@@ -147,11 +147,11 @@ class _DailyInspirationRow extends StatelessWidget {
     final tokens = theme.tokens;
     final colorScheme = theme.colorScheme;
 
-    final TextStyle bodyStyle = theme.textTheme.bodyMedium!.copyWith(
-      color: HomeDashboardSection.secondaryTextColor(context),
-      height: useArabicTypography
-          ? tokens.textHeightLoose + 0.08
-          : (theme.textTheme.bodyMedium?.height ?? 1.4) + 0.05,
+    // Reading heights stay in the calm 1.45–1.65 band (not mushaf-loose 2.0).
+    final double bodyHeight = useArabicTypography ? 1.55 : 1.45;
+    final TextStyle bodyStyle = theme.textTheme.titleLarge!.copyWith(
+      color: colorScheme.onSurface,
+      height: bodyHeight,
       fontWeight: useArabicTypography ? FontWeight.w500 : FontWeight.w400,
     );
 
@@ -164,7 +164,7 @@ class _DailyInspirationRow extends StatelessWidget {
       ),
       child: ConstrainedBox(
         constraints: BoxConstraints(
-          minHeight: tokens.minInteractiveDimension,
+          minHeight: tokens.minInteractiveDimension * 2,
         ),
         child: Row(
           crossAxisAlignment: CrossAxisAlignment.start,
@@ -172,7 +172,7 @@ class _DailyInspirationRow extends StatelessWidget {
           children: [
             Container(
               width: tokens.spaceExtraSmall,
-              height: tokens.spaceExtraLarge + tokens.spaceSmall,
+              height: tokens.spaceExtraLarge + tokens.spaceMedium,
               decoration: BoxDecoration(
                 gradient: LinearGradient(
                   begin: Alignment.topCenter,
@@ -207,28 +207,31 @@ class _DailyInspirationRow extends StatelessWidget {
                           label,
                           maxLines: 1,
                           overflow: TextOverflow.ellipsis,
-                          style: theme.textTheme.titleSmall?.copyWith(
+                          style: theme.textTheme.titleLarge?.copyWith(
                             color: colorScheme.onSurface,
                             fontWeight: FontWeight.w700,
+                            height: 1.25,
                           ),
                         ),
                       ),
-                      Text(
-                        reference,
-                        maxLines: 1,
-                        overflow: TextOverflow.ellipsis,
-                        style: theme.textTheme.bodySmall?.copyWith(
-                          color: HomeDashboardSection.secondaryTextColor(
-                            context,
+                      Flexible(
+                        child: Text(
+                          reference,
+                          maxLines: 1,
+                          overflow: TextOverflow.ellipsis,
+                          textAlign: TextAlign.end,
+                          style: theme.textTheme.bodyMedium?.copyWith(
+                            color: colorScheme.onSurfaceVariant,
+                            fontWeight: FontWeight.w500,
+                            height: 1.35,
                           ),
-                          fontWeight: FontWeight.w500,
                         ),
                       ),
                     ],
                   ),
                   Text(
                     body,
-                    maxLines: 3,
+                    maxLines: 4,
                     overflow: TextOverflow.ellipsis,
                     textAlign: TextAlign.start,
                     style: bodyStyle,

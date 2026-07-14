@@ -494,7 +494,7 @@ class TilawaAdaptiveShellTokens {
       phoneBottomNavSelectedLabelLayoutHeight(textScaler);
 
   /// Nominal line height for the selected bottom-nav label (labelSmall).
-  static const double navButtonLabelLineHeight = 16;
+  static const double navButtonLabelLineHeight = 18;
 
   /// Height of the phone bottom nav row when the selected tab shows a label.
   double phoneBottomNavSelectedLabelLayoutHeight(TextScaler textScaler) {
@@ -629,7 +629,7 @@ class TilawaAdaptiveShellTokens {
       ),
       navButtonSelectedBackgroundOpacity: 0.2,
       navButtonSelectedCenterOpacity: 0.25,
-      navButtonLabelTextRole: TilawaTextRole.labelSmall,
+      navButtonLabelTextRole: TilawaTextRole.labelMedium,
       navButtonSelectedLabelWeight: FontWeight.w700,
       navButtonUnselectedLabelWeight: FontWeight.w400,
       navButtonSelectionContainerVerticalPadding:

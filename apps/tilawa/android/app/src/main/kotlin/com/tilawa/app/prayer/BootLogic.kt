@@ -1,16 +1,14 @@
 package com.tilawa.app.prayer
 
 import android.content.Context
-import android.os.Build
 import android.util.Log
 import org.json.JSONArray
-import org.json.JSONObject
 
 internal class BootLogic(
     private val storage: PrayerStorage,
     private val scheduler: AdhanSchedulerProxy,
     private val watchdog: WatchdogProxy,
-    private val analytics: PrayerAnalytics? = null
+    private val analytics: PrayerAnalytics? = null,
 ) {
     private fun logDebug(message: String) {
         try {
@@ -22,12 +20,35 @@ internal class BootLogic(
         }
     }
 
+    /**
+     * Boot / package-replace path: mark Dart for a full refresh, keep the
+     * WorkManager watchdog armed, then re-install future AlarmManager clocks
+     * from the persisted DPS JSON (no Flutter).
+     */
     fun reArmAlarms(now: Long) {
         storage.setNeedsReschedule(true)
         watchdog.enqueuePeriodic()
         watchdog.enqueueOneTime()
+        reArmPendingAlarms(now, contextLabel = "boot_rearm")
+    }
 
-        val raw = storage.getPendingAlarmsJson() ?: return
+    /**
+     * Native-only re-arm used by [PrayerNotificationsWatchdogWorker].
+     *
+     * Does **not** spin a FlutterEngine (that wedges the Android main looper
+     * and shows up as `MessageQueue.nativePollOnce` / Background ANR). Leaves
+     * [PrayerStorage.setNeedsReschedule] so the next app open runs a full Dart
+     * ensure-scheduled pass.
+     *
+     * @return number of future alarms successfully handed to the scheduler
+     */
+    fun reArmPendingAlarmsForWatchdog(now: Long): Int {
+        storage.setNeedsReschedule(true)
+        return reArmPendingAlarms(now, contextLabel = "watchdog_rearm")
+    }
+
+    private fun reArmPendingAlarms(now: Long, contextLabel: String): Int {
+        val raw = storage.getPendingAlarmsJson() ?: return 0
         val pending = try {
             val arr = JSONArray(raw)
             buildList {
@@ -44,32 +65,34 @@ internal class BootLogic(
                             obj.optString("sound", "adhan"),
                             obj.optString("location", ""),
                             obj.optString("language", ""),
-                        )
+                        ),
                     )
                 }
             }
         } catch (t: Throwable) {
             analytics?.logError(
-                "Failed to parse pending alarms JSON", 
+                "Failed to parse pending alarms JSON",
                 t,
                 mapOf(
                     "exact_alarm_permission_granted" to scheduler.canScheduleExact(),
                     "notification_permission_granted" to scheduler.areNotificationsEnabled(),
                     "device_manufacturer" to android.os.Build.MANUFACTURER,
-                    "fallback_used" to false
-                )
+                    "fallback_used" to false,
+                ),
             )
             emptyList()
         }
 
-        if (pending.isEmpty()) return
+        if (pending.isEmpty()) return 0
 
+        var scheduled = 0
         for (entry in pending) {
             if (entry.trigger <= now) continue
             try {
                 logDebug(
-                    "ADHAN_AUDIT source=boot_rearm event=attempt prayerKey=${entry.key} prayerName=${entry.name} " +
-                        "scheduledMs=${entry.trigger} notificationId=${entry.id} requestCode=${entry.id}"
+                    "ADHAN_AUDIT source=$contextLabel event=attempt prayerKey=${entry.key} " +
+                        "prayerName=${entry.name} scheduledMs=${entry.trigger} " +
+                        "notificationId=${entry.id} requestCode=${entry.id}",
                 )
                 val ok = scheduler.schedule(
                     entry.id,
@@ -81,31 +104,39 @@ internal class BootLogic(
                     entry.languageCode,
                 )
                 if (ok) {
-                    analytics?.logEvent(PrayerEvents.SCHEDULE_SUCCESS, mapOf(
-                        "prayer_name" to entry.name,
-                        "context" to "boot_rearm"
-                    ))
+                    scheduled += 1
+                    analytics?.logEvent(
+                        PrayerEvents.SCHEDULE_SUCCESS,
+                        mapOf(
+                            "prayer_name" to entry.name,
+                            "context" to contextLabel,
+                        ),
+                    )
                 } else {
-                    analytics?.logEvent(PrayerEvents.SCHEDULE_FAILED, mapOf(
-                        "prayer_name" to entry.name,
-                        "context" to "boot_rearm",
-                        "reason" to "permission_denied"
-                    ))
+                    analytics?.logEvent(
+                        PrayerEvents.SCHEDULE_FAILED,
+                        mapOf(
+                            "prayer_name" to entry.name,
+                            "context" to contextLabel,
+                            "reason" to "permission_denied",
+                        ),
+                    )
                 }
             } catch (t: Throwable) {
                 analytics?.logError(
-                    "Failed to schedule alarm during boot re-arm", 
+                    "Failed to schedule alarm during boot re-arm",
                     t,
                     mapOf(
                         "prayer_name" to entry.name,
                         "exact_alarm_permission_granted" to scheduler.canScheduleExact(),
                         "notification_permission_granted" to scheduler.areNotificationsEnabled(),
                         "device_manufacturer" to android.os.Build.MANUFACTURER,
-                        "fallback_used" to false
-                    )
+                        "fallback_used" to false,
+                    ),
                 )
             }
         }
+        return scheduled
     }
 
     private data class AlarmEntry(

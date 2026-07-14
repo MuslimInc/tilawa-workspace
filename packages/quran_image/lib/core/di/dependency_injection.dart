@@ -42,8 +42,11 @@ Future<void> initDependencies() async {
     AssetVerseMarkerRepository.new,
     dispose: (repo) => repo.dispose(),
   );
+  // Named factory — do NOT pass `sl.call` / untyped `sl.get` tear-offs.
+  // Those infer T as VerseMarkerRepository and StackOverflow on reader open.
+  // Formatters that rewrite `() => sl<Asset…>()` → `sl.call` recreate the bug.
   sl.registerLazySingleton<VerseMarkerRepository>(
-    sl.get<AssetVerseMarkerRepository>,
+    _resolveVerseMarkerRepository,
   );
 
   // Surah Header Repository
@@ -79,4 +82,11 @@ Future<void> initDependencies() async {
   sl.registerLazySingleton<SaveLastVisitedPageUseCase>(
     () => SaveLastVisitedPageUseCase(sl<LastVisitedPageRepository>()),
   );
+}
+
+/// Resolves the shared asset-backed [VerseMarkerRepository] instance.
+///
+/// Kept as a named function so formatters cannot collapse it to `sl.call`.
+VerseMarkerRepository _resolveVerseMarkerRepository() {
+  return sl.get<AssetVerseMarkerRepository>();
 }

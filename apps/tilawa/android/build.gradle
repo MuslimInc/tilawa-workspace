@@ -19,6 +19,25 @@ subprojects {
 subprojects {
     project.evaluationDependsOn(":app")
 }
+// WORKAROUND — Flutter 3.44 + FlutterFire (BoM 4.17.x) Kotlin plugin gap.
+//
+// Flutter migrator sets android.builtInKotlin=false (see gradle.properties).
+// FlutterFire plugins (e.g. firebase_app_check) conditionally skip applying
+// kotlin-android when they expect AGP 9 built-in Kotlin. With the flag off,
+// their .kt sources may not compile → GeneratedPluginRegistrant fails with
+// "cannot find symbol … FirebaseAppCheckPlugin".
+//
+// Force-apply kotlin-android to Android library modules that lack it.
+// Safe to remove once apps use AGP 9 built-in Kotlin and FlutterFire no
+// longer needs this escape hatch. Refs: flutterfire#18297, flutter#186800.
+subprojects {
+    project.pluginManager.withPlugin("com.android.library") {
+        if (!project.pluginManager.hasPlugin("kotlin-android") &&
+                !project.pluginManager.hasPlugin("org.jetbrains.kotlin.android")) {
+            project.pluginManager.apply("kotlin-android")
+        }
+    }
+}
 
 tasks.register("clean", Delete) {
     delete rootProject.buildDir

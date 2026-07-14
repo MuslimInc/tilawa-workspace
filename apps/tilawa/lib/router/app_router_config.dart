@@ -394,6 +394,8 @@ class ErrorRoute extends GoRouteData with $ErrorRoute, TilawaRouteData {
 
   @override
   Widget build(BuildContext context, GoRouterState state) {
+    // tilawa-ui-exception: SHELL-SCAFFOLD-ERROR-ROUTE
+    // ignore: tilawa_lints/tilawa_shell_child_scaffold
     return Scaffold(
       body: TilawaErrorState(
         icon: Icons.error_outline_rounded,
@@ -782,6 +784,8 @@ class SmartQuranPlanRoute extends GoRouteData
         !getIt.isRegistered<GenUiComponentRegistry>() ||
         !getIt.isRegistered<GenUiActionDispatcher>() ||
         !getIt.isRegistered<TrustedContentResolver>()) {
+      // tilawa-ui-exception: SHELL-SCAFFOLD-GENUI-UNAVAILABLE
+      // ignore: tilawa_lints/tilawa_shell_child_scaffold
       return Scaffold(
         body: Center(
           child: Text(

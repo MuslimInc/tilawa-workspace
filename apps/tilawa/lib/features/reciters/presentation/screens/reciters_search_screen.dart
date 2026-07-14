@@ -86,9 +86,7 @@ class _RecitersSearchScreenState extends State<RecitersSearchScreen> {
     final tokens = theme.tokens;
     final double keyboardInset = context.keyboardInset;
 
-    return Scaffold(
-      // Keep the catalog chrome at a fixed height; inset the list instead.
-      resizeToAvoidBottomInset: false,
+    return TilawaShellChildScaffold(
       appBar: TilawaCatalogAppBar(
         title: context.l10n.reciters,
         bottomContent: RecitersCatalogSearchField(

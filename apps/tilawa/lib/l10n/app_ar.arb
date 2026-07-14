@@ -266,8 +266,8 @@
     "homeDailyAyahReference2": "القرآن ٢٩:٤٥",
     "homeDailyDuaBody2": "اللهم إني أسألك علماً نافعاً، ورزقاً طيباً، وعملاً متقبلاً",
     "homeDailyDuaReference2": "ابن ماجه",
-    "khatmaEmptyTitle": "ابدأ ختمة",
-    "khatmaEmptySubtitle": "اختر خطة قراءة هادئة. سنعدّلها بلطف إذا انشغل يومك.",
+    "khatmaEmptyTitle": "ابدأ ختمة جديدة",
+    "khatmaEmptySubtitle": "حدّد بداية الختمة ونهايتها والمدة المناسبة لك، وسنقسّمها إلى ورد يومي.",
     "khatmaDurationDays": "{days, plural, =1{يوم واحد} =2{يومان} other{{days} يومًا}}",
     "@khatmaDurationDays": {
         "placeholders": {
@@ -4146,25 +4146,17 @@
     "notificationDebugChecklistKillTitle": "ح. إنهاء العملية بالكامل",
     "notificationDebugChecklistKillSteps": "أغلق التطبيق من المهام الأخيرة → انقر إشعارًا جديدًا → يجب أن يعمل التوجيه البارد",
     "notificationDebugLogsEmpty": "لا أحداث تصحيح بعد",
-    "inAppUpdateFlexibleRestartMessage": "تم تنزيل التحديث. أعد التشغيل عندما تكون مستعدًا للتثبيت.",
-    "@inAppUpdateFlexibleRestartMessage": {
-        "description": "Snackbar message when a flexible in-app update finished downloading"
+    "forcedUpdateTitle": "يلزم التحديث",
+    "@forcedUpdateTitle": {
+        "description": "Title on the blocking forced-update gate screen"
     },
-    "inAppUpdateOptionalMessage": "يتوفر إصدار جديد من أنا مسلم.",
-    "@inAppUpdateOptionalMessage": {
-        "description": "Snackbar message when an optional app update is available"
+    "forcedUpdateMessage": "يلزم التحديث لمتابعة استخدام أنا مسلم.",
+    "@forcedUpdateMessage": {
+        "description": "Body copy on the blocking forced-update gate screen"
     },
-    "inAppUpdateRequiredMessage": "يلزم التحديث لمتابعة استخدام أنا مسلم.",
-    "@inAppUpdateRequiredMessage": {
-        "description": "Snackbar message when a forced update must go through the Play Store"
-    },
-    "inAppUpdateRestartAction": "إعادة التشغيل",
-    "@inAppUpdateRestartAction": {
-        "description": "Snackbar action to install a downloaded flexible update"
-    },
-    "inAppUpdateUpdateAction": "تحديث",
-    "@inAppUpdateUpdateAction": {
-        "description": "Snackbar action to open the Play Store for an optional update"
+    "forcedUpdateAction": "تحديث",
+    "@forcedUpdateAction": {
+        "description": "Primary CTA on the forced-update gate that opens the app store"
     },
     "recitationPracticeTitle": "تدريب {surah}:{ayah}",
     "@recitationPracticeTitle": {
