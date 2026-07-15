@@ -29,9 +29,10 @@ List<PrayerAlertsPermissionStep> prayerAlertsSetupPendingSteps({
   if (!capability.canScheduleExact) {
     steps.add(PrayerAlertsPermissionStep.exactAlarm);
   }
-  if (!capability.isIgnoringBatteryOptimizations) {
-    steps.add(PrayerAlertsPermissionStep.batteryOptimization);
-  }
+  // Battery optimization step temporarily disabled from the first-run wizard.
+  // if (!capability.isIgnoringBatteryOptimizations) {
+  //   steps.add(PrayerAlertsPermissionStep.batteryOptimization);
+  // }
   if (capability.oemRequiresAutostart) {
     steps.add(PrayerAlertsPermissionStep.oemAutostart);
   }

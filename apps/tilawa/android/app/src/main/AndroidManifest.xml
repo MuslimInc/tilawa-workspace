@@ -26,8 +26,8 @@
          for apps not categorised as alarm/clock apps. -->
     <uses-permission android:name="android.permission.SCHEDULE_EXACT_ALARM" />
     <!-- Required for prayer-alerts battery-optimization whitelist (permission_handler
-         + Settings.ACTION_REQUEST_IGNORE_BATTERY_OPTIMIZATIONS). -->
-    <uses-permission android:name="android.permission.REQUEST_IGNORE_BATTERY_OPTIMIZATIONS" />
+         + Settings.ACTION_REQUEST_IGNORE_BATTERY_OPTIMIZATIONS). Temporarily unused. -->
+    <!-- <uses-permission android:name="android.permission.REQUEST_IGNORE_BATTERY_OPTIMIZATIONS" /> -->
     <uses-permission android:name="android.permission.RECEIVE_BOOT_COMPLETED"/>
     <uses-permission android:name="android.permission.VIBRATE" />
 
@@ -281,3 +281,4 @@
 
     </application>
 </manifest>
+

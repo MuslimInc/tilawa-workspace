@@ -3,7 +3,7 @@ import 'package:flutter/material.dart';
 /// Centralized app color constants.
 ///
 /// The Tilawa palette is intentionally **small and calm**:
-/// warm scaffold canvas ([lightCanvas] `#F4F2EE`), green global accent
+/// warm scaffold canvas ([lightCanvas] `#F3F6F4`), green global accent
 /// ([defaultPrimary] `#1DAB61`), neutral text ink ([tripGlideInk] `#1A2E24`),
 /// and restrained category accent hues for hub tiles.
 ///
@@ -92,11 +92,14 @@ abstract final class AppColors {
   /// Elevated surfaces — cards, search (`#FFFFFF`).
   static const Color tripGlideSurface = Color(0xFFFFFFFF);
 
-  /// Medium-emphasis secondary copy (`#6B7F74`).
-  static const Color tripGlideMuted = Color(0xFF6B7F74);
+  /// Medium-emphasis secondary copy (`#617369`) - darkened for ≥ 4.5:1 contrast on canvas.
+  static const Color tripGlideMuted = Color(0xFF617369);
 
-  /// Idle tier for chips, search rests, and header bands (`#E8F3EC`).
-  static const Color tripGlideCanvasElevated = Color(0xFFE8F3EC);
+  /// Idle tier for chips, search rests, and header bands (`#F0F7F2`).
+  ///
+  /// Soft brand-green wash — quieter than the old `#E8F3EC`, matches
+  /// [DESIGN.md] `surface-container-high` / warm chip rest.
+  static const Color tripGlideCanvasElevated = Color(0xFFF0F7F2);
 
   /// Hairline / highest surface tier (`#E6EDE8`).
   static const Color tripGlideCanvasDusk = Color(0xFFE6EDE8);
@@ -198,14 +201,14 @@ abstract final class AppColors {
   /// Foreground on the Home hero night gradient — warm cream ink.
   static const Color homeNextPrayerGradientNightForeground = Color(0xFFF5F0E6);
 
-  /// Home screen canvas — modern light canvas (60-30-10 dominant).
-  static const Color homeBackgroundGradientStart = Color(0xFFF8F9FA);
+  /// Home screen canvas — soft porcelain-green warmth at the top.
+  static const Color homeBackgroundGradientStart = Color(0xFFEEF3EF);
 
-  /// Home screen canvas — modern light canvas mid stop.
-  static const Color homeBackgroundGradientMiddle = Color(0xFFF8F9FA);
+  /// Home screen canvas — middle porcelain stop (`#F3F6F4`).
+  static const Color homeBackgroundGradientMiddle = Color(0xFFF3F6F4);
 
-  /// Home screen canvas — modern light canvas bottom.
-  static const Color homeBackgroundGradientEnd = Color(0xFFF8F9FA);
+  /// Home screen canvas — quiet bottom so white cards keep soft lift.
+  static const Color homeBackgroundGradientEnd = Color(0xFFF5F7F5);
 
   /// Radial glow accent behind the Home hero / next-prayer area.
   static const Color homeBackgroundGlow = Color(0xFFEAF1EC);
@@ -390,10 +393,11 @@ abstract final class AppColors {
   // 60-30-10: canvas (~60%), elevated surfaces (~30%), accent (~10%).
   // ---------------------------------------------------------------------------
 
-  /// App canvas / scaffold — porcelain green matching Home (`#F3F6F4`).
+  /// App canvas / scaffold — porcelain green matching DESIGN.md (`#F3F6F4`).
   ///
   /// Cards use [lightSurface] (`#FFFFFF`) for quiet lift with soft shadows.
-  static const Color lightCanvas = homeBackgroundGradientStart;
+  /// Home top glow still uses [homeBackgroundGradientStart] separately.
+  static const Color lightCanvas = Color(0xFFF3F6F4);
 
   /// Alias for scaffold assembly — same as [lightCanvas].
   static const Color lightBackground = lightCanvas;
@@ -410,14 +414,14 @@ abstract final class AppColors {
   /// Muted labels (`#78736E`).
   static const Color lightMute = tripGlideMuted;
 
-  /// Ash icons / hints — low-emphasis green-grey (`#B0BAB4`).
-  static const Color lightAsh = Color(0xFFB0BAB4);
+  /// Ash icons / hints — low-emphasis green-grey (`#87928C`) - darkened for ≥ 3:1 contrast on white.
+  static const Color lightAsh = Color(0xFF87928C);
 
-  /// Light upper container / idle chip — quiet green-tinted white (`#F0F7F2`).
+  /// Light upper container — pure white (`#FFFFFF`).
   ///
   /// Mapped to [ColorScheme.surfaceContainerHigh] in [AppTheme] without
-  /// primary harmonization so unselected controls stay neutral.
-  static const Color lightSurfaceContainerHighBase = tripGlideCanvasElevated;
+  /// primary harmonization. Chip / badge tints use [tripGlideCanvasElevated].
+  static const Color lightSurfaceContainerHighBase = Color(0xFFFFFFFF);
 
   /// Alias for catalog chips and docs (same as [lightSurfaceContainerHighBase]).
   static const Color catalogFilterUnselectedLight =
@@ -529,8 +533,12 @@ abstract final class AppColors {
 
   static const Color darkSecondary = Color(0xFF9DB5A8);
   static const Color darkSecondaryContainer = Color(0xFF2A3530);
-  static const Color darkTertiary = Color(0xFFCE93D8);
-  static const Color darkTertiaryContainer = Color(0xFF3D2A4A);
+
+  /// Dark [ColorScheme.tertiary] — gold gilding, matching the brand role.
+  static const Color darkTertiary = brandGoldAccent;
+
+  /// Dark [ColorScheme.tertiaryContainer] — restrained gold wash.
+  static const Color darkTertiaryContainer = Color(0xFF4A3510);
 
   // ---------------------------------------------------------------------------
   // True-black mode (OLED-friendly dark refinement).
@@ -585,8 +593,8 @@ abstract final class AppColors {
   /// Pure surface default (`#FFFFFF`).
   static const Color surface = Color(0xFFFFFFFF);
 
-  /// Reference soft red/pink for inactive status surfaces (`#E57373`).
-  static const Color errorSoft = Color(0xFFE57373);
+  /// Reference soft red/pink for inactive status surfaces (`#FFCDD2`) - lightened for contrast with ink.
+  static const Color errorSoft = Color(0xFFFFCDD2);
 
   /// Error / failure — maps to light [ColorScheme.error] (`#C74545`).
   ///

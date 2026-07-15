@@ -29,10 +29,7 @@ class HomePrimaryActionTile extends StatelessWidget {
     final tokens = context.tokens;
     final theme = Theme.of(context);
     final colorScheme = theme.colorScheme;
-    final Color wash = HomeFeaturePastel.wash(
-      accent: accent,
-      colorScheme: colorScheme,
-    );
+    final Color surface = HomeFeaturePastel.cardSurface(colorScheme);
     final double radius = tokens.resolveRadius(
       family: TilawaRadiusFamily.hero,
     );
@@ -46,7 +43,7 @@ class HomePrimaryActionTile extends StatelessWidget {
       onTap: onTap,
       semanticLabel: label,
       stateLayerColor: accent,
-      color: wash,
+      color: surface,
       tier: HomeDashboardElevationTier.primary,
       child: Padding(
         padding: EdgeInsetsDirectional.fromSTEB(

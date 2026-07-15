@@ -121,6 +121,11 @@ class _SettingsScreenState extends State<SettingsScreen> {
           appBar: TilawaCatalogAppBar.titleOnly(
             title: l10n.settings,
             automaticallyImplyLeading: false,
+            actions: [
+              SettingsLogoutAppBarAction(
+                onLogout: () => SettingsSheets.showLogoutConfirmation(context),
+              ),
+            ],
           ),
           body: TilawaCatalogSettingsBody(
             child: SettingsTeacherCapabilityScope(
@@ -182,6 +187,9 @@ class _SettingsScreenState extends State<SettingsScreen> {
                               value: settingsLanguageLabel(
                                 state.locale,
                                 l10n,
+                              ),
+                              fontFamily: AppTheme.fontFamilyForLanguageCode(
+                                state.locale.languageCode,
                               ),
                             ),
                             onTap: () => SettingsSheets.showLanguagePicker(

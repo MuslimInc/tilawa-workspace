@@ -26,7 +26,6 @@ import 'package:tilawa/features/reciters/domain/usecases/get_reciters_use_case.d
 import 'package:tilawa/features/reciters/domain/usecases/toggle_favorite_reciter_use_case.dart';
 import 'package:tilawa/features/reciters/presentation/bloc/alphabet_scrollbar/alphabet_scrollbar_bloc.dart';
 import 'package:tilawa/features/reciters/presentation/bloc/reciters_bloc.dart';
-import 'package:tilawa/features/reciters/presentation/bloc/reciters_tabs_bloc.dart';
 import 'package:tilawa/features/reciters/presentation/cubit/favorites_cubit.dart';
 import 'package:tilawa/features/auth/presentation/bloc/auth_bloc.dart';
 import 'package:tilawa/features/home/presentation/screens/home_screen.dart';
@@ -331,9 +330,6 @@ void main() {
           create: (_) => MainScreenCubit(),
         ),
         BlocProvider<RecitersBloc>.value(value: recitersBloc),
-        BlocProvider<RecitersTabsBloc>(
-          create: (_) => RecitersTabsBloc(),
-        ),
         BlocProvider<AlphabetScrollbarBloc>(
           create: (_) => AlphabetScrollbarBloc(),
         ),

@@ -1,25 +1,30 @@
 import 'package:flutter/material.dart';
 import 'package:tilawa_ui_kit/tilawa_ui_kit.dart';
 
-/// Soft Behance-style pastels for Home daily-worship cards.
+/// Home daily-worship tile accents + quiet status chrome.
 ///
-/// Accents come from [MeMuslimProductColors.exploreFeatureIcon] (no new hex).
-/// Washes stay light so the prayer hero remains the strongest Home surface.
+/// Card **bodies** stay [ColorScheme.surface] (white elevated cards — DESIGN
+/// 60-30-10). Category hue lives only in icon wells / soft status chips so
+/// the prayer hero remains the strongest colored surface.
 abstract final class HomeFeaturePastel {
   const HomeFeaturePastel._();
 
-  /// Card body tint — visible pastel, still calm (~14%).
-  static const double surfaceTintAlpha = 0.14;
+  /// Resting card fill — elevated white, same language as More list rows.
+  static Color cardSurface(ColorScheme colorScheme) => colorScheme.surface;
 
-  /// Icon well — slightly stronger than the card wash (~22%).
-  static const double iconWellFillAlpha = 0.22;
+  /// Icon well — soft accent chip on white (readable, not a full-card wash).
+  static const double iconWellFillAlpha = 0.16;
 
-  static Color wash({
+  /// Soft status-chip fill — finance-app pattern: tint the pill, not the card.
+  static const double statusChipFillAlpha = 0.12;
+
+  /// Soft [TilawaStatusChip] background on white.
+  static Color statusChipBackground({
     required Color accent,
     required ColorScheme colorScheme,
   }) {
     return Color.alphaBlend(
-      accent.withValues(alpha: surfaceTintAlpha),
+      accent.withValues(alpha: statusChipFillAlpha),
       colorScheme.surface,
     );
   }

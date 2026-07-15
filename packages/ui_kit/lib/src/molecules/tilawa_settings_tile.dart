@@ -2,9 +2,9 @@ import 'package:flutter/material.dart';
 
 import '../atoms/tilawa_switch.dart';
 import '../foundation/component_tokens.dart';
-import '../foundation/tilawa_text_roles.dart';
-import '../foundation/tilawa_icons.dart';
 import '../foundation/design_tokens.dart';
+import '../foundation/tilawa_icons.dart';
+import '../foundation/tilawa_text_roles.dart';
 import 'tilawa_settings_group_row_style.dart';
 import 'tilawa_settings_list_row.dart';
 
@@ -20,15 +20,22 @@ BorderRadius _resolveSettingsTileBorderRadius(
       BorderRadius.zero;
 }
 
+/// Horizontal inset matches compact title-only rows; vertical only when a
+/// subtitle is present so the two-line stack clears the rounded clip edge.
 EdgeInsetsGeometry _settingsListRowPadding(
-  BuildContext context,
-  MeMuslimDesignTokens designTokens,
-) {
+  MeMuslimDesignTokens designTokens, {
+  required bool hasSubtitle,
+}) {
   return EdgeInsetsDirectional.only(
     start: designTokens.spaceSmall,
     end: designTokens.spaceSmall,
+    top: hasSubtitle ? designTokens.spaceLarge : 0,
+    bottom: hasSubtitle ? designTokens.spaceLarge : 0,
   );
 }
+
+bool _hasSettingsSubtitle(String? subtitle) =>
+    subtitle != null && subtitle.isNotEmpty;
 
 class TilawaSettingsTile extends StatelessWidget {
   const TilawaSettingsTile({
@@ -71,13 +78,17 @@ class TilawaSettingsTile extends StatelessWidget {
       context,
       borderRadius,
     );
+    final bool hasSubtitle = _hasSettingsSubtitle(subtitle);
 
     return Column(
       children: [
         TilawaSettingsListRow(
           semanticLabel: title,
           borderRadius: resolvedRadius,
-          contentPadding: _settingsListRowPadding(context, designTokens),
+          contentPadding: _settingsListRowPadding(
+            designTokens,
+            hasSubtitle: hasSubtitle,
+          ),
           minTileHeight: designTokens.minInteractiveDimension,
           rowGap: tokens.tileItemGap,
           onTap: onTap,
@@ -153,13 +164,17 @@ class TilawaSettingsSwitchTile extends StatelessWidget {
       context,
       borderRadius,
     );
+    final bool hasSubtitle = _hasSettingsSubtitle(subtitle);
 
     return Column(
       children: [
         TilawaSettingsListRow(
           semanticLabel: title,
           borderRadius: resolvedRadius,
-          contentPadding: _settingsListRowPadding(context, designTokens),
+          contentPadding: _settingsListRowPadding(
+            designTokens,
+            hasSubtitle: hasSubtitle,
+          ),
           minTileHeight: designTokens.minInteractiveDimension,
           rowGap: tokens.tileItemGap,
           onTap: () => onChanged(!value),
@@ -310,7 +325,7 @@ TextStyle _subtitleStyle(
     color: theme.colorScheme.onSurfaceVariant.withValues(
       alpha: tokens.tileSubtitleOpacity,
     ),
-    height: 1.35,
+    height: 1.4,
   );
 }
 

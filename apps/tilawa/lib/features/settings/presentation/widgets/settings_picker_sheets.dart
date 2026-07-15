@@ -282,6 +282,7 @@ class SettingsLanguageSheet extends StatelessWidget {
       children: [
         TilawaSelectionTile(
           title: 'العربية',
+          fontFamily: AppTheme.fontFamilyForLanguageCode(arabicLanguageCode),
           isSelected: currentLocale.languageCode == arabicLanguageCode,
           onTap: () {
             context.read<LocalizationBloc>().add(
@@ -292,6 +293,7 @@ class SettingsLanguageSheet extends StatelessWidget {
         ),
         TilawaSelectionTile(
           title: 'English',
+          fontFamily: AppTheme.fontFamilyForLanguageCode(englishLanguageCode),
           isSelected: currentLocale.languageCode == englishLanguageCode,
           showDivider: false,
           onTap: () {

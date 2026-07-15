@@ -10,8 +10,8 @@ import 'home_shell_tab_navigation.dart';
 
 /// Secondary tools row — Reciters, Qibla, Tasbeeh.
 ///
-/// Behance-style category pastels via [HomeFeaturePastel]; lighter than primary
-/// tiles, quieter than the prayer hero.
+/// White elevated cards with accent icon wells ([HomeFeaturePastel]); quieter
+/// elevation than primary tiles, quieter than the prayer hero.
 class HomeQuickToolsSection extends StatelessWidget {
   const HomeQuickToolsSection({super.key});
 
@@ -69,10 +69,7 @@ class _QuickToolTile extends StatelessWidget {
     final tokens = context.tokens;
     final theme = Theme.of(context);
     final colorScheme = theme.colorScheme;
-    final Color wash = HomeFeaturePastel.wash(
-      accent: accent,
-      colorScheme: colorScheme,
-    );
+    final Color surface = HomeFeaturePastel.cardSurface(colorScheme);
     final BorderRadius borderRadius = BorderRadius.circular(radius);
 
     return HomeDashboardElevatedSurface.interactive(
@@ -81,7 +78,7 @@ class _QuickToolTile extends StatelessWidget {
       onTap: onTap,
       semanticLabel: label,
       stateLayerColor: accent,
-      color: wash,
+      color: surface,
       tier: HomeDashboardElevationTier.quickTool,
       child: Padding(
         padding: EdgeInsets.symmetric(

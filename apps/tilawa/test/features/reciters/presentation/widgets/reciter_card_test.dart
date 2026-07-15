@@ -334,7 +334,7 @@ void main() {
     await cubit.close();
   });
 
-  testWidgets('shows compact moshaf label with localized more suffix', (
+  testWidgets('omits riwayah/moshaf subtitle from catalog row', (
     WidgetTester tester,
   ) async {
     const reciter = ReciterEntity(
@@ -382,10 +382,10 @@ void main() {
     );
     await tester.pumpAndSettle();
 
-    expect(
-      find.text("Hafs A'n Assem · Mojawwad · 1 more"),
-      findsOneWidget,
-    );
+    expect(find.text('Ibrahim Al-Akdar'), findsOneWidget);
+    expect(find.textContaining("Hafs A'n Assem"), findsNothing);
+    expect(find.textContaining('Murattal'), findsNothing);
+    expect(find.textContaining('1 more'), findsNothing);
 
     await cubit.close();
   });

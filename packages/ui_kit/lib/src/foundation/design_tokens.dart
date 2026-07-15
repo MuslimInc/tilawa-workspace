@@ -169,8 +169,11 @@ class MeMuslimDesignTokens extends ThemeExtension<MeMuslimDesignTokens> {
   /// 24.0 — content cards ([TilawaCard], featured panels).
   double get radiusCard => radiusExtraLarge;
 
-  /// 24.0 — grouped settings panels ([TilawaSettingsGroupPanel]).
-  double get radiusSection => radiusExtraLarge;
+  /// 16.0 — grouped settings panels ([TilawaSettingsGroupPanel]).
+  ///
+  /// Quieter than [radiusCard]: short single-row groups stay rectangular
+  /// instead of reading as stadium / pill shells.
+  double get radiusSection => 16.0;
 
   /// Full pill radius for a control of [height] (`height / 2`).
   double radiusPill(double height) => height / 2;

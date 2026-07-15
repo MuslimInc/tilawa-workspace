@@ -2,12 +2,14 @@ import 'package:flutter/material.dart';
 import 'package:tilawa/features/home/presentation/widgets/home_dashboard_elevated_surface.dart';
 import 'package:tilawa/features/home/presentation/widgets/home_dashboard_icon_well.dart';
 import 'package:tilawa/features/home/presentation/widgets/home_dashboard_section.dart';
+import 'package:tilawa/features/home/presentation/widgets/home_feature_pastel.dart';
 import 'package:tilawa_ui_kit/tilawa_ui_kit.dart';
 
-/// Smart Khatma home entry — raised surface with quiet primary wash.
+/// Smart Khatma home entry — white elevated surface + primary accent chrome.
 ///
 /// Green stays in the accent lane (icon well, chevron, optional progress ring).
-/// Full-bleed primary fills are avoided so the prayer hero stays strongest.
+/// Full-bleed tinted fills are avoided so the prayer hero stays strongest and
+/// Home cards share one calm surface language with the More list.
 class KhatmaHomeDestinationCard extends StatelessWidget {
   const KhatmaHomeDestinationCard({
     super.key,
@@ -15,6 +17,7 @@ class KhatmaHomeDestinationCard extends StatelessWidget {
     required this.onTap,
     required this.title,
     this.subtitle,
+    this.statusChipLabel,
     this.detail,
     this.trailing,
     this.progress,
@@ -27,6 +30,10 @@ class KhatmaHomeDestinationCard extends StatelessWidget {
   final String title;
   final String? subtitle;
 
+  /// Soft status pill under the title (e.g. "Day 1 of 30") — prefer over a
+  /// full-card tint for short plan state.
+  final String? statusChipLabel;
+
   /// Optional second body line (e.g. today's page range / confirm count).
   final String? detail;
   final Widget? trailing;
@@ -38,8 +45,6 @@ class KhatmaHomeDestinationCard extends StatelessWidget {
   final bool showChevron;
   final String? semanticLabel;
 
-  static const double _surfaceTintAlpha = 0.10;
-  static const double _iconWellFillAlpha = 0.16;
   static const double _chevronAlpha = 0.72;
 
   @override
@@ -52,10 +57,7 @@ class KhatmaHomeDestinationCard extends StatelessWidget {
     final double radius = tokens.resolveRadius(family: TilawaRadiusFamily.hero);
     final BorderRadius borderRadius = BorderRadius.circular(radius);
     final bool isArabic = Localizations.localeOf(context).languageCode == 'ar';
-    final Color wash = Color.alphaBlend(
-      accent.withValues(alpha: _surfaceTintAlpha),
-      colorScheme.surface,
-    );
+    final Color surface = HomeFeaturePastel.cardSurface(colorScheme);
     final TextStyle? bodyStyle = theme.textTheme.bodyLarge?.copyWith(
       color: HomeDashboardSection.secondaryTextColor(context),
       height: isArabic ? tokens.textHeightLoose : 1.45,
@@ -67,7 +69,7 @@ class KhatmaHomeDestinationCard extends StatelessWidget {
       onTap: onTap,
       semanticLabel: semanticLabel ?? title,
       stateLayerColor: accent,
-      color: wash,
+      color: surface,
       tier: HomeDashboardElevationTier.primary,
       child: Padding(
         // ~8–12dp shorter than all-sides [spaceLarge] + [spaceMedium] gap.
@@ -86,7 +88,7 @@ class KhatmaHomeDestinationCard extends StatelessWidget {
               children: [
                 HomeDashboardIconWell(
                   accent: accent,
-                  fillAlpha: _iconWellFillAlpha,
+                  fillAlpha: HomeFeaturePastel.iconWellFillAlpha,
                   extent: tokens.iconBadgeSize,
                   child: Icon(
                     icon,
@@ -121,6 +123,18 @@ class KhatmaHomeDestinationCard extends StatelessWidget {
                     letterSpacing: -0.2,
                   ),
                 ),
+                if (statusChipLabel case final String chipLabel)
+                  Align(
+                    alignment: AlignmentDirectional.centerStart,
+                    child: TilawaStatusChip(
+                      label: chipLabel,
+                      backgroundColor: HomeFeaturePastel.statusChipBackground(
+                        accent: accent,
+                        colorScheme: colorScheme,
+                      ),
+                      foregroundColor: accent,
+                    ),
+                  ),
                 if (subtitle case final String bodyText)
                   Text(
                     bodyText,

@@ -10,7 +10,6 @@ import 'package:tilawa/features/localization/presentation/bloc/localization_bloc
 import 'package:tilawa/features/reciters/domain/usecases/get_reciters_use_case.dart';
 import 'package:tilawa/features/reciters/presentation/bloc/alphabet_scrollbar/alphabet_scrollbar_bloc.dart';
 import 'package:tilawa/features/reciters/presentation/bloc/reciters_bloc.dart';
-import 'package:tilawa/features/reciters/presentation/bloc/reciters_tabs_bloc.dart';
 import 'package:tilawa/features/reciters/presentation/screens/reciters_screen.dart';
 import 'package:tilawa/features/reciters/presentation/widgets/reciters_screen_scope.dart';
 import 'package:tilawa_core/entities/reciter_entity.dart';
@@ -90,13 +89,12 @@ void main() {
   });
 
   testWidgets(
-    'provides RecitersBloc, RecitersTabsBloc, and AlphabetScrollbarBloc',
+    'provides RecitersBloc and AlphabetScrollbarBloc',
     (
       tester,
     ) async {
       RecitersBloc? recitersBloc;
       AlphabetScrollbarBloc? alphabetBloc;
-      RecitersTabsBloc? tabsBloc;
 
       await tester.pumpWidget(
         _wrapRecitersScopeTest(
@@ -105,7 +103,6 @@ void main() {
               onBuilt: (context) {
                 recitersBloc = readScopeBloc<RecitersBloc>(context);
                 alphabetBloc = readScopeBloc<AlphabetScrollbarBloc>(context);
-                tabsBloc = readScopeBloc<RecitersTabsBloc>(context);
               },
             ),
           ),
@@ -116,8 +113,6 @@ void main() {
 
       expect(recitersBloc, isNotNull);
       expect(alphabetBloc, isNotNull);
-      expect(tabsBloc, isNotNull);
-      expect(tabsBloc!.state.selectedTab, RecitersHomeTab.all);
       verify(() => mockGetReciters.takeCachedSuccessForStartup()).called(1);
     },
   );

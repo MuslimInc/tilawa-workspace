@@ -1072,10 +1072,9 @@ class TilawaSettingsGroupTokens {
 
   /// Default tokens for the settings group.
   ///
-  /// Horizontal list insets stay on [tileContentPadding] /
-  /// [switchTileContentPadding]; vertical is zero so row height is driven by
-  /// [ListTile.minTileHeight] (48 dp, [kMeMuslimMinInteractiveDimension]) in the
-  /// settings tile widgets.
+  /// [tileContentPadding] documents the selection-tile inset language
+  /// (16×14). Compact settings rows use horizontal [spaceSmall] with vertical
+  /// inset only when a subtitle is present (see [TilawaSettingsTile]).
   factory TilawaSettingsGroupTokens.defaults(
     MeMuslimDesignTokens designTokens,
   ) {
@@ -1130,8 +1129,9 @@ class TilawaSettingsGroupTokens {
       tileIconSize: 22,
       tileTitleTextRole: TilawaTextRole.bodyLarge,
       tileSubtitleTextRole: TilawaTextRole.bodySmall,
-      tileSubtitleOpacity: 0.6,
-      tileSubtitleSpacing: 4,
+      // Full [onSurfaceVariant] — extra alpha was muddying the hierarchy.
+      tileSubtitleOpacity: 1.0,
+      tileSubtitleSpacing: 6,
       tileTrailingSize: 16,
       // Effective rendered alpha of the trailing chevron (was 0.45 * 1.35
       // applied inline at the call site; folded here to keep pixels stable).

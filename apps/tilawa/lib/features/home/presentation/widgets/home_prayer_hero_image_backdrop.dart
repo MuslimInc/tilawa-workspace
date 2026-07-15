@@ -51,10 +51,32 @@ class HomePrayerHeroForegroundStyle {
       imageVisible: true,
     );
   }
+
+  /// Readable copy over [HomeHeroBackground] period gradients (no photograph).
+  factory HomePrayerHeroForegroundStyle.fromHeroTokens({
+    required TilawaHomeNextPrayerHeroTokens heroTokens,
+    required TilawaHomeScreenTokens screenTokens,
+  }) {
+    final Color ink = heroTokens.foregroundColor;
+    return HomePrayerHeroForegroundStyle(
+      ink: ink,
+      muted: ink.withValues(alpha: heroTokens.mutedForegroundOpacity),
+      accent: screenTokens.homePrayerHeroAccent,
+      chipBackground: ink.withValues(
+        alpha: heroTokens.locationChipFillOpacity,
+      ),
+      chipBorder: ink.withValues(
+        alpha: heroTokens.locationChipBorderOpacity,
+      ),
+      imageVisible: false,
+    );
+  }
 }
 
-/// Desaturated masjid-arch photograph for the Prayer Hero card.
-/// Falls back to the neutral sheet surface when the asset cannot load.
+/// Optional desaturated photograph surface for Prayer Hero experiments.
+///
+/// Production Home next-prayer uses [HomeHeroBackground] period gradients
+/// instead — see `home_next_prayer_time.dart`.
 class HomePrayerHeroImageBackdrop extends StatefulWidget {
   const HomePrayerHeroImageBackdrop({
     super.key,

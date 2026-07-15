@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:tilawa/features/reciters/presentation/widgets/reciter_catalog_chrome.dart';
 import 'package:tilawa/features/reciters/presentation/widgets/reciter_search_header.dart';
 import 'package:tilawa/shared/widgets/tilawa_back_button.dart';
 import 'package:tilawa_core/entities/reciter_entity.dart';
@@ -47,11 +46,11 @@ class ReciterDetailsAppBar extends StatelessWidget {
         children: [
           CircleAvatar(
             radius: 16,
-            backgroundColor: ReciterCatalogChrome.idleFill(colorScheme),
+            backgroundColor: colorScheme.primaryContainer,
             child: Text(
               reciter.name[0],
               style: theme.textTheme.labelLarge?.copyWith(
-                color: colorScheme.onSurface,
+                color: colorScheme.onPrimaryContainer,
                 fontWeight: FontWeight.w700,
               ),
             ),

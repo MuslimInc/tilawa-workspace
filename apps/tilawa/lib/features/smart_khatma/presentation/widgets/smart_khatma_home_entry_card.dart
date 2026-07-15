@@ -131,7 +131,7 @@ class _KhatmaHomeActiveEntry extends StatelessWidget {
       icon: Icons.auto_stories_outlined,
       onTap: onOpenHub,
       title: context.l10n.khatmaProgressTitle,
-      subtitle: subtitle,
+      statusChipLabel: subtitle,
       detail: detail,
       progress: planProgress,
       showChevron: true,

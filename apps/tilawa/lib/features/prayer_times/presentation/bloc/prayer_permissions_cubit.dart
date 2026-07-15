@@ -86,9 +86,7 @@ class PrayerPermissionsCubit extends Cubit<PrayerPermissionsState> {
     );
   }
 
-  /// Opens the system dialog asking the user to whitelist the app from
-  /// battery-optimisation Doze. The dialog is fire-and-forget; we re-check
-  /// the capability when the user returns to the app.
+  /// Battery-optimisation whitelist dialog temporarily disabled (player no-ops).
   Future<void> requestIgnoreBatteryOptimizations() async {
     await _adhanPlayer.requestIgnoreBatteryOptimizations();
     final result = await _checkCapabilityUseCase.call();

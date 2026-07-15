@@ -80,6 +80,7 @@ Widget settingsPickerTrailing(
   BuildContext context, {
   required String value,
   Widget? leading,
+  String? fontFamily,
 }) {
   final theme = Theme.of(context);
   final tokens = theme.tokens;
@@ -98,6 +99,7 @@ Widget settingsPickerTrailing(
             alpha: tokens.opacityEmphasis,
           ),
           fontWeight: FontWeight.w500,
+          fontFamily: fontFamily,
         ),
       ),
       SizedBox(width: tokens.spaceSmall),
@@ -199,14 +201,13 @@ class SettingsProfileHeader extends StatelessWidget {
                           ),
                         ),
                         if (subtitle != null) ...[
-                          SizedBox(height: tokens.spaceExtraSmall),
+                          SizedBox(height: tokens.spaceSmall),
                           Text(
                             subtitle,
                             textAlign: TextAlign.center,
                             style: theme.textTheme.bodySmall?.copyWith(
-                              color: colorScheme.onSurface.withValues(
-                                alpha: tokens.opacityEmphasis,
-                              ),
+                              color: colorScheme.onSurfaceVariant,
+                              height: 1.4,
                             ),
                           ),
                         ],
@@ -450,6 +451,94 @@ class SettingsGuestAccountGroup extends StatelessWidget {
   }
 }
 
+Future<void> _runGuardedSettingsServerAction(
+  BuildContext context, {
+  required ServerActionType action,
+  required FutureOr<void> Function() run,
+  ServerActionGuard? serverActionGuard,
+}) async {
+  final guardResult = await (serverActionGuard ?? getIt<ServerActionGuard>())
+      .ensureCanRun(action);
+  if (!context.mounted) {
+    return;
+  }
+
+  final Failure? blockedFailure = guardResult.fold(
+    (failure) => failure,
+    (_) => null,
+  );
+  if (blockedFailure != null) {
+    TilawaFeedback.showToast(
+      context,
+      message:
+          blockedFailure.localizedMessage(context) ??
+          context.l10n.serverActionOfflineMessage,
+      variant: TilawaFeedbackVariant.error,
+    );
+    return;
+  }
+
+  await run();
+}
+
+class SettingsLogoutAppBarAction extends StatefulWidget {
+  const SettingsLogoutAppBarAction({
+    super.key,
+    required this.onLogout,
+    this.serverActionGuard,
+  });
+
+  final FutureOr<void> Function() onLogout;
+  final ServerActionGuard? serverActionGuard;
+
+  @override
+  State<SettingsLogoutAppBarAction> createState() =>
+      _SettingsLogoutAppBarActionState();
+}
+
+class _SettingsLogoutAppBarActionState
+    extends State<SettingsLogoutAppBarAction> {
+  bool _actionCheckInProgress = false;
+
+  Future<void> _onLogoutPressed() async {
+    if (_actionCheckInProgress) {
+      return;
+    }
+
+    setState(() => _actionCheckInProgress = true);
+    try {
+      await _runGuardedSettingsServerAction(
+        context,
+        action: ServerActionType.logout,
+        serverActionGuard: widget.serverActionGuard,
+        run: widget.onLogout,
+      );
+    } finally {
+      if (mounted) {
+        setState(() => _actionCheckInProgress = false);
+      }
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return BlocBuilder<AuthBloc, AuthState>(
+      builder: (context, state) {
+        if (state is! AuthAuthenticated) {
+          return const SizedBox.shrink();
+        }
+
+        return TilawaIconActionButton(
+          icon: FluentIcons.sign_out_24_regular,
+          tooltip: context.l10n.logout,
+          enabled: !_actionCheckInProgress,
+          onTap: () => unawaited(_onLogoutPressed()),
+        );
+      },
+    );
+  }
+}
+
 class SettingsAccountActions extends StatefulWidget {
   const SettingsAccountActions({
     super.key,
@@ -479,29 +568,12 @@ class _SettingsAccountActionsState extends State<SettingsAccountActions> {
 
     setState(() => _actionCheckInProgress = true);
     try {
-      final guardResult =
-          await (widget.serverActionGuard ?? getIt<ServerActionGuard>())
-              .ensureCanRun(action);
-      if (!mounted) {
-        return;
-      }
-
-      final Failure? blockedFailure = guardResult.fold(
-        (failure) => failure,
-        (_) => null,
+      await _runGuardedSettingsServerAction(
+        context,
+        action: action,
+        serverActionGuard: widget.serverActionGuard,
+        run: run,
       );
-      if (blockedFailure != null) {
-        TilawaFeedback.showToast(
-          context,
-          message:
-              blockedFailure.localizedMessage(context) ??
-              context.l10n.serverActionOfflineMessage,
-          variant: TilawaFeedbackVariant.error,
-        );
-        return;
-      }
-
-      await run();
     } finally {
       if (mounted) {
         setState(() => _actionCheckInProgress = false);

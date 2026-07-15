@@ -163,6 +163,29 @@ void main() {
       expect(scheme.outline, AppColors.lightOutline);
     });
 
+    test('default green dark theme keeps tertiary as gold gilding', () {
+      final scheme = AppTheme.getDarkTheme(
+        primaryColor: AppColors.defaultPrimary,
+        isDefaultPreset: true,
+      ).colorScheme;
+
+      expect(scheme.tertiary, AppColors.darkTertiary);
+      expect(scheme.tertiary, AppColors.brandGoldAccent);
+      expect(scheme.tertiaryContainer, AppColors.darkTertiaryContainer);
+      _expectContrast(
+        scheme.onTertiary,
+        scheme.tertiary,
+        minRatio: 4.5,
+        label: 'dark tertiary gold label',
+      );
+      _expectContrast(
+        scheme.onTertiaryContainer,
+        scheme.tertiaryContainer,
+        minRatio: 4.5,
+        label: 'dark tertiary container label',
+      );
+    });
+
     test('light-mode clamp is a no-op for presets except saturated coral', () {
       for (final entry in presetNoOpCases.entries) {
         if (entry.key == 'coral') {

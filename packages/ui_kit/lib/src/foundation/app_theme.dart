@@ -15,10 +15,41 @@ import 'memuslim_product_colors.dart';
 class AppTheme {
   AppTheme._();
 
-  /// Brand typeface, bundled as a package asset (see `pubspec.yaml`). Fonts
-  /// declared in a package are exposed to consumers under the
-  /// `packages/<package>/<family>` namespace.
-  static const String _fontFamily = 'packages/tilawa_ui_kit/IBMPlexSansArabic';
+  /// Arabic UI typeface, bundled as a package asset (see `pubspec.yaml`).
+  /// Exposed to consumers as `packages/<package>/<family>`.
+  static const String arabicFontFamily =
+      'packages/tilawa_ui_kit/IBMPlexSansArabic';
+
+  /// Latin UI typeface for English ([Poppins](https://fonts.google.com/specimen/Poppins)).
+  static const String latinFontFamily = 'packages/tilawa_ui_kit/Poppins';
+
+  /// Resolves the UI font for [languageCode].
+  ///
+  /// English → [latinFontFamily] (Poppins). Arabic and unspecified → Arabic face.
+  static String fontFamilyForLanguageCode(String? languageCode) {
+    if (languageCode == 'en') {
+      return latinFontFamily;
+    }
+    return arabicFontFamily;
+  }
+
+  static TextTheme _getTextTheme(
+    Brightness brightness, {
+    required String fontFamily,
+  }) {
+    final TextTheme base = _material3TypographyBase(brightness);
+    if (_isFlutterTestEnvironment()) {
+      return base;
+    }
+    // Apply the locale typeface while preserving each M3 style's own
+    // weight/size so Flutter resolves the matching bundled font file.
+    // Product readability scaling is applied via [tilawaProductTextScaler] on
+    // [MediaQueryData.textScaler], not by mutating theme font sizes.
+    final TextTheme applied = base.apply(fontFamily: fontFamily);
+    return applied.copyWith(
+      titleLarge: applied.titleLarge?.copyWith(fontWeight: FontWeight.w700),
+    );
+  }
 
   // Light theme configuration constants
   static const FlexSurfaceMode _lightSurfaceMode =
@@ -54,21 +85,6 @@ class AppTheme {
       platform: defaultTargetPlatform,
     );
     return brightness == Brightness.dark ? typography.white : typography.black;
-  }
-
-  static TextTheme _getTextTheme(Brightness brightness) {
-    final TextTheme base = _material3TypographyBase(brightness);
-    if (_isFlutterTestEnvironment()) {
-      return base;
-    }
-    // Apply the bundled brand typeface while preserving each M3 style's own
-    // weight/size so Flutter resolves the matching bundled font file.
-    // Product readability scaling is applied via [tilawaProductTextScaler] on
-    // [MediaQueryData.textScaler], not by mutating theme font sizes.
-    final TextTheme applied = base.apply(fontFamily: _fontFamily);
-    return applied.copyWith(
-      titleLarge: applied.titleLarge?.copyWith(fontWeight: FontWeight.w700),
-    );
   }
 
   static bool _isFlutterTestEnvironment() {
@@ -550,12 +566,15 @@ class AppTheme {
 
   /// Get the light theme for the given primary color.
   ///
+  /// Pass [locale] so English UI uses Poppins and Arabic keeps IBM Plex.
   static ThemeData getLightTheme({
     required Color primaryColor,
+    Locale? locale,
     List<ThemeExtension<dynamic>> extensions = const [],
   }) {
     final scheme = _lightScheme(primaryColor);
     final designTokens = MeMuslimDesignTokens.light();
+    final String fontFamily = fontFamilyForLanguageCode(locale?.languageCode);
 
     final theme = FlexThemeData.light(
       colors: scheme,
@@ -568,7 +587,8 @@ class AppTheme {
       tooltipsMatchBackground: _tooltipsMatchBackground,
       visualDensity: FlexColorScheme.comfortablePlatformDensity,
       useMaterial3ErrorColors: _useMaterial3ErrorColors,
-      textTheme: _getTextTheme(Brightness.light),
+      textTheme: _getTextTheme(Brightness.light, fontFamily: fontFamily),
+      fontFamily: fontFamily,
     );
     final colorScheme = _refineLightColorScheme(
       theme.colorScheme,
@@ -592,14 +612,17 @@ class AppTheme {
 
   /// Get the dark theme for the given primary color.
   ///
+  /// Pass [locale] so English UI uses Poppins and Arabic keeps IBM Plex.
   static ThemeData getDarkTheme({
     required Color primaryColor,
+    Locale? locale,
     bool isDefaultPreset = false,
     bool darkIsTrueBlack = false,
     List<ThemeExtension<dynamic>> extensions = const [],
   }) {
     final scheme = _darkScheme(primaryColor, isDefaultPreset: isDefaultPreset);
     final designTokens = MeMuslimDesignTokens.dark();
+    final String fontFamily = fontFamilyForLanguageCode(locale?.languageCode);
 
     final theme = FlexThemeData.dark(
       colors: scheme,
@@ -612,7 +635,8 @@ class AppTheme {
       tooltipsMatchBackground: _tooltipsMatchBackground,
       visualDensity: FlexColorScheme.comfortablePlatformDensity,
       useMaterial3ErrorColors: _useMaterial3ErrorColors,
-      textTheme: _getTextTheme(Brightness.dark),
+      textTheme: _getTextTheme(Brightness.dark, fontFamily: fontFamily),
+      fontFamily: fontFamily,
     );
     final colorScheme = _refineDarkColorScheme(
       theme.colorScheme,

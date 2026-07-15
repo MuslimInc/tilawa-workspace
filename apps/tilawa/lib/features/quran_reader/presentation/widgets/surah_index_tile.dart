@@ -100,6 +100,7 @@ class SurahIndexTile extends StatelessWidget {
           arabicName,
           style: grouped
               ? theme.textTheme.titleSmall?.copyWith(
+                  fontFamily: AppTheme.arabicFontFamily,
                   fontWeight: FontWeight.w700,
                   color: colorScheme.onSurface,
                   height: tokens.textHeightLoose,
