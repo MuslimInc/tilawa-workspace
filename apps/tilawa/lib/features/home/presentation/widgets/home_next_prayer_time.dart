@@ -58,24 +58,13 @@ abstract final class HomeNextPrayerTime {
         TilawaHomeScreenTokens.screenHorizontalPadding(tokens) * 2;
     final bool tightCard =
         MediaQuery.sizeOf(context).width - horizontalGutter < 320;
-    final double cardVerticalPadding =
-        (tokens.spaceMedium + tokens.spaceExtraSmall) * 2;
-    final double contextRow = tokens.minInteractiveDimension * 0.58 * textScale;
-    final double contextToMetricsGap =
-        tokens.spaceSmall + tokens.spaceExtraSmall;
-    final double prayerBlock = 214 * textScale;
+
+    // Content-sized white prayer card (no image/gradient fill forcing height).
+    // Calibrated at 360dp / textScale 1: outer padding + card body.
+    final double cardBody = 207 * textScale;
     final double tightSlack = tightCard ? tokens.spaceExtraLarge : 0;
 
-    // Mirrors [_HomeNextPrayerTimeSliver] padding + card layout, plus small
-    // slack for countdown pill / text-scale layout drift vs estimates.
-    return (tokens.spaceSmall * 2) +
-        cardVerticalPadding +
-        contextRow +
-        contextToMetricsGap +
-        prayerBlock +
-        (tokens.borderWidthThin * 2) +
-        tightSlack +
-        16;
+    return (tokens.spaceSmall * 2) + cardBody + tightSlack;
   }
 }
 
