@@ -22,7 +22,9 @@ void main() {
   late _FakePrayerPermissionStatus permissionStatus;
   late _FakePrayerTimesRepository prayerTimesRepository;
 
-  final DateTime now = DateTime(2026, 7, 11, 12);
+  // Wall-clock based: EnsurePrayerNotificationsScheduledUseCase uses
+  // DateTime.now() when AppStartupTasks does not inject a clock.
+  final DateTime now = DateTime.now();
 
   Future<void> registerPrayerStartupDependencies() async {
     final GetIt container = getIt;

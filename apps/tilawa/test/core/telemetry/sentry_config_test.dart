@@ -26,7 +26,8 @@ void main() {
       expect(options.debug, kDebugMode);
       expect(options.enableLogs, kReleaseMode);
       expect(options.tracesSampleRate, kReleaseMode ? 0.1 : 1.0);
-      expect(options.enableTimeToFullDisplayTracing, isTrue);
+      // Disabled: Sentry Flutter TTFD can assert '!duration.isNegative'.
+      expect(options.enableTimeToFullDisplayTracing, isFalse);
       // ignore: experimental_member_use
       expect(options.profilesSampleRate, kReleaseMode ? 0.1 : 1.0);
       expect(options.autoInitializeNativeSdk, isFalse);

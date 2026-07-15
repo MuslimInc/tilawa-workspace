@@ -29,7 +29,7 @@ List<ReciterEntity> _alphabetCatalogReciters({int perLetter = 8}) {
 }
 
 Finder _allTabCustomScrollView() {
-  return find.byKey(const PageStorageKey<String>('reciters_all_tab'));
+  return find.byKey(const PageStorageKey<String>('reciters_catalog'));
 }
 
 Finder _alphabetLetter(String letter) {

@@ -39,7 +39,7 @@ Finder _refreshProgressIndicator() {
 }
 
 Finder _allTabCustomScrollView() {
-  return find.byKey(const PageStorageKey<String>('reciters_all_tab'));
+    return find.byKey(const PageStorageKey<String>('reciters_catalog'));
 }
 
 Future<void> _scrubLetter(
@@ -158,7 +158,9 @@ void main() {
         tester.view.devicePixelRatio = previousDevicePixelRatio;
       });
       tester.view.devicePixelRatio = 1;
-      tester.view.physicalSize = const Size(390, 844);
+      // Short viewport so the letter rail overflows (itemExtent 22 × letters)
+      // and mounts alphabet_scrollbar_scroll.
+      tester.view.physicalSize = const Size(390, 480);
 
       await pumpAlphabetScreen(tester);
 

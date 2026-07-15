@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:tilawa/features/onboarding/presentation/widgets/onboarding_footer_bar.dart';
-import 'package:tilawa/features/onboarding/presentation/widgets/onboarding_page_indicator.dart';
 import 'package:tilawa/features/theme/domain/primary_color_preset.dart';
 import 'package:tilawa/l10n/generated/app_localizations.dart';
 import 'package:tilawa_ui_kit/tilawa_ui_kit.dart';
@@ -147,15 +146,13 @@ void main() {
       );
 
       final Rect screen = tester.getRect(find.byType(Scaffold));
-      final Rect indicator = tester.getRect(
-        find.byType(OnboardingPageIndicator),
-      );
+      final Rect actions = tester.getRect(find.byType(OnboardingFooterBar));
 
       final double bandStart =
           screen.height * TilawaThumbReachLayout.actionBandStartFraction();
 
-      expect(indicator.top, greaterThanOrEqualTo(bandStart - 1));
-      expect(indicator.top, lessThan(bandStart + screen.height * 0.08));
+      expect(actions.top, greaterThanOrEqualTo(bandStart - 1));
+      expect(actions.top, lessThan(bandStart + screen.height * 0.08));
     });
   });
 }

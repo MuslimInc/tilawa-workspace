@@ -63,7 +63,10 @@ class _FakeKhatmaPlanRepository implements KhatmaPlanRepository {
 void main() {
   final DateTime today = DateTime(2026, 7, 12, 9, 30);
 
-  KhatmaPlan activePlan({int currentPage = 1, bool withProgress = false}) {
+  KhatmaPlan activePlan({
+    int assignmentEndPage = 6,
+    int? confirmedCompletedThroughPage,
+  }) {
     return KhatmaPlan(
       id: 'plan-1',
       createdAt: DateTime(2026, 7, 12),
@@ -73,7 +76,8 @@ void main() {
       targetPage: 604,
       assignmentDate: DateTime(2026, 7, 12),
       assignmentStartPage: 1,
-      assignmentEndPage: 6,
+      assignmentEndPage: assignmentEndPage,
+      confirmedCompletedThroughPage: confirmedCompletedThroughPage,
     );
   }
 
@@ -146,7 +150,8 @@ void main() {
       repository.plan = activePlan();
       await sync.syncIfNeeded(now: today);
 
-      repository.plan = activePlan(currentPage: 6, withProgress: true);
+      // Confirmed through page 5 of today's 1–6 assignment → 5 completed.
+      repository.plan = activePlan(confirmedCompletedThroughPage: 5);
       await sync.syncIfNeeded(now: today);
 
       check(bridge.envelopes).length.equals(2);
@@ -171,7 +176,7 @@ void main() {
 
     test('shapes digits from the locale, not text direction', () async {
       prefs.store[LanguageConfig.languageKey] = 'ar';
-      repository.plan = activePlan();
+      repository.plan = activePlan(assignmentEndPage: 21);
 
       await service().syncIfNeeded(now: today);
 
