@@ -21,6 +21,10 @@ import 'package:tilawa/features/auth/domain/repositories/auth_repository.dart';
 import 'package:tilawa/features/auth/domain/usecases/get_current_user_use_case.dart';
 import 'package:tilawa/features/history/domain/entities/history_entity.dart';
 import 'package:tilawa/features/history/domain/repositories/history_repository.dart';
+import 'package:tilawa/features/home/data/datasources/home_dashboard_memory_cache.dart';
+import 'package:tilawa/features/home/data/repositories/home_dashboard_repository_impl.dart';
+import 'package:tilawa/features/home/domain/usecases/get_home_dashboard_use_case.dart';
+import 'package:tilawa/features/home/presentation/bloc/home_dashboard_bloc.dart';
 import 'package:tilawa/features/home/presentation/cubit/home_athkar_compact_cubit.dart';
 import 'package:tilawa/features/home/presentation/cubit/home_listening_resume_cubit.dart';
 import 'package:tilawa/features/home/presentation/cubit/home_quran_resume_cubit.dart';
@@ -220,6 +224,23 @@ void registerHomeScreenScopeGetIt(GetIt getIt) {
       getIt<PrayerLocationUpdateNotifier>(),
     ),
   );
+  getIt.registerFactory<HomeDashboardBloc>(() {
+    final HomeDashboardRepositoryImpl repository = HomeDashboardRepositoryImpl(
+      getCurrentUser: getIt<GetCurrentUserUseCase>(),
+      loadPrayerSettings: getIt<LoadPrayerSettingsUseCase>(),
+      getCurrentLocation: getIt<GetCurrentLocationUseCase>(),
+      getLocationName: getIt<GetLocationNameUseCase>(),
+      getPrayerTimes: getIt<GetPrayerTimesUseCase>(),
+      savePrayerSettings: getIt<SavePrayerSettingsUseCase>(),
+    );
+    return HomeDashboardBloc(
+      GetHomeDashboardUseCase(
+        repository,
+        HomeDashboardMemoryCache(),
+      ),
+      getIt<NotifyPrayerLocationUpdatedUseCase>(),
+    );
+  });
   getIt.registerFactory<PinnedAthkarCubit>(
     () => PinnedAthkarCubit(
       GetAthkarCategoriesUseCase(athkarRepository),
