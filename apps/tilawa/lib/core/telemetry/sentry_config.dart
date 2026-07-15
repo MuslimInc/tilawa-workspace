@@ -49,10 +49,11 @@ abstract final class SentryConfig {
     options.beforeSend = SentryUserFeedback.filterBeforeSend;
     options.beforeSendLog = CrashReportingContext.filterBeforeSendLog;
 
-    // Session Replay: always capture error replays; sample normal sessions in
-    // production to limit volume. Traces sample rate matches replay cadence.
-    options.replay.onErrorSampleRate = 1.0;
-    options.replay.sessionSampleRate = kReleaseMode ? 0.1 : 1.0;
+    // Session Replay disabled: Android native SIGSEGV in
+    // SentryFlutterReplayRecorder / MPEG4Writer (JNI PortProxy) on config
+    // change — hotfix 2.1.7+81. Re-enable after SDK / native fix verification.
+    options.replay.onErrorSampleRate = 0.0;
+    options.replay.sessionSampleRate = 0.0;
 
     // Defaults are true; set explicitly so privacy posture stays obvious in code.
     options.privacy.maskAllText = true;

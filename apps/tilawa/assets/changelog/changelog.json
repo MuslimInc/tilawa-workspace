@@ -1,7 +1,25 @@
 {
   "schemaVersion": 1,
-  "lastUpdatedAt": "2026-07-15T09:42:55Z",
+  "lastUpdatedAt": "2026-07-15T12:02:40Z",
   "releases": [
+    {
+      "id": "2.1.7+81",
+      "version": "2.1.7",
+      "buildNumber": 81,
+      "highlights": {
+        "en": [
+          "Hotfix: layout and typography polish from the previous update",
+          "Cleaner first-run and home/settings screens",
+          "More reliable Android cold-start splash"
+        ],
+        "ar": [
+          "إصلاح عاجل: تحسينات التخطيط والخطوط من التحديث السابق",
+          "أول تشغيل أوضح وشاشات رئيسية وإعدادات أنظف",
+          "شاشة إقلاع أندرويد أوثق عند التشغيل البارد"
+        ]
+      },
+      "publishedAt": "2026-07-15T12:02:40Z"
+    },
     {
       "id": "2.1.6+80",
       "version": "2.1.6",

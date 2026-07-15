@@ -41,8 +41,8 @@ void main() {
         options.beforeSendLog,
         CrashReportingContext.filterBeforeSendLog,
       );
-      expect(options.replay.onErrorSampleRate, 1.0);
-      expect(options.replay.sessionSampleRate, kReleaseMode ? 0.1 : 1.0);
+      expect(options.replay.onErrorSampleRate, 0.0);
+      expect(options.replay.sessionSampleRate, 0.0);
       expect(options.privacy.maskAllText, isTrue);
       expect(options.privacy.maskAllImages, isTrue);
       final maskingRules =

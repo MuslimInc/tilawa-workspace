@@ -12,6 +12,33 @@ the changelog for full engineering detail.
 
 | Field | Value |
 |-------|--------|
+| Version | **2.1.7** (build **81**) |
+| Git tag | `v2.1.7+81` (pending) |
+| Date | 2026-07-15 |
+| Track | Production |
+
+### What's new (en-US) — copy for Play Console
+
+```text
+• Hotfix: layout and typography polish from the previous update
+• Cleaner first-run and home/settings screens
+• More reliable Android cold-start splash
+```
+
+### ما الجديد (ar) — نص متجر Play
+
+```text
+• إصلاح عاجل: تحسينات التخطيط والخطوط من التحديث السابق
+• أول تشغيل أوضح وشاشات رئيسية وإعدادات أنظف
+• شاشة إقلاع أندرويد أوثق عند التشغيل البارد
+```
+
+---
+
+## Previous current release (2.1.6+80)
+
+| Field | Value |
+|-------|--------|
 | Version | **2.1.6** (build **80**) |
 | Git tag | `v2.1.6+80` (pending) |
 | Date | 2026-07-15 |

@@ -7,6 +7,15 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [2.1.7+81] - 2026-07-15 [Google Play Production]
+
+### Fixed
+
+- **Release**: Hotfix clean rebuild so home/onboarding/settings layout and
+  typography polish from 2.1.6 ship correctly on Play.
+- **Crash**: Disabled Sentry Session Replay (native SIGSEGV in Android replay
+  recorder / MPEG4Writer).
+
 ## [2.1.6+80] - 2026-07-15 [Google Play Production]
 
 ### Added
