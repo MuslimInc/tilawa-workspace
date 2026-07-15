@@ -12,6 +12,7 @@ class TilawaIconButton extends StatelessWidget {
     required this.icon,
     required this.onPressed,
     this.semanticLabel,
+    this.tooltip,
   });
 
   /// The widget below this widget in the tree, typically an [Icon].
@@ -25,10 +26,17 @@ class TilawaIconButton extends StatelessWidget {
   /// Screen reader label for the control.
   final String? semanticLabel;
 
+  /// Optional tooltip / long-press hint (e.g. Material "Back").
+  final String? tooltip;
+
   @override
   Widget build(BuildContext context) {
     return Center(
-      child: IconButton(onPressed: onPressed, icon: icon),
+      child: IconButton(
+        onPressed: onPressed,
+        icon: icon,
+        tooltip: tooltip ?? semanticLabel,
+      ),
     );
   }
 }

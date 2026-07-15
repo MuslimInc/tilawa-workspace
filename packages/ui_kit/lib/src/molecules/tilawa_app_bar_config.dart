@@ -453,6 +453,7 @@ abstract final class TilawaAppBarChrome {
     final Widget body = TilawaIconButton(
       icon: icon,
       onPressed: onPressed,
+      tooltip: tooltip,
     );
 
     return body;

@@ -84,6 +84,9 @@ class _ReportConcernSheetBodyState extends State<_ReportConcernSheetBody> {
                   SizedBox(height: tokens.spaceMedium),
                   TilawaTextField(
                     controller: _controller,
+                    label: l10n.reportConcernDescriptionHint,
+                    hintText: l10n.reportConcernDescriptionHint,
+                    errorText: _error,
                     maxLines: 4,
                     onChanged: (_) => setState(() => _error = null),
                   ),

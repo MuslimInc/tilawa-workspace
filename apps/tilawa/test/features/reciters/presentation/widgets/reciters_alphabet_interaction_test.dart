@@ -3,10 +3,10 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:get_it/get_it.dart';
 import 'package:mocktail/mocktail.dart';
-import 'package:tilawa/features/reciters/presentation/cubit/favorites_cubit.dart';
 import 'package:tilawa/features/reciters/domain/usecases/get_reciters_use_case.dart';
 import 'package:tilawa/features/reciters/presentation/bloc/alphabet_scrollbar/alphabet_scrollbar_bloc.dart';
 import 'package:tilawa/features/reciters/presentation/bloc/reciters_bloc.dart';
+import 'package:tilawa/features/reciters/presentation/cubit/favorites_cubit.dart';
 import 'package:tilawa/features/reciters/presentation/reciter_semantics_ids.dart';
 import 'package:tilawa/features/reciters/presentation/screens/reciters_screen.dart';
 import 'package:tilawa/features/settings/presentation/cubit/settings_cubit.dart';
@@ -39,7 +39,7 @@ Finder _refreshProgressIndicator() {
 }
 
 Finder _allTabCustomScrollView() {
-    return find.byKey(const PageStorageKey<String>('reciters_catalog'));
+  return find.byKey(const PageStorageKey<String>('reciters_catalog'));
 }
 
 Future<void> _scrubLetter(
