@@ -12,6 +12,62 @@ the changelog for full engineering detail.
 
 | Field | Value |
 |-------|--------|
+| Version | **2.1.6** (build **80**) |
+| Git tag | `v2.1.6+80` (pending) |
+| Date | 2026-07-15 |
+| Track | Production |
+
+### What's new (en-US) — copy for Play Console
+
+```text
+• Quieter first-run with fewer permission interruptions
+• Clearer English typography (Poppins) and home/settings polish
+• More reliable Android cold-start splash on some devices
+```
+
+### ما الجديد (ar) — نص متجر Play
+
+```text
+• بداية أهدأ مع أذونات أقل إزعاجاً عند أول تشغيل
+• وضوح أفضل للإنجليزية وتحسينات للرئيسية والإعدادات
+• شاشة إقلاع أندرويد أوثق عند التشغيل البارد على بعض الأجهزة
+```
+
+---
+
+## Previous current release (2.1.5+79)
+
+| Field | Value |
+|-------|--------|
+| Version | **2.1.5** (build **79**) |
+| Git tag | `v2.1.5+79` (pending) |
+| Date | 2026-07-14 |
+| Track | Production |
+
+### What's new (en-US) — copy for Play Console
+
+```text
+• Clearer prompts when a required update is on the store
+• Rate the app opens the correct production Play listing
+• What's New highlights load reliably after each update
+• Smaller download from unused assets/packages cleaned up
+```
+
+### ما الجديد (ar) — نص متجر Play
+
+```text
+• تنبيهات أوضح عند وجوب التحديث من المتجر
+• تقييم التطبيق يفتح صفحة Play الإنتاجية الصحيحة
+• «ما الجديد» يظهر بموثوقية بعد كل تحديث
+• حجم تنزيل أصغر بعد تنظيف أصول وحزم غير مستخدمة
+```
+
+---
+
+## Previous current release (2.1.4+78)
+
+| Field | Value |
+|-------|--------|
 | Version | **2.1.4** (build **78**) |
 | Git tag | `v2.1.4+78` (pending) |
 | Date | 2026-07-13 |

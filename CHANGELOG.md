@@ -7,6 +7,26 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [2.1.6+80] - 2026-07-15 [Google Play Production]
+
+### Added
+
+- **Typography**: Poppins for English UI; Arabic continues on IBM Plex across
+  settings, home, and reading surfaces.
+
+### Changed
+
+- **First-run**: Quieter onboarding — fewer interruptive permission steps;
+  more stable layouts and thumb-reach primary actions.
+- **Home / Settings**: Dashboard and settings polish (surface colors, status
+  chips, spacing, contrast).
+- **Reciters**: Simplified list navigation (tabs bloc removed).
+
+### Fixed
+
+- **Startup / splash**: Hardened Android cold-start splash dismiss races
+  (FLUTTER-A4) so the first frame is not released on a 0×0 Flutter view.
+
 ## [2.1.5+79] - 2026-07-14 [Google Play Production]
 
 ### Added

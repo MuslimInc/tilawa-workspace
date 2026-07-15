@@ -1,7 +1,27 @@
 {
   "schemaVersion": 1,
-  "lastUpdatedAt": "2026-07-14T19:49:00Z",
+  "lastUpdatedAt": "2026-07-15T09:42:55Z",
   "releases": [
+    {
+      "id": "2.1.6+80",
+      "version": "2.1.6",
+      "buildNumber": 80,
+      "highlights": {
+        "en": [
+          "Quieter first-run: fewer permission interruptions and steadier onboarding layout",
+          "English UI uses Poppins; clearer typography in settings and home",
+          "Home and settings visual polish",
+          "More reliable Android cold-start splash on some devices"
+        ],
+        "ar": [
+          "بداية أهدأ: أذونات أقل إزعاجاً وتخطيط أوضح لأول تشغيل",
+          "واجهة الإنجليزية بخط Poppins ووضوح أفضل في الإعدادات والرئيسية",
+          "تحسينات بصرية للرئيسية والإعدادات",
+          "شاشة الإقلاع أوثق على أندرويد عند التشغيل البارد على بعض الأجهزة"
+        ]
+      },
+      "publishedAt": "2026-07-15T09:42:55Z"
+    },
     {
       "id": "2.1.5+79",
       "version": "2.1.5",
@@ -269,4 +289,3 @@
     }
   ]
 }
-
