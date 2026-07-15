@@ -55,11 +55,15 @@ class TilawaAlphabetScrollbarTokens {
     ColorScheme colorScheme,
   ) {
     return TilawaAlphabetScrollbarTokens(
-      width: kMeMuslimMinInteractiveDimension,
-      itemExtent: kMeMuslimMinInteractiveDimension,
-      selectedIndicatorExtent: 36,
-      letterTextRole: TilawaTextRole.labelMedium,
-      verticalPadding: EdgeInsets.zero,
+      // Slim index rail (just clears the selected disk). Vertical drag still
+      // owns the hit path; list gutter adds outer thumb room.
+      width: 24,
+      // Slot taller than the glyph so letters breathe (was 18).
+      itemExtent: 22,
+      selectedIndicatorExtent: 20,
+      letterTextRole: TilawaTextRole.labelSmall,
+      // Inset A/Z from the pill ends.
+      verticalPadding: const EdgeInsets.symmetric(vertical: 8),
       overlaySize: 72,
       overlayTextRole: TilawaTextRole.displaySmall,
       overlayRadius: 16,

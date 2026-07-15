@@ -14,7 +14,6 @@ import 'package:tilawa/features/reciters/domain/usecases/get_reciters_use_case.d
 import 'package:tilawa/features/reciters/domain/usecases/toggle_favorite_reciter_use_case.dart';
 import 'package:tilawa/features/reciters/presentation/bloc/alphabet_scrollbar/alphabet_scrollbar_bloc.dart';
 import 'package:tilawa/features/reciters/presentation/bloc/reciters_bloc.dart';
-import 'package:tilawa/features/reciters/presentation/bloc/reciters_tabs_bloc.dart';
 import 'package:tilawa/features/reciters/presentation/cubit/favorites_cubit.dart';
 import 'package:tilawa/features/reciters/presentation/cubit/favorites_state.dart';
 import 'package:tilawa/features/reciters/presentation/screens/reciters_screen.dart';
@@ -166,7 +165,6 @@ FavoritesCubit seededFavoritesCubit({
 Widget buildRecitersScreenTestApp({
   required RecitersBloc recitersBloc,
   required FavoritesCubit favoritesCubit,
-  RecitersTabsBloc? tabsBloc,
   SettingsState settingsState = const SettingsState(),
   Locale locale = const Locale('en'),
 }) {
@@ -187,9 +185,6 @@ Widget buildRecitersScreenTestApp({
     providers: [
       BlocProvider<MainScreenCubit>(create: (_) => MainScreenCubit()),
       BlocProvider<RecitersBloc>.value(value: recitersBloc),
-      BlocProvider<RecitersTabsBloc>.value(
-        value: tabsBloc ?? RecitersTabsBloc(),
-      ),
       BlocProvider<AlphabetScrollbarBloc>(
         create: (_) => AlphabetScrollbarBloc(),
       ),

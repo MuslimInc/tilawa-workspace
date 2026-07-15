@@ -23,20 +23,13 @@ class RecitersTourLauncher {
       tourId: RecitersTourIds.intro,
       definition: TourDefinition(
         id: RecitersTourIds.intro,
-        version: 1,
+        version: 2,
         steps: <TourStep>[
           TourStep(
             id: 'search',
             targetId: RecitersTourTargets.searchField,
             title: l10n.tourRecitersSearchTitle,
             description: l10n.tourRecitersSearchDescription,
-            contentAlign: TourContentAlign.bottom,
-          ),
-          TourStep(
-            id: 'favorites',
-            targetId: RecitersTourTargets.favoritesToggle,
-            title: l10n.tourRecitersFavoritesTitle,
-            description: l10n.tourRecitersFavoritesDescription,
             contentAlign: TourContentAlign.bottom,
           ),
           TourStep(

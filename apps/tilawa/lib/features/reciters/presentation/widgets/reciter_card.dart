@@ -8,7 +8,6 @@ import '../../../../router/app_router_config.dart';
 import '../cubit/favorites_cubit.dart';
 import '../cubit/favorites_state.dart';
 import '../reciter_semantics_ids.dart';
-import '../utils/reciter_list_moshaf_label.dart';
 
 /// Talabat / Booking–style list row: leading visual, text block, trailing save.
 class ReciterCard extends StatelessWidget {
@@ -38,11 +37,16 @@ class ReciterCard extends StatelessWidget {
         label: context.l10n.a11yOpenReciterDetails(reciter.name),
         child: TilawaCard(
           surface: TilawaCardSurface.flat,
-          padding: EdgeInsets.all(tokens.spaceLarge),
+          padding: EdgeInsetsDirectional.fromSTEB(
+            tokens.spaceMedium,
+            tokens.spaceMedium,
+            tokens.spaceSmall,
+            tokens.spaceMedium,
+          ),
           borderRadius: tokens.radiusLarge,
           onTap: () => _openReciterDetails(context),
           child: Row(
-            mainAxisSize: .min,
+            crossAxisAlignment: CrossAxisAlignment.center,
             spacing: tokens.spaceMedium,
             children: [
               _ReciterAvatar(
@@ -72,7 +76,9 @@ class _ReciterAvatar extends StatelessWidget {
     final theme = Theme.of(context);
     final tokens = theme.tokens;
     final colorScheme = theme.colorScheme;
-    final double size = tokens.iconBadgeSize;
+    // [iconBoxSize] (36) — [iconBadgeSize] (48) fought the alphabet rail and
+    // made each row feel like a card stack instead of a catalog list.
+    final double size = tokens.iconBoxSize;
     final Color backgroundColor = _reciterAvatarBackground(
       reciterId,
       colorScheme,
@@ -81,7 +87,7 @@ class _ReciterAvatar extends StatelessWidget {
       reciterId,
       colorScheme,
     );
-    final BorderRadius radius = BorderRadius.circular(tokens.radiusLarge);
+    final BorderRadius radius = BorderRadius.circular(tokens.radiusMedium);
 
     return Semantics(
       image: true,
@@ -96,12 +102,12 @@ class _ReciterAvatar extends StatelessWidget {
             borderRadius: radius,
             border: Border.all(
               color: foregroundColor.withValues(alpha: tokens.opacityShadow),
-              width: tokens.borderWidthThin * 2,
+              width: tokens.borderWidthThin,
             ),
           ),
           child: Text(
             _reciterInitial(name),
-            style: theme.textTheme.titleLarge?.copyWith(
+            style: theme.textTheme.titleMedium?.copyWith(
               fontWeight: FontWeight.w700,
               color: foregroundColor,
               height: 1,
@@ -143,6 +149,7 @@ String _reciterInitial(String name) {
   return trimmed.characters.first;
 }
 
+/// Name-only — riwayah/moshaf detail lives on the reciter details screen.
 class _ReciterInfo extends StatelessWidget {
   const _ReciterInfo({required this.reciter});
 
@@ -151,60 +158,17 @@ class _ReciterInfo extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
-    final tokens = theme.tokens;
     final colorScheme = theme.colorScheme;
-    final int moshafCount = reciter.moshaf.length;
-    final String? moshafLabel = moshafCount > 0
-        ? buildReciterListMoshafLabel(
-            moshaf: reciter.moshaf,
-            additionalMoshafLabel: context.l10n.reciterAdditionalMoshafCount,
-          )
-        : null;
 
-    return Column(
-      mainAxisSize: .min,
-      crossAxisAlignment: .stretch,
-      spacing: tokens.spaceExtraSmall,
-      children: [
-        Text(
-          reciter.name,
-          style: theme.textTheme.titleMedium?.copyWith(
-            fontWeight: FontWeight.w700,
-            color: colorScheme.onSurface,
-            height: 1.2,
-          ),
-          maxLines: 2,
-          overflow: TextOverflow.ellipsis,
-        ),
-        // Flexible: grid tiles cap the card height (e.g. tablet two-column
-        // layout); the label drops to one line there instead of overflowing.
-        if (moshafLabel != null)
-          Flexible(
-            child: Text(
-              moshafLabel,
-              style: theme.textTheme.bodySmall?.copyWith(
-                color: colorScheme.onSurfaceVariant,
-                fontWeight: FontWeight.w500,
-                height: 1.35,
-              ),
-              maxLines: 2,
-              overflow: TextOverflow.ellipsis,
-            ),
-          )
-        else if (moshafCount == 0)
-          Flexible(
-            child: Text(
-              context.l10n.recitationsAvailable(moshafCount),
-              style: theme.textTheme.bodySmall?.copyWith(
-                color: colorScheme.onSurfaceVariant,
-                fontWeight: FontWeight.w500,
-                height: 1.35,
-              ),
-              maxLines: 1,
-              overflow: TextOverflow.ellipsis,
-            ),
-          ),
-      ],
+    return Text(
+      reciter.name,
+      style: theme.textTheme.titleMedium?.copyWith(
+        fontWeight: FontWeight.w600,
+        color: colorScheme.onSurface,
+        height: 1.2,
+      ),
+      maxLines: 2,
+      overflow: TextOverflow.ellipsis,
     );
   }
 }

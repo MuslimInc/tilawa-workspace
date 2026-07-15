@@ -147,9 +147,12 @@ class _TilawaAlphabetScrollbarState extends State<TilawaAlphabetScrollbar> {
     RenderBox box,
     TilawaAlphabetScrollbarTokens componentTokens,
   ) {
+    final EdgeInsets railPadding = componentTokens.verticalPadding.resolve(
+      Directionality.of(context),
+    );
     return _AlphabetScrollbarTrackLayout.resolve(
       letterCount: widget.letters.length,
-      maxTrackHeight: box.size.height,
+      maxTrackHeight: math.max(0, box.size.height - railPadding.vertical),
       preferredSlotExtent: componentTokens.itemExtent,
     );
   }
@@ -239,9 +242,12 @@ class _TilawaAlphabetScrollbarState extends State<TilawaAlphabetScrollbar> {
 
     final theme = Theme.of(context);
     final componentTokens = theme.componentTokens.alphabetScrollbar;
+    final EdgeInsets railPadding = componentTokens.verticalPadding.resolve(
+      Directionality.of(context),
+    );
     final layout = _trackLayout(box, componentTokens);
     return layout.letterAt(
-      localPosition.dy,
+      localPosition.dy - railPadding.top,
       widget.letters,
       scrollOffset: _railScrollController.hasClients
           ? _railScrollController.offset
@@ -513,10 +519,17 @@ class _TilawaAlphabetScrollbarState extends State<TilawaAlphabetScrollbar> {
                 final BorderRadius borderRadius = BorderRadius.circular(
                   tokens.resolveRadius(family: TilawaRadiusFamily.card),
                 );
+                final EdgeInsets railPadding = componentTokens.verticalPadding
+                    .resolve(
+                      Directionality.of(context),
+                    );
                 final _AlphabetScrollbarTrackLayout layout =
                     _AlphabetScrollbarTrackLayout.resolve(
                       letterCount: widget.letters.length,
-                      maxTrackHeight: constraints.maxHeight,
+                      maxTrackHeight: math.max(
+                        0,
+                        constraints.maxHeight - railPadding.vertical,
+                      ),
                       preferredSlotExtent: componentTokens.itemExtent,
                     );
 
@@ -567,7 +580,8 @@ class _TilawaAlphabetScrollbarState extends State<TilawaAlphabetScrollbar> {
                     clipBehavior: Clip.antiAlias,
                     key: _trackKey,
                     width: componentTokens.width,
-                    height: layout.trackHeight,
+                    height: layout.trackHeight + railPadding.vertical,
+                    padding: railPadding,
                     decoration: BoxDecoration(
                       color: colorScheme.surfaceContainerLow,
                       borderRadius: borderRadius,
