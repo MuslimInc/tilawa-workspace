@@ -54,12 +54,14 @@ class HomeMoreActionsGroup extends StatelessWidget {
 class _MoreActionsItem {
   const _MoreActionsItem({
     required this.icon,
+    required this.iconTint,
     required this.title,
     this.subtitle,
     required this.onTap,
   });
 
   final IconData icon;
+  final TilawaSemanticTint iconTint;
   final String title;
   final String? subtitle;
   final VoidCallback onTap;
@@ -72,24 +74,28 @@ abstract final class _MoreActionsCatalog {
     return <_MoreActionsItem>[
       _MoreActionsItem(
         icon: TilawaIcons.history,
+        iconTint: TilawaSemanticTint.scholar,
         title: l10n.listeningHistory,
         subtitle: l10n.homeHistoryCarouselSubtitle,
         onTap: () => unawaited(const HistoryRoute().push<void>(context)),
       ),
       _MoreActionsItem(
         icon: TilawaIcons.favorite,
+        iconTint: TilawaSemanticTint.caution,
         title: l10n.favorites,
         subtitle: l10n.homeFavoritesCarouselSubtitle,
         onTap: () => unawaited(const FavoritesRoute().push<void>(context)),
       ),
       _MoreActionsItem(
         icon: TilawaIcons.download,
+        iconTint: TilawaSemanticTint.parchment,
         title: l10n.downloads,
         subtitle: l10n.homeDownloadsCarouselSubtitle,
         onTap: () => unawaited(const DownloadsRoute().push<void>(context)),
       ),
       _MoreActionsItem(
         icon: TilawaIcons.support,
+        iconTint: TilawaSemanticTint.success,
         title: l10n.supportTilawa,
         subtitle: l10n.homeSupportCarouselSubtitle,
         onTap: () => unawaited(const SupportRoute().push<void>(context)),
@@ -107,6 +113,7 @@ class _MoreActionsRow extends StatelessWidget {
   Widget build(BuildContext context) {
     return HomeGroupedListRow(
       icon: item.icon,
+      iconTint: item.iconTint,
       title: item.title,
       subtitle: item.subtitle,
       onTap: item.onTap,

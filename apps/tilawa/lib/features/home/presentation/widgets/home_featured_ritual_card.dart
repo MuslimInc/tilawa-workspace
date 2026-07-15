@@ -1,8 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:tilawa/features/athkar/domain/entities/athkar_category.dart';
 import 'package:tilawa/features/athkar/presentation/athkar_category_presentation.dart';
-import 'package:tilawa/router/app_router_config.dart';
+import 'package:tilawa/features/home/presentation/widgets/home_dashboard_icon_well.dart';
+import 'package:tilawa/features/home/presentation/widgets/home_feature_pastel.dart';
 import 'package:tilawa/features/home/presentation/widgets/home_travel_destination_card.dart';
+import 'package:tilawa/router/app_router_config.dart';
 import 'package:tilawa_ui_kit/tilawa_ui_kit.dart';
 
 /// Layout for [HomeFeaturedRitualCard].
@@ -50,6 +52,10 @@ class HomeFeaturedRitualCard extends StatelessWidget {
     }
 
     if (layout == HomeFeaturedRitualCardLayout.carousel) {
+      final Color softChipBg = HomeFeaturePastel.statusChipBackground(
+        accent: colorScheme.primary,
+        colorScheme: colorScheme,
+      );
       return HomeTravelDestinationCard(
         tintIndex: carouselTintIndex,
         icon: athkarCategoryIcon(category.icon),
@@ -60,17 +66,18 @@ class HomeFeaturedRitualCard extends StatelessWidget {
         trailing: _PulseAnimator(
           child: TilawaStatusChip(
             label: nowBadgeLabel,
-            backgroundColor: colorScheme.primary,
-            foregroundColor: colorScheme.onPrimary,
+            backgroundColor: softChipBg,
+            foregroundColor: colorScheme.primary,
           ),
         ),
       );
     }
 
-    final cardTokens = theme.componentTokens.homeDashboardCard;
-    final Color warmStart = cardTokens.gradientStart.withValues(alpha: 0.28);
-    final Color warmEnd = cardTokens.gradientEnd.withValues(alpha: 0.18);
-    final Color tintFg = colorScheme.onSurface;
+    final Color surface = colorScheme.surface;
+    final Color softChipBg = HomeFeaturePastel.statusChipBackground(
+      accent: colorScheme.primary,
+      colorScheme: colorScheme,
+    );
     final double radius = tokens.resolveRadius(family: TilawaRadiusFamily.card);
 
     final BorderRadius borderRadius = BorderRadius.circular(radius);
@@ -79,81 +86,68 @@ class HomeFeaturedRitualCard extends StatelessWidget {
       onTap: openDetails,
       borderRadius: borderRadius,
       semanticLabel: prompt,
-      stateLayerColor: cardTokens.gradientEnd,
-      child: DecoratedBox(
-        decoration: BoxDecoration(
-          gradient: LinearGradient(
-            begin: AlignmentDirectional.topStart,
-            end: AlignmentDirectional.bottomEnd,
-            colors: [warmStart, warmEnd],
-          ),
-          borderRadius: borderRadius,
-          border: Border.all(
-            color: cardTokens.gradientEnd.withValues(alpha: 0.25),
-            width: tokens.borderWidthThin * 2,
-          ),
+      stateLayerColor: colorScheme.primary,
+      materialColor: surface,
+      materialShape: RoundedRectangleBorder(
+        borderRadius: borderRadius,
+        side: BorderSide(
+          color: colorScheme.outlineVariant,
+          width: tokens.borderWidthThin,
         ),
-        child: Padding(
-          padding: EdgeInsets.all(tokens.spaceSmall),
-          child: Row(
-            spacing: tokens.spaceSmall,
-            children: [
-              Container(
-                width: tokens.spaceExtraLarge + tokens.spaceSmall,
-                height: tokens.spaceExtraLarge + tokens.spaceSmall,
-                decoration: BoxDecoration(
-                  color: colorScheme.primary,
-                  borderRadius: BorderRadius.circular(
-                    tokens.resolveRadius(
-                      family: TilawaRadiusFamily.decorative,
+      ),
+      child: Padding(
+        padding: EdgeInsets.all(tokens.spaceSmall),
+        child: Row(
+          spacing: tokens.spaceSmall,
+          children: [
+            HomeDashboardIconWell(
+              accent: colorScheme.primary,
+              fillAlpha: HomeFeaturePastel.iconWellFillAlpha,
+              extent: tokens.spaceExtraLarge + tokens.spaceSmall,
+              child: Icon(
+                athkarCategoryIcon(category.icon),
+                color: colorScheme.primary,
+                size: tokens.iconSizeMedium,
+              ),
+            ),
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                spacing: tokens.spaceExtraSmall,
+                children: [
+                  _PulseAnimator(
+                    child: TilawaStatusChip(
+                      label: nowBadgeLabel,
+                      backgroundColor: softChipBg,
+                      foregroundColor: colorScheme.primary,
                     ),
                   ),
-                ),
-                child: Icon(
-                  athkarCategoryIcon(category.icon),
-                  color: colorScheme.onPrimary,
-                  size: tokens.iconSizeMedium,
-                ),
-              ),
-              Expanded(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  spacing: tokens.spaceExtraSmall,
-                  children: [
-                    _PulseAnimator(
-                      child: TilawaStatusChip(
-                        label: nowBadgeLabel,
-                        backgroundColor: colorScheme.primary,
-                        foregroundColor: colorScheme.onPrimary,
-                      ),
+                  Text(
+                    prompt,
+                    maxLines: 2,
+                    overflow: TextOverflow.ellipsis,
+                    style: theme.textTheme.titleSmall?.copyWith(
+                      color: colorScheme.onSurface,
+                      fontWeight: FontWeight.w800,
                     ),
-                    Text(
-                      prompt,
-                      maxLines: 2,
-                      overflow: TextOverflow.ellipsis,
-                      style: theme.textTheme.titleSmall?.copyWith(
-                        color: tintFg,
-                        fontWeight: FontWeight.w800,
-                      ),
+                  ),
+                  Text(
+                    startLabel,
+                    style: theme.textTheme.bodySmall?.copyWith(
+                      color: colorScheme.onSurfaceVariant,
                     ),
-                    Text(
-                      startLabel,
-                      style: theme.textTheme.bodySmall?.copyWith(
-                        color: tintFg.withValues(alpha: 0.72),
-                      ),
-                    ),
-                  ],
-                ),
+                  ),
+                ],
               ),
-              // Keep the right chevron in both LTR and RTL; this icon
-              // reads correctly in Arabic and avoids unwanted mirroring.
-              Icon(
-                Icons.chevron_right_rounded,
-                size: tokens.iconSizeSmall,
-                color: tintFg.withValues(alpha: 0.55),
-              ),
-            ],
-          ),
+            ),
+            // Keep the right chevron in both LTR and RTL; this icon
+            // reads correctly in Arabic and avoids unwanted mirroring.
+            Icon(
+              Icons.chevron_right_rounded,
+              size: tokens.iconSizeSmall,
+              color: colorScheme.onSurfaceVariant,
+            ),
+          ],
         ),
       ),
     );

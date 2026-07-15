@@ -113,4 +113,66 @@ void main() {
 
     expect(logoutCalls, 1);
   });
+
+  Future<void> pumpAppBarLogout(WidgetTester tester) async {
+    await tester.pumpWidget(
+      MaterialApp(
+        theme: AppTheme.getLightTheme(
+          primaryColor: PrimaryColorPreset.defaultPreset.value,
+        ),
+        supportedLocales: AppLocalizations.supportedLocales,
+        localizationsDelegates: AppLocalizations.localizationsDelegates,
+        locale: const Locale('en'),
+        builder: (context, child) => TilawaFeedbackHost(child: child!),
+        home: BlocProvider<AuthBloc>.value(
+          value: authBloc,
+          child: Scaffold(
+            appBar: AppBar(
+              actions: [
+                SettingsLogoutAppBarAction(
+                  serverActionGuard: serverActionGuard,
+                  onLogout: () {
+                    logoutCalls++;
+                  },
+                ),
+              ],
+            ),
+          ),
+        ),
+      ),
+    );
+    await tester.pump();
+  }
+
+  testWidgets('app bar logout while offline shows message without callback', (
+    tester,
+  ) async {
+    networkInfo.connected = false;
+
+    await pumpAppBarLogout(tester);
+    await tester.tap(find.byTooltip('Logout'));
+    await tester.pump();
+
+    expect(logoutCalls, 0);
+    expect(
+      find.text('No internet connection. Please reconnect and try again.'),
+      findsOneWidget,
+    );
+  });
+
+  testWidgets('app bar online logout invokes callback', (tester) async {
+    await pumpAppBarLogout(tester);
+    await tester.tap(find.byTooltip('Logout'));
+    await tester.pump();
+
+    expect(logoutCalls, 1);
+  });
+
+  testWidgets('app bar logout hidden for guest', (tester) async {
+    when(() => authBloc.state).thenReturn(const AuthState.unauthenticated());
+
+    await pumpAppBarLogout(tester);
+
+    expect(find.byTooltip('Logout'), findsNothing);
+  });
 }

@@ -17,6 +17,7 @@ class KhatmaHomeDestinationCard extends StatelessWidget {
     required this.onTap,
     required this.title,
     this.subtitle,
+    this.statusChipLabel,
     this.detail,
     this.trailing,
     this.progress,
@@ -28,6 +29,10 @@ class KhatmaHomeDestinationCard extends StatelessWidget {
   final VoidCallback onTap;
   final String title;
   final String? subtitle;
+
+  /// Soft status pill under the title (e.g. "Day 1 of 30") — prefer over a
+  /// full-card tint for short plan state.
+  final String? statusChipLabel;
 
   /// Optional second body line (e.g. today's page range / confirm count).
   final String? detail;
@@ -118,6 +123,18 @@ class KhatmaHomeDestinationCard extends StatelessWidget {
                     letterSpacing: -0.2,
                   ),
                 ),
+                if (statusChipLabel case final String chipLabel)
+                  Align(
+                    alignment: AlignmentDirectional.centerStart,
+                    child: TilawaStatusChip(
+                      label: chipLabel,
+                      backgroundColor: HomeFeaturePastel.statusChipBackground(
+                        accent: accent,
+                        colorScheme: colorScheme,
+                      ),
+                      foregroundColor: accent,
+                    ),
+                  ),
                 if (subtitle case final String bodyText)
                   Text(
                     bodyText,

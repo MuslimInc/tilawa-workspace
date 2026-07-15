@@ -1,9 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:tilawa/core/extensions.dart';
 import 'package:tilawa/features/home/domain/home_daily_inspiration_catalog.dart';
-import 'package:tilawa/l10n/generated/app_localizations.dart';
 import 'package:tilawa/features/home/presentation/widgets/home_dashboard_card.dart';
 import 'package:tilawa/features/home/presentation/widgets/home_dashboard_section.dart';
+import 'package:tilawa/features/home/presentation/widgets/home_feature_pastel.dart';
+import 'package:tilawa/l10n/generated/app_localizations.dart';
 import 'package:tilawa_ui_kit/tilawa_ui_kit.dart';
 
 /// Daily ayah and dua in one grouped card with a hairline separator.
@@ -197,37 +198,13 @@ class _DailyInspirationRow extends StatelessWidget {
                 crossAxisAlignment: CrossAxisAlignment.start,
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
-                  Row(
-                    crossAxisAlignment: CrossAxisAlignment.baseline,
-                    textBaseline: TextBaseline.alphabetic,
-                    spacing: tokens.spaceSmall,
-                    children: [
-                      Expanded(
-                        child: Text(
-                          label,
-                          maxLines: 1,
-                          overflow: TextOverflow.ellipsis,
-                          style: theme.textTheme.titleLarge?.copyWith(
-                            color: colorScheme.onSurface,
-                            fontWeight: FontWeight.w700,
-                            height: 1.25,
-                          ),
-                        ),
-                      ),
-                      Flexible(
-                        child: Text(
-                          reference,
-                          maxLines: 1,
-                          overflow: TextOverflow.ellipsis,
-                          textAlign: TextAlign.end,
-                          style: theme.textTheme.bodyMedium?.copyWith(
-                            color: colorScheme.onSurfaceVariant,
-                            fontWeight: FontWeight.w500,
-                            height: 1.35,
-                          ),
-                        ),
-                      ),
-                    ],
+                  TilawaStatusChip(
+                    label: label,
+                    backgroundColor: HomeFeaturePastel.statusChipBackground(
+                      accent: colorScheme.tertiary,
+                      colorScheme: colorScheme,
+                    ),
+                    foregroundColor: colorScheme.tertiary,
                   ),
                   Text(
                     body,
@@ -235,6 +212,16 @@ class _DailyInspirationRow extends StatelessWidget {
                     overflow: TextOverflow.ellipsis,
                     textAlign: TextAlign.start,
                     style: bodyStyle,
+                  ),
+                  Text(
+                    reference,
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                    style: theme.textTheme.bodyMedium?.copyWith(
+                      color: colorScheme.onSurfaceVariant,
+                      fontWeight: FontWeight.w500,
+                      height: 1.35,
+                    ),
                   ),
                 ],
               ),

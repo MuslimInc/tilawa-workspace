@@ -1705,12 +1705,13 @@ class TilawaHomeScreenTokens {
     );
   }
 
-  /// Theme-aware Home canvas gradient — soft warm off-white, not primary wash.
+  /// Theme-aware Home canvas gradient — soft porcelain warmth at top, not a
+  /// primary wash. Top stop stays slightly greener than the scaffold porcelain.
   LinearGradient backgroundGradientFor(ColorScheme colorScheme) {
     final Color top = Color.lerp(
       backgroundGradientStart,
       AppColors.brandActionGreen,
-      0.03,
+      0.04,
     )!;
 
     return LinearGradient(
@@ -1721,7 +1722,7 @@ class TilawaHomeScreenTokens {
         backgroundGradientMiddle,
         backgroundGradientEnd,
       ],
-      stops: const <double>[0, 0.38, 1],
+      stops: const <double>[0, 0.34, 1],
     );
   }
 

@@ -3,7 +3,7 @@ import 'package:flutter/material.dart';
 /// Centralized app color constants.
 ///
 /// The Tilawa palette is intentionally **small and calm**:
-/// warm scaffold canvas ([lightCanvas] `#F4F2EE`), green global accent
+/// warm scaffold canvas ([lightCanvas] `#F3F6F4`), green global accent
 /// ([defaultPrimary] `#1DAB61`), neutral text ink ([tripGlideInk] `#1A2E24`),
 /// and restrained category accent hues for hub tiles.
 ///
@@ -198,14 +198,14 @@ abstract final class AppColors {
   /// Foreground on the Home hero night gradient — warm cream ink.
   static const Color homeNextPrayerGradientNightForeground = Color(0xFFF5F0E6);
 
-  /// Home screen canvas — modern light canvas (60-30-10 dominant).
-  static const Color homeBackgroundGradientStart = Color(0xFFF8F9FA);
+  /// Home screen canvas — soft porcelain-green warmth at the top.
+  static const Color homeBackgroundGradientStart = Color(0xFFEEF3EF);
 
-  /// Home screen canvas — modern light canvas mid stop.
-  static const Color homeBackgroundGradientMiddle = Color(0xFFF8F9FA);
+  /// Home screen canvas — middle porcelain stop (`#F3F6F4`).
+  static const Color homeBackgroundGradientMiddle = Color(0xFFF3F6F4);
 
-  /// Home screen canvas — modern light canvas bottom.
-  static const Color homeBackgroundGradientEnd = Color(0xFFF8F9FA);
+  /// Home screen canvas — quiet bottom so white cards keep soft lift.
+  static const Color homeBackgroundGradientEnd = Color(0xFFF5F7F5);
 
   /// Radial glow accent behind the Home hero / next-prayer area.
   static const Color homeBackgroundGlow = Color(0xFFEAF1EC);
@@ -390,10 +390,11 @@ abstract final class AppColors {
   // 60-30-10: canvas (~60%), elevated surfaces (~30%), accent (~10%).
   // ---------------------------------------------------------------------------
 
-  /// App canvas / scaffold — porcelain green matching Home (`#F3F6F4`).
+  /// App canvas / scaffold — porcelain green matching DESIGN.md (`#F3F6F4`).
   ///
   /// Cards use [lightSurface] (`#FFFFFF`) for quiet lift with soft shadows.
-  static const Color lightCanvas = homeBackgroundGradientStart;
+  /// Home top glow still uses [homeBackgroundGradientStart] separately.
+  static const Color lightCanvas = Color(0xFFF3F6F4);
 
   /// Alias for scaffold assembly — same as [lightCanvas].
   static const Color lightBackground = lightCanvas;
