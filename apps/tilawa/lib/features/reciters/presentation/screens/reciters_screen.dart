@@ -947,16 +947,20 @@ class _RecitersLetterIndexGutter extends StatelessWidget {
           top: false,
           bottom: false,
           minimum: EdgeInsets.zero,
-          child: SizedBox(
-            width: scrollbarWidth,
-            child: ReciterAlphabetScrollbar(
-              key: const ValueKey('alphabet_scrollbar'),
-              allReciters: reciters,
-              onLetterSelected: onLetterSelected,
-              onScrubStart: onScrubStart,
-              onScrubEnd: onScrubEnd,
-              scrollbarSemanticsLabel: scrollbarSemanticsLabel,
-              scrollbarSemanticsHint: scrollbarSemanticsHint,
+          // Rail is pinned to the physical right in LTR and RTL — hug that edge.
+          child: Align(
+            alignment: Alignment.centerRight,
+            child: SizedBox(
+              width: scrollbarWidth,
+              child: ReciterAlphabetScrollbar(
+                key: const ValueKey('alphabet_scrollbar'),
+                allReciters: reciters,
+                onLetterSelected: onLetterSelected,
+                onScrubStart: onScrubStart,
+                onScrubEnd: onScrubEnd,
+                scrollbarSemanticsLabel: scrollbarSemanticsLabel,
+                scrollbarSemanticsHint: scrollbarSemanticsHint,
+              ),
             ),
           ),
         ),
@@ -1573,7 +1577,7 @@ class _ReciterAlphabetScrollbarState extends State<ReciterAlphabetScrollbar> {
 /// Reserved width for the letter-index rail (scrollbar + outer margin).
 double _recitersLetterIndexGutterWidth(ThemeData theme) {
   final tokens = theme.tokens;
-  return theme.componentTokens.alphabetScrollbar.width + tokens.spaceMedium;
+  return theme.componentTokens.alphabetScrollbar.width + tokens.spaceExtraSmall;
 }
 
 EdgeInsetsGeometry _recitersResultPadding(
@@ -1586,15 +1590,15 @@ EdgeInsetsGeometry _recitersResultPadding(
 }) {
   final theme = Theme.of(context);
   final tokens = theme.tokens;
+  // Match catalog search chrome ([TilawaAppBarConfig.catalogChromePadding]).
   final double centeredInset = math.max(
-    tokens.spaceSmall,
+    tokens.spaceMedium,
     ((constraints.crossAxisExtent - tokens.contentMaxWidthMedia) / 2) +
-        tokens.spaceSmall,
+        tokens.spaceMedium,
   );
-  // Rail reserve + small clear so favorite hearts do not sit on letters.
-  // Use max (not sum) with [centeredInset] — stacking left a dead gap.
+  // Clear the opaque rail only — avoid stacking gutter + centeredInset.
   final double scrollbarInset = reserveScrollbarSpace
-      ? _recitersLetterIndexGutterWidth(theme) + tokens.spaceSmall
+      ? theme.componentTokens.alphabetScrollbar.width + tokens.spaceExtraSmall
       : 0;
   final double startInset = reserveScrollbarOnLeading
       ? math.max(centeredInset, scrollbarInset)
