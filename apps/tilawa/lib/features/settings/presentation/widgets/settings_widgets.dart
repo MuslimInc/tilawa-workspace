@@ -201,14 +201,13 @@ class SettingsProfileHeader extends StatelessWidget {
                           ),
                         ),
                         if (subtitle != null) ...[
-                          SizedBox(height: tokens.spaceExtraSmall),
+                          SizedBox(height: tokens.spaceSmall),
                           Text(
                             subtitle,
                             textAlign: TextAlign.center,
                             style: theme.textTheme.bodySmall?.copyWith(
-                              color: colorScheme.onSurface.withValues(
-                                alpha: tokens.opacityEmphasis,
-                              ),
+                              color: colorScheme.onSurfaceVariant,
+                              height: 1.4,
                             ),
                           ),
                         ],

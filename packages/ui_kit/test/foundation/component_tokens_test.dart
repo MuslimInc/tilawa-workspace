@@ -448,7 +448,8 @@ void main() {
       expect(tokens.groupHorizontalPadding, 20.0);
       expect(tokens.groupShadowOpacity, 0.04);
       expect(tokens.tileTitleTextRole, TilawaTextRole.bodyLarge);
-      expect(tokens.tileSubtitleOpacity, 0.6);
+      expect(tokens.tileSubtitleOpacity, 1.0);
+      expect(tokens.tileSubtitleSpacing, 6.0);
       expect(tokens.switchActiveTrackOpacity, 1);
       expect(tokens.selectionTileSelectedBackgroundColor, isA<Color>());
     });
@@ -486,10 +487,10 @@ void main() {
       );
       final updated = original.copyWith(
         tileTitleTextRole: TilawaTextRole.titleMedium,
-        tileSubtitleOpacity: 0.6,
+        tileSubtitleOpacity: 1.0,
       );
       expect(updated.tileTitleTextRole, TilawaTextRole.titleMedium);
-      expect(updated.tileSubtitleOpacity, 0.6);
+      expect(updated.tileSubtitleOpacity, 1.0);
       expect(updated.groupShadowOpacity, original.groupShadowOpacity);
     });
 

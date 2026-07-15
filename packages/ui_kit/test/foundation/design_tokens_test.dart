@@ -866,7 +866,7 @@ void main() {
       test('semantic radius aliases map to token caps', () {
         final tokens = MeMuslimDesignTokens.light();
         expect(tokens.radiusCard, 24.0);
-        expect(tokens.radiusSection, 24.0);
+        expect(tokens.radiusSection, 16.0);
         expect(tokens.radiusPill(48), 24.0);
         expect(tokens.radiusIcon(44), 22.0);
       });
@@ -887,7 +887,7 @@ void main() {
         );
         expect(
           tokens.resolveRadius(family: TilawaRadiusFamily.section),
-          24.0,
+          16.0,
         );
         expect(
           tokens.resolveRadius(family: TilawaRadiusFamily.hero),
