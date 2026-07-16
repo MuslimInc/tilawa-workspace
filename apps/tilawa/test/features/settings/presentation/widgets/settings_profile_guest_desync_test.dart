@@ -79,6 +79,8 @@ void main() {
   });
 
   testWidgets('shows profile when AuthBloc is authenticated', (tester) async {
+    final semanticsHandle = tester.ensureSemantics();
+
     await pumpHeader(
       tester,
       AuthState.authenticated(user: signedInUser),
@@ -90,8 +92,23 @@ void main() {
     expect(find.byIcon(Icons.edit_outlined), findsNothing);
     expect(find.byType(TilawaIconBox), findsOneWidget);
     expect(
+      tester.widget<TilawaIconBox>(find.byType(TilawaIconBox)).variant,
+      TilawaIconBoxVariant.plain,
+    );
+    expect(
       tester.widget<TilawaCard>(find.byType(TilawaCard)).onTap,
       isNotNull,
     );
+    expect(
+      tester.getSemantics(find.bySemanticsLabel('Signed In User')),
+      matchesSemantics(
+        label: 'Signed In User',
+        value: 'Member since Jan 2024',
+        hint: 'Edit Profile',
+        isButton: true,
+        hasTapAction: true,
+      ),
+    );
+    semanticsHandle.dispose();
   });
 }

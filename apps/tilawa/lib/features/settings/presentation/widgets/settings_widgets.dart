@@ -167,9 +167,14 @@ class SettingsProfileHeader extends StatelessWidget {
         return TilawaSettingsGroupHorizontalInset(
           child: Semantics(
             button: true,
+            label: title,
+            value: subtitle,
+            hint: isGuest ? null : context.l10n.editProfileTitle,
+            onTap: onTap,
+            excludeSemantics: true,
             child: TilawaCard(
               onTap: onTap,
-              padding: EdgeInsets.all(tokens.spaceMedium),
+              padding: EdgeInsets.all(tokens.spaceLarge),
               child: Row(
                 children: [
                   ProfileAvatar(
@@ -177,7 +182,7 @@ class SettingsProfileHeader extends StatelessWidget {
                     displayName: user?.displayName,
                     size: tokens.iconHubExtent,
                   ),
-                  SizedBox(width: tokens.spaceMedium),
+                  SizedBox(width: tokens.spaceLarge),
                   Expanded(
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
@@ -187,7 +192,7 @@ class SettingsProfileHeader extends StatelessWidget {
                           title,
                           maxLines: 2,
                           overflow: TextOverflow.ellipsis,
-                          style: theme.textTheme.titleMedium?.copyWith(
+                          style: theme.textTheme.titleLarge?.copyWith(
                             fontWeight: FontWeight.w700,
                             color: colorScheme.onSurface,
                           ),
@@ -198,7 +203,7 @@ class SettingsProfileHeader extends StatelessWidget {
                             subtitle,
                             maxLines: 2,
                             overflow: TextOverflow.ellipsis,
-                            style: theme.textTheme.bodySmall?.copyWith(
+                            style: theme.textTheme.bodyMedium?.copyWith(
                               color: colorScheme.onSurfaceVariant,
                               height: tokens.textHeightLoose,
                             ),
@@ -213,7 +218,7 @@ class SettingsProfileHeader extends StatelessWidget {
                       ],
                     ),
                   ),
-                  SizedBox(width: tokens.spaceSmall),
+                  SizedBox(width: tokens.spaceMedium),
                   if (isGuest)
                     Icon(
                       TilawaIcons.chevronRightSmall,
@@ -224,6 +229,7 @@ class SettingsProfileHeader extends StatelessWidget {
                     TilawaIconBox(
                       icon: FluentIcons.edit_24_regular,
                       iconColor: colorScheme.primary,
+                      variant: TilawaIconBoxVariant.plain,
                     ),
                 ],
               ),
