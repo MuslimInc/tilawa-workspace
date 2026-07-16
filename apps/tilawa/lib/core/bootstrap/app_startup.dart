@@ -23,6 +23,7 @@ import 'package:tilawa/core/bootstrap/launch_timeline.dart';
 import 'package:tilawa/core/bootstrap/splash_launch_handoff.dart';
 import 'package:tilawa/core/bootstrap/startup_launch_coordinator.dart';
 import 'package:tilawa/core/debug/device_preview_app_builder.dart';
+import 'package:tilawa/core/services/app_memory_pressure_handler.dart';
 import 'package:tilawa/core/telemetry/sentry_config.dart';
 import 'package:tilawa/core/telemetry/startup_perf_log.dart';
 import 'package:tilawa/core/telemetry/startup_telemetry.dart';

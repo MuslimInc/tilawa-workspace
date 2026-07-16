@@ -1,6 +1,8 @@
 package com.tilawa.app
 
+import android.app.ActivityManager
 import android.content.Intent
+import android.os.PowerManager
 import android.os.Build
 import android.os.Bundle
 import android.util.Log
@@ -50,6 +52,8 @@ class MainActivity : AudioServiceActivity() {
             },
         )
 
+    private val severeMemoryPressureBridge = SevereMemoryPressureBridge(log = ::firstFrameLog)
+
     private fun firstFrameLog(message: String) {
         Log.d(FIRST_FRAME_TAG, message)
     }
@@ -57,6 +61,7 @@ class MainActivity : AudioServiceActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         BootDeviceEventBreadcrumbs.resetForLaunch()
         BootDeviceEventBreadcrumbs.register(this)
+        severeMemoryPressureBridge.register(this)
         Log.d(
             TAG,
             "MAIN_ACTIVITY_ON_CREATE_INTENT action=${intent?.action} extras=${intent?.extras?.keySet()} renderMode=texture"
@@ -124,6 +129,12 @@ class MainActivity : AudioServiceActivity() {
     override fun configureFlutterEngine(flutterEngine: FlutterEngine) {
         super.configureFlutterEngine(flutterEngine)
         registerAppMethodChannels(flutterEngine)
+        severeMemoryPressureBridge.attachChannel(
+            MethodChannel(
+                flutterEngine.dartExecutor.binaryMessenger,
+                SevereMemoryPressureBridge.CHANNEL,
+            ),
+        )
         if (TranssionOemPolicy.isTranssionDevice()) {
             TranssionCredentialUiLifecycle.ensureRegistered(application)
             invokeCredentialUiDismissed = {
@@ -186,6 +197,9 @@ class MainActivity : AudioServiceActivity() {
                     "isSentryNativeSdkInitialized" -> {
                         result.success(Sentry.isEnabled())
                     }
+                    "getProcessDiagnostics" -> {
+                        result.success(readProcessDiagnostics())
+                    }
                     else -> result.notImplemented()
                 }
             }
@@ -212,6 +226,37 @@ class MainActivity : AudioServiceActivity() {
         }
     }
 
+
+    private fun readProcessDiagnostics(): Map<String, Any?> {
+        val am = getSystemService(ACTIVITY_SERVICE) as ActivityManager
+        val memInfo = ActivityManager.MemoryInfo()
+        am.getMemoryInfo(memInfo)
+        val importance = try {
+            am.runningAppProcesses
+                ?.firstOrNull { it.pid == android.os.Process.myPid() }
+                ?.importance
+        } catch (_: Throwable) {
+            null
+        }
+        val ignoringBattery = try {
+            val pm = getSystemService(POWER_SERVICE) as PowerManager
+            pm.isIgnoringBatteryOptimizations(packageName)
+        } catch (_: Throwable) {
+            null
+        }
+        return mapOf(
+            "importance" to importance,
+            "availMemBytes" to memInfo.availMem,
+            "totalMemBytes" to memInfo.totalMem,
+            "lowMemory" to memInfo.lowMemory,
+            "ignoringBatteryOptimizations" to ignoringBattery,
+            "manufacturer" to Build.MANUFACTURER,
+            "brand" to Build.BRAND,
+            "model" to Build.MODEL,
+            "sdkInt" to Build.VERSION.SDK_INT,
+        )
+    }
+
     private fun readInstallerPackageName(): String? {
         return if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
             packageManager.getInstallSourceInfo(packageName).installingPackageName
@@ -223,6 +268,7 @@ class MainActivity : AudioServiceActivity() {
 
     override fun onDestroy() {
         launchSplashController.onDestroy()
+        severeMemoryPressureBridge.unregister(this)
         BootDeviceEventBreadcrumbs.unregister(this)
         super.onDestroy()
     }
@@ -256,4 +302,5 @@ class MainActivity : AudioServiceActivity() {
      */
     override fun getRenderMode(): RenderMode = RenderMode.texture
 }
+
 

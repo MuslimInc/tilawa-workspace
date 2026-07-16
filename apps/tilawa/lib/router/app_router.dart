@@ -10,6 +10,7 @@ import 'package:shared_preferences/shared_preferences.dart';
 import 'package:tilawa/core/di/injection.dart';
 import 'package:tilawa/core/navigation/notification_launch_dedup.dart';
 import 'package:tilawa/core/services/notification_startup_service.dart';
+import 'package:tilawa/core/telemetry/session_diagnostics_navigator_observer.dart';
 import 'package:tilawa/features/audio_player/domain/repositories/audio_player_repository.dart';
 import 'package:tilawa/features/audio_player/presentation/bloc/audio_player_bloc.dart';
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
@@ -497,6 +498,7 @@ class AppRouter {
   static List<NavigatorObserver> _getObservers() {
     final List<NavigatorObserver> observers = <NavigatorObserver>[
       TilawaSentryNavigatorObserver.create(),
+      SessionDiagnosticsNavigatorObserver(),
     ];
     try {
       observers.add(

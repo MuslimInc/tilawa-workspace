@@ -3,6 +3,7 @@ import 'package:flutter/widgets.dart';
 import 'package:sentry_flutter/sentry_flutter.dart';
 import 'package:tilawa/core/extensions.dart';
 import 'package:tilawa/core/telemetry/crash_reporting_context.dart';
+import 'package:tilawa/core/telemetry/session_diagnostics_hub.dart';
 import 'package:tilawa/core/telemetry/tilawa_feedback_screenshot_session.dart';
 import 'package:tilawa/core/telemetry/tilawa_sentry_feedback_form.dart';
 import 'package:tilawa/l10n/generated/app_localizations.dart';
@@ -38,13 +39,15 @@ abstract final class SentryUserFeedback {
       return null;
     }
 
-    if (shouldPromptFeedbackForEvent(filtered)) {
+    final SentryEvent enriched = SessionDiagnosticsHub.enrichEvent(filtered);
+
+    if (shouldPromptFeedbackForEvent(enriched)) {
       // coverage:ignore-start
-      await _presentFeedbackForEvent(filtered);
+      await _presentFeedbackForEvent(enriched);
       // coverage:ignore-end
     }
 
-    return filtered;
+    return enriched;
   }
 
   /// Opens the Sentry feedback form from settings or other user actions.

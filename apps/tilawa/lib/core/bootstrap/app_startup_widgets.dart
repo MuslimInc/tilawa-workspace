@@ -165,6 +165,8 @@ class _BootGateState extends State<_BootGate> {
     firstFrameLog('BootGate initState');
     StartupPerfLog.log('boot_gate_init');
     unawaited(StartupTelemetry.phase('boot_gate_start'));
+    // Listen for severe native trim before TilawaApp mounts (FLUTTER-9).
+    AppMemoryPressureHandler.attach();
     firstFrameLog('BootGate critical init scheduling');
     SplashLaunchHandoff.resetForNewLaunch();
     LaunchFirstFrameGate.scheduleReleaseAfterFirstFrame();

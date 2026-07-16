@@ -90,4 +90,36 @@ internal object BootDeviceEventBreadcrumbs {
             },
         )
     }
+
+    fun recordTrimMemory(trimLevel: Int) {
+        val duringBoot = bootInProgress
+        Log.d(TAG, "device.event action=TRIM_MEMORY level=$trimLevel during_boot=$duringBoot")
+        Sentry.addBreadcrumb(
+            Breadcrumb().apply {
+                category = CATEGORY
+                type = "system"
+                level = SentryLevel.WARNING
+                message = "Trim memory"
+                setData("action", "TRIM_MEMORY")
+                setData("trim_level", trimLevel)
+                setData("during_boot", duringBoot)
+            },
+        )
+    }
+
+    fun recordLowMemory() {
+        val duringBoot = bootInProgress
+        Log.d(TAG, "device.event action=LOW_MEMORY during_boot=$duringBoot")
+        Sentry.addBreadcrumb(
+            Breadcrumb().apply {
+                category = CATEGORY
+                type = "system"
+                level = SentryLevel.WARNING
+                message = "Low memory"
+                setData("action", "LOW_MEMORY")
+                setData("during_boot", duringBoot)
+            },
+        )
+    }
 }
+

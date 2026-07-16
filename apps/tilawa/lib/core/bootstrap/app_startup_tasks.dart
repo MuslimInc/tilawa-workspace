@@ -37,6 +37,7 @@ import 'package:tilawa/core/services/prayer_notification_payload_classifier.dart
 import 'package:tilawa/core/services/quran_assets_prefetch_policy_service.dart';
 import 'package:tilawa/core/services/quran_assets_prefetch_service.dart';
 import 'package:tilawa/core/services/tasbeeh_reminder_notification_service.dart';
+import 'package:tilawa/core/telemetry/session_diagnostics_hub.dart';
 import 'package:tilawa/core/telemetry/startup_telemetry.dart';
 import 'package:tilawa/features/athkar/domain/services/tasbeeh_reminder_scheduler.dart';
 import 'package:tilawa/features/audio_player/domain/repositories/audio_player_repository.dart';
@@ -270,18 +271,29 @@ class AppStartupTasks {
     );
     unawaited(StartupTelemetry.phase('critical_init_start'));
     await migrateLegacySharedPreferencesToAsyncIfNeeded();
+    // Yield between heavy phases so the UI isolate keeps pumping input / vsync
+    // during cold start after LMK (FLUTTER-9 AppExitInfo input-dispatch class).
+    await yieldToUiEventLoop();
     final bool firebaseOk = await initializeFirebaseAndHydratedStorage(
       timeline,
     );
+    await yieldToUiEventLoop();
     await configurePostFirebaseServices(
       firebaseOk: firebaseOk,
       timeline: timeline,
     );
+    await yieldToUiEventLoop();
     await runDependencyInjection(configureDI: configureDI, timeline: timeline);
+    await yieldToUiEventLoop();
     await configurePreRenderServices(timeline: timeline);
     timeline.logTotal('=== Critical init done');
     unawaited(StartupTelemetry.phase('critical_init_done'));
   }
+
+  /// Returns to the event loop so frames / input can run between long awaits.
+  @visibleForTesting
+  static Future<void> yieldToUiEventLoop() =>
+      Future<void>.delayed(Duration.zero);
 
   void initializeNonCriticalServices() {
     if (!_isEnabled(
@@ -1172,8 +1184,15 @@ class AppStartupTasks {
           androidNotificationChannelId: 'com.tilawa.app.channel.audio',
           androidNotificationChannelName: 'Audio playback',
           androidNotificationOngoing: true,
+          // Required companion of ongoing=true; while paused the service drops
+          // FGS priority (killable). While playing, FGS stays elevated.
+          androidStopForegroundOnPause: true,
+          // Bound artwork decode RAM during long background listens (LMK risk).
+          artDownscaleWidth: 256,
+          artDownscaleHeight: 256,
         ),
       );
+      SessionDiagnosticsHub.bindAudioHandler(handler);
       _wirePlaybackNotificationBridge();
       _requestActivePlaybackSyncAfterHandlerReady();
       logger.d(

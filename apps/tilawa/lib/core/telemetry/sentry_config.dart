@@ -43,6 +43,9 @@ abstract final class SentryConfig {
     // ignore: experimental_member_use
     options.profilesSampleRate = kReleaseMode ? 0.1 : 1.0;
     options.autoInitializeNativeSdk = autoInitializeNativeSdk;
+    // Explicit Android ANR / AppExitInfo capture (defaults true; keep intentional).
+    options.anrEnabled = true;
+    options.anrTimeoutInterval = const Duration(milliseconds: 5000);
     SentryUserFeedback.bindFlutterOptions(options);
     options.navigatorKey = AppRouter.navigatorKey;
     options.attachScreenshot = true;
