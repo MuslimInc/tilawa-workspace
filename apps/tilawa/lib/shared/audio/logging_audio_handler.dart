@@ -2,6 +2,7 @@ import 'package:audio_service/audio_service.dart';
 import 'package:rxdart/rxdart.dart';
 
 import 'package:tilawa/core/logging/app_logger.dart';
+import 'package:tilawa/core/telemetry/session_diagnostics_hub.dart';
 
 class LoggingAudioHandler extends CompositeAudioHandler {
   LoggingAudioHandler(super.inner) {
@@ -244,12 +245,14 @@ class LoggingAudioHandler extends CompositeAudioHandler {
   @override
   Future<void> onTaskRemoved() {
     _log('onTaskRemoved()');
+    SessionDiagnosticsHub.noteEvent('audio_task_removed');
     return super.onTaskRemoved();
   }
 
   @override
   Future<void> onNotificationDeleted() {
     _log('onNotificationDeleted()');
+    SessionDiagnosticsHub.noteEvent('audio_notification_deleted');
     return super.onNotificationDeleted();
   }
 

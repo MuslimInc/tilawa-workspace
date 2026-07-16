@@ -37,6 +37,7 @@ import 'package:tilawa/core/services/prayer_notification_payload_classifier.dart
 import 'package:tilawa/core/services/quran_assets_prefetch_policy_service.dart';
 import 'package:tilawa/core/services/quran_assets_prefetch_service.dart';
 import 'package:tilawa/core/services/tasbeeh_reminder_notification_service.dart';
+import 'package:tilawa/core/telemetry/session_diagnostics_hub.dart';
 import 'package:tilawa/core/telemetry/startup_telemetry.dart';
 import 'package:tilawa/features/athkar/domain/services/tasbeeh_reminder_scheduler.dart';
 import 'package:tilawa/features/audio_player/domain/repositories/audio_player_repository.dart';
@@ -1191,6 +1192,7 @@ class AppStartupTasks {
           artDownscaleHeight: 256,
         ),
       );
+      SessionDiagnosticsHub.bindAudioHandler(handler);
       _wirePlaybackNotificationBridge();
       _requestActivePlaybackSyncAfterHandlerReady();
       logger.d(

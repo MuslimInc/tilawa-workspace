@@ -1,6 +1,8 @@
 package com.tilawa.app
 
+import android.app.ActivityManager
 import android.content.Intent
+import android.os.PowerManager
 import android.os.Build
 import android.os.Bundle
 import android.util.Log
@@ -195,6 +197,9 @@ class MainActivity : AudioServiceActivity() {
                     "isSentryNativeSdkInitialized" -> {
                         result.success(Sentry.isEnabled())
                     }
+                    "getProcessDiagnostics" -> {
+                        result.success(readProcessDiagnostics())
+                    }
                     else -> result.notImplemented()
                 }
             }
@@ -221,6 +226,36 @@ class MainActivity : AudioServiceActivity() {
         }
     }
 
+
+    private fun readProcessDiagnostics(): Map<String, Any?> {
+        val am = getSystemService(ACTIVITY_SERVICE) as ActivityManager
+        val memInfo = ActivityManager.MemoryInfo()
+        am.getMemoryInfo(memInfo)
+        val importance = try {
+            am.runningAppProcesses
+                ?.firstOrNull { it.pid == android.os.Process.myPid() }
+                ?.importance
+        } catch (_: Throwable) {
+            null
+        }
+        val ignoringBattery = try {
+            val pm = getSystemService(POWER_SERVICE) as PowerManager
+            pm.isIgnoringBatteryOptimizations(packageName)
+        } catch (_: Throwable) {
+            null
+        }
+        return mapOf(
+            "importance" to importance,
+            "availMemBytes" to memInfo.availMem,
+            "totalMemBytes" to memInfo.totalMem,
+            "lowMemory" to memInfo.lowMemory,
+            "ignoringBatteryOptimizations" to ignoringBattery,
+            "manufacturer" to Build.MANUFACTURER,
+            "brand" to Build.BRAND,
+            "model" to Build.MODEL,
+            "sdkInt" to Build.VERSION.SDK_INT,
+        )
+    }
 
     private fun readInstallerPackageName(): String? {
         return if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {

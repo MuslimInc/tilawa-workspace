@@ -22,6 +22,7 @@ import '../../features/audio_player/domain/services/playback_uri_resolver.dart';
 import '../../features/audio_player/domain/services/reciter_audio_catalog_cache.dart';
 import '../../features/reciters/domain/repositories/reciters_repository.dart';
 import 'package:tilawa/core/logging/app_logger.dart';
+import 'package:tilawa/core/telemetry/session_diagnostics_hub.dart';
 import '../models/queue_state.dart';
 import 'audio_player_handler.dart';
 
@@ -465,6 +466,18 @@ class AudioPlayerHandlerImpl extends audio_service.BaseAudioHandler
     } catch (e) {
       log('Error clearing audio state: $e');
     }
+  }
+
+  @override
+  Future<void> onTaskRemoved() async {
+    SessionDiagnosticsHub.noteEvent('audio_task_removed');
+    await super.onTaskRemoved();
+  }
+
+  @override
+  Future<void> onNotificationDeleted() async {
+    SessionDiagnosticsHub.noteEvent('audio_notification_deleted');
+    await super.onNotificationDeleted();
   }
 
   @override

@@ -20,6 +20,7 @@ import 'package:tilawa_ui_kit/tilawa_ui_kit.dart';
 import 'app/app_providers.dart';
 import 'app/default_route_system_ui_overlay.dart';
 import 'core/bootstrap/startup_blur_shader_warmup.dart';
+import 'core/telemetry/session_diagnostics_hub.dart';
 import 'core/debug/device_preview_app_builder.dart';
 import 'core/di/injection.dart';
 import 'core/services/notification_startup_service.dart';
@@ -69,6 +70,7 @@ class _TilawaAppState extends State<TilawaApp> with WidgetsBindingObserver {
     super.initState();
     StartupPerfLog.log('tilawa_app_init');
     WidgetsBinding.instance.addObserver(this);
+    unawaited(SessionDiagnosticsHub.startSession());
     SchedulerBinding.instance.addPostFrameCallback((_) {
       StartupPerfLog.log(
         'tilawa_app_first_post_frame',
