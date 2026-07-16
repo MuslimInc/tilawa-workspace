@@ -270,18 +270,29 @@ class AppStartupTasks {
     );
     unawaited(StartupTelemetry.phase('critical_init_start'));
     await migrateLegacySharedPreferencesToAsyncIfNeeded();
+    // Yield between heavy phases so the UI isolate keeps pumping input / vsync
+    // during cold start after LMK (FLUTTER-9 AppExitInfo input-dispatch class).
+    await yieldToUiEventLoop();
     final bool firebaseOk = await initializeFirebaseAndHydratedStorage(
       timeline,
     );
+    await yieldToUiEventLoop();
     await configurePostFirebaseServices(
       firebaseOk: firebaseOk,
       timeline: timeline,
     );
+    await yieldToUiEventLoop();
     await runDependencyInjection(configureDI: configureDI, timeline: timeline);
+    await yieldToUiEventLoop();
     await configurePreRenderServices(timeline: timeline);
     timeline.logTotal('=== Critical init done');
     unawaited(StartupTelemetry.phase('critical_init_done'));
   }
+
+  /// Returns to the event loop so frames / input can run between long awaits.
+  @visibleForTesting
+  static Future<void> yieldToUiEventLoop() =>
+      Future<void>.delayed(Duration.zero);
 
   void initializeNonCriticalServices() {
     if (!_isEnabled(

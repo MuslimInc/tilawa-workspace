@@ -75,4 +75,26 @@ class BootDeviceEventBreadcrumbsTest {
         BootDeviceEventBreadcrumbs.resetForLaunch()
         assertTrue(BootDeviceEventBreadcrumbs.bootInProgress)
     }
+
+    @Test
+    fun `recordTrimMemory stores trim_level`() {
+        BootDeviceEventBreadcrumbs.recordTrimMemory(80)
+
+        assertEquals(1, captured.size)
+        val breadcrumb = captured.single()
+        assertEquals("TRIM_MEMORY", breadcrumb.getData("action"))
+        assertEquals(80, breadcrumb.getData("trim_level"))
+        assertEquals(true, breadcrumb.getData("during_boot"))
+    }
+
+    @Test
+    fun `recordLowMemory tags LOW_MEMORY action`() {
+        BootDeviceEventBreadcrumbs.markBootComplete()
+        BootDeviceEventBreadcrumbs.recordLowMemory()
+
+        assertEquals(1, captured.size)
+        val breadcrumb = captured.single()
+        assertEquals("LOW_MEMORY", breadcrumb.getData("action"))
+        assertEquals(false, breadcrumb.getData("during_boot"))
+    }
 }
