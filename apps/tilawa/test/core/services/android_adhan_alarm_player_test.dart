@@ -447,6 +447,21 @@ void main() {
     );
 
     test(
+      'pullPendingNotificationTapPayload returns null on MissingPluginException',
+      () async {
+        // No mock handler → MethodChannel throws MissingPluginException.
+        expect(await player.pullPendingNotificationTapPayload(), isNull);
+      },
+    );
+
+    test(
+      'flushPendingNotificationTap completes when plugin not registered',
+      () async {
+        await expectLater(player.flushPendingNotificationTap(), completes);
+      },
+    );
+
+    test(
       'pullPendingNotificationTapPayload returns null when not supported',
       () async {
         final unsupported = AndroidAdhanAlarmPlayer(isSupportedOverride: false);

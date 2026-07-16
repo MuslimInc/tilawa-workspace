@@ -81,6 +81,12 @@ class AndroidAdhanAlarmPlayer implements IAdhanAlarmPlayer {
         '[AndroidAdhanAlarmPlayer] consumePendingNotificationTap failed: ${e.message}',
       );
       return null;
+    } on MissingPluginException {
+      // Native handler not attached yet (cold-start race / headless isolate).
+      logger.d(
+        '[AndroidAdhanAlarmPlayer] consumePendingNotificationTap skipped: plugin not registered',
+      );
+      return null;
     }
   }
 
@@ -100,6 +106,10 @@ class AndroidAdhanAlarmPlayer implements IAdhanAlarmPlayer {
     } on PlatformException catch (e) {
       logger.e(
         '[AndroidAdhanAlarmPlayer] ackNotificationTap failed: ${e.message}',
+      );
+    } on MissingPluginException {
+      logger.d(
+        '[AndroidAdhanAlarmPlayer] ackNotificationTap skipped: plugin not registered',
       );
     }
   }
@@ -141,6 +151,11 @@ class AndroidAdhanAlarmPlayer implements IAdhanAlarmPlayer {
     } on PlatformException catch (e) {
       logger.e('[AndroidAdhanAlarmPlayer] scheduleAdhan failed: ${e.message}');
       return false;
+    } on MissingPluginException {
+      logger.d(
+        '[AndroidAdhanAlarmPlayer] scheduleAdhan skipped: plugin not registered',
+      );
+      return false;
     }
   }
 
@@ -173,6 +188,11 @@ class AndroidAdhanAlarmPlayer implements IAdhanAlarmPlayer {
     } on PlatformException catch (e) {
       logger.e('[AndroidAdhanAlarmPlayer] playAdhanNow failed: ${e.message}');
       return false;
+    } on MissingPluginException {
+      logger.d(
+        '[AndroidAdhanAlarmPlayer] playAdhanNow skipped: plugin not registered',
+      );
+      return false;
     }
   }
 
@@ -186,6 +206,10 @@ class AndroidAdhanAlarmPlayer implements IAdhanAlarmPlayer {
       });
     } on PlatformException catch (e) {
       logger.e('[AndroidAdhanAlarmPlayer] cancelAdhan failed: ${e.message}');
+    } on MissingPluginException {
+      logger.d(
+        '[AndroidAdhanAlarmPlayer] cancelAdhan skipped: plugin not registered',
+      );
     }
   }
 
@@ -197,6 +221,10 @@ class AndroidAdhanAlarmPlayer implements IAdhanAlarmPlayer {
     } on PlatformException catch (e) {
       logger.e(
         '[AndroidAdhanAlarmPlayer] cancelAllAdhans failed: ${e.message}',
+      );
+    } on MissingPluginException {
+      logger.d(
+        '[AndroidAdhanAlarmPlayer] cancelAllAdhans skipped: plugin not registered',
       );
     }
   }
@@ -228,6 +256,10 @@ class AndroidAdhanAlarmPlayer implements IAdhanAlarmPlayer {
       logger.e(
         '[AndroidAdhanAlarmPlayer] persistPendingAlarms failed: ${e.message}',
       );
+    } on MissingPluginException {
+      logger.d(
+        '[AndroidAdhanAlarmPlayer] persistPendingAlarms skipped: plugin not registered',
+      );
     }
   }
 
@@ -238,6 +270,10 @@ class AndroidAdhanAlarmPlayer implements IAdhanAlarmPlayer {
     } on PlatformException catch (e) {
       logger.e(
         '[AndroidAdhanAlarmPlayer] clearPendingAlarms failed: ${e.message}',
+      );
+    } on MissingPluginException {
+      logger.d(
+        '[AndroidAdhanAlarmPlayer] clearPendingAlarms skipped: plugin not registered',
       );
     }
   }
@@ -257,6 +293,11 @@ class AndroidAdhanAlarmPlayer implements IAdhanAlarmPlayer {
         '[AndroidAdhanAlarmPlayer] consumeNeedsRescheduleAfterBoot failed: ${e.message}',
       );
       return false;
+    } on MissingPluginException {
+      logger.d(
+        '[AndroidAdhanAlarmPlayer] consumeNeedsRescheduleAfterBoot skipped: plugin not registered',
+      );
+      return false;
     }
   }
 
@@ -268,6 +309,10 @@ class AndroidAdhanAlarmPlayer implements IAdhanAlarmPlayer {
     } on PlatformException catch (e) {
       logger.e(
         '[AndroidAdhanAlarmPlayer] markNeedsReschedule failed: ${e.message}',
+      );
+    } on MissingPluginException {
+      logger.d(
+        '[AndroidAdhanAlarmPlayer] markNeedsReschedule skipped: plugin not registered',
       );
     }
   }
@@ -283,6 +328,11 @@ class AndroidAdhanAlarmPlayer implements IAdhanAlarmPlayer {
     } on PlatformException catch (e) {
       logger.e(
         '[AndroidAdhanAlarmPlayer] isIgnoringBatteryOptimizations failed: ${e.message}',
+      );
+      return false;
+    } on MissingPluginException {
+      logger.d(
+        '[AndroidAdhanAlarmPlayer] isIgnoringBatteryOptimizations skipped: plugin not registered',
       );
       return false;
     }
@@ -308,6 +358,8 @@ class AndroidAdhanAlarmPlayer implements IAdhanAlarmPlayer {
       return await _channel.invokeMethod<String>('manufacturer');
     } on PlatformException {
       return null;
+    } on MissingPluginException {
+      return null;
     }
   }
 
@@ -322,6 +374,10 @@ class AndroidAdhanAlarmPlayer implements IAdhanAlarmPlayer {
       logger.e(
         '[AndroidAdhanAlarmPlayer] STOP_ADHAN_FROM_APP_NATIVE_FAILED: ${e.message}',
       );
+    } on MissingPluginException {
+      logger.d(
+        '[AndroidAdhanAlarmPlayer] STOP_ADHAN_FROM_APP skipped: plugin not registered',
+      );
     }
   }
 
@@ -332,6 +388,11 @@ class AndroidAdhanAlarmPlayer implements IAdhanAlarmPlayer {
       return await _channel.invokeMethod<bool>('isAdhanPlaying') ?? false;
     } on PlatformException catch (e) {
       logger.e('[AndroidAdhanAlarmPlayer] isAdhanPlaying failed: ${e.message}');
+      return false;
+    } on MissingPluginException {
+      logger.d(
+        '[AndroidAdhanAlarmPlayer] isAdhanPlaying skipped: plugin not registered',
+      );
       return false;
     }
   }
@@ -352,6 +413,11 @@ class AndroidAdhanAlarmPlayer implements IAdhanAlarmPlayer {
     } on PlatformException catch (e) {
       logger.e(
         '[AndroidAdhanAlarmPlayer] getActiveAdhanPayload failed: ${e.message}',
+      );
+      return null;
+    } on MissingPluginException {
+      logger.d(
+        '[AndroidAdhanAlarmPlayer] getActiveAdhanPayload skipped: plugin not registered',
       );
       return null;
     }
