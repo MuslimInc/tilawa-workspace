@@ -4177,4 +4177,34 @@ class AppLocalizationsEn extends AppLocalizations {
   @override
   String get editProfileAvatarTooLarge =>
       'Photo is too large. Choose a smaller image.';
+
+  @override
+  String get editProfilePhotoActionsTitle => 'Profile photo';
+
+  @override
+  String get editProfileChangePhotoSemantic => 'Change profile photo';
+
+  @override
+  String get editProfilePickFailed =>
+      'Could not open the photo picker. Try again.';
+
+  @override
+  String get editProfileDiscardTitle => 'Discard changes?';
+
+  @override
+  String get editProfileDiscardMessage =>
+      'Your edits will be lost if you leave now.';
+
+  @override
+  String get editProfileDiscardConfirm => 'Discard';
+
+  @override
+  String get editProfileKeepEditing => 'Keep editing';
+
+  @override
+  String get editProfileUnavailableTitle => 'Profile unavailable';
+
+  @override
+  String get editProfileUnavailableMessage =>
+      'Sign in again to edit your profile.';
 }

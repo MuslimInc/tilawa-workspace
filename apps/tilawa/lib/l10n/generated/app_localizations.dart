@@ -7318,6 +7318,60 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Photo is too large. Choose a smaller image.'**
   String get editProfileAvatarTooLarge;
+
+  /// Title for the profile photo action bottom sheet
+  ///
+  /// In en, this message translates to:
+  /// **'Profile photo'**
+  String get editProfilePhotoActionsTitle;
+
+  /// Accessibility label for the editable profile avatar
+  ///
+  /// In en, this message translates to:
+  /// **'Change profile photo'**
+  String get editProfileChangePhotoSemantic;
+
+  /// Error toast when image picker fails or is denied
+  ///
+  /// In en, this message translates to:
+  /// **'Could not open the photo picker. Try again.'**
+  String get editProfilePickFailed;
+
+  /// Title for discard unsaved profile edits dialog
+  ///
+  /// In en, this message translates to:
+  /// **'Discard changes?'**
+  String get editProfileDiscardTitle;
+
+  /// Body for discard unsaved profile edits dialog
+  ///
+  /// In en, this message translates to:
+  /// **'Your edits will be lost if you leave now.'**
+  String get editProfileDiscardMessage;
+
+  /// Confirm button to discard unsaved profile edits
+  ///
+  /// In en, this message translates to:
+  /// **'Discard'**
+  String get editProfileDiscardConfirm;
+
+  /// Cancel button that keeps the user on edit profile
+  ///
+  /// In en, this message translates to:
+  /// **'Keep editing'**
+  String get editProfileKeepEditing;
+
+  /// Title when edit profile opens without a signed-in user
+  ///
+  /// In en, this message translates to:
+  /// **'Profile unavailable'**
+  String get editProfileUnavailableTitle;
+
+  /// Message when edit profile opens without a signed-in user
+  ///
+  /// In en, this message translates to:
+  /// **'Sign in again to edit your profile.'**
+  String get editProfileUnavailableMessage;
 }
 
 class _AppLocalizationsDelegate

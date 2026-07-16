@@ -5022,5 +5022,41 @@
     "editProfileAvatarTooLarge": "Photo is too large. Choose a smaller image.",
     "@editProfileAvatarTooLarge": {
         "description": "Error when picked avatar exceeds upload size cap"
+    },
+    "editProfilePhotoActionsTitle": "Profile photo",
+    "@editProfilePhotoActionsTitle": {
+        "description": "Title for the profile photo action bottom sheet"
+    },
+    "editProfileChangePhotoSemantic": "Change profile photo",
+    "@editProfileChangePhotoSemantic": {
+        "description": "Accessibility label for the editable profile avatar"
+    },
+    "editProfilePickFailed": "Could not open the photo picker. Try again.",
+    "@editProfilePickFailed": {
+        "description": "Error toast when image picker fails or is denied"
+    },
+    "editProfileDiscardTitle": "Discard changes?",
+    "@editProfileDiscardTitle": {
+        "description": "Title for discard unsaved profile edits dialog"
+    },
+    "editProfileDiscardMessage": "Your edits will be lost if you leave now.",
+    "@editProfileDiscardMessage": {
+        "description": "Body for discard unsaved profile edits dialog"
+    },
+    "editProfileDiscardConfirm": "Discard",
+    "@editProfileDiscardConfirm": {
+        "description": "Confirm button to discard unsaved profile edits"
+    },
+    "editProfileKeepEditing": "Keep editing",
+    "@editProfileKeepEditing": {
+        "description": "Cancel button that keeps the user on edit profile"
+    },
+    "editProfileUnavailableTitle": "Profile unavailable",
+    "@editProfileUnavailableTitle": {
+        "description": "Title when edit profile opens without a signed-in user"
+    },
+    "editProfileUnavailableMessage": "Sign in again to edit your profile.",
+    "@editProfileUnavailableMessage": {
+        "description": "Message when edit profile opens without a signed-in user"
     }
 }

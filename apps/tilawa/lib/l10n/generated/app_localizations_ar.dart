@@ -4140,4 +4140,32 @@ class AppLocalizationsAr extends AppLocalizations {
 
   @override
   String get editProfileAvatarTooLarge => 'الصورة كبيرة جدًا. اختر صورة أصغر.';
+
+  @override
+  String get editProfilePhotoActionsTitle => 'صورة الملف الشخصي';
+
+  @override
+  String get editProfileChangePhotoSemantic => 'تغيير صورة الملف الشخصي';
+
+  @override
+  String get editProfilePickFailed => 'تعذر فتح اختيار الصورة. حاول مرة أخرى.';
+
+  @override
+  String get editProfileDiscardTitle => 'تجاهل التغييرات؟';
+
+  @override
+  String get editProfileDiscardMessage => 'ستُفقد تعديلاتك إذا غادرت الآن.';
+
+  @override
+  String get editProfileDiscardConfirm => 'تجاهل';
+
+  @override
+  String get editProfileKeepEditing => 'متابعة التعديل';
+
+  @override
+  String get editProfileUnavailableTitle => 'الملف الشخصي غير متاح';
+
+  @override
+  String get editProfileUnavailableMessage =>
+      'سجّل الدخول مرة أخرى لتعديل ملفك الشخصي.';
 }

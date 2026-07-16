@@ -4388,5 +4388,41 @@
     "editProfileAvatarTooLarge": "الصورة كبيرة جدًا. اختر صورة أصغر.",
     "@editProfileAvatarTooLarge": {
         "description": "Error when picked avatar exceeds upload size cap"
+    },
+    "editProfilePhotoActionsTitle": "صورة الملف الشخصي",
+    "@editProfilePhotoActionsTitle": {
+        "description": "Title for the profile photo action bottom sheet"
+    },
+    "editProfileChangePhotoSemantic": "تغيير صورة الملف الشخصي",
+    "@editProfileChangePhotoSemantic": {
+        "description": "Accessibility label for the editable profile avatar"
+    },
+    "editProfilePickFailed": "تعذر فتح اختيار الصورة. حاول مرة أخرى.",
+    "@editProfilePickFailed": {
+        "description": "Error toast when image picker fails or is denied"
+    },
+    "editProfileDiscardTitle": "تجاهل التغييرات؟",
+    "@editProfileDiscardTitle": {
+        "description": "Title for discard unsaved profile edits dialog"
+    },
+    "editProfileDiscardMessage": "ستُفقد تعديلاتك إذا غادرت الآن.",
+    "@editProfileDiscardMessage": {
+        "description": "Body for discard unsaved profile edits dialog"
+    },
+    "editProfileDiscardConfirm": "تجاهل",
+    "@editProfileDiscardConfirm": {
+        "description": "Confirm button to discard unsaved profile edits"
+    },
+    "editProfileKeepEditing": "متابعة التعديل",
+    "@editProfileKeepEditing": {
+        "description": "Cancel button that keeps the user on edit profile"
+    },
+    "editProfileUnavailableTitle": "الملف الشخصي غير متاح",
+    "@editProfileUnavailableTitle": {
+        "description": "Title when edit profile opens without a signed-in user"
+    },
+    "editProfileUnavailableMessage": "سجّل الدخول مرة أخرى لتعديل ملفك الشخصي.",
+    "@editProfileUnavailableMessage": {
+        "description": "Message when edit profile opens without a signed-in user"
     }
 }
