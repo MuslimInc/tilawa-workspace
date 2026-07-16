@@ -290,25 +290,77 @@ void main() {
     expect(padding.bottom, systemBottomSafeArea + tokens.spaceExtraLarge);
   });
 
-  testWidgets('footer clears the keyboard with the token footer buffer', (
-    tester,
-  ) async {
-    const keyboardInset = 300.0;
+  testWidgets(
+    'footer uses open buffer when IME visible (parent already lifts sheet)',
+    (tester) async {
+      const keyboardInset = 300.0;
 
-    final padding = await pumpFooterPadding(
-      tester,
-      viewInsets: const EdgeInsets.only(bottom: keyboardInset),
-    );
-    final context = tester.element(find.byKey(footerKey));
-    final footerPadding =
-        Theme.of(
-          context,
-        ).componentTokens.bottomSheetScaffold.footerPadding.resolve(
-          Directionality.of(context),
-        );
+      final padding = await pumpFooterPadding(
+        tester,
+        viewInsets: const EdgeInsets.only(bottom: keyboardInset),
+      );
+      final context = tester.element(find.byKey(footerKey));
+      final footerPadding = Theme.of(context)
+          .componentTokens
+          .bottomSheetScaffold
+          .footerPadding
+          .resolve(Directionality.of(context));
 
-    expect(padding.bottom, keyboardInset + footerPadding.bottom);
-  });
+      // Do not re-add [keyboardInset] — showModalBottomSheet already pads it.
+      expect(padding.bottom, footerPadding.bottom);
+    },
+  );
+
+  testWidgets(
+    'compact action sheet does not overflow while keyboard inset is present',
+    (tester) async {
+      const keyboardInset = 200.0;
+      const sheetMaxHeight = 400.0;
+
+      await tester.pumpWidget(
+        MaterialApp(
+          theme: AppTheme.getLightTheme(
+            primaryColor: AppColors.defaultPrimary,
+          ),
+          home: MediaQuery(
+            data: const MediaQueryData(
+              viewInsets: EdgeInsets.only(bottom: keyboardInset),
+            ),
+            child: Scaffold(
+              body: Align(
+                alignment: Alignment.bottomCenter,
+                child: ConstrainedBox(
+                  constraints: const BoxConstraints(maxHeight: sheetMaxHeight),
+                  child: TilawaBottomSheetScaffold(
+                    topBar: const TilawaBottomSheetTitleRow(
+                      title: 'Profile photo',
+                    ),
+                    footer: TilawaButton(
+                      text: 'Cancel',
+                      variant: TilawaButtonVariant.ghost,
+                      isFullWidth: true,
+                      onPressed: () {},
+                    ),
+                    children: const [
+                      Column(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          ListTile(title: Text('Gallery')),
+                          ListTile(title: Text('Camera')),
+                        ],
+                      ),
+                    ],
+                  ),
+                ),
+              ),
+            ),
+          ),
+        ),
+      );
+
+      expect(tester.takeException(), isNull);
+    },
+  );
 
   testWidgets('resolvedBodyPadding matches token defaults', (tester) async {
     late BuildContext ctx;

@@ -96,6 +96,8 @@ class _EditProfileViewState extends State<_EditProfileView> {
     final theme = Theme.of(context);
     final tokens = theme.tokens;
 
+    FocusManager.instance.primaryFocus?.unfocus();
+
     await showTilawaModalBottomSheet<void>(
       context: context,
       shape: TilawaBottomSheetScaffold.modalShape(context),
