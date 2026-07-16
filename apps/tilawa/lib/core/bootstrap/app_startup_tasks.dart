@@ -1183,6 +1183,12 @@ class AppStartupTasks {
           androidNotificationChannelId: 'com.tilawa.app.channel.audio',
           androidNotificationChannelName: 'Audio playback',
           androidNotificationOngoing: true,
+          // Required companion of ongoing=true; while paused the service drops
+          // FGS priority (killable). While playing, FGS stays elevated.
+          androidStopForegroundOnPause: true,
+          // Bound artwork decode RAM during long background listens (LMK risk).
+          artDownscaleWidth: 256,
+          artDownscaleHeight: 256,
         ),
       );
       _wirePlaybackNotificationBridge();
