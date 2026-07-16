@@ -12,6 +12,33 @@ the changelog for full engineering detail.
 
 | Field | Value |
 |-------|--------|
+| Version | **2.1.8** (build **82**) |
+| Git tag | `v2.1.8+82` (pending) |
+| Date | 2026-07-17 |
+| Track | Production |
+
+### What's new (en-US) — copy for Play Console
+
+```text
+• Edit your display name and profile photo from Settings
+• Clearer, more accessible profile controls
+• More reliable Android startup and prayer alarms
+```
+
+### ما الجديد (ar) — نص متجر Play
+
+```text
+• عدّل اسم العرض وصورة الملف الشخصي من الإعدادات
+• عناصر تحكم أوضح وأسهل وصولاً للملف الشخصي
+• موثوقية أفضل لبدء أندرويد وتنبيهات الصلاة
+```
+
+---
+
+## Previous current release (2.1.7+81)
+
+| Field | Value |
+|-------|--------|
 | Version | **2.1.7** (build **81**) |
 | Git tag | `v2.1.7+81` (pending) |
 | Date | 2026-07-15 |
@@ -585,10 +612,14 @@ _Move shipped notes to **Current release** when cutting a Play upload._
 
 ## How to publish
 
-1. Update **What's new** in Play Console from the en-US / ar blocks above (trim to
-   500 characters if needed).
-2. Record the same version in [`CHANGELOG.md`](../CHANGELOG.md).
-3. Tag: `git tag -a v1.0.5+32 -m "Release 1.0.5+32"` and `git push origin v1.0.5+32`.
+1. Before building, move shipped notes to **Current release**, update version,
+   build, date, track, and both Play Console language blocks (500 characters
+   maximum per language).
+2. Before building, record the same version and verified changes in
+   [`CHANGELOG.md`](../CHANGELOG.md). Version bump, release notes, and changelog
+   are one release-preparation change.
+3. Tag: `git tag -a v<version>+<build> -m "Release <version>+<build>"` and
+   `git push origin v<version>+<build>`.
 4. Build: GitHub Actions **Android Release (Google Play)** workflow, or locally:
-   `cd apps/tilawa && flutter build appbundle --release --target-platform android-arm64 --obfuscate --split-debug-info=build/symbols`
+   `dart run melos run tilawa:build:android:production`.
 5. Checklist: [`google_play_release_checklist.md`](google_play_release_checklist.md)
