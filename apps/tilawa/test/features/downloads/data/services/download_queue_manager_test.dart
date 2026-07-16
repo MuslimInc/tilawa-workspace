@@ -134,7 +134,9 @@ void main() {
     ).thenAnswer((_) async => 'mock_task_id');
     when(
       mockDownloader.cancel(taskId: anyNamed('taskId')),
-    ).thenAnswer((_) async {});
+    ).thenAnswer((_) async {
+      return;
+    });
 
     // We cannot set this static override if the instance relies on GetIt which we just reset
     // But since we registered DownloadService, DownloadServiceImpl.instance might work if it resolves via GetIt.
@@ -283,7 +285,9 @@ void main() {
                 as MockDownloadNotificationService;
         when(
           mockNotification.cancelAllNotifications(),
-        ).thenAnswer((_) async {});
+        ).thenAnswer((_) async {
+          return;
+        });
 
         simulateBusyQueue();
         GetIt.instance<DownloadQueueManager>().initialize();
@@ -757,10 +761,13 @@ void main() {
           when(
             mockDownloader.loadTasksWithRawQuery(query: anyNamed('query')),
           ).thenAnswer((_) async => []);
+          return;
         });
         when(
           mockDownloader.remove(taskId: 'task_1', shouldDeleteContent: true),
-        ).thenAnswer((_) async {});
+        ).thenAnswer((_) async {
+          return;
+        });
 
         // Act
         GetIt.instance<DownloadQueueManager>().initialize();
@@ -1303,13 +1310,16 @@ void main() {
           _,
         ) async {
           when(mockDownloader.loadTasks()).thenAnswer((_) async => []);
+          return;
         });
         when(
           mockDownloader.remove(
             taskId: anyNamed('taskId'),
             shouldDeleteContent: anyNamed('shouldDeleteContent'),
           ),
-        ).thenAnswer((_) async {});
+        ).thenAnswer((_) async {
+          return;
+        });
 
         async.elapse(const Duration(seconds: 31));
         expect(
@@ -1362,7 +1372,9 @@ void main() {
                   as MockDownloadNotificationService;
           when(
             mockNotification.cancelNotification(any),
-          ).thenAnswer((_) async {});
+          ).thenAnswer((_) async {
+            return;
+          });
 
           final manager = GetIt.instance<DownloadQueueManager>();
           manager.initialize();
@@ -1429,7 +1441,9 @@ void main() {
         final mockNotification =
             GetIt.instance<DownloadNotificationService>()
                 as MockDownloadNotificationService;
-        when(mockNotification.cancelNotification(any)).thenAnswer((_) async {});
+        when(mockNotification.cancelNotification(any)).thenAnswer((_) async {
+          return;
+        });
 
         final manager = GetIt.instance<DownloadQueueManager>();
         manager.initialize();
@@ -1509,7 +1523,9 @@ void main() {
             completeMessage: anyNamed('completeMessage'),
             failedMessage: anyNamed('failedMessage'),
           ),
-        ).thenAnswer((_) async {});
+        ).thenAnswer((_) async {
+          return;
+        });
 
         final manager = GetIt.instance<DownloadQueueManager>();
         manager.locale = const Locale('en');
@@ -1764,7 +1780,9 @@ void main() {
             completeMessage: anyNamed('completeMessage'),
             failedMessage: anyNamed('failedMessage'),
           ),
-        ).thenAnswer((_) async {});
+        ).thenAnswer((_) async {
+          return;
+        });
 
         final manager = GetIt.instance<DownloadQueueManager>();
         manager.locale = const Locale('en');
@@ -1854,7 +1872,9 @@ void main() {
               completeMessage: anyNamed('completeMessage'),
               failedMessage: anyNamed('failedMessage'),
             ),
-          ).thenAnswer((_) async {});
+          ).thenAnswer((_) async {
+            return;
+          });
 
           final manager = GetIt.instance<DownloadQueueManager>();
           manager.locale = const Locale('en');
@@ -2427,7 +2447,9 @@ void main() {
             reciterId: anyNamed('reciterId'),
             showNotification: anyNamed('showNotification'),
           ),
-        ).thenAnswer((_) async {});
+        ).thenAnswer((_) async {
+          return;
+        });
 
         final dqm = DownloadQueueManager(
           throwingService,

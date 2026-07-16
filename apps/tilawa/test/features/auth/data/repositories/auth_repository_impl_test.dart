@@ -28,8 +28,12 @@ void main() {
     mockPrepare = MockGoogleSignInPrepareDataSource();
     mockEmailAuth = MockEmailPasswordAuthGateway();
 
-    when(mockPrepare.prepare()).thenAnswer((_) async {});
-    when(mockPrepare.ensureInitialized()).thenAnswer((_) async {});
+    when(mockPrepare.prepare()).thenAnswer((_) async {
+      return;
+    });
+    when(mockPrepare.ensureInitialized()).thenAnswer((_) async {
+      return;
+    });
 
     authRepository = AuthRepositoryImpl(
       mockAuthProvider,
@@ -110,7 +114,9 @@ void main() {
     test(
       'deleteAccount should ensure initialization before deleting',
       () async {
-        when(mockAuthProvider.deleteAccount()).thenAnswer((_) async {});
+        when(mockAuthProvider.deleteAccount()).thenAnswer((_) async {
+          return;
+        });
 
         await authRepository.deleteAccount();
 

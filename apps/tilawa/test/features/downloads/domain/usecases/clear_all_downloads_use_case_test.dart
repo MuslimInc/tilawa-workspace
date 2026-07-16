@@ -19,7 +19,9 @@ void main() {
     group('call', () {
       test('should return Right(null) when clear is successful', () async {
         // Arrange
-        when(mockRepository.clearAllDownloads()).thenAnswer((_) async {});
+        when(mockRepository.clearAllDownloads()).thenAnswer((_) async {
+          return;
+        });
 
         // Act
         final Either<Failure, void> result = await useCase();
@@ -76,7 +78,9 @@ void main() {
 
       test('should call repository clearAllDownloads method', () async {
         // Arrange
-        when(mockRepository.clearAllDownloads()).thenAnswer((_) async {});
+        when(mockRepository.clearAllDownloads()).thenAnswer((_) async {
+          return;
+        });
 
         // Act
         await useCase();
@@ -183,7 +187,9 @@ void main() {
 
       test('should handle multiple consecutive clear calls', () async {
         // Arrange
-        when(mockRepository.clearAllDownloads()).thenAnswer((_) async {});
+        when(mockRepository.clearAllDownloads()).thenAnswer((_) async {
+          return;
+        });
 
         // Act
         final Either<Failure, void> result1 = await useCase();
@@ -210,7 +216,9 @@ void main() {
 
       test('should handle clear when no downloads exist', () async {
         // Arrange
-        when(mockRepository.clearAllDownloads()).thenAnswer((_) async {});
+        when(mockRepository.clearAllDownloads()).thenAnswer((_) async {
+          return;
+        });
 
         // Act
         final Either<Failure, void> result = await useCase();
@@ -226,7 +234,9 @@ void main() {
 
       test('should handle clear with large number of downloads', () async {
         // Arrange
-        when(mockRepository.clearAllDownloads()).thenAnswer((_) async {});
+        when(mockRepository.clearAllDownloads()).thenAnswer((_) async {
+          return;
+        });
 
         // Act
         final Either<Failure, void> result = await useCase();

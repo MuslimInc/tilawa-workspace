@@ -80,14 +80,22 @@ void main() {
 
     when(mockPrefs.getString(any)).thenAnswer((_) async => null);
     when(mockPrefs.getInt(any)).thenAnswer((_) async => null);
-    when(mockPrefs.setString(any, any)).thenAnswer((_) async {});
-    when(mockPrefs.setInt(any, any)).thenAnswer((_) async {});
+    when(mockPrefs.setString(any, any)).thenAnswer((_) async {
+      return;
+    });
+    when(mockPrefs.setInt(any, any)).thenAnswer((_) async {
+      return;
+    });
     when(
       mockAnalytics.logAthkarNotificationOpen(any, any),
-    ).thenAnswer((_) async {});
+    ).thenAnswer((_) async {
+      return;
+    });
     when(
       mockAnalytics.logEvent(any, parameters: anyNamed('parameters')),
-    ).thenAnswer((_) async {});
+    ).thenAnswer((_) async {
+      return;
+    });
 
     athkarService = AthkarNotificationService(
       mockPrefs,
@@ -173,13 +181,19 @@ void main() {
       when(mockPid.currentPid).thenReturn(4242);
       when(mockStartupPrefs.getInt(any)).thenAnswer((_) async => null);
       when(mockStartupPrefs.getString(any)).thenAnswer((_) async => null);
-      when(mockStartupPrefs.setInt(any, any)).thenAnswer((_) async {});
-      when(mockStartupPrefs.setString(any, any)).thenAnswer((_) async {});
+      when(mockStartupPrefs.setInt(any, any)).thenAnswer((_) async {
+        return;
+      });
+      when(mockStartupPrefs.setString(any, any)).thenAnswer((_) async {
+        return;
+      });
       when(
         mockDispatcher.initialize(
           createHighImportanceChannel: anyNamed('createHighImportanceChannel'),
         ),
-      ).thenAnswer((_) async {});
+      ).thenAnswer((_) async {
+        return;
+      });
       when(
         mockDispatcher.getNotificationAppLaunchDetails(),
       ).thenAnswer((_) async => null);

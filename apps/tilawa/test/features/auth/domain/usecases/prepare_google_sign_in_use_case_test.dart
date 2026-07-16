@@ -14,7 +14,9 @@ void main() {
   setUp(() {
     mockAuthRepository = MockAuthRepository();
     useCase = PrepareGoogleSignInUseCase(mockAuthRepository);
-    when(mockAuthRepository.prepareGoogleSignIn()).thenAnswer((_) async {});
+    when(mockAuthRepository.prepareGoogleSignIn()).thenAnswer((_) async {
+      return;
+    });
   });
 
   test('call delegates to AuthRepository.prepareGoogleSignIn', () async {

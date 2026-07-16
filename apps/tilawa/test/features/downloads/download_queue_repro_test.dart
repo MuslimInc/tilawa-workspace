@@ -100,7 +100,9 @@ void main() {
     GetIt.I.registerSingleton<DownloadQueueManager>(downloadQueueManager);
 
     // Mock notification behaviors
-    when(mockNotification.initialize()).thenAnswer((_) async {});
+    when(mockNotification.initialize()).thenAnswer((_) async {
+      return;
+    });
     when(
       mockNotification.showDownloadProgress(
         downloadId: anyNamed('downloadId'),
@@ -113,8 +115,12 @@ void main() {
         completeMessage: anyNamed('completeMessage'),
         failedMessage: anyNamed('failedMessage'),
       ),
-    ).thenAnswer((_) async {});
-    when(mockNotification.cancelNotification(any)).thenAnswer((_) async {});
+    ).thenAnswer((_) async {
+      return;
+    });
+    when(mockNotification.cancelNotification(any)).thenAnswer((_) async {
+      return;
+    });
 
     // Setup Service basics
     when(mockDownloader.initialize(debug: anyNamed('debug'))).thenAnswer((

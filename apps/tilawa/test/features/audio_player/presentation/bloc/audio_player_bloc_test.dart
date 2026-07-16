@@ -142,10 +142,14 @@ void main() {
     mockAppReviewTriggerManager = MockAppReviewTriggerManager();
     when(
       mockAppReviewTriggerManager.onSessionStarted(),
-    ).thenAnswer((_) async {});
+    ).thenAnswer((_) async {
+      return;
+    });
     when(
       mockAppReviewTriggerManager.recordSignal(any),
-    ).thenAnswer((_) async {});
+    ).thenAnswer((_) async {
+      return;
+    });
     when(
       mockAppReviewTriggerManager.tryPromptIfEligible(any),
     ).thenAnswer((_) async => false);

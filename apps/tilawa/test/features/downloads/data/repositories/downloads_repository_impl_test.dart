@@ -99,7 +99,9 @@ void main() {
     when(
       mockDownloadService.globalProgressStream,
     ).thenAnswer((_) => progressController.stream);
-    when(mockDownloadService.initialize()).thenAnswer((_) async {});
+    when(mockDownloadService.initialize()).thenAnswer((_) async {
+      return;
+    });
     when(
       mockDownloadService.getStatus(any),
     ).thenAnswer((_) async => DownloadStatus.pending);
@@ -109,9 +111,15 @@ void main() {
     when(
       mockDownloadService.isStatusDownloadActive(any),
     ).thenAnswer((_) async => false);
-    when(mockDownloadService.cancel(any)).thenAnswer((_) async {});
-    when(mockDownloadService.pause(any)).thenAnswer((_) async {});
-    when(mockDownloadService.resume(any)).thenAnswer((_) async {});
+    when(mockDownloadService.cancel(any)).thenAnswer((_) async {
+      return;
+    });
+    when(mockDownloadService.pause(any)).thenAnswer((_) async {
+      return;
+    });
+    when(mockDownloadService.resume(any)).thenAnswer((_) async {
+      return;
+    });
     when(mockNetworkInfo.isConnected).thenAnswer((_) async => true);
 
     // Stub testing-specific new logic
@@ -243,7 +251,9 @@ void main() {
       () async {
         // Arrange
         when(mockLocalDataSource.getDownloads()).thenAnswer((_) async => []);
-        when(mockLocalDataSource.deleteDownload(any)).thenAnswer((_) async {});
+        when(mockLocalDataSource.deleteDownload(any)).thenAnswer((_) async {
+          return;
+        });
 
         // Act
         await repository.deleteDownload('non_existent');
@@ -354,7 +364,9 @@ void main() {
         when(
           mockLocalDataSource.getDownloads(),
         ).thenAnswer((_) async => [download]);
-        when(mockLocalDataSource.updateDownload(any)).thenAnswer((_) async {});
+        when(mockLocalDataSource.updateDownload(any)).thenAnswer((_) async {
+          return;
+        });
 
         final Stream<DownloadItem> stream = repository.getDownloadProgress(
           testId,
@@ -794,7 +806,9 @@ void main() {
             mockQueueManager.enqueueBatch(any),
           ).thenThrow(MissingPluginException());
           when(mockPathResolver.getDownloadsDir()).thenAnswer((_) async => '.');
-          when(mockLocalDataSource.addDownload(any)).thenAnswer((_) async {});
+          when(mockLocalDataSource.addDownload(any)).thenAnswer((_) async {
+            return;
+          });
 
           // Act
           await repository.startDownloadBatch([
@@ -822,7 +836,9 @@ void main() {
         when(
           mockPathResolver.getDownloadsDir(),
         ).thenAnswer((_) async => testDownloadsDir);
-        when(mockLocalDataSource.addDownload(any)).thenAnswer((_) async {});
+        when(mockLocalDataSource.addDownload(any)).thenAnswer((_) async {
+          return;
+        });
 
         final List<
           ({int reciterId, String reciterName, String surahTitle, String url})
@@ -862,7 +878,9 @@ void main() {
         when(
           mockPathResolver.getDownloadsDir(),
         ).thenAnswer((_) async => testDownloadsDir);
-        when(mockLocalDataSource.addDownload(any)).thenAnswer((_) async {});
+        when(mockLocalDataSource.addDownload(any)).thenAnswer((_) async {
+          return;
+        });
 
         final List<
           ({int reciterId, String reciterName, String surahTitle, String url})
@@ -2386,8 +2404,12 @@ void main() {
       when(
         mockValidator.verifyFileExists(any, maxRetries: anyNamed('maxRetries')),
       ).thenAnswer((_) async => true);
-      when(mockLocalDataSource.deleteFile(any)).thenAnswer((_) async {});
-      when(mockLocalDataSource.deleteDownload(testId)).thenAnswer((_) async {});
+      when(mockLocalDataSource.deleteFile(any)).thenAnswer((_) async {
+        return;
+      });
+      when(mockLocalDataSource.deleteDownload(testId)).thenAnswer((_) async {
+        return;
+      });
 
       // Act
       await repository.deleteDownload(testId);
@@ -2419,7 +2441,9 @@ void main() {
       when(
         mockValidator.verifyFileExists(any, maxRetries: anyNamed('maxRetries')),
       ).thenAnswer((_) async => false);
-      when(mockLocalDataSource.deleteDownload(testId)).thenAnswer((_) async {});
+      when(mockLocalDataSource.deleteDownload(testId)).thenAnswer((_) async {
+        return;
+      });
 
       // Act
       await repository.deleteDownload(testId);
@@ -2449,7 +2473,9 @@ void main() {
       when(
         mockLocalDataSource.getDownloads(),
       ).thenAnswer((_) async => [download]);
-      when(mockDownloadService.pause(any)).thenAnswer((_) async {});
+      when(mockDownloadService.pause(any)).thenAnswer((_) async {
+        return;
+      });
 
       // Act
       await repository.pauseDownload(testId);
@@ -2478,7 +2504,9 @@ void main() {
       when(
         mockLocalDataSource.getDownloads(),
       ).thenAnswer((_) async => [download]);
-      when(mockDownloadService.resume(any)).thenAnswer((_) async {});
+      when(mockDownloadService.resume(any)).thenAnswer((_) async {
+        return;
+      });
 
       // Act
       await repository.resumeDownload(testId);
@@ -2503,7 +2531,9 @@ void main() {
 
         when(mockQueueManager.stopAll()).thenThrow(Exception('Stop failed'));
         when(mockLocalDataSource.getDownloads()).thenAnswer((_) async => []);
-        when(mockLocalDataSource.clearAllDownloads()).thenAnswer((_) async {});
+        when(mockLocalDataSource.clearAllDownloads()).thenAnswer((_) async {
+          return;
+        });
 
         // Re-create repository with mock
         repository = DownloadsRepositoryImpl(
@@ -2608,8 +2638,12 @@ void main() {
       when(
         mockValidator.verifyFileExists(any, maxRetries: anyNamed('maxRetries')),
       ).thenAnswer((_) async => false);
-      when(mockLocalDataSource.deleteFile(any)).thenAnswer((_) async {});
-      when(mockLocalDataSource.clearAllDownloads()).thenAnswer((_) async {});
+      when(mockLocalDataSource.deleteFile(any)).thenAnswer((_) async {
+        return;
+      });
+      when(mockLocalDataSource.clearAllDownloads()).thenAnswer((_) async {
+        return;
+      });
 
       // Act
       await repository.clearAllDownloads();
@@ -2707,7 +2741,9 @@ void main() {
       when(
         mockLocalDataSource.getDownloads(),
       ).thenAnswer((_) async => [download]);
-      when(mockLocalDataSource.updateDownload(any)).thenAnswer((_) async {});
+      when(mockLocalDataSource.updateDownload(any)).thenAnswer((_) async {
+        return;
+      });
 
       // Act
       await repository.updateDownloadProgress(
@@ -2825,7 +2861,9 @@ void main() {
       when(
         mockLocalDataSource.getDownloads(),
       ).thenAnswer((_) async => [stuckDownload]);
-      when(mockLocalDataSource.updateDownload(any)).thenAnswer((_) async {});
+      when(mockLocalDataSource.updateDownload(any)).thenAnswer((_) async {
+        return;
+      });
 
       final GetIt getIt = GetIt.instance;
       final mockQueueManager = MockDownloadQueueManager();
@@ -2843,7 +2881,9 @@ void main() {
           title: anyNamed('title'),
           reciterName: anyNamed('reciterName'),
         ),
-      ).thenAnswer((_) async {});
+      ).thenAnswer((_) async {
+        return;
+      });
 
       // Re-create repository with mock
       repository = DownloadsRepositoryImpl(
@@ -3932,8 +3972,12 @@ void main() {
       when(
         mockLocalDataSource.getDownloads(),
       ).thenAnswer((_) async => [downloadItem]);
-      when(mockLocalDataSource.deleteDownload(any)).thenAnswer((_) async {});
-      when(mockDownloadService.cancel(any)).thenAnswer((_) async {});
+      when(mockLocalDataSource.deleteDownload(any)).thenAnswer((_) async {
+        return;
+      });
+      when(mockDownloadService.cancel(any)).thenAnswer((_) async {
+        return;
+      });
 
       await repository.deleteReciterDownloads(reciterName);
 
@@ -3971,12 +4015,18 @@ void main() {
         );
 
         // Mock updateDownloads
-        when(mockLocalDataSource.updateDownloads(any)).thenAnswer((_) async {});
+        when(mockLocalDataSource.updateDownloads(any)).thenAnswer((_) async {
+          return;
+        });
         when(
           mockValidator.verifyFileExists(any),
         ).thenAnswer((_) async => false);
-        when(mockLocalDataSource.deleteDownload(any)).thenAnswer((_) async {});
-        when(mockDownloadService.cancel(any)).thenAnswer((_) async {});
+        when(mockLocalDataSource.deleteDownload(any)).thenAnswer((_) async {
+          return;
+        });
+        when(mockDownloadService.cancel(any)).thenAnswer((_) async {
+          return;
+        });
 
         await repository.deleteReciterDownloads(reciterName);
 

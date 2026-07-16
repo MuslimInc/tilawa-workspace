@@ -55,12 +55,16 @@ void main() {
     when(mockInit()).thenAnswer((_) async {});
     when(mockPid.currentPid).thenReturn(1234);
     when(mockPrefs.getInt(any)).thenAnswer((_) async => null);
-    when(mockPrefs.setInt(any, any)).thenAnswer((_) async {});
+    when(mockPrefs.setInt(any, any)).thenAnswer((_) async {
+      return;
+    });
     when(
       mockDispatcher.initialize(
         createHighImportanceChannel: anyNamed('createHighImportanceChannel'),
       ),
-    ).thenAnswer((_) async {});
+    ).thenAnswer((_) async {
+      return;
+    });
     when(
       mockDispatcher.getNotificationAppLaunchDetails(),
     ).thenAnswer((_) async => null);

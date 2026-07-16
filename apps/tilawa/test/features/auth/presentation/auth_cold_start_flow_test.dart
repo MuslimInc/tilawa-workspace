@@ -169,10 +169,14 @@ void main() {
     when(mockGetSplashNextRoute.call()).thenAnswer(
       (_) async => const SplashRouteResult(SplashDestination.login),
     );
-    when(mockPrepareGoogleSignIn.call()).thenAnswer((_) async {});
+    when(mockPrepareGoogleSignIn.call()).thenAnswer((_) async {
+      return;
+    });
     when(
       mockReadiness.waitUntilReady(prepareShell: anyNamed('prepareShell')),
-    ).thenAnswer((_) async {});
+    ).thenAnswer((_) async {
+      return;
+    });
     when(mockReadiness.warmShellPrepInBackground()).thenReturn(null);
     when(mockReadiness.timedOut).thenReturn(false);
 

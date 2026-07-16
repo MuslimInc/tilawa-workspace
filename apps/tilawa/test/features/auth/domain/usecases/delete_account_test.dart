@@ -76,15 +76,21 @@ void main() {
 
     when(
       mockSyncDeviceTokenUseCase.removeCurrentTokenForUser(any),
-    ).thenAnswer((_) async {});
-    when(mockPremiumRepository.clearPremiumStatus()).thenAnswer((_) async {});
+    ).thenAnswer((_) async {
+      return;
+    });
+    when(mockPremiumRepository.clearPremiumStatus()).thenAnswer((_) async {
+      return;
+    });
     when(
       mockAccountDeletionRepository.requestSelfAccountDeletion(
         reason: anyNamed('reason'),
         confirmEmail: anyNamed('confirmEmail'),
       ),
     ).thenAnswer((_) async => const Right(null));
-    when(mockAuthRepository.signOut()).thenAnswer((_) async {});
+    when(mockAuthRepository.signOut()).thenAnswer((_) async {
+      return;
+    });
   });
 
   tearDown(() async {

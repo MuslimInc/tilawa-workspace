@@ -20,7 +20,9 @@ void main() {
       test('should return Right(null) when delete is successful', () async {
         // Arrange
         const testDownloadId = '001_Abdul_Rahman_Al-Sudais';
-        when(mockRepository.deleteDownload(any)).thenAnswer((_) async {});
+        when(mockRepository.deleteDownload(any)).thenAnswer((_) async {
+          return;
+        });
 
         // Act
         final Either<Failure, void> result = await useCase(testDownloadId);
@@ -80,7 +82,9 @@ void main() {
       test('should call repository with correct download ID', () async {
         // Arrange
         const testDownloadId = '002_Mishary_Rashid_Alafasy';
-        when(mockRepository.deleteDownload(any)).thenAnswer((_) async {});
+        when(mockRepository.deleteDownload(any)).thenAnswer((_) async {
+          return;
+        });
 
         // Act
         await useCase(testDownloadId);
@@ -93,7 +97,9 @@ void main() {
       test('should handle empty download ID', () async {
         // Arrange
         const testDownloadId = '';
-        when(mockRepository.deleteDownload(any)).thenAnswer((_) async {});
+        when(mockRepository.deleteDownload(any)).thenAnswer((_) async {
+          return;
+        });
 
         // Act
         final Either<Failure, void> result = await useCase(testDownloadId);
@@ -110,7 +116,9 @@ void main() {
       test('should handle special characters in download ID', () async {
         // Arrange
         const testDownloadId = '001-الفاتحة_عبد_الرحمن_السديس';
-        when(mockRepository.deleteDownload(any)).thenAnswer((_) async {});
+        when(mockRepository.deleteDownload(any)).thenAnswer((_) async {
+          return;
+        });
 
         // Act
         final Either<Failure, void> result = await useCase(testDownloadId);
@@ -127,7 +135,9 @@ void main() {
       test('should handle very long download ID', () async {
         // Arrange
         final String testDownloadId = 'a' * 1000; // Very long ID
-        when(mockRepository.deleteDownload(any)).thenAnswer((_) async {});
+        when(mockRepository.deleteDownload(any)).thenAnswer((_) async {
+          return;
+        });
 
         // Act
         final Either<Failure, void> result = await useCase(testDownloadId);
@@ -207,7 +217,9 @@ void main() {
         const testDownloadId2 = '002_Abdul_Rahman_Al-Sudais';
         const testDownloadId3 = '003_Abdul_Rahman_Al-Sudais';
 
-        when(mockRepository.deleteDownload(any)).thenAnswer((_) async {});
+        when(mockRepository.deleteDownload(any)).thenAnswer((_) async {
+          return;
+        });
 
         // Act
         final Either<Failure, void> result1 = await useCase(testDownloadId1);

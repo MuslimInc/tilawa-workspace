@@ -45,7 +45,9 @@ void main() {
         password: anyNamed('password'),
       ),
     ).thenAnswer((_) async => AuthResult.success(user: tUser));
-    when(mockUserRepository.saveUserData(any)).thenAnswer((_) async {});
+    when(mockUserRepository.saveUserData(any)).thenAnswer((_) async {
+      return;
+    });
 
     final AuthResult result = await useCase(
       email: 'test@example.com',

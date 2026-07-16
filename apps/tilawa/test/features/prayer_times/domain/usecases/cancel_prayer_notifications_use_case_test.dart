@@ -20,7 +20,9 @@ void main() {
 
   group('CancelPrayerNotificationsUseCase', () {
     test('delegates to service.cancelAllPrayerNotifications()', () async {
-      when(mockService.cancelAllPrayerNotifications()).thenAnswer((_) async {});
+      when(mockService.cancelAllPrayerNotifications()).thenAnswer((_) async {
+        return;
+      });
 
       final result = await useCase();
 
@@ -29,7 +31,9 @@ void main() {
     });
 
     test('calls service exactly once', () async {
-      when(mockService.cancelAllPrayerNotifications()).thenAnswer((_) async {});
+      when(mockService.cancelAllPrayerNotifications()).thenAnswer((_) async {
+        return;
+      });
 
       await useCase();
 

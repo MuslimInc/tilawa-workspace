@@ -93,7 +93,9 @@ void main() {
         user: anyNamed('user'),
         draft: anyNamed('draft'),
       ),
-    ).thenAnswer((_) async {});
+    ).thenAnswer((_) async {
+      return;
+    });
 
     final RegisterWithEmailResult result = await useCase(draft: _draft());
     await Future<void>.delayed(Duration.zero);

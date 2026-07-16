@@ -152,7 +152,9 @@ void main() {
       sequenceSubject.add(indexedSources);
       return null;
     });
-    when(mockPlayer.addAudioSource(any)).thenAnswer((_) async {});
+    when(mockPlayer.addAudioSource(any)).thenAnswer((_) async {
+      return;
+    });
 
     handler = AudioPlayerHandlerImpl(
       [],

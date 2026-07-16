@@ -133,7 +133,9 @@ void main() {
       mockDispatcher.initialize(
         createHighImportanceChannel: anyNamed('createHighImportanceChannel'),
       ),
-    ).thenAnswer((_) async {});
+    ).thenAnswer((_) async {
+      return;
+    });
     when(
       mockDispatcher.registerHandler(
         serviceId: anyNamed('serviceId'),
@@ -155,18 +157,28 @@ void main() {
       mockAdhanPlayer.pullPendingNotificationTapPayload(),
     ).thenAnswer((_) async => null);
     when(mockAdhanPlayer.isSupported).thenReturn(false);
-    when(mockAdhanPlayer.cancelAllAdhans()).thenAnswer((_) async {});
+    when(mockAdhanPlayer.cancelAllAdhans()).thenAnswer((_) async {
+      return;
+    });
     when(
       mockNotificationPermissions.isPermissionGranted(),
     ).thenAnswer((_) async => true);
     when(
       mockAnalytics.logEvent(any, parameters: anyNamed('parameters')),
-    ).thenAnswer((_) async {});
+    ).thenAnswer((_) async {
+      return;
+    });
     when(mockPrefs.getString(any)).thenAnswer((_) async => null);
-    when(mockPrefs.setString(any, any)).thenAnswer((_) async {});
-    when(mockPrefs.remove(any)).thenAnswer((_) async {});
+    when(mockPrefs.setString(any, any)).thenAnswer((_) async {
+      return;
+    });
+    when(mockPrefs.remove(any)).thenAnswer((_) async {
+      return;
+    });
     when(mockPrefs.getInt(any)).thenAnswer((_) async => null);
-    when(mockPrefs.setInt(any, any)).thenAnswer((_) async {});
+    when(mockPrefs.setInt(any, any)).thenAnswer((_) async {
+      return;
+    });
     when(
       mockPlugin.zonedSchedule(
         id: anyNamed('id'),
@@ -178,8 +190,12 @@ void main() {
         matchDateTimeComponents: anyNamed('matchDateTimeComponents'),
         payload: anyNamed('payload'),
       ),
-    ).thenAnswer((_) async {});
-    when(mockPlugin.cancel(id: anyNamed('id'))).thenAnswer((_) async {});
+    ).thenAnswer((_) async {
+      return;
+    });
+    when(mockPlugin.cancel(id: anyNamed('id'))).thenAnswer((_) async {
+      return;
+    });
     when(
       mockNav.navigateToNotification(any, extra: anyNamed('extra')),
     ).thenAnswer((invocation) {
@@ -218,10 +234,14 @@ void main() {
       mockNotificationPermissions,
     );
 
-    when(mockPrepareGoogleSignIn.call()).thenAnswer((_) async {});
+    when(mockPrepareGoogleSignIn.call()).thenAnswer((_) async {
+      return;
+    });
     when(
       mockReadiness.waitUntilReady(prepareShell: anyNamed('prepareShell')),
-    ).thenAnswer((_) async {});
+    ).thenAnswer((_) async {
+      return;
+    });
     when(mockReadiness.timedOut).thenReturn(false);
     when(mockReadiness.recitersDataReady).thenReturn(false);
 

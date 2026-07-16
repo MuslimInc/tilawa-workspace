@@ -49,7 +49,9 @@ void main() {
       ),
     ).thenAnswer((_) => Future<GoogleSignInAccount?>.value());
     when(mockGoogleSignIn.supportsAuthenticate()).thenReturn(true);
-    when(mockGoogleSignIn.signOut()).thenAnswer((_) async {});
+    when(mockGoogleSignIn.signOut()).thenAnswer((_) async {
+      return;
+    });
     // The sign-in debug log reads the account email on every success path.
     when(mockGoogleUser.email).thenReturn('test@example.com');
 
@@ -918,8 +920,12 @@ void main() {
     });
 
     test('signOut should sign out of Firebase and Google', () async {
-      when(mockFirebaseAuth.signOut()).thenAnswer((_) async {});
-      when(mockGoogleSignIn.signOut()).thenAnswer((_) async {});
+      when(mockFirebaseAuth.signOut()).thenAnswer((_) async {
+        return;
+      });
+      when(mockGoogleSignIn.signOut()).thenAnswer((_) async {
+        return;
+      });
 
       await googleAuthProvider.signOut();
 
@@ -967,8 +973,12 @@ void main() {
     group('deleteAccount', () {
       setUp(() {
         when(mockFirebaseAuth.currentUser).thenReturn(mockFirebaseUser);
-        when(mockFirebaseUser.delete()).thenAnswer((_) async {});
-        when(mockGoogleSignIn.signOut()).thenAnswer((_) async {});
+        when(mockFirebaseUser.delete()).thenAnswer((_) async {
+          return;
+        });
+        when(mockGoogleSignIn.signOut()).thenAnswer((_) async {
+          return;
+        });
       });
 
       test('returns silently when no user is signed in', () async {
@@ -1006,6 +1016,7 @@ void main() {
             if (deleteCalls == 1) {
               throw FirebaseAuthException(code: 'requires-recent-login');
             }
+            return;
           });
           when(
             mockGoogleSignIn.authenticate(

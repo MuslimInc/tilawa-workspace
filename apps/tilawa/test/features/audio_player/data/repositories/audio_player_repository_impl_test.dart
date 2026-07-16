@@ -136,6 +136,7 @@ void main() {
             ),
           );
           mediaItemSubject.add(null);
+          return;
         });
 
         await repository.stop();
@@ -431,7 +432,9 @@ void main() {
 
   group('AudioPlayerRepositoryImpl - Playback Controls', () {
     test('play calls audioHandler.play and returns Right', () async {
-      when(mockAudioHandler.play()).thenAnswer((_) async {});
+      when(mockAudioHandler.play()).thenAnswer((_) async {
+        return;
+      });
 
       final Either<Failure, void> result = await repository.play();
 
@@ -440,7 +443,9 @@ void main() {
     });
 
     test('pause calls audioHandler.pause and returns Right', () async {
-      when(mockAudioHandler.pause()).thenAnswer((_) async {});
+      when(mockAudioHandler.pause()).thenAnswer((_) async {
+        return;
+      });
 
       final Either<Failure, void> result = await repository.pause();
 
@@ -475,7 +480,9 @@ void main() {
     });
 
     test('stop calls audioHandler.stop and returns Right', () async {
-      when(mockAudioHandler.stop()).thenAnswer((_) async {});
+      when(mockAudioHandler.stop()).thenAnswer((_) async {
+        return;
+      });
 
       final Either<Failure, void> result = await repository.stop();
 
@@ -486,7 +493,9 @@ void main() {
     test(
       'seek calls audioHandler.seek with position and returns Right',
       () async {
-        when(mockAudioHandler.seek(any)).thenAnswer((_) async {});
+        when(mockAudioHandler.seek(any)).thenAnswer((_) async {
+          return;
+        });
 
         final Either<Failure, void> result = await repository.seek(
           const Duration(seconds: 45),
@@ -498,7 +507,9 @@ void main() {
     );
 
     test('next calls audioHandler.skipToNext and returns Right', () async {
-      when(mockAudioHandler.skipToNext()).thenAnswer((_) async {});
+      when(mockAudioHandler.skipToNext()).thenAnswer((_) async {
+        return;
+      });
 
       final Either<Failure, void> result = await repository.next();
 
@@ -509,7 +520,9 @@ void main() {
     test(
       'previous calls audioHandler.skipToPrevious and returns Right',
       () async {
-        when(mockAudioHandler.skipToPrevious()).thenAnswer((_) async {});
+        when(mockAudioHandler.skipToPrevious()).thenAnswer((_) async {
+          return;
+        });
 
         final Either<Failure, void> result = await repository.previous();
 
@@ -521,7 +534,9 @@ void main() {
     test(
       'skipToQueueItem calls audioHandler with index and returns Right',
       () async {
-        when(mockAudioHandler.skipToQueueItem(any)).thenAnswer((_) async {});
+        when(mockAudioHandler.skipToQueueItem(any)).thenAnswer((_) async {
+          return;
+        });
 
         final Either<Failure, void> result = await repository.skipToQueueItem(
           3,
@@ -535,7 +550,9 @@ void main() {
 
   group('AudioPlayerRepositoryImpl - Settings', () {
     test('setVolume calls audioHandler.setVolume and returns Right', () async {
-      when(mockAudioHandler.setVolume(any)).thenAnswer((_) async {});
+      when(mockAudioHandler.setVolume(any)).thenAnswer((_) async {
+        return;
+      });
 
       final Either<Failure, void> result = await repository.setVolume(0.5);
 
@@ -544,7 +561,9 @@ void main() {
     });
 
     test('setSpeed calls audioHandler.setSpeed and returns Right', () async {
-      when(mockAudioHandler.setSpeed(any)).thenAnswer((_) async {});
+      when(mockAudioHandler.setSpeed(any)).thenAnswer((_) async {
+        return;
+      });
 
       final Either<Failure, void> result = await repository.setSpeed(1.5);
 
@@ -553,7 +572,9 @@ void main() {
     });
 
     test('setRepeatMode.none maps correctly and calls audioHandler', () async {
-      when(mockAudioHandler.setRepeatMode(any)).thenAnswer((_) async {});
+      when(mockAudioHandler.setRepeatMode(any)).thenAnswer((_) async {
+        return;
+      });
 
       final Either<Failure, void> result = await repository.setRepeatMode(
         AudioRepeatMode.none,
@@ -568,7 +589,9 @@ void main() {
     });
 
     test('setRepeatMode.one maps correctly and calls audioHandler', () async {
-      when(mockAudioHandler.setRepeatMode(any)).thenAnswer((_) async {});
+      when(mockAudioHandler.setRepeatMode(any)).thenAnswer((_) async {
+        return;
+      });
 
       final Either<Failure, void> result = await repository.setRepeatMode(
         AudioRepeatMode.one,
@@ -583,7 +606,9 @@ void main() {
     });
 
     test('setRepeatMode.all maps correctly and calls audioHandler', () async {
-      when(mockAudioHandler.setRepeatMode(any)).thenAnswer((_) async {});
+      when(mockAudioHandler.setRepeatMode(any)).thenAnswer((_) async {
+        return;
+      });
 
       final Either<Failure, void> result = await repository.setRepeatMode(
         AudioRepeatMode.all,
@@ -598,7 +623,9 @@ void main() {
     });
 
     test('setShuffleMode.none maps correctly and calls audioHandler', () async {
-      when(mockAudioHandler.setShuffleMode(any)).thenAnswer((_) async {});
+      when(mockAudioHandler.setShuffleMode(any)).thenAnswer((_) async {
+        return;
+      });
 
       final Either<Failure, void> result = await repository.setShuffleMode(
         AudioShuffleMode.none,
@@ -613,7 +640,9 @@ void main() {
     });
 
     test('setShuffleMode.all maps correctly and calls audioHandler', () async {
-      when(mockAudioHandler.setShuffleMode(any)).thenAnswer((_) async {});
+      when(mockAudioHandler.setShuffleMode(any)).thenAnswer((_) async {
+        return;
+      });
 
       final Either<Failure, void> result = await repository.setShuffleMode(
         AudioShuffleMode.all,
@@ -642,7 +671,9 @@ void main() {
     test(
       'addQueueItem converts entity to MediaItem and calls audioHandler',
       () async {
-        when(mockAudioHandler.addQueueItem(any)).thenAnswer((_) async {});
+        when(mockAudioHandler.addQueueItem(any)).thenAnswer((_) async {
+          return;
+        });
 
         final Either<Failure, void> result = await repository.addQueueItem(
           testAudioEntity,
@@ -656,7 +687,9 @@ void main() {
     test(
       'removeQueueItem converts entity to MediaItem and calls audioHandler',
       () async {
-        when(mockAudioHandler.removeQueueItem(any)).thenAnswer((_) async {});
+        when(mockAudioHandler.removeQueueItem(any)).thenAnswer((_) async {
+          return;
+        });
 
         final Either<Failure, void> result = await repository.removeQueueItem(
           testAudioEntity,
@@ -668,7 +701,9 @@ void main() {
     );
 
     test('moveQueueItem calls audioHandler with indices', () async {
-      when(mockAudioHandler.moveQueueItem(any, any)).thenAnswer((_) async {});
+      when(mockAudioHandler.moveQueueItem(any, any)).thenAnswer((_) async {
+        return;
+      });
 
       final Either<Failure, void> result = await repository.moveQueueItem(0, 2);
 
@@ -677,7 +712,9 @@ void main() {
     });
 
     test('updateQueue converts entities and calls audioHandler', () async {
-      when(mockAudioHandler.updateQueue(any)).thenAnswer((_) async {});
+      when(mockAudioHandler.updateQueue(any)).thenAnswer((_) async {
+        return;
+      });
 
       final Either<Failure, void> result = await repository.updateQueue([
         testAudioEntity,
@@ -688,7 +725,9 @@ void main() {
     });
 
     test('playFromQueue converts entities and calls audioHandler', () async {
-      when(mockAudioHandler.playFromQueue(any, any)).thenAnswer((_) async {});
+      when(mockAudioHandler.playFromQueue(any, any)).thenAnswer((_) async {
+        return;
+      });
 
       final Either<Failure, void> result = await repository.playFromQueue([
         testAudioEntity,
@@ -699,7 +738,9 @@ void main() {
     });
 
     test('maps AudioEntity with null artUri correctly', () async {
-      when(mockAudioHandler.addQueueItem(any)).thenAnswer((_) async {});
+      when(mockAudioHandler.addQueueItem(any)).thenAnswer((_) async {
+        return;
+      });
 
       const entityWithNullArt = AudioEntity(
         id: 'null-art',
@@ -718,7 +759,9 @@ void main() {
     });
 
     test('maps AudioEntity with artUri correctly', () async {
-      when(mockAudioHandler.addQueueItem(any)).thenAnswer((_) async {});
+      when(mockAudioHandler.addQueueItem(any)).thenAnswer((_) async {
+        return;
+      });
 
       const entityWithArt = AudioEntity(
         id: 'with-art',
@@ -740,7 +783,9 @@ void main() {
       );
     });
     test('passes extras to audioHandler when adding queue item', () async {
-      when(mockAudioHandler.addQueueItem(any)).thenAnswer((_) async {});
+      when(mockAudioHandler.addQueueItem(any)).thenAnswer((_) async {
+        return;
+      });
       const entityWithExtras = AudioEntity(
         id: '1',
         title: 'Title',

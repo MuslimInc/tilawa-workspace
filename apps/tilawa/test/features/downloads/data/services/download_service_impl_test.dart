@@ -289,13 +289,17 @@ void main() {
       // Setup cancel expectations
       when(
         mockDownloader.cancel(taskId: anyNamed('taskId')),
-      ).thenAnswer((_) async {});
+      ).thenAnswer((_) async {
+        return;
+      });
       when(
         mockDownloader.remove(
           taskId: anyNamed('taskId'),
           shouldDeleteContent: anyNamed('shouldDeleteContent'),
         ),
-      ).thenAnswer((_) async {});
+      ).thenAnswer((_) async {
+        return;
+      });
 
       final Future<void> expectation = expectLater(
         downloadService.globalProgressStream,
@@ -930,8 +934,12 @@ void main() {
       when(localMockIsolateManager.registerPort()).thenReturn(null);
       when(
         localMockDownloader.initialize(debug: anyNamed('debug')),
-      ).thenAnswer((_) async {});
-      when(localMockDownloader.registerCallback(any)).thenAnswer((_) async {});
+      ).thenAnswer((_) async {
+        return;
+      });
+      when(localMockDownloader.registerCallback(any)).thenAnswer((_) async {
+        return;
+      });
       when(localMockFileHelper.getDirectoryName(any)).thenReturn('/path/to');
       when(localMockFileHelper.getFileName(any)).thenReturn('file.mp3');
       when(localMockFileHelper.ensureDirectoryExists(any)).thenReturn(true);
@@ -985,8 +993,12 @@ void main() {
       when(localMockIsolateManager.registerPort()).thenReturn(null);
       when(
         localMockDownloader.initialize(debug: anyNamed('debug')),
-      ).thenAnswer((_) async {});
-      when(localMockDownloader.registerCallback(any)).thenAnswer((_) async {});
+      ).thenAnswer((_) async {
+        return;
+      });
+      when(localMockDownloader.registerCallback(any)).thenAnswer((_) async {
+        return;
+      });
 
       // loadTasks throws exception
       when(localMockDownloader.loadTasks()).thenThrow(Exception('DB error'));
@@ -1021,10 +1033,14 @@ void main() {
         when(localMockIsolateManager.registerPort()).thenReturn(null);
         when(
           localMockDownloader.initialize(debug: anyNamed('debug')),
-        ).thenAnswer((_) async {});
+        ).thenAnswer((_) async {
+          return;
+        });
         when(
           localMockDownloader.registerCallback(any),
-        ).thenAnswer((_) async {});
+        ).thenAnswer((_) async {
+          return;
+        });
 
         final localService = DownloadServiceImpl(
           localMockDownloader,
@@ -1061,8 +1077,12 @@ void main() {
       when(localMockIsolateManager.registerPort()).thenReturn(null);
       when(
         localMockDownloader.initialize(debug: anyNamed('debug')),
-      ).thenAnswer((_) async {});
-      when(localMockDownloader.registerCallback(any)).thenAnswer((_) async {});
+      ).thenAnswer((_) async {
+        return;
+      });
+      when(localMockDownloader.registerCallback(any)).thenAnswer((_) async {
+        return;
+      });
       when(localMockFileHelper.getDirectoryName(any)).thenReturn('/path/to');
       when(localMockFileHelper.getFileName(any)).thenReturn('file.mp3');
       when(localMockFileHelper.ensureDirectoryExists(any)).thenReturn(true);
@@ -1124,8 +1144,12 @@ void main() {
       when(localMockIsolateManager.registerPort()).thenReturn(null);
       when(
         localMockDownloader.initialize(debug: anyNamed('debug')),
-      ).thenAnswer((_) async {});
-      when(localMockDownloader.registerCallback(any)).thenAnswer((_) async {});
+      ).thenAnswer((_) async {
+        return;
+      });
+      when(localMockDownloader.registerCallback(any)).thenAnswer((_) async {
+        return;
+      });
       when(localMockFileHelper.getDirectoryName(any)).thenReturn('/valid/path');
       when(localMockFileHelper.getFileName(any)).thenReturn(''); // Empty!
       when(localMockFileHelper.ensureDirectoryExists(any)).thenReturn(true);
@@ -1169,8 +1193,12 @@ void main() {
       when(localMockIsolateManager.registerPort()).thenReturn(null);
       when(
         localMockDownloader.initialize(debug: anyNamed('debug')),
-      ).thenAnswer((_) async {});
-      when(localMockDownloader.registerCallback(any)).thenAnswer((_) async {});
+      ).thenAnswer((_) async {
+        return;
+      });
+      when(localMockDownloader.registerCallback(any)).thenAnswer((_) async {
+        return;
+      });
       when(localMockFileHelper.getDirectoryName(any)).thenReturn('/path/to');
       when(localMockFileHelper.getFileName(any)).thenReturn('file.mp3');
       when(localMockFileHelper.ensureDirectoryExists(any)).thenReturn(true);
@@ -1216,8 +1244,12 @@ void main() {
       when(localMockIsolateManager.registerPort()).thenReturn(null);
       when(
         localMockDownloader.initialize(debug: anyNamed('debug')),
-      ).thenAnswer((_) async {});
-      when(localMockDownloader.registerCallback(any)).thenAnswer((_) async {});
+      ).thenAnswer((_) async {
+        return;
+      });
+      when(localMockDownloader.registerCallback(any)).thenAnswer((_) async {
+        return;
+      });
 
       final localService = DownloadServiceImpl(
         localMockDownloader,
@@ -1281,10 +1313,14 @@ void main() {
         when(localMockIsolateManager.registerPort()).thenReturn(null);
         when(
           localMockDownloader.initialize(debug: anyNamed('debug')),
-        ).thenAnswer((_) async {});
+        ).thenAnswer((_) async {
+          return;
+        });
         when(
           localMockDownloader.registerCallback(any),
-        ).thenAnswer((_) async {});
+        ).thenAnswer((_) async {
+          return;
+        });
 
         final localService = DownloadServiceImpl(
           localMockDownloader,
@@ -1331,13 +1367,17 @@ void main() {
         ).thenThrow(Exception('Failed'));
         when(
           localMockDownloader.cancel(taskId: 'task2'),
-        ).thenAnswer((_) async {});
+        ).thenAnswer((_) async {
+          return;
+        });
         when(
           localMockDownloader.remove(
             taskId: anyNamed('taskId'),
             shouldDeleteContent: anyNamed('shouldDeleteContent'),
           ),
-        ).thenAnswer((_) async {});
+        ).thenAnswer((_) async {
+          return;
+        });
 
         final Future<void> expectation = expectLater(
           localService.globalProgressStream,
@@ -1371,8 +1411,12 @@ void main() {
       when(localMockIsolateManager.registerPort()).thenReturn(null);
       when(
         localMockDownloader.initialize(debug: anyNamed('debug')),
-      ).thenAnswer((_) async {});
-      when(localMockDownloader.registerCallback(any)).thenAnswer((_) async {});
+      ).thenAnswer((_) async {
+        return;
+      });
+      when(localMockDownloader.registerCallback(any)).thenAnswer((_) async {
+        return;
+      });
 
       final localService = DownloadServiceImpl(
         localMockDownloader,
@@ -1403,8 +1447,12 @@ void main() {
       when(localMockIsolateManager.registerPort()).thenReturn(null);
       when(
         localMockDownloader.initialize(debug: anyNamed('debug')),
-      ).thenAnswer((_) async {});
-      when(localMockDownloader.registerCallback(any)).thenAnswer((_) async {});
+      ).thenAnswer((_) async {
+        return;
+      });
+      when(localMockDownloader.registerCallback(any)).thenAnswer((_) async {
+        return;
+      });
       when(localMockFileHelper.getDirectoryName(any)).thenReturn('/path/to');
       when(localMockFileHelper.getFileName(any)).thenReturn('file.mp3');
       when(localMockFileHelper.ensureDirectoryExists(any)).thenReturn(true);
@@ -1524,8 +1572,12 @@ void main() {
       when(localMockIsolateManager.registerPort()).thenReturn(null);
       when(
         localMockDownloader.initialize(debug: anyNamed('debug')),
-      ).thenAnswer((_) async {});
-      when(localMockDownloader.registerCallback(any)).thenAnswer((_) async {});
+      ).thenAnswer((_) async {
+        return;
+      });
+      when(localMockDownloader.registerCallback(any)).thenAnswer((_) async {
+        return;
+      });
       when(localMockFileHelper.getDirectoryName(any)).thenReturn('/path/to');
       when(localMockFileHelper.getFileName(any)).thenReturn('file.mp3');
       when(localMockFileHelper.ensureDirectoryExists(any)).thenReturn(true);
@@ -1576,8 +1628,12 @@ void main() {
       final localMockDownloader = MockFlutterDownloaderWrapper();
       when(
         localMockDownloader.initialize(debug: anyNamed('debug')),
-      ).thenAnswer((_) async {});
-      when(localMockDownloader.registerCallback(any)).thenAnswer((_) async {});
+      ).thenAnswer((_) async {
+        return;
+      });
+      when(localMockDownloader.registerCallback(any)).thenAnswer((_) async {
+        return;
+      });
       when(localMockDownloader.loadTasks()).thenAnswer((_) async => []);
 
       final localMockStatusMapper = MockDownloadStatusMapper();
@@ -1668,8 +1724,12 @@ void main() {
       final localMockDownloader = MockFlutterDownloaderWrapper();
       when(
         localMockDownloader.initialize(debug: anyNamed('debug')),
-      ).thenAnswer((_) async {});
-      when(localMockDownloader.registerCallback(any)).thenAnswer((_) async {});
+      ).thenAnswer((_) async {
+        return;
+      });
+      when(localMockDownloader.registerCallback(any)).thenAnswer((_) async {
+        return;
+      });
 
       // Setup a completed task
       when(localMockDownloader.loadTasks()).thenAnswer(
@@ -1734,8 +1794,12 @@ void main() {
       when(mockIsolateManager.registerPort()).thenReturn(null);
       when(
         mockDownloader.initialize(debug: anyNamed('debug')),
-      ).thenAnswer((_) async {});
-      when(mockDownloader.registerCallback(any)).thenAnswer((_) async {});
+      ).thenAnswer((_) async {
+        return;
+      });
+      when(mockDownloader.registerCallback(any)).thenAnswer((_) async {
+        return;
+      });
       when(mockDownloader.loadTasks()).thenAnswer((_) async => []);
     });
 
@@ -1986,7 +2050,9 @@ void main() {
         when(mockFileHelper.ensureDirectoryExists(any)).thenReturn(true);
 
         // 3. Setup remove to SUCCEED
-        when(mockDownloader.remove(taskId: taskId)).thenAnswer((_) async {});
+        when(mockDownloader.remove(taskId: taskId)).thenAnswer((_) async {
+          return;
+        });
 
         // 4. Setup enqueue for the retry
         when(

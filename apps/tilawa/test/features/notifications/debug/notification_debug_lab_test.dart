@@ -107,13 +107,16 @@ void main() {
     when(mockPrefs.setInt(any, any)).thenAnswer((Invocation inv) async {
       prefStore[inv.positionalArguments[0] as String] =
           inv.positionalArguments[1] as int;
+      return;
     });
     when(mockPrefs.setString(any, any)).thenAnswer((Invocation inv) async {
       prefStore[inv.positionalArguments[0] as String] =
           inv.positionalArguments[1] as String;
+      return;
     });
     when(mockPrefs.remove(any)).thenAnswer((Invocation inv) async {
       prefStore.remove(inv.positionalArguments[0] as String);
+      return;
     });
   }
 

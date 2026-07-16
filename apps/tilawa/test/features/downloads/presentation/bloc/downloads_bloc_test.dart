@@ -181,7 +181,9 @@ void main() {
       mockDownloadNotificationService,
     );
 
-    when(mockDownloadNotificationService.initialize()).thenAnswer((_) async {});
+    when(mockDownloadNotificationService.initialize()).thenAnswer((_) async {
+      return;
+    });
     when(
       mockDownloadNotificationService.showDownloadProgress(
         downloadId: anyNamed('downloadId'),
@@ -194,10 +196,14 @@ void main() {
         completeMessage: anyNamed('completeMessage'),
         failedMessage: anyNamed('failedMessage'),
       ),
-    ).thenAnswer((_) async {});
+    ).thenAnswer((_) async {
+      return;
+    });
     when(
       mockDownloadNotificationService.cancelNotification(any),
-    ).thenAnswer((_) async {});
+    ).thenAnswer((_) async {
+      return;
+    });
 
     // Mock FlutterDownloader for DownloadService
     mockDownloader = MockFlutterDownloaderWrapper();

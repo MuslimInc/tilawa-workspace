@@ -598,7 +598,9 @@ void main() {
             matchDateTimeComponents: anyNamed('matchDateTimeComponents'),
             payload: anyNamed('payload'),
           ),
-        ).thenAnswer((_) async {});
+        ).thenAnswer((_) async {
+          return;
+        });
 
         when(
           mockNotificationsPlugin.zonedSchedule(

@@ -25,8 +25,12 @@ void main() {
     when(
       mockPrefs.getInt(NotificationLaunchDedup.schemaVersionKey),
     ).thenAnswer((_) async => NotificationLaunchDedup.currentSchemaVersion);
-    when(mockPrefs.setInt(any, any)).thenAnswer((_) async {});
-    when(mockPrefs.setString(any, any)).thenAnswer((_) async {});
+    when(mockPrefs.setInt(any, any)).thenAnswer((_) async {
+      return;
+    });
+    when(mockPrefs.setString(any, any)).thenAnswer((_) async {
+      return;
+    });
   });
 
   group('launchSignature', () {

@@ -73,10 +73,16 @@ void main() {
 
   void stubPrefsDefault() {
     when(mockPrefs.getString(any)).thenAnswer((_) async => null);
-    when(mockPrefs.setString(any, any)).thenAnswer((_) async {});
-    when(mockPrefs.remove(any)).thenAnswer((_) async {});
+    when(mockPrefs.setString(any, any)).thenAnswer((_) async {
+      return;
+    });
+    when(mockPrefs.remove(any)).thenAnswer((_) async {
+      return;
+    });
     when(mockPrefs.getInt(any)).thenAnswer((_) async => null);
-    when(mockPrefs.setInt(any, any)).thenAnswer((_) async {});
+    when(mockPrefs.setInt(any, any)).thenAnswer((_) async {
+      return;
+    });
   }
 
   void stubPluginDefault() {
@@ -91,8 +97,12 @@ void main() {
         matchDateTimeComponents: anyNamed('matchDateTimeComponents'),
         payload: anyNamed('payload'),
       ),
-    ).thenAnswer((_) async {});
-    when(mockPlugin.cancel(id: anyNamed('id'))).thenAnswer((_) async {});
+    ).thenAnswer((_) async {
+      return;
+    });
+    when(mockPlugin.cancel(id: anyNamed('id'))).thenAnswer((_) async {
+      return;
+    });
     when(
       mockPlugin.show(
         id: anyNamed('id'),
@@ -101,7 +111,9 @@ void main() {
         notificationDetails: anyNamed('notificationDetails'),
         payload: anyNamed('payload'),
       ),
-    ).thenAnswer((_) async {});
+    ).thenAnswer((_) async {
+      return;
+    });
   }
 
   setUp(() {
@@ -122,13 +134,17 @@ void main() {
           >(),
     ).thenReturn(mockAndroidPlugin);
     when(mockAndroidPlugin.createNotificationChannel(any)).thenAnswer(
-      (_) async {},
+      (_) async {
+        return;
+      },
     );
     when(
       mockAndroidPlugin.deleteNotificationChannel(
         channelId: anyNamed('channelId'),
       ),
-    ).thenAnswer((_) async {});
+    ).thenAnswer((_) async {
+      return;
+    });
     when(mockAndroidPlugin.canScheduleExactNotifications()).thenAnswer(
       (_) async => true,
     );
@@ -141,7 +157,9 @@ void main() {
       mockDispatcher.initialize(
         createHighImportanceChannel: anyNamed('createHighImportanceChannel'),
       ),
-    ).thenAnswer((_) async {});
+    ).thenAnswer((_) async {
+      return;
+    });
     when(
       mockDispatcher.registerHandler(
         serviceId: anyNamed('serviceId'),
@@ -165,16 +183,22 @@ void main() {
     ).thenAnswer((_) async => null);
     when(
       mockAdhanPlayer.flushPendingNotificationTap(),
-    ).thenAnswer((_) async {});
+    ).thenAnswer((_) async {
+      return;
+    });
     when(mockAdhanPlayer.isSupported).thenReturn(false);
     when(mockNav.getCurrentLocation()).thenReturn(null);
-    when(mockAdhanPlayer.cancelAllAdhans()).thenAnswer((_) async {});
+    when(mockAdhanPlayer.cancelAllAdhans()).thenAnswer((_) async {
+      return;
+    });
     when(
       mockNotificationPermissions.isPermissionGranted(),
     ).thenAnswer((_) async => true);
     when(
       mockAnalytics.logEvent(any, parameters: anyNamed('parameters')),
-    ).thenAnswer((_) async {});
+    ).thenAnswer((_) async {
+      return;
+    });
 
     stubPrefsDefault();
     stubPluginDefault();
@@ -964,6 +988,7 @@ void main() {
           when(mockPrefs.setString(any, any)).thenAnswer((inv) async {
             store[inv.positionalArguments[0] as String] =
                 inv.positionalArguments[1] as String;
+            return;
           });
 
           await initialize();
@@ -1052,6 +1077,7 @@ void main() {
         when(mockPrefs.setString(any, any)).thenAnswer((inv) async {
           store[inv.positionalArguments[0] as String] =
               inv.positionalArguments[1] as String;
+          return;
         });
 
         await initialize();
@@ -1510,6 +1536,7 @@ void main() {
           when(mockPrefs.setString(any, any)).thenAnswer((inv) async {
             store[inv.positionalArguments[0] as String] =
                 inv.positionalArguments[1] as String;
+            return;
           });
 
           await initialize();
@@ -1553,6 +1580,7 @@ void main() {
           when(mockPrefs.setString(any, any)).thenAnswer((inv) async {
             store[inv.positionalArguments[0] as String] =
                 inv.positionalArguments[1] as String;
+            return;
           });
 
           await initialize();
@@ -1799,6 +1827,7 @@ void main() {
         when(mockPrefs.setString(any, any)).thenAnswer((inv) async {
           store[inv.positionalArguments[0] as String] =
               inv.positionalArguments[1] as String;
+          return;
         });
 
         store[PrayerNotificationConfig.lastTimezoneKey] = 'America/New_York';

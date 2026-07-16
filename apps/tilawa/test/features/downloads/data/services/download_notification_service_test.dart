@@ -631,7 +631,9 @@ void main() {
           reciterId: anyNamed('reciterId'),
           reciterName: anyNamed('reciterName'),
         ),
-      ).thenAnswer((_) async {});
+      ).thenAnswer((_) async {
+        return;
+      });
 
       await service.handleNotificationTap(payload);
 
@@ -653,7 +655,9 @@ void main() {
             reciterId: anyNamed('reciterId'),
             reciterName: anyNamed('reciterName'),
           ),
-        ).thenAnswer((_) async {});
+        ).thenAnswer((_) async {
+          return;
+        });
 
         await service.handleNotificationTap(payload);
 
@@ -709,7 +713,9 @@ void main() {
           reciterId: anyNamed('reciterId'),
           reciterName: anyNamed('reciterName'),
         ),
-      ).thenAnswer((_) async {});
+      ).thenAnswer((_) async {
+        return;
+      });
 
       final String payload = jsonEncode({'reciterName': reciterName});
 
@@ -737,7 +743,9 @@ void main() {
           reciterId: anyNamed('reciterId'),
           reciterName: anyNamed('reciterName'),
         ),
-      ).thenAnswer((_) async {});
+      ).thenAnswer((_) async {
+        return;
+      });
 
       final String payload = jsonEncode({
         'reciterId': reciterId,

@@ -79,7 +79,9 @@ void main() {
           'tour_guide_b_version',
         },
       );
-      when(mockPrefs.remove(any)).thenAnswer((_) async {});
+      when(mockPrefs.remove(any)).thenAnswer((_) async {
+        return;
+      });
 
       await dataSource.clearAll();
 

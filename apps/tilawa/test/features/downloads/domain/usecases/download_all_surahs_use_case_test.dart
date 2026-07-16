@@ -46,7 +46,9 @@ void main() {
     // Arrange
     when(
       mockDownloadsRepository.startDownloadBatch(any),
-    ).thenAnswer((_) async {});
+    ).thenAnswer((_) async {
+      return;
+    });
 
     // Act
     final Either<Failure, void> result = await useCase.call(

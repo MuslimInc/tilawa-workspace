@@ -36,7 +36,9 @@ void main() {
   group('DownloadsInitializationService', () {
     test('initialize calls dependencies correctly', () async {
       // Arrange
-      when(mockRepository.resumePendingDownloads()).thenAnswer((_) async {});
+      when(mockRepository.resumePendingDownloads()).thenAnswer((_) async {
+        return;
+      });
 
       // Act
       await service.initialize();
@@ -65,7 +67,9 @@ void main() {
       'initialize completes successfully when repository succeeds',
       () async {
         // Arrange
-        when(mockRepository.resumePendingDownloads()).thenAnswer((_) async {});
+        when(mockRepository.resumePendingDownloads()).thenAnswer((_) async {
+          return;
+        });
 
         // Act & Assert - should complete without errors
         await expectLater(service.initialize(), completes);

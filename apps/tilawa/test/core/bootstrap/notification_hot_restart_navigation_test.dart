@@ -94,7 +94,9 @@ void main() {
   void stubLaunchProbe({required NotificationAppLaunchDetails? details}) {
     when(
       mockDispatcher.initialize(createHighImportanceChannel: false),
-    ).thenAnswer((_) async {});
+    ).thenAnswer((_) async {
+      return;
+    });
     when(
       mockDispatcher.getNotificationAppLaunchDetails(),
     ).thenAnswer((_) async => details);
@@ -113,8 +115,12 @@ void main() {
     when(mockPid.currentPid).thenReturn(processPid);
     when(mockPrefs.getInt(any)).thenAnswer((_) async => null);
     when(mockPrefs.getString(any)).thenAnswer((_) async => null);
-    when(mockPrefs.setInt(any, any)).thenAnswer((_) async {});
-    when(mockPrefs.setString(any, any)).thenAnswer((_) async {});
+    when(mockPrefs.setInt(any, any)).thenAnswer((_) async {
+      return;
+    });
+    when(mockPrefs.setString(any, any)).thenAnswer((_) async {
+      return;
+    });
 
     await registerProbeDependencies();
   });

@@ -66,7 +66,9 @@ void main() {
           prayerTimesForDays: anyNamed('prayerTimesForDays'),
           forceReschedule: anyNamed('forceReschedule'),
         ),
-      ).thenAnswer((_) async {});
+      ).thenAnswer((_) async {
+        return;
+      });
 
       final result = await useCase(
         settings: tSettings,
@@ -95,7 +97,9 @@ void main() {
           prayerTimesForDays: anyNamed('prayerTimesForDays'),
           forceReschedule: anyNamed('forceReschedule'),
         ),
-      ).thenAnswer((_) async {});
+      ).thenAnswer((_) async {
+        return;
+      });
 
       await useCase(
         settings: tSettings,
@@ -131,7 +135,9 @@ void main() {
           prayerTimesForDays: anyNamed('prayerTimesForDays'),
           forceReschedule: anyNamed('forceReschedule'),
         ),
-      ).thenAnswer((_) async {});
+      ).thenAnswer((_) async {
+        return;
+      });
 
       await useCase(settings: tSettings, latitude: 30.0, longitude: 31.0);
 

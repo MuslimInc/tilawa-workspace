@@ -170,7 +170,9 @@ void main() {
     test('should call deletePlaylist on repository', () async {
       when(
         mockRepository.deletePlaylist(any),
-      ).thenAnswer((_) async {});
+      ).thenAnswer((_) async {
+        return;
+      });
 
       final Either<Failure, void> result = await deletePlaylistUseCase('1');
 

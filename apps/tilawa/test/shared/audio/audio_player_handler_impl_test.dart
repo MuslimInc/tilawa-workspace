@@ -202,6 +202,7 @@ void main() {
         invocation.positionalArguments[0] as AudioSource,
       );
       updateMockSequence();
+      return;
     });
 
     when(mockPlayer.addAudioSources(any)).thenAnswer((invocation) async {
@@ -209,6 +210,7 @@ void main() {
         invocation.positionalArguments[0] as List<AudioSource>,
       );
       updateMockSequence();
+      return;
     });
 
     when(
@@ -219,12 +221,14 @@ void main() {
           invocation.positionalArguments[1] as AudioSource;
       capturedPlaylist.insert(index, source);
       updateMockSequence();
+      return;
     });
 
     when(mockPlayer.removeAudioSourceAt(any)).thenAnswer((invocation) async {
       final int index = invocation.positionalArguments[0] as int;
       capturedPlaylist.removeAt(index);
       updateMockSequence();
+      return;
     });
 
     when(mockPlayer.moveAudioSource(any, any)).thenAnswer((invocation) async {
@@ -233,11 +237,13 @@ void main() {
       final AudioSource moved = capturedPlaylist.removeAt(from);
       capturedPlaylist.insert(to, moved);
       updateMockSequence();
+      return;
     });
 
     when(mockPlayer.clearAudioSources()).thenAnswer((_) async {
       capturedPlaylist.clear();
       updateMockSequence();
+      return;
     });
 
     handler = AudioPlayerHandlerImpl(
@@ -974,7 +980,9 @@ void main() {
 
   group('Other Logic', () {
     test('clearAudioState resets state', () async {
-      when(mockPlayer.stop()).thenAnswer((_) async {});
+      when(mockPlayer.stop()).thenAnswer((_) async {
+        return;
+      });
       await handler.clearAudioState();
       verify(mockPlayer.stop()).called(1);
       verify(mockPlayer.clearAudioSources()).called(1);
@@ -1061,7 +1069,9 @@ void main() {
       await Future.delayed(Duration.zero);
       clearInteractions(mockPlayer);
       when(mockPlayer.currentIndex).thenReturn(0);
-      when(mockPlayer.stop()).thenAnswer((_) async {});
+      when(mockPlayer.stop()).thenAnswer((_) async {
+        return;
+      });
 
       processingStateSubject.add(ProcessingState.completed);
 

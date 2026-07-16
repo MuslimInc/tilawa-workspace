@@ -63,8 +63,12 @@ void main() {
 
     when(
       mockBatchDownloadManager.cancelBatchesForReciter(any),
-    ).thenAnswer((_) async {});
-    when(mockRepository.cancelDownload(any)).thenAnswer((_) async {});
+    ).thenAnswer((_) async {
+      return;
+    });
+    when(mockRepository.cancelDownload(any)).thenAnswer((_) async {
+      return;
+    });
     when(
       mockRecitersRepository.getReciters(),
     ).thenAnswer((_) async => const Right([testReciter]));
@@ -504,6 +508,7 @@ void main() {
       when(mockRepository.cancelDownload(any)).thenAnswer((_) async {
         callCount++;
         if (callCount == 2) throw Exception('Partial failure');
+        return;
       });
 
       final result = await useCase(testReciterName);

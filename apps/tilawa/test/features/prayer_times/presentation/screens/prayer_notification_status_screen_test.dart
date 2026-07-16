@@ -36,7 +36,9 @@ void main() {
 
     // Stub default methods
     when(mockAdhanPlayer.isAdhanPlaying()).thenAnswer((_) async => false);
-    when(mockAdhanPlayer.stopCurrentAdhan()).thenAnswer((_) async {});
+    when(mockAdhanPlayer.stopCurrentAdhan()).thenAnswer((_) async {
+      return;
+    });
   });
 
   Widget createWidget({String? payloadJson}) {

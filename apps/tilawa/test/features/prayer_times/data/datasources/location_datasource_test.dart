@@ -335,7 +335,9 @@ void main() {
           when(
             mockGeolocatorClient.requestPermission(),
           ).thenAnswer((_) async => LocationPermission.deniedForever);
-          when(mockGeolocatorClient.openAppSettings()).thenAnswer((_) async {});
+          when(mockGeolocatorClient.openAppSettings()).thenAnswer((_) async {
+            return;
+          });
 
           final bool result = await dataSource.requestPermission(
             allowOpenSettings: true,

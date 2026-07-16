@@ -135,7 +135,9 @@ void main() {
           createTestDownload(id: 'id1'),
           createTestDownload(id: 'id2'),
         ];
-        when(mockPrefs.setStringList(any, any)).thenAnswer((_) async {});
+        when(mockPrefs.setStringList(any, any)).thenAnswer((_) async {
+          return;
+        });
 
         // Act
         await dataSource.saveDownloads(downloads);
@@ -154,7 +156,9 @@ void main() {
 
       test('should save empty list when no downloads', () async {
         // Arrange
-        when(mockPrefs.setStringList(any, any)).thenAnswer((_) async {});
+        when(mockPrefs.setStringList(any, any)).thenAnswer((_) async {
+          return;
+        });
 
         // Act
         await dataSource.saveDownloads([]);
@@ -169,7 +173,9 @@ void main() {
         // Arrange
         final DownloadItem download = createTestDownload();
         when(mockPrefs.getStringList('downloads')).thenAnswer((_) async => []);
-        when(mockPrefs.setStringList(any, any)).thenAnswer((_) async {});
+        when(mockPrefs.setStringList(any, any)).thenAnswer((_) async {
+          return;
+        });
 
         // Act
         await dataSource.addDownload(download);
@@ -193,7 +199,9 @@ void main() {
         when(
           mockPrefs.getStringList('downloads'),
         ).thenAnswer((_) async => [jsonEncode(existingDownload.toJson())]);
-        when(mockPrefs.setStringList(any, any)).thenAnswer((_) async {});
+        when(mockPrefs.setStringList(any, any)).thenAnswer((_) async {
+          return;
+        });
 
         // Act
         await dataSource.addDownload(updatedDownload);
@@ -216,7 +224,9 @@ void main() {
         when(
           mockPrefs.getStringList('downloads'),
         ).thenAnswer((_) async => [jsonEncode(existing.toJson())]);
-        when(mockPrefs.setStringList(any, any)).thenAnswer((_) async {});
+        when(mockPrefs.setStringList(any, any)).thenAnswer((_) async {
+          return;
+        });
 
         // Act
         await dataSource.addDownload(newDownload);
@@ -249,7 +259,9 @@ void main() {
           createTestDownload(id: 'id2'),
         ];
         when(mockPrefs.getStringList('downloads')).thenAnswer((_) async => []);
-        when(mockPrefs.setStringList(any, any)).thenAnswer((_) async {});
+        when(mockPrefs.setStringList(any, any)).thenAnswer((_) async {
+          return;
+        });
 
         // Act
         await dataSource.addDownloads(items);
@@ -275,7 +287,9 @@ void main() {
         when(
           mockPrefs.getStringList('downloads'),
         ).thenAnswer((_) async => [jsonEncode(existing.toJson())]);
-        when(mockPrefs.setStringList(any, any)).thenAnswer((_) async {});
+        when(mockPrefs.setStringList(any, any)).thenAnswer((_) async {
+          return;
+        });
 
         // Act
         await dataSource.addDownloads(items);
@@ -319,7 +333,9 @@ void main() {
         when(mockPrefs.getStringList('downloads')).thenAnswer(
           (_) async => [jsonEncode(item1.toJson()), jsonEncode(item2.toJson())],
         );
-        when(mockPrefs.setStringList(any, any)).thenAnswer((_) async {});
+        when(mockPrefs.setStringList(any, any)).thenAnswer((_) async {
+          return;
+        });
 
         // Act
         await dataSource.updateDownloads(updates);
@@ -365,7 +381,9 @@ void main() {
         when(
           mockPrefs.getStringList('downloads'),
         ).thenAnswer((_) async => [jsonEncode(existing.toJson())]);
-        when(mockPrefs.setStringList(any, any)).thenAnswer((_) async {});
+        when(mockPrefs.setStringList(any, any)).thenAnswer((_) async {
+          return;
+        });
 
         // Act
         await dataSource.updateDownload(updated);
@@ -403,7 +421,9 @@ void main() {
             jsonEncode(download2.toJson()),
           ],
         );
-        when(mockPrefs.setStringList(any, any)).thenAnswer((_) async {});
+        when(mockPrefs.setStringList(any, any)).thenAnswer((_) async {
+          return;
+        });
 
         // Act
         await dataSource.deleteDownload('id1');
@@ -422,7 +442,9 @@ void main() {
       test('should handle deleting non-existent download', () async {
         // Arrange
         when(mockPrefs.getStringList('downloads')).thenAnswer((_) async => []);
-        when(mockPrefs.setStringList(any, any)).thenAnswer((_) async {});
+        when(mockPrefs.setStringList(any, any)).thenAnswer((_) async {
+          return;
+        });
 
         // Act
         await dataSource.deleteDownload('non_existent');
@@ -435,7 +457,9 @@ void main() {
     group('clearAllDownloads', () {
       test('should remove downloads key from preferences', () async {
         // Arrange
-        when(mockPrefs.remove('downloads')).thenAnswer((_) async {});
+        when(mockPrefs.remove('downloads')).thenAnswer((_) async {
+          return;
+        });
 
         // Act
         await dataSource.clearAllDownloads();

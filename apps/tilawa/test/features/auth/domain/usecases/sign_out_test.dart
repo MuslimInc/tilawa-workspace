@@ -38,7 +38,9 @@ void main() {
       mockTokenSyncCache,
       ServerActionGuard(networkInfo),
     );
-    when(mockTokenSyncCache.clearSession()).thenAnswer((_) async {});
+    when(mockTokenSyncCache.clearSession()).thenAnswer((_) async {
+      return;
+    });
   });
 
   tearDown(() async {
@@ -49,8 +51,12 @@ void main() {
     'remote revoke skips server token clear so new device token is preserved',
     () async {
       when(mockAuthRepository.currentUser).thenReturn(tUser);
-      when(mockPremiumRepository.clearPremiumStatus()).thenAnswer((_) async {});
-      when(mockAuthRepository.signOut()).thenAnswer((_) async {});
+      when(mockPremiumRepository.clearPremiumStatus()).thenAnswer((_) async {
+        return;
+      });
+      when(mockAuthRepository.signOut()).thenAnswer((_) async {
+        return;
+      });
 
       final Either<Failure, void> result = await useCase(
         skipServerTokenClear: true,
@@ -70,9 +76,15 @@ void main() {
     when(mockAuthRepository.currentUser).thenReturn(tUser);
     when(
       mockSyncDeviceTokenUseCase.removeCurrentTokenForUser(tUser.id),
-    ).thenAnswer((_) async {});
-    when(mockPremiumRepository.clearPremiumStatus()).thenAnswer((_) async {});
-    when(mockAuthRepository.signOut()).thenAnswer((_) async {});
+    ).thenAnswer((_) async {
+      return;
+    });
+    when(mockPremiumRepository.clearPremiumStatus()).thenAnswer((_) async {
+      return;
+    });
+    when(mockAuthRepository.signOut()).thenAnswer((_) async {
+      return;
+    });
 
     final Either<Failure, void> result = await useCase();
 
@@ -89,8 +101,12 @@ void main() {
     'should still clear premium cache and sign out without a current user',
     () async {
       when(mockAuthRepository.currentUser).thenReturn(null);
-      when(mockPremiumRepository.clearPremiumStatus()).thenAnswer((_) async {});
-      when(mockAuthRepository.signOut()).thenAnswer((_) async {});
+      when(mockPremiumRepository.clearPremiumStatus()).thenAnswer((_) async {
+        return;
+      });
+      when(mockAuthRepository.signOut()).thenAnswer((_) async {
+        return;
+      });
 
       final Either<Failure, void> result = await useCase();
 
@@ -109,8 +125,12 @@ void main() {
       when(
         mockSyncDeviceTokenUseCase.removeCurrentTokenForUser(tUser.id),
       ).thenThrow(Exception('apns-token-not-set'));
-      when(mockPremiumRepository.clearPremiumStatus()).thenAnswer((_) async {});
-      when(mockAuthRepository.signOut()).thenAnswer((_) async {});
+      when(mockPremiumRepository.clearPremiumStatus()).thenAnswer((_) async {
+        return;
+      });
+      when(mockAuthRepository.signOut()).thenAnswer((_) async {
+        return;
+      });
 
       final Either<Failure, void> result = await useCase();
 

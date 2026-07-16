@@ -32,7 +32,9 @@ void main() {
             reciterName: anyNamed('reciterName'),
             reciterId: anyNamed('reciterId'),
           ),
-        ).thenAnswer((_) async {});
+        ).thenAnswer((_) async {
+          return;
+        });
 
         // Act
         final Either<Failure, void> result = await useCase(
@@ -150,7 +152,9 @@ void main() {
             reciterName: anyNamed('reciterName'),
             reciterId: anyNamed('reciterId'),
           ),
-        ).thenAnswer((_) async {});
+        ).thenAnswer((_) async {
+          return;
+        });
 
         // Act
         await useCase(
@@ -183,7 +187,9 @@ void main() {
             reciterName: anyNamed('reciterName'),
             reciterId: anyNamed('reciterId'),
           ),
-        ).thenAnswer((_) async {});
+        ).thenAnswer((_) async {
+          return;
+        });
 
         // Act
         final Either<Failure, void> result = await useCase(
@@ -224,7 +230,9 @@ void main() {
             reciterName: anyNamed('reciterName'),
             reciterId: anyNamed('reciterId'),
           ),
-        ).thenAnswer((_) async {});
+        ).thenAnswer((_) async {
+          return;
+        });
 
         // Act
         final Either<Failure, void> result = await useCase(

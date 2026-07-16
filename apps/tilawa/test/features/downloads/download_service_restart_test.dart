@@ -28,11 +28,15 @@ void main() {
         debug: anyNamed('debug'),
         ignoreSsl: anyNamed('ignoreSsl'),
       ),
-    ).thenAnswer((_) async {});
+    ).thenAnswer((_) async {
+      return;
+    });
 
     when(
       mockDownloader.registerCallback(any, step: anyNamed('step')),
-    ).thenAnswer((_) async {});
+    ).thenAnswer((_) async {
+      return;
+    });
 
     when(mockIsolateManager.registerPort()).thenReturn(null);
     when(

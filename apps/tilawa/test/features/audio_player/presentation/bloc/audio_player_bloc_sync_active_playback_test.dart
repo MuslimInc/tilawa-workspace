@@ -221,7 +221,9 @@ void main() {
       (_) => Stream<bool>.value(true),
     );
     when(mockAppReviewTriggerManager.onSessionStarted()).thenAnswer(
-      (_) async {},
+      (_) async {
+        return;
+      },
     );
   });
 
