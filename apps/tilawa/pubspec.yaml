@@ -31,6 +31,7 @@ dependencies:
   firebase_messaging: ^16.4.3
   firebase_app_installations: ^0.4.2+4
   firebase_performance: ^0.11.4+5
+  firebase_storage: ^13.4.5
   flex_color_scheme:
     path: ../../packages/flex_color_scheme
   fluentui_system_icons: ^1.1.273

@@ -7270,6 +7270,54 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'{collection}, Hadith {referenceNumber}'**
   String dailyGuidanceHadithSource(String collection, String referenceNumber);
+
+  /// Title for the edit profile screen
+  ///
+  /// In en, this message translates to:
+  /// **'Edit Profile'**
+  String get editProfileTitle;
+
+  /// Label for display name field on edit profile
+  ///
+  /// In en, this message translates to:
+  /// **'Display name'**
+  String get editProfileDisplayName;
+
+  /// Validation error when display name is empty
+  ///
+  /// In en, this message translates to:
+  /// **'Enter a display name'**
+  String get editProfileDisplayNameRequired;
+
+  /// Action to change profile photo
+  ///
+  /// In en, this message translates to:
+  /// **'Change photo'**
+  String get editProfileChangePhoto;
+
+  /// Action to remove profile photo
+  ///
+  /// In en, this message translates to:
+  /// **'Remove photo'**
+  String get editProfileRemovePhoto;
+
+  /// Success toast after saving profile
+  ///
+  /// In en, this message translates to:
+  /// **'Profile updated'**
+  String get editProfileSaved;
+
+  /// Error toast when profile save fails
+  ///
+  /// In en, this message translates to:
+  /// **'Could not update profile. Try again.'**
+  String get editProfileSaveFailed;
+
+  /// Error when picked avatar exceeds upload size cap
+  ///
+  /// In en, this message translates to:
+  /// **'Photo is too large. Choose a smaller image.'**
+  String get editProfileAvatarTooLarge;
 }
 
 class _AppLocalizationsDelegate

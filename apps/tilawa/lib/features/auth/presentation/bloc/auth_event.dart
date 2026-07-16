@@ -20,4 +20,9 @@ abstract class AuthEvent with _$AuthEvent {
   /// Drops an in-flight interactive sign-in without signing out of Firebase.
   const factory AuthEvent.abortInteractiveSignIn() =
       AbortInteractiveSignInEvent;
+
+  /// Refreshes the authenticated user after Edit Profile save.
+  const factory AuthEvent.accountProfileUpdated({
+    required UserEntity user,
+  }) = AccountProfileUpdatedEvent;
 }

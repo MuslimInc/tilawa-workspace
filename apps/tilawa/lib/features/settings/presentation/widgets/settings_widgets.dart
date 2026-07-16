@@ -171,8 +171,8 @@ class SettingsProfileHeader extends StatelessWidget {
                 color: Colors.transparent,
                 child: InkWell(
                   onTap: isGuest
-                      ? () => const LoginRoute().push(context)
-                      : null,
+                      ? () => const LoginRoute().push<void>(context)
+                      : () => const EditProfileRoute().push<void>(context),
                   borderRadius: BorderRadius.circular(groupRadius),
                   child: Padding(
                     padding: EdgeInsets.fromLTRB(

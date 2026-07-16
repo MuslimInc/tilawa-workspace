@@ -20,6 +20,14 @@ abstract class UserRepository {
   /// Writes `languageCode` on the signed-in user's Firestore document.
   Future<void> syncLanguagePreference(String languageCode);
 
+  /// Updates Auth + Firestore identity for the signed-in user.
+  ///
+  /// Pass [photoUrl] `null` to clear the profile picture.
+  Future<UserEntity> updateAccountProfile({
+    required String displayName,
+    String? photoUrl,
+  });
+
   /// Removes the user document and known subcollections from Firestore.
   Future<void> deleteUserData(String userId);
 }

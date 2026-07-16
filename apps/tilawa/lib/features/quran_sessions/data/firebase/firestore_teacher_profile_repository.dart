@@ -345,8 +345,12 @@ class FirestoreTeacherProfileDataSource
         } else {
           payload['externalMeetingUrl'] = FieldValue.delete();
         }
-        if (profile.avatarUrl != null) {
-          payload['avatarUrl'] = profile.avatarUrl;
+        final trimmedAvatarUrl = profile.avatarUrl?.trim();
+        if (trimmedAvatarUrl != null && trimmedAvatarUrl.isNotEmpty) {
+          payload['avatarUrl'] = trimmedAvatarUrl;
+        } else if (profile.avatarUrl != null) {
+          // Empty string clears the marketplace avatar (Edit Profile remove).
+          payload['avatarUrl'] = FieldValue.delete();
         }
         await _collection.doc(profile.id).set(payload, SetOptions(merge: true));
         final updated = await _collection.doc(profile.id).get();

@@ -25,6 +25,20 @@ class NoopUserRepository implements UserRepository {
 
   @override
   Future<void> syncLanguagePreference(String languageCode) async {}
+
+  @override
+  Future<UserEntity> updateAccountProfile({
+    required String displayName,
+    String? photoUrl,
+  }) async {
+    return UserEntity(
+      id: 'noop',
+      email: '',
+      displayName: displayName,
+      photoUrl: photoUrl,
+      createdAt: DateTime.fromMillisecondsSinceEpoch(0),
+    );
+  }
 }
 
 SyncUserLanguagePreferenceUseCase noopSyncUserLanguagePreferenceUseCase() {

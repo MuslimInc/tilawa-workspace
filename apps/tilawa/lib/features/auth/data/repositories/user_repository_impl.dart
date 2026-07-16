@@ -105,6 +105,67 @@ class UserRepositoryImpl implements UserRepository {
   }
 
   @override
+  Future<UserEntity> updateAccountProfile({
+    required String displayName,
+    String? photoUrl,
+  }) async {
+    final User? firebaseUser = _firebaseAuth.currentUser;
+    if (firebaseUser == null) {
+      throw StateError('No signed-in user');
+    }
+
+    final String trimmedName = displayName.trim();
+    final String currentName = firebaseUser.displayName?.trim() ?? '';
+    final String? currentPhoto = firebaseUser.photoURL;
+    final bool nameChanged = trimmedName != currentName;
+    final bool photoChanged = photoUrl != currentPhoto;
+
+    if (!nameChanged && !photoChanged) {
+      return UserEntity(
+        id: firebaseUser.uid,
+        email: firebaseUser.email ?? '',
+        displayName: currentName,
+        photoUrl: currentPhoto,
+        createdAt: firebaseUser.metadata.creationTime ?? DateTime.now(),
+      );
+    }
+
+    if (nameChanged) {
+      await firebaseUser.updateDisplayName(trimmedName);
+    }
+    if (photoChanged) {
+      await firebaseUser.updatePhotoURL(photoUrl);
+    }
+    await firebaseUser.reload();
+    final User refreshed = _firebaseAuth.currentUser ?? firebaseUser;
+
+    final Map<String, dynamic> payload = <String, dynamic>{
+      'updatedAt': FieldValue.serverTimestamp(),
+    };
+    if (nameChanged) {
+      payload['displayName'] = trimmedName;
+    }
+    if (photoChanged) {
+      payload['photoUrl'] = photoUrl ?? FieldValue.delete();
+    }
+    await _firestore
+        .collection('users')
+        .doc(refreshed.uid)
+        .set(
+          payload,
+          SetOptions(merge: true),
+        );
+
+    return UserEntity(
+      id: refreshed.uid,
+      email: refreshed.email ?? '',
+      displayName: refreshed.displayName ?? trimmedName,
+      photoUrl: refreshed.photoURL,
+      createdAt: refreshed.metadata.creationTime ?? DateTime.now(),
+    );
+  }
+
+  @override
   Future<void> deleteUserData(String userId) async {
     final DocumentReference<Map<String, dynamic>> userRef = _firestore
         .collection('users')

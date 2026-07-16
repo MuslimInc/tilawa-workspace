@@ -4356,5 +4356,37 @@
             "collection": { "type": "String", "example": "صحيح البخاري" },
             "referenceNumber": { "type": "String", "example": "6412" }
         }
+    },
+    "editProfileTitle": "تعديل الملف الشخصي",
+    "@editProfileTitle": {
+        "description": "Title for the edit profile screen"
+    },
+    "editProfileDisplayName": "الاسم الظاهر",
+    "@editProfileDisplayName": {
+        "description": "Label for display name field on edit profile"
+    },
+    "editProfileDisplayNameRequired": "أدخل الاسم الظاهر",
+    "@editProfileDisplayNameRequired": {
+        "description": "Validation error when display name is empty"
+    },
+    "editProfileChangePhoto": "تغيير الصورة",
+    "@editProfileChangePhoto": {
+        "description": "Action to change profile photo"
+    },
+    "editProfileRemovePhoto": "إزالة الصورة",
+    "@editProfileRemovePhoto": {
+        "description": "Action to remove profile photo"
+    },
+    "editProfileSaved": "تم تحديث الملف الشخصي",
+    "@editProfileSaved": {
+        "description": "Success toast after saving profile"
+    },
+    "editProfileSaveFailed": "تعذر تحديث الملف الشخصي. حاول مرة أخرى.",
+    "@editProfileSaveFailed": {
+        "description": "Error toast when profile save fails"
+    },
+    "editProfileAvatarTooLarge": "الصورة كبيرة جدًا. اختر صورة أصغر.",
+    "@editProfileAvatarTooLarge": {
+        "description": "Error when picked avatar exceeds upload size cap"
     }
 }

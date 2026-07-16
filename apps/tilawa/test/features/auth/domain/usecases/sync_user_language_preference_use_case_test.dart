@@ -31,6 +31,20 @@ class _RecordingUserRepository implements UserRepository {
   Future<void> syncLanguagePreference(String languageCode) async {
     lastSyncedLanguageCode = languageCode;
   }
+
+  @override
+  Future<UserEntity> updateAccountProfile({
+    required String displayName,
+    String? photoUrl,
+  }) async {
+    return UserEntity(
+      id: 'test',
+      email: '',
+      displayName: displayName,
+      photoUrl: photoUrl,
+      createdAt: DateTime.fromMillisecondsSinceEpoch(0),
+    );
+  }
 }
 
 void main() {

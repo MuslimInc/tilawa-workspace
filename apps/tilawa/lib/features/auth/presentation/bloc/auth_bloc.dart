@@ -60,6 +60,7 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
     on<CheckAuthStatusEvent>(_onCheckAuthStatus);
     on<SessionInvalidatedEvent>(_onSessionInvalidated);
     on<AbortInteractiveSignInEvent>(_onAbortInteractiveSignIn);
+    on<AccountProfileUpdatedEvent>(_onAccountProfileUpdated);
   }
 
   int _interactiveSignInGeneration = 0;
@@ -382,6 +383,13 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
         emit(const AuthState.unauthenticated());
       },
     );
+  }
+
+  void _onAccountProfileUpdated(
+    AccountProfileUpdatedEvent event,
+    Emitter<AuthState> emit,
+  ) {
+    emit(AuthState.authenticated(user: event.user));
   }
 
   void _onAbortInteractiveSignIn(

@@ -4152,4 +4152,29 @@ class AppLocalizationsEn extends AppLocalizations {
   String dailyGuidanceHadithSource(String collection, String referenceNumber) {
     return '$collection, Hadith $referenceNumber';
   }
+
+  @override
+  String get editProfileTitle => 'Edit Profile';
+
+  @override
+  String get editProfileDisplayName => 'Display name';
+
+  @override
+  String get editProfileDisplayNameRequired => 'Enter a display name';
+
+  @override
+  String get editProfileChangePhoto => 'Change photo';
+
+  @override
+  String get editProfileRemovePhoto => 'Remove photo';
+
+  @override
+  String get editProfileSaved => 'Profile updated';
+
+  @override
+  String get editProfileSaveFailed => 'Could not update profile. Try again.';
+
+  @override
+  String get editProfileAvatarTooLarge =>
+      'Photo is too large. Choose a smaller image.';
 }

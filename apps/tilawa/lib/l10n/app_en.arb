@@ -4990,5 +4990,37 @@
             "collection": { "type": "String", "example": "Sahih al-Bukhari" },
             "referenceNumber": { "type": "String", "example": "6412" }
         }
+    },
+    "editProfileTitle": "Edit Profile",
+    "@editProfileTitle": {
+        "description": "Title for the edit profile screen"
+    },
+    "editProfileDisplayName": "Display name",
+    "@editProfileDisplayName": {
+        "description": "Label for display name field on edit profile"
+    },
+    "editProfileDisplayNameRequired": "Enter a display name",
+    "@editProfileDisplayNameRequired": {
+        "description": "Validation error when display name is empty"
+    },
+    "editProfileChangePhoto": "Change photo",
+    "@editProfileChangePhoto": {
+        "description": "Action to change profile photo"
+    },
+    "editProfileRemovePhoto": "Remove photo",
+    "@editProfileRemovePhoto": {
+        "description": "Action to remove profile photo"
+    },
+    "editProfileSaved": "Profile updated",
+    "@editProfileSaved": {
+        "description": "Success toast after saving profile"
+    },
+    "editProfileSaveFailed": "Could not update profile. Try again.",
+    "@editProfileSaveFailed": {
+        "description": "Error toast when profile save fails"
+    },
+    "editProfileAvatarTooLarge": "Photo is too large. Choose a smaller image.",
+    "@editProfileAvatarTooLarge": {
+        "description": "Error when picked avatar exceeds upload size cap"
     }
 }

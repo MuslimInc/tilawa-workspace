@@ -32,6 +32,8 @@
 	<string>MeMuslim uses the microphone for Quran recitation practice and live tutoring session calls.</string>
 	<key>NSCameraUsageDescription</key>
 	<string>MeMuslim uses the camera for optional video during live Quran tutoring sessions.</string>
+	<key>NSPhotoLibraryUsageDescription</key>
+	<string>MeMuslim uses your photo library so you can set a profile picture.</string>
 	<key>NSSpeechRecognitionUsageDescription</key>
 	<string>MeMuslim uses recitation audio analysis to compare your recitation with the selected Quran verse.</string>
 	<key>UIApplicationSceneManifest</key>

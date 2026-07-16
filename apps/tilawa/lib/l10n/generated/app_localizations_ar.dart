@@ -4116,4 +4116,28 @@ class AppLocalizationsAr extends AppLocalizations {
   String dailyGuidanceHadithSource(String collection, String referenceNumber) {
     return '$collection، حديث رقم $referenceNumber';
   }
+
+  @override
+  String get editProfileTitle => 'تعديل الملف الشخصي';
+
+  @override
+  String get editProfileDisplayName => 'الاسم الظاهر';
+
+  @override
+  String get editProfileDisplayNameRequired => 'أدخل الاسم الظاهر';
+
+  @override
+  String get editProfileChangePhoto => 'تغيير الصورة';
+
+  @override
+  String get editProfileRemovePhoto => 'إزالة الصورة';
+
+  @override
+  String get editProfileSaved => 'تم تحديث الملف الشخصي';
+
+  @override
+  String get editProfileSaveFailed => 'تعذر تحديث الملف الشخصي. حاول مرة أخرى.';
+
+  @override
+  String get editProfileAvatarTooLarge => 'الصورة كبيرة جدًا. اختر صورة أصغر.';
 }

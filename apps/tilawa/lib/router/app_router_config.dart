@@ -22,6 +22,7 @@ import '../features/athkar/presentation/widgets/athkar_categories_screen_scope.d
 import '../features/auth/presentation/screens/email_auth_screens.dart';
 import '../features/auth/presentation/screens/login_screen.dart';
 import '../features/auth/presentation/screens/manage_devices_screen.dart';
+import '../features/settings/presentation/screens/edit_profile_screen.dart';
 import '../features/bookmarks/presentation/bloc/bookmarks_bloc.dart';
 import '../features/bookmarks/presentation/screens/bookmarks_screen.dart';
 import '../features/downloads/presentation/widgets/downloads_screen_scope.dart';
@@ -73,6 +74,7 @@ part 'app_router_config.g.dart';
     TypedGoRoute<SupportRoute>(path: '/support'),
     TypedGoRoute<PremiumRoute>(path: '/premium'),
     TypedGoRoute<SettingsRoute>(path: '/settings'),
+    TypedGoRoute<EditProfileRoute>(path: '/settings/edit-profile'),
     TypedGoRoute<ManageDevicesRoute>(path: '/settings/devices'),
     TypedGoRoute<DownloadsRoute>(path: '/downloads'),
     TypedGoRoute<ErrorRoute>(path: '/error'),
@@ -313,6 +315,16 @@ class SettingsRoute extends GoRouteData with $SettingsRoute, TilawaRouteData {
   @override
   Widget build(BuildContext context, GoRouterState state) {
     return const SettingsScreenScope();
+  }
+}
+
+class EditProfileRoute extends GoRouteData
+    with $EditProfileRoute, TilawaRouteData {
+  const EditProfileRoute();
+
+  @override
+  Widget build(BuildContext context, GoRouterState state) {
+    return const EditProfileScreen();
   }
 }
 

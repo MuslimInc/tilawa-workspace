@@ -11,7 +11,13 @@
         "admin": [
           "tilawa-admin"
         ]
+      },
+      "storage": {
+        "default": [
+          "quran-playera-app.firebasestorage.app"
+        ]
       }
     }
-  }
+  },
+  "etags": {}
 }
