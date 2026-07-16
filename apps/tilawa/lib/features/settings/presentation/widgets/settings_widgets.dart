@@ -160,39 +160,31 @@ class SettingsProfileHeader extends StatelessWidget {
           final u => settingsMemberSinceLabel(context, u.createdAt),
         };
         final photoUrl = user?.photoUrl?.trim() ?? '';
-        final double groupRadius = tokens.resolveRadius(
-          family: TilawaRadiusFamily.section,
-        );
+        final VoidCallback onTap = isGuest
+            ? () => const LoginRoute().push<void>(context)
+            : () => const EditProfileRoute().push<void>(context);
 
         return TilawaSettingsGroupHorizontalInset(
-          child: TilawaSettingsGroupPanel(
-            children: [
-              Material(
-                color: Colors.transparent,
-                child: InkWell(
-                  onTap: isGuest
-                      ? () => const LoginRoute().push<void>(context)
-                      : () => const EditProfileRoute().push<void>(context),
-                  borderRadius: BorderRadius.circular(groupRadius),
-                  child: Padding(
-                    padding: EdgeInsets.fromLTRB(
-                      tokens.spaceMedium,
-                      tokens.spaceMedium,
-                      tokens.spaceMedium,
-                      tokens.spaceMedium,
-                    ),
+          child: Semantics(
+            button: true,
+            child: TilawaCard(
+              onTap: onTap,
+              padding: EdgeInsets.all(tokens.spaceMedium),
+              child: Row(
+                children: [
+                  ProfileAvatar(
+                    photoUrl: photoUrl,
+                    displayName: user?.displayName,
+                    size: tokens.iconHubExtent,
+                  ),
+                  SizedBox(width: tokens.spaceMedium),
+                  Expanded(
                     child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
                       mainAxisSize: MainAxisSize.min,
                       children: [
-                        ProfileAvatar(
-                          photoUrl: photoUrl,
-                          displayName: user?.displayName,
-                          size: 72,
-                        ),
-                        SizedBox(height: tokens.spaceMedium),
                         Text(
                           title,
-                          textAlign: TextAlign.center,
                           maxLines: 2,
                           overflow: TextOverflow.ellipsis,
                           style: theme.textTheme.titleMedium?.copyWith(
@@ -201,13 +193,14 @@ class SettingsProfileHeader extends StatelessWidget {
                           ),
                         ),
                         if (subtitle != null) ...[
-                          SizedBox(height: tokens.spaceSmall),
+                          SizedBox(height: tokens.spaceExtraSmall),
                           Text(
                             subtitle,
-                            textAlign: TextAlign.center,
+                            maxLines: 2,
+                            overflow: TextOverflow.ellipsis,
                             style: theme.textTheme.bodySmall?.copyWith(
                               color: colorScheme.onSurfaceVariant,
-                              height: 1.4,
+                              height: tokens.textHeightLoose,
                             ),
                           ),
                         ],
@@ -220,9 +213,21 @@ class SettingsProfileHeader extends StatelessWidget {
                       ],
                     ),
                   ),
-                ),
+                  SizedBox(width: tokens.spaceSmall),
+                  if (isGuest)
+                    Icon(
+                      TilawaIcons.chevronRightSmall,
+                      size: tokens.iconSizeSmall,
+                      color: colorScheme.onSurfaceVariant,
+                    )
+                  else
+                    TilawaIconBox(
+                      icon: FluentIcons.edit_24_regular,
+                      iconColor: colorScheme.primary,
+                    ),
+                ],
               ),
-            ],
+            ),
           ),
         );
       },

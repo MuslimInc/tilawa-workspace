@@ -58,6 +58,8 @@ void main() {
 
     expect(find.text('Sign in to sync your data'), findsOneWidget);
     expect(find.text('Signed In User'), findsNothing);
+    expect(find.byType(TilawaCard), findsOneWidget);
+    expect(find.byIcon(TilawaIcons.chevronRightSmall), findsOneWidget);
   });
 
   testWidgets('shows guest prompt when AuthBloc is still initial', (
@@ -84,5 +86,12 @@ void main() {
 
     expect(find.text('Signed In User'), findsOneWidget);
     expect(find.text('Sign in to sync your data'), findsNothing);
+    expect(find.byType(TilawaCard), findsOneWidget);
+    expect(find.byIcon(Icons.edit_outlined), findsNothing);
+    expect(find.byType(TilawaIconBox), findsOneWidget);
+    expect(
+      tester.widget<TilawaCard>(find.byType(TilawaCard)).onTap,
+      isNotNull,
+    );
   });
 }
