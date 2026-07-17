@@ -48,11 +48,39 @@
     "@homeGreeting": {
         "description": "Default Home greeting"
     },
-    "homeInspirationTitle": "Today's inspiration",
+    "homeInspirationTitle": "Ayah & dua",
+    "homeComfortLine": "Everything you need is here. Start gently",
+    "@homeComfortLine": {
+        "description": "Calm reassurance under the Home greeting"
+    },
+    "homeMainActionsSubtitle": "Open them every day with ease",
+    "@homeMainActionsSubtitle": {
+        "description": "Mind-map subtitle under daily worship branch"
+    },
+    "homeQuickToolsSubtitle": "Everything close to you",
+    "@homeQuickToolsSubtitle": {
+        "description": "Mind-map subtitle under quick tools branch"
+    },
+    "homeMapLabelWorship": "Daily",
+    "@homeMapLabelWorship": {
+        "description": "Short Home mind-map label for worship branch"
+    },
+    "homeMapLabelTools": "Quick",
+    "@homeMapLabelTools": {
+        "description": "Short Home mind-map label for tools branch"
+    },
+    "homeMapLabelLibrary": "Other",
+    "@homeMapLabelLibrary": {
+        "description": "Short Home mind-map label for library branch"
+    },
+    "homeMapLabelHeart": "Calm",
+    "@homeMapLabelHeart": {
+        "description": "Short Home mind-map label for inspiration branch"
+    },
     "@homeInspirationTitle": {
         "description": "Title for the daily inspiration section"
     },
-    "homeInspirationSubtitle": "An ayah and dua for your heart",
+    "homeInspirationSubtitle": "A kind word for today",
     "@homeInspirationSubtitle": {
         "description": "Subtitle for the daily inspiration section"
     },
@@ -344,11 +372,11 @@
     "@homeQuickActionsTitle": {
         "description": "Home section title for the high-frequency 2x2 action grid"
     },
-    "homeMainActionsTitle": "Your daily worship",
+    "homeMainActionsTitle": "Quran & athkar",
     "@homeMainActionsTitle": {
         "description": "Home section title for the two primary daily action cards"
     },
-    "homeQuickToolsTitle": "Quick tools",
+    "homeQuickToolsTitle": "Shortcuts",
     "@homeQuickToolsTitle": {
         "description": "Home section title for the compact secondary tools row"
     },
@@ -356,7 +384,7 @@
     "@homeLearningBrowseTitle": {
         "description": "Title of the persistent Learn Quran entry card for interested students"
     },
-    "homeLearningBrowseSubtitle": "Choose your hafiz and book a live 1-on-1 session.",
+    "homeLearningBrowseSubtitle": "Your sessions and schedule",
     "@homeLearningBrowseSubtitle": {
         "description": "Subtitle of the persistent Learn Quran entry card for interested students"
     },
@@ -364,15 +392,15 @@
     "@homeLearningBrowseCta": {
         "description": "Call to action on the persistent Learn Quran entry card"
     },
-    "homeLearningInterestPromptTitle": "Learn Quran with a Qualified Tutor?",
+    "homeLearningInterestPromptTitle": "Learn with a tutor",
     "@homeLearningInterestPromptTitle": {
         "description": "Title of the tutoring interest card shown on home screen"
     },
-    "homeLearningInterestPromptSubtitle": "Master your recitation and Tajweed 1-on-1 with live feedback.",
+    "homeLearningInterestPromptSubtitle": "Live one-to-one session",
     "@homeLearningInterestPromptSubtitle": {
         "description": "Subtitle of the tutoring interest card shown on home screen"
     },
-    "homeLearningInterestPromptYes": "Yes, interested",
+    "homeLearningInterestPromptYes": "Interested",
     "@homeLearningInterestPromptYes": {
         "description": "Button to accept tutoring interest"
     },
@@ -4263,7 +4291,7 @@
     "@moreOptions": {
         "description": "Label for the more-options overflow menu button"
     },
-    "homeMoreOptionsSubtitle": "Your library and more options",
+    "homeMoreOptionsSubtitle": "History, favorites, and downloads",
     "@homeMoreOptionsSubtitle": {
         "description": "Subtitle for the More section on the home dashboard"
     },

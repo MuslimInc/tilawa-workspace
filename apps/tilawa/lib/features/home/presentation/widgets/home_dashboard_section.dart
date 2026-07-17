@@ -5,7 +5,7 @@ import 'package:tilawa_ui_kit/tilawa_ui_kit.dart';
 class HomeDashboardSection extends StatelessWidget {
   const HomeDashboardSection({
     super.key,
-    required this.title,
+    this.title,
     this.subtitle,
     this.trailing,
     this.contentSpacing,
@@ -14,7 +14,8 @@ class HomeDashboardSection extends StatelessWidget {
     required this.child,
   });
 
-  final String title;
+  /// When null, only [child] is shown (no header chrome).
+  final String? title;
   final String? subtitle;
   final Widget? trailing;
   final double? contentSpacing;
@@ -37,37 +38,46 @@ class HomeDashboardSection extends StatelessWidget {
     final double afterHeaderGap = contentSpacing ?? tokens.spaceLarge;
     final TextStyle subtitleStyle = theme.textTheme.bodyLarge!.copyWith(
       color: secondaryText,
-      height: 1.45,
-      fontWeight: FontWeight.w500,
+      height: 1.4,
+      fontWeight: FontWeight.w400,
     );
 
-    final Widget titleWidget = Semantics(
-      header: true,
-      child: Text(
-        title,
-        style: theme.textTheme.titleLarge?.copyWith(
-          fontWeight: FontWeight.w800,
-          color: theme.colorScheme.onSurface,
-          height: 1.2,
-          letterSpacing: -0.2,
-        ),
-      ),
-    );
+    final String? titleText = title;
+    final bool hasHeader = titleText != null || subtitle != null;
+
+    if (!hasHeader) {
+      return child;
+    }
+
+    final Widget? titleWidget = titleText == null
+        ? null
+        : Semantics(
+            header: true,
+            child: Text(
+              titleText,
+              style: theme.textTheme.titleLarge?.copyWith(
+                fontWeight: FontWeight.w700,
+                color: theme.colorScheme.onSurface,
+                height: 1.25,
+              ),
+            ),
+          );
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
-        if (trailing == null)
-          titleWidget
-        else
-          Row(
-            children: [
-              Expanded(child: titleWidget),
-              trailing!,
-            ],
-          ),
+        if (titleWidget != null)
+          if (trailing == null)
+            titleWidget
+          else
+            Row(
+              children: [
+                Expanded(child: titleWidget),
+                trailing!,
+              ],
+            ),
         if (subtitle != null) ...[
-          SizedBox(height: subtitleGap),
+          if (titleWidget != null) SizedBox(height: subtitleGap),
           Text(
             subtitle!,
             style: subtitleStyle,

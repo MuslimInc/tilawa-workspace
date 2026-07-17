@@ -1653,7 +1653,7 @@ class TilawaHomeScreenTokens {
     Color? color,
     double? shadowOpacity,
   }) {
-    final double opacity = shadowOpacity ?? homePrayerHeroShadowOpacity;
+    final double opacity = shadowOpacity ?? homeContentSheetShadowOpacity;
     final Color borderColor = Color.alphaBlend(
       homePrayerHeroBorder.withValues(alpha: 0.72),
       colorScheme.outlineVariant.withValues(alpha: 0.28),
@@ -1729,11 +1729,11 @@ class TilawaHomeScreenTokens {
       backgroundGradientMiddle: AppColors.homeBackgroundGradientMiddle,
       backgroundGradientEnd: AppColors.homeBackgroundGradientEnd,
       backgroundGlowColor: AppColors.homeBackgroundGlow,
-      backgroundGlowOpacity: 0,
+      backgroundGlowOpacity: 0.55,
       homePrayerHeroBackground: AppColors.homePrayerHeroBackground,
       homePrayerHeroBorder: AppColors.homePrayerHeroBorder,
       homePrayerHeroShadow: AppColors.homePrayerHeroShadow,
-      homePrayerHeroShadowOpacity: 0,
+      homePrayerHeroShadowOpacity: 0.08,
       homePrayerHeroAccent: AppColors.homePrayerHeroAccent,
       homePrayerHeroWatermark: AppColors.homePrayerHeroWatermark,
       homePrayerHeroWatermarkOpacity: 0.07,
@@ -1749,8 +1749,8 @@ class TilawaHomeScreenTokens {
       homeContentSheetShadowOpacity: 0,
       homeContentSheetTopBorder: AppColors.homeContentSheetTopBorder,
       homeHeroPatternInk: AppColors.homeHeroPatternInk,
-      homeHeroPatternOpacity: 0,
-      homeHeroGoldGlowOpacity: 0,
+      homeHeroPatternOpacity: 0.07,
+      homeHeroGoldGlowOpacity: 0.22,
       homeFeaturedTutorCtaForeground: AppColors.homeFeaturedTutorCtaForeground,
       quickActionTileBackground: AppColors.homeQuickActionTileBackground,
     );

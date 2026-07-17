@@ -3,7 +3,10 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:mocktail/mocktail.dart';
+import 'package:tilawa/features/home/presentation/cubit/home_learning_cubit.dart';
+import 'package:tilawa/features/home/presentation/cubit/home_learning_state.dart';
 import 'package:tilawa/features/home/presentation/cubit/home_listening_resume_cubit.dart';
+import 'package:tilawa/features/settings/presentation/cubit/teacher_capability_cubit.dart';
 import 'package:tilawa/features/home/presentation/cubit/home_listening_resume_state.dart';
 import 'package:tilawa/features/home/presentation/widgets/home_daily_inspiration_section.dart';
 import 'package:tilawa/features/home/presentation/widgets/home_dashboard_body.dart';
@@ -21,6 +24,13 @@ class _MockHomeListeningResumeCubit extends MockCubit<HomeListeningResumeState>
 
 class _MockMainScreenCubit extends MockCubit<MainScreenState>
     implements MainScreenCubit {}
+
+class _MockHomeLearningCubit extends MockCubit<HomeLearningState>
+    implements HomeLearningCubit {}
+
+class _MockTeacherCapabilityCubit
+    extends MockCubit<SettingsTeacherCapabilityLoadState>
+    implements TeacherCapabilityCubit {}
 
 void main() {
   testWidgets('renders skeleton placeholders while dashboard load is pending', (
@@ -63,6 +73,21 @@ void main() {
     when(() => mainScreenCubit.state).thenReturn(const MainScreenState());
     when(() => mainScreenCubit.stream).thenAnswer((_) => const Stream.empty());
 
+    final learningCubit = _MockHomeLearningCubit();
+    when(() => learningCubit.state).thenReturn(
+      const HomeLearningState(status: HomeLearningStatus.none),
+    );
+    when(() => learningCubit.stream).thenAnswer((_) => const Stream.empty());
+
+    final teacherCubit = _MockTeacherCapabilityCubit();
+    when(() => teacherCubit.state).thenReturn(
+      const SettingsTeacherCapabilityLoadState(
+        isLoading: false,
+        hasLoaded: true,
+      ),
+    );
+    when(() => teacherCubit.stream).thenAnswer((_) => const Stream.empty());
+
     await tester.pumpWidget(
       MaterialApp(
         theme: AppTheme.getLightTheme(primaryColor: AppColors.defaultPrimary),
@@ -77,6 +102,8 @@ void main() {
                   value: listeningCubit,
                 ),
                 BlocProvider<MainScreenCubit>.value(value: mainScreenCubit),
+                BlocProvider<HomeLearningCubit>.value(value: learningCubit),
+                BlocProvider<TeacherCapabilityCubit>.value(value: teacherCubit),
               ],
               child: const HomeDashboardBody(),
             ),
@@ -117,6 +144,8 @@ void main() {
     expect(find.text(l10n.homeAthkarRitualsTitle), findsNothing);
 
     expect(find.text(l10n.homeQuickActionsTitle), findsNothing);
+    expect(find.text(l10n.homeQuickToolsTitle), findsOneWidget);
+    expect(find.text(l10n.homeGreeting), findsOneWidget);
     expect(find.text(l10n.homeQuickReciters), findsOneWidget);
     expect(find.text(l10n.homeQuickQuranReader), findsOneWidget);
     expect(find.text(l10n.homeQuickAthkar), findsOneWidget);

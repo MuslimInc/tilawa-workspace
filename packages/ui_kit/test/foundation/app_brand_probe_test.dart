@@ -7,34 +7,34 @@ import 'package:tilawa_ui_kit/tilawa_ui_kit.dart';
 void main() {
   group('AppBrandProbe', () {
     test(
-      'brand action orange passes decorative onPrimary contrast',
+      'brand action green passes decorative onPrimary contrast',
       () {
         final ratio = _contrastRatio(
           AppColors.lightSchemeOnPrimary,
-          AppColors.brandActionOrange,
+          AppColors.brandActionGreen,
         );
         expect(
           ratio,
           greaterThanOrEqualTo(2.9),
           reason:
-              'white onPrimary on #FA5B2E (${ratio.toStringAsFixed(2)}:1) — '
+              'white onPrimary on #1DAB61 (${ratio.toStringAsFixed(2)}:1) — '
               'large UI / brand accent',
         );
       },
     );
 
     test(
-      'brand action orange accessible passes solid CTA contrast',
+      'brand action green accessible passes solid CTA contrast',
       () {
         final ratio = _contrastRatio(
           AppColors.lightSchemeOnPrimary,
-          AppColors.brandActionOrangeAccessible,
+          AppColors.brandActionGreenAccessible,
         );
         expect(
           ratio,
           greaterThanOrEqualTo(4.5),
           reason:
-              'white on #C2410C (${ratio.toStringAsFixed(2)}:1) — filled buttons',
+              'white on #148048 (${ratio.toStringAsFixed(2)}:1) — filled buttons',
         );
       },
     );
@@ -50,15 +50,15 @@ void main() {
         expect(
           ratio,
           greaterThanOrEqualTo(4.5),
-          reason: 'dark onPrimary on #FF8A65 (${ratio.toStringAsFixed(2)}:1)',
+          reason:
+              'dark onPrimary on lifted green (${ratio.toStringAsFixed(2)}:1)',
         );
       },
     );
 
-    test('production default primary is brand action orange', () {
-      expect(AppColors.defaultPrimary, AppColors.brandActionOrange);
-      expect(AppBrandProbe.actionOrange, AppColors.brandActionOrange);
-      expect(AppBrandProbe.actionGreen, AppColors.brandActionOrange);
+    test('production default primary is brand action green', () {
+      expect(AppColors.defaultPrimary, AppColors.brandActionGreen);
+      expect(AppBrandProbe.actionGreen, AppColors.brandActionGreen);
     });
 
     test('default primary uses brand-locked scheme roles', () {
@@ -66,34 +66,34 @@ void main() {
         primaryColor: AppColors.defaultPrimary,
       ).colorScheme;
 
-      expect(scheme.primary, AppColors.brandActionOrange);
+      expect(scheme.primary, AppColors.brandActionGreen);
       expect(scheme.onPrimary, AppColors.lightSchemeOnPrimary);
     });
 
-    test('home dashboard accents align with brand action orange', () {
-      expect(AppColors.homeDashboardAccent, AppColors.brandActionOrange);
-      expect(AppColors.homePrayerHeroAccent, AppColors.brandActionOrange);
-      expect(AppColors.homeHeroPatternInk, AppColors.brandActionOrange);
-      expect(AppColors.homeTravelSectionLink, AppColors.brandActionOrange);
-      expect(AppColors.homeTravelDestinationIcon, AppColors.brandActionOrange);
+    test('home dashboard accents align with brand action green', () {
+      expect(AppColors.homeDashboardAccent, AppColors.brandActionGreen);
+      expect(AppColors.homePrayerHeroAccent, AppColors.brandActionGreen);
+      expect(AppColors.homeHeroPatternInk, AppColors.brandActionGreen);
+      expect(AppColors.homeTravelSectionLink, AppColors.brandActionGreen);
+      expect(AppColors.homeTravelDestinationIcon, AppColors.brandActionGreen);
     });
 
-    test('featured tutor CTA accent aligns with global primary orange', () {
-      expect(AppColors.homeFeaturedTutorAccent, AppColors.brandActionOrange);
+    test('featured tutor CTA accent aligns with global primary green', () {
+      expect(AppColors.homeFeaturedTutorAccent, AppColors.brandActionGreen);
       expect(
         AppColors.homeFeaturedTutorAccentDark,
         AppColors.darkDefaultPrimary,
       );
     });
 
-    test('home dark accents use lifted brand orange', () {
+    test('home dark accents use lifted brand green', () {
       expect(AppColors.homeDashboardAccentDark, AppColors.darkDefaultPrimary);
       expect(AppColors.homePrayerHeroAccentDark, AppColors.darkDefaultPrimary);
       expect(AppColors.homeHeroPatternInkDark, AppColors.darkDefaultPrimary);
     });
 
-    test('launch splash is brand splash orange', () {
-      expect(AppColors.launchSplashBackground, AppColors.brandSplashOrange);
+    test('launch splash is brand splash green', () {
+      expect(AppColors.launchSplashBackground, AppColors.brandSplashGreen);
     });
   });
 }

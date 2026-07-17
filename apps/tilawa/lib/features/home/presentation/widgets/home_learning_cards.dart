@@ -75,40 +75,43 @@ class HomeLearningInterestCard extends StatelessWidget {
             ),
           ),
           SizedBox(height: tokens.spaceSmall),
-          Column(
-            crossAxisAlignment: CrossAxisAlignment.stretch,
-            spacing: tokens.spaceExtraSmall,
+          Row(
+            spacing: tokens.spaceSmall,
             children: [
-              TilawaButton(
-                text: context.l10n.homeLearningInterestPromptYes,
-                variant: TilawaButtonVariant.secondary,
-                size: TilawaButtonSize.small,
-                isFullWidth: true,
-                onPressed: () {
-                  logHomeLearnQuranCardAction(
-                    action: 'accept_interest',
-                    status: 'none',
-                  );
-                  context.read<HomeLearningCubit>().setTutoringInterest(
-                    isInterested: true,
-                  );
-                  context.push(QuranSessionsRoutes.home);
-                },
+              Expanded(
+                child: TilawaButton(
+                  text: context.l10n.homeLearningInterestPromptYes,
+                  variant: TilawaButtonVariant.secondary,
+                  size: TilawaButtonSize.small,
+                  isFullWidth: true,
+                  onPressed: () {
+                    logHomeLearnQuranCardAction(
+                      action: 'accept_interest',
+                      status: 'none',
+                    );
+                    context.read<HomeLearningCubit>().setTutoringInterest(
+                      isInterested: true,
+                    );
+                    context.push(QuranSessionsRoutes.home);
+                  },
+                ),
               ),
-              TilawaButton(
-                text: context.l10n.homeLearningInterestPromptNo,
-                variant: TilawaButtonVariant.ghost,
-                size: TilawaButtonSize.small,
-                isFullWidth: true,
-                onPressed: () {
-                  logHomeLearnQuranCardAction(
-                    action: 'dismiss_interest',
-                    status: 'none',
-                  );
-                  context.read<HomeLearningCubit>().setTutoringInterest(
-                    isInterested: false,
-                  );
-                },
+              Expanded(
+                child: TilawaButton(
+                  text: context.l10n.homeLearningInterestPromptNo,
+                  variant: TilawaButtonVariant.ghost,
+                  size: TilawaButtonSize.small,
+                  isFullWidth: true,
+                  onPressed: () {
+                    logHomeLearnQuranCardAction(
+                      action: 'dismiss_interest',
+                      status: 'none',
+                    );
+                    context.read<HomeLearningCubit>().setTutoringInterest(
+                      isInterested: false,
+                    );
+                  },
+                ),
               ),
             ],
           ),

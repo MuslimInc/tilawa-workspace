@@ -2,16 +2,14 @@ import 'package:flutter/material.dart';
 import 'package:tilawa/core/extensions.dart';
 import 'package:tilawa/features/home/presentation/widgets/home_dashboard_elevated_surface.dart';
 import 'package:tilawa/features/home/presentation/widgets/home_dashboard_icon_well.dart';
+import 'package:tilawa/features/home/presentation/widgets/home_dashboard_section.dart';
 import 'package:tilawa/features/home/presentation/widgets/home_feature_pastel.dart';
 import 'package:tilawa/router/app_router_config.dart';
 import 'package:tilawa_ui_kit/tilawa_ui_kit.dart';
 
 import 'home_shell_tab_navigation.dart';
 
-/// Secondary tools row — Reciters, Qibla, Tasbeeh.
-///
-/// White elevated cards with accent icon wells ([HomeFeaturePastel]); quieter
-/// elevation than primary tiles, quieter than the prayer hero.
+/// Compact shortcuts — Reciters, Qibla, Tasbeeh.
 class HomeQuickToolsSection extends StatelessWidget {
   const HomeQuickToolsSection({super.key});
 
@@ -25,25 +23,28 @@ class HomeQuickToolsSection extends StatelessWidget {
     final product = Theme.of(context).productColors;
     final items = _QuickToolsCatalog.items(context);
 
-    return IntrinsicHeight(
-      child: Row(
-        crossAxisAlignment: CrossAxisAlignment.stretch,
-        spacing: tokens.spaceSmall,
-        children: [
-          for (final item in items)
-            Expanded(
-              child: _QuickToolTile(
-                icon: item.buildIcon(
-                  HomeFeaturePastel.accentFor(item.feature, product),
-                  iconSize,
+    return HomeDashboardSection(
+      title: context.l10n.homeQuickToolsTitle,
+      child: IntrinsicHeight(
+        child: Row(
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          spacing: tokens.spaceSmall,
+          children: [
+            for (final item in items)
+              Expanded(
+                child: _QuickToolTile(
+                  icon: item.buildIcon(
+                    HomeFeaturePastel.accentFor(item.feature, product),
+                    iconSize,
+                  ),
+                  label: item.label,
+                  accent: HomeFeaturePastel.accentFor(item.feature, product),
+                  radius: radius,
+                  onTap: item.onTap,
                 ),
-                label: item.label,
-                accent: HomeFeaturePastel.accentFor(item.feature, product),
-                radius: radius,
-                onTap: item.onTap,
               ),
-            ),
-        ],
+          ],
+        ),
       ),
     );
   }
@@ -69,9 +70,8 @@ class _QuickToolTile extends StatelessWidget {
     final tokens = context.tokens;
     final theme = Theme.of(context);
     final colorScheme = theme.colorScheme;
-    final Color surface = HomeFeaturePastel.cardSurface(colorScheme);
+    final Color surface = colorScheme.surface;
     final BorderRadius borderRadius = BorderRadius.circular(radius);
-
     return HomeDashboardElevatedSurface.interactive(
       context: context,
       borderRadius: borderRadius,
@@ -88,7 +88,7 @@ class _QuickToolTile extends StatelessWidget {
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           mainAxisSize: MainAxisSize.min,
-          spacing: tokens.spaceSmall + tokens.spaceExtraSmall,
+          spacing: tokens.spaceSmall,
           children: [
             HomeDashboardIconWell(
               accent: accent,
@@ -102,7 +102,7 @@ class _QuickToolTile extends StatelessWidget {
               overflow: TextOverflow.ellipsis,
               textAlign: TextAlign.center,
               style: theme.textTheme.labelLarge?.copyWith(
-                color: colorScheme.onSurface.withValues(alpha: 0.92),
+                color: colorScheme.onSurface,
                 fontWeight: FontWeight.w700,
                 height: 1.2,
               ),

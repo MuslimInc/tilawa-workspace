@@ -430,17 +430,19 @@ class _HomeNextPrayerTimeFocus extends StatelessWidget {
                 style: theme.textTheme.labelSmall?.copyWith(
                   color: onMuted,
                   fontWeight: FontWeight.w600,
-                  letterSpacing: 0.4,
+                  letterSpacing: 0.6,
                 ),
               ),
               Text(
                 prayerName,
                 maxLines: 1,
                 overflow: TextOverflow.ellipsis,
-                style: theme.textTheme.titleLarge?.copyWith(
+                style: theme.textTheme.headlineSmall?.copyWith(
+                  // Deep ink — countdown pill owns the green accent lane.
                   color: onCard,
-                  fontWeight: FontWeight.w700,
-                  height: 1.08,
+                  fontWeight: FontWeight.w800,
+                  height: 1.05,
+                  letterSpacing: -0.3,
                 ),
               ),
               Text(
@@ -449,7 +451,8 @@ class _HomeNextPrayerTimeFocus extends StatelessWidget {
                   color: onCard,
                   fontWeight: FontWeight.w800,
                   fontFeatures: const [FontFeature.tabularFigures()],
-                  height: 0.98,
+                  height: 0.96,
+                  letterSpacing: -0.8,
                 ),
               ),
               _HomeNextPrayerTimeRemainingText(

@@ -531,7 +531,7 @@ class AppTheme {
                 return AppBrandProbe.usesBrandLockedSchemeRoles(
                       colorScheme.primary.toARGB32(),
                     )
-                    ? AppColors.brandActionOrangeAccessible
+                    ? AppColors.brandActionGreenAccessible
                     : colorScheme.primary;
               }),
               foregroundColor: WidgetStateProperty.resolveWith((states) {

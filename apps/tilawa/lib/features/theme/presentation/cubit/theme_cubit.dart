@@ -15,14 +15,14 @@ enum PrimaryColorSource { preset, custom }
 /// Must stay in sync with [PrimaryColorPreset.defaultPreset.valueArgb]; the
 /// constructor uses a literal here because Dart constant-list initialisers
 /// can't call a non-trivial getter chain.
-const int _kDefaultPrimaryColorArgb = 0xFFFA5B2E;
+const int _kDefaultPrimaryColorArgb = 0xFF1DAB61;
 
 class ThemeState extends Equatable {
   const ThemeState({
     required this.mode,
     this.primaryColorArgb = _kDefaultPrimaryColorArgb,
     this.primaryColorSource = PrimaryColorSource.preset,
-    this.primaryPresetId = 'brand_orange',
+    this.primaryPresetId = 'brand_green',
     this.useSystemTheme = false,
     this.preset = AppThemePreset.defaultMode,
   });
@@ -132,7 +132,7 @@ class ThemeCubit extends HydratedCubit<ThemeState> {
         if (migratedArgb != colorValue) {
           primaryColorArgb = migratedArgb;
           primaryColorSource = PrimaryColorSource.preset;
-          primaryPresetId = PrimaryColorPreset.brandOrange.id;
+          primaryPresetId = PrimaryColorPreset.brandGreen.id;
         } else {
           primaryColorArgb = colorValue;
           primaryColorSource = PrimaryColorSource.custom;

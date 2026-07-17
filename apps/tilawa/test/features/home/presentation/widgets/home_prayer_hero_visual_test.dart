@@ -8,6 +8,9 @@ import 'package:tilawa/core/di/injection.dart';
 import 'package:tilawa/features/home/domain/entities/home_dashboard.dart';
 import 'package:tilawa/features/home/presentation/bloc/home_dashboard_state.dart';
 import 'package:tilawa/features/home/presentation/cubit/home_listening_resume_cubit.dart';
+import 'package:tilawa/features/home/presentation/cubit/home_learning_cubit.dart';
+import 'package:tilawa/features/home/presentation/cubit/home_learning_state.dart';
+import 'package:tilawa/features/settings/presentation/cubit/teacher_capability_cubit.dart';
 import 'package:tilawa/features/home/presentation/cubit/home_listening_resume_state.dart';
 import 'package:tilawa/features/home/presentation/widgets/home_dashboard_body.dart';
 import 'package:tilawa/features/home/presentation/widgets/home_next_prayer_time.dart';
@@ -20,6 +23,13 @@ import 'package:tilawa_ui_kit/tilawa_ui_kit.dart';
 
 class _MockHomeListeningResumeCubit extends MockCubit<HomeListeningResumeState>
     implements HomeListeningResumeCubit {}
+
+class _MockHomeLearningCubit extends MockCubit<HomeLearningState>
+    implements HomeLearningCubit {}
+
+class _MockTeacherCapabilityCubit
+    extends MockCubit<SettingsTeacherCapabilityLoadState>
+    implements TeacherCapabilityCubit {}
 
 class _MockMainScreenCubit extends MockCubit<MainScreenState>
     implements MainScreenCubit {}
@@ -130,6 +140,21 @@ Future<void> _pumpHome(
   when(() => mainScreenCubit.state).thenReturn(const MainScreenState());
   when(() => mainScreenCubit.stream).thenAnswer((_) => const Stream.empty());
 
+  final learningCubit = _MockHomeLearningCubit();
+  when(() => learningCubit.state).thenReturn(
+    const HomeLearningState(status: HomeLearningStatus.none),
+  );
+  when(() => learningCubit.stream).thenAnswer((_) => const Stream.empty());
+
+  final teacherCubit = _MockTeacherCapabilityCubit();
+  when(() => teacherCubit.state).thenReturn(
+    const SettingsTeacherCapabilityLoadState(
+      isLoading: false,
+      hasLoaded: true,
+    ),
+  );
+  when(() => teacherCubit.stream).thenAnswer((_) => const Stream.empty());
+
   tester.view.physicalSize = size;
   tester.view.devicePixelRatio = 1;
   addTearDown(tester.view.resetPhysicalSize);
@@ -178,6 +203,12 @@ Future<void> _pumpHome(
                             ),
                             BlocProvider<MainScreenCubit>.value(
                               value: mainScreenCubit,
+                            ),
+                            BlocProvider<HomeLearningCubit>.value(
+                              value: learningCubit,
+                            ),
+                            BlocProvider<TeacherCapabilityCubit>.value(
+                              value: teacherCubit,
                             ),
                           ],
                           child: const HomeDashboardBody(),

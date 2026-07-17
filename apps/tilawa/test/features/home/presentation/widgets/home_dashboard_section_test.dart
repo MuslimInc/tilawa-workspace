@@ -3,7 +3,6 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:tilawa/features/home/presentation/widgets/home_dashboard_card.dart';
 import 'package:tilawa/features/home/presentation/widgets/home_more_actions_group.dart';
 import 'package:tilawa/features/home/presentation/widgets/home_daily_inspiration_section.dart';
-import 'package:tilawa/features/home/presentation/widgets/home_primary_actions_section.dart';
 import 'package:tilawa/l10n/generated/app_localizations.dart';
 import 'package:tilawa_ui_kit/tilawa_ui_kit.dart';
 
@@ -21,7 +20,6 @@ void main() {
           body: SingleChildScrollView(
             child: Column(
               children: [
-                HomePrimaryActionsSection(),
                 HomeMoreActionsGroup(),
                 HomeDailyInspirationSection(),
               ],
@@ -33,45 +31,31 @@ void main() {
     await tester.pumpAndSettle();
 
     final l10n = AppLocalizations.of(
-      tester.element(find.byType(HomePrimaryActionsSection)),
+      tester.element(find.byType(HomeMoreActionsGroup)),
     );
 
     double gapAfterHeader({
       required Finder sectionFinder,
       required String title,
-      String? subtitle,
     }) {
-      final Offset headerBottom = subtitle == null
-          ? tester.getBottomLeft(find.text(title))
-          : tester.getBottomLeft(find.text(subtitle));
+      final Offset headerBottom = tester.getBottomLeft(find.text(title));
       final Finder content = find.descendant(
         of: sectionFinder,
-        matching: find.byWidgetPredicate(
-          (widget) =>
-              widget is HomeDashboardCard ||
-              widget.runtimeType.toString() == 'HomePrimaryActionTile',
-        ),
+        matching: find.byType(HomeDashboardCard),
       );
       final Offset contentTop = tester.getTopLeft(content.first);
       return contentTop.dy - headerBottom.dy;
     }
 
-    final double primaryGap = gapAfterHeader(
-      sectionFinder: find.byType(HomePrimaryActionsSection),
-      title: l10n.homeMainActionsTitle,
-    );
     final double moreGap = gapAfterHeader(
       sectionFinder: find.byType(HomeMoreActionsGroup),
       title: l10n.moreOptions,
-      subtitle: l10n.homeMoreOptionsSubtitle,
     );
     final double inspirationGap = gapAfterHeader(
       sectionFinder: find.byType(HomeDailyInspirationSection),
       title: l10n.homeInspirationTitle,
-      subtitle: l10n.homeInspirationSubtitle,
     );
 
-    expect((moreGap - primaryGap).abs(), lessThan(2));
     expect((inspirationGap - moreGap).abs(), lessThan(2));
   });
 

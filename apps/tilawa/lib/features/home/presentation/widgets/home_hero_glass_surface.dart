@@ -44,8 +44,12 @@ class HomeHeroGlassSurface extends StatelessWidget {
     final Color fill = usePrayerHeroTokens
         ? screenTokens.homePrayerHeroBackground
         : colorScheme.surface.withValues(alpha: 0.90);
+    // Warm gold-sage hairline — ceremonial frame, not cold utility border.
     final Color border = usePrayerHeroTokens
-        ? screenTokens.homePrayerHeroBorder
+        ? Color.alphaBlend(
+            colorScheme.tertiary.withValues(alpha: 0.22),
+            screenTokens.homePrayerHeroBorder,
+          )
         : colorScheme.outlineVariant.withValues(alpha: 0.48);
     final Color shadowColor = usePrayerHeroTokens
         ? screenTokens.homePrayerHeroShadow.withValues(

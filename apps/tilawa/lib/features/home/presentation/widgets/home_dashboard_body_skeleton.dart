@@ -28,23 +28,18 @@ class HomeDashboardBodySkeleton extends StatelessWidget {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
-          HomeDashboardSection(
-            title: context.l10n.homeMainActionsTitle,
-            child: const _PrimaryActionTilesSkeleton(),
-          ),
+          const _PrimaryActionTilesSkeleton(),
           SizedBox(height: sectionGap + tokens.spaceExtraSmall),
           const _QuickToolsRowSkeleton(),
           SizedBox(height: zoneGap),
           HomeDashboardSection(
             title: context.l10n.moreOptions,
-            subtitle: context.l10n.homeMoreOptionsSubtitle,
             compact: true,
             child: const _GroupedListSkeleton(rowCount: 4),
           ),
           SizedBox(height: zoneGap),
           HomeDashboardSection(
             title: context.l10n.homeInspirationTitle,
-            subtitle: context.l10n.homeInspirationSubtitle,
             child: const _InspirationCardSkeleton(),
           ),
         ],
@@ -88,7 +83,6 @@ class _PrimaryActionTileSkeleton extends StatelessWidget {
       family: TilawaRadiusFamily.decorative,
     );
     final double iconBoxSize = tokens.iconBoxSize;
-    final double accentRailWidth = tokens.spaceExtraSmall;
 
     return DecoratedBox(
       decoration: HomeDashboardElevatedSurface.decoration(
@@ -96,13 +90,7 @@ class _PrimaryActionTileSkeleton extends StatelessWidget {
         borderRadius: BorderRadius.circular(radius),
       ),
       child: Padding(
-        // Mirrors [HomePrimaryActionTile] content padding (incl. accent rail).
-        padding: EdgeInsetsDirectional.fromSTEB(
-          tokens.spaceMedium + accentRailWidth,
-          tokens.spaceMedium,
-          tokens.spaceMedium,
-          tokens.spaceMedium + tokens.spaceExtraSmall,
-        ),
+        padding: EdgeInsets.all(tokens.spaceMedium),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
@@ -111,7 +99,7 @@ class _PrimaryActionTileSkeleton extends StatelessWidget {
               height: iconBoxSize,
               borderRadius: decorativeRadius,
             ),
-            SizedBox(height: tokens.spaceMedium + tokens.spaceExtraSmall),
+            SizedBox(height: tokens.spaceMedium),
             TilawaSkeletonLine(
               width: 96,
               style: theme.textTheme.titleMedium,

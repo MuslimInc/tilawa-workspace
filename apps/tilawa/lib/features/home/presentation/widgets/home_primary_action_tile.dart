@@ -5,37 +5,34 @@ import 'package:tilawa/features/home/presentation/widgets/home_dashboard_section
 import 'package:tilawa/features/home/presentation/widgets/home_feature_pastel.dart';
 import 'package:tilawa_ui_kit/tilawa_ui_kit.dart';
 
-/// Premium primary action tile for the Home dashboard.
+/// Primary action tile for the Home dashboard.
 class HomePrimaryActionTile extends StatelessWidget {
   const HomePrimaryActionTile({
     super.key,
     required this.icon,
     required this.label,
-    required this.subtitle,
+    this.subtitle,
     required this.onTap,
     required this.accent,
-    this.goldAccentOnStart = true,
   });
 
   final Widget icon;
   final String label;
-  final String subtitle;
+  final String? subtitle;
   final VoidCallback onTap;
   final Color accent;
-  final bool goldAccentOnStart;
 
   @override
   Widget build(BuildContext context) {
     final tokens = context.tokens;
     final theme = Theme.of(context);
     final colorScheme = theme.colorScheme;
-    final Color surface = HomeFeaturePastel.cardSurface(colorScheme);
+    final Color surface = colorScheme.surface;
     final double radius = tokens.resolveRadius(
       family: TilawaRadiusFamily.hero,
     );
-
     final BorderRadius borderRadius = BorderRadius.circular(radius);
-    final double accentRailWidth = tokens.spaceExtraSmall;
+    final String? subtitleText = subtitle;
 
     return HomeDashboardElevatedSurface.interactive(
       context: context,
@@ -46,12 +43,7 @@ class HomePrimaryActionTile extends StatelessWidget {
       color: surface,
       tier: HomeDashboardElevationTier.primary,
       child: Padding(
-        padding: EdgeInsetsDirectional.fromSTEB(
-          tokens.spaceMedium + accentRailWidth,
-          tokens.spaceMedium,
-          tokens.spaceMedium,
-          tokens.spaceMedium + tokens.spaceExtraSmall,
-        ),
+        padding: EdgeInsets.all(tokens.spaceMedium),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
@@ -61,28 +53,29 @@ class HomePrimaryActionTile extends StatelessWidget {
               extent: tokens.iconBoxSize,
               child: icon,
             ),
-            SizedBox(height: tokens.spaceMedium + tokens.spaceExtraSmall),
+            SizedBox(height: tokens.spaceMedium),
             Text(
               label,
               maxLines: 1,
               overflow: TextOverflow.ellipsis,
               style: theme.textTheme.titleMedium?.copyWith(
                 color: colorScheme.onSurface,
-                fontWeight: FontWeight.w800,
-                height: 1.12,
-                letterSpacing: -0.15,
+                fontWeight: FontWeight.w700,
+                height: 1.15,
               ),
             ),
-            SizedBox(height: tokens.spaceExtraSmall),
-            Text(
-              subtitle,
-              maxLines: 2,
-              overflow: TextOverflow.ellipsis,
-              style: theme.textTheme.bodySmall?.copyWith(
-                color: HomeDashboardSection.secondaryTextColor(context),
-                height: 1.4,
+            if (subtitleText != null && subtitleText.isNotEmpty) ...[
+              SizedBox(height: tokens.spaceExtraSmall),
+              Text(
+                subtitleText,
+                maxLines: 2,
+                overflow: TextOverflow.ellipsis,
+                style: theme.textTheme.bodySmall?.copyWith(
+                  color: HomeDashboardSection.secondaryTextColor(context),
+                  height: 1.35,
+                ),
               ),
-            ),
+            ],
           ],
         ),
       ),

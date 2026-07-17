@@ -5,23 +5,23 @@ name: MeMuslim
 tagline: Calm Islamic lifestyle companion — Quran, prayer, dhikr, and learning in a warm, readable, premium shell.
 description: >-
   MeMuslim / أنا مسلم (formerly Tilawa) uses Material 3 with a small, calm palette:
-  orange global accent for CTAs and active chrome, cool off-white canvas, white elevated
+  green global accent for CTAs and active chrome, whisper-green canvas, white elevated
   cards, gold featured heroes, and restrained shadows. Implementation truth lives in
   packages/ui_kit and apps/tilawa — this file is the single source of truth for humans
   and AI agents making UI/UX changes.
 
 colors:
   # Brand / action (production-locked - unified for UI, splash, and launcher)
-  primary: "#FA5B2E"
-  primary-accessible: "#C2410C"
+  primary: "#1DAB61"
+  primary-accessible: "#148048"
   on-primary: "#FFFFFF"
-  primary-dark: "#FF8A65"
+  primary-dark: "#4ADE80"
   primary-container-light: "#E0F2F1"
 
   # Semantic feedback
   success: "#43A047"
   success-dark: "#6BCF7F"
-  warning: "#C2410C"
+  warning: "#148048"
   warning-dark: "#FB923C"
   error: "#C74545"
   error-soft: "#E57373"
@@ -29,12 +29,12 @@ colors:
   on-error: "#FFFFFF"
 
   # Light surfaces (60-30-10)
-  canvas: "#F4F4F4"
+  canvas: "#F5F8F5"
   surface: "#FFFFFF"
-  surface-container-high: "#F4F4F4"
+  surface-container-high: "#F5F8F5"
   surface-container-highest: "#E8E8E8"
-  ink: "#050505"
-  body: "#050505"
+  ink: "#14201A"
+  body: "#14201A"
   mute: "#6B6B6B"
   ash: "#BDBDBD"
   outline: "#E0E0E0"
@@ -44,7 +44,7 @@ colors:
   gold-start: "#FFD28E"
   gold-end: "#FF9E44"
   gold-accent: "#F2AC1F"
-  gold-foreground: "#050505"
+  gold-foreground: "#14201A"
 
   # Dark surfaces
   canvas-dark: "#0E1413"
@@ -163,7 +163,7 @@ Design system for **MeMuslim / أنا مسلم** (internal package name `tilawa`
 ## Visual theme and atmosphere
 
 - **Material 3** via **FlexColorScheme**, refined in `AppTheme` with palette from `AppColors`.
-- **Calm, content-first:** small palette, cool off-white canvas (`#F4F4F4`), white cards (`#FFFFFF`), one **orange global accent** (`#FA5B2E`) for CTAs and active chrome. No legacy purple. Brown/warm tones appear only as approved secondary micro-accents (gold featured cards, warm hero gradients, metadata browns) — never as a new primary.
+- **Calm, content-first:** small palette, whisper-green canvas (`#F5F8F5`), white cards (`#FFFFFF`), one **green global accent** (`#1DAB61`) for CTAs and active chrome. No legacy purple. Brown/warm tones appear only as approved secondary micro-accents (gold featured cards, warm hero gradients, metadata browns) — never as a new primary.
 - **Not e-commerce / admin:** avoid dense data grids, heavy gradients on chrome, stacked shadows, or crowded multi-accent layouts.
 - **Readable Arabic:** `textHeightLoose` (2.0) for dense script; bundled **IBM Plex Sans Arabic** on all M3 roles.
 - **Comfortable density:** `FlexColorScheme.comfortablePlatformDensity` — not compact.
@@ -174,16 +174,16 @@ Design system for **MeMuslim / أنا مسلم** (internal package name `tilawa`
 
 ## Color palette and roles
 
-### Production primary (brand-locked orange)
+### Production primary (brand-locked green)
 
 | Token | Hex | Usage |
 |-------|-----|--------|
-| `brandActionOrange` | `#FA5B2E` | **Default primary** — CTAs, active nav, selected pills, switch ON, progress |
-| `brandActionOrangeAccessible` | `#C2410C` | Solid buttons/links needing higher contrast |
-| `lightSchemeOnPrimary` | `#003317` | Labels/icons on green fills (AA on `#FA5B2E`) |
-| `darkDefaultPrimary` | `#FF8A65` | Lifted green on dark surfaces |
+| `brandActionGreen` | `#1DAB61` | **Default primary** — CTAs, active nav, selected pills, switch ON, progress |
+| `brandActionGreenAccessible` | `#148048` | Solid buttons/links needing higher contrast |
+| `lightSchemeOnPrimary` | `#003317` | Labels/icons on green fills (AA on `#1DAB61`) |
+| `darkDefaultPrimary` | `#4ADE80` | Lifted green on dark surfaces |
 
-Production locks `PrimaryColorPreset.brandOrange` (`#FA5B2E`). Legacy purple (`#7A5C89`), brown (`#8B5E3C`), sage (`#219653`), and teal (`#00897B`) presets migrate to brand green on read — **do not reintroduce purple** or add new accent hues.
+Production locks `PrimaryColorPreset.brandGreen` (`#1DAB61`). Legacy purple (`#7A5C89`), brown (`#8B5E3C`), sage (`#219653`), and teal (`#00897B`) presets migrate to brand green on read — **do not reintroduce purple** or add new accent hues.
 
 Dev/QA only (`TILAWA_SHOW_COLOR_PICKER=true`): coral, teal, sage, forest presets remain for testing; never ship new UI assuming a user-picked primary other than green.
 
@@ -192,7 +192,7 @@ Dev/QA only (`TILAWA_SHOW_COLOR_PICKER=true`): coral, teal, sage, forest presets
 | Role | Light | Dark | Access |
 |------|-------|------|--------|
 | Success | `#43A047` | `#6BCF7F` | `colorScheme.success` |
-| Warning | `#C2410C` | `#FB923C` | `colorScheme.warning` |
+| Warning | `#148048` | `#FB923C` | `colorScheme.warning` |
 | Error | `#C74545` | `#FFB4AB` | `colorScheme.error` |
 
 ### Light neutral ramp (60-30-10)
@@ -201,11 +201,11 @@ Dev/QA only (`TILAWA_SHOW_COLOR_PICKER=true`): coral, teal, sage, forest presets
 
 | Role | Hex | `ColorScheme` / API |
 |------|-----|-------------------|
-| Canvas / scaffold | `#F4F4F4` | `surfaceContainerLowest` |
+| Canvas / scaffold | `#F5F8F5` | `surfaceContainerLowest` |
 | Cards, sheets | `#FFFFFF` | `surface` |
-| Ink / onSurface | `#050505` | `onSurface` |
+| Ink / onSurface | `#14201A` | `onSurface` |
 | Muted labels | `#6B6B6B` | `onSurfaceVariant` |
-| Idle chips / search rest | `#F4F4F4` | `surfaceContainerHigh` |
+| Idle chips / search rest | `#F5F8F5` | `surfaceContainerHigh` |
 | Hairline | `#EEEEEE` | `outlineVariant` |
 | Strong outline | `#E0E0E0` | `outline` |
 
@@ -401,7 +401,7 @@ Every empty region: **`TilawaEmptyState`** or **`TilawaIllustratedState`** — i
 ## Accessibility
 
 - **Touch targets:** ≥ **48 dp** on all in-app interactive elements.
-- **Contrast:** body text vs surface ≥ WCAG AA; orange `#FA5B2E` uses `#003317` on-primary for labels.
+- **Contrast:** body text vs surface ≥ WCAG AA; orange `#1DAB61` uses `#003317` on-primary for labels.
 - **RTL / Arabic:** use `EdgeInsetsDirectional`, `AlignmentDirectional`, skeleton sweep follows reading direction; test Arabic layouts.
 - **State:** never color-only — pair with icon, label, or pattern (selected pill fill + label weight).
 - **Loading / empty / error / disabled:** distinct visuals; announce skeleton regions via `semanticLabel`.
@@ -428,7 +428,7 @@ Calm parchment surfaces; one green CTA per screen; no gold pay chrome; no worshi
 
 1. Read **this file** and [`packages/ui_kit/docs/design_system.md`](packages/ui_kit/docs/design_system.md).
 2. Use **`ColorScheme`**, **`context.tokens`**, **`theme.componentTokens`**, **`theme.productColors`** — no new hex, spacing, radius, or typography unless explicitly requested and added to tokens first.
-3. **Orange `#FA5B2E`** is the production primary for CTAs (Start, Continue, Save, Book, etc.). **No legacy purple.** Brown/warm/gold only where already tokenized.
+3. **Orange `#1DAB61`** is the production primary for CTAs (Start, Continue, Save, Book, etc.). **No legacy purple.** Brown/warm/gold only where already tokenized.
 4. **Prefer UI Kit components.** New reusable widgets go in `packages/ui_kit` first, then consume from features.
 5. **No hardcoded** `Color(0x…)`, raw dp, or `Curves.*` in feature code — extend tokens/theme.
 6. **Dashboard / complex screens:** clear hierarchy, grouped sections, scannable rows, approved empty states, skeleton loading.
@@ -461,7 +461,7 @@ Calm parchment surfaces; one green CTA per screen; no gold pay chrome; no worshi
 - Add purple, random accent colors, or e-commerce-style dense dashboards.
 - Use heavy gradients, excessive shadows, or primary-tinted catalog backgrounds.
 - Toast field validation errors.
-- Flatten scaffold to pure white — use porcelain canvas `#F4F4F4` so white cards lift.
+- Flatten scaffold to pure white — use porcelain canvas `#F5F8F5` so white cards lift.
 - Put support/donation UI on worship surfaces (reader, prayer, athkar).
 
 ---

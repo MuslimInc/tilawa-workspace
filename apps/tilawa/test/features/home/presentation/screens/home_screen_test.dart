@@ -649,16 +649,20 @@ void main() {
         ),
       );
 
-      final double scrollAmount = tester
+      final double viewportHeight = tester
           .getSize(find.byType(CustomScrollView))
           .height;
+      // Mind-map branches + greeting make the body taller than one viewport.
       await tester.drag(
         find.byType(CustomScrollView),
-        Offset(0, -scrollAmount),
+        Offset(0, -(viewportHeight * 2.2)),
       );
       await tester.pumpAndSettle();
 
-      expect(find.byType(HomeLearningInterestCard), findsNothing);
+      expect(
+        find.byType(HomeLearningInterestCard).hitTestable(),
+        findsNothing,
+      );
     },
   );
 }

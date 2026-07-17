@@ -190,16 +190,11 @@ void main() {
       );
       await tester.pumpAndSettle();
 
-      expect(find.text('Learn Quran with a Qualified Tutor?'), findsOneWidget);
-      expect(
-        find.text(
-          'Master your recitation and Tajweed 1-on-1 with live feedback.',
-        ),
-        findsOneWidget,
-      );
+      expect(find.text('Learn with a tutor'), findsOneWidget);
+      expect(find.text('Live one-to-one session'), findsOneWidget);
 
-      // Tap Yes, interested
-      await tester.tap(find.text('Yes, interested'));
+      // Tap Interested
+      await tester.tap(find.text('Interested'));
       await tester.pumpAndSettle();
 
       expect(preferenceStore.hasSetInterest, isTrue);
@@ -234,10 +229,7 @@ void main() {
         await tester.pumpAndSettle();
 
         expect(find.text('Learn Quran'), findsOneWidget);
-        expect(
-          find.text('Choose your hafiz and book a live 1-on-1 session.'),
-          findsOneWidget,
-        );
+        expect(find.text('Your sessions and schedule'), findsOneWidget);
         expect(find.text('Start learning'), findsNothing);
 
         await tester.tap(find.byType(HomeLearningBrowseCard));

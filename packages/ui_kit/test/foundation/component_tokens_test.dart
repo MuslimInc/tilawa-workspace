@@ -1275,8 +1275,8 @@ void main() {
         AppColors.homeContentSheetTopBorder,
       );
       expect(tokens.homeHeroPatternInk, AppColors.homeHeroPatternInk);
-      expect(tokens.homeHeroPatternOpacity, 0);
-      expect(tokens.homeHeroGoldGlowOpacity, 0);
+      expect(tokens.homeHeroPatternOpacity, 0.07);
+      expect(tokens.homeHeroGoldGlowOpacity, 0.22);
       expect(
         tokens.homeFeaturedTutorCtaForeground,
         AppColors.homeFeaturedTutorCtaForeground,

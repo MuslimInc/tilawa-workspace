@@ -11,6 +11,7 @@ enum PrimaryColorPreset {
   teal(id: 'teal', value: AppColors.primaryTeal),
   sage(id: 'sage', value: AppColors.primarySage),
   gold(id: 'gold', value: AppColors.primaryGold),
+  brandGreen(id: 'brand_green', value: AppColors.brandActionGreen),
   brandOrange(id: 'brand_orange', value: AppColors.brandActionOrange),
   ink(id: 'ink', value: AppColors.tripGlideInk);
 
@@ -28,46 +29,34 @@ enum PrimaryColorPreset {
 
   /// Default primary preset for fresh installs and corrupt-payload fallback.
   ///
-  /// Brand-locked to orange global accent (`#FA5B2E`) for the MeMuslim palette
-  /// system (see `Env.kShowColorPicker`).
-  static const PrimaryColorPreset defaultPreset =
-      PrimaryColorPreset.brandOrange;
+  /// Brand-locked to green global accent (`#1DAB61`) — Islamic system color.
+  static const PrimaryColorPreset defaultPreset = PrimaryColorPreset.brandGreen;
 
-  /// Alias for [defaultPreset]. Use this name at call sites whose intent is
-  /// "I want the immutable brand color," so readers don't have to know that
-  /// the default preset *is* the brand-locked preset.
-  static const PrimaryColorPreset brandLocked = PrimaryColorPreset.brandOrange;
+  /// Alias for [defaultPreset].
+  static const PrimaryColorPreset brandLocked = PrimaryColorPreset.brandGreen;
 
-  /// Compatibility alias for [brandOrange] (pre-orange rebrand name).
-  static const PrimaryColorPreset brandGreen = PrimaryColorPreset.brandOrange;
-
-  /// Deprecated purple preset id — migrates to [brandOrange].
+  /// Deprecated purple preset id — migrates to [brandGreen].
   static const String legacyPurplePresetId = 'purple';
 
-  /// Deprecated brown preset id — migrates to [brandOrange].
+  /// Deprecated brown preset id — migrates to [brandGreen].
   static const String legacyBrownPresetId = 'brown';
 
-  /// Deprecated brand-green preset id — migrates to [brandOrange].
-  static const String legacyBrandGreenPresetId = 'brand_green';
-
-  /// Deprecated purple primary ARGB — migrates to [brandOrange].
+  /// Deprecated purple primary ARGB — migrates to [brandGreen].
   static const int legacyPurplePrimaryArgb = 0xFF7A5C89;
 
-  /// Deprecated brown primary ARGB — migrates to [brandOrange].
+  /// Deprecated brown primary ARGB — migrates to [brandGreen].
   static const int legacyBrownPrimaryArgb = 0xFF8B5E3C;
 
-  /// Retired brand green ARGB (`#2B8659`) — migrates to [brandOrange].
+  /// Retired brand green ARGB (`#2B8659`) — migrates to [brandGreen].
   static const int legacyBrandGreenPrimaryArgb = 0xFF2B8659;
 
-  /// Retired production green ARGB (`#1DAB61`) — migrates to [brandOrange].
-  static const int legacyActionGreenPrimaryArgb = 0xFF1DAB61;
+  /// Lifestyle orange experiment ARGB — may stay as [brandOrange] preset.
+  static const int lifestyleOrangePrimaryArgb = 0xFFFA5B2E;
 
   static PrimaryColorPreset? findById(String? id) {
     if (id == null) return null;
-    if (id == legacyPurplePresetId ||
-        id == legacyBrownPresetId ||
-        id == legacyBrandGreenPresetId) {
-      return brandOrange;
+    if (id == legacyPurplePresetId || id == legacyBrownPresetId) {
+      return brandGreen;
     }
     for (final p in values) {
       if (p.id == id) return p;
@@ -78,9 +67,8 @@ enum PrimaryColorPreset {
   static PrimaryColorPreset? findByArgb(int argb) {
     if (argb == legacyPurplePrimaryArgb ||
         argb == legacyBrownPrimaryArgb ||
-        argb == legacyBrandGreenPrimaryArgb ||
-        argb == legacyActionGreenPrimaryArgb) {
-      return brandOrange;
+        argb == legacyBrandGreenPrimaryArgb) {
+      return brandGreen;
     }
     for (final p in values) {
       if (p.value.toARGB32() == argb) return p;
@@ -89,13 +77,12 @@ enum PrimaryColorPreset {
   }
 
   /// Normalizes a stored primary ARGB, remapping deprecated purple/brown and
-  /// retired greens to the current brand orange.
+  /// retired greens to the current brand green.
   static int migrateLegacyPrimaryArgb(int argb) {
     if (argb == legacyPurplePrimaryArgb ||
         argb == legacyBrownPrimaryArgb ||
-        argb == legacyBrandGreenPrimaryArgb ||
-        argb == legacyActionGreenPrimaryArgb) {
-      return brandOrange.valueArgb;
+        argb == legacyBrandGreenPrimaryArgb) {
+      return brandGreen.valueArgb;
     }
     return argb;
   }
