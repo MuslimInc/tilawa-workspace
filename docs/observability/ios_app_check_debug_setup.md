@@ -1,8 +1,15 @@
 # iOS App Check — Debug / Simulator Setup
 
-**Firebase project:** `quran-playera-app`  
-**iOS app ID:** `1:181575856185:ios:3f02220381ba118d381de8`  
-**Bundle ID:** `com.tilawa.app`
+**Firebase project:** `quran-playera-app`
+
+| Flavor | Bundle ID | Firebase iOS app ID |
+|--------|-----------|---------------------|
+| development | `com.tilawa.app.dev` | `1:181575856185:ios:4c3a8e674c6138d0381de8` |
+| staging | `com.tilawa.app.staging` | `1:181575856185:ios:122febc64df470f2381de8` |
+| production (MeMuslim / TestFlight) | `com.memuslim.app` | `1:181575856185:ios:c2b2bf0966057dfd381de8` |
+
+Legacy `com.tilawa.app` (`…:ios:3f02220381ba118d381de8`) is not the MeMuslim
+TestFlight target — register **App Check** for `com.memuslim.app` separately.
 
 Use this when Google Sign-In succeeds but sign-in ends with
 `authDeviceRegistrationFailed`, or Xcode logs show:
@@ -37,8 +44,8 @@ App Attest + DeviceCheck only in **release** builds.
 1. Open [Firebase Console](https://console.firebase.google.com/) → project
    **quran-playera-app**.
 2. **Build** → **App Check**.
-3. If the iOS app (`com.tilawa.app`) is missing, click **Register** and select
-   the iOS app with ID `1:181575856185:ios:3f02220381ba118d381de8`.
+3. If the iOS app you are testing is missing (e.g. `com.memuslim.app` for
+   TestFlight), click **Register** and select that iOS app.
 4. For **production** attestation, enable **Device Check** (and optionally App
    Attest) for that app. Save.
 
@@ -91,3 +98,4 @@ to **Unenforced** for the APIs you are not testing.
 - Device registration callable: `functions/src/registerActiveDevice.ts`
 - Staging CF enforcement runbook:
   [app_check_staging_verification.md](../quran_sessions/app_check_staging_verification.md)
+

@@ -5,6 +5,15 @@ class AppStrings {
     'APP_ENV',
     defaultValue: '',
   );
+
+  /// Injected by Flutter when building with `--flavor` (Xcode scheme /
+  /// TestFlight Archive). Used when [APP_ENV] is omitted so iOS Google
+  /// client IDs stay aligned with Info.plist `GIDClientID`.
+  static const String _flutterAppFlavor = String.fromEnvironment(
+    'FLUTTER_APP_FLAVOR',
+    defaultValue: '',
+  );
+
   static const String _distribution = String.fromEnvironment(
     'TILAWA_DISTRIBUTION',
     defaultValue: 'local',
@@ -49,6 +58,18 @@ class AppStrings {
     if (normalized == 'production' || normalized == 'prod') {
       return 'production';
     }
+
+    final flavor = _flutterAppFlavor.trim().toLowerCase();
+    if (flavor == 'development' || flavor == 'dev') {
+      return 'development';
+    }
+    if (flavor == 'staging') {
+      return 'staging';
+    }
+    if (flavor == 'production' || flavor == 'prod') {
+      return 'production';
+    }
+
     final normalizedDistribution = _distribution.trim();
     if (normalizedDistribution == 'staging') {
       return 'staging';

@@ -2,7 +2,13 @@
 ///
 /// Prefer `--dart-define=APP_ENV=development|staging|production` (or
 /// `--dart-define-from-file=env/<flavor>.json`). When [APP_ENV] is absent,
-/// [current] falls back to [fromDistribution] using [TILAWA_DISTRIBUTION].
+/// [current] uses Flutter's `--flavor` via [FLUTTER_APP_FLAVOR], then
+/// [fromDistribution] using [TILAWA_DISTRIBUTION].
+///
+/// Flavor fallback matters for iOS TestFlight / Xcode Archive: native
+/// `GoogleService-Info` + `GIDClientID` follow the Xcode scheme, but Dart
+/// used to default to development when dart-defines were omitted — breaking
+/// Google Sign-In (client ID / URL scheme mismatch).
 enum AppEnvironment {
   /// Local engineering builds (`TILAWA_DISTRIBUTION=local` by default).
   development,
@@ -17,8 +23,16 @@ enum AppEnvironment {
 
   static const String distributionKey = 'TILAWA_DISTRIBUTION';
 
+  /// Injected by Flutter when building with `--flavor`.
+  static const String flutterAppFlavorKey = 'FLUTTER_APP_FLAVOR';
+
   static const String _rawAppEnv = String.fromEnvironment(
     appEnvKey,
+    defaultValue: '',
+  );
+
+  static const String _rawFlutterAppFlavor = String.fromEnvironment(
+    flutterAppFlavorKey,
     defaultValue: '',
   );
 
@@ -36,12 +50,15 @@ enum AppEnvironment {
   static AppEnvironment get current => fromRaw(
     _rawAppEnv,
     distribution: _fallbackDistribution,
+    flutterAppFlavor: _rawFlutterAppFlavor,
   );
 
-  /// Parses [rawAppEnv] when non-empty; otherwise maps [distribution].
+  /// Parses [rawAppEnv] when non-empty; else [flutterAppFlavor]; else
+  /// [distribution].
   static AppEnvironment fromRaw(
     String rawAppEnv, {
     required String distribution,
+    String flutterAppFlavor = '',
   }) {
     final normalized = rawAppEnv.trim().toLowerCase();
     if (normalized.isNotEmpty) {
@@ -52,7 +69,25 @@ enum AppEnvironment {
         _ => throw StateError('Unknown $appEnvKey: $rawAppEnv'),
       };
     }
+    final AppEnvironment? fromFlavor = tryParseFlavor(flutterAppFlavor);
+    if (fromFlavor != null) {
+      return fromFlavor;
+    }
     return fromDistribution(distribution);
+  }
+
+  /// Maps Flutter `--flavor` names to an environment, or null if unknown.
+  static AppEnvironment? tryParseFlavor(String flavor) {
+    final normalized = flavor.trim().toLowerCase();
+    if (normalized.isEmpty) {
+      return null;
+    }
+    return switch (normalized) {
+      'development' || 'dev' => AppEnvironment.development,
+      'staging' => AppEnvironment.staging,
+      'production' || 'prod' => AppEnvironment.production,
+      _ => null,
+    };
   }
 
   /// Maps legacy [TILAWA_DISTRIBUTION] values to an [AppEnvironment].

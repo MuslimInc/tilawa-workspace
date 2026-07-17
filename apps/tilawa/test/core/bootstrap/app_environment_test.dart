@@ -4,6 +4,58 @@ import 'package:test/test.dart';
 import 'package:tilawa/core/bootstrap/app_environment.dart';
 
 void main() {
+  group('AppEnvironment.fromRaw', () {
+    test('prefers APP_ENV over flavor and distribution', () {
+      check(
+        AppEnvironment.fromRaw(
+          'staging',
+          distribution: 'play_production',
+          flutterAppFlavor: 'production',
+        ),
+      ).equals(AppEnvironment.staging);
+    });
+
+    test('uses FLUTTER_APP_FLAVOR when APP_ENV is empty', () {
+      check(
+        AppEnvironment.fromRaw(
+          '',
+          distribution: 'local',
+          flutterAppFlavor: 'production',
+        ),
+      ).equals(AppEnvironment.production);
+      check(
+        AppEnvironment.fromRaw(
+          '',
+          distribution: 'local',
+          flutterAppFlavor: 'staging',
+        ),
+      ).equals(AppEnvironment.staging);
+    });
+
+    test('falls back to distribution when flavor unknown', () {
+      check(
+        AppEnvironment.fromRaw(
+          '',
+          distribution: 'play_production',
+          flutterAppFlavor: '',
+        ),
+      ).equals(AppEnvironment.production);
+    });
+  });
+
+  group('AppEnvironment.tryParseFlavor', () {
+    test('maps known flavors', () {
+      check(
+        AppEnvironment.tryParseFlavor('production'),
+      ).equals(AppEnvironment.production);
+      check(AppEnvironment.tryParseFlavor('dev')).equals(
+        AppEnvironment.development,
+      );
+      check(AppEnvironment.tryParseFlavor('')).equals(null);
+      check(AppEnvironment.tryParseFlavor('unknown')).equals(null);
+    });
+  });
+
   group('AppEnvironment.fromDistribution', () {
     test('maps play_production to production', () {
       check(
