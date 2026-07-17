@@ -44,7 +44,11 @@ class AndroidAdhanAlarmPlayer implements IAdhanAlarmPlayer {
 
   late final _onNotificationTappedController =
       StreamController<String>.broadcast(
-        onListen: _drainPendingNotificationTap,
+        onListen: () {
+          // Async drain must not become an unhandled zone error (Sentry
+          // FLUTTER-EY: MissingPluginException on cold start / low memory).
+          unawaited(_drainPendingNotificationTap());
+        },
       );
   @override
   Stream<String> get onNotificationTapped =>
@@ -70,24 +74,44 @@ class AndroidAdhanAlarmPlayer implements IAdhanAlarmPlayer {
   @override
   Future<String?> pullPendingNotificationTapPayload() async {
     if (!isSupported) return null;
-    try {
-      final pending = await _channel.invokeMethod<Object?>(
-        'consumePendingNotificationTap',
-      );
-      if (pending is! Map) return null;
-      return pending['payload'] as String?;
-    } on PlatformException catch (e) {
-      logger.e(
-        '[AndroidAdhanAlarmPlayer] consumePendingNotificationTap failed: ${e.message}',
-      );
-      return null;
-    } on MissingPluginException {
-      // Native handler not attached yet (cold-start race / headless isolate).
-      logger.d(
-        '[AndroidAdhanAlarmPlayer] consumePendingNotificationTap skipped: plugin not registered',
-      );
-      return null;
+    // Brief retries cover Activity/engine recreate under memory pressure
+    // (native handler briefly missing while Dart isolate still runs).
+    const List<Duration> attachRetries = <Duration>[
+      Duration.zero,
+      Duration(milliseconds: 64),
+      Duration(milliseconds: 250),
+    ];
+    for (var attempt = 0; attempt < attachRetries.length; attempt++) {
+      final Duration delay = attachRetries[attempt];
+      if (delay > Duration.zero) {
+        await Future<void>.delayed(delay);
+      }
+      try {
+        final pending = await _channel.invokeMethod<Object?>(
+          'consumePendingNotificationTap',
+        );
+        if (pending is! Map) return null;
+        return pending['payload'] as String?;
+      } on PlatformException catch (e) {
+        logger.e(
+          '[AndroidAdhanAlarmPlayer] consumePendingNotificationTap failed: ${e.message}',
+        );
+        return null;
+      } on MissingPluginException {
+        if (attempt == attachRetries.length - 1) {
+          // Native handler not attached (cold-start race / headless isolate).
+          logger.d(
+            '[AndroidAdhanAlarmPlayer] consumePendingNotificationTap skipped: plugin not registered',
+          );
+          return null;
+        }
+        logger.d(
+          '[AndroidAdhanAlarmPlayer] consumePendingNotificationTap waiting for plugin attach '
+          '(attempt ${attempt + 1}/${attachRetries.length})',
+        );
+      }
     }
+    return null;
   }
 
   Future<void> _drainPendingNotificationTap() async {

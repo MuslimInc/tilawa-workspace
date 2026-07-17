@@ -78,9 +78,12 @@ class MainActivity : AudioServiceActivity() {
             firstFrameLog("splash exit animation → LaunchSplashController")
             launchSplashController.onExitAnimation(splashScreenViewProvider)
         }
+        // Buffer notification-tap payload BEFORE FlutterEngine/Dart start so an
+        // early consumePendingNotificationTap (BootGate) still finds pendingTap.
+        // register() later delivers the buffered tap over the method channel.
+        handleIntent(intent)
         super.onCreate(savedInstanceState)
         firstFrameLog("MainActivity.onCreate complete")
-        handleIntent(intent)
     }
 
     private fun handleIntent(intent: Intent?) {
@@ -302,5 +305,6 @@ class MainActivity : AudioServiceActivity() {
      */
     override fun getRenderMode(): RenderMode = RenderMode.texture
 }
+
 
 
