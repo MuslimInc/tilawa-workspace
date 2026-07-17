@@ -9,6 +9,9 @@ import flutter_downloader
     didFinishLaunchingWithOptions launchOptions: [UIApplication.LaunchOptionsKey: Any]?
   ) -> Bool {
     FlutterDownloaderPlugin.setPluginRegistrantCallback(registerPlugins)
+    // Ensures APNs device token is requested so FCM can map it (FlutterAppDelegate
+    // forwards the token to Firebase Messaging).
+    application.registerForRemoteNotifications()
     return super.application(application, didFinishLaunchingWithOptions: launchOptions)
   }
 
@@ -24,3 +27,4 @@ private func registerPlugins(registry: FlutterPluginRegistry) {
     )
   }
 }
+

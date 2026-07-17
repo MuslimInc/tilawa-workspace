@@ -29,6 +29,7 @@
 	<key>UIBackgroundModes</key>
 	<array>
 		<string>audio</string>
+		<string>remote-notification</string>
 	</array>
 	<key>NSLocationWhenInUseUsageDescription</key>
 	<string>MeMuslim uses your location to calculate accurate prayer times and Qibla direction.</string>
@@ -99,3 +100,4 @@
 	</array>
 </dict>
 </plist>
+
