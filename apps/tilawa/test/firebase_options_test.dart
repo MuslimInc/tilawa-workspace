@@ -32,7 +32,8 @@ void main() {
     check(staging.appId).equals('1:181575856185:ios:c04495544365732a381de8');
     check(staging.iosBundleId).equals('com.tilawa.app.staging');
 
-    check(production.appId).equals('1:181575856185:ios:3f02220381ba118d381de8');
-    check(production.iosBundleId).equals('com.tilawa.app');
+    check(production.appId).equals('1:181575856185:ios:c2b2bf0966057dfd381de8');
+    check(production.iosBundleId).equals('com.memuslim.app');
   });
 }
+

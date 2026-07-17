@@ -21,7 +21,7 @@ class AppStrings {
     'staging' =>
       '181575856185-o2k7lc3j2itugtg2b7l4kj4kauhucsiu.apps.googleusercontent.com',
     _ =>
-      '181575856185-n7pkcdipps2lm920ve1qbcbo4kemn45b.apps.googleusercontent.com',
+      '181575856185-utien7qr321gnjecad9toqpi0j1kguoo.apps.googleusercontent.com',
   };
 
   /// Reversed iOS client ID for `CFBundleURLSchemes` (`REVERSED_CLIENT_ID`).
@@ -32,7 +32,7 @@ class AppStrings {
     'staging' =>
       'com.googleusercontent.apps.181575856185-o2k7lc3j2itugtg2b7l4kj4kauhucsiu',
     _ =>
-      'com.googleusercontent.apps.181575856185-n7pkcdipps2lm920ve1qbcbo4kemn45b',
+      'com.googleusercontent.apps.181575856185-utien7qr321gnjecad9toqpi0j1kguoo',
   };
 
   static const String restorationScopeId = 'tilawa_app';
@@ -60,3 +60,4 @@ class AppStrings {
     return 'development';
   }
 }
+

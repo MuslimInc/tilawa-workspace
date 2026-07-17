@@ -105,14 +105,15 @@ class DefaultFirebaseOptions {
 
   static const FirebaseOptions ios = FirebaseOptions(
     apiKey: 'AIzaSyDlIxMc7sRMmNYmYCo-IJbgHo8H9avi4ws',
-    appId: '1:181575856185:ios:3f02220381ba118d381de8',
+    appId: '1:181575856185:ios:c2b2bf0966057dfd381de8',
     messagingSenderId: '181575856185',
     projectId: 'quran-playera-app',
     storageBucket: 'quran-playera-app.firebasestorage.app',
     androidClientId:
-        '181575856185-o5o9q4t3sc0tsoik2c9ibkkc7b8d8kqp.apps.googleusercontent.com',
+        '181575856185-3tdkcorcrq2vq5hqoj40p1u5hjupnpam.apps.googleusercontent.com',
     iosClientId:
-        '181575856185-n7pkcdipps2lm920ve1qbcbo4kemn45b.apps.googleusercontent.com',
-    iosBundleId: 'com.tilawa.app',
+        '181575856185-utien7qr321gnjecad9toqpi0j1kguoo.apps.googleusercontent.com',
+    iosBundleId: 'com.memuslim.app',
   );
 }
+
