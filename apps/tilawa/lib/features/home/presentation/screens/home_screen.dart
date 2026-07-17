@@ -174,8 +174,6 @@ class _HomeScreenState extends State<HomeScreen> {
                                       state: state,
                                       onOpenPrayer: widget.onOpenPrayer,
                                     ),
-                                    if (!ui.showFullSkeleton)
-                                      const HomeLearningUrgentSliver(),
                                     HomeDashboardContentSliver(
                                       child: AnimatedSwitcher(
                                         duration: context.tokens.durationMedium,

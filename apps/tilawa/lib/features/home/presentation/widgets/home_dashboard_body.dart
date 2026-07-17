@@ -19,8 +19,8 @@ import 'home_quick_tools_section.dart';
 
 /// Home body under the Sliver Prayer Hero — clear sections, no extra chrome.
 ///
-/// Order: greeting → primary worship → soft Learn → tools → More →
-/// listening → inspiration → closing mark.
+/// Order: greeting → primary worship → urgent Learn → soft Learn →
+/// tools → More → listening → inspiration → closing mark.
 class HomeDashboardBody extends StatelessWidget {
   const HomeDashboardBody({super.key, this.skeleton = false});
 
@@ -45,6 +45,7 @@ class HomeDashboardBody extends StatelessWidget {
         const HomeComfortGreeting(),
         SizedBox(height: tokens.spaceMedium),
         const HomePrimaryActionsSection(),
+        const HomeLearningUrgentSection(),
         const HomeLearningSoftPrompt(),
         if (isSmartKhatmaEnabled()) ...[
           SizedBox(height: zoneGap),

@@ -188,7 +188,7 @@ class AppLocalizationsAr extends AppLocalizations {
   }
 
   @override
-  String get homeAthkarDone => 'تم';
+  String get homeAthkarDone => 'خلصت';
 
   @override
   String homeAthkarRemaining(int count) {

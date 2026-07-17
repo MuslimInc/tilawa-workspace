@@ -4,7 +4,6 @@ import 'package:tilawa/core/di/injection.dart';
 import 'package:tilawa/core/extensions.dart';
 import 'package:tilawa/features/home/domain/home_daily_inspiration_catalog.dart';
 import 'package:tilawa/features/home/domain/usecases/toggle_home_daily_ayah_bookmark_use_case.dart';
-import 'package:tilawa/l10n/generated/app_localizations.dart';
 import 'package:tilawa_ui_kit/tilawa_ui_kit.dart';
 
 Future<void> showHomeDailyAyahSheet(
@@ -57,21 +56,14 @@ class _HomeDailyAyahSheetState extends State<_HomeDailyAyahSheet> {
     return '${verse.surahNumber}:${verse.ayahNumber}';
   }
 
-  _DailyAyahSheetCopy _copy(AppLocalizations l10n) {
-    return switch (widget.catalogIndex) {
-      1 => _DailyAyahSheetCopy(
-        body: l10n.homeDailyAyahBody1,
-        reference: l10n.homeDailyAyahReference1,
-      ),
-      2 => _DailyAyahSheetCopy(
-        body: l10n.homeDailyAyahBody2,
-        reference: l10n.homeDailyAyahReference2,
-      ),
-      _ => _DailyAyahSheetCopy(
-        body: l10n.homeDailyAyahBody,
-        reference: l10n.homeDailyAyahReference,
-      ),
-    };
+  _DailyAyahSheetCopy _copy(BuildContext context) {
+    final HomeDailyInspirationEntry entry =
+        homeDailyInspirationEntries[widget.catalogIndex];
+    final bool arabic = context.isArabic;
+    return _DailyAyahSheetCopy(
+      body: entry.ayahBody(arabic: arabic),
+      reference: entry.ayahReference(arabic: arabic),
+    );
   }
 
   Future<void> _toggleBookmark() async {
@@ -95,7 +87,7 @@ class _HomeDailyAyahSheetState extends State<_HomeDailyAyahSheet> {
   Widget build(BuildContext context) {
     final tokens = context.tokens;
     final theme = Theme.of(context);
-    final copy = _copy(context.l10n);
+    final copy = _copy(context);
 
     return Padding(
       padding: EdgeInsets.fromLTRB(

@@ -30,8 +30,8 @@ Match this order everywhere (slivers + body):
 | # | Layer | Widget / behavior |
 |---|--------|-------------------|
 | 1 | Sliver — Now | `HomeNextPrayerTime` |
-| 2 | Sliver — urgent Learn | `HomeLearningUrgentSliver` → live session / pending / revision only |
-| 3 | Body | `HomePrimaryActionsSection` |
+| 2 | Body | `HomePrimaryActionsSection` (Quran / Athkar) |
+| 3 | Body | `HomeLearningUrgentSection` → live session / pending / revision only |
 | 4 | Body | `HomeLearningSoftPrompt` → interest / browse (below worship) |
 | 5 | Body | `HomeQuickToolsSection` |
 | 6 | Body | `TodayPlanCard` (optional, deferred) |
@@ -41,8 +41,8 @@ Match this order everywhere (slivers + body):
 | 10 | Body | `_HomeDashboardClosingMark` (deferred) |
 
 Items 6–10 render inside `DeferredAfterFirstFrame` except primary actions,
-soft Learn prompt, and quick tools, which load immediately under the sliver
-stack.
+urgent Learn, soft Learn prompt, and quick tools, which load immediately
+under the prayer hero.
 
 **Spacing rhythm** (do not change casually without cause): within a zone
 `tokens.spaceLarge`; between unrelated zones `tokens.spaceExtraLarge`; More
@@ -68,10 +68,11 @@ Scaffold
             ├── HomeNextPrayerTime
             │   ├── HomeHeroBackground (prayer-period atmospheric band)
             │   └── HomeHeroGlassSurface (frosted next-prayer card)
-            ├── HomeLearningUrgentSliver (session / pending / revision)
             ├── HomeDashboardContentSliver (rounded sheet below hero fade)
                 └── HomeDashboardBody
+                    ├── HomeComfortGreeting
                     ├── HomePrimaryActionsSection
+                    ├── HomeLearningUrgentSection (session / pending / revision)
                     ├── HomeLearningSoftPrompt (interest / browse)
                     ├── HomeQuickToolsSection
                     ├── [deferred] TodayPlanCard
@@ -81,7 +82,7 @@ Scaffold
                     └── _HomeDashboardClosingMark
 ```
 Deferred body content uses `DeferredAfterFirstFrame` for first-frame perf.
-Above-deferred: primary actions + soft Learn prompt + quick tools load
+Above-deferred: greeting + primary + urgent/soft Learn + quick tools load
 immediately under the hero.
 
 ---
@@ -90,8 +91,8 @@ immediately under the hero.
 
 When `quranSessionsFeatureConfig().quranSessionsEnabled`:
 
-- Hero and urgent Learn slivers scroll away — no pinned headers on Home
-- Soft interest / browse prompts live in the body after primary worship tiles
+- Hero scrolls away — no pinned headers on Home
+- Urgent + soft Learn cards live in the body after primary worship tiles
 
 When the flag is off:
 
@@ -275,6 +276,7 @@ flutter test test/features/home/
 
 Manual: light + dark, RTL Arabic, text scale 1.4, hero snap, tutor pin when
 flag on.
+
 
 
 

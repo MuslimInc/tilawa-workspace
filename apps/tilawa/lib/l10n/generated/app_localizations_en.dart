@@ -189,7 +189,7 @@ class AppLocalizationsEn extends AppLocalizations {
   }
 
   @override
-  String get homeAthkarDone => 'Done';
+  String get homeAthkarDone => 'Finished';
 
   @override
   String homeAthkarRemaining(int count) {

@@ -7,6 +7,7 @@ import 'package:tilawa/core/di/injection.dart';
 import 'package:tilawa/features/auth/domain/entities/user_entity.dart';
 import 'package:tilawa/features/auth/presentation/bloc/auth_bloc.dart';
 import 'package:tilawa/features/home/di/home_screen_module.dart';
+import 'package:tilawa/features/home/presentation/cubit/home_athkar_compact_cubit.dart';
 import 'package:tilawa/features/home/presentation/cubit/home_listening_resume_cubit.dart';
 import 'package:tilawa/features/home/presentation/cubit/home_quran_resume_cubit.dart';
 import 'package:tilawa/features/home/home.dart';
@@ -54,6 +55,14 @@ class HomeScreenScope extends StatelessWidget {
         BlocProvider(
           create: (_) {
             final HomeQuranResumeCubit cubit = getIt<HomeQuranResumeCubit>();
+            _deferToNextFrame(cubit.load);
+            return cubit;
+          },
+        ),
+        BlocProvider(
+          create: (_) {
+            final HomeAthkarCompactCubit cubit =
+                getIt<HomeAthkarCompactCubit>();
             _deferToNextFrame(cubit.load);
             return cubit;
           },

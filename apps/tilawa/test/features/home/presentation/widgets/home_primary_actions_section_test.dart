@@ -2,8 +2,11 @@ import 'package:dartz_plus/dartz_plus.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:tilawa/features/athkar/domain/entities/athkar_category.dart';
 import 'package:tilawa/features/history/domain/entities/history_entity.dart';
 import 'package:tilawa/features/history/domain/repositories/history_repository.dart';
+import 'package:tilawa/features/home/presentation/cubit/home_athkar_compact_cubit.dart';
+import 'package:tilawa/features/home/presentation/cubit/home_athkar_compact_state.dart';
 import 'package:tilawa/features/home/presentation/cubit/home_quran_resume_cubit.dart';
 import 'package:tilawa/features/home/presentation/widgets/home_primary_action_tile.dart';
 import 'package:tilawa/features/home/presentation/widgets/home_primary_actions_section.dart';
@@ -86,6 +89,62 @@ void main() {
     expect(find.text(l10n.homeContinueQuranSubtitle), findsNothing);
     expect(find.text(l10n.homeQuranResumePage(1)), findsNothing);
   });
+
+  testWidgets('Athkar tile shows remaining count for in-progress ritual', (
+    tester,
+  ) async {
+    const AthkarCategory morning = AthkarCategory(
+      id: 1,
+      nameAr: 'أذكار الصباح',
+      nameEn: 'Morning Athkar',
+      icon: 'wb_sunny_rounded',
+    );
+    final athkarCubit = _FakeAthkarCompactCubit(
+      const HomeAthkarCompactState(
+        status: HomeAthkarRowStatus.ready,
+        rows: <HomeAthkarRowState>[
+          HomeAthkarRowState(
+            category: morning,
+            completion: HomeAthkarCompletionState.inProgress,
+            remainingCount: 3,
+          ),
+        ],
+      ),
+    );
+    addTearDown(athkarCubit.close);
+
+    await tester.pumpWidget(
+      MaterialApp(
+        theme: AppTheme.getLightTheme(primaryColor: AppColors.defaultPrimary),
+        locale: const Locale('en'),
+        localizationsDelegates: AppLocalizations.localizationsDelegates,
+        supportedLocales: AppLocalizations.supportedLocales,
+        home: Scaffold(
+          body: BlocProvider<HomeAthkarCompactCubit>.value(
+            value: athkarCubit,
+            child: const HomePrimaryActionsSection(),
+          ),
+        ),
+      ),
+    );
+    await tester.pumpAndSettle();
+
+    final l10n = AppLocalizations.of(
+      tester.element(find.byType(HomePrimaryActionsSection)),
+    );
+    expect(
+      find.text('Morning Athkar · ${l10n.homeAthkarRemaining(3)}'),
+      findsOneWidget,
+    );
+  });
+}
+
+class _FakeAthkarCompactCubit extends Cubit<HomeAthkarCompactState>
+    implements HomeAthkarCompactCubit {
+  _FakeAthkarCompactCubit(super.initial);
+
+  @override
+  Future<void> load({DateTime? now}) async {}
 }
 
 class _FixedGetLastRead implements GetLastReadPositionUseCase {

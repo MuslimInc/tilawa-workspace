@@ -234,7 +234,7 @@
             "surah": { "type": "String" }
         }
     },
-    "homeAthkarDone": "Done",
+    "homeAthkarDone": "Finished",
     "@homeAthkarDone": {
         "description": "Athkar compact card completed state"
     },

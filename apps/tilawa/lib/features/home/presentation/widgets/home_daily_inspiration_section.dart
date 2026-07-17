@@ -3,7 +3,6 @@ import 'package:tilawa/core/extensions.dart';
 import 'package:tilawa/features/home/domain/home_daily_inspiration_catalog.dart';
 import 'package:tilawa/features/home/presentation/widgets/home_dashboard_card.dart';
 import 'package:tilawa/features/home/presentation/widgets/home_dashboard_section.dart';
-import 'package:tilawa/l10n/generated/app_localizations.dart';
 import 'package:tilawa_ui_kit/tilawa_ui_kit.dart';
 
 /// Daily ayah and dua in one grouped card with a hairline separator.
@@ -14,8 +13,10 @@ class HomeDailyInspirationSection extends StatelessWidget {
   Widget build(BuildContext context) {
     final tokens = context.tokens;
     final colorScheme = Theme.of(context).colorScheme;
+    final bool arabic = context.isArabic;
     final int catalogIndex = homeDailyInspirationCatalogIndex(DateTime.now());
-    final _DailyInspirationCopy copy = _resolveCopy(context.l10n, catalogIndex);
+    final HomeDailyInspirationEntry entry =
+        homeDailyInspirationEntries[catalogIndex];
 
     return HomeDashboardSection(
       title: context.l10n.homeInspirationTitle,
@@ -26,9 +27,9 @@ class HomeDailyInspirationSection extends StatelessWidget {
           children: [
             _DailyInspirationRow(
               label: context.l10n.homeDailyAyahLabel,
-              body: copy.ayahBody,
-              reference: copy.ayahReference,
-              useArabicTypography: context.isArabic,
+              body: entry.ayahBody(arabic: arabic),
+              reference: entry.ayahReference(arabic: arabic),
+              useArabicTypography: arabic,
             ),
             Padding(
               padding: EdgeInsets.symmetric(horizontal: tokens.spaceMedium),
@@ -39,52 +40,15 @@ class HomeDailyInspirationSection extends StatelessWidget {
             ),
             _DailyInspirationRow(
               label: context.l10n.homeDailyDuaLabel,
-              body: copy.duaBody,
-              reference: copy.duaReference,
-              useArabicTypography: context.isArabic,
+              body: entry.duaBody(arabic: arabic),
+              reference: entry.duaReference(arabic: arabic),
+              useArabicTypography: arabic,
             ),
           ],
         ),
       ),
     );
   }
-}
-
-_DailyInspirationCopy _resolveCopy(AppLocalizations l10n, int index) {
-  return switch (index) {
-    1 => _DailyInspirationCopy(
-      ayahBody: l10n.homeDailyAyahBody1,
-      ayahReference: l10n.homeDailyAyahReference1,
-      duaBody: l10n.homeDailyDuaBody1,
-      duaReference: l10n.homeDailyDuaReference1,
-    ),
-    2 => _DailyInspirationCopy(
-      ayahBody: l10n.homeDailyAyahBody2,
-      ayahReference: l10n.homeDailyAyahReference2,
-      duaBody: l10n.homeDailyDuaBody2,
-      duaReference: l10n.homeDailyDuaReference2,
-    ),
-    _ => _DailyInspirationCopy(
-      ayahBody: l10n.homeDailyAyahBody,
-      ayahReference: l10n.homeDailyAyahReference,
-      duaBody: l10n.homeDailyDuaBody,
-      duaReference: l10n.homeDailyDuaReference,
-    ),
-  };
-}
-
-final class _DailyInspirationCopy {
-  const _DailyInspirationCopy({
-    required this.ayahBody,
-    required this.ayahReference,
-    required this.duaBody,
-    required this.duaReference,
-  });
-
-  final String ayahBody;
-  final String ayahReference;
-  final String duaBody;
-  final String duaReference;
 }
 
 class _DailyInspirationRow extends StatelessWidget {

@@ -419,7 +419,7 @@ abstract class AppLocalizations {
   /// Athkar compact card completed state
   ///
   /// In en, this message translates to:
-  /// **'Done'**
+  /// **'Finished'**
   String get homeAthkarDone;
 
   /// Athkar compact card in-progress state

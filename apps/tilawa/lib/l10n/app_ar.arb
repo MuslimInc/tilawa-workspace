@@ -143,7 +143,7 @@
             "surah": { "type": "String" }
         }
     },
-    "homeAthkarDone": "تم",
+    "homeAthkarDone": "خلصت",
     "homeAthkarRemaining": "متبقٍ {count}",
     "@homeAthkarRemaining": {
         "placeholders": {
