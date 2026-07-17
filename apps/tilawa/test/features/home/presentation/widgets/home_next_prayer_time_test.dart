@@ -11,7 +11,6 @@ import 'package:tilawa/features/home/presentation/widgets/home_dashboard_card.da
 import 'package:tilawa/features/home/presentation/widgets/home_dashboard_content_sliver.dart';
 import 'package:tilawa/features/home/presentation/widgets/home_hero_background.dart';
 import 'package:tilawa/features/home/presentation/widgets/home_next_prayer_time.dart';
-import 'package:tilawa/features/home/presentation/widgets/home_prayer_hero_image_backdrop.dart';
 import 'package:tilawa/features/prayer_times/domain/entities/prayer_time_entity.dart';
 import 'package:tilawa/l10n/generated/app_localizations.dart';
 import 'package:tilawa_ui_kit/tilawa_ui_kit.dart';
@@ -184,7 +183,6 @@ void main() {
     expect(prayerCard.padding, isNot(EdgeInsets.zero));
     expect(find.byType(TilawaCard), findsOneWidget);
     expect(find.byType(HomeHeroBackground), findsNothing);
-    expect(find.byType(HomePrayerHeroImageBackdrop), findsNothing);
   });
 
   testWidgets('hero has no collapse scroll extent', (tester) async {

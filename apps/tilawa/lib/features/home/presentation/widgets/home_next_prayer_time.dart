@@ -8,11 +8,11 @@ import 'package:tilawa/features/home/presentation/bloc/home_dashboard_bloc.dart'
 import 'package:tilawa/features/home/presentation/bloc/home_dashboard_event.dart';
 import 'package:tilawa/features/home/presentation/bloc/home_dashboard_state.dart';
 import 'package:tilawa/features/home/presentation/models/home_dashboard_ui_state.dart';
+import 'package:tilawa/features/home/presentation/models/home_prayer_hero_foreground_style.dart';
 import 'package:tilawa/features/home/presentation/widgets/home_dashboard_card.dart';
 import 'package:tilawa/features/home/presentation/widgets/home_dashboard_icon_well.dart';
 import 'package:tilawa/features/home/presentation/widgets/home_feature_pastel.dart';
 import 'package:tilawa/features/home/presentation/widgets/home_prayer_hero_context_row.dart';
-import 'package:tilawa/features/home/presentation/widgets/home_prayer_hero_image_backdrop.dart';
 import 'package:tilawa/features/prayer_times/domain/entities/prayer_time_entity.dart';
 import 'package:tilawa_ui_kit/tilawa_ui_kit.dart';
 
