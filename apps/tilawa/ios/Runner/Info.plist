@@ -28,6 +28,8 @@
 	<true/>
 	<key>NSLocationWhenInUseUsageDescription</key>
 	<string>MeMuslim uses your location to calculate accurate prayer times and Qibla direction.</string>
+	<key>NSLocationAlwaysAndWhenInUseUsageDescription</key>
+	<string>MeMuslim uses your location to calculate accurate prayer times and Qibla direction, including when the app is in the background for location-based reminders.</string>
 	<key>NSMicrophoneUsageDescription</key>
 	<string>MeMuslim uses the microphone for Quran recitation practice and live tutoring session calls.</string>
 	<key>NSCameraUsageDescription</key>
@@ -93,3 +95,4 @@
 	</array>
 </dict>
 </plist>
+
