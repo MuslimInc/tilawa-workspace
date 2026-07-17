@@ -30,7 +30,7 @@ import 'package:flutter/material.dart';
 /// Use this to tune the overall depth of the UI kit from a single place.
 /// Values > 1.0 increase elevation (deeper shadow, wider blur),
 /// while values < 1.0 flatten the UI. All surface elevations scale proportionally.
-const double kElevationMultiplier = 1.0;
+const double kElevationMultiplier = 0.3;
 
 const double kMeMuslimMinInteractiveDimension = 48.0;
 
@@ -1021,40 +1021,40 @@ extension MeMuslimElevationX on MeMuslimDesignTokens {
   /// Soft two-layer shadow for resting cards on the scaffold canvas.
   List<BoxShadow> elevationRaised(Color tint) => <BoxShadow>[
     BoxShadow(
-      color: tint.withValues(alpha: 0.05 * kElevationMultiplier),
-      blurRadius: 3.0 * kElevationMultiplier,
+      color: tint.withValues(alpha: 0.03 * kElevationMultiplier),
+      blurRadius: 2.0 * kElevationMultiplier,
       offset: const Offset(0, 1.0 * kElevationMultiplier),
     ),
     BoxShadow(
-      color: tint.withValues(alpha: 0.07 * kElevationMultiplier),
-      blurRadius: 24.0 * kElevationMultiplier,
-      spreadRadius: -2.0,
-      offset: const Offset(0, 10.0 * kElevationMultiplier),
+      color: tint.withValues(alpha: 0.05 * kElevationMultiplier),
+      blurRadius: 16.0 * kElevationMultiplier,
+      spreadRadius: -2.0 * kElevationMultiplier,
+      offset: const Offset(0, 6.0 * kElevationMultiplier),
     ),
   ];
 
   /// Deeper two-layer shadow for chrome floating above content.
   List<BoxShadow> elevationFloating(Color tint) => <BoxShadow>[
     BoxShadow(
-      color: tint.withValues(alpha: 0.06 * kElevationMultiplier),
-      blurRadius: 6.0 * kElevationMultiplier,
-      offset: const Offset(0, 2.0 * kElevationMultiplier),
+      color: tint.withValues(alpha: 0.04 * kElevationMultiplier),
+      blurRadius: 4.0 * kElevationMultiplier,
+      offset: const Offset(0, 1.5 * kElevationMultiplier),
     ),
     BoxShadow(
-      color: tint.withValues(alpha: 0.11 * kElevationMultiplier),
-      blurRadius: 32.0 * kElevationMultiplier,
-      spreadRadius: -4.0,
-      offset: const Offset(0, 14.0 * kElevationMultiplier),
+      color: tint.withValues(alpha: 0.07 * kElevationMultiplier),
+      blurRadius: 20.0 * kElevationMultiplier,
+      spreadRadius: -3.0 * kElevationMultiplier,
+      offset: const Offset(0, 8.0 * kElevationMultiplier),
     ),
   ];
 
   /// Single soft shadow for compact Home quick-tool tiles and light chrome.
   List<BoxShadow> elevationSubtle(Color tint) => <BoxShadow>[
     BoxShadow(
-      color: tint.withValues(alpha: 0.04 * kElevationMultiplier),
-      blurRadius: 10.0 * kElevationMultiplier,
-      spreadRadius: -2.0,
-      offset: const Offset(0, 3.0 * kElevationMultiplier),
+      color: tint.withValues(alpha: 0.03 * kElevationMultiplier),
+      blurRadius: 8.0 * kElevationMultiplier,
+      spreadRadius: -2.0 * kElevationMultiplier,
+      offset: const Offset(0, 2.0 * kElevationMultiplier),
     ),
   ];
 }

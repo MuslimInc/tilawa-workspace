@@ -119,11 +119,11 @@ hand-roll `BoxShadow` lists on new surfaces.
 
 | Tier | Layers (alpha / blur / y-offset) | Use |
 |------|----------------------------------|-----|
-| `elevationRaised(colorScheme.shadow)` | 0.05 / 3 / 1 + 0.07 / 24 / 10 | Resting cards — `TilawaCard` raised, settings group panels, capability action cards |
-| `elevationFloating(colorScheme.shadow)` | 0.06 / 6 / 2 + 0.11 / 32 / 14 | Floating chrome — hero summaries, pinned bars, dialogs |
+| `elevationRaised(colorScheme.shadow)` | 0.03 / 2 / 1 + 0.05 / 16 / 6 | Resting cards — `TilawaCard` raised, settings group panels, capability action cards |
+| `elevationFloating(colorScheme.shadow)` | 0.04 / 4 / 1.5 + 0.07 / 20 / 8 | Floating chrome — hero summaries, pinned bars, dialogs |
 
 Every shadow value (legacy and tiers) scales with `kElevationMultiplier`
-(currently `1.0`) — a single device-tuning knob; safe range ≈ 0.8–1.3.
+(currently `0.8`) — a single device-tuning knob; safe range ≈ 0.8–1.3.
 
 Legacy single-shadow tokens stay for existing chrome (search field, collapsed
 header); prefer the tiers for new work:

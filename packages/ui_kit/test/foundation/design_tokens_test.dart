@@ -3,6 +3,23 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:tilawa_ui_kit/src/foundation/foundation.dart';
 
 void main() {
+  test('uses soft global elevation', () {
+    expect(kElevationMultiplier, 0.8);
+  });
+
+  test('elevation tiers use softened scaled geometry', () {
+    final tokens = MeMuslimDesignTokens.light();
+    final raised = tokens.elevationRaised(Colors.black);
+    final floating = tokens.elevationFloating(Colors.black);
+    final subtle = tokens.elevationSubtle(Colors.black);
+
+    expect(raised.last.blurRadius, 16 * kElevationMultiplier);
+    expect(raised.last.offset, const Offset(0, 6 * kElevationMultiplier));
+    expect(floating.last.blurRadius, 20 * kElevationMultiplier);
+    expect(floating.last.offset, const Offset(0, 8 * kElevationMultiplier));
+    expect(subtle.single.blurRadius, 8 * kElevationMultiplier);
+  });
+
   group('MeMuslimDesignTokens', () {
     const defaultTokens = MeMuslimDesignTokens(
       spaceTiny: 2.0,

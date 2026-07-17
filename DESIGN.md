@@ -353,7 +353,7 @@ Host: `TilawaFeedbackHost` wraps `MaterialApp.builder` child.
 
 ## Depth and elevation
 
-- **Layered elevation:** resting cards use `tokens.elevationRaised(colorScheme.shadow)` — contact (0.05 / blur 3 / y1) + ambient (0.07 / blur 24 / y10); floating chrome uses `elevationFloating` — contact (0.06 / blur 6 / y2) + ambient (0.11 / blur 32 / y14). Shadows tint with brand ink via `ColorScheme.shadow`, never gray-black. Global tuning knob: `kElevationMultiplier` (1.0, safe ≈ 0.8–1.3).
+- **Layered elevation:** resting cards use `tokens.elevationRaised(colorScheme.shadow)` — contact (0.03 / blur 2 / y1) + ambient (0.05 / blur 16 / y6); floating chrome uses `elevationFloating` — contact (0.04 / blur 4 / y1.5) + ambient (0.07 / blur 20 / y8). Shadows tint with brand ink via `ColorScheme.shadow`, never gray-black. Global tuning knob: `kElevationMultiplier` (0.8, safe ≈ 0.8–1.3).
 - **Borders:** `borderWidthThin` **0.5** hairlines where tokens apply.
 - **No heavy elevation stacks** or decorative gradients on standard chrome — depth comes from the two calibrated layers, not stacked effects.
 

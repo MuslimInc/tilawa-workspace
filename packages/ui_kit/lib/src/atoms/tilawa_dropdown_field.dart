@@ -196,7 +196,7 @@ class _TilawaDropdownFieldState<T> extends State<TilawaDropdownField<T>> {
             ),
             surfaceTintColor: const WidgetStatePropertyAll(Colors.transparent),
             shadowColor: WidgetStatePropertyAll(
-              colorScheme.shadow.withValues(alpha: 0.08),
+              colorScheme.shadow.withValues(alpha: tokens.opacityShadowStrong),
             ),
             side: WidgetStatePropertyAll(
               BorderSide(color: colorScheme.outlineVariant),

@@ -36,10 +36,10 @@ abstract final class TilawaAppBarConfig {
   static const bool showElevationShadow = false;
 
   /// Material [AppBar.elevation] when [showElevationShadow] is true.
-  static const double elevation = 1;
+  static const double elevation = 1 * kElevationMultiplier;
 
   /// Material [AppBar.scrolledUnderElevation] when [showElevationShadow] is true.
-  static const double scrolledUnderElevation = 1;
+  static const double scrolledUnderElevation = 1 * kElevationMultiplier;
 
   static const bool pinned = true;
   static const bool floating = false;

@@ -69,9 +69,11 @@ class TilawaAlphabetScrollbarTokens {
       overlayRadius: 16,
       overlayOffset: 48,
       overlayBackgroundColor: colorScheme.surfaceContainerHighest,
-      overlayShadowColor: const Color(0xFF000000).withValues(alpha: 0.15),
-      overlayShadowBlur: 16,
-      overlayShadowOffset: const Offset(0, 8),
+      overlayShadowColor: const Color(
+        0xFF000000,
+      ).withValues(alpha: 0.15 * kElevationMultiplier),
+      overlayShadowBlur: 16 * kElevationMultiplier,
+      overlayShadowOffset: const Offset(0, 8 * kElevationMultiplier),
     );
   }
 
@@ -499,8 +501,8 @@ class TilawaChipTokens {
       iconSize: 16,
       inlineIconSize: 14,
       borderWidth: 0.5,
-      selectedShadowOpacity: 0.18,
-      selectedShadowBlur: 12,
+      selectedShadowOpacity: 0.18 * kElevationMultiplier,
+      selectedShadowBlur: 12 * kElevationMultiplier,
       selectionFontWeight: FontWeight.w700,
       statusFontWeight: FontWeight.w600,
       statusLetterSpacing: 0.25,
@@ -718,9 +720,11 @@ class TilawaSegmentedControlTokens {
       minItemWidth: 100,
       selectedFontWeight: FontWeight.bold,
       unselectedFontWeight: FontWeight.normal,
-      selectedItemShadowColor: const Color(0xFF000000).withValues(alpha: 0.05),
-      selectedItemShadowBlur: 4,
-      selectedItemShadowOffset: const Offset(0, 2),
+      selectedItemShadowColor: const Color(
+        0xFF000000,
+      ).withValues(alpha: 0.05 * kElevationMultiplier),
+      selectedItemShadowBlur: 4 * kElevationMultiplier,
+      selectedItemShadowOffset: const Offset(0, 2 * kElevationMultiplier),
     );
   }
 
@@ -984,7 +988,7 @@ class TilawaSearchFieldTokens {
     final backgroundColor = colorScheme.surface;
     const focusedBorderOpacity = 0.28;
     const unfocusedBorderOpacity = 0.26;
-    const shadowOpacity = 0.04;
+    const shadowOpacity = 0.04 * kElevationMultiplier;
     // Slightly higher floor for hint vs surface (readability / WCAG-ish headroom).
     const hintOpacity = 0.62;
     const iconOpacity = 0.72;
@@ -1013,8 +1017,8 @@ class TilawaSearchFieldTokens {
       shadowOpacity: shadowOpacity,
       hintOpacity: hintOpacity,
       iconOpacity: iconOpacity,
-      shadowBlur: 12,
-      shadowOffset: const Offset(0, 4),
+      shadowBlur: 12 * kElevationMultiplier,
+      shadowOffset: const Offset(0, 4 * kElevationMultiplier),
       focusedBorderColor: focusedBorderColor,
       unfocusedBorderColor: unfocusedBorderColor,
       boxShadowColor: boxShadowColor,
@@ -1633,15 +1637,7 @@ class TilawaHomeScreenTokens {
         ),
       ),
       boxShadow: homeContentSheetShadowOpacity > 0
-          ? <BoxShadow>[
-              BoxShadow(
-                color: colorScheme.shadow.withValues(
-                  alpha: homeContentSheetShadowOpacity,
-                ),
-                offset: Offset(0, -tokens.shadowOffsetSmall.dy.abs()),
-                blurRadius: tokens.spaceMedium,
-              ),
-            ]
+          ? tokens.elevationSubtle(colorScheme.shadow)
           : null,
     );
   }
@@ -1668,13 +1664,7 @@ class TilawaHomeScreenTokens {
         width: tokens.borderWidthThin,
       ),
       boxShadow: opacity > 0
-          ? <BoxShadow>[
-              BoxShadow(
-                color: homePrayerHeroShadow.withValues(alpha: opacity),
-                offset: Offset(0, tokens.spaceExtraSmall),
-                blurRadius: tokens.spaceLarge,
-              ),
-            ]
+          ? tokens.elevationRaised(colorScheme.shadow)
           : null,
     );
   }

@@ -222,8 +222,8 @@ void main() {
       expect(tokens.contentPadding, const EdgeInsets.symmetric(vertical: 12));
       expect(tokens.iconSize, 18.0);
       expect(tokens.focusedBorderOpacity, 0.28);
-      expect(tokens.shadowBlur, 12.0);
-      expect(tokens.shadowOffset, const Offset(0, 4));
+      expect(tokens.shadowBlur, 12.0 * kElevationMultiplier);
+      expect(tokens.shadowOffset, const Offset(0, 4 * kElevationMultiplier));
     });
 
     test('copyWith updates all value types', () {
@@ -446,7 +446,7 @@ void main() {
         MeMuslimDesignTokens.light(),
       );
       expect(tokens.groupHorizontalPadding, 20.0);
-      expect(tokens.groupShadowOpacity, 0.04);
+      expect(tokens.groupShadowOpacity, 0.04 * kElevationMultiplier);
       expect(tokens.tileTitleTextRole, TilawaTextRole.bodyLarge);
       expect(tokens.tileSubtitleOpacity, 1.0);
       expect(tokens.tileSubtitleSpacing, 6.0);
@@ -754,9 +754,18 @@ void main() {
       );
 
       expect(tokens.bottomNavBackgroundColor, isA<Color>());
-      expect(tokens.bottomNavShadowOpacity, 0.08);
-      expect(tokens.bottomNavShadowBlur, 12.0);
-      expect(tokens.bottomNavShadowOffset, const Offset(0, -1.5));
+      expect(tokens.bottomNavShadowOpacity, 0.08 * kElevationMultiplier);
+      expect(tokens.bottomNavShadowBlur, 12.0 * kElevationMultiplier);
+      expect(
+        tokens.bottomNavShadowOffset,
+        const Offset(0, -1.5 * kElevationMultiplier),
+      );
+      expect(tokens.sideRailShadowOpacity, 0.05 * kElevationMultiplier);
+      expect(tokens.sideRailShadowBlur, 12 * kElevationMultiplier);
+      expect(
+        tokens.sideRailShadowOffset,
+        const Offset(2 * kElevationMultiplier, 0),
+      );
       expect(tokens.bottomNavBackgroundColor, scheme.surface);
       expect(
         tokens.navButtonSelectedBackgroundColor,
@@ -837,9 +846,12 @@ void main() {
         tokens.bottomNavBackgroundColor,
         isA<Color>(),
       );
-      expect(tokens.bottomNavShadowOpacity, 0.08);
-      expect(tokens.bottomNavShadowBlur, 12.0);
-      expect(tokens.bottomNavShadowOffset, const Offset(0, -1.5));
+      expect(tokens.bottomNavShadowOpacity, 0.08 * kElevationMultiplier);
+      expect(tokens.bottomNavShadowBlur, 12.0 * kElevationMultiplier);
+      expect(
+        tokens.bottomNavShadowOffset,
+        const Offset(0, -1.5 * kElevationMultiplier),
+      );
       expect(tokens.bottomNavBackgroundColor, scheme.surface);
       expect(
         tokens.bottomNavOutlineColor,
@@ -1476,6 +1488,32 @@ void main() {
 
       expect(tokens.catalogSelectedBackgroundColor, light.primary);
       expect(tokens.catalogSelectedForegroundColor, light.onPrimary);
+    });
+  });
+
+  group('scaled component shadows', () {
+    const ColorScheme scheme = ColorScheme.light();
+
+    test('alphabet overlay scales shadow geometry', () {
+      final tokens = TilawaAlphabetScrollbarTokens.fromColorScheme(scheme);
+      expect(tokens.overlayShadowBlur, 16 * kElevationMultiplier);
+      expect(
+        tokens.overlayShadowOffset,
+        const Offset(0, 8 * kElevationMultiplier),
+      );
+    });
+
+    test('chip and segmented selection shadows scale', () {
+      final chip = TilawaChipTokens.fromColorScheme(scheme);
+      final segmented = TilawaSegmentedControlTokens.fromColorScheme(scheme);
+
+      expect(chip.selectedShadowOpacity, 0.18 * kElevationMultiplier);
+      expect(chip.selectedShadowBlur, 12 * kElevationMultiplier);
+      expect(segmented.selectedItemShadowBlur, 4 * kElevationMultiplier);
+      expect(
+        segmented.selectedItemShadowOffset,
+        const Offset(0, 2 * kElevationMultiplier),
+      );
     });
   });
 

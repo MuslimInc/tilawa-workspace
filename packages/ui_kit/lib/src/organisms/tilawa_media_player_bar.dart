@@ -410,8 +410,8 @@ class TilawaMediaPlayerBar extends StatelessWidget {
                   color: colorScheme.shadow.withValues(
                     alpha: componentTokens.shadowOpacity * 0.55,
                   ),
-                  blurRadius: 3,
-                  offset: const Offset(0, 1),
+                  blurRadius: 3.0 * kElevationMultiplier,
+                  offset: const Offset(0, 1.0 * kElevationMultiplier),
                 ),
                 BoxShadow(
                   color: colorScheme.shadow.withValues(

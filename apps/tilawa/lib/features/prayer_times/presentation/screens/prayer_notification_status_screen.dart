@@ -496,20 +496,6 @@ class _ImmersiveStatusPanel extends StatelessWidget {
                   foregroundColor: onHero,
                 ),
               ),
-              if (soundName != null) ...[
-                _ImmersiveDivider(),
-                _StatusRow(
-                  icon: Icons.volume_up_outlined,
-                  label: l10n.sound,
-                  value: TilawaStatusChip(
-                    label: soundName!,
-                    backgroundColor: onHero.withValues(alpha: 0.12),
-                    foregroundColor: onHero.withValues(
-                      alpha: heroTokens.footerForegroundOpacity,
-                    ),
-                  ),
-                ),
-              ],
             ],
           ),
         ),

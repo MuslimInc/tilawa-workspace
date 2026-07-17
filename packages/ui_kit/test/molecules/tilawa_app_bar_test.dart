@@ -53,7 +53,7 @@ void main() {
     test('elevation shadow is off; hairline is on', () {
       expect(TilawaAppBarConfig.showElevationShadow, isFalse);
       expect(TilawaAppBarConfig.showBottomHairline, isTrue);
-      expect(TilawaAppBarConfig.elevation, 1);
+      expect(TilawaAppBarConfig.elevation, kElevationMultiplier);
     });
 
     test('catalog screens default to parchment and left title', () {

@@ -500,7 +500,7 @@ class _TilawaAlphabetScrollbarState extends State<TilawaAlphabetScrollbar> {
                               alpha: tokens.opacityShadow,
                             ),
                             blurRadius: tokens.blurShadow,
-                            spreadRadius: 1,
+                            spreadRadius: 1.0 * kElevationMultiplier,
                           ),
                         ],
                       ),
@@ -847,10 +847,10 @@ class _LetterItem extends StatelessWidget {
                     boxShadow: [
                       BoxShadow(
                         color: primaryColor.withValues(
-                          alpha: tokens.opacityMedium,
+                          alpha: tokens.opacityShadowStrong,
                         ),
-                        blurRadius: 4,
-                        offset: const Offset(0, 1),
+                        blurRadius: tokens.blurShadow / 3,
+                        offset: tokens.shadowOffsetSmall,
                       ),
                     ],
                   ),

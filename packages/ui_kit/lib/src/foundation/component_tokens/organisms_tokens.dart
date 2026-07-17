@@ -4,7 +4,10 @@ import 'package:flutter/material.dart';
 
 import '../app_colors.dart';
 import '../design_tokens.dart'
-    show MeMuslimDesignTokens, kMeMuslimMinInteractiveDimension;
+    show
+        MeMuslimDesignTokens,
+        kElevationMultiplier,
+        kMeMuslimMinInteractiveDimension;
 import '../tilawa_text_roles.dart';
 import 'token_lerp.dart';
 
@@ -614,9 +617,9 @@ class TilawaAdaptiveShellTokens {
       sideRailIndicatorColor: _sideRailIndicatorColor(colorScheme),
       sideRailBackgroundColor: _sideRailBackgroundColor(colorScheme),
       sideRailOutlineColor: shellChromeOutline,
-      sideRailShadowOpacity: 0.05,
-      sideRailShadowBlur: 12,
-      sideRailShadowOffset: const Offset(2, 0),
+      sideRailShadowOpacity: 0.05 * kElevationMultiplier,
+      sideRailShadowBlur: 12 * kElevationMultiplier,
+      sideRailShadowOffset: const Offset(2 * kElevationMultiplier, 0),
       navButtonMinHeight: navButtonMinHeight,
       navButtonVerticalPadding: navButtonVerticalPadding,
       navButtonGap: navButtonGap,
