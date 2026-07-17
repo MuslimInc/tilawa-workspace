@@ -30,8 +30,10 @@ dev_dependencies:
 
 flutter:
   uses-material-design: true
+  # Explicit list only — do not use assets/ (ships test-only files like
+  # quran_page_line_map.json ~2.1MB and unused banner/svg/manifest).
   assets:
-    - assets/
+    - assets/sura_header_banner.png
     - assets/quran_fonts/qpc-v4.json
     - assets/quran_fonts/quran_page_index.json
 
@@ -39,3 +41,4 @@ flutter:
     - family: QCF_BSML
       fonts:
         - asset: assets/quran_fonts/QCF4_QBSML-Regular.ttf
+
