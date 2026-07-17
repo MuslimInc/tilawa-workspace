@@ -22,6 +22,24 @@
       },
       "ios": {
         "buildConfigurations": {
+          "Debug": {
+            "projectId": "quran-playera-app",
+            "appId": "1:181575856185:ios:c2b2bf0966057dfd381de8",
+            "uploadDebugSymbols": true,
+            "fileOutput": "ios/Runner/Firebase/production/GoogleService-Info.plist"
+          },
+          "Release": {
+            "projectId": "quran-playera-app",
+            "appId": "1:181575856185:ios:c2b2bf0966057dfd381de8",
+            "uploadDebugSymbols": true,
+            "fileOutput": "ios/Runner/Firebase/production/GoogleService-Info.plist"
+          },
+          "Profile": {
+            "projectId": "quran-playera-app",
+            "appId": "1:181575856185:ios:c2b2bf0966057dfd381de8",
+            "uploadDebugSymbols": true,
+            "fileOutput": "ios/Runner/Firebase/production/GoogleService-Info.plist"
+          },
           "Release-production": {
             "projectId": "quran-playera-app",
             "appId": "1:181575856185:ios:c2b2bf0966057dfd381de8",
