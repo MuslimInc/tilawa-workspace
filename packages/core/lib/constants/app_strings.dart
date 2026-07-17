@@ -60,4 +60,3 @@ class AppStrings {
     return 'development';
   }
 }
-
