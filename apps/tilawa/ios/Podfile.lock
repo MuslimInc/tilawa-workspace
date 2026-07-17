@@ -1217,11 +1217,11 @@ PODS:
   - BoringSSL-GRPC/Implementation (0.0.37):
     - BoringSSL-GRPC/Interface (= 0.0.37)
   - BoringSSL-GRPC/Interface (0.0.37)
-  - cloud_firestore (6.6.0):
+  - cloud_firestore (6.7.1):
     - Firebase/Firestore (= 12.15.0)
     - firebase_core
     - Flutter
-  - cloud_functions (6.3.3):
+  - cloud_functions (6.3.5):
     - Firebase/Functions (= 12.15.0)
     - firebase_core
     - Flutter
@@ -1259,36 +1259,43 @@ PODS:
   - Firebase/Performance (12.15.0):
     - Firebase/CoreOnly
     - FirebasePerformance (~> 12.15.0)
-  - firebase_analytics (12.4.3):
+  - Firebase/Storage (12.15.0):
+    - Firebase/CoreOnly
+    - FirebaseStorage (~> 12.15.0)
+  - firebase_analytics (12.4.5):
     - firebase_core
     - FirebaseAnalytics (= 12.15.0)
     - Flutter
-  - firebase_app_check (0.4.5):
+  - firebase_app_check (0.4.5-2):
     - Firebase/CoreOnly (~> 12.15.0)
     - firebase_core
     - FirebaseAppCheck (~> 12.15.0)
     - Flutter
-  - firebase_app_installations (0.4.2-4):
+  - firebase_app_installations (0.4.2-6):
     - Firebase/Installations (= 12.15.0)
     - firebase_core
     - Flutter
-  - firebase_auth (6.5.4):
+  - firebase_auth (6.5.6):
     - Firebase/Auth (= 12.15.0)
     - firebase_core
     - Flutter
-  - firebase_core (4.11.0):
+  - firebase_core (4.12.1):
     - Firebase/CoreOnly (= 12.15.0)
     - Flutter
-  - firebase_crashlytics (5.2.4):
+  - firebase_crashlytics (5.2.6):
     - Firebase/Crashlytics (= 12.15.0)
     - firebase_core
     - Flutter
-  - firebase_messaging (16.4.1):
+  - firebase_messaging (16.4.3):
     - Firebase/Messaging (= 12.15.0)
     - firebase_core
     - Flutter
-  - firebase_performance (0.11.4-3):
+  - firebase_performance (0.11.4-5):
     - Firebase/Performance (= 12.15.0)
+    - firebase_core
+    - Flutter
+  - firebase_storage (13.4.5):
+    - Firebase/Storage (= 12.15.0)
     - firebase_core
     - Flutter
   - FirebaseABTesting (12.15.0):
@@ -1417,6 +1424,13 @@ PODS:
     - nanopb (~> 3.30910.0)
     - PromisesSwift (~> 2.1)
   - FirebaseSharedSwift (12.15.0)
+  - FirebaseStorage (12.15.0):
+    - FirebaseAppCheckInterop (~> 12.15.0)
+    - FirebaseAuthInterop (~> 12.15.0)
+    - FirebaseCore (~> 12.15.0)
+    - FirebaseCoreExtension (~> 12.15.0)
+    - GoogleUtilities/Environment (~> 8.1)
+    - GTMSessionFetcher/Core (< 6.0, >= 3.4)
   - Flutter (1.0.0)
   - flutter_downloader (0.0.1):
     - Flutter
@@ -1640,7 +1654,7 @@ PODS:
   - record_ios (2.0.0):
     - Flutter
   - Sentry/HybridSDK (8.58.3)
-  - sentry_flutter (9.22.0):
+  - sentry_flutter (9.24.0):
     - Flutter
     - FlutterMacOS
     - Sentry/HybridSDK (= 8.58.3)
@@ -1682,6 +1696,7 @@ DEPENDENCIES:
   - firebase_crashlytics (from `.symlinks/plugins/firebase_crashlytics/ios`)
   - firebase_messaging (from `.symlinks/plugins/firebase_messaging/ios`)
   - firebase_performance (from `.symlinks/plugins/firebase_performance/ios`)
+  - firebase_storage (from `.symlinks/plugins/firebase_storage/ios`)
   - Flutter (from `Flutter`)
   - flutter_downloader (from `.symlinks/plugins/flutter_downloader/ios`)
   - flutter_local_notifications (from `.symlinks/plugins/flutter_local_notifications/ios`)
@@ -1743,6 +1758,7 @@ SPEC REPOS:
     - FirebaseRemoteConfigInterop
     - FirebaseSessions
     - FirebaseSharedSwift
+    - FirebaseStorage
     - GoogleAdsOnDeviceConversion
     - GoogleAppMeasurement
     - GoogleDataTransport
@@ -1795,6 +1811,8 @@ EXTERNAL SOURCES:
     :path: ".symlinks/plugins/firebase_messaging/ios"
   firebase_performance:
     :path: ".symlinks/plugins/firebase_performance/ios"
+  firebase_storage:
+    :path: ".symlinks/plugins/firebase_storage/ios"
   Flutter:
     :path: Flutter
   flutter_downloader:
@@ -1862,8 +1880,8 @@ SPEC CHECKSUMS:
   audio_service: cab6c1a0eaf01b5a35b567e11fa67d3cc1956910
   audio_session: 19e9480dbdd4e5f6c4543826b2e8b0e4ab6145fe
   BoringSSL-GRPC: dded2a44897e45f28f08ae87a55ee4bcd19bc508
-  cloud_firestore: f7ca38720511e65eede1b19041948ce35f66ebb7
-  cloud_functions: 78db792881457b5a6c4e13e930e2e50c76fe5a45
+  cloud_firestore: e9fb4a8542f2a95445eaf99b3190fb6da9c0419f
+  cloud_functions: daf8915512adb9021a99c2634c7b5ba1b0ea1b06
   compass: bebc66d5186bb004acc9593fb1abab9f21e43510
   connectivity_plus: 2a701ffec2c0ae28a48cf7540e279787e77c447d
   CwlCatchException: 7acc161b299a6de7f0a46a6ed741eae2c8b4d75a
@@ -1871,14 +1889,15 @@ SPEC CHECKSUMS:
   device_info_plus: bf2e3232933866d73fe290f2942f2156cdd10342
   disk_space_plus: 47b68514830946bee63abfc90c892610fae735d6
   Firebase: a8539b633d474fbeb654c7043f9c1649e274045b
-  firebase_analytics: 444603cf97c21326b60115cd18d28f4a56bd78f6
-  firebase_app_check: 9b1262dbaef210e5a900f3a8c077b791223e4598
-  firebase_app_installations: 32e5a2c4e50715059604e96b743d9df3161e3820
-  firebase_auth: b9077bef727b19b519285a98f7b97d2ea78a0d78
-  firebase_core: 2f51bd38a4e012634cf229f81dc9e2506df32f1c
-  firebase_crashlytics: 251d4c57b75af742297bb7a39d50b40b9caf88cc
-  firebase_messaging: c8d9730ad2cf85f50f1e16be82ffebcb9a20a792
-  firebase_performance: 8d32ab7c2282409f47c4bbdce4665c6fb227b137
+  firebase_analytics: 673bb63121902bd55afca59abefb3d4728ef54e8
+  firebase_app_check: 3ec3875d627752d9ca874b9b721d5e605feefabb
+  firebase_app_installations: 97df607f2138afa3e18b2a67a563c646c0faf2c2
+  firebase_auth: 92f24182be81073cb370710ad6f754932415a99b
+  firebase_core: ee2e6c050e05882c2453c21efd082627351c9d38
+  firebase_crashlytics: a04158d76289665e9400653b67cc23c7d8865810
+  firebase_messaging: 98a853b361e297a7825720ea9ab3e98a9cb55536
+  firebase_performance: 990b6cce86b38314c9be8c10d525a2e5ae778ae7
+  firebase_storage: 58bf9467197a07e8c47a5f4d6ee69b1390d9b8f5
   FirebaseABTesting: 04cab3e6db77b86af50b6cf7c825a13e04beca52
   FirebaseAnalytics: 9c9fa7915fc52ea03077000d5a7b6a8947b2d76e
   FirebaseAppCheck: 29d81a8b4a1bf0273c04a1ffe1532aceabc9e7a8
@@ -1900,6 +1919,7 @@ SPEC CHECKSUMS:
   FirebaseRemoteConfigInterop: 7e3d57ce4b1e958bb1d15403faa7178f46bbb5b7
   FirebaseSessions: acfe7eadca47cda94ac86592737204581bb1abf6
   FirebaseSharedSwift: 3f5c2758484d32099d693f269f110d3249c3f7e3
+  FirebaseStorage: 949f0a5a8d8a77fff68ec8733057dc76a0e08179
   Flutter: cabc95a1d2626b1b06e7179b784ebcf0c0cde467
   flutter_downloader: b7301ae057deadd4b1650dc7c05375f10ff12c39
   flutter_local_notifications: eda81afddbf18f8589f6ec069ce593c4c6378769
@@ -1935,7 +1955,7 @@ SPEC CHECKSUMS:
   RecaptchaInterop: 11e0b637842dfb48308d242afc3f448062325aba
   record_ios: 41f9412c3311401689babe6d7ba69362f10b8325
   Sentry: 108fdbb76299c4189af12246bf0308c09c278922
-  sentry_flutter: 23107cf6ac9e0b93600711a4a3ae3d4c1de01b9e
+  sentry_flutter: b9c59bc3a9fe2272f74961586afc08bd7300c2c3
   share_plus: 8b6f8b3447e494cca5317c8c3073de39b3600d1f
   shared_preferences_foundation: 5086985c1d43c5ba4d5e69a4e8083a389e2909e6
   speech_to_text: 87bf9298952e8d9073be1b6aade6d5758db5170c
