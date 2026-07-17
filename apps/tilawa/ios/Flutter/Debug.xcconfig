@@ -4,3 +4,5 @@ INFOPLIST_KEY_CFBundleDisplayName=MeMuslim
 GOOGLE_SIGN_IN_CLIENT_ID=181575856185-utien7qr321gnjecad9toqpi0j1kguoo.apps.googleusercontent.com
 GOOGLE_SIGN_IN_REVERSED_CLIENT_ID=com.googleusercontent.apps.181575856185-utien7qr321gnjecad9toqpi0j1kguoo
 IPHONEOS_DEPLOYMENT_TARGET=15.0
+CODE_SIGN_ENTITLEMENTS=Runner/Runner.entitlements
+

@@ -86,14 +86,22 @@ class HomePrayerHeroContextRow extends StatelessWidget {
           onTap: () => showHomeHijriCalendarSheet(context),
           borderRadius: BorderRadius.circular(tokens.radiusSmall),
           semanticLabel: context.l10n.hijriCalendarOpenLabel,
-          child: Text(
-            hijriDateLine,
-            maxLines: 1,
-            overflow: TextOverflow.ellipsis,
-            textAlign: TextAlign.end,
-            style: theme.textTheme.labelSmall?.copyWith(
-              color: resolvedMuted,
-              fontWeight: FontWeight.w500,
+          child: ConstrainedBox(
+            constraints: BoxConstraints(
+              minHeight: tokens.minInteractiveDimension,
+            ),
+            child: Align(
+              alignment: AlignmentDirectional.centerEnd,
+              child: Text(
+                hijriDateLine,
+                maxLines: 1,
+                overflow: TextOverflow.ellipsis,
+                textAlign: TextAlign.end,
+                style: theme.textTheme.labelSmall?.copyWith(
+                  color: resolvedMuted,
+                  fontWeight: FontWeight.w600,
+                ),
+              ),
             ),
           ),
         ),
@@ -131,57 +139,62 @@ class _HomePrayerHeroLocationChip extends StatelessWidget {
       onTap: isRefreshingLocation ? null : onRefreshLocation,
       borderRadius: chipRadius,
       semanticLabel: label,
-      child: DecoratedBox(
-        decoration: BoxDecoration(
-          color: chipBackground,
-          borderRadius: chipRadius,
-          border: Border.all(
-            color: chipBorder,
-            width: tokens.borderWidthThin,
-          ),
+      child: ConstrainedBox(
+        constraints: BoxConstraints(
+          minHeight: tokens.minInteractiveDimension,
         ),
-        child: Padding(
-          padding: EdgeInsetsDirectional.symmetric(
-            horizontal: tokens.spaceSmall,
-            vertical: tokens.spaceExtraSmall,
+        child: DecoratedBox(
+          decoration: BoxDecoration(
+            color: chipBackground,
+            borderRadius: chipRadius,
+            border: Border.all(
+              color: chipBorder,
+              width: tokens.borderWidthThin,
+            ),
           ),
-          child: Row(
-            mainAxisSize: MainAxisSize.min,
-            spacing: tokens.spaceExtraSmall * 0.75,
-            children: [
-              Icon(
-                FluentIcons.location_24_regular,
-                size: tokens.iconSizeSmall,
-                color: muted,
-              ),
-              Flexible(
-                child: Text(
-                  label,
-                  maxLines: 1,
-                  overflow: TextOverflow.ellipsis,
-                  style: theme.textTheme.labelMedium?.copyWith(
-                    color: ink,
-                    fontWeight: FontWeight.w600,
-                  ),
-                ),
-              ),
-              if (isRefreshingLocation)
-                SizedBox(
-                  width: tokens.iconSizeExtraSmall,
-                  height: tokens.iconSizeExtraSmall,
-                  child: TilawaLoadingIndicator(
-                    centered: false,
-                    strokeWidth: 1.5,
-                    color: ink,
-                  ),
-                )
-              else
+          child: Padding(
+            padding: EdgeInsetsDirectional.symmetric(
+              horizontal: tokens.spaceSmall,
+              vertical: tokens.spaceExtraSmall,
+            ),
+            child: Row(
+              mainAxisSize: MainAxisSize.min,
+              spacing: tokens.spaceExtraSmall * 0.75,
+              children: [
                 Icon(
-                  FluentIcons.chevron_down_24_regular,
-                  size: tokens.iconSizeSmall * 0.85,
+                  FluentIcons.location_24_regular,
+                  size: tokens.iconSizeSmall,
                   color: muted,
                 ),
-            ],
+                Flexible(
+                  child: Text(
+                    label,
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                    style: theme.textTheme.labelMedium?.copyWith(
+                      color: ink,
+                      fontWeight: FontWeight.w600,
+                    ),
+                  ),
+                ),
+                if (isRefreshingLocation)
+                  SizedBox(
+                    width: tokens.iconSizeExtraSmall,
+                    height: tokens.iconSizeExtraSmall,
+                    child: TilawaLoadingIndicator(
+                      centered: false,
+                      strokeWidth: 1.5,
+                      color: ink,
+                    ),
+                  )
+                else
+                  Icon(
+                    FluentIcons.chevron_down_24_regular,
+                    size: tokens.iconSizeSmall * 0.85,
+                    color: muted,
+                  ),
+              ],
+            ),
           ),
         ),
       ),

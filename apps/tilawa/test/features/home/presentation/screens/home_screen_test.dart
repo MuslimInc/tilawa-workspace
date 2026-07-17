@@ -27,7 +27,7 @@ import 'package:tilawa/features/quran_sessions/domain/entities/quran_sessions_pl
 import 'package:tilawa/features/quran_sessions/quran_sessions_platform_config_store.dart';
 import 'package:tilawa/features/home/presentation/widgets/home_daily_inspiration_section.dart';
 import 'package:tilawa/features/home/presentation/widgets/home_dashboard_body_skeleton.dart';
-import 'package:tilawa/features/home/presentation/widgets/home_dashboard_card.dart';
+import 'package:tilawa/features/home/presentation/widgets/home_hero_glass_surface.dart';
 import 'package:tilawa/features/home/presentation/widgets/home_more_actions_group.dart';
 import 'package:tilawa/features/home/presentation/widgets/home_primary_actions_section.dart';
 import 'package:tilawa/features/home/presentation/widgets/home_quick_tools_section.dart';
@@ -450,7 +450,7 @@ void main() {
     }
 
     final Offset heroTop = tester.getTopLeft(
-      find.byType(HomeDashboardCard).first,
+      find.byType(HomeHeroGlassSurface).first,
     );
     expect(heroTop.dy, greaterThanOrEqualTo(topInset));
   });
@@ -571,7 +571,7 @@ void main() {
   );
 
   testWidgets(
-    'featured tutor card scrolls away with content on small screen',
+    'interest prompt sits below primary worship and scrolls away',
     (tester) async {
       final view = tester.view;
       view.devicePixelRatio = 1;
@@ -642,17 +642,27 @@ void main() {
 
       expect(find.byType(SliverPersistentHeader), findsNothing);
       expect(find.byType(HomeLearningInterestCard), findsOneWidget);
+      expect(
+        tester.getTopLeft(find.byType(HomeLearningInterestCard)).dy,
+        greaterThan(
+          tester.getTopLeft(find.byType(HomePrimaryActionsSection)).dy,
+        ),
+      );
 
-      final double scrollAmount = tester
+      final double viewportHeight = tester
           .getSize(find.byType(CustomScrollView))
           .height;
+      // Mind-map branches + greeting make the body taller than one viewport.
       await tester.drag(
         find.byType(CustomScrollView),
-        Offset(0, -scrollAmount),
+        Offset(0, -(viewportHeight * 2.2)),
       );
       await tester.pumpAndSettle();
 
-      expect(find.byType(HomeLearningInterestCard), findsNothing);
+      expect(
+        find.byType(HomeLearningInterestCard).hitTestable(),
+        findsNothing,
+      );
     },
   );
 }

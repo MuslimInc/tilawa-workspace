@@ -272,13 +272,13 @@ class AppTheme {
       surfaceTint: Colors.transparent,
       surfaceContainerLowest: AppColors.lightCanvas,
       surfaceContainerLow: AppColors.lightSurface,
-      // Warm parchment canvas + white card ramp.
+      // Cool off-white canvas + white card ramp.
       surfaceContainer: AppColors.lightCanvas,
-      surfaceContainerHigh: AppColors.lightSurfaceContainerHighBase,
+      surfaceContainerHigh: AppColors.catalogFilterUnselectedLight,
       surfaceContainerHighest: AppColors.lightSurfaceContainerHighestBase,
       tertiary: AppColors.brandTertiary,
-      // Tertiary tracks brand green, so it shares the ink on-color (white
-      // fails contrast on #1DAB61).
+      // Tertiary is gold gilding; onTertiary stays white for brand chrome
+      // consistency with primary fills.
       onTertiary: AppColors.lightSchemeOnPrimary,
       tertiaryContainer: AppColors.tripGlideCanvasElevated,
       onTertiaryContainer: AppColors.tripGlideInk,

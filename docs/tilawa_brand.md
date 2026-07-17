@@ -15,13 +15,13 @@ this file wins on intent.
 
 MeMuslim is a **daily Muslim lifestyle companion** — prayer, Quran, Qibla, dhikr,
 and calm home rituals in one warm, approachable shell. The product name is
-**MeMuslim / أنا مسلم**; the visual language follows the Behance warm parchment +
-**green accent** + gold featured-card system (implementation in `DESIGN.md`).
+**MeMuslim / أنا مسلم**; the visual language follows the Behance cool off-white +
+**orange accent** + gold featured-card system (implementation in `DESIGN.md`).
 
 | Word | What it means in pixels |
 |---|---|
-| **Warm** | Soft parchment canvas (`#F4F2EE`), warm ink (`#1A2E24`), **brand green** accent (`#1DAB61`), gold featured cards (`#FFD28E`→`#FF9E44`). No cool porcelain; brown/warm tones only as secondary micro-accents — never as production primary. |
-| **Clear** | One primary accent per screen (green). Generous radius (20–24 dp cards). Readable metadata in warm grey-green (`#6B7F74`). |
+| **Clear** | Soft parchment canvas (`#F4F4F4`), warm ink (`#050505`), **brand orange** accent (`#FA5B2E`), gold featured cards (`#FFD28E`→`#FF9E44`). No cool porcelain; brown/warm tones only as secondary micro-accents — never as production primary. |
+| **Clear** | One primary accent per screen (green). Generous radius (20–24 dp cards). Readable metadata in warm grey-green (`#6B6B6B`). |
 | **Faithful** | Bundled **IBM Plex Sans Arabic**, `textHeightLoose` (2.0), reverent reader surfaces, no stereotype chrome (mosques/crescents in app bars). |
 
 ---
@@ -42,21 +42,21 @@ and calm home rituals in one warm, approachable shell. The product name is
 
 | Brand role | Maps to | When to use |
 |---|---|---|
-| **Brand green** | `colorScheme.primary` (`#1DAB61`) | CTAs, active nav, selected pills/segments, switch ON, progress |
-| **On-primary ink** | `colorScheme.onPrimary` (`#003317`) | Labels/icons on green fills |
+| **Brand orange** | `colorScheme.primary` (`#FA5B2E`) | CTAs, active nav, selected pills/segments, switch ON, progress |
+| **On-primary** | `colorScheme.onPrimary` (`#FFFFFF`) | Labels/icons on orange fills |
 | **Gold gilding** | `colorScheme.tertiary` / featured gradient stops | Hero cards, Last Read, surah header banners — not purchase buttons |
-| **Canvas** | `colorScheme.surfaceContainerLowest` (`#F4F2EE`) | Scaffold, canvas (~60% neutral) |
+| **Canvas** | `colorScheme.surfaceContainerLowest` (`#F4F4F4`) | Scaffold, canvas (~60% neutral) |
 | **Card white** | `colorScheme.surface` (`#FFFFFF`) | List rows, settings tiles (~30% secondary) |
-| **Warm chip rest** | `colorScheme.surfaceContainerHigh` (`#F0F7F2`) | Idle chips, search rests |
-| **Body ink** | `colorScheme.onSurface` (`#1A2E24`) | Headings, primary copy |
-| **Muted labels** | `colorScheme.onSurfaceVariant` (`#6B7F74`) | Metadata, captions |
+| **Warm chip rest** | `colorScheme.surfaceContainerHigh` (`#F4F4F4`) | Idle chips, search rests |
+| **Body ink** | `colorScheme.onSurface` (`#050505`) | Headings, primary copy |
+| **Muted labels** | `colorScheme.onSurfaceVariant` (`#6B6B6B`) | Metadata, captions |
 | **Hairline** | `colorScheme.outlineVariant` (`#EEEEEE`) | Dividers at `borderWidthThin` (0.5) |
 | **Featured text** | `AppColors.featuredGradientForeground` | Copy on gold gradient cards |
 
 **Anti-patterns:**
-- Don't flatten scaffold/canvas to pure white (`#FFFFFF`) — use warm parchment (`#F4F2EE`) so white cards lift.
+- Don't flatten scaffold/canvas to pure white (`#FFFFFF`) — use cool off-white (`#F4F4F4`) so white cards lift.
 - Don't reintroduce legacy purple (`#7A5C89`), brown (`#8B5E3C`), sage (`#219653`), or teal (`#00897B`) as production primary.
-- Don't use cool grey porcelain (`#F4F5F7`) on lifestyle surfaces.
+- Canvas is cool off-white (`#F4F4F4`); keep white cards for lift.
 - Don't use gold gradient on Support MeMuslim CTAs.
 
 ---
@@ -77,7 +77,7 @@ and calm home rituals in one warm, approachable shell. The product name is
 
 ## 5. Rhythm and elevation (Behance lifestyle)
 
-- **Cards:** white fill on the neutral canvas, **24 dp** radius (`radiusCard`), restrained
+- **Cards:** white fill on the neutral canvas, **28 dp** radius (`radiusCard`), restrained
   shadow (`opacityShadow` **0.04**, `opacityShadowStrong` **0.08** on `colorScheme.shadow`;
   offsets `(0, 1)` / `(0, 2)`, blur **8** — not heavy 0.18/0.28 stacks).
 - **Featured cards:** gold linear gradient, no hairline border.
@@ -90,9 +90,9 @@ and calm home rituals in one warm, approachable shell. The product name is
 
 | Family | Token | Use |
 |---|---|---|
-| `card` / `pill` | `radiusExtraLarge` (24 dp) | Cards, buttons, chips |
-| `chrome` | `radiusLarge` (20 dp) | Search, segment tracks |
-| `hero` | `radiusHero` (28 dp) | Hub summary groups |
+| `card` / `pill` | `radiusExtraLarge` (28 dp) | Cards, buttons, chips |
+| `chrome` | `radiusLarge` (24 dp) | Search, segment tracks |
+| `hero` | `radiusHero` (32 dp) | Hub summary groups |
 
 ---
 
@@ -137,5 +137,5 @@ not Premium. See §8 in prior revision — strings live in `*.arb`.
 
 Unchanged ethics — see [`specs/016-support-tilawa/spec.md`](../specs/016-support-tilawa/spec.md)
 and [`packages/ui_kit/docs/support_visual_system.md`](../packages/ui_kit/docs/support_visual_system.md).
-Calm parchment surfaces; green Ink CTA; no gold pay heroes.
+Calm parchment surfaces; orange Ink CTA; no gold pay heroes.
 

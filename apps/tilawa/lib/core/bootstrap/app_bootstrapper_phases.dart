@@ -84,13 +84,24 @@ extension AppBootstrapperPhases on AppBootstrapper {
     );
   }
 
-  /// Schedules critical init to start after the first frame paints.
+  /// Schedules critical init to start after the first BootGate frame builds.
+  ///
+  /// Critical init is isolate-saturating (Firebase, Hydrated, DI). If it runs
+  /// in the same turn as the first post-frame callback, BootGate's
+  /// [LaunchFirstFrameGate.scheduleReleaseAfterFirstFrame] never gets a second
+  /// vsync — the 3s failsafe fires (`first_frame_release_failsafe`) and
+  /// Crashlytics records a false-positive hang. Release the deferred frame
+  /// first, then yield via [Timer.run] before kicking off heavy work.
   void scheduleCriticalInit(CriticalInitCoordinator coordinator) {
     logger.d(
       '[AppLaunch] source=AppBootstrapperPhases.scheduleCriticalInit: Start in (${DateTime.now()})',
     );
     SchedulerBinding.instance.addPostFrameCallback((_) {
-      coordinator.kickOff();
+      firstFrameLog(
+        'first BootGate frame built → release deferred frame, then critical init',
+      );
+      LaunchFirstFrameGate.release();
+      Timer.run(coordinator.kickOff);
     });
   }
 

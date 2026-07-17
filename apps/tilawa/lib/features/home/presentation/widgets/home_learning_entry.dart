@@ -20,9 +20,11 @@ bool _isHomeLearnQuranStudentCardVisible({
   capability: capability,
 );
 
-/// Loads [TeacherCapability] and builds the home Learn Quran sliver when allowed.
+/// Provides Learn Quran cubits for Home urgent + soft prompt slots.
 class HomeLearningEntryScope extends StatelessWidget {
-  const HomeLearningEntryScope({super.key});
+  const HomeLearningEntryScope({super.key, required this.child});
+
+  final Widget child;
 
   @override
   Widget build(BuildContext context) {
@@ -31,84 +33,39 @@ class HomeLearningEntryScope extends StatelessWidget {
         BlocProvider(create: (_) => TeacherCapabilityCubit()..load()),
         BlocProvider(create: (_) => getIt<HomeLearningCubit>()..load()),
       ],
-      child: const _HomeLearningEntrySliverHost(),
+      child: child,
     );
   }
 }
 
-class _HomeLearningEntrySliverHost extends StatelessWidget {
-  const _HomeLearningEntrySliverHost();
+/// Time-sensitive Learn Quran card after worship tiles (session / booking /
+/// revision). Interest + browse prompts live in [HomeLearningSoftPrompt].
+class HomeLearningUrgentSection extends StatelessWidget {
+  const HomeLearningUrgentSection({super.key});
 
   @override
   Widget build(BuildContext context) {
-    final SettingsTeacherCapabilityLoadState capabilityState = context
-        .watch<TeacherCapabilityCubit>()
-        .state;
-    final HomeLearningState learningState = context
-        .watch<HomeLearningCubit>()
-        .state;
+    final Widget? cardWidget = _urgentLearningCard(context);
+    if (cardWidget == null) {
+      return const SizedBox.shrink();
+    }
 
-    final Widget? cardWidget = () {
-      switch (learningState.status) {
-        case HomeLearningStatus.initial:
-        case HomeLearningStatus.loading:
-          return null;
+    final MeMuslimDesignTokens tokens = context.tokens;
+    return Padding(
+      padding: EdgeInsets.only(top: tokens.spaceLarge),
+      child: cardWidget,
+    );
+  }
+}
 
-        case HomeLearningStatus.nextSession:
-          final session = learningState.session;
-          if (session == null) return null;
-          final isOngoing =
-              DateTime.now().isAfter(session.startsAt) &&
-              DateTime.now().isBefore(session.endsAt);
-          return HomeLearningCardImpressionListener(
-            cardType: isOngoing ? 'ongoing' : 'imminent',
-            bookingId: session.bookingId,
-            child: HomeLearningNextSessionCard(session: session),
-          );
+/// Sliver wrapper around urgent Learn card — tests only; Home uses
+/// [HomeLearningUrgentSection] in the body after worship tiles.
+class HomeLearningUrgentSliver extends StatelessWidget {
+  const HomeLearningUrgentSliver({super.key});
 
-        case HomeLearningStatus.pendingBooking:
-          final session = learningState.session;
-          if (session == null) return null;
-          return HomeLearningCardImpressionListener(
-            cardType: 'pending',
-            bookingId: session.bookingId,
-            child: HomeLearningPendingBookingCard(session: session),
-          );
-
-        case HomeLearningStatus.continueLearning:
-          final aggregate = learningState.revisionAggregate;
-          if (aggregate == null) return null;
-          return HomeLearningCardImpressionListener(
-            cardType: 'revision',
-            bookingId: aggregate.id,
-            child: HomeLearningRevisionCard(revisionAggregate: aggregate),
-          );
-
-        case HomeLearningStatus.none:
-          if (!learningState.isInterestSignalNeeded &&
-              !learningState.isBrowseEntryVisible) {
-            return null;
-          }
-          if (!_isHomeLearnQuranStudentCardVisible(
-            capability: capabilityState.capability,
-            capabilityLoaded: capabilityState.hasLoaded,
-          )) {
-            return null;
-          }
-          if (learningState.isInterestSignalNeeded) {
-            return const HomeLearningCardImpressionListener(
-              cardType: 'interest',
-              child: HomeLearningInterestCard(),
-            );
-          }
-          // Answered yes: keep the Learn Quran entry on Home.
-          return const HomeLearningCardImpressionListener(
-            cardType: 'browse',
-            child: HomeLearningBrowseCard(),
-          );
-      }
-    }();
-
+  @override
+  Widget build(BuildContext context) {
+    final Widget? cardWidget = _urgentLearningCard(context);
     if (cardWidget == null) {
       return const SliverToBoxAdapter(child: SizedBox.shrink());
     }
@@ -127,6 +84,94 @@ class _HomeLearningEntrySliverHost extends StatelessWidget {
         ),
         child: cardWidget,
       ),
+    );
+  }
+}
+
+Widget? _urgentLearningCard(BuildContext context) {
+  final HomeLearningState learningState = context
+      .watch<HomeLearningCubit>()
+      .state;
+
+  return switch (learningState.status) {
+    HomeLearningStatus.initial || HomeLearningStatus.loading => null,
+    HomeLearningStatus.nextSession => () {
+      final session = learningState.session;
+      if (session == null) return null;
+      final isOngoing =
+          DateTime.now().isAfter(session.startsAt) &&
+          DateTime.now().isBefore(session.endsAt);
+      return HomeLearningCardImpressionListener(
+        cardType: isOngoing ? 'ongoing' : 'imminent',
+        bookingId: session.bookingId,
+        child: HomeLearningNextSessionCard(session: session),
+      );
+    }(),
+    HomeLearningStatus.pendingBooking => () {
+      final session = learningState.session;
+      if (session == null) return null;
+      return HomeLearningCardImpressionListener(
+        cardType: 'pending',
+        bookingId: session.bookingId,
+        child: HomeLearningPendingBookingCard(session: session),
+      );
+    }(),
+    HomeLearningStatus.continueLearning => () {
+      final aggregate = learningState.revisionAggregate;
+      if (aggregate == null) return null;
+      return HomeLearningCardImpressionListener(
+        cardType: 'revision',
+        bookingId: aggregate.id,
+        child: HomeLearningRevisionCard(revisionAggregate: aggregate),
+      );
+    }(),
+    HomeLearningStatus.none => null,
+  };
+}
+
+/// Low-emphasis Learn Quran interest / browse entry after daily worship tiles.
+///
+/// Keeps conversion below worship so prayer + Quran/Athkar stay primary.
+class HomeLearningSoftPrompt extends StatelessWidget {
+  const HomeLearningSoftPrompt({super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    final SettingsTeacherCapabilityLoadState capabilityState = context
+        .watch<TeacherCapabilityCubit>()
+        .state;
+    final HomeLearningState learningState = context
+        .watch<HomeLearningCubit>()
+        .state;
+
+    if (learningState.status != HomeLearningStatus.none) {
+      return const SizedBox.shrink();
+    }
+    if (!learningState.isInterestSignalNeeded &&
+        !learningState.isBrowseEntryVisible) {
+      return const SizedBox.shrink();
+    }
+    if (!_isHomeLearnQuranStudentCardVisible(
+      capability: capabilityState.capability,
+      capabilityLoaded: capabilityState.hasLoaded,
+    )) {
+      return const SizedBox.shrink();
+    }
+
+    final Widget card = learningState.isInterestSignalNeeded
+        ? const HomeLearningCardImpressionListener(
+            cardType: 'interest',
+            child: HomeLearningInterestCard(),
+          )
+        : const HomeLearningCardImpressionListener(
+            cardType: 'browse',
+            child: HomeLearningBrowseCard(),
+          );
+
+    final MeMuslimDesignTokens tokens = context.tokens;
+    return Padding(
+      padding: EdgeInsets.only(top: tokens.spaceExtraLarge),
+      child: card,
     );
   }
 }

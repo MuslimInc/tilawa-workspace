@@ -42,8 +42,36 @@
     },
     "homeTitle": "الصفحة الرئيسية",
     "homeGreeting": "السلام عليكم",
-    "homeInspirationTitle": "إلهام اليوم",
-    "homeInspirationSubtitle": "آية ودعاء لقلبك",
+    "homeInspirationTitle": "آية ودعاء",
+    "homeComfortLine": "كل حاجة محتاجها هنا. ابدأ بهدوء",
+    "@homeComfortLine": {
+        "description": "Calm reassurance under the Home greeting"
+    },
+    "homeMainActionsSubtitle": "افتحها كل يوم بسهولة",
+    "@homeMainActionsSubtitle": {
+        "description": "Mind-map subtitle under daily worship branch"
+    },
+    "homeQuickToolsSubtitle": "كل حاجة قريبة منك",
+    "@homeQuickToolsSubtitle": {
+        "description": "Mind-map subtitle under quick tools branch"
+    },
+    "homeMapLabelWorship": "يومك",
+    "@homeMapLabelWorship": {
+        "description": "Short Home mind-map label for worship branch"
+    },
+    "homeMapLabelTools": "سريع",
+    "@homeMapLabelTools": {
+        "description": "Short Home mind-map label for tools branch"
+    },
+    "homeMapLabelLibrary": "أخرى",
+    "@homeMapLabelLibrary": {
+        "description": "Short Home mind-map label for library branch"
+    },
+    "homeMapLabelHeart": "راحة",
+    "@homeMapLabelHeart": {
+        "description": "Short Home mind-map label for inspiration branch"
+    },
+    "homeInspirationSubtitle": "كلمة طيبة لليوم",
     "homeGreetingName": "السلام عليكم، {name}",
     "@homeGreetingName": {
         "placeholders": {
@@ -91,10 +119,10 @@
     "homeExploreTitle": "اكتشف",
     "homeExploreSubtitle": "أدواتك اليومية بلمحة",
     "homeKhatmaCarouselSubtitle": "تقدّم في ختمتك",
-    "homeSupportCarouselSubtitle": "ساهِم في إبقاء تلاوة مجانية للجميع",
-    "homeHistoryCarouselSubtitle": "تابع من حيث توقّفت",
-    "homeFavoritesCarouselSubtitle": "تلاواتك وسورك المحفوظة",
-    "homeDownloadsCarouselSubtitle": "استمع بلا إنترنت",
+    "homeSupportCarouselSubtitle": "ساعد التطبيق يفضل مجاني للجميع",
+    "homeHistoryCarouselSubtitle": "كمّل من حيث وقفت",
+    "homeFavoritesCarouselSubtitle": "اللي حفظته من التلاوات",
+    "homeDownloadsCarouselSubtitle": "اسمع من غير نت",
     "homeSessionsTitle": "تعلّم التلاوة",
     "homeSessionsSubtitle": "جلسات مخصصة مع محفظ معتمد",
     "homeExploreShowAsList": "عرض كقائمة",
@@ -115,7 +143,7 @@
             "surah": { "type": "String" }
         }
     },
-    "homeAthkarDone": "تم",
+    "homeAthkarDone": "خلصت",
     "homeAthkarRemaining": "متبقٍ {count}",
     "@homeAthkarRemaining": {
         "placeholders": {
@@ -150,7 +178,7 @@
     "homeStartQuranTitle": "افتح المصحف",
     "homeStartQuranSubtitle": "ابدأ قراءة القرآن اليوم",
     "homeContinueQuranTitle": "تابع القرآن",
-    "homeContinueQuranSubtitle": "ارجع إلى آخر صفحة قرأتها",
+    "homeContinueQuranSubtitle": "كمّل من آخر قراءة",
     "homeQuranResumeSurahPage": "{surah} · صفحة {page}",
     "@homeQuranResumeSurahPage": {
         "placeholders": {
@@ -180,14 +208,14 @@
     "experimentalBadgeLabel": "تجريبي",
     "homeQuickQuran": "القرآن",
     "homeQuickActionsTitle": "إجراءات سريعة",
-    "homeMainActionsTitle": "عباداتك اليومية",
-    "homeQuickToolsTitle": "أدوات سريعة",
+    "homeMainActionsTitle": "قرآن وأذكار",
+    "homeQuickToolsTitle": "اختصارات",
     "homeLearningBrowseTitle": "تعلّم القرآن",
-    "homeLearningBrowseSubtitle": "اختر محفظك واحجز جلسة مباشرة فردية.",
+    "homeLearningBrowseSubtitle": "جلساتك ومواعيدك",
     "homeLearningBrowseCta": "ابدأ التعلّم",
-    "homeLearningInterestPromptTitle": "هل ترغب في تعلّم القرآن مع محفظ؟",
-    "homeLearningInterestPromptSubtitle": "أتقن التلاوة والتجويد بشكل فردي (1-على-1) مع توجيه مباشر.",
-    "homeLearningInterestPromptYes": "نعم، مهتم",
+    "homeLearningInterestPromptTitle": "تعلّم مع محفّظ",
+    "homeLearningInterestPromptSubtitle": "جلسة فردية مباشرة",
+    "homeLearningInterestPromptYes": "مهتم",
     "homeLearningInterestPromptNo": "ليس الآن",
     "homeLearningNextSessionTitle": "جلسة القرآن القادمة",
     "homeLearningNextSessionStartsIn": "تبدأ خلال {minutes} دقيقة",
@@ -204,18 +232,18 @@
     "teacherApplicationLaterCta": "لاحقاً",
     "teacherApplicationFormOpenFailed": "تعذّر فتح نموذج التقديم. حاول مرة أخرى.",
     "homeQuickQuranReader": "المصحف",
-    "homeQuickQuranReaderSubtitle": "اقرأ القرآن بتدبّر",
+    "homeQuickQuranReaderSubtitle": "كمّل من آخر قراءة",
     "homeLearnQuranWithTutor": "تعلّم القرآن مع محفظك",
     "homeQuickReciters": "القرّاء",
-    "homeQuickRecitersSubtitle": "استمع لتلاوات مختارة",
+    "homeQuickRecitersSubtitle": "اسمع القرآن بصوت قرّاء",
     "homeQuickPrayer": "الصلاة",
     "homeQuickQibla": "القبلة",
     "homeQuickQiblaSubtitle": "اتجه نحو القبلة بسهولة",
     "homeQuickSettingsSubtitle": "المظهر والصوت والحساب",
     "homeQuickTasbeeh": "التسبيح",
-    "homeQuickTasbeehSubtitle": "سبّح واذكر الله بلمسة",
+    "homeQuickTasbeehSubtitle": "سبّح بلمسة واحدة",
     "homeQuickAthkar": "الأذكار",
-    "homeQuickAthkarSubtitle": "وردك اليومي من الأذكار",
+    "homeQuickAthkarSubtitle": "أذكار الصباح والمساء",
     "homeQuickSettings": "الإعدادات",
     "homePinnedAthkarTitle": "أذكارك السريعة",
     "homePinnedAthkarEdit": "تعديل اختصارات الأذكار",
@@ -1604,6 +1632,10 @@
         "description": "Cyan color name"
     },
     "colorGreen": "أخضر",
+  "colorOrange": "برتقالي",
+  "@colorOrange": {
+    "description": "Primary color preset label for brand orange"
+  },
     "@colorGreen": {
         "description": "Green color name"
     },
@@ -3697,7 +3729,7 @@
     "@moreOptions": {
         "description": "Label for the more-options overflow menu button"
     },
-    "homeMoreOptionsSubtitle": "مكتبتك وخيارات أخرى",
+    "homeMoreOptionsSubtitle": "سجل ومفضلة وتحميلات",
     "@homeMoreOptionsSubtitle": {
         "description": "Subtitle for the More section on the home dashboard"
     },

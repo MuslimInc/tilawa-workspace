@@ -8,7 +8,7 @@ import {
   assertSucceeds,
   type RulesTestEnvironment,
 } from "@firebase/rules-unit-testing";
-import { doc, deleteDoc, getDoc, setDoc, updateDoc } from "firebase/firestore";
+import { collection, doc, deleteDoc, getDoc, getDocs, setDoc, updateDoc } from "firebase/firestore";
 
 const PROJECT_ID = "demo-tilawa-rules";
 let testEnv: RulesTestEnvironment;
@@ -218,6 +218,18 @@ test("rules: owner can read own device doc", async () => {
     getDoc(doc(ownerDb, "users/student1/devices/device-a")),
   );
   assert.equal(snap.get("platform"), "android");
+});
+
+test("rules: owner can list own devices collection", async () => {
+  await testEnv.clearFirestore();
+  await seedUser();
+  await seedDevice();
+
+  const ownerDb = testEnv.authenticatedContext("student1").firestore();
+  const snap = await assertSucceeds(
+    getDocs(collection(ownerDb, "users/student1/devices")),
+  );
+  assert.equal(snap.size, 1);
 });
 
 test("rules: non-owner cannot read another user's device doc", async () => {

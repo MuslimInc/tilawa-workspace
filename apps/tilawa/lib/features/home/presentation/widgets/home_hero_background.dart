@@ -34,7 +34,6 @@ class HomeHeroBackground extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final ThemeData theme = Theme.of(context);
-    final ColorScheme colorScheme = theme.colorScheme;
     final MeMuslimDesignTokens tokens = theme.tokens;
     final bool lightPhase =
         heroTokens.gradientBottomEnd.computeLuminance() > 0.45;
@@ -81,24 +80,6 @@ class HomeHeroBackground extends StatelessWidget {
                 Colors.transparent,
               ],
               stops: const <double>[0, 0.72],
-            ),
-          ),
-        ),
-        DecoratedBox(
-          decoration: BoxDecoration(
-            gradient: LinearGradient(
-              begin: AlignmentDirectional.topCenter,
-              end: AlignmentDirectional.bottomCenter,
-              colors: <Color>[
-                colorScheme.shadow.withValues(
-                  alpha: lightPhase ? 0.015 : 0.03,
-                ),
-                Colors.transparent,
-                colorScheme.shadow.withValues(
-                  alpha: lightPhase ? 0.025 : 0.05,
-                ),
-              ],
-              stops: const <double>[0, 0.45, 1],
             ),
           ),
         ),

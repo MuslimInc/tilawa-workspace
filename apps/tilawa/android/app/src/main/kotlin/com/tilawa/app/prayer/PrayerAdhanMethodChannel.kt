@@ -135,24 +135,32 @@ internal object PrayerAdhanMethodChannel {
             activeLogic.handleMethodCall(call.method, call.arguments as? Map<String, Any?>, proxy)
         }
         this.methodChannel = mc
+        // Intent may have buffered a tap before configureFlutterEngine; push now.
+        deliverPendingTapToDart()
     }
 
     fun notifyNotificationTapped(prayerKey: String, payload: String) {
         logDebug("METHOD_CHANNEL_TAP_RECEIVED prayerKey=$prayerKey")
         pendingTap = Pair(prayerKey, payload)
+        deliverPendingTapToDart()
+    }
+
+    /** Pushes [pendingTap] to Dart once the method channel exists. */
+    private fun deliverPendingTapToDart() {
+        val tap = pendingTap ?: return
         val mc = methodChannel
         if (mc == null) {
-            logDebug("METHOD_CHANNEL_TAP_BUFFERED reason=no_channel prayerKey=$prayerKey")
+            logDebug("METHOD_CHANNEL_TAP_BUFFERED reason=no_channel prayerKey=${tap.first}")
             return
         }
         logDebug(
-            "METHOD_CHANNEL_TAP_BUFFERED reason=awaiting_dart_ack prayerKey=$prayerKey"
+            "METHOD_CHANNEL_TAP_BUFFERED reason=awaiting_dart_ack prayerKey=${tap.first}"
         )
         mc.invokeMethod(
             "onNotificationTapped",
             mapOf(
-                "prayer_key" to prayerKey,
-                "payload" to payload
+                "prayer_key" to tap.first,
+                "payload" to tap.second
             )
         )
     }
@@ -188,4 +196,5 @@ internal object PrayerAdhanMethodChannel {
         }
     }
 }
+
 

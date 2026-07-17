@@ -7,33 +7,15 @@ export interface NotificationTarget {
   targetUserIds: string[];
 }
 
-export class BroadcastAllUsersDisabledError extends Error {
-  constructor() {
-    super(
-      "Broadcast to all users is disabled in production. " +
-        "Use targetType 'selected' with explicit user IDs."
-    );
-    this.name = "BroadcastAllUsersDisabledError";
-  }
-}
-
-/** Full collection scans are allowed only in the Functions emulator. */
-export function isFullUserCollectionScanAllowed(): boolean {
-  return process.env.FUNCTIONS_EMULATOR === "true";
-}
-
 /**
  * Resolve target user IDs based on targetType.
- * Production blocks unbounded "all" scans; emulator uses paginated reads.
+ * `all` uses paginated reads over the users collection.
  */
 export async function resolveUserIds(
   db: FirebaseFirestore.Firestore,
   notification: NotificationTarget
 ): Promise<string[]> {
   if (notification.targetType === "all") {
-    if (!isFullUserCollectionScanAllowed()) {
-      throw new BroadcastAllUsersDisabledError();
-    }
     return collectAllUserIdsPaginated(db);
   }
   return notification.targetUserIds;

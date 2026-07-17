@@ -8,32 +8,19 @@ import 'package:tilawa_ui_kit/tilawa_ui_kit.dart';
 
 import '../cubit/home_listening_resume_cubit.dart';
 import '../cubit/home_listening_resume_state.dart';
+import 'home_comfort_greeting.dart';
 import 'home_daily_inspiration_section.dart';
 import 'home_dashboard_body_skeleton.dart';
+import 'home_learning_entry.dart';
 import 'home_listening_resume_row.dart';
 import 'home_more_actions_group.dart';
 import 'home_primary_actions_section.dart';
 import 'home_quick_tools_section.dart';
 
-/// Home body — product-grade hierarchy under the Sliver Prayer Hero.
+/// Home body under the Sliver Prayer Hero — clear sections, no extra chrome.
 ///
-/// IA zones (top → bottom):
-/// 1. **Now** — Sliver Prayer Hero (location, Hijri date, next prayer) — sliver above.
-/// 2. **Primary actions** — Quran Reader, Athkar (two large cards).
-/// 3. **Quick tools** — Reciters, Qibla, Tasbeeh (compact row).
-/// 4. **Today Plan** — optional daily worship plan card.
-/// 5. **Continue** — conditional continue-listening row.
-/// 6. **More** — secondary library/account destinations.
-/// 7. **Inspiration** — passive daily ayah and dua at the bottom.
-///
-/// The featured tutor card is a scroll-away sliver directly under the hero.
-///
-/// Hierarchy: primary cards > quick tools > more list.
-///
-/// **Spacing rhythm** (relationship-based):
-/// - Within same zone: `spaceLarge` rhythm.
-/// - Between zones: `spaceExtraLarge` for unrelated zones; `spaceLarge` for
-///   related secondary zones.
+/// Order: greeting → primary worship → urgent Learn → soft Learn →
+/// tools → More → listening → inspiration → closing mark.
 class HomeDashboardBody extends StatelessWidget {
   const HomeDashboardBody({super.key, this.skeleton = false});
 
@@ -55,7 +42,11 @@ class HomeDashboardBody extends StatelessWidget {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
+        const HomeComfortGreeting(),
+        SizedBox(height: tokens.spaceMedium),
         const HomePrimaryActionsSection(),
+        const HomeLearningUrgentSection(),
+        const HomeLearningSoftPrompt(),
         if (isSmartKhatmaEnabled()) ...[
           SizedBox(height: zoneGap),
           const SmartKhatmaHomeEntryCard(),
@@ -106,11 +97,7 @@ class _ConditionalListeningRow extends StatelessWidget {
   }
 }
 
-/// Calm ending watermark at the bottom of the home dashboard.
-///
-/// Peak-End Rule: the ending matters. This provides gentle closure
-/// instead of the page just "falling off." Extremely quiet — does not
-/// compete with content.
+/// Quiet app mark at the bottom of the home dashboard.
 class _HomeDashboardClosingMark extends StatelessWidget {
   const _HomeDashboardClosingMark();
 
@@ -119,7 +106,7 @@ class _HomeDashboardClosingMark extends StatelessWidget {
     final tokens = context.tokens;
     final theme = Theme.of(context);
     final Color markColor = theme.colorScheme.onSurfaceVariant.withValues(
-      alpha: 0.72,
+      alpha: 0.55,
     );
 
     return Padding(
@@ -140,8 +127,7 @@ class _HomeDashboardClosingMark extends StatelessWidget {
               context.l10n.appTitle,
               style: theme.textTheme.bodyLarge?.copyWith(
                 color: markColor,
-                fontWeight: FontWeight.w600,
-                letterSpacing: 0.4,
+                fontWeight: FontWeight.w500,
                 height: 1.3,
               ),
             ),

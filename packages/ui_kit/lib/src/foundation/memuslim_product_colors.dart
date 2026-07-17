@@ -120,15 +120,16 @@ class MeMuslimProductColors extends ThemeExtension<MeMuslimProductColors> {
   /// imports visual palette names.
   Color exploreFeatureIcon(HomeExploreFeature feature) {
     return switch (feature) {
+      // Quiet green family + ceremonial gold — distinct per feature.
       HomeExploreFeature.reciters => AppColors.categoryAccentGreen,
       HomeExploreFeature.athkar => AppColors.categoryAccentOrange,
       HomeExploreFeature.prayer => prayerTimeActive,
       HomeExploreFeature.qibla => AppColors.categoryAccentBlue,
-      HomeExploreFeature.tasbeeh => AppColors.success,
+      HomeExploreFeature.tasbeeh => AppColors.brandGoldAccent,
       HomeExploreFeature.bookmarks => AppColors.categoryAccentIndigo,
       HomeExploreFeature.quran => AppColors.categoryAccentAmber,
-      HomeExploreFeature.support => AppColors.categoryAccentTealLight,
-      HomeExploreFeature.sessions => info,
+      HomeExploreFeature.support => AppColors.brandActionGreenAccessible,
+      HomeExploreFeature.sessions => AppColors.categoryAccentBlueGrey,
     };
   }
 

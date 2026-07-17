@@ -1443,17 +1443,20 @@ class TilawaHomeNextPrayerHeroTokens {
   }
 
   /// Night hero gradient (Isha through deep night before pre-dawn ease).
+  ///
+  /// Light cool canvas — matches day/preDawn so Home never flashes a black
+  /// header band under the white prayer card.
   factory TilawaHomeNextPrayerHeroTokens.night() {
     return const TilawaHomeNextPrayerHeroTokens(
       gradientTopStart: AppColors.homeNextPrayerGradientNightTop,
       gradientBottomEnd: AppColors.homeNextPrayerGradientNightBottom,
       foregroundColor: AppColors.homeNextPrayerGradientNightForeground,
-      locationChipFillOpacity: 0.12,
-      locationChipBorderOpacity: 0.24,
-      locationChipSplashOpacity: 0.1,
-      locationChipHighlightOpacity: 0.05,
+      locationChipFillOpacity: 0.10,
+      locationChipBorderOpacity: 0.22,
+      locationChipSplashOpacity: 0.08,
+      locationChipHighlightOpacity: 0.04,
       mutedForegroundOpacity: 0.68,
-      tertiaryForegroundOpacity: 0.58,
+      tertiaryForegroundOpacity: 0.60,
       footerForegroundOpacity: 0.90,
     );
   }
@@ -1650,7 +1653,7 @@ class TilawaHomeScreenTokens {
     Color? color,
     double? shadowOpacity,
   }) {
-    final double opacity = shadowOpacity ?? homePrayerHeroShadowOpacity;
+    final double opacity = shadowOpacity ?? homeContentSheetShadowOpacity;
     final Color borderColor = Color.alphaBlend(
       homePrayerHeroBorder.withValues(alpha: 0.72),
       colorScheme.outlineVariant.withValues(alpha: 0.28),
@@ -1726,11 +1729,11 @@ class TilawaHomeScreenTokens {
       backgroundGradientMiddle: AppColors.homeBackgroundGradientMiddle,
       backgroundGradientEnd: AppColors.homeBackgroundGradientEnd,
       backgroundGlowColor: AppColors.homeBackgroundGlow,
-      backgroundGlowOpacity: 0,
+      backgroundGlowOpacity: 0.55,
       homePrayerHeroBackground: AppColors.homePrayerHeroBackground,
       homePrayerHeroBorder: AppColors.homePrayerHeroBorder,
       homePrayerHeroShadow: AppColors.homePrayerHeroShadow,
-      homePrayerHeroShadowOpacity: 0,
+      homePrayerHeroShadowOpacity: 0.08,
       homePrayerHeroAccent: AppColors.homePrayerHeroAccent,
       homePrayerHeroWatermark: AppColors.homePrayerHeroWatermark,
       homePrayerHeroWatermarkOpacity: 0.07,
@@ -1746,8 +1749,8 @@ class TilawaHomeScreenTokens {
       homeContentSheetShadowOpacity: 0,
       homeContentSheetTopBorder: AppColors.homeContentSheetTopBorder,
       homeHeroPatternInk: AppColors.homeHeroPatternInk,
-      homeHeroPatternOpacity: 0,
-      homeHeroGoldGlowOpacity: 0,
+      homeHeroPatternOpacity: 0.07,
+      homeHeroGoldGlowOpacity: 0.22,
       homeFeaturedTutorCtaForeground: AppColors.homeFeaturedTutorCtaForeground,
       quickActionTileBackground: AppColors.homeQuickActionTileBackground,
     );

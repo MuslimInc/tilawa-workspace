@@ -68,8 +68,7 @@ void main() {
       expect(WidgetsBinding.instance.sendFramesToEngine, isFalse);
 
       LaunchFirstFrameGate.scheduleReleaseAfterFirstFrame();
-      await tester.pump();
-      await tester.pump();
+      await tester.pumpWidget(const SizedBox.shrink());
 
       expect(
         WidgetsBinding.instance.sendFramesToEngine,
@@ -80,6 +79,21 @@ void main() {
       viewReady = true;
       binding.handleMetricsChanged();
       await tester.pump();
+
+      expect(WidgetsBinding.instance.sendFramesToEngine, isTrue);
+    },
+  );
+
+  testWidgets(
+    'scheduleReleaseAfterFirstFrame releases on first post-frame when view ready',
+    (WidgetTester tester) async {
+      LaunchFirstFrameGate.debugHasNonZeroFlutterViewOverride = () => true;
+
+      LaunchFirstFrameGate.defer();
+      expect(WidgetsBinding.instance.sendFramesToEngine, isFalse);
+
+      LaunchFirstFrameGate.scheduleReleaseAfterFirstFrame();
+      await tester.pumpWidget(const SizedBox.shrink());
 
       expect(WidgetsBinding.instance.sendFramesToEngine, isTrue);
     },

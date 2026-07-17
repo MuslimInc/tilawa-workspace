@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:tilawa/core/extensions.dart';
 import 'package:tilawa/features/home/domain/home_daily_inspiration_catalog.dart';
-import 'package:tilawa/l10n/generated/app_localizations.dart';
 import 'package:tilawa_ui_kit/tilawa_ui_kit.dart';
 
 import 'home_daily_ayah_sheet.dart';
@@ -14,7 +13,11 @@ class HomeDailyAyahCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final int catalogIndex = homeDailyInspirationCatalogIndex(DateTime.now());
-    final _DailyAyahCopy copy = _resolveCopy(context.l10n, catalogIndex);
+    final HomeDailyInspirationEntry entry =
+        homeDailyInspirationEntries[catalogIndex];
+    final bool arabic = context.isArabic;
+    final String body = entry.ayahBody(arabic: arabic);
+    final String reference = entry.ayahReference(arabic: arabic);
 
     return HomeDashboardCard(
       surface: TilawaCardSurface.raised,
@@ -34,21 +37,21 @@ class HomeDailyAyahCard extends StatelessWidget {
           ),
           SizedBox(height: context.tokens.spaceExtraSmall),
           Text(
-            copy.body,
+            body,
             maxLines: 2,
             overflow: TextOverflow.ellipsis,
             textAlign: TextAlign.start,
             style: Theme.of(context).textTheme.bodyMedium?.copyWith(
               color: Theme.of(context).colorScheme.onSurfaceVariant,
-              height: context.isArabic
+              height: arabic
                   ? context.tokens.textHeightLoose
                   : Theme.of(context).textTheme.bodyMedium?.height,
-              fontWeight: context.isArabic ? FontWeight.w500 : FontWeight.w400,
+              fontWeight: arabic ? FontWeight.w500 : FontWeight.w400,
             ),
           ),
           SizedBox(height: context.tokens.spaceExtraSmall),
           Text(
-            copy.reference,
+            reference,
             style: Theme.of(context).textTheme.bodySmall?.copyWith(
               color: Theme.of(context).colorScheme.onSurfaceVariant,
               fontWeight: FontWeight.w500,
@@ -58,28 +61,4 @@ class HomeDailyAyahCard extends StatelessWidget {
       ),
     );
   }
-}
-
-_DailyAyahCopy _resolveCopy(AppLocalizations l10n, int index) {
-  return switch (index) {
-    1 => _DailyAyahCopy(
-      body: l10n.homeDailyAyahBody1,
-      reference: l10n.homeDailyAyahReference1,
-    ),
-    2 => _DailyAyahCopy(
-      body: l10n.homeDailyAyahBody2,
-      reference: l10n.homeDailyAyahReference2,
-    ),
-    _ => _DailyAyahCopy(
-      body: l10n.homeDailyAyahBody,
-      reference: l10n.homeDailyAyahReference,
-    ),
-  };
-}
-
-final class _DailyAyahCopy {
-  const _DailyAyahCopy({required this.body, required this.reference});
-
-  final String body;
-  final String reference;
 }

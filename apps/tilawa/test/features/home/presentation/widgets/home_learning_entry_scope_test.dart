@@ -44,7 +44,6 @@ void main() {
   late MockTeacherCapabilityCubit mockTeacherCapabilityCubit;
 
   setUpAll(() {
-    // VisibilityDetector synchronous mode
     VisibilityDetectorController.instance.updateInterval = Duration.zero;
   });
 
@@ -52,7 +51,6 @@ void main() {
     mockHomeLearningCubit = MockHomeLearningCubit();
     mockTeacherCapabilityCubit = MockTeacherCapabilityCubit();
 
-    // Register GetIt dependencies
     if (getIt.isRegistered<QuranSessionsPlatformConfigStore>()) {
       getIt.unregister<QuranSessionsPlatformConfigStore>();
     }
@@ -102,7 +100,6 @@ void main() {
     }
     getIt.registerSingleton<HomeLearningCubit>(mockHomeLearningCubit);
 
-    // Mock TeacherCapabilityCubit states
     when(mockTeacherCapabilityCubit.state).thenReturn(
       const SettingsTeacherCapabilityLoadState(
         isLoading: false,
@@ -113,7 +110,6 @@ void main() {
       mockTeacherCapabilityCubit.stream,
     ).thenAnswer((_) => const Stream.empty());
 
-    // Mock HomeLearningCubit stream
     when(mockHomeLearningCubit.stream).thenAnswer((_) => const Stream.empty());
   });
 
@@ -138,7 +134,7 @@ void main() {
     }
   });
 
-  Widget createWidgetUnderTest() {
+  Widget createUrgentSliverUnderTest() {
     return MaterialApp(
       theme: ThemeData(
         colorScheme: ColorScheme.fromSeed(seedColor: Colors.teal),
@@ -149,28 +145,52 @@ void main() {
         QuranSessionsLocalizations.delegate,
       ],
       supportedLocales: AppLocalizations.supportedLocales,
-      home: const Scaffold(
-        body: CustomScrollView(
-          slivers: [
-            HomeLearningEntryScope(),
-          ],
+      home: const HomeLearningEntryScope(
+        child: Scaffold(
+          body: CustomScrollView(
+            slivers: [
+              HomeLearningUrgentSliver(),
+            ],
+          ),
         ),
       ),
     );
   }
 
-  testWidgets('renders nothing when state is loading', (tester) async {
+  Widget createSoftPromptUnderTest() {
+    return MaterialApp(
+      theme: ThemeData(
+        colorScheme: ColorScheme.fromSeed(seedColor: Colors.teal),
+      ),
+      locale: const Locale('en'),
+      localizationsDelegates: const [
+        ...AppLocalizations.localizationsDelegates,
+        QuranSessionsLocalizations.delegate,
+      ],
+      supportedLocales: AppLocalizations.supportedLocales,
+      home: const HomeLearningEntryScope(
+        child: Scaffold(
+          body: HomeLearningSoftPrompt(),
+        ),
+      ),
+    );
+  }
+
+  testWidgets('urgent sliver renders nothing when state is loading', (
+    tester,
+  ) async {
     when(mockHomeLearningCubit.state).thenReturn(
       const HomeLearningState(status: HomeLearningStatus.loading),
     );
 
-    await tester.pumpWidget(createWidgetUnderTest());
+    await tester.pumpWidget(createUrgentSliverUnderTest());
     await tester.pumpAndSettle();
 
     expect(find.byType(HomeLearningInterestCard), findsNothing);
+    expect(find.byType(HomeLearningNextSessionCard), findsNothing);
   });
 
-  testWidgets('renders browse entry when the user answered yes', (
+  testWidgets('soft prompt shows browse when the user answered yes', (
     tester,
   ) async {
     when(mockHomeLearningCubit.state).thenReturn(
@@ -180,11 +200,41 @@ void main() {
       ),
     );
 
-    await tester.pumpWidget(createWidgetUnderTest());
+    await tester.pumpWidget(createSoftPromptUnderTest());
     await tester.pumpAndSettle();
 
     expect(find.byType(HomeLearningBrowseCard), findsOneWidget);
     expect(find.byType(HomeLearningInterestCard), findsNothing);
+  });
+
+  testWidgets('urgent sliver ignores browse / interest soft prompts', (
+    tester,
+  ) async {
+    when(mockHomeLearningCubit.state).thenReturn(
+      const HomeLearningState(
+        status: HomeLearningStatus.none,
+        isInterestSignalNeeded: true,
+      ),
+    );
+
+    await tester.pumpWidget(createUrgentSliverUnderTest());
+    await tester.pumpAndSettle();
+
+    expect(find.byType(HomeLearningInterestCard), findsNothing);
+  });
+
+  testWidgets('soft prompt shows interest when signal needed', (tester) async {
+    when(mockHomeLearningCubit.state).thenReturn(
+      const HomeLearningState(
+        status: HomeLearningStatus.none,
+        isInterestSignalNeeded: true,
+      ),
+    );
+
+    await tester.pumpWidget(createSoftPromptUnderTest());
+    await tester.pumpAndSettle();
+
+    expect(find.byType(HomeLearningInterestCard), findsOneWidget);
   });
 
   testWidgets('renders nothing when the user answered not-now', (
@@ -194,7 +244,7 @@ void main() {
       const HomeLearningState(status: HomeLearningStatus.none),
     );
 
-    await tester.pumpWidget(createWidgetUnderTest());
+    await tester.pumpWidget(createSoftPromptUnderTest());
     await tester.pumpAndSettle();
 
     expect(find.byType(HomeLearningBrowseCard), findsNothing);
@@ -224,7 +274,7 @@ void main() {
       ),
     );
 
-    await tester.pumpWidget(createWidgetUnderTest());
+    await tester.pumpWidget(createUrgentSliverUnderTest());
     await tester.pumpAndSettle();
 
     expect(find.byType(HomeLearningNextSessionCard), findsOneWidget);
@@ -254,7 +304,7 @@ void main() {
       ),
     );
 
-    await tester.pumpWidget(createWidgetUnderTest());
+    await tester.pumpWidget(createUrgentSliverUnderTest());
     await tester.pumpAndSettle();
 
     expect(find.byType(HomeLearningPendingBookingCard), findsOneWidget);
@@ -285,7 +335,7 @@ void main() {
       ),
     );
 
-    await tester.pumpWidget(createWidgetUnderTest());
+    await tester.pumpWidget(createUrgentSliverUnderTest());
     await tester.pumpAndSettle();
 
     expect(find.byType(HomeLearningRevisionCard), findsOneWidget);

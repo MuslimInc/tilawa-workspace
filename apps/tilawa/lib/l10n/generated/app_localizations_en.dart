@@ -45,10 +45,31 @@ class AppLocalizationsEn extends AppLocalizations {
   String get homeGreeting => 'Assalamu alaikum';
 
   @override
-  String get homeInspirationTitle => 'Today\'s inspiration';
+  String get homeInspirationTitle => 'Ayah & dua';
 
   @override
-  String get homeInspirationSubtitle => 'An ayah and dua for your heart';
+  String get homeComfortLine => 'Everything you need is here. Start gently';
+
+  @override
+  String get homeMainActionsSubtitle => 'Open them every day with ease';
+
+  @override
+  String get homeQuickToolsSubtitle => 'Everything close to you';
+
+  @override
+  String get homeMapLabelWorship => 'Daily';
+
+  @override
+  String get homeMapLabelTools => 'Quick';
+
+  @override
+  String get homeMapLabelLibrary => 'Other';
+
+  @override
+  String get homeMapLabelHeart => 'Calm';
+
+  @override
+  String get homeInspirationSubtitle => 'A kind word for today';
 
   @override
   String homeGreetingName(String name) {
@@ -168,7 +189,7 @@ class AppLocalizationsEn extends AppLocalizations {
   }
 
   @override
-  String get homeAthkarDone => 'Done';
+  String get homeAthkarDone => 'Finished';
 
   @override
   String homeAthkarRemaining(int count) {
@@ -270,31 +291,28 @@ class AppLocalizationsEn extends AppLocalizations {
   String get homeQuickActionsTitle => 'Quick Actions';
 
   @override
-  String get homeMainActionsTitle => 'Your daily worship';
+  String get homeMainActionsTitle => 'Quran & athkar';
 
   @override
-  String get homeQuickToolsTitle => 'Quick tools';
+  String get homeQuickToolsTitle => 'Shortcuts';
 
   @override
   String get homeLearningBrowseTitle => 'Learn Quran';
 
   @override
-  String get homeLearningBrowseSubtitle =>
-      'Choose your hafiz and book a live 1-on-1 session.';
+  String get homeLearningBrowseSubtitle => 'Your sessions and schedule';
 
   @override
   String get homeLearningBrowseCta => 'Start learning';
 
   @override
-  String get homeLearningInterestPromptTitle =>
-      'Learn Quran with a Qualified Tutor?';
+  String get homeLearningInterestPromptTitle => 'Learn with a tutor';
 
   @override
-  String get homeLearningInterestPromptSubtitle =>
-      'Master your recitation and Tajweed 1-on-1 with live feedback.';
+  String get homeLearningInterestPromptSubtitle => 'Live one-to-one session';
 
   @override
-  String get homeLearningInterestPromptYes => 'Yes, interested';
+  String get homeLearningInterestPromptYes => 'Interested';
 
   @override
   String get homeLearningInterestPromptNo => 'Not now';
@@ -351,7 +369,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get homeQuickQuranReader => 'Mushaf';
 
   @override
-  String get homeQuickQuranReaderSubtitle => 'Read the Quran with reflection';
+  String get homeQuickQuranReaderSubtitle => 'Resume from your last read page';
 
   @override
   String get homeLearnQuranWithTutor => 'Learn Quran with your hafiz';
@@ -384,7 +402,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get homeQuickAthkar => 'Athkar';
 
   @override
-  String get homeQuickAthkarSubtitle => 'Your daily athkar';
+  String get homeQuickAthkarSubtitle => 'Morning and evening remembrance';
 
   @override
   String get homeQuickSettings => 'Settings';
@@ -1743,6 +1761,9 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get colorGreen => 'Green';
+
+  @override
+  String get colorOrange => 'Orange';
 
   @override
   String get colorBrown => 'Brown';
@@ -3359,7 +3380,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get moreOptions => 'More';
 
   @override
-  String get homeMoreOptionsSubtitle => 'Your library and more options';
+  String get homeMoreOptionsSubtitle => 'History, favorites, and downloads';
 
   @override
   String get supportTilawa => 'Support MeMuslim';

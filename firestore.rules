@@ -357,9 +357,27 @@ service cloud.firestore {
       allow read, write: if false;
     }
 
-    // Push campaigns — created in console; sendNotification function delivers.
+    // Push campaigns — admin panel creates pending docs; sendNotification CF delivers.
     match /notifications/{notificationId} {
-      allow read, write: if false;
+      allow read: if isAdmin();
+      allow create: if isAdmin()
+        && request.resource.data.keys().hasAll([
+          'title',
+          'body',
+          'targetType',
+          'targetUserIds',
+          'createdAt',
+          'status',
+          'actionType',
+        ])
+        && request.resource.data.status == 'pending'
+        && request.resource.data.targetType in ['all', 'single', 'selected']
+        && request.resource.data.title is string
+        && request.resource.data.body is string
+        && request.resource.data.actionType is string
+        && request.resource.data.targetUserIds is list
+        && request.resource.data.createdAt is int;
+      allow update, delete: if false;
     }
 
     function quranSessionsProfileEligibilityFieldUnchanged(field) {
@@ -508,4 +526,5 @@ service cloud.firestore {
     }
   }
 }
+
 

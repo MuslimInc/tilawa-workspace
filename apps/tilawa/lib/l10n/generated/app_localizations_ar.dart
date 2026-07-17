@@ -45,10 +45,31 @@ class AppLocalizationsAr extends AppLocalizations {
   String get homeGreeting => 'السلام عليكم';
 
   @override
-  String get homeInspirationTitle => 'إلهام اليوم';
+  String get homeInspirationTitle => 'آية ودعاء';
 
   @override
-  String get homeInspirationSubtitle => 'آية ودعاء لقلبك';
+  String get homeComfortLine => 'كل حاجة محتاجها هنا. ابدأ بهدوء';
+
+  @override
+  String get homeMainActionsSubtitle => 'افتحها كل يوم بسهولة';
+
+  @override
+  String get homeQuickToolsSubtitle => 'كل حاجة قريبة منك';
+
+  @override
+  String get homeMapLabelWorship => 'يومك';
+
+  @override
+  String get homeMapLabelTools => 'سريع';
+
+  @override
+  String get homeMapLabelLibrary => 'أخرى';
+
+  @override
+  String get homeMapLabelHeart => 'راحة';
+
+  @override
+  String get homeInspirationSubtitle => 'كلمة طيبة لليوم';
 
   @override
   String homeGreetingName(String name) {
@@ -107,17 +128,16 @@ class AppLocalizationsAr extends AppLocalizations {
   String get homeKhatmaCarouselSubtitle => 'تقدّم في ختمتك';
 
   @override
-  String get homeSupportCarouselSubtitle =>
-      'ساهِم في إبقاء تلاوة مجانية للجميع';
+  String get homeSupportCarouselSubtitle => 'ساعد التطبيق يفضل مجاني للجميع';
 
   @override
-  String get homeHistoryCarouselSubtitle => 'تابع من حيث توقّفت';
+  String get homeHistoryCarouselSubtitle => 'كمّل من حيث وقفت';
 
   @override
-  String get homeFavoritesCarouselSubtitle => 'تلاواتك وسورك المحفوظة';
+  String get homeFavoritesCarouselSubtitle => 'اللي حفظته من التلاوات';
 
   @override
-  String get homeDownloadsCarouselSubtitle => 'استمع بلا إنترنت';
+  String get homeDownloadsCarouselSubtitle => 'اسمع من غير نت';
 
   @override
   String get homeSessionsTitle => 'تعلّم التلاوة';
@@ -168,7 +188,7 @@ class AppLocalizationsAr extends AppLocalizations {
   }
 
   @override
-  String get homeAthkarDone => 'تم';
+  String get homeAthkarDone => 'خلصت';
 
   @override
   String homeAthkarRemaining(int count) {
@@ -234,7 +254,7 @@ class AppLocalizationsAr extends AppLocalizations {
   String get homeContinueQuranTitle => 'تابع القرآن';
 
   @override
-  String get homeContinueQuranSubtitle => 'ارجع إلى آخر صفحة قرأتها';
+  String get homeContinueQuranSubtitle => 'كمّل من آخر قراءة';
 
   @override
   String homeQuranResumeSurahPage(String surah, int page) {
@@ -269,31 +289,28 @@ class AppLocalizationsAr extends AppLocalizations {
   String get homeQuickActionsTitle => 'إجراءات سريعة';
 
   @override
-  String get homeMainActionsTitle => 'عباداتك اليومية';
+  String get homeMainActionsTitle => 'قرآن وأذكار';
 
   @override
-  String get homeQuickToolsTitle => 'أدوات سريعة';
+  String get homeQuickToolsTitle => 'اختصارات';
 
   @override
   String get homeLearningBrowseTitle => 'تعلّم القرآن';
 
   @override
-  String get homeLearningBrowseSubtitle =>
-      'اختر محفظك واحجز جلسة مباشرة فردية.';
+  String get homeLearningBrowseSubtitle => 'جلساتك ومواعيدك';
 
   @override
   String get homeLearningBrowseCta => 'ابدأ التعلّم';
 
   @override
-  String get homeLearningInterestPromptTitle =>
-      'هل ترغب في تعلّم القرآن مع محفظ؟';
+  String get homeLearningInterestPromptTitle => 'تعلّم مع محفّظ';
 
   @override
-  String get homeLearningInterestPromptSubtitle =>
-      'أتقن التلاوة والتجويد بشكل فردي (1-على-1) مع توجيه مباشر.';
+  String get homeLearningInterestPromptSubtitle => 'جلسة فردية مباشرة';
 
   @override
-  String get homeLearningInterestPromptYes => 'نعم، مهتم';
+  String get homeLearningInterestPromptYes => 'مهتم';
 
   @override
   String get homeLearningInterestPromptNo => 'ليس الآن';
@@ -349,7 +366,7 @@ class AppLocalizationsAr extends AppLocalizations {
   String get homeQuickQuranReader => 'المصحف';
 
   @override
-  String get homeQuickQuranReaderSubtitle => 'اقرأ القرآن بتدبّر';
+  String get homeQuickQuranReaderSubtitle => 'كمّل من آخر قراءة';
 
   @override
   String get homeLearnQuranWithTutor => 'تعلّم القرآن مع محفظك';
@@ -358,7 +375,7 @@ class AppLocalizationsAr extends AppLocalizations {
   String get homeQuickReciters => 'القرّاء';
 
   @override
-  String get homeQuickRecitersSubtitle => 'استمع لتلاوات مختارة';
+  String get homeQuickRecitersSubtitle => 'اسمع القرآن بصوت قرّاء';
 
   @override
   String get homeQuickPrayer => 'الصلاة';
@@ -376,13 +393,13 @@ class AppLocalizationsAr extends AppLocalizations {
   String get homeQuickTasbeeh => 'التسبيح';
 
   @override
-  String get homeQuickTasbeehSubtitle => 'سبّح واذكر الله بلمسة';
+  String get homeQuickTasbeehSubtitle => 'سبّح بلمسة واحدة';
 
   @override
   String get homeQuickAthkar => 'الأذكار';
 
   @override
-  String get homeQuickAthkarSubtitle => 'وردك اليومي من الأذكار';
+  String get homeQuickAthkarSubtitle => 'أذكار الصباح والمساء';
 
   @override
   String get homeQuickSettings => 'الإعدادات';
@@ -1730,6 +1747,9 @@ class AppLocalizationsAr extends AppLocalizations {
 
   @override
   String get colorGreen => 'أخضر';
+
+  @override
+  String get colorOrange => 'برتقالي';
 
   @override
   String get colorBrown => 'بني';
@@ -3337,7 +3357,7 @@ class AppLocalizationsAr extends AppLocalizations {
   String get moreOptions => 'المزيد';
 
   @override
-  String get homeMoreOptionsSubtitle => 'مكتبتك وخيارات أخرى';
+  String get homeMoreOptionsSubtitle => 'سجل ومفضلة وتحميلات';
 
   @override
   String get supportTilawa => 'ادعم أنا مسلم';

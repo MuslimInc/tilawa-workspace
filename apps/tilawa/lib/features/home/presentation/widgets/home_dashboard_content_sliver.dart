@@ -2,10 +2,10 @@ import 'package:flutter/material.dart';
 import 'package:tilawa/core/layout/home_dashboard_scroll_padding.dart';
 import 'package:tilawa_ui_kit/tilawa_ui_kit.dart';
 
-/// Dashboard sections on the neutral Home canvas.
+/// Dashboard sections on a TripGlide-style sheet below the prayer hero.
 ///
-/// Cards sit on the canvas through spacing, contrast, and hairline borders —
-/// no overlapping sheet or heavy elevation.
+/// Rounded top edge sits on the hero fade; cards use spacing and contrast on
+/// the sheet surface.
 class HomeDashboardContentSliver extends StatelessWidget {
   const HomeDashboardContentSliver({
     super.key,
@@ -18,15 +18,30 @@ class HomeDashboardContentSliver extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final MeMuslimDesignTokens tokens = context.tokens;
+    final ThemeData theme = Theme.of(context);
+    final MeMuslimDesignTokens tokens = theme.tokens;
+    final TilawaHomeScreenTokens screenTokens =
+        theme.componentTokens.homeScreen;
     final double horizontalInset =
         TilawaHomeScreenTokens.screenHorizontalPadding(tokens);
+    final BorderRadius sheetRadius = BorderRadius.vertical(
+      top: Radius.circular(
+        tokens.resolveRadius(family: TilawaRadiusFamily.hero),
+      ),
+    );
 
     return SliverToBoxAdapter(
-      child: _HomeDashboardSheetBody(
-        horizontalInset: horizontalInset,
-        topPadding: topPadding ?? tokens.spaceMedium,
-        child: child,
+      child: DecoratedBox(
+        decoration: screenTokens.contentSheetDecoration(
+          tokens: tokens,
+          colorScheme: theme.colorScheme,
+          borderRadius: sheetRadius,
+        ),
+        child: _HomeDashboardSheetBody(
+          horizontalInset: horizontalInset,
+          topPadding: topPadding ?? tokens.spaceLarge,
+          child: child,
+        ),
       ),
     );
   }

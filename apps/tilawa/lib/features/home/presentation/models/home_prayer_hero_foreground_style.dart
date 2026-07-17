@@ -22,7 +22,7 @@ class HomePrayerHeroForegroundStyle {
   }) {
     return HomePrayerHeroForegroundStyle(
       ink: colorScheme.onSurface,
-      muted: colorScheme.onSurfaceVariant,
+      muted: screenTokens.homeHeaderSecondaryText,
       chipBackground: screenTokens.homeHeaderChipBackground,
       chipBorder: Color.alphaBlend(
         screenTokens.homePrayerHeroBorder.withValues(alpha: 0.72),

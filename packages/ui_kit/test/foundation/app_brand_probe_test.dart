@@ -50,7 +50,8 @@ void main() {
         expect(
           ratio,
           greaterThanOrEqualTo(4.5),
-          reason: 'dark onPrimary on #4ADE80 (${ratio.toStringAsFixed(2)}:1)',
+          reason:
+              'dark onPrimary on lifted green (${ratio.toStringAsFixed(2)}:1)',
         );
       },
     );

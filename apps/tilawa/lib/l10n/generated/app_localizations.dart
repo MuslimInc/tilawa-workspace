@@ -173,13 +173,55 @@ abstract class AppLocalizations {
   /// Title for the daily inspiration section
   ///
   /// In en, this message translates to:
-  /// **'Today\'s inspiration'**
+  /// **'Ayah & dua'**
   String get homeInspirationTitle;
+
+  /// Calm reassurance under the Home greeting
+  ///
+  /// In en, this message translates to:
+  /// **'Everything you need is here. Start gently'**
+  String get homeComfortLine;
+
+  /// Mind-map subtitle under daily worship branch
+  ///
+  /// In en, this message translates to:
+  /// **'Open them every day with ease'**
+  String get homeMainActionsSubtitle;
+
+  /// Mind-map subtitle under quick tools branch
+  ///
+  /// In en, this message translates to:
+  /// **'Everything close to you'**
+  String get homeQuickToolsSubtitle;
+
+  /// Short Home mind-map label for worship branch
+  ///
+  /// In en, this message translates to:
+  /// **'Daily'**
+  String get homeMapLabelWorship;
+
+  /// Short Home mind-map label for tools branch
+  ///
+  /// In en, this message translates to:
+  /// **'Quick'**
+  String get homeMapLabelTools;
+
+  /// Short Home mind-map label for library branch
+  ///
+  /// In en, this message translates to:
+  /// **'Other'**
+  String get homeMapLabelLibrary;
+
+  /// Short Home mind-map label for inspiration branch
+  ///
+  /// In en, this message translates to:
+  /// **'Calm'**
+  String get homeMapLabelHeart;
 
   /// Subtitle for the daily inspiration section
   ///
   /// In en, this message translates to:
-  /// **'An ayah and dua for your heart'**
+  /// **'A kind word for today'**
   String get homeInspirationSubtitle;
 
   /// Home greeting with display name
@@ -377,7 +419,7 @@ abstract class AppLocalizations {
   /// Athkar compact card completed state
   ///
   /// In en, this message translates to:
-  /// **'Done'**
+  /// **'Finished'**
   String get homeAthkarDone;
 
   /// Athkar compact card in-progress state
@@ -551,13 +593,13 @@ abstract class AppLocalizations {
   /// Home section title for the two primary daily action cards
   ///
   /// In en, this message translates to:
-  /// **'Your daily worship'**
+  /// **'Quran & athkar'**
   String get homeMainActionsTitle;
 
   /// Home section title for the compact secondary tools row
   ///
   /// In en, this message translates to:
-  /// **'Quick tools'**
+  /// **'Shortcuts'**
   String get homeQuickToolsTitle;
 
   /// Title of the persistent Learn Quran entry card for interested students
@@ -569,7 +611,7 @@ abstract class AppLocalizations {
   /// Subtitle of the persistent Learn Quran entry card for interested students
   ///
   /// In en, this message translates to:
-  /// **'Choose your hafiz and book a live 1-on-1 session.'**
+  /// **'Your sessions and schedule'**
   String get homeLearningBrowseSubtitle;
 
   /// Call to action on the persistent Learn Quran entry card
@@ -581,19 +623,19 @@ abstract class AppLocalizations {
   /// Title of the tutoring interest card shown on home screen
   ///
   /// In en, this message translates to:
-  /// **'Learn Quran with a Qualified Tutor?'**
+  /// **'Learn with a tutor'**
   String get homeLearningInterestPromptTitle;
 
   /// Subtitle of the tutoring interest card shown on home screen
   ///
   /// In en, this message translates to:
-  /// **'Master your recitation and Tajweed 1-on-1 with live feedback.'**
+  /// **'Live one-to-one session'**
   String get homeLearningInterestPromptSubtitle;
 
   /// Button to accept tutoring interest
   ///
   /// In en, this message translates to:
-  /// **'Yes, interested'**
+  /// **'Interested'**
   String get homeLearningInterestPromptYes;
 
   /// Button to dismiss tutoring interest
@@ -695,7 +737,7 @@ abstract class AppLocalizations {
   /// Subtitle for the Quran Reader primary action card
   ///
   /// In en, this message translates to:
-  /// **'Read the Quran with reflection'**
+  /// **'Resume from your last read page'**
   String get homeQuickQuranReaderSubtitle;
 
   /// Home quick action for Quran teaching sessions with a hafiz
@@ -761,7 +803,7 @@ abstract class AppLocalizations {
   /// Subtitle for the Athkar primary action card
   ///
   /// In en, this message translates to:
-  /// **'Your daily athkar'**
+  /// **'Morning and evening remembrance'**
   String get homeQuickAthkarSubtitle;
 
   /// Home quick action for settings
@@ -3084,6 +3126,12 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Green'**
   String get colorGreen;
+
+  /// Primary color preset label for brand orange
+  ///
+  /// In en, this message translates to:
+  /// **'Orange'**
+  String get colorOrange;
 
   /// Brown color name
   ///
@@ -5890,7 +5938,7 @@ abstract class AppLocalizations {
   /// Subtitle for the More section on the home dashboard
   ///
   /// In en, this message translates to:
-  /// **'Your library and more options'**
+  /// **'History, favorites, and downloads'**
   String get homeMoreOptionsSubtitle;
 
   /// Support Tilawa screen and settings entry title

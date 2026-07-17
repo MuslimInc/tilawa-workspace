@@ -1,6 +1,7 @@
 import 'package:checks/checks.dart';
 import 'package:cloud_functions/cloud_functions.dart';
 import 'package:fake_cloud_firestore/fake_cloud_firestore.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:mocktail/mocktail.dart';
 import 'package:tilawa/features/auth/data/repositories/firebase_device_registry_repository.dart';
@@ -25,10 +26,16 @@ class _MockCallable extends Mock implements HttpsCallable {}
 class _MockCallableResult extends Mock
     implements HttpsCallableResult<Map<String, dynamic>> {}
 
+class _MockAuth extends Mock implements FirebaseAuth {}
+
+class _MockUser extends Mock implements User {}
+
 void main() {
   late FakeFirebaseFirestore firestore;
   late _MockFunctions functions;
   late _MockCallable callable;
+  late _MockAuth auth;
+  late _MockUser authUser;
   late FirebaseDeviceRegistryRepository repository;
 
   const userId = 'user_1';
@@ -37,11 +44,17 @@ void main() {
     firestore = FakeFirebaseFirestore();
     functions = _MockFunctions();
     callable = _MockCallable();
+    auth = _MockAuth();
+    authUser = _MockUser();
     when(() => functions.httpsCallable(any())).thenReturn(callable);
+    when(() => auth.currentUser).thenReturn(authUser);
+    when(() => authUser.uid).thenReturn(userId);
+    when(() => authUser.getIdToken()).thenAnswer((_) async => 'id-token');
     repository = FirebaseDeviceRegistryRepository(
       firestore,
       _FakeDeviceIdentityService('device-current'),
       functions,
+      auth,
     );
   });
 
@@ -115,6 +128,22 @@ void main() {
     check(devices).length.equals(1);
     check(devices.single.isRevoked).isTrue();
   });
+
+  test(
+    'getDevices returns unauthenticated when Auth has no live user',
+    () async {
+      when(() => auth.currentUser).thenReturn(null);
+      when(() => auth.authStateChanges()).thenAnswer(
+        (_) => const Stream<User?>.empty(),
+      );
+
+      final result = await repository.getDevices(userId);
+      check(result.isLeft()).isTrue();
+      check(
+        result.fold((l) => l.message, (_) => null),
+      ).equals('unauthenticated');
+    },
+  );
 
   group('management writes', () {
     test(

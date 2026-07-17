@@ -27,7 +27,6 @@ class HomeMoreActionsGroup extends StatelessWidget {
 
     return HomeDashboardSection(
       title: l10n.moreOptions,
-      subtitle: l10n.homeMoreOptionsSubtitle,
       child: HomeDashboardCard(
         surface: TilawaCardSurface.flat,
         padding: EdgeInsets.zero,

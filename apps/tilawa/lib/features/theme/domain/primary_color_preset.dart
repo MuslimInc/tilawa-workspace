@@ -12,6 +12,7 @@ enum PrimaryColorPreset {
   sage(id: 'sage', value: AppColors.primarySage),
   gold(id: 'gold', value: AppColors.primaryGold),
   brandGreen(id: 'brand_green', value: AppColors.brandActionGreen),
+  brandOrange(id: 'brand_orange', value: AppColors.brandActionOrange),
   ink(id: 'ink', value: AppColors.tripGlideInk);
 
   const PrimaryColorPreset({required this.id, required this.value});
@@ -28,13 +29,10 @@ enum PrimaryColorPreset {
 
   /// Default primary preset for fresh installs and corrupt-payload fallback.
   ///
-  /// Brand-locked to green global accent (`#1DAB61`) for the Tilawa palette
-  /// system (see `Env.kShowColorPicker`).
+  /// Brand-locked to green global accent (`#1DAB61`) — Islamic system color.
   static const PrimaryColorPreset defaultPreset = PrimaryColorPreset.brandGreen;
 
-  /// Alias for [defaultPreset]. Use this name at call sites whose intent is
-  /// "I want the immutable brand color," so readers don't have to know that
-  /// the default preset *is* the brand-locked preset.
+  /// Alias for [defaultPreset].
   static const PrimaryColorPreset brandLocked = PrimaryColorPreset.brandGreen;
 
   /// Deprecated purple preset id — migrates to [brandGreen].
@@ -49,9 +47,11 @@ enum PrimaryColorPreset {
   /// Deprecated brown primary ARGB — migrates to [brandGreen].
   static const int legacyBrownPrimaryArgb = 0xFF8B5E3C;
 
-  /// Retired brand green ARGB (`#2B8659`, pre-`#1DAB61` rebrand) — migrates
-  /// to [brandGreen] so persisted payloads pick up the new brand color.
+  /// Retired brand green ARGB (`#2B8659`) — migrates to [brandGreen].
   static const int legacyBrandGreenPrimaryArgb = 0xFF2B8659;
+
+  /// Lifestyle orange experiment ARGB — may stay as [brandOrange] preset.
+  static const int lifestyleOrangePrimaryArgb = 0xFFFA5B2E;
 
   static PrimaryColorPreset? findById(String? id) {
     if (id == null) return null;
@@ -77,7 +77,7 @@ enum PrimaryColorPreset {
   }
 
   /// Normalizes a stored primary ARGB, remapping deprecated purple/brown and
-  /// the retired pre-rebrand green to the current brand green.
+  /// retired greens to the current brand green.
   static int migrateLegacyPrimaryArgb(int argb) {
     if (argb == legacyPurplePrimaryArgb ||
         argb == legacyBrownPrimaryArgb ||

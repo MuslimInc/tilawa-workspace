@@ -59,6 +59,17 @@ class PrayerAdhanMethodChannelTest {
         every { anyConstructed<MethodChannel>().invokeMethod(any(), any()) } returns Unit
         
         PrayerAdhanMethodChannel.register(mockMessenger, mockContext)
+
+        // Channel attach should push the pre-buffered tap to Dart.
+        verify {
+            anyConstructed<MethodChannel>().invokeMethod(
+                "onNotificationTapped",
+                mapOf(
+                    "prayer_key" to prayerKey,
+                    "payload" to payload
+                )
+            )
+        }
         
         handlerSlot.captured.onMethodCall(MethodCall("consumePendingNotificationTap", null), mockResult)
 
@@ -107,3 +118,4 @@ class PrayerAdhanMethodChannelTest {
         unmockkConstructor(MethodChannel::class)
     }
 }
+

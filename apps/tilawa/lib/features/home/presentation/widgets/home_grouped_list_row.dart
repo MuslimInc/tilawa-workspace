@@ -117,7 +117,9 @@ class HomeGroupedListRow extends StatelessWidget {
                     color: colorScheme.surfaceContainerHighest.withValues(
                       alpha: 0.55,
                     ),
-                    shape: BoxShape.circle,
+                    borderRadius: BorderRadius.circular(
+                      tokens.resolveRadius(family: TilawaRadiusFamily.chip),
+                    ),
                   ),
                   child: Padding(
                     padding: EdgeInsets.all(tokens.spaceExtraSmall * 0.5),

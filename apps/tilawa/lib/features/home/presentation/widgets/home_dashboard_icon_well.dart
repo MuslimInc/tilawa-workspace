@@ -3,8 +3,9 @@ import 'package:tilawa_ui_kit/tilawa_ui_kit.dart';
 
 /// Tinted icon well for Home dashboard tiles.
 ///
-/// Uses [TilawaRadiusFamily.decorative] — the same rounded-square treatment as
-/// [TilawaIconBox] in grouped Home list rows.
+/// Locked to [TilawaRadiusFamily.chip] (sharp rounded square) so prayer,
+/// primary tiles, quick tools, Learn, and resume rows share one silhouette —
+/// never a circle / stadium.
 class HomeDashboardIconWell extends StatelessWidget {
   const HomeDashboardIconWell({
     super.key,
@@ -35,7 +36,7 @@ class HomeDashboardIconWell extends StatelessWidget {
     return DecoratedBox(
       decoration: BoxDecoration(
         borderRadius: BorderRadius.circular(
-          tokens.resolveRadius(family: TilawaRadiusFamily.decorative),
+          tokens.resolveRadius(family: TilawaRadiusFamily.chip),
         ),
         color: iconAccent.withValues(alpha: fillAlpha),
       ),

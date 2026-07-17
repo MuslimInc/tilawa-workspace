@@ -4,7 +4,7 @@ import 'package:tilawa/features/home/presentation/widgets/home_dashboard_content
 import 'package:tilawa_ui_kit/tilawa_ui_kit.dart';
 
 void main() {
-  testWidgets('applies 16 dp bottom padding to dashboard body', (
+  testWidgets('applies trailing scroll bottom padding to dashboard body', (
     tester,
   ) async {
     const double miniPlayerHeight = 57;
@@ -15,7 +15,7 @@ void main() {
         theme: AppTheme.getLightTheme(primaryColor: AppColors.defaultPrimary),
         home: Builder(
           builder: (hostContext) {
-            expectedBottomPadding = hostContext.tokens.spaceLarge;
+            expectedBottomPadding = hostContext.tokens.spaceExtraLarge;
 
             return const TilawaShellPadding(
               padding: miniPlayerHeight,
@@ -48,6 +48,6 @@ void main() {
         );
     final EdgeInsets insets = paddingWidget.padding as EdgeInsets;
     expect(insets.bottom, expectedBottomPadding);
-    expect(insets.bottom, 16);
+    expect(insets.bottom, 24);
   });
 }

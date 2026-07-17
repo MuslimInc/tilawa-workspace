@@ -12,7 +12,10 @@ abstract final class AppBrandProbe {
   /// Production global accent green (`#1DAB61`).
   static const Color actionGreen = AppColors.brandActionGreen;
 
-  /// Whether [primary] uses brand-locked neutral containers + ink onPrimary.
+  /// Compatibility alias — prefer [actionGreen].
+  static const Color actionOrange = actionGreen;
+
+  /// Whether [primary] uses brand-locked neutral containers + white onPrimary.
   static bool usesBrandLockedSchemeRoles(int primaryArgb) {
     return primaryArgb == AppColors.brandActionGreen.toARGB32();
   }
