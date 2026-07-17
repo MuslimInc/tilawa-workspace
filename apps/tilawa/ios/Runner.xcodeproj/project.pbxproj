@@ -430,7 +430,7 @@
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 			shellPath = /bin/sh;
-			shellScript = "set -euo pipefail\n\ncase \"${PRODUCT_BUNDLE_IDENTIFIER}\" in\n  com.tilawa.app.dev)\n    FIREBASE_CONFIG=development\n    ;;\n  com.tilawa.app.staging)\n    FIREBASE_CONFIG=staging\n    ;;\n  com.tilawa.app)\n    FIREBASE_CONFIG=production\n    ;;\n  *)\n    echo \"error: Unknown Firebase bundle ID: ${PRODUCT_BUNDLE_IDENTIFIER}\" >&2\n    exit 1\n    ;;\nesac\n\nSOURCE=\"${PROJECT_DIR}/Runner/Firebase/${FIREBASE_CONFIG}/GoogleService-Info.plist\"\nDEST=\"${TARGET_BUILD_DIR}/${UNLOCALIZED_RESOURCES_FOLDER_PATH}/GoogleService-Info.plist\"\n\nif [ ! -f \"${SOURCE}\" ]; then\n  echo \"error: Missing Firebase config: ${SOURCE}\" >&2\n  exit 1\nfi\n\ncp \"${SOURCE}\" \"${DEST}\"\n";
+			shellScript = "set -euo pipefail\n\ncase \"${PRODUCT_BUNDLE_IDENTIFIER}\" in\n  com.tilawa.app.dev)\n    FIREBASE_CONFIG=development\n    ;;\n  com.tilawa.app.staging)\n    FIREBASE_CONFIG=staging\n    ;;\n  com.memuslim.app)\n    FIREBASE_CONFIG=production\n    ;;\n  *)\n    echo \"error: Unknown Firebase bundle ID: ${PRODUCT_BUNDLE_IDENTIFIER}\" >&2\n    exit 1\n    ;;\nesac\n\nSOURCE=\"${PROJECT_DIR}/Runner/Firebase/${FIREBASE_CONFIG}/GoogleService-Info.plist\"\nDEST=\"${TARGET_BUILD_DIR}/${UNLOCALIZED_RESOURCES_FOLDER_PATH}/GoogleService-Info.plist\"\n\nif [ ! -f \"${SOURCE}\" ]; then\n  echo \"error: Missing Firebase config: ${SOURCE}\" >&2\n  exit 1\nfi\n\ncp \"${SOURCE}\" \"${DEST}\"\n";
 		};
 		F1BC96F26B2C8B56781B0A37 /* [CP] Embed Pods Frameworks */ = {
 			isa = PBXShellScriptBuildPhase;
@@ -724,7 +724,7 @@
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				CLANG_ENABLE_MODULES = YES;
 				CURRENT_PROJECT_VERSION = 1;
-				DEVELOPMENT_TEAM = 7PHD9D4DAF;
+				DEVELOPMENT_TEAM = STVQJVF347;
 				ENABLE_BITCODE = NO;
 				INFOPLIST_FILE = Runner/Info.plist;
 				INFOPLIST_KEY_LSApplicationCategoryType = "public.app-category.books";
@@ -733,7 +733,7 @@
 					"@executable_path/Frameworks",
 				);
 				MARKETING_VERSION = 1.0.0;
-				PRODUCT_BUNDLE_IDENTIFIER = com.tilawa.app;
+				PRODUCT_BUNDLE_IDENTIFIER = com.memuslim.app;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SWIFT_OBJC_BRIDGING_HEADER = "Runner/Runner-Bridging-Header.h";
 				SWIFT_VERSION = 5.0;
@@ -1119,7 +1119,7 @@
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				CLANG_ENABLE_MODULES = YES;
 				CURRENT_PROJECT_VERSION = 1;
-				DEVELOPMENT_TEAM = L9S9TC8GVH;
+				DEVELOPMENT_TEAM = STVQJVF347;
 				ENABLE_BITCODE = NO;
 				INFOPLIST_FILE = Runner/Info.plist;
 				INFOPLIST_KEY_LSApplicationCategoryType = "public.app-category.books";
@@ -1128,7 +1128,7 @@
 					"@executable_path/Frameworks",
 				);
 				MARKETING_VERSION = 1.0.0;
-				PRODUCT_BUNDLE_IDENTIFIER = com.tilawa.app;
+				PRODUCT_BUNDLE_IDENTIFIER = com.memuslim.app;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SWIFT_OBJC_BRIDGING_HEADER = "Runner/Runner-Bridging-Header.h";
 				SWIFT_OPTIMIZATION_LEVEL = "-Onone";
@@ -1144,7 +1144,7 @@
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				CLANG_ENABLE_MODULES = YES;
 				CURRENT_PROJECT_VERSION = 1;
-				DEVELOPMENT_TEAM = 7PHD9D4DAF;
+				DEVELOPMENT_TEAM = STVQJVF347;
 				ENABLE_BITCODE = NO;
 				INFOPLIST_FILE = Runner/Info.plist;
 				INFOPLIST_KEY_LSApplicationCategoryType = "public.app-category.books";
@@ -1153,7 +1153,7 @@
 					"@executable_path/Frameworks",
 				);
 				MARKETING_VERSION = 1.0.0;
-				PRODUCT_BUNDLE_IDENTIFIER = com.tilawa.app;
+				PRODUCT_BUNDLE_IDENTIFIER = com.memuslim.app;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SWIFT_OBJC_BRIDGING_HEADER = "Runner/Runner-Bridging-Header.h";
 				SWIFT_VERSION = 5.0;
@@ -1301,7 +1301,7 @@
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				CLANG_ENABLE_MODULES = YES;
 				CURRENT_PROJECT_VERSION = 1;
-				DEVELOPMENT_TEAM = L9S9TC8GVH;
+				DEVELOPMENT_TEAM = STVQJVF347;
 				ENABLE_BITCODE = NO;
 				INFOPLIST_FILE = Runner/Info.plist;
 				INFOPLIST_KEY_LSApplicationCategoryType = "public.app-category.books";
@@ -1310,7 +1310,7 @@
 					"@executable_path/Frameworks",
 				);
 				MARKETING_VERSION = 1.0.0;
-				PRODUCT_BUNDLE_IDENTIFIER = com.tilawa.app;
+				PRODUCT_BUNDLE_IDENTIFIER = com.memuslim.app;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SWIFT_OBJC_BRIDGING_HEADER = "Runner/Runner-Bridging-Header.h";
 				SWIFT_OPTIMIZATION_LEVEL = "-Onone";
@@ -1326,7 +1326,7 @@
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				CLANG_ENABLE_MODULES = YES;
 				CURRENT_PROJECT_VERSION = 1;
-				DEVELOPMENT_TEAM = 7PHD9D4DAF;
+				DEVELOPMENT_TEAM = STVQJVF347;
 				ENABLE_BITCODE = NO;
 				INFOPLIST_FILE = Runner/Info.plist;
 				INFOPLIST_KEY_LSApplicationCategoryType = "public.app-category.books";
@@ -1335,7 +1335,7 @@
 					"@executable_path/Frameworks",
 				);
 				MARKETING_VERSION = 1.0.0;
-				PRODUCT_BUNDLE_IDENTIFIER = com.tilawa.app;
+				PRODUCT_BUNDLE_IDENTIFIER = com.memuslim.app;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SWIFT_OBJC_BRIDGING_HEADER = "Runner/Runner-Bridging-Header.h";
 				SWIFT_VERSION = 5.0;
@@ -1613,7 +1613,7 @@
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				CLANG_ENABLE_MODULES = YES;
 				CURRENT_PROJECT_VERSION = 1;
-				DEVELOPMENT_TEAM = 7PHD9D4DAF;
+				DEVELOPMENT_TEAM = STVQJVF347;
 				ENABLE_BITCODE = NO;
 				INFOPLIST_FILE = Runner/Info.plist;
 				INFOPLIST_KEY_LSApplicationCategoryType = "public.app-category.books";
@@ -1622,7 +1622,7 @@
 					"@executable_path/Frameworks",
 				);
 				MARKETING_VERSION = 1.0.0;
-				PRODUCT_BUNDLE_IDENTIFIER = com.tilawa.app;
+				PRODUCT_BUNDLE_IDENTIFIER = com.memuslim.app;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SWIFT_OBJC_BRIDGING_HEADER = "Runner/Runner-Bridging-Header.h";
 				SWIFT_VERSION = 5.0;
