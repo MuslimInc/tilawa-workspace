@@ -84,7 +84,7 @@ void main() {
 
   group('new schema restore', () {
     test(
-      'legacy brown preset id migrates to brand green',
+      'legacy brown preset id migrates to brand orange',
       () {
         final restored = cubit.fromJson({
           'mode': 'light',
@@ -128,7 +128,7 @@ void main() {
     );
 
     test(
-      'custom source with retired brand green migrates to brand green preset',
+      'custom source with retired brand green migrates to brand orange preset',
       () {
         final restored = cubit.fromJson({
           'mode': 'light',
@@ -189,7 +189,7 @@ void main() {
     }
 
     test(
-      'legacy payload with retired brand green ARGB migrates to brandGreen',
+      'legacy payload with retired brand green ARGB migrates to brandOrange',
       () {
         final restored = cubit.fromJson({
           'mode': 'light',

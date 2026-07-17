@@ -1,22 +1,30 @@
 import 'dart:async';
 
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:tilawa/core/extensions.dart';
+import 'package:tilawa/features/home/debug/home_hero_gradient_debug.dart';
 import 'package:tilawa/features/home/domain/entities/home_dashboard.dart';
+import 'package:tilawa/features/home/domain/entities/home_prayer_day_boundaries.dart';
+import 'package:tilawa/features/home/domain/home_hero_gradient_resolver.dart';
 import 'package:tilawa/features/home/presentation/bloc/home_dashboard_bloc.dart';
 import 'package:tilawa/features/home/presentation/bloc/home_dashboard_event.dart';
 import 'package:tilawa/features/home/presentation/bloc/home_dashboard_state.dart';
 import 'package:tilawa/features/home/presentation/models/home_dashboard_ui_state.dart';
 import 'package:tilawa/features/home/presentation/models/home_prayer_hero_foreground_style.dart';
-import 'package:tilawa/features/home/presentation/widgets/home_dashboard_card.dart';
 import 'package:tilawa/features/home/presentation/widgets/home_dashboard_icon_well.dart';
 import 'package:tilawa/features/home/presentation/widgets/home_feature_pastel.dart';
+import 'package:tilawa/features/home/presentation/widgets/home_hero_background.dart';
+import 'package:tilawa/features/home/presentation/widgets/home_hero_glass_surface.dart';
 import 'package:tilawa/features/home/presentation/widgets/home_prayer_hero_context_row.dart';
 import 'package:tilawa/features/prayer_times/domain/entities/prayer_time_entity.dart';
 import 'package:tilawa_ui_kit/tilawa_ui_kit.dart';
 
-/// Scrollable next-prayer card at the top of the Home dashboard.
+/// Scrollable next-prayer hero at the top of the Home dashboard.
+///
+/// TripGlide-inspired craft: atmospheric prayer-period gradient band with a
+/// frosted glass metrics card floating over it. Worship IA unchanged.
 abstract final class HomeNextPrayerTime {
   const HomeNextPrayerTime._();
 
@@ -59,16 +67,16 @@ abstract final class HomeNextPrayerTime {
     final bool tightCard =
         MediaQuery.sizeOf(context).width - horizontalGutter < 320;
 
-    // Content-sized white prayer card (no image/gradient fill forcing height).
-    // Calibrated at 360dp / textScale 1: outer padding + card body.
-    final double cardBody = 207 * textScale;
+    // Atmospheric band peek + frosted glass card body.
+    // Calibrated at 360dp / textScale 1: top Large + card + bottom Medium.
+    final double cardBody = 202 * textScale;
     final double tightSlack = tightCard ? tokens.spaceExtraLarge : 0;
 
-    return (tokens.spaceSmall * 2) + cardBody + tightSlack;
+    return tokens.spaceLarge + cardBody + tokens.spaceMedium + tightSlack;
   }
 }
 
-class _HomeNextPrayerTimeSliver extends StatelessWidget {
+class _HomeNextPrayerTimeSliver extends StatefulWidget {
   const _HomeNextPrayerTimeSliver({
     required this.ui,
     required this.onOpenPrayer,
@@ -78,50 +86,160 @@ class _HomeNextPrayerTimeSliver extends StatelessWidget {
   final VoidCallback onOpenPrayer;
 
   @override
+  State<_HomeNextPrayerTimeSliver> createState() =>
+      _HomeNextPrayerTimeSliverState();
+}
+
+class _HomeNextPrayerTimeSliverState extends State<_HomeNextPrayerTimeSliver> {
+  Timer? _gradientRefreshTimer;
+
+  @override
+  void initState() {
+    super.initState();
+    HomeHeroGradientDebug.phaseOverride.addListener(_onDebugPhaseChanged);
+    _scheduleGradientRefresh();
+  }
+
+  @override
+  void didUpdateWidget(covariant _HomeNextPrayerTimeSliver oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    if (oldWidget.ui.dashboard?.prayerBoundaries !=
+        widget.ui.dashboard?.prayerBoundaries) {
+      _scheduleGradientRefresh();
+    }
+  }
+
+  @override
+  void dispose() {
+    HomeHeroGradientDebug.phaseOverride.removeListener(_onDebugPhaseChanged);
+    _gradientRefreshTimer?.cancel();
+    super.dispose();
+  }
+
+  void _onDebugPhaseChanged() {
+    if (!mounted) {
+      return;
+    }
+    setState(() {});
+    _scheduleGradientRefresh();
+  }
+
+  void _scheduleGradientRefresh() {
+    _gradientRefreshTimer?.cancel();
+    final HomePrayerDayBoundaries? boundaries =
+        widget.ui.dashboard?.prayerBoundaries;
+    if (boundaries == null) {
+      return;
+    }
+
+    final Duration? delay =
+        HomeHeroGradientResolver.delayUntilNextGradientRefresh(
+          now: DateTime.now(),
+          boundaries: boundaries,
+        );
+    if (delay == null) {
+      return;
+    }
+
+    _gradientRefreshTimer = Timer(delay, () {
+      if (!mounted) {
+        return;
+      }
+      setState(() {});
+      _scheduleGradientRefresh();
+    });
+  }
+
+  @override
   Widget build(BuildContext context) {
     final MeMuslimDesignTokens tokens = context.tokens;
+    final ThemeData theme = Theme.of(context);
+    final TilawaHomeScreenTokens screenTokens =
+        theme.componentTokens.homeScreen;
     final double horizontalInset =
         TilawaHomeScreenTokens.screenHorizontalPadding(tokens);
-    final HomeDashboard? dashboard = ui.dashboard;
+    final HomeDashboard? dashboard = widget.ui.dashboard;
     final HomeNextPrayer? nextPrayer = dashboard?.nextPrayer;
     final String? locationName = dashboard?.locationLabel;
+    final Color canvasBottom = screenTokens.backgroundGradientEnd;
+
+    final TilawaHomeNextPrayerHeroTokens heroTokens =
+        HomeHeroGradientResolver.resolve(
+          now: DateTime.now(),
+          boundaries: dashboard?.prayerBoundaries,
+          debugPhaseOverride: HomeHeroGradientDebug.phaseOverride.value,
+        );
 
     return SliverToBoxAdapter(
-      child: Padding(
-        padding: EdgeInsetsDirectional.fromSTEB(
-          horizontalInset,
-          tokens.spaceSmall,
-          horizontalInset,
-          tokens.spaceSmall,
-        ),
-        child: _HomeNextPrayerTimeCard(
-          locationName: locationName,
-          isRefreshingLocation: ui.isRefreshingLocation,
-          onRefreshLocation: ui.showContent
-              ? () {
+      child: AnnotatedRegion<SystemUiOverlayStyle>(
+        value: HomeHeroBackground.systemOverlayStyle(heroTokens),
+        child: Stack(
+          clipBehavior: Clip.none,
+          children: [
+            Positioned.fill(
+              child: HomeHeroBackground(
+                heroTokens: heroTokens,
+                screenTokens: screenTokens,
+              ),
+            ),
+            Positioned(
+              left: 0,
+              right: 0,
+              bottom: 0,
+              height: tokens.spaceMedium,
+              child: IgnorePointer(
+                child: DecoratedBox(
+                  decoration: BoxDecoration(
+                    gradient: LinearGradient(
+                      begin: Alignment.topCenter,
+                      end: Alignment.bottomCenter,
+                      colors: <Color>[
+                        canvasBottom.withValues(alpha: 0),
+                        canvasBottom,
+                      ],
+                    ),
+                  ),
+                ),
+              ),
+            ),
+            Padding(
+              padding: EdgeInsetsDirectional.fromSTEB(
+                horizontalInset,
+                tokens.spaceLarge,
+                horizontalInset,
+                tokens.spaceMedium,
+              ),
+              child: _HomeNextPrayerTimeCard(
+                locationName: locationName,
+                isRefreshingLocation: widget.ui.isRefreshingLocation,
+                onRefreshLocation: widget.ui.showContent
+                    ? () {
+                        context.read<HomeDashboardBloc>().add(
+                          HomeDashboardLocationRefreshRequested(
+                            localeIdentifier: Localizations.localeOf(
+                              context,
+                            ).languageCode,
+                          ),
+                        );
+                      }
+                    : null,
+                nextPrayer: nextPrayer,
+                showFullSkeleton: widget.ui.showFullSkeleton,
+                showFailure: widget.ui.showFailure,
+                failureIsOffline: widget.ui.failureIsOffline,
+                onRetryDashboard: () {
                   context.read<HomeDashboardBloc>().add(
-                    HomeDashboardLocationRefreshRequested(
+                    HomeDashboardRefreshRequested(
                       localeIdentifier: Localizations.localeOf(
                         context,
                       ).languageCode,
                     ),
                   );
-                }
-              : null,
-          nextPrayer: nextPrayer,
-          showFullSkeleton: ui.showFullSkeleton,
-          showFailure: ui.showFailure,
-          failureIsOffline: ui.failureIsOffline,
-          onRetryDashboard: () {
-            context.read<HomeDashboardBloc>().add(
-              HomeDashboardRefreshRequested(
-                localeIdentifier: Localizations.localeOf(
-                  context,
-                ).languageCode,
+                },
+                onOpenPrayer: widget.onOpenPrayer,
               ),
-            );
-          },
-          onOpenPrayer: onOpenPrayer,
+            ),
+          ],
         ),
       ),
     );
@@ -179,50 +297,54 @@ class _HomeNextPrayerTimeCard extends StatelessWidget {
             onOpenPrayer: onOpenPrayer,
           );
 
+    final Widget cardBody = showFullSkeleton
+        ? _HomeHeroSkeletonScope(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.stretch,
+              spacing: tokens.spaceMedium,
+              children: const [
+                _HomePrayerHeroContextRowSkeleton(),
+                _HomeNextPrayerTimeMetricsSkeleton(),
+              ],
+            ),
+          )
+        : Column(
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            spacing: tokens.spaceSmall + tokens.spaceExtraSmall,
+            children: [
+              HomePrayerHeroContextRow(
+                locationName: locationName,
+                isRefreshingLocation: isRefreshingLocation,
+                onRefreshLocation: onRefreshLocation,
+                ink: style.ink,
+                muted: style.muted,
+                chipBackground: style.chipBackground,
+                chipBorder: style.chipBorder,
+              ),
+              metricsChild,
+            ],
+          );
+
     return Semantics(
       button: !showFailure && !showFullSkeleton,
       label: context.l10n.nextPrayer,
-      child: HomeDashboardCard(
-        surface: TilawaCardSurface.floating,
-        backgroundColor: HomeFeaturePastel.cardSurface(colorScheme),
+      child: HomeHeroGlassSurface(
+        usePrayerHeroTokens: true,
+        borderRadius: BorderRadius.circular(
+          tokens.resolveRadius(family: TilawaRadiusFamily.hero),
+        ),
         padding: EdgeInsets.symmetric(
           horizontal: tokens.spaceLarge,
           vertical: tokens.spaceMedium + tokens.spaceExtraSmall,
         ),
         onTap: showFailure || showFullSkeleton ? null : onOpenPrayer,
-        child: showFullSkeleton
-            ? _HomeHeroSkeletonScope(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.stretch,
-                  spacing: tokens.spaceMedium,
-                  children: const [
-                    _HomePrayerHeroContextRowSkeleton(),
-                    _HomeNextPrayerTimeMetricsSkeleton(),
-                  ],
-                ),
-              )
-            : Column(
-                crossAxisAlignment: CrossAxisAlignment.stretch,
-                spacing: tokens.spaceSmall + tokens.spaceExtraSmall,
-                children: [
-                  HomePrayerHeroContextRow(
-                    locationName: locationName,
-                    isRefreshingLocation: isRefreshingLocation,
-                    onRefreshLocation: onRefreshLocation,
-                    ink: style.ink,
-                    muted: style.muted,
-                    chipBackground: style.chipBackground,
-                    chipBorder: style.chipBorder,
-                  ),
-                  metricsChild,
-                ],
-              ),
+        child: cardBody,
       ),
     );
   }
 }
 
-/// Skeleton scope tinted for [HomeDashboardCard]'s sheet surface.
+/// Skeleton scope tinted for the frosted prayer glass surface.
 class _HomeHeroSkeletonScope extends StatelessWidget {
   const _HomeHeroSkeletonScope({required this.child});
 
@@ -232,7 +354,7 @@ class _HomeHeroSkeletonScope extends StatelessWidget {
   Widget build(BuildContext context) {
     final ThemeData theme = Theme.of(context);
     final Color sheetSurface =
-        theme.componentTokens.homeScreen.homeContentSheetSurface;
+        theme.componentTokens.homeScreen.homePrayerHeroBackground;
 
     return Theme(
       data: theme.copyWith(
@@ -278,70 +400,66 @@ class _HomeNextPrayerTimeFocus extends StatelessWidget {
     final String prayerName = _localizedPrayerName(context, prayer.type);
     final String timeLabel = _formatTime(context, prayer.time);
     final double textScale = MediaQuery.textScalerOf(context).scale(1);
-    final TextStyle? timeStyle = textScale > 1.2
-        ? theme.textTheme.displaySmall
-        : theme.textTheme.displayMedium;
+    // One step below displayMedium so prayer context stays readable beside the
+    // clock — displayMedium only when text scale is reduced.
+    final TextStyle? timeStyle = textScale > 1.15
+        ? theme.textTheme.headlineMedium
+        : theme.textTheme.displaySmall;
 
-    return Column(
+    return Row(
       crossAxisAlignment: CrossAxisAlignment.start,
-      spacing: tokens.spaceSmall + tokens.spaceExtraSmall,
+      spacing: tokens.spaceMedium,
       children: [
-        Row(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          spacing: tokens.spaceMedium,
-          children: [
-            HomeDashboardIconWell(
-              accent: theme.colorScheme.primary,
-              fillAlpha: HomeFeaturePastel.iconWellFillAlpha,
-              extent: tokens.iconBadgeSize,
-              child: Icon(
-                Icons.mosque_rounded,
-                color: theme.colorScheme.primary,
-                size: tokens.iconSizeLarge,
-              ),
-            ),
-            Expanded(
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                spacing: tokens.spaceExtraSmall,
-                children: [
-                  Text(
-                    context.l10n.nextPrayer,
-                    style: theme.textTheme.labelSmall?.copyWith(
-                      color: onMuted,
-                      fontWeight: FontWeight.w600,
-                      letterSpacing: 0.4,
-                    ),
-                  ),
-                  Text(
-                    prayerName,
-                    maxLines: 1,
-                    overflow: TextOverflow.ellipsis,
-                    style: theme.textTheme.titleLarge?.copyWith(
-                      color: onCard,
-                      fontWeight: FontWeight.w700,
-                      height: 1.08,
-                    ),
-                  ),
-                ],
-              ),
-            ),
-          ],
-        ),
-        Text(
-          timeLabel,
-          style: timeStyle?.copyWith(
-            color: onCard,
-            fontWeight: FontWeight.w800,
-            fontFeatures: const [FontFeature.tabularFigures()],
-            height: 0.98,
+        HomeDashboardIconWell(
+          accent: theme.colorScheme.primary,
+          fillAlpha: HomeFeaturePastel.iconWellFillAlpha,
+          extent: tokens.iconBoxSize,
+          child: Icon(
+            Icons.mosque_rounded,
+            color: theme.colorScheme.primary,
+            size: tokens.iconSizeLarge,
           ),
         ),
-        _HomeNextPrayerTimeRemainingText(
-          prayerType: prayer.type,
-          prayerTime: prayer.time,
-          backgroundColor: theme.colorScheme.primary,
-          foregroundColor: theme.colorScheme.onPrimary,
+        Expanded(
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            spacing: tokens.spaceExtraSmall,
+            children: [
+              Text(
+                context.l10n.nextPrayer,
+                style: theme.textTheme.labelSmall?.copyWith(
+                  color: onMuted,
+                  fontWeight: FontWeight.w600,
+                  letterSpacing: 0.4,
+                ),
+              ),
+              Text(
+                prayerName,
+                maxLines: 1,
+                overflow: TextOverflow.ellipsis,
+                style: theme.textTheme.titleLarge?.copyWith(
+                  color: onCard,
+                  fontWeight: FontWeight.w700,
+                  height: 1.08,
+                ),
+              ),
+              Text(
+                timeLabel,
+                style: timeStyle?.copyWith(
+                  color: onCard,
+                  fontWeight: FontWeight.w800,
+                  fontFeatures: const [FontFeature.tabularFigures()],
+                  height: 0.98,
+                ),
+              ),
+              _HomeNextPrayerTimeRemainingText(
+                prayerType: prayer.type,
+                prayerTime: prayer.time,
+                backgroundColor: theme.colorScheme.primary,
+                foregroundColor: theme.colorScheme.onPrimary,
+              ),
+            ],
+          ),
         ),
       ],
     );
@@ -490,9 +608,9 @@ class _HomeNextPrayerTimeMetricsSkeleton extends StatelessWidget {
     final tokens = context.tokens;
     final theme = Theme.of(context);
     final double textScale = MediaQuery.textScalerOf(context).scale(1);
-    final TextStyle? timeStyle = textScale > 1.2
-        ? theme.textTheme.displaySmall
-        : theme.textTheme.displayMedium;
+    final TextStyle? timeStyle = textScale > 1.15
+        ? theme.textTheme.headlineMedium
+        : theme.textTheme.displaySmall;
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,

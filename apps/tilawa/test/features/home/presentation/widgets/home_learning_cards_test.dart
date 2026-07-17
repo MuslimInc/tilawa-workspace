@@ -238,8 +238,9 @@ void main() {
           find.text('Choose your hafiz and book a live 1-on-1 session.'),
           findsOneWidget,
         );
+        expect(find.text('Start learning'), findsNothing);
 
-        await tester.tap(find.text('Start learning'));
+        await tester.tap(find.byType(HomeLearningBrowseCard));
         await tester.pumpAndSettle();
 
         expect(navigatedPaths, contains('/sessions'));

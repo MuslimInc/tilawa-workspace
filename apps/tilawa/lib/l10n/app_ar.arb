@@ -204,7 +204,7 @@
     "teacherApplicationLaterCta": "لاحقاً",
     "teacherApplicationFormOpenFailed": "تعذّر فتح نموذج التقديم. حاول مرة أخرى.",
     "homeQuickQuranReader": "المصحف",
-    "homeQuickQuranReaderSubtitle": "اقرأ القرآن بتدبّر",
+    "homeQuickQuranReaderSubtitle": "ارجع إلى آخر صفحة قرأتها",
     "homeLearnQuranWithTutor": "تعلّم القرآن مع محفظك",
     "homeQuickReciters": "القرّاء",
     "homeQuickRecitersSubtitle": "استمع لتلاوات مختارة",
@@ -215,7 +215,7 @@
     "homeQuickTasbeeh": "التسبيح",
     "homeQuickTasbeehSubtitle": "سبّح واذكر الله بلمسة",
     "homeQuickAthkar": "الأذكار",
-    "homeQuickAthkarSubtitle": "وردك اليومي من الأذكار",
+    "homeQuickAthkarSubtitle": "أذكار الصباح والمساء",
     "homeQuickSettings": "الإعدادات",
     "homePinnedAthkarTitle": "أذكارك السريعة",
     "homePinnedAthkarEdit": "تعديل اختصارات الأذكار",
@@ -1604,6 +1604,10 @@
         "description": "Cyan color name"
     },
     "colorGreen": "أخضر",
+  "colorOrange": "برتقالي",
+  "@colorOrange": {
+    "description": "Primary color preset label for brand orange"
+  },
     "@colorGreen": {
         "description": "Green color name"
     },

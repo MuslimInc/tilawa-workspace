@@ -163,14 +163,7 @@ class _HomeScreenState extends State<HomeScreen> {
                                     : blocState;
                                 final HomeDashboardUiState ui =
                                     HomeDashboardUiState.from(state);
-                                final Widget learningEntrySliver =
-                                    ui.showFullSkeleton
-                                    ? const SliverToBoxAdapter(
-                                        child: SizedBox.shrink(),
-                                      )
-                                    : const HomeLearningEntryScope();
-
-                                return CustomScrollView(
+                                final Widget scrollView = CustomScrollView(
                                   controller: _scrollController,
                                   physics: const AlwaysScrollableScrollPhysics(
                                     parent: BouncingScrollPhysics(),
@@ -181,7 +174,8 @@ class _HomeScreenState extends State<HomeScreen> {
                                       state: state,
                                       onOpenPrayer: widget.onOpenPrayer,
                                     ),
-                                    learningEntrySliver,
+                                    if (!ui.showFullSkeleton)
+                                      const HomeLearningUrgentSliver(),
                                     HomeDashboardContentSliver(
                                       child: AnimatedSwitcher(
                                         duration: context.tokens.durationMedium,
@@ -207,6 +201,13 @@ class _HomeScreenState extends State<HomeScreen> {
                                       ),
                                     ),
                                   ],
+                                );
+
+                                if (ui.showFullSkeleton) {
+                                  return scrollView;
+                                }
+                                return HomeLearningEntryScope(
+                                  child: scrollView,
                                 );
                               },
                             ),

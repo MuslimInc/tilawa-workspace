@@ -21,7 +21,7 @@ class HomeQuickToolsSection extends StatelessWidget {
     final double radius = tokens.resolveRadius(
       family: TilawaRadiusFamily.decorative,
     );
-    final double iconSize = tokens.iconSizeLarge + tokens.spaceExtraSmall;
+    final double iconSize = tokens.iconSizeLarge;
     final product = Theme.of(context).productColors;
     final items = _QuickToolsCatalog.items(context);
 
@@ -93,7 +93,7 @@ class _QuickToolTile extends StatelessWidget {
             HomeDashboardIconWell(
               accent: accent,
               fillAlpha: HomeFeaturePastel.iconWellFillAlpha,
-              extent: tokens.iconBadgeSize,
+              extent: tokens.iconBoxSize,
               child: icon,
             ),
             Text(

@@ -4,16 +4,19 @@ import 'app_colors.dart';
 
 /// Brand accent and scheme-role helpers.
 ///
-/// Production default is green global accent ([AppColors.brandActionGreen],
-/// `#1DAB61`) with matching Home micro-accents on the same green family.
+/// Production default is orange global accent ([AppColors.brandActionOrange],
+/// `#FA5B2E`) with matching Home micro-accents on the same orange family.
 abstract final class AppBrandProbe {
   AppBrandProbe._();
 
-  /// Production global accent green (`#1DAB61`).
-  static const Color actionGreen = AppColors.brandActionGreen;
+  /// Production global accent orange (`#FA5B2E`).
+  static const Color actionOrange = AppColors.brandActionOrange;
 
-  /// Whether [primary] uses brand-locked neutral containers + ink onPrimary.
+  /// Compatibility alias for [actionOrange].
+  static const Color actionGreen = actionOrange;
+
+  /// Whether [primary] uses brand-locked neutral containers + white onPrimary.
   static bool usesBrandLockedSchemeRoles(int primaryArgb) {
-    return primaryArgb == AppColors.brandActionGreen.toARGB32();
+    return primaryArgb == AppColors.brandActionOrange.toARGB32();
   }
 }

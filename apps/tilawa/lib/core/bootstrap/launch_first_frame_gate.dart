@@ -108,7 +108,12 @@ abstract final class LaunchFirstFrameGate {
     await _invokeAndroidLaunchSplashReady();
   }
 
-  /// Schedules [release] after the first frame containing [child] is built.
+  /// Schedules [release] after the current/next frame that builds BootGate.
+  ///
+  /// Uses [SchedulerBinding.addPostFrameCallback] (not a second-frame
+  /// [SchedulerBinding.scheduleFrameCallback]) so release can run at the end of
+  /// BootGate's first build. Critical init must still [release] itself before
+  /// saturating the isolate — see [AppBootstrapperPhases.scheduleCriticalInit].
   ///
   /// On some OEM cold starts the first post-frame callback can run while the
   /// Flutter view is still 0×0 (see FLUTTER-A4 breadcrumbs). In that case we
@@ -116,21 +121,17 @@ abstract final class LaunchFirstFrameGate {
   static void scheduleReleaseAfterFirstFrame() {
     firstFrameLog('scheduleReleaseAfterFirstFrame registered');
     StartupPerfLog.log('first_frame_release_scheduled');
-    SchedulerBinding.instance.scheduleFrameCallback((_) {
-      firstFrameLog('frame callback: BootGate splash scheduled to build');
-      StartupPerfLog.log('first_frame_boot_gate_build_scheduled');
-      SchedulerBinding.instance.addPostFrameCallback((_) {
-        firstFrameLog('post-frame callback: BootGate splash built');
-        StartupPerfLog.log('first_frame_boot_gate_built');
-        if (!_hasNonZeroFlutterView()) {
-          firstFrameLog(
-            'post-frame callback: Flutter view is 0×0; waiting for metrics',
-          );
-          _attachMetricsObserver();
-          return;
-        }
-        release();
-      });
+    SchedulerBinding.instance.addPostFrameCallback((_) {
+      firstFrameLog('post-frame callback: BootGate splash built');
+      StartupPerfLog.log('first_frame_boot_gate_built');
+      if (!_hasNonZeroFlutterView()) {
+        firstFrameLog(
+          'post-frame callback: Flutter view is 0×0; waiting for metrics',
+        );
+        _attachMetricsObserver();
+        return;
+      }
+      release();
     });
   }
 

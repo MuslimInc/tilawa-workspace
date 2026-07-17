@@ -11,9 +11,13 @@ import 'package:tilawa_ui_kit/tilawa_ui_kit.dart';
 import 'home_dashboard_card.dart';
 import 'home_dashboard_icon_well.dart';
 import 'home_dashboard_section.dart';
+import 'home_feature_pastel.dart';
 import 'home_learn_quran_analytics.dart';
 
 /// Card requesting tutoring interest with Yes/Not Now buttons.
+///
+/// Low-emphasis surface + tonal/ghost CTAs so prayer remains the sole filled
+/// primary action on Home.
 class HomeLearningInterestCard extends StatelessWidget {
   const HomeLearningInterestCard({super.key});
 
@@ -24,7 +28,7 @@ class HomeLearningInterestCard extends StatelessWidget {
     final accent = theme.colorScheme.primary;
 
     return HomeDashboardCard(
-      surface: TilawaCardSurface.raised,
+      surface: TilawaCardSurface.flat,
       padding: EdgeInsets.symmetric(
         horizontal: tokens.spaceMedium,
         vertical: tokens.spaceSmall + tokens.spaceExtraSmall,
@@ -38,6 +42,8 @@ class HomeLearningInterestCard extends StatelessWidget {
             children: [
               HomeDashboardIconWell(
                 accent: accent,
+                fillAlpha: HomeFeaturePastel.iconWellFillAlpha,
+                extent: tokens.iconBoxSize,
                 child: Icon(
                   TilawaIcons.teacherCapability,
                   size: tokens.iconSizeMedium,
@@ -47,7 +53,7 @@ class HomeLearningInterestCard extends StatelessWidget {
               Expanded(
                 child: Text(
                   context.l10n.homeLearningInterestPromptTitle,
-                  maxLines: 1,
+                  maxLines: 2,
                   overflow: TextOverflow.ellipsis,
                   style: theme.textTheme.titleSmall?.copyWith(
                     color: theme.colorScheme.onSurface,
@@ -69,41 +75,40 @@ class HomeLearningInterestCard extends StatelessWidget {
             ),
           ),
           SizedBox(height: tokens.spaceSmall),
-          Row(
-            spacing: tokens.spaceSmall,
+          Column(
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            spacing: tokens.spaceExtraSmall,
             children: [
-              Expanded(
-                child: TilawaButton(
-                  text: context.l10n.homeLearningInterestPromptNo,
-                  variant: TilawaButtonVariant.secondary,
-                  size: TilawaButtonSize.small,
-                  onPressed: () {
-                    logHomeLearnQuranCardAction(
-                      action: 'dismiss_interest',
-                      status: 'none',
-                    );
-                    context.read<HomeLearningCubit>().setTutoringInterest(
-                      isInterested: false,
-                    );
-                  },
-                ),
+              TilawaButton(
+                text: context.l10n.homeLearningInterestPromptYes,
+                variant: TilawaButtonVariant.secondary,
+                size: TilawaButtonSize.small,
+                isFullWidth: true,
+                onPressed: () {
+                  logHomeLearnQuranCardAction(
+                    action: 'accept_interest',
+                    status: 'none',
+                  );
+                  context.read<HomeLearningCubit>().setTutoringInterest(
+                    isInterested: true,
+                  );
+                  context.push(QuranSessionsRoutes.home);
+                },
               ),
-              Expanded(
-                child: TilawaButton(
-                  text: context.l10n.homeLearningInterestPromptYes,
-                  variant: TilawaButtonVariant.primary,
-                  size: TilawaButtonSize.small,
-                  onPressed: () {
-                    logHomeLearnQuranCardAction(
-                      action: 'accept_interest',
-                      status: 'none',
-                    );
-                    context.read<HomeLearningCubit>().setTutoringInterest(
-                      isInterested: true,
-                    );
-                    context.push(QuranSessionsRoutes.home);
-                  },
-                ),
+              TilawaButton(
+                text: context.l10n.homeLearningInterestPromptNo,
+                variant: TilawaButtonVariant.ghost,
+                size: TilawaButtonSize.small,
+                isFullWidth: true,
+                onPressed: () {
+                  logHomeLearnQuranCardAction(
+                    action: 'dismiss_interest',
+                    status: 'none',
+                  );
+                  context.read<HomeLearningCubit>().setTutoringInterest(
+                    isInterested: false,
+                  );
+                },
               ),
             ],
           ),
@@ -116,6 +121,8 @@ class HomeLearningInterestCard extends StatelessWidget {
 /// Persistent Learn Quran entry for students who answered the interest
 /// prompt with yes — keeps the section reachable from Home until a real
 /// learning state takes over.
+///
+/// Single-row tap target (icon + copy + chevron) — no competing CTA button.
 class HomeLearningBrowseCard extends StatelessWidget {
   const HomeLearningBrowseCard({super.key});
 
@@ -131,29 +138,32 @@ class HomeLearningBrowseCard extends StatelessWidget {
     }
 
     return HomeDashboardCard(
-      surface: TilawaCardSurface.raised,
+      surface: TilawaCardSurface.flat,
       padding: EdgeInsets.symmetric(
         horizontal: tokens.spaceMedium,
-        vertical: tokens.spaceSmall + tokens.spaceExtraSmall,
+        vertical: tokens.spaceMedium,
       ),
       onTap: openLearnQuran,
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        mainAxisSize: MainAxisSize.min,
+      child: Row(
+        spacing: tokens.spaceMedium,
         children: [
-          Row(
-            spacing: tokens.spaceSmall,
-            children: [
-              HomeDashboardIconWell(
-                accent: accent,
-                child: Icon(
-                  TilawaIcons.teacherCapability,
-                  size: tokens.iconSizeMedium,
-                  color: accent,
-                ),
-              ),
-              Expanded(
-                child: Text(
+          HomeDashboardIconWell(
+            accent: accent,
+            fillAlpha: HomeFeaturePastel.iconWellFillAlpha,
+            extent: tokens.iconBoxSize,
+            child: Icon(
+              TilawaIcons.teacherCapability,
+              size: tokens.iconSizeMedium,
+              color: accent,
+            ),
+          ),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              mainAxisSize: MainAxisSize.min,
+              spacing: tokens.spaceExtraSmall,
+              children: [
+                Text(
                   context.l10n.homeLearningBrowseTitle,
                   maxLines: 1,
                   overflow: TextOverflow.ellipsis,
@@ -163,33 +173,22 @@ class HomeLearningBrowseCard extends StatelessWidget {
                     height: 1.15,
                   ),
                 ),
-              ),
-              Icon(
-                Icons.chevron_right_rounded,
-                size: tokens.iconSizeSmall,
-                color: HomeDashboardSection.secondaryTextColor(context),
-              ),
-            ],
-          ),
-          SizedBox(height: tokens.spaceExtraSmall),
-          Text(
-            context.l10n.homeLearningBrowseSubtitle,
-            maxLines: 2,
-            overflow: TextOverflow.ellipsis,
-            style: theme.textTheme.bodySmall?.copyWith(
-              color: HomeDashboardSection.secondaryTextColor(context),
-              height: 1.3,
+                Text(
+                  context.l10n.homeLearningBrowseSubtitle,
+                  maxLines: 2,
+                  overflow: TextOverflow.ellipsis,
+                  style: theme.textTheme.bodySmall?.copyWith(
+                    color: HomeDashboardSection.secondaryTextColor(context),
+                    height: 1.3,
+                  ),
+                ),
+              ],
             ),
           ),
-          SizedBox(height: tokens.spaceSmall),
-          Align(
-            alignment: AlignmentDirectional.centerStart,
-            child: TilawaButton(
-              text: context.l10n.homeLearningBrowseCta,
-              variant: TilawaButtonVariant.secondary,
-              size: TilawaButtonSize.small,
-              onPressed: openLearnQuran,
-            ),
+          Icon(
+            Icons.chevron_right_rounded,
+            size: tokens.iconSizeMedium,
+            color: HomeDashboardSection.secondaryTextColor(context),
           ),
         ],
       ),
@@ -279,6 +278,8 @@ class _HomeLearningNextSessionCardState
             children: [
               HomeDashboardIconWell(
                 accent: accent,
+                fillAlpha: HomeFeaturePastel.iconWellFillAlpha,
+                extent: tokens.iconBoxSize,
                 child: Icon(
                   TilawaIcons.timer,
                   size: tokens.iconSizeLarge,
@@ -416,6 +417,8 @@ class HomeLearningPendingBookingCard extends StatelessWidget {
             children: [
               HomeDashboardIconWell(
                 accent: accent,
+                fillAlpha: HomeFeaturePastel.iconWellFillAlpha,
+                extent: tokens.iconBoxSize,
                 child: Icon(
                   TilawaIcons.schedule,
                   size: tokens.iconSizeLarge,
@@ -519,15 +522,11 @@ class HomeLearningRevisionCard extends StatelessWidget {
             children: [
               HomeDashboardIconWell(
                 accent: accent,
-                child: SizedBox(
-                  width: tokens.iconSizeLarge,
-                  height: tokens.iconSizeLarge,
-                  child: Center(
-                    child: TilawaIcons.quran.svg(
-                      color: accent,
-                      size: tokens.iconSizeLarge,
-                    ),
-                  ),
+                fillAlpha: HomeFeaturePastel.iconWellFillAlpha,
+                extent: tokens.iconBoxSize,
+                child: TilawaIcons.quran.svg(
+                  color: accent,
+                  size: tokens.iconSizeLarge,
                 ),
               ),
               Expanded(

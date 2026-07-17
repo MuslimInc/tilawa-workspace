@@ -1443,17 +1443,20 @@ class TilawaHomeNextPrayerHeroTokens {
   }
 
   /// Night hero gradient (Isha through deep night before pre-dawn ease).
+  ///
+  /// Light cool canvas — matches day/preDawn so Home never flashes a black
+  /// header band under the white prayer card.
   factory TilawaHomeNextPrayerHeroTokens.night() {
     return const TilawaHomeNextPrayerHeroTokens(
       gradientTopStart: AppColors.homeNextPrayerGradientNightTop,
       gradientBottomEnd: AppColors.homeNextPrayerGradientNightBottom,
       foregroundColor: AppColors.homeNextPrayerGradientNightForeground,
-      locationChipFillOpacity: 0.12,
-      locationChipBorderOpacity: 0.24,
-      locationChipSplashOpacity: 0.1,
-      locationChipHighlightOpacity: 0.05,
+      locationChipFillOpacity: 0.10,
+      locationChipBorderOpacity: 0.22,
+      locationChipSplashOpacity: 0.08,
+      locationChipHighlightOpacity: 0.04,
       mutedForegroundOpacity: 0.68,
-      tertiaryForegroundOpacity: 0.58,
+      tertiaryForegroundOpacity: 0.60,
       footerForegroundOpacity: 0.90,
     );
   }

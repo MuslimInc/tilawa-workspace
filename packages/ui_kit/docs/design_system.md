@@ -62,30 +62,30 @@ smallest correct Atomic Design level instead of bypassing the guard.
 
 ## 2. Theme freeze — calm catalog chrome (light)
 
-Default primary: **brand green** `#1DAB61` (`AppColors.brandActionGreen` /
+Default primary: **brand orange** `#FA5B2E` (`AppColors.brandActionOrange` /
 `AppColors.defaultPrimary`), **brand-locked** for production per
 `PrimaryColorPreset.brandGreen` / `Env.kShowColorPicker`.
 Legacy presets (coral, teal, sage, brown, purple) remain only for the dev/QA
 color picker and persisted user choices — **do not reintroduce purple** or ship
 new UI assuming a user-picked primary other than green.
 
-**Accent usage (one-accent rule):** Green primary for **one** emphasis per screen
+**Accent usage (one-accent rule):** Orange primary for **one** emphasis per screen
 — primary CTA, active bottom nav, selected pills/segments, progress fill,
 switch ON. **Not** for scaffold fills (use the neutral canvas).
 
 ### Light neutral ramp (warm near-white canvas + white cards)
 
-60-30-10: canvas ~60% (`lightCanvas`), elevated surfaces ~30% (`lightSurface`, chips), accent ~10% (`primary`). Scaffold stays porcelain-green near-white — not pure white.
+60-30-10: canvas ~60% (`lightCanvas`), elevated surfaces ~30% (`lightSurface`, chips), accent ~10% (`primary`). Scaffold stays cool off-white near-white — not pure white.
 
 | `AppColors` | Hex | `ColorScheme` / usage |
 |-------------|-----|------------------------|
-| `lightCanvas` / `lightBackground` | `#F3F6F4` | Scaffold, `surfaceContainerLowest` |
+| `lightCanvas` / `lightBackground` | `#F4F4F4` | Scaffold, `surfaceContainerLowest` |
 | `lightSurface` | `#FFFFFF` | Cards, sheets, dialogs |
-| `lightInk` | `#1A2E24` | `onSurface` |
+| `lightInk` | `#050505` | `onSurface` |
 | `lightMute` | `#6B7F74` | Muted labels (`onSurfaceVariant`) |
 | `lightSurfaceContainerHighBase` | `#F0F7F2` | Idle chips, `surfaceContainerHigh` |
 | `featuredGradientStart` / `End` | `#FFD28E` / `#FF9E44` | Last Read / hero gold cards (via `productColors`) |
-| `brandActionGreen` / `defaultPrimary` | `#1DAB61` | `primary` — CTAs, active nav, selected controls |
+| `brandActionOrange` / `defaultPrimary` | `#FA5B2E` | `primary` — CTAs, active nav, selected controls |
 | `lightSchemeOnPrimary` | `#003317` | `onPrimary` on green fills |
 
 ### Product semantics

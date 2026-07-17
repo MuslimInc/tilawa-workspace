@@ -10,6 +10,7 @@ import '../cubit/home_listening_resume_cubit.dart';
 import '../cubit/home_listening_resume_state.dart';
 import 'home_daily_inspiration_section.dart';
 import 'home_dashboard_body_skeleton.dart';
+import 'home_learning_entry.dart';
 import 'home_listening_resume_row.dart';
 import 'home_more_actions_group.dart';
 import 'home_primary_actions_section.dart';
@@ -20,13 +21,16 @@ import 'home_quick_tools_section.dart';
 /// IA zones (top → bottom):
 /// 1. **Now** — Sliver Prayer Hero (location, Hijri date, next prayer) — sliver above.
 /// 2. **Primary actions** — Quran Reader, Athkar (two large cards).
-/// 3. **Quick tools** — Reciters, Qibla, Tasbeeh (compact row).
-/// 4. **Today Plan** — optional daily worship plan card.
-/// 5. **Continue** — conditional continue-listening row.
-/// 6. **More** — secondary library/account destinations.
-/// 7. **Inspiration** — passive daily ayah and dua at the bottom.
+/// 3. **Learn (soft)** — optional interest / browse prompt (below worship).
+/// 4. **Quick tools** — Reciters, Qibla, Tasbeeh (compact row).
+/// 5. **Today Plan** — optional daily worship plan card.
+/// 6. **Continue** — conditional continue-listening row.
+/// 7. **More** — secondary library/account destinations.
+/// 8. **Inspiration** — passive daily ayah and dua at the bottom.
 ///
-/// The featured tutor card is a scroll-away sliver directly under the hero.
+/// Urgent Learn Quran states (live session / pending / revision) stay as a
+/// sliver under the hero. Interest + browse prompts render after primary
+/// worship tiles so conversion does not interrupt prayer.
 ///
 /// Hierarchy: primary cards > quick tools > more list.
 ///
@@ -56,6 +60,7 @@ class HomeDashboardBody extends StatelessWidget {
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
         const HomePrimaryActionsSection(),
+        const HomeLearningSoftPrompt(),
         if (isSmartKhatmaEnabled()) ...[
           SizedBox(height: zoneGap),
           const SmartKhatmaHomeEntryCard(),

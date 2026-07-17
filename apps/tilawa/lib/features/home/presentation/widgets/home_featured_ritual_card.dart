@@ -103,7 +103,7 @@ class HomeFeaturedRitualCard extends StatelessWidget {
             HomeDashboardIconWell(
               accent: colorScheme.primary,
               fillAlpha: HomeFeaturePastel.iconWellFillAlpha,
-              extent: tokens.spaceExtraLarge + tokens.spaceSmall,
+              extent: tokens.iconBoxSize,
               child: Icon(
                 athkarCategoryIcon(category.icon),
                 color: colorScheme.primary,

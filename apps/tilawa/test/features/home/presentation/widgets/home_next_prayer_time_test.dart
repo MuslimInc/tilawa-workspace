@@ -7,9 +7,9 @@ import 'package:tilawa/core/bootstrap/startup_blur_shader_warmup.dart';
 import 'package:tilawa/features/home/domain/entities/home_dashboard.dart';
 import 'package:tilawa/features/home/domain/home_hijri_date_formatter.dart';
 import 'package:tilawa/features/home/presentation/bloc/home_dashboard_state.dart';
-import 'package:tilawa/features/home/presentation/widgets/home_dashboard_card.dart';
 import 'package:tilawa/features/home/presentation/widgets/home_dashboard_content_sliver.dart';
 import 'package:tilawa/features/home/presentation/widgets/home_hero_background.dart';
+import 'package:tilawa/features/home/presentation/widgets/home_hero_glass_surface.dart';
 import 'package:tilawa/features/home/presentation/widgets/home_next_prayer_time.dart';
 import 'package:tilawa/features/prayer_times/domain/entities/prayer_time_entity.dart';
 import 'package:tilawa/l10n/generated/app_localizations.dart';
@@ -55,8 +55,8 @@ void main() {
     expect(find.byType(TilawaSkeleton), findsOneWidget);
     expect(find.text('Cairo'), findsNothing);
 
-    final HomeDashboardCard prayerCard = tester.widget<HomeDashboardCard>(
-      find.byType(HomeDashboardCard),
+    final HomeHeroGlassSurface prayerCard = tester.widget<HomeHeroGlassSurface>(
+      find.byType(HomeHeroGlassSurface),
     );
     expect(prayerCard.onTap, isNull);
   });
@@ -137,13 +137,13 @@ void main() {
     );
     await tester.pump();
 
-    await tester.tap(find.byType(HomeDashboardCard));
+    await tester.tap(find.byType(HomeHeroGlassSurface));
     await tester.pump();
 
     expect(openPrayerTapped, isFalse);
   });
 
-  testWidgets('renders scrollable next-prayer card on neutral canvas', (
+  testWidgets('renders atmospheric hero with frosted prayer glass', (
     tester,
   ) async {
     final view = tester.view;
@@ -176,13 +176,13 @@ void main() {
     expect(find.byType(SliverToBoxAdapter), findsWidgets);
     expect(find.byIcon(FluentIcons.location_24_regular), findsOneWidget);
 
-    expect(find.byType(HomeDashboardCard), findsOneWidget);
-    final HomeDashboardCard prayerCard = tester.widget<HomeDashboardCard>(
-      find.byType(HomeDashboardCard).first,
+    expect(find.byType(HomeHeroBackground), findsOneWidget);
+    expect(find.byType(HomeHeroGlassSurface), findsOneWidget);
+    final HomeHeroGlassSurface prayerCard = tester.widget<HomeHeroGlassSurface>(
+      find.byType(HomeHeroGlassSurface).first,
     );
+    expect(prayerCard.usePrayerHeroTokens, isTrue);
     expect(prayerCard.padding, isNot(EdgeInsets.zero));
-    expect(find.byType(TilawaCard), findsOneWidget);
-    expect(find.byType(HomeHeroBackground), findsNothing);
   });
 
   testWidgets('hero has no collapse scroll extent', (tester) async {
@@ -342,12 +342,13 @@ void main() {
               find
                   .descendant(
                     of: find.byType(CustomScrollView),
-                    matching: find.byType(HomeDashboardCard),
+                    matching: find.byType(HomeHeroGlassSurface),
                   )
                   .first,
             )
             .height +
-        (tokens.spaceSmall * 2);
+        tokens.spaceLarge +
+        tokens.spaceMedium;
 
     expect(
       heroExtent,
@@ -364,7 +365,7 @@ void main() {
     expect(
       probeTop.dy,
       lessThanOrEqualTo(
-        MediaQuery.paddingOf(scrollContext).top + tokens.spaceMedium + 1,
+        MediaQuery.paddingOf(scrollContext).top + tokens.spaceLarge + 1,
       ),
     );
   });

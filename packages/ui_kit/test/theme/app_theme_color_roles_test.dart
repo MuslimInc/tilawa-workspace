@@ -8,7 +8,7 @@ void main() {
   group('AppTheme color roles', () {
     const customAndroidGreen = Color(0xFF87CC23);
     const paletteCases = <String, Color>{
-      'default green': AppColors.defaultPrimary,
+      'default orange': AppColors.defaultPrimary,
       'custom android green': customAndroidGreen,
       'muted gold': AppColors.primaryGold,
       'forest green': AppColors.primarySage,
@@ -24,7 +24,7 @@ void main() {
       'teal': AppColors.primaryTeal,
       'sage': AppColors.primarySage,
       'gold': AppColors.primaryGold,
-      'brand green': AppColors.brandActionGreen,
+      'brand orange': AppColors.brandActionGreen,
     };
 
     test('light themes keep accessible contrast on core color roles', () {
@@ -91,7 +91,7 @@ void main() {
     );
 
     test(
-      'light surfaceContainerHigh is warm neutral for every preset',
+      'light surfaceContainerHigh is cool neutral for every preset',
       () {
         for (final entry in presetNoOpCases.entries) {
           final theme = AppTheme.getLightTheme(
@@ -110,7 +110,7 @@ void main() {
     );
 
     test(
-      'light scaffold and surfaces use parchment canvas not primary',
+      'light scaffold and surfaces use cool off-white canvas not primary',
       () {
         final theme = AppTheme.getLightTheme(
           primaryColor: AppColors.primaryCoral,
@@ -132,7 +132,7 @@ void main() {
       },
     );
 
-    test('default green light theme matches brand ColorScheme roles', () {
+    test('default orange light theme matches brand ColorScheme roles', () {
       final scheme = AppTheme.getLightTheme(
         primaryColor: AppColors.defaultPrimary,
       ).colorScheme;
@@ -163,7 +163,7 @@ void main() {
       expect(scheme.outline, AppColors.lightOutline);
     });
 
-    test('default green dark theme keeps tertiary as gold gilding', () {
+    test('default orange dark theme keeps tertiary as gold gilding', () {
       final scheme = AppTheme.getDarkTheme(
         primaryColor: AppColors.defaultPrimary,
         isDefaultPreset: true,
@@ -301,8 +301,8 @@ void _expectCoreContrast(ColorScheme colorScheme, {required String label}) {
     _expectContrast(
       entry.value.$1,
       entry.value.$2,
-      // Brand-locked decorative green (#1DAB61) uses white onPrimary (~3:1).
-      // Solid CTAs use [AppColors.brandActionGreenAccessible] instead.
+      // Brand-locked decorative orange (#FA5B2E) uses white onPrimary (~3:1).
+      // Solid CTAs use [AppColors.brandActionOrangeAccessible] instead.
       // Gold tertiary (#F2AC1F) is decorative accent only (~2:1 with white).
       minRatio: brandOnPrimary
           ? 2.9

@@ -58,6 +58,7 @@ class HomePrimaryActionTile extends StatelessWidget {
             HomeDashboardIconWell(
               accent: accent,
               fillAlpha: HomeFeaturePastel.iconWellFillAlpha,
+              extent: tokens.iconBoxSize,
               child: icon,
             ),
             SizedBox(height: tokens.spaceMedium + tokens.spaceExtraSmall),

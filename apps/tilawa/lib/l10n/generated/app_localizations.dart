@@ -695,7 +695,7 @@ abstract class AppLocalizations {
   /// Subtitle for the Quran Reader primary action card
   ///
   /// In en, this message translates to:
-  /// **'Read the Quran with reflection'**
+  /// **'Resume from your last read page'**
   String get homeQuickQuranReaderSubtitle;
 
   /// Home quick action for Quran teaching sessions with a hafiz
@@ -761,7 +761,7 @@ abstract class AppLocalizations {
   /// Subtitle for the Athkar primary action card
   ///
   /// In en, this message translates to:
-  /// **'Your daily athkar'**
+  /// **'Morning and evening remembrance'**
   String get homeQuickAthkarSubtitle;
 
   /// Home quick action for settings
@@ -3084,6 +3084,12 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Green'**
   String get colorGreen;
+
+  /// Primary color preset label for brand orange
+  ///
+  /// In en, this message translates to:
+  /// **'Orange'**
+  String get colorOrange;
 
   /// Brown color name
   ///

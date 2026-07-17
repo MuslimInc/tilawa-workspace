@@ -151,29 +151,29 @@ class MeMuslimDesignTokens extends ThemeExtension<MeMuslimDesignTokens> {
   /// [TilawaBottomActionInset] and [TilawaBottomActionArea]).
   double get bottomActionHorizontalInset => spaceHuge;
 
-  /// 6.0
+  /// 12.0
   final double radiusSmall;
 
-  /// 8.0 — decorative chips, icon boxes, nested controls.
+  /// 16.0 — decorative chips, icon boxes, nested controls.
   final double radiusMedium;
 
-  /// 20.0 — chrome tracks, search bars, nested fields.
+  /// 24.0 — chrome tracks, search bars, nested fields.
   final double radiusLarge;
 
-  /// 24.0 — content cards and pill affordances (Behance lifestyle).
+  /// 28.0 — content cards and pill affordances (high-contrast lifestyle).
   final double radiusExtraLarge;
 
-  /// 28.0 — dashboard / hub summary groups only.
+  /// 32.0 — dashboard / hub summary groups only.
   final double radiusHero;
 
-  /// 24.0 — content cards ([TilawaCard], featured panels).
+  /// 28.0 — content cards ([TilawaCard], featured panels).
   double get radiusCard => radiusExtraLarge;
 
-  /// 16.0 — grouped settings panels ([TilawaSettingsGroupPanel]).
+  /// 20.0 — grouped settings panels ([TilawaSettingsGroupPanel]).
   ///
   /// Quieter than [radiusCard]: short single-row groups stay rectangular
   /// instead of reading as stadium / pill shells.
-  double get radiusSection => 16.0;
+  double get radiusSection => 20.0;
 
   /// Full pill radius for a control of [height] (`height / 2`).
   double radiusPill(double height) => height / 2;
@@ -398,11 +398,11 @@ class MeMuslimDesignTokens extends ThemeExtension<MeMuslimDesignTokens> {
       spaceSection: 20.0,
       spaceXXL: 32.0,
       spaceHuge: 48.0,
-      radiusSmall: 8.0,
-      radiusMedium: 12.0,
-      radiusLarge: 20.0,
-      radiusExtraLarge: 24.0,
-      radiusHero: 28.0,
+      radiusSmall: 12.0,
+      radiusMedium: 16.0,
+      radiusLarge: 24.0,
+      radiusExtraLarge: 28.0,
+      radiusHero: 32.0,
       opacitySubtle: 0.1,
       opacityShadow: 0.04 * kElevationMultiplier,
       opacityShadowStrong: 0.08 * kElevationMultiplier,

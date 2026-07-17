@@ -59,12 +59,12 @@ void main() {
     expect(style.statusBarIconBrightness, Brightness.dark);
   });
 
-  test('system overlay uses light icons on night gradient', () {
+  test('system overlay uses dark icons on night gradient', () {
     final style = HomeHeroBackground.systemOverlayStyle(
       TilawaHomeNextPrayerHeroTokens.night(),
     );
 
-    expect(style.statusBarIconBrightness, Brightness.light);
+    expect(style.statusBarIconBrightness, Brightness.dark);
   });
 
   test('pre-dawn hero uses dark chrome ink not cream foreground', () {
@@ -74,6 +74,16 @@ void main() {
     expect(
       HomeHeroPhotoTheme.heroChromeInk(tokens),
       AppColors.homeNextPrayerGradientForeground,
+    );
+  });
+
+  test('night hero uses dark chrome ink on light cool canvas', () {
+    final tokens = TilawaHomeNextPrayerHeroTokens.night();
+
+    expect(HomeHeroPhotoTheme.isDarkHero(tokens), isFalse);
+    expect(
+      HomeHeroPhotoTheme.heroChromeInk(tokens),
+      AppColors.homeNextPrayerGradientNightForeground,
     );
   });
 }

@@ -349,7 +349,7 @@ class AppLocalizationsAr extends AppLocalizations {
   String get homeQuickQuranReader => 'المصحف';
 
   @override
-  String get homeQuickQuranReaderSubtitle => 'اقرأ القرآن بتدبّر';
+  String get homeQuickQuranReaderSubtitle => 'ارجع إلى آخر صفحة قرأتها';
 
   @override
   String get homeLearnQuranWithTutor => 'تعلّم القرآن مع محفظك';
@@ -382,7 +382,7 @@ class AppLocalizationsAr extends AppLocalizations {
   String get homeQuickAthkar => 'الأذكار';
 
   @override
-  String get homeQuickAthkarSubtitle => 'وردك اليومي من الأذكار';
+  String get homeQuickAthkarSubtitle => 'أذكار الصباح والمساء';
 
   @override
   String get homeQuickSettings => 'الإعدادات';
@@ -1730,6 +1730,9 @@ class AppLocalizationsAr extends AppLocalizations {
 
   @override
   String get colorGreen => 'أخضر';
+
+  @override
+  String get colorOrange => 'برتقالي';
 
   @override
   String get colorBrown => 'بني';

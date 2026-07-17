@@ -1,8 +1,8 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
     <!-- Match light launch canvas for a single branded handoff. -->
-    <!-- Production: #1DAB61 -->
-    <color name="launch_background">#1DAB61</color>
+    <!-- Production: #FA5B2E -->
+    <color name="launch_background">#FA5B2E</color>
 
     <!-- Prayer widget (spec 041) dark theme. -->
     <color name="widget_surface">#302645</color>

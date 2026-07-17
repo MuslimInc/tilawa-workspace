@@ -1,6 +1,10 @@
+import 'dart:async';
+
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:cloud_functions/cloud_functions.dart';
 import 'package:dartz_plus/dartz_plus.dart';
+import 'package:firebase_auth/firebase_auth.dart';
+import 'package:flutter/services.dart';
 import 'package:injectable/injectable.dart';
 import 'package:tilawa_core/errors/failures.dart';
 
@@ -20,11 +24,20 @@ class FirebaseDeviceRegistryRepository implements DeviceRegistryRepository {
     this._firestore,
     this._deviceIdentityService,
     this._functions,
+    this._auth,
   );
 
   final FirebaseFirestore _firestore;
   final DeviceIdentityService _deviceIdentityService;
   final FirebaseFunctions _functions;
+  final FirebaseAuth _auth;
+
+  /// Cold-start AuthBloc can emit [AuthAuthenticated] from a persisted hint
+  /// while [FirebaseAuth.currentUser] is still null
+  /// ([AuthRestorationOutcome.pendingUnresolved]). Firestore then sees
+  /// `request.auth == null` and returns PERMISSION_DENIED on
+  /// `users/{uid}/devices`. Wait briefly for the live session before reading.
+  static const Duration _authReadyTimeout = Duration(seconds: 5);
 
   @override
   Future<String> currentDeviceId() => _deviceIdentityService.getDeviceId();
@@ -66,9 +79,21 @@ class FirebaseDeviceRegistryRepository implements DeviceRegistryRepository {
     String userId,
   ) async {
     try {
+      final User? authUser = await _waitForAuthUser();
+      if (authUser == null) {
+        return Left(Failure.serverError('unauthenticated'));
+      }
+
+      // Always query the live Auth uid — never a stale AuthBloc hint.
+      final String uid = authUser.uid;
+      if (userId.isNotEmpty && userId != uid) {
+        return Left(Failure.serverError('permission-denied'));
+      }
+      await authUser.getIdToken();
+
       final snapshot = await _firestore
           .collection('users')
-          .doc(userId)
+          .doc(uid)
           .collection('devices')
           .get();
 
@@ -84,9 +109,34 @@ class FirebaseDeviceRegistryRepository implements DeviceRegistryRepository {
       return Right(devices);
     } on FirebaseException catch (error) {
       return Left(Failure.serverError(error.message ?? error.code));
+    } on PlatformException catch (error) {
+      return Left(
+        Failure.serverError(error.message ?? error.code),
+      );
     } catch (error) {
       return Left(Failure.unexpectedError(error.toString()));
     }
+  }
+
+  /// Returns the live Firebase user, waiting briefly if Auth is still
+  /// restoring a persisted session after cold start.
+  Future<User?> _waitForAuthUser() async {
+    final User? existing = _auth.currentUser;
+    if (existing != null) {
+      return existing;
+    }
+    try {
+      await _auth
+          .authStateChanges()
+          .where((User? user) => user != null)
+          .first
+          .timeout(_authReadyTimeout);
+    } on TimeoutException {
+      // Fall through — return whatever Auth has now (likely still null).
+    } on Object {
+      // Stream closed / cancelled before a user appeared.
+    }
+    return _auth.currentUser;
   }
 
   RegisteredDevice _mapDevice(

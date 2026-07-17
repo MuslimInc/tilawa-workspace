@@ -22,6 +22,7 @@ class HomePrimaryActionsSection extends StatelessWidget {
       HomeExploreFeature.athkar,
       product,
     );
+    final double iconSize = tokens.iconSizeLarge;
 
     return HomeDashboardSection(
       title: context.l10n.homeMainActionsTitle,
@@ -35,12 +36,13 @@ class HomePrimaryActionsSection extends StatelessWidget {
                 goldAccentOnStart: true,
                 accent: quranAccent,
                 icon: TilawaIcons.quran.svg(
-                  size: tokens.iconSizeLarge + tokens.spaceExtraSmall * 0.5,
+                  size: iconSize,
                   color: quranAccent,
                 ),
                 label: context.l10n.homeQuickQuranReader,
-                subtitle: context.l10n.homeQuickQuranReaderSubtitle,
-                onTap: () => const QuranIndexRoute().push<void>(context),
+                subtitle: context.l10n.homeContinueQuranSubtitle,
+                // Last-read route continues progress; opens index when fresh.
+                onTap: () => const QuranLastReadRoute().push<void>(context),
               ),
             ),
             Expanded(
@@ -48,8 +50,8 @@ class HomePrimaryActionsSection extends StatelessWidget {
                 goldAccentOnStart: false,
                 accent: athkarAccent,
                 icon: Icon(
-                  Icons.brightness_7_outlined,
-                  size: tokens.iconSizeLarge + tokens.spaceExtraSmall * 0.5,
+                  Icons.brightness_5_outlined,
+                  size: iconSize,
                   color: athkarAccent,
                 ),
                 label: context.l10n.homeQuickAthkar,

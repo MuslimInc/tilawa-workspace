@@ -445,7 +445,7 @@
     "@homeQuickQuranReader": {
         "description": "Home quick action tile label for opening the Mushaf reader"
     },
-    "homeQuickQuranReaderSubtitle": "Read the Quran with reflection",
+    "homeQuickQuranReaderSubtitle": "Resume from your last read page",
     "@homeQuickQuranReaderSubtitle": {
         "description": "Subtitle for the Quran Reader primary action card"
     },
@@ -489,7 +489,7 @@
     "@homeQuickAthkar": {
         "description": "Home quick action for athkar"
     },
-    "homeQuickAthkarSubtitle": "Your daily athkar",
+    "homeQuickAthkarSubtitle": "Morning and evening remembrance",
     "@homeQuickAthkarSubtitle": {
         "description": "Subtitle for the Athkar primary action card"
     },
@@ -2118,6 +2118,10 @@
         "description": "Cyan color name"
     },
     "colorGreen": "Green",
+  "colorOrange": "Orange",
+  "@colorOrange": {
+    "description": "Primary color preset label for brand orange"
+  },
     "@colorGreen": {
         "description": "Green color name"
     },

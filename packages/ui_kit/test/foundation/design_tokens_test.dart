@@ -4,7 +4,7 @@ import 'package:tilawa_ui_kit/src/foundation/foundation.dart';
 
 void main() {
   test('uses soft global elevation', () {
-    expect(kElevationMultiplier, 0.8);
+    expect(kElevationMultiplier, 0.3);
   });
 
   test('elevation tiers use softened scaled geometry', () {
@@ -94,11 +94,11 @@ void main() {
         expect(light.spaceMedium, 12.0);
         expect(light.spaceLarge, 16.0);
         expect(light.spaceExtraLarge, 24.0);
-        expect(light.radiusSmall, 8.0);
-        expect(light.radiusMedium, 12.0);
-        expect(light.radiusLarge, 20.0);
-        expect(light.radiusExtraLarge, 24.0);
-        expect(light.radiusHero, 28.0);
+        expect(light.radiusSmall, 12.0);
+        expect(light.radiusMedium, 16.0);
+        expect(light.radiusLarge, 24.0);
+        expect(light.radiusExtraLarge, 28.0);
+        expect(light.radiusHero, 32.0);
         expect(light.opacitySubtle, 0.1);
         expect(light.opacityShadow, 0.04 * kElevationMultiplier);
         expect(light.opacityShadowStrong, 0.08 * kElevationMultiplier);
@@ -821,7 +821,7 @@ void main() {
               builder: (context) {
                 final accessedTokens = Theme.of(context).tokens;
                 expect(accessedTokens.spaceSmall, 8.0);
-                expect(accessedTokens.radiusSmall, 8.0);
+                expect(accessedTokens.radiusSmall, 12.0);
                 return const SizedBox.shrink();
               },
             ),
@@ -882,8 +882,8 @@ void main() {
     group('MeMuslimRadiusResolverX', () {
       test('semantic radius aliases map to token caps', () {
         final tokens = MeMuslimDesignTokens.light();
-        expect(tokens.radiusCard, 24.0);
-        expect(tokens.radiusSection, 16.0);
+        expect(tokens.radiusCard, 28.0);
+        expect(tokens.radiusSection, 20.0);
         expect(tokens.radiusPill(48), 24.0);
         expect(tokens.radiusIcon(44), 22.0);
       });
@@ -892,7 +892,7 @@ void main() {
         final tokens = MeMuslimDesignTokens.light();
         expect(
           tokens.resolveRadius(family: TilawaRadiusFamily.card),
-          24.0,
+          28.0,
         );
         expect(
           tokens.resolveRadius(family: TilawaRadiusFamily.pill),
@@ -900,19 +900,19 @@ void main() {
         );
         expect(
           tokens.resolveRadius(family: TilawaRadiusFamily.chrome),
-          12.0,
-        );
-        expect(
-          tokens.resolveRadius(family: TilawaRadiusFamily.section),
           16.0,
         );
         expect(
-          tokens.resolveRadius(family: TilawaRadiusFamily.hero),
+          tokens.resolveRadius(family: TilawaRadiusFamily.section),
           20.0,
         );
         expect(
+          tokens.resolveRadius(family: TilawaRadiusFamily.hero),
+          24.0,
+        );
+        expect(
           tokens.resolveRadius(family: TilawaRadiusFamily.decorative),
-          12.0,
+          16.0,
         );
         expect(
           tokens.resolveRadius(
@@ -924,11 +924,11 @@ void main() {
         );
         expect(
           tokens.resolveRadius(family: TilawaRadiusFamily.chip),
-          8.0,
+          12.0,
         );
         expect(
           tokens.resolveRadius(family: TilawaRadiusFamily.selection),
-          12.0,
+          16.0,
         );
       });
 
@@ -976,8 +976,8 @@ void main() {
           itemHeight: 32,
           containerPadding: 4,
         );
-        expect(radii.containerRadius, 12.0);
-        expect(radii.itemRadius, 8.0);
+        expect(radii.containerRadius, 16.0);
+        expect(radii.itemRadius, 12.0);
       });
 
       test(
