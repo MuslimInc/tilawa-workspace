@@ -603,7 +603,7 @@ class TilawaAdaptiveShellTokens {
       bottomNavVerticalMargin: 0,
       bottomNavBottomLift: 0,
       bottomNavIconOnlyVerticalMargin: 2,
-      bottomNavInternalPadding: 8,
+      bottomNavInternalPadding: designTokens.spaceExtraSmall,
       bottomNavBorderWidth: lightChrome ? 0.5 : 1,
       bottomNavItemGap: 8,
       bottomNavBackgroundColor: bottomNavBackgroundColor,
