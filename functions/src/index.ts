@@ -86,6 +86,9 @@ interface NotificationDoc {
   status: "pending" | "sent" | "failed";
 }
 
+/** FCM sendEachForMulticast accepts at most 500 tokens per request. */
+const FCM_MULTICAST_LIMIT = 500;
+
 /**
  * Triggered when a new notification document is created in Firestore.
  * Reads the target users' FCM tokens and sends push notifications.
@@ -117,9 +120,8 @@ export const sendNotification = onDocumentCreated(
         await notificationRef.update({ status: "failed", error: "No FCM tokens found" });
         return;
       }
-      const tokens = tokenEntries.map((entry) => entry.token);
 
-      // 3. Build and send FCM message
+      // 3. Build shared payload and send in FCM-sized chunks
       const dataPayload: Record<string, string> = {
         title: notification.title,
         body: notification.body,
@@ -129,37 +131,43 @@ export const sendNotification = onDocumentCreated(
         dataPayload.actionData = notification.actionData;
       }
 
-      const message: MulticastMessage = {
-        tokens,
-        notification: {
-          title: notification.title,
-          body: notification.body,
-        },
-        data: dataPayload,
-        android: {
-          priority: "high",
-        },
-        apns: {
-          payload: {
-            aps: {
-              sound: "default",
-              badge: 1,
+      let successCount = 0;
+      let failureCount = 0;
+
+      for (let i = 0; i < tokenEntries.length; i += FCM_MULTICAST_LIMIT) {
+        const chunk = tokenEntries.slice(i, i + FCM_MULTICAST_LIMIT);
+        const message: MulticastMessage = {
+          tokens: chunk.map((entry) => entry.token),
+          notification: {
+            title: notification.title,
+            body: notification.body,
+          },
+          data: dataPayload,
+          android: {
+            priority: "high",
+          },
+          apns: {
+            payload: {
+              aps: {
+                sound: "default",
+                badge: 1,
+              },
             },
           },
-        },
-      };
+        };
 
-      const response = await getMessaging().sendEachForMulticast(message);
+        const response = await getMessaging().sendEachForMulticast(message);
+        await clearInvalidActiveFcmTokens(db, chunk, response);
+        successCount += response.successCount;
+        failureCount += response.failureCount;
+      }
 
-      // 4. Clean up invalid tokens
-      await clearInvalidActiveFcmTokens(db, tokenEntries, response);
-
-      // 5. Update notification status
+      // 4. Update notification status
       await notificationRef.update({
         status: "sent",
         sentAt: Date.now(),
-        successCount: response.successCount,
-        failureCount: response.failureCount,
+        successCount,
+        failureCount,
       });
     } catch (error) {
       console.error("Failed to send notification:", error);
@@ -170,4 +178,5 @@ export const sendNotification = onDocumentCreated(
     }
   }
 );
+
 

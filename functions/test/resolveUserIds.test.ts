@@ -1,19 +1,14 @@
 import test from "node:test";
 import assert from "node:assert/strict";
 
-import {
-  BroadcastAllUsersDisabledError,
-  isFullUserCollectionScanAllowed,
-  resolveUserIds,
-} from "../src/notifications/resolveUserIds";
+import { resolveUserIds } from "../src/notifications/resolveUserIds";
 
 function createPaginatedUsersDb(userIds: string[]) {
   const sortedIds = [...userIds].sort();
-  let emulator = process.env.FUNCTIONS_EMULATOR;
-  process.env.FUNCTIONS_EMULATOR = "true";
 
   const db = {
     collection(name: string) {
+      assert.equal(name, "users");
       return {
         orderBy() {
           return {
@@ -55,16 +50,7 @@ function createPaginatedUsersDb(userIds: string[]) {
     },
   } as unknown as FirebaseFirestore.Firestore;
 
-  return {
-    db,
-    restore() {
-      if (emulator === undefined) {
-        delete process.env.FUNCTIONS_EMULATOR;
-      } else {
-        process.env.FUNCTIONS_EMULATOR = emulator;
-      }
-    },
-  };
+  return db;
 }
 
 test("resolveUserIds returns explicit targetUserIds for selected", async () => {
@@ -78,55 +64,13 @@ test("resolveUserIds returns explicit targetUserIds for selected", async () => {
   assert.deepEqual(userIds, ["u1", "u2"]);
 });
 
-test("resolveUserIds rejects broadcast-all outside emulator", async () => {
-  const emulator = process.env.FUNCTIONS_EMULATOR;
-  delete process.env.FUNCTIONS_EMULATOR;
+test("resolveUserIds paginates all users for broadcast", async () => {
+  const db = createPaginatedUsersDb(["u1", "u2", "u3"]);
 
-  try {
-    const db = {} as FirebaseFirestore.Firestore;
-    await assert.rejects(
-      () =>
-        resolveUserIds(db, {
-          targetType: "all",
-          targetUserIds: [],
-        }),
-      BroadcastAllUsersDisabledError
-    );
-  } finally {
-    if (emulator === undefined) {
-      delete process.env.FUNCTIONS_EMULATOR;
-    } else {
-      process.env.FUNCTIONS_EMULATOR = emulator;
-    }
-  }
-});
+  const userIds = await resolveUserIds(db, {
+    targetType: "all",
+    targetUserIds: [],
+  });
 
-test("resolveUserIds paginates all users in emulator", async () => {
-  const { db, restore } = createPaginatedUsersDb(["u1", "u2", "u3"]);
-
-  try {
-    const userIds = await resolveUserIds(db, {
-      targetType: "all",
-      targetUserIds: [],
-    });
-
-    assert.deepEqual(userIds, ["u1", "u2", "u3"]);
-  } finally {
-    restore();
-  }
-});
-
-test("isFullUserCollectionScanAllowed is true only in emulator", () => {
-  const emulator = process.env.FUNCTIONS_EMULATOR;
-  delete process.env.FUNCTIONS_EMULATOR;
-  assert.equal(isFullUserCollectionScanAllowed(), false);
-
-  process.env.FUNCTIONS_EMULATOR = "true";
-  assert.equal(isFullUserCollectionScanAllowed(), true);
-
-  if (emulator === undefined) {
-    delete process.env.FUNCTIONS_EMULATOR;
-  } else {
-    process.env.FUNCTIONS_EMULATOR = emulator;
-  }
+  assert.deepEqual(userIds, ["u1", "u2", "u3"]);
 });
