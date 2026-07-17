@@ -1,5 +1,4 @@
 import 'dart:async';
-import 'dart:io';
 
 import 'package:flutter/foundation.dart';
 import 'package:google_sign_in/google_sign_in.dart';
@@ -64,8 +63,12 @@ class GoogleSignInPrepareDataSourceImpl
   }
 
   Future<void> _runInitialize() async {
+    // iOS: leave [clientId] null so google_sign_in_ios reads Info.plist
+    // `GIDClientID` (same xcconfig as `CFBundleURLSchemes`). Passing a Dart
+    // clientId that disagrees with the URL scheme (e.g. Archive without
+    // APP_ENV dart-defines) breaks the OAuth redirect on TestFlight.
     await _googleSignIn.initialize(
-      clientId: Platform.isIOS ? AppStrings.googleIosClientId : null,
+      clientId: null,
       serverClientId: AppStrings.googleClientId,
     );
   }

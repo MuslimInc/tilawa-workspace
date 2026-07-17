@@ -3,11 +3,11 @@
 <plist version="1.0">
 <dict>
 	<key>CLIENT_ID</key>
-	<string>181575856185-n7pkcdipps2lm920ve1qbcbo4kemn45b.apps.googleusercontent.com</string>
+	<string>181575856185-utien7qr321gnjecad9toqpi0j1kguoo.apps.googleusercontent.com</string>
 	<key>REVERSED_CLIENT_ID</key>
-	<string>com.googleusercontent.apps.181575856185-n7pkcdipps2lm920ve1qbcbo4kemn45b</string>
+	<string>com.googleusercontent.apps.181575856185-utien7qr321gnjecad9toqpi0j1kguoo</string>
 	<key>ANDROID_CLIENT_ID</key>
-	<string>181575856185-o5o9q4t3sc0tsoik2c9ibkkc7b8d8kqp.apps.googleusercontent.com</string>
+	<string>181575856185-3tdkcorcrq2vq5hqoj40p1u5hjupnpam.apps.googleusercontent.com</string>
 	<key>API_KEY</key>
 	<string>AIzaSyDlIxMc7sRMmNYmYCo-IJbgHo8H9avi4ws</string>
 	<key>GCM_SENDER_ID</key>
@@ -15,7 +15,7 @@
 	<key>PLIST_VERSION</key>
 	<string>1</string>
 	<key>BUNDLE_ID</key>
-	<string>com.tilawa.app</string>
+	<string>com.memuslim.app</string>
 	<key>PROJECT_ID</key>
 	<string>quran-playera-app</string>
 	<key>STORAGE_BUCKET</key>
@@ -31,6 +31,6 @@
 	<key>IS_SIGNIN_ENABLED</key>
 	<true></true>
 	<key>GOOGLE_APP_ID</key>
-	<string>1:181575856185:ios:3f02220381ba118d381de8</string>
+	<string>1:181575856185:ios:c2b2bf0966057dfd381de8</string>
 </dict>
 </plist>

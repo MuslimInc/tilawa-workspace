@@ -72,6 +72,94 @@
           ]
         }
       }
+    },
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:181575856185:android:43541a93da054b8e381de8",
+        "android_client_info": {
+          "package_name": "com.tilawa.app.dev"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "181575856185-ig208bbrpt8falifug3s4gtnl4co226v.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.tilawa.app.dev",
+            "certificate_hash": "6bb232467039abe3a73bbf3f48ce9a1630c5c337"
+          }
+        },
+        {
+          "client_id": "181575856185-2ioqgr7miir7hj7hvgcsi7qp7juo2gco.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyCGJQ04bgIRkijYOhJdgl4wdhPTB99XFUk"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "181575856185-2ioqgr7miir7hj7hvgcsi7qp7juo2gco.apps.googleusercontent.com",
+              "client_type": 3
+            },
+            {
+              "client_id": "181575856185-0hpamtc8c188fdj2g448htrhgidtutjj.apps.googleusercontent.com",
+              "client_type": 2,
+              "ios_info": {
+                "bundle_id": "com.quranapp.quranConnect"
+              }
+            }
+          ]
+        }
+      }
+    },
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:181575856185:android:17fc49ff4a5b1366381de8",
+        "android_client_info": {
+          "package_name": "com.tilawa.app.staging"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "181575856185-lp6lnpfr967aj5e975uh67cqjmrmd4k4.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.tilawa.app.staging",
+            "certificate_hash": "6bb232467039abe3a73bbf3f48ce9a1630c5c337"
+          }
+        },
+        {
+          "client_id": "181575856185-2ioqgr7miir7hj7hvgcsi7qp7juo2gco.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyCGJQ04bgIRkijYOhJdgl4wdhPTB99XFUk"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "181575856185-2ioqgr7miir7hj7hvgcsi7qp7juo2gco.apps.googleusercontent.com",
+              "client_type": 3
+            },
+            {
+              "client_id": "181575856185-0hpamtc8c188fdj2g448htrhgidtutjj.apps.googleusercontent.com",
+              "client_type": 2,
+              "ios_info": {
+                "bundle_id": "com.quranapp.quranConnect"
+              }
+            }
+          ]
+        }
+      }
     }
   ],
   "configuration_version": "1"

@@ -18,7 +18,7 @@ MODES = ("Debug", "Release", "Profile")
 PRODUCT_BUNDLE_IDENTIFIERS = {
     "development": "com.tilawa.app.dev",
     "staging": "com.tilawa.app.staging",
-    "production": "com.tilawa.app",
+    "production": "com.memuslim.app",
 }
 PBXPROJ = Path(__file__).resolve().parents[1] / "ios/Runner.xcodeproj/project.pbxproj"
 
@@ -203,3 +203,4 @@ def _append_to_config_list(
 
 if __name__ == "__main__":
     main()
+

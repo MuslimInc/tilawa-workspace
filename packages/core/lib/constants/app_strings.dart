@@ -5,6 +5,15 @@ class AppStrings {
     'APP_ENV',
     defaultValue: '',
   );
+
+  /// Injected by Flutter when building with `--flavor` (Xcode scheme /
+  /// TestFlight Archive). Used when [APP_ENV] is omitted so iOS Google
+  /// client IDs stay aligned with Info.plist `GIDClientID`.
+  static const String _flutterAppFlavor = String.fromEnvironment(
+    'FLUTTER_APP_FLAVOR',
+    defaultValue: '',
+  );
+
   static const String _distribution = String.fromEnvironment(
     'TILAWA_DISTRIBUTION',
     defaultValue: 'local',
@@ -21,7 +30,7 @@ class AppStrings {
     'staging' =>
       '181575856185-o2k7lc3j2itugtg2b7l4kj4kauhucsiu.apps.googleusercontent.com',
     _ =>
-      '181575856185-n7pkcdipps2lm920ve1qbcbo4kemn45b.apps.googleusercontent.com',
+      '181575856185-utien7qr321gnjecad9toqpi0j1kguoo.apps.googleusercontent.com',
   };
 
   /// Reversed iOS client ID for `CFBundleURLSchemes` (`REVERSED_CLIENT_ID`).
@@ -32,7 +41,7 @@ class AppStrings {
     'staging' =>
       'com.googleusercontent.apps.181575856185-o2k7lc3j2itugtg2b7l4kj4kauhucsiu',
     _ =>
-      'com.googleusercontent.apps.181575856185-n7pkcdipps2lm920ve1qbcbo4kemn45b',
+      'com.googleusercontent.apps.181575856185-utien7qr321gnjecad9toqpi0j1kguoo',
   };
 
   static const String restorationScopeId = 'tilawa_app';
@@ -49,6 +58,18 @@ class AppStrings {
     if (normalized == 'production' || normalized == 'prod') {
       return 'production';
     }
+
+    final flavor = _flutterAppFlavor.trim().toLowerCase();
+    if (flavor == 'development' || flavor == 'dev') {
+      return 'development';
+    }
+    if (flavor == 'staging') {
+      return 'staging';
+    }
+    if (flavor == 'production' || flavor == 'prod') {
+      return 'production';
+    }
+
     final normalizedDistribution = _distribution.trim();
     if (normalizedDistribution == 'staging') {
       return 'staging';

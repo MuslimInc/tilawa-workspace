@@ -1,0 +1,110 @@
+{
+  "flutter": {
+    "platforms": {
+      "android": {
+        "buildConfigurations": {
+          "src/production": {
+            "projectId": "quran-playera-app",
+            "appId": "1:181575856185:android:d43fb05037208139381de8",
+            "fileOutput": "android/app/src/production/google-services.json"
+          },
+          "src/staging": {
+            "projectId": "quran-playera-app",
+            "appId": "1:181575856185:android:17fc49ff4a5b1366381de8",
+            "fileOutput": "android/app/src/staging/google-services.json"
+          },
+          "src/development": {
+            "projectId": "quran-playera-app",
+            "appId": "1:181575856185:android:43541a93da054b8e381de8",
+            "fileOutput": "android/app/src/development/google-services.json"
+          }
+        }
+      },
+      "ios": {
+        "buildConfigurations": {
+          "Debug": {
+            "projectId": "quran-playera-app",
+            "appId": "1:181575856185:ios:c2b2bf0966057dfd381de8",
+            "uploadDebugSymbols": true,
+            "fileOutput": "ios/Runner/Firebase/production/GoogleService-Info.plist"
+          },
+          "Release": {
+            "projectId": "quran-playera-app",
+            "appId": "1:181575856185:ios:c2b2bf0966057dfd381de8",
+            "uploadDebugSymbols": true,
+            "fileOutput": "ios/Runner/Firebase/production/GoogleService-Info.plist"
+          },
+          "Profile": {
+            "projectId": "quran-playera-app",
+            "appId": "1:181575856185:ios:c2b2bf0966057dfd381de8",
+            "uploadDebugSymbols": true,
+            "fileOutput": "ios/Runner/Firebase/production/GoogleService-Info.plist"
+          },
+          "Release-production": {
+            "projectId": "quran-playera-app",
+            "appId": "1:181575856185:ios:c2b2bf0966057dfd381de8",
+            "uploadDebugSymbols": true,
+            "fileOutput": "ios/Runner/Firebase/production/GoogleService-Info.plist"
+          },
+          "Release-staging": {
+            "projectId": "quran-playera-app",
+            "appId": "1:181575856185:ios:122febc64df470f2381de8",
+            "uploadDebugSymbols": true,
+            "fileOutput": "ios/Runner/Firebase/staging/GoogleService-Info.plist"
+          },
+          "Release-development": {
+            "projectId": "quran-playera-app",
+            "appId": "1:181575856185:ios:4c3a8e674c6138d0381de8",
+            "uploadDebugSymbols": true,
+            "fileOutput": "ios/Runner/Firebase/development/GoogleService-Info.plist"
+          },
+          "Debug-production": {
+            "projectId": "quran-playera-app",
+            "appId": "1:181575856185:ios:c2b2bf0966057dfd381de8",
+            "uploadDebugSymbols": true,
+            "fileOutput": "ios/Runner/Firebase/production/GoogleService-Info.plist"
+          },
+          "Debug-staging": {
+            "projectId": "quran-playera-app",
+            "appId": "1:181575856185:ios:122febc64df470f2381de8",
+            "uploadDebugSymbols": true,
+            "fileOutput": "ios/Runner/Firebase/staging/GoogleService-Info.plist"
+          },
+          "Debug-development": {
+            "projectId": "quran-playera-app",
+            "appId": "1:181575856185:ios:4c3a8e674c6138d0381de8",
+            "uploadDebugSymbols": true,
+            "fileOutput": "ios/Runner/Firebase/development/GoogleService-Info.plist"
+          },
+          "Profile-production": {
+            "projectId": "quran-playera-app",
+            "appId": "1:181575856185:ios:c2b2bf0966057dfd381de8",
+            "uploadDebugSymbols": true,
+            "fileOutput": "ios/Runner/Firebase/production/GoogleService-Info.plist"
+          },
+          "Profile-staging": {
+            "projectId": "quran-playera-app",
+            "appId": "1:181575856185:ios:122febc64df470f2381de8",
+            "uploadDebugSymbols": true,
+            "fileOutput": "ios/Runner/Firebase/staging/GoogleService-Info.plist"
+          },
+          "Profile-development": {
+            "projectId": "quran-playera-app",
+            "appId": "1:181575856185:ios:4c3a8e674c6138d0381de8",
+            "uploadDebugSymbols": true,
+            "fileOutput": "ios/Runner/Firebase/development/GoogleService-Info.plist"
+          }
+        }
+      },
+      "dart": {
+        "lib/firebase_options.dart": {
+          "projectId": "quran-playera-app",
+          "configurations": {
+            "android": "1:181575856185:android:d43fb05037208139381de8",
+            "ios": "1:181575856185:ios:c2b2bf0966057dfd381de8"
+          }
+        }
+      }
+    }
+  }
+}
