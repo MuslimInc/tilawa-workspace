@@ -12,8 +12,8 @@ the changelog for full engineering detail.
 
 | Field | Value |
 |-------|--------|
-| Version | **2.1.8** (build **82**) |
-| Git tag | `v2.1.8+82` (pending) |
+| Version | **2.1.8** (build **83**) |
+| Git tag | `v2.1.8+83` (pending) |
 | Date | 2026-07-17 |
 | Track | Production |
 
@@ -623,3 +623,4 @@ _Move shipped notes to **Current release** when cutting a Play upload._
 4. Build: GitHub Actions **Android Release (Google Play)** workflow, or locally:
    `dart run melos run tilawa:build:android:production`.
 5. Checklist: [`google_play_release_checklist.md`](google_play_release_checklist.md)
+

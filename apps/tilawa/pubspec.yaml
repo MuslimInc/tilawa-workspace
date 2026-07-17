@@ -3,7 +3,7 @@ resolution: workspace
 description: An Audio Quran Player project.
 
 publish_to: none
-version: 2.1.8+82
+version: 2.1.8+83
 
 environment:
   sdk: ^3.12.2

@@ -7,7 +7,14 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
-## [2.1.8+82] - 2026-07-17 [Google Play Production]
+## [2.1.8+83] - 2026-07-17 [Google Play Production]
+
+### Changed
+
+- **Release**: Production build after closed-testing verification of 2.1.8+82
+  (same user-facing changes).
+
+## [2.1.8+82] - 2026-07-17 [Google Play Closed Testing]
 
 ### Added
 
