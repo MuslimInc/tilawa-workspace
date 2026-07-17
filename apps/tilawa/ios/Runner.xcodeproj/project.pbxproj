@@ -263,6 +263,7 @@
 				3B06AD1E1E4923F5004D2608 /* Thin Binary */,
 				F1BC96F26B2C8B56781B0A37 /* [CP] Embed Pods Frameworks */,
 				1AFDC3EF7BD0FC0BC3E905E8 /* [CP] Copy Pods Resources */,
+				C4E8F2A19B7D4E6F8A0C1D2E /* Generate Vendor dSYMs */,
 			);
 			buildRules = (
 			);
@@ -448,6 +449,25 @@
 			shellPath = /bin/sh;
 			shellScript = "\"${PODS_ROOT}/Target Support Files/Pods-Runner/Pods-Runner-frameworks.sh\"\n";
 			showEnvVarsInLog = 0;
+		};
+		C4E8F2A19B7D4E6F8A0C1D2E /* Generate Vendor dSYMs */ = {
+			isa = PBXShellScriptBuildPhase;
+			alwaysOutOfDate = 1;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			inputFileListPaths = (
+			);
+			inputPaths = (
+			);
+			name = "Generate Vendor dSYMs";
+			outputFileListPaths = (
+			);
+			outputPaths = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+			shellPath = /bin/sh;
+			shellScript = "/bin/sh \"${PROJECT_DIR}/scripts/generate_vendor_dsyms.sh\"\n";
 		};
 		FCE9190AF6A0C94440C5A94B /* [CP] Check Pods Manifest.lock */ = {
 			isa = PBXShellScriptBuildPhase;
