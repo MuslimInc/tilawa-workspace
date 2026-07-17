@@ -19,4 +19,5 @@ Scope: **Android only**. Run on at least one phone (API 26+) and one emulator be
 
 - Repeat **one** / **all** follow existing repeat-mode controls.
 - Cold-start full resume metadata CTA is **out of scope** for this pass.
-- iOS background audio deferred.
+- iOS: `UIBackgroundModes` → `audio` in `apps/tilawa/ios/Runner/Info.plist` (requires full rebuild, not hot reload).
+
