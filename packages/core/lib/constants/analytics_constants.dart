@@ -134,6 +134,13 @@ class AnalyticsEvents {
   static const String widgetRemoved = 'widget_removed';
   static const String widgetTapped = 'widget_tapped';
   static const String widgetSnapshotGenerated = 'widget_snapshot_generated';
+
+  // Islamic Reels
+  static const String reelViewStart = 'reel_view_start';
+  static const String reelViewComplete = 'reel_view_complete';
+  static const String reelReaction = 'reel_reaction';
+  static const String reelSave = 'reel_save';
+  static const String reelShare = 'reel_share';
 }
 
 class AnalyticsParams {
@@ -214,6 +221,11 @@ class AnalyticsParams {
 
   // Screens
   static const String reciterDetailsScreen = 'ReciterDetailsScreen';
+
+  // Islamic Reels
+  static const String reelId = 'reel_id';
+  static const String reactionType = 'reaction_type';
+  static const String shareMode = 'share_mode';
 }
 
 class UserProperties {

@@ -6,6 +6,8 @@ class ApiConfig {
 
   // Endpoints
   static const String recitersPath = '/reciters';
+  static const String videosPath = '/videos';
+  static const String videoTypesPath = '/video_types';
 
   // Helpers
   static String reciters({String? language}) {
@@ -13,5 +15,19 @@ class ApiConfig {
       return '$baseUrl$recitersPath';
     }
     return '$baseUrl$recitersPath?language=$language';
+  }
+
+  static String videos({String? language}) {
+    if (language == null || language.isEmpty) {
+      return '$baseUrl$videosPath';
+    }
+    return '$baseUrl$videosPath?language=$language';
+  }
+
+  static String videoTypes({String? language}) {
+    if (language == null || language.isEmpty) {
+      return '$baseUrl$videoTypesPath';
+    }
+    return '$baseUrl$videoTypesPath?language=$language';
   }
 }

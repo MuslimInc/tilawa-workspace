@@ -130,6 +130,7 @@ class MeMuslimProductColors extends ThemeExtension<MeMuslimProductColors> {
       HomeExploreFeature.quran => AppColors.categoryAccentAmber,
       HomeExploreFeature.support => AppColors.brandActionGreenAccessible,
       HomeExploreFeature.sessions => AppColors.categoryAccentBlueGrey,
+      HomeExploreFeature.reels => AppColors.categoryAccentIndigo,
     };
   }
 
@@ -144,6 +145,7 @@ class MeMuslimProductColors extends ThemeExtension<MeMuslimProductColors> {
       HomeExploreFeature.quran => TilawaSemanticTint.gilding,
       HomeExploreFeature.support => TilawaSemanticTint.success,
       HomeExploreFeature.sessions => TilawaSemanticTint.scholar,
+      HomeExploreFeature.reels => TilawaSemanticTint.scholar,
     };
   }
 

@@ -4188,4 +4188,77 @@ class AppLocalizationsAr extends AppLocalizations {
   @override
   String get editProfileUnavailableMessage =>
       'سجّل الدخول مرة أخرى لتعديل ملفك الشخصي.';
+
+  @override
+  String get reelsTitle => 'ريلز إسلامية';
+
+  @override
+  String get homeQuickReels => 'ريلز';
+
+  @override
+  String get reelsCategoryAll => 'الكل';
+
+  @override
+  String get reelsCategoryProphet => 'الصلاة على النبي ﷺ';
+
+  @override
+  String get reelsCategoryFaith => 'نفحات إيمانية';
+
+  @override
+  String get reelsCategoryRamadan => 'نفحات رمضانية';
+
+  @override
+  String get reelsCategoryUnknown => 'مقطع';
+
+  @override
+  String get reelsActionReact => 'تفاعل';
+
+  @override
+  String get reelsActionSave => 'حفظ';
+
+  @override
+  String get reelsActionShare => 'مشاركة';
+
+  @override
+  String get reelsActionMore => 'المزيد';
+
+  @override
+  String get reelsReactionsTitle => 'تفاعل';
+
+  @override
+  String get reelsReactionLoved => 'أحببته';
+
+  @override
+  String get reelsReactionAllahummaTaqabbal => 'اللهم تقبل';
+
+  @override
+  String get reelsReactionSubhanAllah => 'سبحان الله';
+
+  @override
+  String get reelsReactionMashaAllah => 'ما شاء الله';
+
+  @override
+  String get reelsSavedTitle => 'الريلز المحفوظة';
+
+  @override
+  String get reelsSavedEmpty => 'لا توجد ريلز محفوظة بعد';
+
+  @override
+  String get reelsLoadError =>
+      'تعذر تحميل الريلز. تحقق من الاتصال وحاول مجددًا.';
+
+  @override
+  String get reelsPlaybackError => 'تعذر تشغيل هذا الفيديو.';
+
+  @override
+  String get reelsEmpty => 'لا توجد ريلز في هذا التصنيف.';
+
+  @override
+  String get reelsRetry => 'إعادة المحاولة';
+
+  @override
+  String get reelsShareLink => 'مشاركة الرابط';
+
+  @override
+  String get reelsShareFile => 'مشاركة ملف الفيديو';
 }

@@ -7420,6 +7420,150 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Sign in again to edit your profile.'**
   String get editProfileUnavailableMessage;
+
+  /// Islamic Reels feed screen title
+  ///
+  /// In en, this message translates to:
+  /// **'Islamic Reels'**
+  String get reelsTitle;
+
+  /// Home quick tools label for Islamic Reels
+  ///
+  /// In en, this message translates to:
+  /// **'Reels'**
+  String get homeQuickReels;
+
+  /// Reels category chip for all types
+  ///
+  /// In en, this message translates to:
+  /// **'All'**
+  String get reelsCategoryAll;
+
+  /// Reels category for salawat / Prophet videos
+  ///
+  /// In en, this message translates to:
+  /// **'Prophet ﷺ'**
+  String get reelsCategoryProphet;
+
+  /// Reels category for faith reminder videos
+  ///
+  /// In en, this message translates to:
+  /// **'Faith reminders'**
+  String get reelsCategoryFaith;
+
+  /// Reels category for Ramadan videos
+  ///
+  /// In en, this message translates to:
+  /// **'Ramadan'**
+  String get reelsCategoryRamadan;
+
+  /// Fallback label for unknown reel category
+  ///
+  /// In en, this message translates to:
+  /// **'Clip'**
+  String get reelsCategoryUnknown;
+
+  /// Reel action: open Islamic reactions
+  ///
+  /// In en, this message translates to:
+  /// **'React'**
+  String get reelsActionReact;
+
+  /// Reel action: save locally
+  ///
+  /// In en, this message translates to:
+  /// **'Save'**
+  String get reelsActionSave;
+
+  /// Reel action: share
+  ///
+  /// In en, this message translates to:
+  /// **'Share'**
+  String get reelsActionShare;
+
+  /// Reel action: more options
+  ///
+  /// In en, this message translates to:
+  /// **'More'**
+  String get reelsActionMore;
+
+  /// Title for Islamic reaction picker
+  ///
+  /// In en, this message translates to:
+  /// **'React'**
+  String get reelsReactionsTitle;
+
+  /// Islamic reel reaction: Loved
+  ///
+  /// In en, this message translates to:
+  /// **'Loved'**
+  String get reelsReactionLoved;
+
+  /// Islamic reel reaction: Allahumma Taqabbal
+  ///
+  /// In en, this message translates to:
+  /// **'Allahumma Taqabbal'**
+  String get reelsReactionAllahummaTaqabbal;
+
+  /// Islamic reel reaction: Subhan Allah
+  ///
+  /// In en, this message translates to:
+  /// **'Subhan Allah'**
+  String get reelsReactionSubhanAllah;
+
+  /// Islamic reel reaction: MashaAllah
+  ///
+  /// In en, this message translates to:
+  /// **'MashaAllah'**
+  String get reelsReactionMashaAllah;
+
+  /// Saved reels screen title
+  ///
+  /// In en, this message translates to:
+  /// **'Saved Reels'**
+  String get reelsSavedTitle;
+
+  /// Empty state for saved reels
+  ///
+  /// In en, this message translates to:
+  /// **'No saved reels yet'**
+  String get reelsSavedEmpty;
+
+  /// Error loading reels catalog
+  ///
+  /// In en, this message translates to:
+  /// **'Could not load reels. Check your connection and try again.'**
+  String get reelsLoadError;
+
+  /// Error playing a reel video
+  ///
+  /// In en, this message translates to:
+  /// **'This video could not be played.'**
+  String get reelsPlaybackError;
+
+  /// Empty state when category has no reels
+  ///
+  /// In en, this message translates to:
+  /// **'No reels in this category.'**
+  String get reelsEmpty;
+
+  /// Retry button for reels errors
+  ///
+  /// In en, this message translates to:
+  /// **'Retry'**
+  String get reelsRetry;
+
+  /// Share reel as link/text
+  ///
+  /// In en, this message translates to:
+  /// **'Share link'**
+  String get reelsShareLink;
+
+  /// Share reel as downloaded video file
+  ///
+  /// In en, this message translates to:
+  /// **'Share video file'**
+  String get reelsShareFile;
 }
 
 class _AppLocalizationsDelegate

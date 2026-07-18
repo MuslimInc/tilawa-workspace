@@ -4228,4 +4228,77 @@ class AppLocalizationsEn extends AppLocalizations {
   @override
   String get editProfileUnavailableMessage =>
       'Sign in again to edit your profile.';
+
+  @override
+  String get reelsTitle => 'Islamic Reels';
+
+  @override
+  String get homeQuickReels => 'Reels';
+
+  @override
+  String get reelsCategoryAll => 'All';
+
+  @override
+  String get reelsCategoryProphet => 'Prophet ﷺ';
+
+  @override
+  String get reelsCategoryFaith => 'Faith reminders';
+
+  @override
+  String get reelsCategoryRamadan => 'Ramadan';
+
+  @override
+  String get reelsCategoryUnknown => 'Clip';
+
+  @override
+  String get reelsActionReact => 'React';
+
+  @override
+  String get reelsActionSave => 'Save';
+
+  @override
+  String get reelsActionShare => 'Share';
+
+  @override
+  String get reelsActionMore => 'More';
+
+  @override
+  String get reelsReactionsTitle => 'React';
+
+  @override
+  String get reelsReactionLoved => 'Loved';
+
+  @override
+  String get reelsReactionAllahummaTaqabbal => 'Allahumma Taqabbal';
+
+  @override
+  String get reelsReactionSubhanAllah => 'Subhan Allah';
+
+  @override
+  String get reelsReactionMashaAllah => 'MashaAllah';
+
+  @override
+  String get reelsSavedTitle => 'Saved Reels';
+
+  @override
+  String get reelsSavedEmpty => 'No saved reels yet';
+
+  @override
+  String get reelsLoadError =>
+      'Could not load reels. Check your connection and try again.';
+
+  @override
+  String get reelsPlaybackError => 'This video could not be played.';
+
+  @override
+  String get reelsEmpty => 'No reels in this category.';
+
+  @override
+  String get reelsRetry => 'Retry';
+
+  @override
+  String get reelsShareLink => 'Share link';
+
+  @override
+  String get reelsShareFile => 'Share video file';
 }
