@@ -116,6 +116,7 @@ abstract final class QuranPlayerRoutePolicy {
     '/login',
     '/prayer-alerts-permissions',
     '/share/',
+    '/reels',
   ];
 
   static bool shouldShowPlayer(String location) {
@@ -156,6 +157,7 @@ abstract final class AppShellRoutePolicy {
     '/share/',
     '/athkar',
     '/player',
+    '/reels',
   ];
 
   /// Bottom navigation is only shown on the main tab shell (`/`).

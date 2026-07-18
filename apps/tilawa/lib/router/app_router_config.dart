@@ -46,6 +46,7 @@ import '../features/reciters/presentation/widgets/reciters_search_screen_scope.d
 import '../features/settings/presentation/widgets/settings_screen_scope.dart';
 import '../features/share/presentation/screens/screenshot_composer_screen.dart';
 import '../features/share/presentation/screens/video_reel_composer_screen.dart';
+import '../features/reels/presentation/widgets/reels_screen_scope.dart';
 import '../features/share/presentation/widgets/share_composer_screen_scope.dart';
 import '../features/smart_khatma/presentation/widgets/smart_khatma_hub_scope.dart';
 import '../features/smart_khatma/smart_khatma_feature_flags.dart';
@@ -736,6 +737,33 @@ class QuranPlayerExpandedRoute extends GoRouteData
         ),
       ),
     );
+  }
+}
+
+@TypedGoRoute<ReelsRoute>(
+  path: '/reels',
+  routes: [
+    TypedGoRoute<SavedReelsRoute>(path: 'saved'),
+  ],
+)
+class ReelsRoute extends GoRouteData with $ReelsRoute, TilawaRouteData {
+  const ReelsRoute({this.initialReelId});
+
+  final int? initialReelId;
+
+  @override
+  Widget build(BuildContext context, GoRouterState state) {
+    return ReelsFeedScope(initialReelId: initialReelId);
+  }
+}
+
+class SavedReelsRoute extends GoRouteData
+    with $SavedReelsRoute, TilawaRouteData {
+  const SavedReelsRoute();
+
+  @override
+  Widget build(BuildContext context, GoRouterState state) {
+    return const SavedReelsScope();
   }
 }
 
