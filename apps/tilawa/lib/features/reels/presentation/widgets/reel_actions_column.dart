@@ -38,21 +38,21 @@ class ReelActionsColumn extends StatelessWidget {
           label: context.l10n.reelsActionReact,
           onTap: onReact,
         ),
-        SizedBox(height: tokens.spaceMedium),
+        SizedBox(height: tokens.spaceSmall),
         _ActionButton(
           icon: isSaved ? Icons.bookmark : Icons.bookmark_border,
           color: Colors.white,
           label: context.l10n.reelsActionSave,
           onTap: onSave,
         ),
-        SizedBox(height: tokens.spaceMedium),
+        SizedBox(height: tokens.spaceSmall),
         _ActionButton(
           icon: Icons.ios_share_rounded,
           color: Colors.white,
           label: context.l10n.reelsActionShare,
           onTap: onShare,
         ),
-        SizedBox(height: tokens.spaceMedium),
+        SizedBox(height: tokens.spaceSmall),
         _ActionButton(
           icon: Icons.more_horiz,
           color: Colors.white,
@@ -148,28 +148,37 @@ Future<ReelReaction?> showReelReactionPicker(BuildContext context) {
     builder: (ctx) {
       return SafeArea(
         child: Padding(
-          padding: EdgeInsets.all(tokens.spaceMedium),
+          padding: EdgeInsets.fromLTRB(
+            tokens.spaceMedium,
+            tokens.spaceSmall,
+            tokens.spaceMedium,
+            tokens.spaceMedium,
+          ),
           child: Column(
             mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
               Text(
                 l10n.reelsReactionsTitle,
+                textAlign: TextAlign.center,
                 style: Theme.of(ctx).textTheme.titleMedium,
               ),
               SizedBox(height: tokens.spaceMedium),
-              Wrap(
-                spacing: tokens.spaceSmall,
-                runSpacing: tokens.spaceSmall,
-                alignment: WrapAlignment.center,
+              GridView.count(
+                shrinkWrap: true,
+                physics: const NeverScrollableScrollPhysics(),
+                crossAxisCount: 2,
+                mainAxisSpacing: tokens.spaceSmall,
+                crossAxisSpacing: tokens.spaceSmall,
+                childAspectRatio: 2.8,
                 children: [
                   for (final reaction in ReelReaction.values)
-                    ActionChip(
-                      label: Text(_reactionLabel(l10n, reaction)),
-                      onPressed: () => Navigator.of(ctx).pop(reaction),
+                    TilawaChip(
+                      label: _reactionLabel(l10n, reaction),
+                      onTap: () => Navigator.of(ctx).pop(reaction),
                     ),
                 ],
               ),
-              SizedBox(height: tokens.spaceMedium),
             ],
           ),
         ),

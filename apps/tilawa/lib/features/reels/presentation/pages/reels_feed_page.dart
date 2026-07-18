@@ -87,7 +87,7 @@ class _ReelsFeedPageState extends State<ReelsFeedPage> {
             mainAxisSize: MainAxisSize.min,
             children: [
               ListTile(
-                leading: const Icon(Icons.bookmark_outline),
+                leading: const Icon(Icons.collections_bookmark_outlined),
                 title: Text(l10n.reelsSavedTitle),
                 onTap: () => Navigator.pop(ctx, 'saved'),
               ),
@@ -129,7 +129,9 @@ class _ReelsFeedPageState extends State<ReelsFeedPage> {
     final l10n = context.l10n;
 
     return AnnotatedRegion<SystemUiOverlayStyle>(
-      value: SystemUiOverlayStyle.light,
+      value: SystemUiOverlayStyle.light.copyWith(
+        statusBarColor: Colors.transparent,
+      ),
       child: Scaffold(
         backgroundColor: Colors.black,
         body: BlocConsumer<ReelsCubit, ReelsState>(
@@ -158,7 +160,8 @@ class _ReelsFeedPageState extends State<ReelsFeedPage> {
                   ReelsStatus.ready => PageView.builder(
                     controller: _pageController,
                     scrollDirection: Axis.vertical,
-                    allowImplicitScrolling: true,
+                    // Avoid prebuilding off-screen pages (less attach/semantics churn).
+                    allowImplicitScrolling: false,
                     itemCount: state.reels.length,
                     onPageChanged: (i) {
                       context.read<ReelsCubit>().onPageChanged(i);
@@ -198,89 +201,121 @@ class _ReelsFeedPageState extends State<ReelsFeedPage> {
                   ),
                 },
 
-                // Top chrome
-                SafeArea(
-                  child: Padding(
-                    padding: EdgeInsets.symmetric(
-                      horizontal: tokens.spaceSmall,
-                      vertical: tokens.spaceExtraSmall,
+                // Compact immersive top chrome — scrim + slim controls.
+                Positioned(
+                  top: 0,
+                  left: 0,
+                  right: 0,
+                  child: DecoratedBox(
+                    decoration: BoxDecoration(
+                      gradient: LinearGradient(
+                        begin: Alignment.topCenter,
+                        end: Alignment.bottomCenter,
+                        colors: [
+                          Colors.black.withValues(alpha: 0.55),
+                          Colors.transparent,
+                        ],
+                      ),
                     ),
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.stretch,
-                      children: [
-                        Row(
+                    child: SafeArea(
+                      bottom: false,
+                      child: Padding(
+                        padding: EdgeInsets.fromLTRB(
+                          tokens.spaceExtraSmall,
+                          tokens.spaceExtraSmall,
+                          tokens.spaceExtraSmall,
+                          tokens.spaceMedium,
+                        ),
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.stretch,
                           children: [
-                            IconButton(
-                              onPressed: () => Navigator.of(context).maybePop(),
-                              icon: const Icon(
-                                Icons.arrow_back,
-                                color: Colors.white,
-                              ),
-                              tooltip: MaterialLocalizations.of(
-                                context,
-                              ).backButtonTooltip,
-                            ),
-                            Expanded(
-                              child: Text(
-                                l10n.reelsTitle,
-                                textAlign: TextAlign.center,
-                                style: Theme.of(context).textTheme.titleMedium
-                                    ?.copyWith(
+                            SizedBox(
+                              height: tokens.minInteractiveDimension,
+                              child: Row(
+                                children: [
+                                  IconButton(
+                                    onPressed: () =>
+                                        Navigator.of(context).maybePop(),
+                                    icon: const Icon(
+                                      Icons.arrow_back,
                                       color: Colors.white,
-                                      fontWeight: FontWeight.w700,
                                     ),
+                                    tooltip: MaterialLocalizations.of(
+                                      context,
+                                    ).backButtonTooltip,
+                                  ),
+                                  Expanded(
+                                    child: Text(
+                                      l10n.reelsTitle,
+                                      textAlign: TextAlign.center,
+                                      style: Theme.of(context)
+                                          .textTheme
+                                          .titleSmall
+                                          ?.copyWith(
+                                            color: Colors.white,
+                                            fontWeight: FontWeight.w700,
+                                          ),
+                                    ),
+                                  ),
+                                  IconButton(
+                                    onPressed: () => const SavedReelsRoute()
+                                        .push<void>(context),
+                                    icon: const Icon(
+                                      Icons.collections_bookmark_outlined,
+                                      color: Colors.white,
+                                    ),
+                                    tooltip: l10n.reelsSavedTitle,
+                                  ),
+                                ],
                               ),
                             ),
-                            IconButton(
-                              onPressed: () =>
-                                  const SavedReelsRoute().push<void>(context),
-                              icon: const Icon(
-                                Icons.bookmark_outline,
-                                color: Colors.white,
+                            if (state.categories.isNotEmpty)
+                              SizedBox(
+                                height: kMeMuslimMinInteractiveDimension,
+                                child: ListView.separated(
+                                  scrollDirection: Axis.horizontal,
+                                  padding: EdgeInsets.symmetric(
+                                    horizontal: tokens.spaceSmall,
+                                  ),
+                                  itemCount: state.categories.length,
+                                  separatorBuilder: (_, _) =>
+                                      SizedBox(width: tokens.spaceExtraSmall),
+                                  itemBuilder: (context, i) {
+                                    final cat = state.categories[i];
+                                    final selected =
+                                        state.selectedCategoryId == cat.id;
+                                    return Center(
+                                      child: TilawaChip(
+                                        label: cat.label,
+                                        semanticsSelected: selected,
+                                        backgroundColor: selected
+                                            ? Colors.white
+                                            : Colors.white.withValues(
+                                                alpha: 0.18,
+                                              ),
+                                        foregroundColor: selected
+                                            ? Colors.black
+                                            : Colors.white,
+                                        borderColor: selected
+                                            ? Colors.white
+                                            : Colors.white.withValues(
+                                                alpha: 0.35,
+                                              ),
+                                        padding: EdgeInsets.symmetric(
+                                          horizontal: tokens.spaceSmall,
+                                          vertical: tokens.spaceExtraSmall,
+                                        ),
+                                        onTap: () => context
+                                            .read<ReelsCubit>()
+                                            .selectCategory(cat.id),
+                                      ),
+                                    );
+                                  },
+                                ),
                               ),
-                              tooltip: l10n.reelsSavedTitle,
-                            ),
                           ],
                         ),
-                        if (state.categories.isNotEmpty)
-                          SizedBox(
-                            height: 40,
-                            child: ListView.separated(
-                              scrollDirection: Axis.horizontal,
-                              padding: EdgeInsets.symmetric(
-                                horizontal: tokens.spaceSmall,
-                              ),
-                              itemCount: state.categories.length,
-                              separatorBuilder: (_, _) =>
-                                  SizedBox(width: tokens.spaceExtraSmall),
-                              itemBuilder: (context, i) {
-                                final cat = state.categories[i];
-                                final selected =
-                                    state.selectedCategoryId == cat.id;
-                                return FilterChip(
-                                  selected: selected,
-                                  label: Text(cat.label),
-                                  onSelected: (_) => context
-                                      .read<ReelsCubit>()
-                                      .selectCategory(cat.id),
-                                  selectedColor: Theme.of(
-                                    context,
-                                  ).colorScheme.primaryContainer,
-                                  backgroundColor: Colors.white24,
-                                  labelStyle: TextStyle(
-                                    color: selected
-                                        ? Theme.of(
-                                            context,
-                                          ).colorScheme.onPrimaryContainer
-                                        : Colors.white,
-                                  ),
-                                  side: BorderSide.none,
-                                  showCheckmark: false,
-                                );
-                              },
-                            ),
-                          ),
-                      ],
+                      ),
                     ),
                   ),
                 ),
@@ -328,3 +363,4 @@ class _MessageState extends StatelessWidget {
     );
   }
 }
+

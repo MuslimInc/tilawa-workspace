@@ -29,11 +29,10 @@ class _SavedReelsPageState extends State<SavedReelsPage> {
   Widget build(BuildContext context) {
     final l10n = context.l10n;
     final tokens = context.tokens;
+    final radius = tokens.resolveRadius(family: TilawaRadiusFamily.card);
 
     return TilawaShellChildScaffold(
-      // Material AppBar — Saved Reels is a secondary list, not a branded shell header.
-      // ignore: tilawa_lints/tilawa_ui_component
-      appBar: AppBar(title: Text(l10n.reelsSavedTitle)),
+      appBar: TilawaCatalogAppBar.titleOnly(title: l10n.reelsSavedTitle),
       body: BlocBuilder<SavedReelsCubit, SavedReelsState>(
         builder: (context, state) {
           return switch (state.status) {
@@ -42,93 +41,138 @@ class _SavedReelsPageState extends State<SavedReelsPage> {
               child: CircularProgressIndicator.adaptive(),
             ),
             SavedReelsStatus.error => Center(
-              child: Column(
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  Text(l10n.reelsLoadError),
-                  SizedBox(height: tokens.spaceMedium),
-                  TilawaButton(
-                    onPressed: () => context.read<SavedReelsCubit>().load(),
-                    text: l10n.reelsRetry,
-                  ),
-                ],
+              child: Padding(
+                padding: EdgeInsets.all(tokens.spaceLarge),
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    Text(
+                      l10n.reelsLoadError,
+                      textAlign: TextAlign.center,
+                      style: Theme.of(context).textTheme.bodyLarge,
+                    ),
+                    SizedBox(height: tokens.spaceMedium),
+                    TilawaButton(
+                      onPressed: () => context.read<SavedReelsCubit>().load(),
+                      text: l10n.reelsRetry,
+                    ),
+                  ],
+                ),
               ),
             ),
-            SavedReelsStatus.empty => Center(child: Text(l10n.reelsSavedEmpty)),
+            SavedReelsStatus.empty => TilawaEmptyState(
+              icon: Icons.bookmark_border,
+              title: l10n.reelsSavedEmpty,
+            ),
             SavedReelsStatus.ready => GridView.builder(
               padding: EdgeInsets.all(tokens.spaceMedium),
               gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
                 crossAxisCount: 2,
                 mainAxisSpacing: tokens.spaceSmall,
                 crossAxisSpacing: tokens.spaceSmall,
-                childAspectRatio: 9 / 14,
+                childAspectRatio: 9 / 16,
               ),
               itemCount: state.reels.length,
               itemBuilder: (context, index) {
                 final reel = state.reels[index];
-                return TilawaCard(
-                  onTap: () =>
-                      ReelsRoute(initialReelId: reel.id).push<void>(context),
-                  child: Stack(
-                    fit: StackFit.expand,
-                    children: [
-                      CachedNetworkImage(
-                        imageUrl: reel.thumbUrl,
-                        fit: BoxFit.cover,
-                      ),
-                      Positioned(
-                        left: tokens.spaceExtraSmall,
-                        right: tokens.spaceExtraSmall,
-                        bottom: tokens.spaceExtraSmall,
-                        child: Text(
-                          reel.sheikhName,
-                          maxLines: 2,
-                          overflow: TextOverflow.ellipsis,
-                          style: Theme.of(context).textTheme.labelMedium
-                              ?.copyWith(
-                                color: Colors.white,
-                                shadows: const [
-                                  Shadow(blurRadius: 6, color: Colors.black87),
-                                ],
+                // Sibling Stack: card navigates; unsave is a separate action.
+                return Stack(
+                  fit: StackFit.expand,
+                  children: [
+                    TilawaCard(
+                      padding: EdgeInsets.zero,
+                      expandHeight: true,
+                      borderRadius: radius,
+                      onTap: () => ReelsRoute(
+                        initialReelId: reel.id,
+                      ).push<void>(context),
+                      child: Stack(
+                        fit: StackFit.expand,
+                        children: [
+                          CachedNetworkImage(
+                            imageUrl: reel.thumbUrl,
+                            fit: BoxFit.cover,
+                            width: double.infinity,
+                            height: double.infinity,
+                          ),
+                          Positioned(
+                            left: 0,
+                            right: 0,
+                            bottom: 0,
+                            child: DecoratedBox(
+                              decoration: BoxDecoration(
+                                gradient: LinearGradient(
+                                  begin: Alignment.topCenter,
+                                  end: Alignment.bottomCenter,
+                                  colors: [
+                                    Colors.transparent,
+                                    Colors.black.withValues(alpha: 0.75),
+                                  ],
+                                ),
                               ),
-                        ),
+                              child: Padding(
+                                padding: EdgeInsets.fromLTRB(
+                                  tokens.spaceSmall,
+                                  tokens.spaceLarge,
+                                  tokens.spaceSmall,
+                                  tokens.spaceSmall,
+                                ),
+                                child: Column(
+                                  crossAxisAlignment: CrossAxisAlignment.start,
+                                  mainAxisSize: MainAxisSize.min,
+                                  children: [
+                                    Text(
+                                      ReelCategoryLabels.forId(
+                                        context,
+                                        reel.categoryId,
+                                      ),
+                                      maxLines: 1,
+                                      overflow: TextOverflow.ellipsis,
+                                      style: Theme.of(context)
+                                          .textTheme
+                                          .labelSmall
+                                          ?.copyWith(color: Colors.white70),
+                                    ),
+                                    Text(
+                                      reel.sheikhName,
+                                      maxLines: 2,
+                                      overflow: TextOverflow.ellipsis,
+                                      style: Theme.of(context)
+                                          .textTheme
+                                          .labelMedium
+                                          ?.copyWith(
+                                            color: Colors.white,
+                                            fontWeight: FontWeight.w600,
+                                          ),
+                                    ),
+                                  ],
+                                ),
+                              ),
+                            ),
+                          ),
+                        ],
                       ),
-                      Positioned(
-                        top: 0,
-                        right: 0,
+                    ),
+                    Positioned.directional(
+                      textDirection: Directionality.of(context),
+                      top: tokens.spaceExtraSmall,
+                      end: tokens.spaceExtraSmall,
+                      child: Material(
+                        color: Colors.black45,
+                        shape: const CircleBorder(),
                         child: IconButton(
-                          icon: const Icon(Icons.bookmark_remove_outlined),
-                          color: Colors.white,
+                          visualDensity: VisualDensity.compact,
+                          icon: const Icon(
+                            Icons.bookmark_remove_outlined,
+                            color: Colors.white,
+                          ),
+                          tooltip: l10n.reelsActionSave,
                           onPressed: () =>
                               context.read<SavedReelsCubit>().unsave(reel.id),
                         ),
                       ),
-                      Positioned(
-                        top: tokens.spaceExtraSmall,
-                        left: tokens.spaceExtraSmall,
-                        child: DecoratedBox(
-                          decoration: BoxDecoration(
-                            color: Colors.black45,
-                            borderRadius: BorderRadius.circular(8),
-                          ),
-                          child: Padding(
-                            padding: EdgeInsets.symmetric(
-                              horizontal: tokens.spaceExtraSmall,
-                              vertical: 2,
-                            ),
-                            child: Text(
-                              ReelCategoryLabels.forId(
-                                context,
-                                reel.categoryId,
-                              ),
-                              style: Theme.of(context).textTheme.labelSmall
-                                  ?.copyWith(color: Colors.white),
-                            ),
-                          ),
-                        ),
-                      ),
-                    ],
-                  ),
+                    ),
+                  ],
                 );
               },
             ),
