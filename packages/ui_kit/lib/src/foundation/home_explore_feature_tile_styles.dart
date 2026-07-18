@@ -14,6 +14,7 @@ enum HomeExploreFeature {
   quran,
   support,
   sessions,
+  reels,
 }
 
 /// Resolved icon styling for a [HomeExploreFeature] category tile.
