@@ -7,6 +7,27 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [2.1.8+86] - 2026-07-18 [TestFlight Production]
+
+### Added
+
+- **Home**: Expanded daily inspiration catalog and clearer primary-action /
+  learning-entry presentation on the dashboard.
+- **iOS**: Push notifications via APNs entitlements and remote-notification
+  background mode (MeMuslim production / TestFlight).
+
+### Changed
+
+- **Design**: MeMuslim UI refresh across home and shared surfaces.
+- **iOS**: Production flavor wired for MeMuslim TestFlight (`com.memuslim.app`),
+  including Google Sign-In and Firebase flavor config.
+
+### Fixed
+
+- **Prayer alarms**: Hardened native adhan tap delivery on Android cold start.
+- **Notifications**: Admin FCM broadcast to all users (paginated scans, chunked
+  multicast).
+
 ## [2.1.8+83] - 2026-07-17 [Google Play Production]
 
 ### Changed

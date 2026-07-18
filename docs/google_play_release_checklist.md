@@ -6,10 +6,11 @@ For policy gaps, phased remediation, and Console-only verification, see
 ## 1. Version and Branch
 
 - [ ] Confirm release branch is stable and merged to master.
-- [ ] Update app version in apps/tilawa/pubspec.yaml.
-- [ ] Update [`CHANGELOG.md`](../CHANGELOG.md) and Play copy in
-      [`release_notes.md`](release_notes.md) (en-US + ar).
-- [ ] Create and push release tag (example: v0.1.4+21).
+- [ ] Bump shared app version in `apps/tilawa/pubspec.yaml` (one version for
+      Android and iOS; see Versioning in [`release_notes.md`](release_notes.md)).
+- [ ] Update [`CHANGELOG.md`](../CHANGELOG.md) with a **Google Play** track
+      label, and Play copy in [`release_notes.md`](release_notes.md) (en-US + ar).
+- [ ] Create and push release tag (example: `v2.1.8+86`).
 
 ## 2. Security and Signing
 
@@ -55,3 +56,4 @@ For policy gaps, phased remediation, and Console-only verification, see
 - [ ] Monitor Crashlytics and ANR dashboards.
 - [ ] Monitor analytics for startup failures and playback regressions.
 - [ ] Prepare hotfix branch and rollback plan.
+

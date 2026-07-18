@@ -12,6 +12,35 @@ the changelog for full engineering detail.
 
 | Field | Value |
 |-------|--------|
+| Version | **2.1.8** (build **86**) |
+| Git tag | `v2.1.8+86` (pending) |
+| Date | 2026-07-18 |
+| Track | TestFlight Production (MeMuslim) |
+
+### What's new (en-US) — copy for Play Console
+
+```text
+• Refreshed home dashboard with richer daily inspiration
+• Push notifications on iOS (TestFlight / production)
+• More reliable prayer-alarm taps after cold start
+• Google Sign-In and Firebase wired for MeMuslim iOS
+```
+
+### ما الجديد (ar) — نص متجر Play
+
+```text
+• لوحة رئيسية محدّثة بإلهام يومي أغنى
+• إشعارات فورية على iOS (TestFlight / الإنتاج)
+• تنبيهات صلاة أوثق بعد التشغيل البارد
+• تسجيل Google وFirebase جاهزان لـ MeMuslim على iOS
+```
+
+---
+
+## Previous current release (2.1.8+83)
+
+| Field | Value |
+|-------|--------|
 | Version | **2.1.8** (build **83**) |
 | Git tag | `v2.1.8+83` (pending) |
 | Date | 2026-07-17 |
@@ -606,21 +635,40 @@ Older entries: see [`CHANGELOG.md`](../CHANGELOG.md).
 
 ## Unreleased
 
-_Move shipped notes to **Current release** when cutting a Play upload._
+_Move shipped notes to **Current release** when cutting a store upload._
+
+---
+
+## Versioning (Android + iOS)
+
+Tilawa keeps **one shared version** in [`apps/tilawa/pubspec.yaml`](../apps/tilawa/pubspec.yaml)
+(`x.y.z+build`). Flutter feeds both stores from that single value.
+
+- **Bump once** before any store upload (Play and/or TestFlight).
+- **Label the platform** in `Track` here and in [`CHANGELOG.md`](../CHANGELOG.md)
+  headings, e.g. `[Google Play Production]`, `[TestFlight Production]`, or
+  `[Both]`.
+- Upload **only** the store that needs the build. The other platform can stay on
+  its last published binary until you ship it with a newer `+build`.
+- Do **not** maintain separate Android/iOS version numbers in Gradle or Xcode.
 
 ---
 
 ## How to publish
 
-1. Before building, move shipped notes to **Current release**, update version,
-   build, date, track, and both Play Console language blocks (500 characters
-   maximum per language).
-2. Before building, record the same version and verified changes in
-   [`CHANGELOG.md`](../CHANGELOG.md). Version bump, release notes, and changelog
-   are one release-preparation change.
+1. Before building, bump `apps/tilawa/pubspec.yaml`, move shipped notes to
+   **Current release**, and set version, build, date, **platform track**, and
+   both language blocks (500 characters maximum per language for Play).
+2. Record the same version and verified changes in
+   [`CHANGELOG.md`](../CHANGELOG.md) with a platform label in the heading.
+   Version bump, release notes, and changelog are one release-preparation
+   change.
 3. Tag: `git tag -a v<version>+<build> -m "Release <version>+<build>"` and
    `git push origin v<version>+<build>`.
-4. Build: GitHub Actions **Android Release (Google Play)** workflow, or locally:
-   `dart run melos run tilawa:build:android:production`.
-5. Checklist: [`google_play_release_checklist.md`](google_play_release_checklist.md)
+4. Build only the platforms you are shipping:
+   - Android: GitHub Actions **Android Release (Google Play)**, or locally
+     `dart run melos run tilawa:build:android:production`.
+   - iOS: archive the **production** flavor for TestFlight (`com.memuslim.app`).
+5. Android checklist: [`google_play_release_checklist.md`](google_play_release_checklist.md)
+
 
