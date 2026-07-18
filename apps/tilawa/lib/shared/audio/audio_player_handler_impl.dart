@@ -906,12 +906,34 @@ class AudioPlayerHandlerImpl extends audio_service.BaseAudioHandler
     int index, {
     Duration? initialPosition,
   }) async {
+    await _configureSessionForQueue(queue);
     await _safeSetAudioSources(
       await _itemsToSources(queue),
       initialIndex: index,
       initialPosition: initialPosition,
     );
     await play();
+  }
+
+  Future<void> _configureSessionForQueue(
+    List<audio_service.MediaItem> queue,
+  ) async {
+    final bool isRadio = queue.any(
+      (item) =>
+          item.extras?['source'] == 'radio' ||
+          item.extras?['live'] == true ||
+          item.id.startsWith('radio:'),
+    );
+    try {
+      final AudioSession session = _testSession ?? await AudioSession.instance;
+      await session.configure(
+        isRadio
+            ? const AudioSessionConfiguration.music()
+            : const AudioSessionConfiguration.speech(),
+      );
+    } catch (e) {
+      log('AudioSession reconfigure failed: $e');
+    }
   }
 
   @override

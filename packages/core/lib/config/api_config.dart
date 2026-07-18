@@ -8,6 +8,7 @@ class ApiConfig {
   static const String recitersPath = '/reciters';
   static const String videosPath = '/videos';
   static const String videoTypesPath = '/video_types';
+  static const String radiosPath = '/radios';
 
   // Helpers
   static String reciters({String? language}) {
@@ -29,5 +30,12 @@ class ApiConfig {
       return '$baseUrl$videoTypesPath';
     }
     return '$baseUrl$videoTypesPath?language=$language';
+  }
+
+  static String radios({String? language}) {
+    if (language == null || language.isEmpty) {
+      return '$baseUrl$radiosPath';
+    }
+    return '$baseUrl$radiosPath?language=$language';
   }
 }

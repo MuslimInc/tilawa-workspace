@@ -151,6 +151,7 @@ File: `home_quick_tools_section.dart`
 - Lighter visual weight than primary tiles (decorative radius, icon box)
 - Reciters: `openHomeRecitersTab(context)` — tab selection, not a new route
 - Qibla: `QiblaRoute`; Tasbeeh: `TasbeehRoute`
+- Reels and Radio live in More — do not add them here (keeps the row at 3)
 
 ---
 
@@ -162,7 +163,7 @@ Files: `home_more_actions_group.dart`, `home_grouped_list_row.dart`
 - Row: tinted icon box (`iconSizeLarge`) + title + optional subtitle + RTL chevron
 - Min height: `tokens.minInteractiveDimension * 2` (~88dp)
 - Title: `titleLarge` w600; subtitle: `bodyLarge` on `onSurfaceVariant`
-- Items: History, Favorites, Downloads, Support Tilawa
+- Items: Reels, Radio, History, Favorites, Downloads, Support Tilawa
 
 Reciters, Qibla, and Tasbeeh belong in quick tools — not in More.
 
@@ -276,6 +277,7 @@ flutter test test/features/home/
 
 Manual: light + dark, RTL Arabic, text scale 1.4, hero snap, tutor pin when
 flag on.
+
 
 
 

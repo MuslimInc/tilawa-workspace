@@ -11,8 +11,9 @@ import 'home_grouped_list_row.dart';
 
 /// Grouped list of secondary non-nav destinations — More zone.
 ///
-/// Holds the less-frequent library/account destinations (History, Favorites,
-/// Downloads, Support). One raised card with hairline dividers.
+/// Holds media discovery (Reels, Radio) plus library/account destinations
+/// (History, Favorites, Downloads, Support). One raised card with hairline
+/// dividers.
 class HomeMoreActionsGroup extends StatelessWidget {
   const HomeMoreActionsGroup({super.key});
 
@@ -67,10 +68,23 @@ class _MoreActionsItem {
 }
 
 abstract final class _MoreActionsCatalog {
-  /// Secondary non-nav destinations — weekly/setup frequency.
+  /// Media discovery first, then weekly/setup library destinations.
   static List<_MoreActionsItem> items(BuildContext context) {
     final l10n = context.l10n;
+    final product = Theme.of(context).productColors;
     return <_MoreActionsItem>[
+      _MoreActionsItem(
+        icon: Icons.video_library_rounded,
+        iconTint: product.exploreFeatureSemanticTint(HomeExploreFeature.reels),
+        title: l10n.reelsTitle,
+        onTap: () => unawaited(const ReelsRoute().push<void>(context)),
+      ),
+      _MoreActionsItem(
+        icon: Icons.radio_rounded,
+        iconTint: product.exploreFeatureSemanticTint(HomeExploreFeature.radio),
+        title: l10n.radioTitle,
+        onTap: () => unawaited(const RadioRoute().push<void>(context)),
+      ),
       _MoreActionsItem(
         icon: TilawaIcons.history,
         iconTint: TilawaSemanticTint.scholar,

@@ -155,15 +155,17 @@ class _MiniPlayerSnapshot {
   final bool isPlaybackStalled;
 
   static _MiniPlayerSnapshot fromState(AudioPlayerState state) {
+    final bool isRadio = RadioPlaybackMapper.isRadioAudio(state.currentAudio);
     final PositionData? data = state.positionData;
-    final double progress = data == null || data.duration.inMilliseconds == 0
+    final double progress =
+        isRadio || data == null || data.duration.inMilliseconds == 0
         ? 0.0
         : data.position.inMilliseconds / data.duration.inMilliseconds;
     return _MiniPlayerSnapshot(
       progress: progress.clamp(0.0, 1.0),
       isPlaying: state.isPlaying,
-      canGoPrevious: state.canGoPrevious,
-      canGoNext: state.canGoNext,
+      canGoPrevious: !isRadio && state.canGoPrevious,
+      canGoNext: !isRadio && state.canGoNext,
       isSleepTimerActive: state.isSleepTimerActive,
       isPlaybackStalled: state.isPlaybackStalled,
     );
@@ -265,7 +267,10 @@ class _YtMusicMiniPlayerBody extends StatelessWidget {
     final bool sleepTimerEnabled =
         !(shellPillLayout || shellDockLayout) &&
         context.watch<SettingsCubit>().state.isSleepTimerEnabled;
-    final String subtitle = audio.artist ?? context.l10n.unknownReciter;
+    final bool isRadio = RadioPlaybackMapper.isRadioAudio(audio);
+    final String subtitle = isRadio
+        ? context.l10n.radioLive
+        : (audio.artist ?? context.l10n.unknownReciter);
     final TextStyle titleStyle =
         (theme.textTheme.titleSmall ?? const TextStyle()).copyWith(
           fontWeight: barTokens.titleFontWeight,
@@ -325,6 +330,11 @@ class _YtMusicMiniPlayerBody extends StatelessWidget {
             artwork: artwork,
             identityChromeOpacity: identityChromeOpacity,
             progress: snapshot.progress,
+            progressBarOverride: isRadio
+                ? _RadioLiveProgressBand(
+                    isBuffering: snapshot.isPlaybackStalled,
+                  )
+                : null,
             isPlaying: snapshot.isPlaying,
             isPlaybackStalled: snapshot.isPlaybackStalled,
             canGoPrevious: snapshot.canGoPrevious,
@@ -422,6 +432,28 @@ class _MiniArtwork extends StatelessWidget {
                     const SizedBox.shrink(),
               ),
       ),
+    );
+  }
+}
+
+/// Slim top-band for live radio: indeterminate while buffering, solid when live.
+class _RadioLiveProgressBand extends StatelessWidget {
+  const _RadioLiveProgressBand({required this.isBuffering});
+
+  final bool isBuffering;
+
+  @override
+  Widget build(BuildContext context) {
+    final tokens = Theme.of(context).tokens;
+    final barTokens = Theme.of(context).componentTokens.mediaPlayerBar;
+    final colorScheme = Theme.of(context).colorScheme;
+    return LinearProgressIndicator(
+      value: isBuffering ? null : 1.0,
+      backgroundColor: barTokens.progressTrackBackgroundColor,
+      valueColor: AlwaysStoppedAnimation<Color>(
+        isBuffering ? colorScheme.primary : colorScheme.error,
+      ),
+      minHeight: tokens.progressHeight,
     );
   }
 }

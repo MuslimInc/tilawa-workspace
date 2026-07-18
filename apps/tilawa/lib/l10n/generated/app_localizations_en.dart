@@ -4301,4 +4301,90 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get reelsShareFile => 'Share video file';
+
+  @override
+  String get radioTitle => 'Islamic Radio';
+
+  @override
+  String get radioNowPlaying => 'Now playing';
+
+  @override
+  String get radioFeatured => 'Featured';
+
+  @override
+  String get radioFavorites => 'Favorites';
+
+  @override
+  String get radioRecentlyPlayed => 'Recently played';
+
+  @override
+  String get radioAllStations => 'All stations';
+
+  @override
+  String get radioSearchHint => 'Search stations';
+
+  @override
+  String get radioSearchResults => 'Search results';
+
+  @override
+  String get radioNoSearchResults => 'No stations match your search';
+
+  @override
+  String get radioLive => 'LIVE';
+
+  @override
+  String get radioBuffering => 'Buffering…';
+
+  @override
+  String get radioAddFavorite => 'Add to favorites';
+
+  @override
+  String get radioRemoveFavorite => 'Remove from favorites';
+
+  @override
+  String get radioShare => 'Share';
+
+  @override
+  String radioShareText(String name, String url) {
+    return '$name\n$url';
+  }
+
+  @override
+  String get radioSleepTimer => 'Sleep timer';
+
+  @override
+  String get radioVolume => 'Volume';
+
+  @override
+  String get radioVolumeHint => 'Use your device volume buttons';
+
+  @override
+  String get radioStop => 'Stop';
+
+  @override
+  String get radioEmptyTitle => 'No stations available';
+
+  @override
+  String get radioEmptyMessage =>
+      'We could not find any radio stations. Try again.';
+
+  @override
+  String get radioErrorTitle => 'Unable to load radio';
+
+  @override
+  String get radioErrorGeneric => 'Something went wrong. Please try again.';
+
+  @override
+  String get radioErrorOffline =>
+      'You appear to be offline. Showing saved stations when available.';
+
+  @override
+  String get radioErrorTimeout => 'The request timed out. Please try again.';
+
+  @override
+  String get radioOfflineBanner =>
+      'You are offline. Showing cached stations. Streaming needs a connection.';
+
+  @override
+  String get homeQuickRadio => 'Radio';
 }

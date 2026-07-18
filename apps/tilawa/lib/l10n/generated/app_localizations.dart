@@ -7564,6 +7564,168 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Share video file'**
   String get reelsShareFile;
+
+  /// Islamic Radio feature title
+  ///
+  /// In en, this message translates to:
+  /// **'Islamic Radio'**
+  String get radioTitle;
+
+  /// Radio full player app bar title
+  ///
+  /// In en, this message translates to:
+  /// **'Now playing'**
+  String get radioNowPlaying;
+
+  /// Featured station section label
+  ///
+  /// In en, this message translates to:
+  /// **'Featured'**
+  String get radioFeatured;
+
+  /// Radio favorites section title
+  ///
+  /// In en, this message translates to:
+  /// **'Favorites'**
+  String get radioFavorites;
+
+  /// Radio recently played section
+  ///
+  /// In en, this message translates to:
+  /// **'Recently played'**
+  String get radioRecentlyPlayed;
+
+  /// All radio stations section
+  ///
+  /// In en, this message translates to:
+  /// **'All stations'**
+  String get radioAllStations;
+
+  /// Radio search field hint
+  ///
+  /// In en, this message translates to:
+  /// **'Search stations'**
+  String get radioSearchHint;
+
+  /// Radio search results section
+  ///
+  /// In en, this message translates to:
+  /// **'Search results'**
+  String get radioSearchResults;
+
+  /// Radio empty search results
+  ///
+  /// In en, this message translates to:
+  /// **'No stations match your search'**
+  String get radioNoSearchResults;
+
+  /// Live streaming badge
+  ///
+  /// In en, this message translates to:
+  /// **'LIVE'**
+  String get radioLive;
+
+  /// Radio buffering status
+  ///
+  /// In en, this message translates to:
+  /// **'Buffering…'**
+  String get radioBuffering;
+
+  /// Add radio station to favorites
+  ///
+  /// In en, this message translates to:
+  /// **'Add to favorites'**
+  String get radioAddFavorite;
+
+  /// Remove radio station from favorites
+  ///
+  /// In en, this message translates to:
+  /// **'Remove from favorites'**
+  String get radioRemoveFavorite;
+
+  /// Share radio station
+  ///
+  /// In en, this message translates to:
+  /// **'Share'**
+  String get radioShare;
+
+  /// Share sheet body for a radio station
+  ///
+  /// In en, this message translates to:
+  /// **'{name}\n{url}'**
+  String radioShareText(String name, String url);
+
+  /// Radio sleep timer action
+  ///
+  /// In en, this message translates to:
+  /// **'Sleep timer'**
+  String get radioSleepTimer;
+
+  /// Radio volume action
+  ///
+  /// In en, this message translates to:
+  /// **'Volume'**
+  String get radioVolume;
+
+  /// Hint for system volume
+  ///
+  /// In en, this message translates to:
+  /// **'Use your device volume buttons'**
+  String get radioVolumeHint;
+
+  /// Stop radio playback
+  ///
+  /// In en, this message translates to:
+  /// **'Stop'**
+  String get radioStop;
+
+  /// Radio empty catalog title
+  ///
+  /// In en, this message translates to:
+  /// **'No stations available'**
+  String get radioEmptyTitle;
+
+  /// Radio empty catalog message
+  ///
+  /// In en, this message translates to:
+  /// **'We could not find any radio stations. Try again.'**
+  String get radioEmptyMessage;
+
+  /// Radio error title
+  ///
+  /// In en, this message translates to:
+  /// **'Unable to load radio'**
+  String get radioErrorTitle;
+
+  /// Radio generic error
+  ///
+  /// In en, this message translates to:
+  /// **'Something went wrong. Please try again.'**
+  String get radioErrorGeneric;
+
+  /// Radio offline error
+  ///
+  /// In en, this message translates to:
+  /// **'You appear to be offline. Showing saved stations when available.'**
+  String get radioErrorOffline;
+
+  /// Radio timeout error
+  ///
+  /// In en, this message translates to:
+  /// **'The request timed out. Please try again.'**
+  String get radioErrorTimeout;
+
+  /// Offline banner on radio home
+  ///
+  /// In en, this message translates to:
+  /// **'You are offline. Showing cached stations. Streaming needs a connection.'**
+  String get radioOfflineBanner;
+
+  /// Home quick tools label for Islamic Radio
+  ///
+  /// In en, this message translates to:
+  /// **'Radio'**
+  String get homeQuickRadio;
 }
 
 class _AppLocalizationsDelegate

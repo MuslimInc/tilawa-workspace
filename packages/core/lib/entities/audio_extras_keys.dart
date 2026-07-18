@@ -5,6 +5,10 @@ abstract final class AudioExtrasKeys {
   static const String moshafName = 'moshafName';
   static const String nameAr = 'nameAr';
   static const String ayahNumber = 'ayahNumber';
+  static const String source = 'source';
+  static const String live = 'live';
+  static const String stationId = 'station_id';
+  static const String sourceRadio = 'radio';
 }
 
 /// Safe readers for the untyped values stored in [AudioEntity.extras].

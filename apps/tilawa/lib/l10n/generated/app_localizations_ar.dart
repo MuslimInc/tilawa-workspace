@@ -4261,4 +4261,89 @@ class AppLocalizationsAr extends AppLocalizations {
 
   @override
   String get reelsShareFile => 'مشاركة ملف الفيديو';
+
+  @override
+  String get radioTitle => 'إذاعة إسلامية';
+
+  @override
+  String get radioNowPlaying => 'يُبث الآن';
+
+  @override
+  String get radioFeatured => 'مميزة';
+
+  @override
+  String get radioFavorites => 'المفضلة';
+
+  @override
+  String get radioRecentlyPlayed => 'شُغّلت مؤخرًا';
+
+  @override
+  String get radioAllStations => 'كل المحطات';
+
+  @override
+  String get radioSearchHint => 'ابحث عن محطة';
+
+  @override
+  String get radioSearchResults => 'نتائج البحث';
+
+  @override
+  String get radioNoSearchResults => 'لا توجد محطات تطابق بحثك';
+
+  @override
+  String get radioLive => 'مباشر';
+
+  @override
+  String get radioBuffering => 'جارٍ التحميل…';
+
+  @override
+  String get radioAddFavorite => 'إضافة إلى المفضلة';
+
+  @override
+  String get radioRemoveFavorite => 'إزالة من المفضلة';
+
+  @override
+  String get radioShare => 'مشاركة';
+
+  @override
+  String radioShareText(String name, String url) {
+    return '$name\n$url';
+  }
+
+  @override
+  String get radioSleepTimer => 'مؤقت النوم';
+
+  @override
+  String get radioVolume => 'الصوت';
+
+  @override
+  String get radioVolumeHint => 'استخدم أزرار الصوت في جهازك';
+
+  @override
+  String get radioStop => 'إيقاف';
+
+  @override
+  String get radioEmptyTitle => 'لا توجد محطات';
+
+  @override
+  String get radioEmptyMessage => 'تعذر العثور على محطات. حاول مرة أخرى.';
+
+  @override
+  String get radioErrorTitle => 'تعذر تحميل الإذاعة';
+
+  @override
+  String get radioErrorGeneric => 'حدث خطأ. يرجى المحاولة مرة أخرى.';
+
+  @override
+  String get radioErrorOffline =>
+      'يبدو أنك غير متصل. نعرض المحطات المحفوظة إن وُجدت.';
+
+  @override
+  String get radioErrorTimeout => 'انتهت مهلة الطلب. يرجى المحاولة مرة أخرى.';
+
+  @override
+  String get radioOfflineBanner =>
+      'أنت غير متصل. نعرض المحطات المخزّنة. البث يحتاج اتصالًا.';
+
+  @override
+  String get homeQuickRadio => 'إذاعة';
 }

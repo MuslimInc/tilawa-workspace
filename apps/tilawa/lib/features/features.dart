@@ -7,6 +7,7 @@ export 'localization/localization.dart';
 export 'playlists/playlists.dart';
 export 'prayer_times/prayer_times.dart';
 export 'premium/premium.dart';
+export 'radio/radio.dart';
 export 'support/support.dart';
 export 'quran_reader/quran_reader.dart';
 export 'reciters/reciters.dart';

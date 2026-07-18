@@ -36,6 +36,8 @@ import '../features/prayer_times/presentation/screens/prayer_alerts_permission_s
 import '../features/prayer_times/presentation/screens/prayer_notification_status_screen.dart';
 import '../features/prayer_times/presentation/widgets/prayer_times_screen_scope.dart';
 import '../features/qibla/presentation/widgets/qibla_screen_scope.dart';
+import '../features/radio/presentation/widgets/radio_home_scope.dart';
+import '../features/radio/presentation/widgets/radio_player_scope.dart';
 import '../features/reciters/presentation/bloc/reciter_details_bloc.dart';
 import '../features/reciters/presentation/bloc/reciter_download_bloc.dart';
 import '../features/reciters/presentation/screens/favorites_screen.dart';
@@ -83,6 +85,12 @@ part 'app_router_config.g.dart';
     TypedGoRoute<BookmarksRoute>(path: '/bookmarks'),
     TypedGoRoute<HistoryRoute>(path: '/history'),
     TypedGoRoute<QiblaRoute>(path: '/qibla'),
+    TypedGoRoute<RadioRoute>(
+      path: '/radio',
+      routes: <TypedRoute<RouteData>>[
+        TypedGoRoute<RadioPlayerRoute>(path: 'player/:stationId'),
+      ],
+    ),
     TypedGoRoute<SmartKhatmaHubRoute>(path: '/smart-khatma'),
     TypedGoRoute<RouteListRoute>(path: '/routes'),
     TypedGoRoute<NotificationDebugLabRoute>(path: '/debug/notifications'),
@@ -480,6 +488,27 @@ class QiblaRoute extends GoRouteData with $QiblaRoute, TilawaRouteData {
   @override
   Widget build(BuildContext context, GoRouterState state) {
     return const QiblaScreenScope();
+  }
+}
+
+class RadioRoute extends GoRouteData with $RadioRoute, TilawaRouteData {
+  const RadioRoute();
+
+  @override
+  Widget build(BuildContext context, GoRouterState state) {
+    return const RadioHomeScope();
+  }
+}
+
+class RadioPlayerRoute extends GoRouteData
+    with $RadioPlayerRoute, TilawaRouteData {
+  const RadioPlayerRoute({required this.stationId});
+
+  final String stationId;
+
+  @override
+  Widget build(BuildContext context, GoRouterState state) {
+    return RadioPlayerScope(stationId: stationId);
   }
 }
 

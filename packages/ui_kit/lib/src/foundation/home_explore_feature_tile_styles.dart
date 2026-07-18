@@ -15,6 +15,7 @@ enum HomeExploreFeature {
   support,
   sessions,
   reels,
+  radio,
 }
 
 /// Resolved icon styling for a [HomeExploreFeature] category tile.

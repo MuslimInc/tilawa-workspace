@@ -388,4 +388,3 @@ class _ErrorBody extends StatelessWidget {
     );
   }
 }
-

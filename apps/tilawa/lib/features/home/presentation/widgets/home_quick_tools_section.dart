@@ -9,7 +9,9 @@ import 'package:tilawa_ui_kit/tilawa_ui_kit.dart';
 
 import 'home_shell_tab_navigation.dart';
 
-/// Compact shortcuts — Reels, Reciters, Qibla, Tasbeeh.
+/// Secondary tools branch — Reciters, Qibla, Tasbeeh.
+///
+/// Soft mind-map island under worship; lighter tiles than primary actions.
 class HomeQuickToolsSection extends StatelessWidget {
   const HomeQuickToolsSection({super.key});
 
@@ -133,16 +135,6 @@ abstract final class _QuickToolsCatalog {
   static List<_QuickToolItem> items(BuildContext context) {
     final l10n = context.l10n;
     return <_QuickToolItem>[
-      _QuickToolItem(
-        feature: HomeExploreFeature.reels,
-        buildIcon: (color, size) => Icon(
-          Icons.play_circle_outline,
-          size: size,
-          color: color,
-        ),
-        label: l10n.homeQuickReels,
-        onTap: () => const ReelsRoute().push<void>(context),
-      ),
       _QuickToolItem(
         feature: HomeExploreFeature.reciters,
         buildIcon: (color, size) => Icon(

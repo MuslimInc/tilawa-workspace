@@ -141,6 +141,14 @@ class AnalyticsEvents {
   static const String reelReaction = 'reel_reaction';
   static const String reelSave = 'reel_save';
   static const String reelShare = 'reel_share';
+
+  // Islamic Radio
+  static const String radioStationOpened = 'radio_station_opened';
+  static const String radioPlay = 'radio_play';
+  static const String radioStop = 'radio_stop';
+  static const String radioFavorite = 'radio_favorite';
+  static const String radioShare = 'radio_share';
+  static const String radioListenDuration = 'radio_listen_duration';
 }
 
 class AnalyticsParams {
@@ -226,6 +234,12 @@ class AnalyticsParams {
   static const String reelId = 'reel_id';
   static const String reactionType = 'reaction_type';
   static const String shareMode = 'share_mode';
+
+  // Islamic Radio
+  static const String radioStationId = 'radio_station_id';
+  static const String radioStationName = 'radio_station_name';
+  static const String listenDurationSeconds = 'listen_duration_seconds';
+  static const String isFavorite = 'is_favorite';
 }
 
 class UserProperties {
