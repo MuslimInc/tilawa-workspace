@@ -299,32 +299,27 @@ class _BottomNavBar extends StatelessWidget {
                     child: GestureDetector(
                       behavior: HitTestBehavior.opaque,
                       onHorizontalDragEnd: _handleHorizontalDragEnd,
-                      child: Padding(
-                        padding: EdgeInsets.symmetric(
-                          vertical: tokens.bottomNavInternalPadding,
-                        ),
-                        child: Row(
-                          children: [
-                            for (int i = 0; i < destinations.length; i++)
-                              Expanded(
-                                child: Align(
-                                  alignment: Alignment.center,
-                                  child: _NavButton(
-                                    key: Key('nav_button_$i'),
-                                    destination: destinations[i],
-                                    isSelected:
-                                        selectedIndex != null &&
-                                        selectedIndex == i,
-                                    onTap: () => onDestinationSelected(i),
-                                    borderRadius: slotBorderRadius,
-                                    slotWidth: slotWidth,
-                                    rowHeight: rowHeight,
-                                    iconAreaHeight: iconAreaHeight,
-                                  ),
+                      child: Row(
+                        children: [
+                          for (int i = 0; i < destinations.length; i++)
+                            Expanded(
+                              child: Align(
+                                alignment: Alignment.center,
+                                child: _NavButton(
+                                  key: Key('nav_button_$i'),
+                                  destination: destinations[i],
+                                  isSelected:
+                                      selectedIndex != null &&
+                                      selectedIndex == i,
+                                  onTap: () => onDestinationSelected(i),
+                                  borderRadius: slotBorderRadius,
+                                  slotWidth: slotWidth,
+                                  rowHeight: rowHeight,
+                                  iconAreaHeight: iconAreaHeight,
                                 ),
                               ),
-                          ],
-                        ),
+                            ),
+                        ],
                       ),
                     ),
                   );

@@ -76,12 +76,11 @@ extension TilawaSafeAreaX on BuildContext {
   /// - system bottom safe area + buffer when available
   /// - fallback spacing when Android reports 0 bottom safe area
   double get floatingBottomPadding {
-    final buffer = theme.tokens.spaceSmall;
     final fallback = theme.tokens.spaceExtraLarge;
     final double bottomInset = effectiveSystemBottomSafeArea;
 
     if (bottomInset > 0) {
-      return bottomInset + buffer;
+      return bottomInset;
     }
 
     return fallback;
