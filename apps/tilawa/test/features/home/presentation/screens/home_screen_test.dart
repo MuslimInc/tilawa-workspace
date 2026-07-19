@@ -27,7 +27,6 @@ import 'package:tilawa/features/quran_sessions/domain/entities/quran_sessions_pl
 import 'package:tilawa/features/quran_sessions/quran_sessions_platform_config_store.dart';
 import 'package:tilawa/features/home/presentation/widgets/home_daily_inspiration_section.dart';
 import 'package:tilawa/features/home/presentation/widgets/home_dashboard_body_skeleton.dart';
-import 'package:tilawa/features/home/presentation/widgets/home_hero_glass_surface.dart';
 import 'package:tilawa/features/home/presentation/widgets/home_more_actions_group.dart';
 import 'package:tilawa/features/home/presentation/widgets/home_primary_actions_section.dart';
 import 'package:tilawa/features/home/presentation/widgets/home_quick_tools_section.dart';
@@ -387,7 +386,7 @@ void main() {
     expect(HomeNextPrayerTime.collapseScrollExtent(homeContext), 0);
   });
 
-  testWidgets('paints status bar chrome with bottom-nav surface color', (
+  testWidgets('keeps transparent status bar spacer for immersive hero', (
     tester,
   ) async {
     const double topInset = 44;
@@ -415,17 +414,11 @@ void main() {
     expect(chrome, findsOneWidget);
 
     final ColoredBox box = tester.widget<ColoredBox>(chrome);
-    final ThemeData theme = AppTheme.getLightTheme(
-      primaryColor: AppColors.defaultPrimary,
-    );
-    expect(
-      box.color,
-      theme.componentTokens.adaptiveShell.bottomNavBackgroundColor,
-    );
+    expect(box.color, Colors.transparent);
     expect(tester.getSize(chrome).height, topInset);
   });
 
-  testWidgets('keeps dashboard content below status bar chrome', (
+  testWidgets('keeps header greeting below status bar inset', (
     tester,
   ) async {
     const double topInset = 44;
@@ -441,7 +434,7 @@ void main() {
     await tester.pumpWidget(
       MediaQuery(
         data: const MediaQueryData(padding: EdgeInsets.only(top: topInset)),
-        child: _HomeScreenHarness(bloc: bloc, locale: 'ar'),
+        child: _HomeScreenHarness(bloc: bloc, locale: 'en'),
       ),
     );
     await tester.pump();
@@ -449,10 +442,10 @@ void main() {
       await tester.pump(const Duration(milliseconds: 16));
     }
 
-    final Offset heroTop = tester.getTopLeft(
-      find.byType(HomeHeroGlassSurface).first,
-    );
-    expect(heroTop.dy, greaterThanOrEqualTo(topInset));
+    final BuildContext homeContext = tester.element(find.byType(HomeScreen));
+    final l10n = AppLocalizations.of(homeContext);
+    final Offset greetingTop = tester.getTopLeft(find.text(l10n.homeGreeting));
+    expect(greetingTop.dy, greaterThanOrEqualTo(topInset));
   });
 
   testWidgets('Home avoids bottom-nav duplicate shortcuts', (tester) async {

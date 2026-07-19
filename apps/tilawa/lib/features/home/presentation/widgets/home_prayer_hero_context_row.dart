@@ -68,9 +68,35 @@ class HomePrayerHeroContextRow extends StatelessWidget {
       crossAxisAlignment: CrossAxisAlignment.center,
       spacing: tokens.spaceSmall,
       children: [
+        Expanded(
+          child: TilawaInteractiveSurface(
+            onTap: () => showHomeHijriCalendarSheet(context),
+            borderRadius: BorderRadius.circular(tokens.radiusSmall),
+            semanticLabel: context.l10n.hijriCalendarOpenLabel,
+            child: ConstrainedBox(
+              constraints: BoxConstraints(
+                minHeight: tokens.minInteractiveDimension,
+              ),
+              child: Align(
+                alignment: AlignmentDirectional.centerStart,
+                child: Text(
+                  hijriDateLine,
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                  textAlign: TextAlign.start,
+                  style: theme.textTheme.labelSmall?.copyWith(
+                    color: resolvedMuted,
+                    fontWeight: FontWeight.w400,
+                    letterSpacing: 0.2,
+                  ),
+                ),
+              ),
+            ),
+          ),
+        ),
         Flexible(
           child: Align(
-            alignment: AlignmentDirectional.centerStart,
+            alignment: AlignmentDirectional.centerEnd,
             child: _HomePrayerHeroLocationChip(
               label: locationLabel,
               ink: resolvedInk,
@@ -79,29 +105,6 @@ class HomePrayerHeroContextRow extends StatelessWidget {
               chipBorder: resolvedChipBorder,
               isRefreshingLocation: isRefreshingLocation,
               onRefreshLocation: onRefreshLocation,
-            ),
-          ),
-        ),
-        TilawaInteractiveSurface(
-          onTap: () => showHomeHijriCalendarSheet(context),
-          borderRadius: BorderRadius.circular(tokens.radiusSmall),
-          semanticLabel: context.l10n.hijriCalendarOpenLabel,
-          child: ConstrainedBox(
-            constraints: BoxConstraints(
-              minHeight: tokens.minInteractiveDimension,
-            ),
-            child: Align(
-              alignment: AlignmentDirectional.centerEnd,
-              child: Text(
-                hijriDateLine,
-                maxLines: 1,
-                overflow: TextOverflow.ellipsis,
-                textAlign: TextAlign.end,
-                style: theme.textTheme.labelSmall?.copyWith(
-                  color: resolvedMuted,
-                  fontWeight: FontWeight.w600,
-                ),
-              ),
             ),
           ),
         ),

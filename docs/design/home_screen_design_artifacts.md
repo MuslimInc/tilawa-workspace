@@ -33,8 +33,8 @@ RTL layout.
 
 ## Visual hierarchy (eye path)
 
-1. **Now** — prayer/time context in the hero (and optional pinned tutor promo
-   when Quran Sessions is enabled)
+1. **Now** — immersive header zone (greeting, next prayer, today’s strip; and
+   optional pinned tutor promo when Quran Sessions is enabled)
 2. **Daily entry** — two featured primary tiles (Mushaf + Athkar), equal weight
 3. **Supporting tools** — lighter compact row (Reciters, Qibla, Tasbeeh)
 4. **Personal / library** — optional today plan, then flat More list (Reels, Radio, History, Favorites, Downloads, Support)
@@ -104,4 +104,5 @@ Do not implement from: `docs/product/home_screen_redesign.md`,
 `docs/plans/home_screen_redesign_plan.md`,
 `docs/migrations/home_screen_redesign_migration.md`,
 `docs/specs/home_screen_acceptance_criteria.md`.
+
 

@@ -43,44 +43,44 @@ void main() {
     expect(tokens.gradientBottomEnd, AppColors.homeNextPrayerGradientBottom);
   });
 
-  test('system overlay uses dark icons on light day gradient', () {
+  test('system overlay uses light icons on dark day gradient', () {
     final style = HomeHeroBackground.systemOverlayStyle(
       TilawaHomeNextPrayerHeroTokens.day(),
     );
 
-    expect(style.statusBarIconBrightness, Brightness.dark);
+    expect(style.statusBarIconBrightness, Brightness.light);
   });
 
-  test('system overlay uses dark icons on pre-dawn gradient', () {
+  test('system overlay uses light icons on pre-dawn gradient', () {
     final style = HomeHeroBackground.systemOverlayStyle(
       TilawaHomeNextPrayerHeroTokens.preDawn(),
     );
 
-    expect(style.statusBarIconBrightness, Brightness.dark);
+    expect(style.statusBarIconBrightness, Brightness.light);
   });
 
-  test('system overlay uses dark icons on night gradient', () {
+  test('system overlay uses light icons on night gradient', () {
     final style = HomeHeroBackground.systemOverlayStyle(
       TilawaHomeNextPrayerHeroTokens.night(),
     );
 
-    expect(style.statusBarIconBrightness, Brightness.dark);
+    expect(style.statusBarIconBrightness, Brightness.light);
   });
 
-  test('pre-dawn hero uses dark chrome ink not cream foreground', () {
+  test('pre-dawn hero uses white ink on dark forest band', () {
     final tokens = TilawaHomeNextPrayerHeroTokens.preDawn();
 
-    expect(HomeHeroPhotoTheme.isDarkHero(tokens), isFalse);
+    expect(HomeHeroPhotoTheme.isDarkHero(tokens), isTrue);
     expect(
       HomeHeroPhotoTheme.heroChromeInk(tokens),
       AppColors.homeNextPrayerGradientForeground,
     );
   });
 
-  test('night hero uses dark chrome ink on light cool canvas', () {
+  test('night hero uses white ink on deep forest band', () {
     final tokens = TilawaHomeNextPrayerHeroTokens.night();
 
-    expect(HomeHeroPhotoTheme.isDarkHero(tokens), isFalse);
+    expect(HomeHeroPhotoTheme.isDarkHero(tokens), isTrue);
     expect(
       HomeHeroPhotoTheme.heroChromeInk(tokens),
       AppColors.homeNextPrayerGradientNightForeground,

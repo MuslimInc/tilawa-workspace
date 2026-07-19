@@ -41,6 +41,33 @@ void main() {
     );
   });
 
+  test('attaches portrait artUri for mapped reciters', () {
+    const ReciterEntity reciter = ReciterEntity(
+      id: 51,
+      name: 'Abdulbasit Abdulsamad',
+      letter: 'A',
+      date: '2020',
+      moshaf: <MoshafEntity>[
+        MoshafEntity(
+          id: 10,
+          name: 'Hafs',
+          server: 'https://cdn.example.com/',
+          surahList: '1',
+          surahTotal: 1,
+          moshafType: 1,
+        ),
+      ],
+    );
+
+    final ReciterAudioCatalog catalog = builder.build(<ReciterEntity>[reciter]);
+
+    expect(catalog.tracks, hasLength(1));
+    expect(
+      catalog.tracks.single.artUri,
+      startsWith('https://tvquran.com/uploads/authors/images/'),
+    );
+  });
+
   test('skips invalid constructed URLs', () {
     const ReciterEntity reciter = ReciterEntity(
       id: 1,

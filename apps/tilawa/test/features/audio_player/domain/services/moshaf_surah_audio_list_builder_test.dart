@@ -33,12 +33,31 @@ void main() {
     final List<AudioEntity>? tracks = await builder.build(
       moshaf,
       reciterName: 'Reciter',
-      reciterId: '1',
+      reciterId: '999999',
     );
 
     expect(tracks, hasLength(2));
     expect(tracks!.first.title, contains('Al-Fatiha'));
     expect(tracks.first.artist, 'Reciter');
+    expect(tracks.first.artUri, isNull);
+  });
+
+  test('build attaches portrait artUri for mapped reciter ids', () async {
+    when(
+      mockPrefs.getString(LanguageConfig.languageKey),
+    ).thenAnswer((_) async => 'en');
+
+    final List<AudioEntity>? tracks = await builder.build(
+      moshaf,
+      reciterName: 'Yasser Al-Dosari',
+      reciterId: '92',
+    );
+
+    expect(tracks, hasLength(2));
+    expect(
+      tracks!.first.artUri,
+      startsWith('https://tvquran.com/uploads/authors/images/'),
+    );
   });
 
   test('build returns localized surah titles for Arabic default', () async {

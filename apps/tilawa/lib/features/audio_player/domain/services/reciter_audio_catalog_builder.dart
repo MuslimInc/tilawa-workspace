@@ -3,6 +3,7 @@ import 'package:tilawa_core/entities/audio.dart';
 import 'package:tilawa_core/entities/audio_extras_keys.dart';
 import 'package:tilawa_core/entities/moshaf_entity.dart';
 import 'package:tilawa_core/entities/reciter_entity.dart';
+import 'package:tilawa_core/utils/reciter_portrait_catalog.dart';
 import 'package:tilawa_core/utils/surah_names.dart';
 import 'package:tilawa_core/utils/url_validator.dart';
 
@@ -45,6 +46,7 @@ class ReciterAudioCatalogBuilder {
             duration: Duration.zero,
             album: moshaf.name,
             artist: reciter.name,
+            artUri: ReciterPortraitCatalog.photoUrlFor(reciter.id),
             extras: <String, Object>{
               AudioExtrasKeys.reciterId: reciter.id,
               AudioExtrasKeys.moshafId: moshaf.id,

@@ -8,7 +8,6 @@ import 'package:tilawa_ui_kit/tilawa_ui_kit.dart';
 
 import '../cubit/home_listening_resume_cubit.dart';
 import '../cubit/home_listening_resume_state.dart';
-import 'home_comfort_greeting.dart';
 import 'home_daily_inspiration_section.dart';
 import 'home_dashboard_body_skeleton.dart';
 import 'home_learning_entry.dart';
@@ -17,10 +16,11 @@ import 'home_more_actions_group.dart';
 import 'home_primary_actions_section.dart';
 import 'home_quick_tools_section.dart';
 
-/// Home body under the Sliver Prayer Hero — clear sections, no extra chrome.
+/// Home body under the immersive header zone — clear sections, no extra chrome.
 ///
-/// Order: greeting → primary worship → urgent Learn → soft Learn →
+/// Order: primary worship → urgent Learn → soft Learn →
 /// tools → More → listening → inspiration → closing mark.
+/// Greeting lives in the header zone (see [HomeNextPrayerTime]).
 class HomeDashboardBody extends StatelessWidget {
   const HomeDashboardBody({super.key, this.skeleton = false});
 
@@ -42,8 +42,6 @@ class HomeDashboardBody extends StatelessWidget {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
-        const HomeComfortGreeting(),
-        SizedBox(height: tokens.spaceMedium),
         const HomePrimaryActionsSection(),
         const HomeLearningUrgentSection(),
         const HomeLearningSoftPrompt(),

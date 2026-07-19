@@ -1,7 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:tilawa/core/extensions.dart';
+import 'package:tilawa/shared/widgets/profile_avatar.dart';
 import 'package:tilawa_core/entities/reciter_entity.dart';
+import 'package:tilawa_core/utils/reciter_portrait_catalog.dart';
 import 'package:tilawa_ui_kit/tilawa_ui_kit.dart';
 
 import '../../../../router/app_router_config.dart';
@@ -87,35 +89,19 @@ class _ReciterAvatar extends StatelessWidget {
       reciterId,
       colorScheme,
     );
-    final BorderRadius radius = BorderRadius.circular(tokens.radiusMedium);
 
-    return Semantics(
-      image: true,
-      label: name,
-      child: ExcludeSemantics(
-        child: Container(
-          width: size,
-          height: size,
-          alignment: Alignment.center,
-          decoration: BoxDecoration(
-            color: backgroundColor,
-            borderRadius: radius,
-            border: Border.all(
-              color: foregroundColor.withValues(alpha: tokens.opacityShadow),
-              width: tokens.borderWidthThin,
-            ),
-          ),
-          child: Text(
-            _reciterInitial(name),
-            style: theme.textTheme.titleMedium?.copyWith(
-              fontWeight: FontWeight.w700,
-              color: foregroundColor,
-              height: 1,
-            ),
-            maxLines: 1,
-            textAlign: TextAlign.center,
-          ),
-        ),
+    return ProfileAvatar(
+      photoUrl: ReciterPortraitCatalog.photoUrlFor(reciterId),
+      displayName: name,
+      size: size,
+      backgroundColor: backgroundColor,
+      foregroundColor: foregroundColor,
+      fallbackStyle: ProfileAvatarFallbackStyle.initial,
+      textStyle: theme.textTheme.titleMedium?.copyWith(
+        fontWeight: FontWeight.w700,
+        color: foregroundColor,
+        height: 1,
+        fontSize: size * 0.42,
       ),
     );
   }
@@ -139,14 +125,6 @@ Color _reciterAvatarForeground(int reciterId, ColorScheme colorScheme) {
     colorScheme.onSurfaceVariant,
   ];
   return palette[reciterId.abs() % palette.length];
-}
-
-String _reciterInitial(String name) {
-  final String trimmed = name.trim();
-  if (trimmed.isEmpty) {
-    return '?';
-  }
-  return trimmed.characters.first;
 }
 
 /// Name-only — riwayah/moshaf detail lives on the reciter details screen.

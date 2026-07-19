@@ -6,6 +6,7 @@ import 'package:tilawa_core/config/language_config.dart';
 import 'package:tilawa_core/entities/audio.dart';
 import 'package:tilawa_core/entities/audio_extras_keys.dart';
 import 'package:tilawa_core/entities/moshaf_entity.dart';
+import 'package:tilawa_core/utils/reciter_portrait_catalog.dart';
 import 'package:tilawa_core/utils/surah_names.dart';
 import 'package:tilawa_core/utils/url_validator.dart';
 
@@ -45,6 +46,7 @@ class MoshafSurahAudioListBuilder {
             duration: Duration.zero,
             artist: reciterName,
             album: moshaf.name,
+            artUri: ReciterPortraitCatalog.photoUrlForIdString(reciterId),
             extras: <String, dynamic>{
               AudioExtrasKeys.reciterId: reciterId,
               AudioExtrasKeys.moshafId: moshaf.id,

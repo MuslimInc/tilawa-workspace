@@ -29,7 +29,7 @@ Match this order everywhere (slivers + body):
 
 | # | Layer | Widget / behavior |
 |---|--------|-------------------|
-| 1 | Sliver — Now | `HomeNextPrayerTime` |
+| 1 | Sliver — Now | `HomeNextPrayerTime` (header zone: greeting, prayer, strip) |
 | 2 | Body | `HomePrimaryActionsSection` (Quran / Athkar) |
 | 3 | Body | `HomeLearningUrgentSection` → live session / pending / revision only |
 | 4 | Body | `HomeLearningSoftPrompt` → interest / browse (below worship) |
@@ -65,12 +65,14 @@ Scaffold
 └── RefreshIndicator
     └── HomeLearningEntryScope
         └── CustomScrollView
-            ├── HomeNextPrayerTime
-            │   ├── HomeHeroBackground (prayer-period atmospheric band)
-            │   └── HomeHeroGlassSurface (frosted next-prayer card)
+            ├── HomeNextPrayerTime (immersive header zone, full-bleed under status bar)
+            │   ├── HomeHeroBackground (prayer-period green gradient)
+            │   ├── profile row (greeting + avatar)
+            │   ├── HomePrayerHeroContextRow (Hijri date + location)
+            │   ├── centered next-prayer metrics
+            │   └── HomePrayerScheduleStrip (today’s five prayers)
             ├── HomeDashboardContentSliver (rounded sheet below hero fade)
                 └── HomeDashboardBody
-                    ├── HomeComfortGreeting
                     ├── HomePrimaryActionsSection
                     ├── HomeLearningUrgentSection (session / pending / revision)
                     ├── HomeLearningSoftPrompt (interest / browse)
@@ -82,8 +84,8 @@ Scaffold
                     └── _HomeDashboardClosingMark
 ```
 Deferred body content uses `DeferredAfterFirstFrame` for first-frame perf.
-Above-deferred: greeting + primary + urgent/soft Learn + quick tools load
-immediately under the hero.
+Above-deferred: primary + urgent/soft Learn + quick tools load immediately
+under the header zone. Greeting lives in the header, not the body.
 
 ---
 
@@ -277,6 +279,7 @@ flutter test test/features/home/
 
 Manual: light + dark, RTL Arabic, text scale 1.4, hero snap, tutor pin when
 flag on.
+
 
 
 

@@ -1,7 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:tilawa/features/reciters/presentation/widgets/reciter_search_header.dart';
+import 'package:tilawa/shared/widgets/profile_avatar.dart';
 import 'package:tilawa/shared/widgets/tilawa_back_button.dart';
 import 'package:tilawa_core/entities/reciter_entity.dart';
+import 'package:tilawa_core/utils/reciter_portrait_catalog.dart';
 import 'package:tilawa_ui_kit/tilawa_ui_kit.dart';
 
 /// Reciter title + search on vellum [TilawaSliverAppBar] chrome.
@@ -44,15 +46,16 @@ class ReciterDetailsAppBar extends StatelessWidget {
       titleWidget: Row(
         mainAxisSize: MainAxisSize.min,
         children: [
-          CircleAvatar(
-            radius: 16,
+          ProfileAvatar(
+            photoUrl: ReciterPortraitCatalog.photoUrlFor(reciter.id),
+            displayName: reciter.name,
+            size: tokens.iconBoxSize,
             backgroundColor: colorScheme.primaryContainer,
-            child: Text(
-              reciter.name[0],
-              style: theme.textTheme.labelLarge?.copyWith(
-                color: colorScheme.onPrimaryContainer,
-                fontWeight: FontWeight.w700,
-              ),
+            foregroundColor: colorScheme.onPrimaryContainer,
+            fallbackStyle: ProfileAvatarFallbackStyle.initial,
+            textStyle: theme.textTheme.labelLarge?.copyWith(
+              color: colorScheme.onPrimaryContainer,
+              fontWeight: FontWeight.w700,
             ),
           ),
           SizedBox(width: tokens.spaceSmall + tokens.spaceTiny),

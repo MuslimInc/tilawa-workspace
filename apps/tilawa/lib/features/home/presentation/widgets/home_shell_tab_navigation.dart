@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:provider/provider.dart';
+import 'package:tilawa/screens/app_shell_nav_destinations.dart';
 import 'package:tilawa/screens/cubit/main_screen_cubit.dart';
 
 /// Switches to the Reciters tab when [MainScreenCubit] is available.
@@ -9,7 +10,13 @@ import 'package:tilawa/screens/cubit/main_screen_cubit.dart';
 /// isolated widget tests) so quick-action taps never throw provider errors.
 void openHomeRecitersTab(BuildContext context) {
   final MainScreenCubit? cubit = _readMainScreenCubit(context);
-  cubit?.selectTab(1);
+  cubit?.selectTab(kAppShellRecitersTabIndex);
+}
+
+/// Switches to the Settings / profile tab when [MainScreenCubit] is available.
+void openHomeSettingsTab(BuildContext context) {
+  final MainScreenCubit? cubit = _readMainScreenCubit(context);
+  cubit?.selectTab(kAppShellSettingsTabIndex);
 }
 
 MainScreenCubit? _readMainScreenCubit(BuildContext context) {

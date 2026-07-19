@@ -1426,7 +1426,7 @@ class TilawaHomeNextPrayerHeroTokens {
     );
   }
 
-  /// Pre-dawn hero gradient (cool mist before sunrise — always light).
+  /// Pre-dawn hero gradient (cool forest mist before sunrise).
   factory TilawaHomeNextPrayerHeroTokens.preDawn() {
     return const TilawaHomeNextPrayerHeroTokens(
       gradientTopStart: AppColors.homeNextPrayerGradientPreDawnTop,
@@ -1444,8 +1444,7 @@ class TilawaHomeNextPrayerHeroTokens {
 
   /// Night hero gradient (Isha through deep night before pre-dawn ease).
   ///
-  /// Light cool canvas — matches day/preDawn so Home never flashes a black
-  /// header band under the white prayer card.
+  /// Deep forest band — immersive white-on-green header zone.
   factory TilawaHomeNextPrayerHeroTokens.night() {
     return const TilawaHomeNextPrayerHeroTokens(
       gradientTopStart: AppColors.homeNextPrayerGradientNightTop,

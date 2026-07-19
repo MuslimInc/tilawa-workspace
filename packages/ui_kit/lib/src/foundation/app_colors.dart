@@ -178,41 +178,38 @@ abstract final class AppColors {
   /// Section links (See all) on the travel Home dashboard.
   static const Color homeTravelSectionLink = brandActionGreen;
 
-  /// Day hero top — warm ivory parchment with a soft gold cast.
-  static const Color homeNextPrayerGradientTop = Color(0xFFFBF8F2);
+  /// Day hero top — deep forest green (MeMuslim immersive header zone).
+  static const Color homeNextPrayerGradientTop = Color(0xFF0A4D2E);
 
-  /// Day hero mid — intentional warm gold between parchment and sage mist.
-  static const Color homeNextPrayerGradientDayMid = Color(0xFFF2EBDD);
+  /// Day hero mid — accessible brand green between forest and emerald.
+  static const Color homeNextPrayerGradientDayMid = brandActionGreenAccessible;
 
-  /// Day hero bottom — soft orange mist with a quieter tint.
-  static const Color homeNextPrayerGradientBottom = Color(0xFFE3F0E8);
+  /// Day hero bottom — brighter emerald easing into the content sheet.
+  static const Color homeNextPrayerGradientBottom = Color(0xFF2EB870);
 
-  /// Pre-dawn hero top — cool mist ivory (Fajr, not forest night).
-  static const Color homeNextPrayerGradientPreDawnTop = Color(0xFFF6F8F6);
+  /// Pre-dawn hero top — cooler deep forest before sunrise.
+  static const Color homeNextPrayerGradientPreDawnTop = Color(0xFF0C3F2A);
 
-  /// Pre-dawn hero bottom — cool grey haze easing into day off-white.
-  static const Color homeNextPrayerGradientPreDawnBottom = Color(0xFFEAF2EC);
+  /// Pre-dawn hero bottom — cool emerald mist.
+  static const Color homeNextPrayerGradientPreDawnBottom = Color(0xFF1A7A4C);
 
   /// Foreground on the Home hero day/dusk/pre-dawn gradients.
-  static const Color homeNextPrayerGradientForeground = tripGlideInk;
+  static const Color homeNextPrayerGradientForeground = Color(0xFFFFFFFF);
 
-  /// Dusk hero top — luminous gold cream (Maghrib warmth).
-  static const Color homeNextPrayerGradientDuskTop = Color(0xFFF8F0E4);
+  /// Dusk hero top — deeper forest with Maghrib warmth.
+  static const Color homeNextPrayerGradientDuskTop = Color(0xFF0B3D28);
 
-  /// Dusk hero bottom — warm gold with restrained sage depth.
-  static const Color homeNextPrayerGradientDuskBottom = Color(0xFFE8E0D0);
+  /// Dusk hero bottom — warmer emerald at Maghrib.
+  static const Color homeNextPrayerGradientDuskBottom = Color(0xFF1F8F55);
 
-  /// Night hero top — cool light canvas (Isha through midnight).
-  ///
-  /// Kept light so the lifestyle Home chrome stays TASA-clean; atmosphere
-  /// comes from a quiet cool ramp, not a black header band.
-  static const Color homeNextPrayerGradientNightTop = Color(0xFFF4F7F5);
+  /// Night hero top — deepest forest (Isha through midnight).
+  static const Color homeNextPrayerGradientNightTop = Color(0xFF082E1F);
 
-  /// Night hero bottom — slightly deeper cool gray for a soft ramp.
-  static const Color homeNextPrayerGradientNightBottom = Color(0xFFE6EEE8);
+  /// Night hero bottom — quiet night emerald.
+  static const Color homeNextPrayerGradientNightBottom = Color(0xFF146B42);
 
-  /// Foreground on the Home hero night gradient — same near-black ink.
-  static const Color homeNextPrayerGradientNightForeground = tripGlideInk;
+  /// Foreground on the Home hero night gradient — white ink on green.
+  static const Color homeNextPrayerGradientNightForeground = Color(0xFFFFFFFF);
 
   /// Home screen canvas — soft cool off-white warmth at the top.
   static const Color homeBackgroundGradientStart = Color(0xFFF3F7F4);

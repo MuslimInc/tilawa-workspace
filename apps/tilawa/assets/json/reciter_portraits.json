@@ -1,0 +1,1011 @@
+{
+  "version": 5,
+  "sources": [
+    "https://tvquran.com/en/quran/recitations/reciters-list",
+    "https://surahquran.com/mp3/Jibrel/"
+  ],
+  "count": 143,
+  "portraits": {
+    "1": {
+      "name": "Ibrahim Al-Akdar",
+      "photoUrl": "https://tvquran.com/uploads/authors/images/%D8%A5%D8%A8%D8%B1%D8%A7%D9%87%D9%8A%D9%85%20%D8%A7%D9%84%D8%A3%D8%AE%D8%B6%D8%B1.jpg",
+      "source": "tvquran",
+      "matchedAs": "Ibrahim Al-Akhdar",
+      "method": null
+    },
+    "2": {
+      "name": "Ibrahim Al-Jebreen",
+      "photoUrl": "https://tvquran.com/uploads/authors/images/%D8%A7%D8%A8%D8%B1%D8%A7%D9%87%D9%8A%D9%85%20%D8%A7%D9%84%D8%AC%D8%A8%D8%B1%D9%8A%D9%86.jpg",
+      "source": "tvquran",
+      "matchedAs": "Ibrahim Al-Jebreen",
+      "method": null
+    },
+    "3": {
+      "name": "Ibrahim Al-Asiri",
+      "photoUrl": "https://tvquran.com/uploads/authors/images/%D8%A5%D8%A8%D8%B1%D8%A7%D9%87%D9%8A%D9%85%20%D8%A7%D9%84%D8%B9%D8%B3%D9%8A%D8%B1%D9%8A.jpg",
+      "source": "tvquran",
+      "matchedAs": "Ibrahim Al-Asiri",
+      "method": null
+    },
+    "4": {
+      "name": "Shaik Abu Bakr Al Shatri",
+      "photoUrl": "https://tvquran.com/uploads/authors/images/%D8%B4%D9%8A%D8%AE%20%D8%A3%D8%A8%D9%88%20%D8%A8%D9%83%D8%B1%20%D8%A7%D9%84%D8%B4%D8%A7%D8%B7%D8%B1%D9%8A.jpg",
+      "source": "tvquran",
+      "matchedAs": "Abu Bakr Ashatri",
+      "method": null
+    },
+    "5": {
+      "name": "Ahmad Al-Ajmy",
+      "photoUrl": "https://api.kalamalah.com/api/reciter-profile/ahmed-al-ajamy",
+      "source": "supplement",
+      "matchedAs": "Ahmad Al-Ajmy",
+      "method": "manual"
+    },
+    "6": {
+      "name": "Ahmad Al-Hawashi",
+      "photoUrl": "https://tvquran.com/uploads/authors/images/%D8%A3%D8%AD%D9%85%D8%AF%20%D8%A7%D9%84%D8%AD%D9%88%D8%A7%D8%B4%D9%8A.jpg",
+      "source": "tvquran",
+      "matchedAs": "Ahmad Al-Hawashy",
+      "method": "fuzzy:0.96"
+    },
+    "8": {
+      "name": "Ahmad Saber",
+      "photoUrl": "https://tvquran.com/uploads/authors/images/%D8%A3%D8%AD%D9%85%D8%AF%20%D8%B5%D8%A7%D8%A8%D8%B1.jpg",
+      "source": "tvquran",
+      "matchedAs": "Ahmed Saber",
+      "method": "fuzzy:0.96"
+    },
+    "10": {
+      "name": "Akram Alalaqmi",
+      "photoUrl": "https://tvquran.com/uploads/authors/images/%D8%A3%D9%83%D8%B1%D9%85%20%D8%A7%D9%84%D8%B9%D9%84%D8%A7%D9%82%D9%85%D9%8A.jpg",
+      "source": "tvquran",
+      "matchedAs": "Akram Alalaqmi",
+      "method": null
+    },
+    "11": {
+      "name": "Alhusayni Al-Azazi",
+      "photoUrl": "https://tvquran.com/uploads/authors/images/%D8%A7%D9%84%D8%AD%D8%B3%D9%8A%D9%86%D9%8A%20%D8%A7%D9%84%D8%B9%D8%B2%D8%A7%D8%B2%D9%8A.jpg",
+      "source": "tvquran",
+      "matchedAs": "الحسيني العزازي",
+      "method": "manual-gap"
+    },
+    "12": {
+      "name": "Idrees Abkr",
+      "photoUrl": "https://tvquran.com/uploads/authors/images/%D8%A5%D8%AF%D8%B1%D9%8A%D8%B3%20%D8%A3%D8%A8%D9%83%D8%B1.jpg",
+      "source": "tvquran",
+      "matchedAs": "Idriss Abkar",
+      "method": null
+    },
+    "13": {
+      "name": "Alzain Mohammad Ahmad",
+      "photoUrl": "https://tvquran.com/uploads/authors/images/%D8%A7%D9%84%D8%B2%D9%8A%D9%86%20%D9%85%D8%AD%D9%85%D8%AF%20%D8%A3%D8%AD%D9%85%D8%AF.jpg",
+      "source": "tvquran",
+      "matchedAs": "Al-Zain Mohammad",
+      "method": "fuzzy:1.05"
+    },
+    "15": {
+      "name": "Alashri Omran",
+      "photoUrl": "https://tvquran.com/uploads/authors/images/%D8%A7%D9%84%D8%B9%D8%B4%D8%B1%D9%8A%20%D8%B9%D9%85%D8%B1%D8%A7%D9%86.jpg",
+      "source": "tvquran",
+      "matchedAs": "Alashri Omran",
+      "method": null
+    },
+    "16": {
+      "name": "Aloyoon Al-Koshi",
+      "photoUrl": "https://tvquran.com/uploads/authors/images/%D8%A7%D9%84%D8%B9%D9%8A%D9%88%D9%86%20%D8%A7%D9%84%D9%83%D9%88%D8%B4%D9%8A.jpg",
+      "source": "tvquran",
+      "matchedAs": "Laayoun Al-Kouchi",
+      "method": "fuzzy:0.57"
+    },
+    "17": {
+      "name": "Tawfeeq As-Sayegh",
+      "photoUrl": "https://tvquran.com/uploads/authors/images/%D8%AA%D9%88%D9%81%D9%8A%D9%82%20%D8%A7%D9%84%D8%B5%D8%A7%D9%8A%D8%BA.jpg",
+      "source": "tvquran",
+      "matchedAs": "Tawfeeq As-Sayegh",
+      "method": null
+    },
+    "18": {
+      "name": "Jamal Shaker Abdullah",
+      "photoUrl": "https://tvquran.com/uploads/authors/images/%D8%AC%D9%85%D8%A7%D9%84%20%D8%B4%D8%A7%D9%83%D8%B1%20%D8%B9%D8%A8%D8%AF%20%D8%A7%D9%84%D9%84%D9%87.jpg",
+      "source": "tvquran",
+      "matchedAs": "Jamal Shaker",
+      "method": "fuzzy:0.98"
+    },
+    "19": {
+      "name": "Hamad Al Daghriri",
+      "photoUrl": "https://tvquran.com/uploads/authors/images/%D8%AD%D9%85%D8%AF%20%D8%AF%D8%BA%D8%B1%D9%8A%D8%B1%D9%8A.jpg",
+      "source": "tvquran",
+      "matchedAs": "Hamad Daghriry",
+      "method": "fuzzy:0.57"
+    },
+    "20": {
+      "name": "Khalid Al-Jileel",
+      "photoUrl": "https://tvquran.com/uploads/authors/images/%D8%AE%D8%A7%D9%84%D8%AF%20%D8%A7%D9%84%D8%AC%D9%84%D9%8A%D9%84.jpg",
+      "source": "tvquran",
+      "matchedAs": "خالد الجليل",
+      "method": "exact"
+    },
+    "21": {
+      "name": "Khaled Al-Qahtani",
+      "photoUrl": "https://tvquran.com/uploads/authors/images/%D8%AE%D8%A7%D9%84%D8%AF%20%D8%A7%D9%84%D9%82%D8%AD%D8%B7%D8%A7%D9%86%D9%8A.jpg",
+      "source": "tvquran",
+      "matchedAs": "Khaled Al-Qahtani",
+      "method": null
+    },
+    "22": {
+      "name": "Khalid Abdulkafi",
+      "photoUrl": "https://tvquran.com/uploads/authors/images/%D8%AE%D8%A7%D9%84%D8%AF%20%D8%B9%D8%A8%D8%AF%20%D8%A7%D9%84%D9%83%D8%A7%D9%81%D9%8A.jpg",
+      "source": "tvquran",
+      "matchedAs": "khalid Abdulkafi",
+      "method": null
+    },
+    "24": {
+      "name": "Khalifa Altunaiji",
+      "photoUrl": "https://static.qurancdn.com/images/reciters/11/khalifa-al-tunaiji-profile.jpeg",
+      "source": "supplement",
+      "matchedAs": "Khalifa Altunaiji",
+      "method": "manual"
+    },
+    "25": {
+      "name": "Dawood Hamza",
+      "photoUrl": "https://tvquran.com/uploads/authors/images/%D8%AF%D8%A7%D9%88%D8%AF%20%D8%AD%D9%85%D8%B2%D8%A9.jpg",
+      "source": "tvquran",
+      "matchedAs": "Daoud Hamza",
+      "method": "fuzzy:0.96"
+    },
+    "26": {
+      "name": "Rasheed Ifrad",
+      "photoUrl": "https://tvquran.com/uploads/authors/images/%D8%B1%D8%B4%D9%8A%D8%AF%20%D8%A5%D9%81%D8%B1%D8%A7%D8%AF.jpg",
+      "source": "tvquran",
+      "matchedAs": "Rachid Ifrad",
+      "method": "fuzzy:0.96"
+    },
+    "27": {
+      "name": "Rachid Belalya",
+      "photoUrl": "https://tvquran.com/uploads/authors/images/%D8%B1%D8%B4%D9%8A%D8%AF%20%D8%A8%D9%84%D8%B9%D8%A7%D9%84%D9%8A%D8%A9.jpg",
+      "source": "tvquran",
+      "matchedAs": "Rachid Belaalia",
+      "method": "fuzzy:0.96"
+    },
+    "28": {
+      "name": "Zakaria Hamamah",
+      "photoUrl": "https://tvquran.com/uploads/authors/images/%D8%B2%D9%83%D8%B1%D9%8A%D8%A7%D8%A1%20%D8%AD%D9%85%D8%A7%D9%85%D8%A9.jpg",
+      "source": "tvquran",
+      "matchedAs": "Zakaria Hamama",
+      "method": "fuzzy:0.57"
+    },
+    "30": {
+      "name": "Saad Al-Ghamdi",
+      "photoUrl": "https://tvquran.com/uploads/authors/images/%D8%B3%D8%B9%D8%AF%20%D8%A7%D9%84%D8%BA%D8%A7%D9%85%D8%AF%D9%8A.jpg",
+      "source": "tvquran",
+      "matchedAs": "Saad Al-Ghamdi",
+      "method": null
+    },
+    "31": {
+      "name": "Saud Al-Shuraim",
+      "photoUrl": "https://tvquran.com/uploads/authors/images/%D8%B3%D8%B9%D9%88%D8%AF%20%D8%A7%D9%84%D8%B4%D8%B1%D9%8A%D9%85.jpg",
+      "source": "tvquran",
+      "matchedAs": "Saud Ashuraim",
+      "method": null
+    },
+    "32": {
+      "name": "Sahl Yassin",
+      "photoUrl": "https://tvquran.com/uploads/authors/images/%D8%B3%D9%87%D9%84%20%D9%8A%D8%A7%D8%B3%D9%8A%D9%86.jpg",
+      "source": "tvquran",
+      "matchedAs": "Sahl Yassin",
+      "method": null
+    },
+    "33": {
+      "name": "Zaki Daghistani",
+      "photoUrl": "https://tvquran.com/uploads/authors/images/%D8%B2%D9%83%D9%8A%20%D8%AF%D8%A7%D8%BA%D8%B3%D8%AA%D8%A7%D9%86%D9%8A.jpg",
+      "source": "tvquran",
+      "matchedAs": "Zaki Daghistani",
+      "method": null
+    },
+    "34": {
+      "name": "Sami Al-Hasn",
+      "photoUrl": "https://tvquran.com/uploads/authors/images/%D8%B3%D8%A7%D9%85%D9%8A%20%D8%A7%D9%84%D8%AD%D8%B3%D9%86.jpg",
+      "source": "tvquran",
+      "matchedAs": "Sami Al-Hasn",
+      "method": null
+    },
+    "35": {
+      "name": "Sami Al-Dosari",
+      "photoUrl": "https://tvquran.com/uploads/authors/images/%D8%B3%D8%A7%D9%85%D9%8A%20%D8%A7%D9%84%D8%AF%D9%88%D8%B3%D8%B1%D9%8A.jpg",
+      "source": "tvquran",
+      "matchedAs": "Sami Al-Dosari",
+      "method": null
+    },
+    "36": {
+      "name": "Sayeed Ramadan",
+      "photoUrl": "https://tvquran.com/uploads/authors/images/%D8%B3%D9%8A%D8%AF%20%D8%B1%D9%85%D8%B6%D8%A7%D9%86.jpg",
+      "source": "tvquran",
+      "matchedAs": "Sayeed Ramadan",
+      "method": null
+    },
+    "37": {
+      "name": "Shaban Al-Sayiaad",
+      "photoUrl": "https://tvquran.com/uploads/authors/images/%D8%B4%D8%B9%D8%A8%D8%A7%D9%86%20%D8%A7%D9%84%D8%B5%D9%8A%D8%A7%D8%AF.jpg",
+      "source": "tvquran",
+      "matchedAs": "Shaban Sayyad",
+      "method": "fuzzy:0.96"
+    },
+    "38": {
+      "name": "Shirazad Taher",
+      "photoUrl": "https://tvquran.com/uploads/authors/images/%D8%B4%D9%8A%D8%B1%D8%B2%D8%A7%D8%AF%20%D8%B7%D8%A7%D9%87%D8%B1.jpg",
+      "source": "tvquran",
+      "matchedAs": "Shirazad Taher",
+      "method": null
+    },
+    "40": {
+      "name": "Saleh Alsahood",
+      "photoUrl": "https://tvquran.com/uploads/authors/images/%D8%B5%D8%A7%D9%84%D8%AD%20%D8%A8%D9%86%20%D8%B3%D8%A7%D9%84%D9%85%20%D8%A7%D9%84%D8%B5%D8%A7%D9%87%D9%88%D8%AF.jpg",
+      "source": "tvquran",
+      "matchedAs": "Saleh Alsahood",
+      "method": null
+    },
+    "41": {
+      "name": "Saleh Al-Talib",
+      "photoUrl": "https://tvquran.com/uploads/authors/images/%D8%B5%D8%A7%D9%84%D8%AD%20%D8%A2%D9%84%20%D8%B7%D8%A7%D9%84%D8%A8.jpg",
+      "source": "tvquran",
+      "matchedAs": "Saleh Al-Talib",
+      "method": null
+    },
+    "42": {
+      "name": "Saleh Al-Habdan",
+      "photoUrl": "https://tvquran.com/uploads/authors/images/%D8%B5%D8%A7%D9%84%D8%AD%20%D8%A7%D9%84%D9%87%D8%A8%D8%AF%D8%A7%D9%86.jpg",
+      "source": "tvquran",
+      "matchedAs": "Saleh Al-Habdan",
+      "method": null
+    },
+    "44": {
+      "name": "Salah Alhashim",
+      "photoUrl": "https://tvquran.com/uploads/authors/images/%D8%B5%D9%84%D8%A7%D8%AD%20%D8%A7%D9%84%D9%87%D8%A7%D8%B4%D9%85.jpg",
+      "source": "tvquran",
+      "matchedAs": "Salah Al-Hashim",
+      "method": "translit"
+    },
+    "46": {
+      "name": "Slaah Bukhatir",
+      "photoUrl": "https://tvquran.com/uploads/authors/images/%D8%B5%D9%84%D8%A7%D8%AD%20%D8%A8%D9%88%20%D8%AE%D8%A7%D8%B7%D8%B1.jpg",
+      "source": "tvquran",
+      "matchedAs": "Salah Bukhatir",
+      "method": "fuzzy:1.15"
+    },
+    "48": {
+      "name": "Adel Ryyan",
+      "photoUrl": "https://tvquran.com/uploads/authors/images/%D8%B9%D8%A7%D8%AF%D9%84%20%D8%B1%D9%8A%D8%A7%D9%86.jpg",
+      "source": "tvquran",
+      "matchedAs": "Adel Rayan",
+      "method": "translit"
+    },
+    "51": {
+      "name": "Abdulbasit Abdulsamad",
+      "photoUrl": "https://tvquran.com/uploads/authors/images/%D8%B9%D8%A8%D8%AF%20%D8%A7%D9%84%D8%A8%D8%A7%D8%B3%D8%B7%20%D8%B9%D8%A8%D8%AF%20%D8%A7%D9%84%D8%B5%D9%85%D8%AF.jpg",
+      "source": "tvquran",
+      "matchedAs": "عبد الباسط عبد الصمد",
+      "method": "exact"
+    },
+    "54": {
+      "name": "Abdulrahman Alsudaes",
+      "photoUrl": "https://tvquran.com/uploads/authors/images/%D8%B9%D8%A8%D8%AF%20%D8%A7%D9%84%D8%B1%D8%AD%D9%85%D9%86%20%D8%A7%D9%84%D8%B3%D8%AF%D9%8A%D8%B3.jpg",
+      "source": "tvquran",
+      "matchedAs": "Abdulrahman Assudais",
+      "method": null
+    },
+    "58": {
+      "name": "Abdullah Albuajan",
+      "photoUrl": "https://tvquran.com/uploads/authors/images/%D8%B9%D8%A8%D8%AF%D8%A7%D9%84%D9%84%D9%87%20%D8%A7%D9%84%D8%A8%D8%B9%D9%8A%D8%AC%D8%A7%D9%86.jpg",
+      "source": "tvquran",
+      "matchedAs": "Abdullah Al-Buaijan",
+      "method": "fuzzy:0.96"
+    },
+    "59": {
+      "name": "Abdullah Al-Mattrod",
+      "photoUrl": "https://tvquran.com/uploads/authors/images/%D8%B9%D8%A8%D8%AF%20%D8%A7%D9%84%D9%84%D9%87%20%D8%A7%D9%84%D9%85%D8%B7%D8%B1%D9%88%D8%AF.jpg",
+      "source": "tvquran",
+      "matchedAs": "Abdullah Al-Mattrod",
+      "method": null
+    },
+    "62": {
+      "name": "Abdullah Al-Johany",
+      "photoUrl": "https://tvquran.com/uploads/authors/images/%D8%B9%D8%A8%D8%AF%20%D8%A7%D9%84%D9%84%D9%87%20%D8%A7%D9%84%D8%AC%D9%87%D9%86%D9%8A(1).jpg",
+      "source": "tvquran",
+      "matchedAs": "Abdullah Al-Johany",
+      "method": null
+    },
+    "64": {
+      "name": "Abdulrasheed Soufi",
+      "photoUrl": "https://tvquran.com/uploads/authors/images/%D8%B9%D8%A8%D8%AF%20%D8%A7%D9%84%D8%B1%D8%B4%D9%8A%D8%AF%20%D8%A8%D9%86%20%D8%B9%D9%84%D9%8A%20%D8%B5%D9%88%D9%81%D9%8A.jpg",
+      "source": "tvquran",
+      "matchedAs": "Abdulrasheed Soufi",
+      "method": null
+    },
+    "67": {
+      "name": "Abdulmohsen Al-Qasim",
+      "photoUrl": "https://tvquran.com/uploads/authors/images/%D8%B9%D8%A8%D8%AF%20%D8%A7%D9%84%D9%85%D8%AD%D8%B3%D9%86%20%D8%A7%D9%84%D9%82%D8%A7%D8%B3%D9%85.jpg",
+      "source": "tvquran",
+      "matchedAs": "Abdulmohsen Al-Qasim",
+      "method": null
+    },
+    "68": {
+      "name": "Abdulmohsin Al-Askar",
+      "photoUrl": "https://tvquran.com/uploads/authors/images/%D8%B9%D8%A8%D8%AF%D8%A7%D9%84%D9%85%D8%AD%D8%B3%D9%86%20%D8%A7%D9%84%D8%B9%D8%B3%D9%83%D8%B1.jpg",
+      "source": "tvquran",
+      "matchedAs": "Abdulmohsen Al-Askar",
+      "method": "fuzzy:0.96"
+    },
+    "69": {
+      "name": "Abdulmohsin Al-Obaikan",
+      "photoUrl": "https://tvquran.com/uploads/authors/images/%D8%B9%D8%A8%D8%AF%D8%A7%D9%84%D9%85%D8%AD%D8%B3%D9%86%20%D8%A7%D9%84%D8%B9%D8%A8%D9%8A%D9%83%D8%A7%D9%86.jpg",
+      "source": "tvquran",
+      "matchedAs": "Abdulmohsin Al-Obaikan",
+      "method": null
+    },
+    "70": {
+      "name": "Abdulhadi Kanakeri",
+      "photoUrl": "https://tvquran.com/uploads/authors/images/%D8%B9%D8%A8%D8%AF%20%D8%A7%D9%84%D9%87%D8%A7%D8%AF%D9%8A%20%D9%83%D9%86%D8%A7%D9%83%D8%B1%D9%8A.jpg",
+      "source": "tvquran",
+      "matchedAs": "Abdulhadi Kanakeri",
+      "method": null
+    },
+    "72": {
+      "name": "Abdulwali Al-Arkani",
+      "photoUrl": "https://tvquran.com/uploads/authors/images/%D8%B9%D8%A8%D8%AF%20%D8%A7%D9%84%D9%88%D9%84%D9%8A%20%D8%A7%D9%84%D8%A3%D8%B1%D9%83%D8%A7%D9%86%D9%8A.jpeg",
+      "source": "tvquran",
+      "matchedAs": "Abdulwali Al-Arkani",
+      "method": null
+    },
+    "73": {
+      "name": "Ali Abo-Hashim",
+      "photoUrl": "https://tvquran.com/uploads/authors/images/%D8%B9%D9%84%D9%8A%20%D8%A3%D8%A8%D9%88%20%D9%87%D8%A7%D8%B4%D9%85.jpg",
+      "source": "tvquran",
+      "matchedAs": "Ali Abu Hashim",
+      "method": null
+    },
+    "74": {
+      "name": "Ali Alhuthaifi",
+      "photoUrl": "https://tvquran.com/uploads/authors/images/%D8%A3%D8%AD%D9%85%D8%AF%20%D8%A7%D9%84%D8%AD%D8%B0%D9%8A%D9%81%D9%8A.jpg",
+      "source": "tvquran",
+      "matchedAs": "Ahmed Ali Alhuthaifi",
+      "method": null
+    },
+    "76": {
+      "name": "Ali Jaber",
+      "photoUrl": "https://tvquran.com/uploads/authors/images/%D8%B9%D9%84%D9%8A%20%D8%AC%D8%A7%D8%A8%D8%B1.jpg",
+      "source": "tvquran",
+      "matchedAs": "Ali Jaber",
+      "method": null
+    },
+    "77": {
+      "name": "Ali Hajjaj Alsouasi",
+      "photoUrl": "https://tvquran.com/uploads/authors/images/%D8%B9%D9%84%D9%8A%20%D8%AD%D8%AC%D8%A7%D8%AC%20%D8%A7%D9%84%D8%B3%D9%88%D9%8A%D8%B3%D9%8A.jpg",
+      "source": "tvquran",
+      "matchedAs": "Ali Hajjaj Alsouasi",
+      "method": null
+    },
+    "78": {
+      "name": "Emad Hafez",
+      "photoUrl": "https://tvquran.com/uploads/authors/images/%D8%B9%D9%85%D8%A7%D8%AF%20%D8%B2%D9%87%D9%8A%D8%B1%20%D8%AD%D8%A7%D9%81%D8%B8.jpg",
+      "source": "tvquran",
+      "matchedAs": "Imad Hafiz",
+      "method": "fuzzy:0.79"
+    },
+    "80": {
+      "name": "Omar Al-Qazabri",
+      "photoUrl": "https://tvquran.com/uploads/authors/images/%D8%B9%D9%85%D8%B1%20%D8%A7%D9%84%D9%82%D8%B2%D8%A7%D8%A8%D8%B1%D9%8A.jpg",
+      "source": "tvquran",
+      "matchedAs": "Omar Al-Qazabri",
+      "method": null
+    },
+    "81": {
+      "name": "Fares Abbad",
+      "photoUrl": "https://tvquran.com/uploads/authors/images/%D9%81%D8%A7%D8%B1%D8%B3%20%D8%B9%D8%A8%D8%A7%D8%AF.jpg",
+      "source": "tvquran",
+      "matchedAs": "فارس عباد",
+      "method": "exact"
+    },
+    "83": {
+      "name": "Fahad Al-Kandari",
+      "photoUrl": "https://tvquran.com/uploads/authors/images/%D9%81%D9%87%D8%AF%20%D8%A7%D9%84%D9%83%D9%86%D8%AF%D8%B1%D9%8A.jpeg",
+      "source": "tvquran",
+      "matchedAs": "Fahad Al-Kandari",
+      "method": null
+    },
+    "84": {
+      "name": "Fawaz Alkabi",
+      "photoUrl": "https://tvquran.com/uploads/authors/images/%D9%81%D9%88%D8%A7%D8%B2%20%D8%A7%D9%84%D9%83%D8%B9%D8%A8%D9%8A.jpg",
+      "source": "tvquran",
+      "matchedAs": "Fawaz Al-kaabi",
+      "method": "fuzzy:0.96"
+    },
+    "85": {
+      "name": "Lafi Al-Oni",
+      "photoUrl": "https://tvquran.com/uploads/authors/images/%D9%84%D8%A7%D9%81%D9%8A%20%D8%A7%D9%84%D8%B9%D9%88%D9%86%D9%8A.png",
+      "source": "tvquran",
+      "matchedAs": "Lafi Al-Oni",
+      "method": null
+    },
+    "86": {
+      "name": "Nasser Alqatami",
+      "photoUrl": "https://tvquran.com/uploads/authors/images/%D9%86%D8%A7%D8%B5%D8%B1%20%D8%A7%D9%84%D9%82%D8%B7%D8%A7%D9%85%D9%8A.jpg",
+      "source": "tvquran",
+      "matchedAs": "Nasser Alqatami",
+      "method": null
+    },
+    "87": {
+      "name": "Nabil Al Rifay",
+      "photoUrl": "https://tvquran.com/uploads/authors/images/%D9%86%D8%A8%D9%8A%D9%84%20%D8%A7%D9%84%D8%B1%D9%81%D8%A7%D8%B9%D9%8A.jpg",
+      "source": "tvquran",
+      "matchedAs": "Nabil Arrifai",
+      "method": "fuzzy:0.96"
+    },
+    "89": {
+      "name": "Hani Arrifai",
+      "photoUrl": "https://tvquran.com/uploads/authors/images/%D9%87%D8%A7%D9%86%D9%8A%20%D8%A7%D9%84%D8%B1%D9%81%D8%A7%D8%B9%D9%8A.jpg",
+      "source": "tvquran",
+      "matchedAs": "Hani Arrifai",
+      "method": null
+    },
+    "90": {
+      "name": "Walid Al-Dulaimi",
+      "photoUrl": "https://tvquran.com/uploads/authors/images/%D9%88%D9%84%D9%8A%D8%AF%20%D8%A7%D9%84%D8%AF%D9%84%D9%8A%D9%85%D9%8A.jpg",
+      "source": "tvquran",
+      "matchedAs": "Walid Al-Dulaimi",
+      "method": null
+    },
+    "91": {
+      "name": "Waleed Alnaehi",
+      "photoUrl": "https://tvquran.com/uploads/authors/images/%D9%88%D9%84%D9%8A%D8%AF%20%D8%A7%D9%84%D9%86%D8%A7%D8%A6%D8%AD%D9%8A.jpg",
+      "source": "tvquran",
+      "matchedAs": "Walid Al-Naihi",
+      "method": "fuzzy:0.57"
+    },
+    "92": {
+      "name": "Yasser Al-Dosari",
+      "photoUrl": "https://tvquran.com/uploads/authors/images/%D9%8A%D8%A7%D8%B3%D8%B1%20%D8%A7%D9%84%D8%AF%D9%88%D8%B3%D8%B1%D9%8A.jpg",
+      "source": "tvquran",
+      "matchedAs": "ياسر الدوسري",
+      "method": "exact"
+    },
+    "93": {
+      "name": "Yasser Al-Qurashi",
+      "photoUrl": "https://tvquran.com/uploads/authors/images/%D9%8A%D8%A7%D8%B3%D8%B1%20%D8%A7%D9%84%D9%82%D8%B1%D8%B4%D9%8A.jpg",
+      "source": "tvquran",
+      "matchedAs": "Yasser Al-Qurashi",
+      "method": null
+    },
+    "94": {
+      "name": "Yasser Al-Faylakawi",
+      "photoUrl": "https://tvquran.com/uploads/authors/images/%D9%8A%D8%A7%D8%B3%D8%B1%20%D8%A7%D9%84%D9%81%D9%8A%D9%84%D9%83%D8%A7%D9%88%D9%8A.jpg",
+      "source": "tvquran",
+      "matchedAs": "Yasser Al-Failakawi",
+      "method": "fuzzy:0.96"
+    },
+    "95": {
+      "name": "Yasser Al-Mazroyee",
+      "photoUrl": "https://tvquran.com/uploads/authors/images/%D9%8A%D8%A7%D8%B3%D8%B1%20%D8%A7%D9%84%D9%85%D8%B2%D8%B1%D9%88%D8%B9%D9%8A.jpg",
+      "source": "tvquran",
+      "matchedAs": "Yasser Al-Mazroui",
+      "method": "fuzzy:0.96"
+    },
+    "96": {
+      "name": "Yahya Hawwa",
+      "photoUrl": "https://tvquran.com/uploads/authors/images/%D9%8A%D8%AD%D9%8A%D9%89%20%D8%AD%D9%88%D8%A7.jpg",
+      "source": "tvquran",
+      "matchedAs": "Yahya Hawa",
+      "method": "fuzzy:0.96"
+    },
+    "97": {
+      "name": "Yousef Alshoaey",
+      "photoUrl": "https://tvquran.com/uploads/authors/images/%D9%8A%D9%88%D8%B3%D9%81%20%D8%A7%D9%84%D8%B4%D9%88%D9%8A%D8%B9%D9%8A.jpg",
+      "source": "tvquran",
+      "matchedAs": "Youssef Achewaie",
+      "method": "fuzzy:0.57"
+    },
+    "102": {
+      "name": "Maher Al Meaqli",
+      "photoUrl": "https://tvquran.com/uploads/authors/images/%D9%85%D8%A7%D9%87%D8%B1%20%D8%A7%D9%84%D9%85%D8%B9%D9%8A%D9%82%D9%84%D9%8A.jpg",
+      "source": "tvquran",
+      "matchedAs": "ماهر المعيقلي",
+      "method": "exact"
+    },
+    "105": {
+      "name": "Mohammed Al-Barrak",
+      "photoUrl": "https://tvquran.com/uploads/authors/images/%D9%85%D8%AD%D9%85%D8%AF%20%D8%A7%D9%84%D8%A8%D8%B1%D8%A7%D9%83.jpg",
+      "source": "tvquran",
+      "matchedAs": "Muhammad Al-Barrak",
+      "method": "fuzzy:0.96"
+    },
+    "107": {
+      "name": "Mohammed Al-Lohaidan",
+      "photoUrl": "https://tvquran.com/uploads/authors/images/%D9%85%D8%AD%D9%85%D8%AF%20%D8%A7%D9%84%D9%84%D8%AD%D9%8A%D8%AF%D8%A7%D9%86.jpg",
+      "source": "tvquran",
+      "matchedAs": "Muhammad Al-Lohaidan",
+      "method": "fuzzy:0.96"
+    },
+    "108": {
+      "name": "Mohammed Al-Muhasny",
+      "photoUrl": "https://tvquran.com/uploads/authors/images/%D9%85%D8%AD%D9%85%D8%AF%20%D8%A7%D9%84%D9%85%D8%AD%D9%8A%D8%B3%D9%86%D9%8A.jpg",
+      "source": "tvquran",
+      "matchedAs": "محمد المحيسني",
+      "method": "manual-gap"
+    },
+    "109": {
+      "name": "Mohammed Ayyub",
+      "photoUrl": "https://tvquran.com/uploads/authors/images/%D9%85%D8%AD%D9%85%D8%AF%20%D8%A3%D9%8A%D9%88%D8%A8.jpg",
+      "source": "tvquran",
+      "matchedAs": "Muhammad Ayyub",
+      "method": null
+    },
+    "110": {
+      "name": "Mohammad Saleh Alim Shah",
+      "photoUrl": "https://tvquran.com/uploads/authors/images/%D9%85%D8%AD%D9%85%D8%AF%20%D8%B5%D8%A7%D9%84%D8%AD%20%D8%B4%D8%A7%D9%87.jpg",
+      "source": "tvquran",
+      "matchedAs": "محمد صالح شاه",
+      "method": "manual-gap"
+    },
+    "111": {
+      "name": "Mohammed Jibreel",
+      "photoUrl": "https://i.pinimg.com/564x/fa/8f/f8/fa8ff84527ff6c1611e304f94b1bf96d.jpg",
+      "source": "user-pinimg",
+      "matchedAs": "محمد جبريل",
+      "method": "manual"
+    },
+    "112": {
+      "name": "Mohammed Siddiq Al-Minshawi",
+      "photoUrl": "https://tvquran.com/uploads/authors/images/%D9%85%D8%AD%D9%85%D8%AF%20%D8%B5%D8%AF%D9%8A%D9%82%20%D8%A7%D9%84%D9%85%D9%86%D8%B4%D8%A7%D9%88%D9%8A%202.jpg",
+      "source": "tvquran",
+      "matchedAs": "Muhammad Siddiq Al-Minshawi",
+      "method": null
+    },
+    "115": {
+      "name": "Mohammad Abdullkarem",
+      "photoUrl": "https://tvquran.com/uploads/authors/images/%D9%85%D8%AD%D9%85%D8%AF%20%D8%B9%D8%A8%D8%AF%20%D8%A7%D9%84%D9%83%D8%B1%D9%8A%D9%85.jpg",
+      "source": "tvquran",
+      "matchedAs": "محمد عبد الكريم",
+      "method": "manual-gap"
+    },
+    "118": {
+      "name": "Mahmoud Khalil Al-Hussary",
+      "photoUrl": "https://tvquran.com/uploads/authors/images/%D9%85%D8%AD%D9%85%D9%88%D8%AF%20%D8%AE%D9%84%D9%8A%D9%84%20%D8%A7%D9%84%D8%AD%D8%B5%D8%B1%D9%8A.jpg",
+      "source": "tvquran",
+      "matchedAs": "محمود خليل الحصري",
+      "method": "exact"
+    },
+    "121": {
+      "name": "Mahmoud Ali  Albanna",
+      "photoUrl": "https://tvquran.com/uploads/authors/images/%D9%85%D8%AD%D9%85%D9%88%D8%AF%20%D8%B9%D9%84%D9%8A%20%D8%A7%D9%84%D8%A8%D9%86%D8%A7.jpg",
+      "source": "tvquran",
+      "matchedAs": "Mahmoud Ali Albanna",
+      "method": null
+    },
+    "123": {
+      "name": "Mishary Alafasi",
+      "photoUrl": "https://tvquran.com/uploads/authors/images/%D9%85%D8%B4%D8%A7%D8%B1%D9%8A%20%D8%A7%D9%84%D8%B9%D9%81%D8%A7%D8%B3%D9%8A.jpg",
+      "source": "tvquran",
+      "matchedAs": "Mishary Alafasi",
+      "method": null
+    },
+    "125": {
+      "name": "Mustafa Ismail",
+      "photoUrl": "https://tvquran.com/uploads/authors/images/%D9%85%D8%B5%D8%B7%D9%81%D9%89%20%D8%A5%D8%B3%D9%85%D8%A7%D8%B9%D9%8A%D9%84.jpg",
+      "source": "tvquran",
+      "matchedAs": "Mustafa Ismail",
+      "method": null
+    },
+    "126": {
+      "name": "Mustafa Al-Lahoni",
+      "photoUrl": "https://tvquran.com/uploads/authors/images/%D9%85%D8%B5%D8%B7%D9%81%D9%89%20%D8%A7%D9%84%D9%84%D8%A7%D9%87%D9%88%D9%86%D9%8A.png",
+      "source": "tvquran",
+      "matchedAs": "Mustafa Al-Lahoni",
+      "method": null
+    },
+    "127": {
+      "name": "Mustafa raad Alazawy",
+      "photoUrl": "https://tvquran.com/uploads/authors/images/%D9%85%D8%B5%D8%B7%D9%81%D9%89%20%D8%A8%D9%86%20%D8%B1%D8%B9%D8%AF%20%D8%A7%D9%84%D8%B9%D8%B2%D8%A7%D9%88%D9%8A.jpg",
+      "source": "tvquran",
+      "matchedAs": "Mustafa bin Raad Al Azzawi",
+      "method": null
+    },
+    "129": {
+      "name": "Muftah Alsaltany",
+      "photoUrl": "https://tvquran.com/uploads/authors/images/%D9%85%D9%81%D8%AA%D8%A7%D8%AD%20%D8%A7%D9%84%D8%B3%D9%84%D8%B7%D9%86%D9%8A.jpg",
+      "source": "tvquran",
+      "matchedAs": "Moftah Assultany",
+      "method": "fuzzy:0.57"
+    },
+    "139": {
+      "name": "Majed Al-Zamil",
+      "photoUrl": "https://tvquran.com/uploads/authors/images/%D9%85%D8%A7%D8%AC%D8%AF%20%D8%A7%D9%84%D8%B2%D8%A7%D9%85%D9%84.jpg",
+      "source": "tvquran",
+      "matchedAs": "Majed Al-Zamil",
+      "method": null
+    },
+    "149": {
+      "name": "Maher Shakhashero",
+      "photoUrl": "https://tvquran.com/uploads/authors/images/%D9%85%D8%A7%D9%87%D8%B1%20%D8%B4%D8%AE%D8%A7%D8%B4%D9%8A%D8%B1%D9%88.jpg",
+      "source": "tvquran",
+      "matchedAs": "Maher Shakhashero",
+      "method": null
+    },
+    "150": {
+      "name": "Mohammad AlMonshed",
+      "photoUrl": "https://tvquran.com/uploads/authors/images/%D9%85%D8%AD%D9%85%D8%AF%20%D8%A7%D9%84%D9%85%D9%86%D8%B4%D8%AF.jpg",
+      "source": "tvquran",
+      "matchedAs": "Muhammad Al-Manshid",
+      "method": "fuzzy:0.57"
+    },
+    "151": {
+      "name": "Mahmood AlSheimy",
+      "photoUrl": "https://tvquran.com/uploads/authors/images/%D9%85%D8%AD%D9%85%D9%88%D8%AF%20%D8%A7%D9%84%D8%B4%D9%8A%D9%85%D9%8A.jpg",
+      "source": "tvquran",
+      "matchedAs": "Mahmoud Elshemy",
+      "method": "fuzzy:0.57"
+    },
+    "152": {
+      "name": "Yasser Salamah",
+      "photoUrl": "https://tvquran.com/uploads/authors/images/%D9%8A%D8%A7%D8%B3%D8%B1%20%D8%B3%D9%84%D8%A7%D9%85%D8%A9.jpg",
+      "source": "tvquran",
+      "matchedAs": "Yasser Salama",
+      "method": "fuzzy:0.96"
+    },
+    "154": {
+      "name": "Ustaz Zamri",
+      "photoUrl": "https://tvquran.com/uploads/authors/images/%D8%A3%D8%B3%D8%AA%D8%A7%D8%B0%20%D8%B2%D8%A7%D9%85%D8%B1%D9%8A.jpg",
+      "source": "tvquran",
+      "matchedAs": "Ustaz Zamri",
+      "method": null
+    },
+    "159": {
+      "name": "Khalid Almohana",
+      "photoUrl": "https://tvquran.com/uploads/authors/images/%D8%AE%D8%A7%D9%84%D8%AF%20%D8%A7%D9%84%D9%85%D9%87%D9%86%D8%A7.jpg",
+      "source": "tvquran",
+      "matchedAs": "Khalid Almohana",
+      "method": null
+    },
+    "160": {
+      "name": "Adel Al-Khalbany",
+      "photoUrl": "https://tvquran.com/uploads/authors/images/%D8%B9%D8%A7%D8%AF%D9%84%20%D8%A7%D9%84%D9%83%D9%84%D8%A8%D8%A7%D9%86%D9%8A.jpg",
+      "source": "tvquran",
+      "matchedAs": "Adel Al-Kalbany",
+      "method": "translit"
+    },
+    "161": {
+      "name": "Mousa Bilal",
+      "photoUrl": "https://tvquran.com/uploads/authors/images/%D9%85%D9%88%D8%B3%D9%89%20%D8%A8%D9%84%D8%A7%D9%84.jpg",
+      "source": "tvquran",
+      "matchedAs": "Mousa Bilal",
+      "method": null
+    },
+    "162": {
+      "name": "Hussain Alshaik",
+      "photoUrl": "https://tvquran.com/uploads/authors/images/%D8%AD%D8%B3%D9%8A%D9%86%20%D8%A2%D9%84%20%D8%A7%D9%84%D8%B4%D9%8A%D8%AE.jpg",
+      "source": "tvquran",
+      "matchedAs": "Hussein Al-Sheikh",
+      "method": "fuzzy:0.64"
+    },
+    "163": {
+      "name": "Hatem Fareed Alwaer",
+      "photoUrl": "https://tvquran.com/uploads/authors/images/%D8%AD%D8%A7%D8%AA%D9%85%20%D9%81%D8%B1%D9%8A%D8%AF%20%D8%A7%D9%84%D9%88%D8%A7%D8%B9%D8%B1.jpg",
+      "source": "tvquran",
+      "matchedAs": "Hatem Farid",
+      "method": "fuzzy:1.05"
+    },
+    "164": {
+      "name": "Ibrahim Aljormy",
+      "photoUrl": "https://tvquran.com/uploads/authors/images/%D8%A5%D8%A8%D8%B1%D8%A7%D9%87%D9%8A%D9%85%20%D8%A7%D9%84%D8%AC%D8%B1%D9%85%D9%8A.jpg",
+      "source": "tvquran",
+      "matchedAs": "إبراهيم الجرمي",
+      "method": "exact"
+    },
+    "165": {
+      "name": "Mahmood Al rifai",
+      "photoUrl": "https://tvquran.com/uploads/authors/images/%D9%85%D8%AD%D9%85%D9%88%D8%AF%20%D8%A7%D9%84%D8%B1%D9%81%D8%A7%D8%B9%D9%8A.jpg",
+      "source": "tvquran",
+      "matchedAs": "Mahmoud Rifai",
+      "method": "fuzzy:0.96"
+    },
+    "166": {
+      "name": "Nasser Al obaid",
+      "photoUrl": "https://tvquran.com/uploads/authors/images/%D9%86%D8%A7%D8%B5%D8%B1%20%D8%A7%D9%84%D8%B9%D8%A8%D9%8A%D8%AF.jpg",
+      "source": "tvquran",
+      "matchedAs": "Nasser Al-obaid",
+      "method": null
+    },
+    "167": {
+      "name": "Wasel Almethen",
+      "photoUrl": "https://tvquran.com/uploads/authors/images/%D9%88%D8%A7%D8%B5%D9%84%20%D8%A7%D9%84%D9%85%D8%B0%D9%86.jpg",
+      "source": "tvquran",
+      "matchedAs": "Wassel Almethen",
+      "method": "fuzzy:0.96"
+    },
+    "178": {
+      "name": "Ibrahim Aldosari",
+      "photoUrl": "https://tvquran.com/uploads/authors/images/%D8%A5%D8%A8%D8%B1%D8%A7%D9%87%D9%8A%D9%85%20%D8%A7%D9%84%D8%AF%D9%88%D8%B3%D8%B1%D9%8A.jpg",
+      "source": "tvquran",
+      "matchedAs": "Ibrahim Dousari",
+      "method": "translit"
+    },
+    "181": {
+      "name": "Jamaan Alosaimi",
+      "photoUrl": "https://tvquran.com/uploads/authors/images/%D8%AC%D9%85%D8%B9%D8%A7%D9%86%20%D8%A7%D9%84%D8%B9%D8%B5%D9%8A%D9%85%D9%8A.jpg",
+      "source": "tvquran",
+      "matchedAs": "Jamaan Alosaimi",
+      "method": null
+    },
+    "189": {
+      "name": "Abdullah Fahmi",
+      "photoUrl": "https://tvquran.com/uploads/authors/images/%D8%B9%D8%A8%D8%AF%D8%A7%D9%84%D9%84%D9%87%20%D9%81%D9%87%D9%85%D9%8A.jpg",
+      "source": "tvquran",
+      "matchedAs": "Abdullah Fahmi",
+      "method": null
+    },
+    "192": {
+      "name": "Muhammed Khairul Anuar",
+      "photoUrl": "https://tvquran.com/uploads/authors/images/%D9%85%D8%AD%D9%85%D8%AF%20%D8%AE%D9%8A%D8%B1%20%D8%A7%D9%84%D9%86%D9%88%D8%B1.jpg",
+      "source": "tvquran",
+      "matchedAs": "Muhammad Khairul Anuar",
+      "method": "fuzzy:1.31"
+    },
+    "194": {
+      "name": "Jamal Addeen Alzailaie",
+      "photoUrl": "https://tvquran.com/uploads/authors/images/%D8%AC%D9%85%D8%A7%D9%84%20%D8%A7%D9%84%D8%AF%D9%8A%D9%86%20%D8%A7%D9%84%D8%B2%D9%8A%D9%84%D8%B9%D9%8A.jpg",
+      "source": "tvquran",
+      "matchedAs": "Jamal Al-Zaili",
+      "method": "fuzzy:1.05"
+    },
+    "198": {
+      "name": "Mohammad Rashad Alshareef",
+      "photoUrl": "https://tvquran.com/uploads/authors/images/%D9%85%D8%AD%D9%85%D8%AF%20%D8%B1%D8%B4%D8%A7%D8%AF%20%D8%A7%D9%84%D8%B4%D8%B1%D9%8A%D9%81.jpg",
+      "source": "tvquran",
+      "matchedAs": "Muhammad Rashad Al Shareef",
+      "method": "fuzzy:0.98"
+    },
+    "201": {
+      "name": "Ahmed Al-trabulsi",
+      "photoUrl": "https://tvquran.com/uploads/authors/images/%D8%A3%D8%AD%D9%85%D8%AF%20%D8%AE%D8%B6%D8%B1%20%D8%A7%D9%84%D8%B7%D8%B1%D8%A7%D8%A8%D9%84%D8%B3%D9%8A.jpg",
+      "source": "tvquran",
+      "matchedAs": "Ahmed Al-Tarabolsi",
+      "method": "fuzzy:0.86"
+    },
+    "202": {
+      "name": "Abdullah Al-Kandari",
+      "photoUrl": "https://tvquran.com/uploads/authors/images/%D8%B9%D8%A8%D8%AF%D8%A7%D9%84%D9%84%D9%87%20%D8%A7%D9%84%D9%83%D9%86%D8%AF%D8%B1%D9%8A.jpg",
+      "source": "tvquran",
+      "matchedAs": "Abdullah Al-Kandari",
+      "method": null
+    },
+    "203": {
+      "name": "Ahmed Amer",
+      "photoUrl": "https://tvquran.com/uploads/authors/images/%D8%A3%D8%AD%D9%85%D8%AF%20%D8%B9%D8%A7%D9%85%D8%B1.jpg",
+      "source": "tvquran",
+      "matchedAs": "Ahmed Amer",
+      "method": null
+    },
+    "205": {
+      "name": "Ahmad Alhuthaifi",
+      "photoUrl": "https://tvquran.com/uploads/authors/images/%D8%A3%D8%AD%D9%85%D8%AF%20%D8%A7%D9%84%D8%AD%D8%B0%D9%8A%D9%81%D9%8A.jpg",
+      "source": "tvquran",
+      "matchedAs": "Ahmed Ali Alhuthaifi",
+      "method": "fuzzy:0.86"
+    },
+    "206": {
+      "name": "Mohammed Osman Khan",
+      "photoUrl": "https://tvquran.com/uploads/authors/images/%D9%85%D8%AD%D9%85%D8%AF%20%D8%B9%D8%AB%D9%85%D8%A7%D9%86%20%D8%AE%D8%A7%D9%86.jpg",
+      "source": "tvquran",
+      "matchedAs": "Muhammad Othman Khan",
+      "method": "translit"
+    },
+    "207": {
+      "name": "Youssef Edghouch",
+      "photoUrl": "https://tvquran.com/uploads/authors/images/%D9%8A%D9%88%D8%B3%D9%81%20%D8%A7%D9%84%D8%AF%D8%BA%D9%88%D8%B4.jpg",
+      "source": "tvquran",
+      "matchedAs": "Youssef Edghouch",
+      "method": null
+    },
+    "208": {
+      "name": "Addokali Mohammad Alalim",
+      "photoUrl": "https://tvquran.com/uploads/authors/images/%D8%A7%D9%84%D8%AF%D9%88%D9%83%D8%A7%D9%84%D9%8A%20%D9%85%D8%AD%D9%85%D8%AF%20%D8%A7%D9%84%D8%B9%D8%A7%D9%84%D9%85.jpg",
+      "source": "tvquran",
+      "matchedAs": "Al-Dokali Muhammad",
+      "method": "fuzzy:0.73"
+    },
+    "209": {
+      "name": "Wishear Hayder Arbili",
+      "photoUrl": "https://tvquran.com/uploads/authors/images/%D9%88%D8%B4%DB%8C%D8%A7%D8%B1%20%D8%AD%DB%8C%D8%AF%D8%B1%20%D8%A7%D8%B1%D8%A8%DB%8C%D9%84%DB%8C.jpg",
+      "source": "tvquran",
+      "matchedAs": "Wishear Hayder Arbili",
+      "method": null
+    },
+    "211": {
+      "name": "Alfateh Alzubair",
+      "photoUrl": "https://tvquran.com/uploads/authors/images/%D8%A7%D9%84%D9%81%D8%A7%D8%AA%D8%AD%20%D9%85%D8%AD%D9%85%D8%AF%20%D8%A7%D9%84%D8%B2%D8%A8%D9%8A%D8%B1.jpg",
+      "source": "tvquran",
+      "matchedAs": "Alfateh Alzubair",
+      "method": null
+    },
+    "217": {
+      "name": "Bandar Balilah",
+      "photoUrl": "https://tvquran.com/uploads/authors/images/%D8%A8%D9%86%D8%AF%D8%B1%20%D8%A8%D9%84%D9%8A%D9%84%D9%87.jpg",
+      "source": "tvquran",
+      "matchedAs": "Bandar Baleela",
+      "method": "fuzzy:0.96"
+    },
+    "221": {
+      "name": "Raad Al Kurdi",
+      "photoUrl": "https://tvquran.com/uploads/authors/images/%D8%B1%D8%B9%D8%AF%20%D8%A7%D9%84%D9%83%D8%B1%D8%AF%D9%8A.jpg",
+      "source": "tvquran",
+      "matchedAs": "Raad Al-Kurdi",
+      "method": null
+    },
+    "225": {
+      "name": "Abdulrahman Aloosi",
+      "photoUrl": "https://tvquran.com/uploads/authors/images/%D8%B9%D8%A8%D8%AF%D8%A7%D9%84%D8%B1%D8%AD%D9%85%D9%86%20%D8%A7%D9%84%D8%B9%D9%88%D8%B3%D9%8A.jpg",
+      "source": "tvquran",
+      "matchedAs": "Abdulrahman Aloosi",
+      "method": null
+    },
+    "226": {
+      "name": "Khalid Algamdi",
+      "photoUrl": "https://tvquran.com/uploads/authors/images/%D8%AE%D8%A7%D9%84%D8%AF%20%D8%A7%D9%84%D8%BA%D8%A7%D9%85%D8%AF%D9%8A.jpg",
+      "source": "tvquran",
+      "matchedAs": "Khaled Al-Ghamdi",
+      "method": "fuzzy:0.57"
+    },
+    "227": {
+      "name": "Ramadan Shakoor",
+      "photoUrl": "https://tvquran.com/uploads/authors/images/%D8%B1%D9%85%D8%B6%D8%A7%D9%86%20%D8%B4%D9%83%D9%88%D8%B1.jpg",
+      "source": "tvquran",
+      "matchedAs": "Ramadan Shakour",
+      "method": "fuzzy:0.96"
+    },
+    "228": {
+      "name": "Abdulmajeed Al-Arkani",
+      "photoUrl": "https://tvquran.com/uploads/authors/images/%D8%B9%D8%A8%D8%AF%D8%A7%D9%84%D9%85%D8%AC%D9%8A%D8%AF%20%D8%A7%D9%84%D8%A3%D8%B1%D9%83%D8%A7%D9%86%D9%8A.jpg",
+      "source": "tvquran",
+      "matchedAs": "Abdulmajeed Al-Arkani",
+      "method": null
+    },
+    "229": {
+      "name": "Mohammad Khalil Al-Qari",
+      "photoUrl": "https://tvquran.com/uploads/authors/images/%D9%85%D8%AD%D9%85%D8%AF%20%D8%AE%D9%84%D9%8A%D9%84%20%D8%A7%D9%84%D9%82%D8%A7%D8%B1%D8%A6.jpg",
+      "source": "tvquran",
+      "matchedAs": "Muhammad Khalil Al-Qari",
+      "method": "fuzzy:1.15"
+    },
+    "231": {
+      "name": "Hazza Al-Balushi",
+      "photoUrl": "https://tvquran.com/uploads/authors/images/%D9%87%D8%B2%D8%A7%D8%B9%20%D8%A7%D9%84%D8%A8%D9%84%D9%88%D8%B4%D9%8A.jpg",
+      "source": "tvquran",
+      "matchedAs": "Hazza Albalushi",
+      "method": "fuzzy:0.96"
+    },
+    "236": {
+      "name": "Abdulrahman Al-Majed",
+      "photoUrl": "https://tvquran.com/uploads/authors/images/%D8%B9%D8%A8%D8%AF%20%D8%A7%D9%84%D8%B1%D8%AD%D9%85%D9%86%20%D8%A7%D9%84%D9%85%D8%A7%D8%AC%D8%AF.jpg",
+      "source": "tvquran",
+      "matchedAs": "Abdulrahman Al-Majed",
+      "method": null
+    },
+    "240": {
+      "name": "Salman Alotaibi",
+      "photoUrl": "https://tvquran.com/uploads/authors/images/%D8%B3%D9%84%D9%85%D8%A7%D9%86%20%D8%A7%D9%84%D8%B9%D8%AA%D9%8A%D8%A8%D9%8A.jpg",
+      "source": "tvquran",
+      "matchedAs": "Salman Al-Otaibi",
+      "method": "translit"
+    },
+    "241": {
+      "name": "Mohammad Refat",
+      "photoUrl": "https://tvquran.com/uploads/authors/images/%D9%85%D8%AD%D9%85%D8%AF%20%D8%B1%D9%81%D8%B9%D8%AA.jpg",
+      "source": "tvquran",
+      "matchedAs": "Muhammad Refaat",
+      "method": "fuzzy:0.57"
+    },
+    "244": {
+      "name": "Abdullah Al-Khalaf",
+      "photoUrl": "https://tvquran.com/uploads/authors/images/%D8%B9%D8%A8%D8%AF%20%D8%A7%D9%84%D9%84%D9%87%20%D8%AE%D9%84%D9%81.jpg",
+      "source": "tvquran",
+      "matchedAs": "Abdullah Al-Khalaf",
+      "method": null
+    },
+    "245": {
+      "name": "Mansour Al-Salemi",
+      "photoUrl": "https://tvquran.com/uploads/authors/images/%D9%85%D9%86%D8%B5%D9%88%D8%B1%20%D8%A7%D9%84%D8%B3%D8%A7%D9%84%D9%85%D9%8A.jpg",
+      "source": "tvquran",
+      "matchedAs": "Mansour Al-Salmi",
+      "method": "fuzzy:0.96"
+    },
+    "253": {
+      "name": "Islam Sobhi",
+      "photoUrl": "https://tvquran.com/uploads/authors/images/%D8%A7%D8%B3%D9%84%D8%A7%D9%85%20%D8%B5%D8%A8%D8%AD%D9%8A.jpg",
+      "source": "tvquran",
+      "matchedAs": "Islam Sobhi",
+      "method": null
+    },
+    "254": {
+      "name": "Bader Alturki",
+      "photoUrl": "https://tvquran.com/uploads/authors/images/%D8%A8%D8%AF%D8%B1%20%D8%A7%D9%84%D8%AA%D8%B1%D9%83%D9%8A.jpeg",
+      "source": "tvquran",
+      "matchedAs": "Badr Al-Turki",
+      "method": "fuzzy:0.57"
+    },
+    "259": {
+      "name": "Ahmad Al Nufais",
+      "photoUrl": "https://tvquran.com/uploads/authors/images/%D8%A3%D8%AD%D9%85%D8%AF%20%D8%A7%D9%84%D9%86%D9%81%D9%8A%D8%B3.jpg",
+      "source": "tvquran",
+      "matchedAs": "Ahmad Alnufais",
+      "method": "fuzzy:0.96"
+    },
+    "264": {
+      "name": "Younes Souilass",
+      "photoUrl": "https://tvquran.com/uploads/authors/images/%D9%8A%D9%88%D9%86%D8%B3%20%D8%A7%D8%B3%D9%88%D9%8A%D9%84%D8%B5.jpg",
+      "source": "tvquran",
+      "matchedAs": "Younes Souilas",
+      "method": "fuzzy:0.96"
+    },
+    "267": {
+      "name": "Abdullah Kamel",
+      "photoUrl": "https://tvquran.com/uploads/authors/images/%D8%B9%D8%A8%D8%AF%20%D8%A7%D9%84%D9%84%D9%87%20%D9%83%D8%A7%D9%85%D9%84.jpg",
+      "source": "tvquran",
+      "matchedAs": "Abdullah Kamel",
+      "method": null
+    },
+    "268": {
+      "name": "Peshawa Qadr Al-Kurdi",
+      "photoUrl": "https://tvquran.com/uploads/authors/images/%D8%A8%D9%8A%D8%B4%D9%87%20%D9%88%D8%A7%20%D9%82%D8%A7%D8%AF%D8%B1%20%D8%A7%D9%84%D9%83%D8%B1%D8%AF%D9%8A.jpg",
+      "source": "tvquran",
+      "matchedAs": "Peshawa Qadr Al-Kurdi",
+      "method": null
+    },
+    "272": {
+      "name": "Okasha Kameny",
+      "photoUrl": "https://tvquran.com/uploads/authors/images/%D8%B9%D9%83%D8%A7%D8%B4%D8%A9%20%D9%83%D9%85%D9%8A%D9%86%D9%8A.jpg",
+      "source": "tvquran",
+      "matchedAs": "Okasha Kamina",
+      "method": "fuzzy:0.96"
+    },
+    "273": {
+      "name": "Haitham Aldukhain",
+      "photoUrl": "https://api.kalamalah.com/api/reciter-profile/haitham-al-dukhin",
+      "source": "supplement",
+      "matchedAs": "Haitham Aldukhain",
+      "method": "manual"
+    },
+    "274": {
+      "name": "Muhammad Abu Sneina",
+      "photoUrl": "https://tvquran.com/uploads/authors/images/%D9%85%D8%AD%D9%85%D8%AF%20%D8%A3%D8%A8%D9%88%20%D8%B3%D9%86%D9%8A%D9%86%D8%A9.jpg",
+      "source": "tvquran",
+      "matchedAs": "Muhammad Abdul Salam Abu Sneina",
+      "method": null
+    },
+    "281": {
+      "name": "Fouad Alkhamery",
+      "photoUrl": "https://tvquran.com/uploads/authors/images/%D9%81%D8%A4%D8%A7%D8%AF%20%D8%A7%D9%84%D8%AE%D8%A7%D9%85%D8%B1%D9%8A.jpg",
+      "source": "tvquran",
+      "matchedAs": "Fouad Al-khamri",
+      "method": "fuzzy:0.96"
+    },
+    "286": {
+      "name": "Hasan Saleh",
+      "photoUrl": "https://tvquran.com/uploads/authors/images/%D8%AD%D8%B3%D9%86%20%D9%85%D8%AD%D9%85%D8%AF%20%D8%B5%D8%A7%D9%84%D8%AD.jpg",
+      "source": "tvquran",
+      "matchedAs": "Hasan Saleh",
+      "method": null
+    },
+    "305": {
+      "name": "Hicham Lharraz",
+      "photoUrl": "https://tvquran.com/uploads/authors/images/%D9%87%D8%B4%D8%A7%D9%85%20%D8%A7%D9%84%D9%87%D8%B1%D8%A7%D8%B2.jpg",
+      "source": "tvquran",
+      "matchedAs": "Hicham Elharraz",
+      "method": "fuzzy:0.96"
+    },
+    "21199": {
+      "name": "Abdelmoujib Benkirane",
+      "photoUrl": "https://tvquran.com/uploads/authors/images/%D8%B9%D8%A8%D8%AF%20%D8%A7%D9%84%D9%85%D8%AC%D9%8A%D8%A8%20%D8%A8%D9%86%D9%83%D9%8A%D8%B1%D8%A7%D9%86.jpg",
+      "source": "tvquran",
+      "matchedAs": "Abdulmojib Benkiran",
+      "method": "fuzzy:0.79"
+    }
+  }
+}

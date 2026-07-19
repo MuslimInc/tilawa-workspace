@@ -145,7 +145,7 @@ void main() {
 
     expect(find.text(l10n.homeQuickActionsTitle), findsNothing);
     expect(find.text(l10n.homeQuickToolsTitle), findsOneWidget);
-    expect(find.text(l10n.homeGreeting), findsOneWidget);
+    expect(find.text(l10n.homeGreeting), findsNothing);
     expect(find.text(l10n.homeQuickReciters), findsOneWidget);
     expect(find.text(l10n.homeQuickQuranReader), findsOneWidget);
     expect(find.text(l10n.homeQuickAthkar), findsOneWidget);

@@ -5,11 +5,12 @@ import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:tilawa/core/bootstrap/startup_blur_shader_warmup.dart';
 import 'package:tilawa/features/home/domain/entities/home_dashboard.dart';
+import 'package:tilawa/features/home/domain/entities/home_prayer_slot.dart';
 import 'package:tilawa/features/home/domain/home_hijri_date_formatter.dart';
 import 'package:tilawa/features/home/presentation/bloc/home_dashboard_state.dart';
 import 'package:tilawa/features/home/presentation/widgets/home_dashboard_content_sliver.dart';
 import 'package:tilawa/features/home/presentation/widgets/home_hero_background.dart';
-import 'package:tilawa/features/home/presentation/widgets/home_hero_glass_surface.dart';
+import 'package:tilawa/features/home/presentation/widgets/home_prayer_schedule_strip.dart';
 import 'package:tilawa/features/home/presentation/widgets/home_next_prayer_time.dart';
 import 'package:tilawa/features/prayer_times/domain/entities/prayer_time_entity.dart';
 import 'package:tilawa/l10n/generated/app_localizations.dart';
@@ -54,11 +55,7 @@ void main() {
 
     expect(find.byType(TilawaSkeleton), findsOneWidget);
     expect(find.text('Cairo'), findsNothing);
-
-    final HomeHeroGlassSurface prayerCard = tester.widget<HomeHeroGlassSurface>(
-      find.byType(HomeHeroGlassSurface),
-    );
-    expect(prayerCard.onTap, isNull);
+    expect(find.byType(HomePrayerScheduleStrip), findsNothing);
   });
 
   testWidgets('keeps prayer content visible during pull-to-refresh', (
@@ -137,13 +134,11 @@ void main() {
     );
     await tester.pump();
 
-    await tester.tap(find.byType(HomeHeroGlassSurface));
-    await tester.pump();
-
+    expect(find.textContaining('Assalamu'), findsNothing);
     expect(openPrayerTapped, isFalse);
   });
 
-  testWidgets('renders atmospheric hero with frosted prayer glass', (
+  testWidgets('renders immersive header zone with prayer strip', (
     tester,
   ) async {
     final view = tester.view;
@@ -171,18 +166,14 @@ void main() {
     expect(find.text(l10n.homeHeroLocationContext), findsNothing);
     expect(find.text('Cairo'), findsOneWidget);
     expect(find.text(hijriDateLine), findsOneWidget);
-    expect(find.text(l10n.nextPrayer), findsOneWidget);
+    expect(find.text(l10n.homeGreeting), findsOneWidget);
+    expect(find.text('Muhammad Kamel'), findsOneWidget);
     expect(find.byType(SliverPersistentHeader), findsNothing);
     expect(find.byType(SliverToBoxAdapter), findsWidgets);
     expect(find.byIcon(FluentIcons.location_24_regular), findsOneWidget);
 
     expect(find.byType(HomeHeroBackground), findsOneWidget);
-    expect(find.byType(HomeHeroGlassSurface), findsOneWidget);
-    final HomeHeroGlassSurface prayerCard = tester.widget<HomeHeroGlassSurface>(
-      find.byType(HomeHeroGlassSurface).first,
-    );
-    expect(prayerCard.usePrayerHeroTokens, isTrue);
-    expect(prayerCard.padding, isNot(EdgeInsets.zero));
+    expect(find.byType(HomePrayerScheduleStrip), findsOneWidget);
   });
 
   testWidgets('hero has no collapse scroll extent', (tester) async {
@@ -320,6 +311,7 @@ void main() {
                     color: Colors.blue,
                   ),
                 ),
+                const SliverToBoxAdapter(child: SizedBox(height: 1200)),
               ],
             );
           },
@@ -336,36 +328,26 @@ void main() {
     );
 
     final MeMuslimDesignTokens tokens = Theme.of(scrollContext).tokens;
-    final double measuredHeroExtent =
-        tester
-            .getSize(
-              find
-                  .descendant(
-                    of: find.byType(CustomScrollView),
-                    matching: find.byType(HomeHeroGlassSurface),
-                  )
-                  .first,
-            )
-            .height +
-        tokens.spaceLarge +
-        tokens.spaceMedium;
+    final double probeBefore = tester
+        .getTopLeft(find.byKey(const Key('quick_actions_probe')))
+        .dy;
 
-    expect(
-      heroExtent,
-      closeTo(measuredHeroExtent, 2),
-      reason: 'expandedLayoutExtent should match rendered hero sliver height',
-    );
+    expect(heroExtent, greaterThan(200));
+    expect(probeBefore, greaterThan(heroExtent * 0.5));
 
     controller.jumpTo(heroExtent);
     await tester.pump();
 
-    final Offset probeTop = tester.getTopLeft(
-      find.byKey(const Key('quick_actions_probe')),
-    );
+    final double probeAfter = tester
+        .getTopLeft(find.byKey(const Key('quick_actions_probe')))
+        .dy;
+    expect(probeAfter, lessThan(probeBefore));
     expect(
-      probeTop.dy,
+      probeAfter,
       lessThanOrEqualTo(
-        MediaQuery.paddingOf(scrollContext).top + tokens.spaceLarge + 1,
+        MediaQuery.paddingOf(scrollContext).top +
+            tokens.spaceLarge +
+            tokens.spaceExtraSmall,
       ),
     );
   });
@@ -404,15 +386,50 @@ class _HomeNextPrayerTimeHarness extends StatelessWidget {
   }
 }
 
-HomeDashboardState _homeDashboardState() => HomeDashboardLoaded(
-  HomeDashboard(
-    generatedAt: DateTime(2026, 6, 16, 17, 57),
-    displayName: 'Muhammad Kamel',
-    locationLabel: 'Cairo',
-    nextPrayer: HomeNextPrayer(
-      type: PrayerType.maghrib,
-      time: DateTime.now().add(const Duration(hours: 2, minutes: 1)),
-      timeUntil: const Duration(hours: 2, minutes: 1),
+HomeDashboardState _homeDashboardState() {
+  final DateTime now = DateTime.now();
+  return HomeDashboardLoaded(
+    HomeDashboard(
+      generatedAt: DateTime(2026, 6, 16, 17, 57),
+      displayName: 'Muhammad Kamel',
+      locationLabel: 'Cairo',
+      nextPrayer: HomeNextPrayer(
+        type: PrayerType.maghrib,
+        time: now.add(const Duration(hours: 2, minutes: 1)),
+        timeUntil: const Duration(hours: 2, minutes: 1),
+      ),
+      todayPrayers: [
+        HomePrayerSlot(
+          type: PrayerType.fajr,
+          time: now.subtract(const Duration(hours: 12)),
+          isNext: false,
+          hasPassed: true,
+        ),
+        HomePrayerSlot(
+          type: PrayerType.dhuhr,
+          time: now.subtract(const Duration(hours: 5)),
+          isNext: false,
+          hasPassed: true,
+        ),
+        HomePrayerSlot(
+          type: PrayerType.asr,
+          time: now.subtract(const Duration(hours: 2)),
+          isNext: false,
+          hasPassed: true,
+        ),
+        HomePrayerSlot(
+          type: PrayerType.maghrib,
+          time: now.add(const Duration(hours: 2, minutes: 1)),
+          isNext: true,
+          hasPassed: false,
+        ),
+        HomePrayerSlot(
+          type: PrayerType.isha,
+          time: now.add(const Duration(hours: 3, minutes: 30)),
+          isNext: false,
+          hasPassed: false,
+        ),
+      ],
     ),
-  ),
-);
+  );
+}

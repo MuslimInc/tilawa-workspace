@@ -92,8 +92,6 @@ class _HomeScreenState extends State<HomeScreen> {
     final ThemeData theme = Theme.of(context);
     final Color canvasBottom =
         theme.componentTokens.homeScreen.backgroundGradientEnd;
-    final Color statusBarChromeColor =
-        theme.componentTokens.adaptiveShell.bottomNavBackgroundColor;
     final double topInset = MediaQuery.paddingOf(context).top;
 
     return _HomeTtfdScope(
@@ -137,13 +135,9 @@ class _HomeScreenState extends State<HomeScreen> {
               fit: StackFit.expand,
               children: [
                 const Positioned.fill(child: HomeScreenBackground()),
-                Positioned(
-                  top: topInset,
-                  left: 0,
-                  right: 0,
-                  bottom: 0,
+                Positioned.fill(
                   child: TilawaRefreshIndicator.adaptive(
-                    edgeOffset: 0,
+                    edgeOffset: topInset,
                     displacement: context.tokens.spaceExtraLarge,
                     onRefresh: _refreshHome,
                     child: NotificationListener<ScrollNotification>(
@@ -213,14 +207,18 @@ class _HomeScreenState extends State<HomeScreen> {
                     ),
                   ),
                 ),
+                // Hit-test spacer only — immersive hero paints under the status
+                // bar; keep the key for layout tests.
                 Positioned(
                   top: 0,
                   left: 0,
                   right: 0,
                   height: topInset,
-                  child: ColoredBox(
-                    key: const Key('home_status_bar_chrome'),
-                    color: statusBarChromeColor,
+                  child: const IgnorePointer(
+                    child: ColoredBox(
+                      key: Key('home_status_bar_chrome'),
+                      color: Colors.transparent,
+                    ),
                   ),
                 ),
               ],
