@@ -14,9 +14,15 @@ import 'package:tilawa/features/home/presentation/widgets/home_prayer_schedule_s
 import 'package:tilawa/features/home/presentation/widgets/home_next_prayer_time.dart';
 import 'package:tilawa/features/prayer_times/domain/entities/prayer_time_entity.dart';
 import 'package:tilawa/l10n/generated/app_localizations.dart';
+import 'package:intl/date_symbol_data_local.dart';
 import 'package:tilawa_ui_kit/tilawa_ui_kit.dart';
 
 void main() {
+  setUpAll(() async {
+    await initializeDateFormatting('ar');
+    await initializeDateFormatting('en');
+  });
+
   setUp(StartupBlurShaderWarmup.completeForTest);
 
   tearDown(StartupBlurShaderWarmup.resetForTest);
@@ -158,19 +164,19 @@ void main() {
       find.byType(CustomScrollView),
     );
     final l10n = AppLocalizations.of(scrollContext);
-    final String hijriDateLine = formatHomeHijriDate(
+    final String dateLine = formatHomeHeaderDateLine(
       date: DateTime.now(),
       languageCode: 'ar',
     );
 
     expect(find.text(l10n.homeHeroLocationContext), findsNothing);
     expect(find.text('Cairo'), findsOneWidget);
-    expect(find.text(hijriDateLine), findsOneWidget);
+    expect(find.text(dateLine), findsOneWidget);
     expect(find.text(l10n.homeGreeting), findsOneWidget);
     expect(find.text('Muhammad Kamel'), findsOneWidget);
     expect(find.byType(SliverPersistentHeader), findsNothing);
     expect(find.byType(SliverToBoxAdapter), findsWidgets);
-    expect(find.byIcon(FluentIcons.location_24_regular), findsOneWidget);
+    expect(find.byIcon(FluentIcons.location_24_filled), findsOneWidget);
 
     expect(find.byType(HomeHeroBackground), findsOneWidget);
     expect(find.byType(HomePrayerScheduleStrip), findsOneWidget);

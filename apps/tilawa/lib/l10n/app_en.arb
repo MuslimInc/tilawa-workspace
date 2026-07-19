@@ -44,7 +44,7 @@
     "@homeTitle": {
         "description": "Home dashboard title"
     },
-    "homeGreeting": "Assalamu alaikum",
+    "homeGreeting": "Assalamu Alaikum,",
     "@homeGreeting": {
         "description": "Default Home greeting"
     },
@@ -141,6 +141,27 @@
             "hours": {
                 "type": "int"
             },
+            "minutes": {
+                "type": "int"
+            }
+        }
+    },
+    "homeNextPrayerCountdownHoursMinutes": "Next prayer in {hours}h {minutes}m",
+    "@homeNextPrayerCountdownHoursMinutes": {
+        "description": "Immersive Home header countdown with hours and minutes",
+        "placeholders": {
+            "hours": {
+                "type": "int"
+            },
+            "minutes": {
+                "type": "int"
+            }
+        }
+    },
+    "homeNextPrayerCountdownMinutes": "{minutes, plural, =1{Next prayer in 1 minute} other{Next prayer in {minutes} minutes}}",
+    "@homeNextPrayerCountdownMinutes": {
+        "description": "Immersive Home header countdown under one hour",
+        "placeholders": {
             "minutes": {
                 "type": "int"
             }

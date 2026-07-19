@@ -272,14 +272,23 @@ final class HomeDashboardRepositoryImpl implements HomeDashboardRepository {
     required DateTime now,
     required PrayerType? nextType,
   }) {
+    // MeMuslim header strip is five salah only (no sunrise).
+    const Set<PrayerType> stripTypes = {
+      PrayerType.fajr,
+      PrayerType.dhuhr,
+      PrayerType.asr,
+      PrayerType.maghrib,
+      PrayerType.isha,
+    };
     return [
       for (final PrayerTimeItem prayer in prayerTimes.mainPrayers)
-        HomePrayerSlot(
-          type: prayer.type,
-          time: prayer.time,
-          isNext: prayer.type == nextType,
-          hasPassed: !prayer.time.isAfter(now),
-        ),
+        if (stripTypes.contains(prayer.type))
+          HomePrayerSlot(
+            type: prayer.type,
+            time: prayer.time,
+            isNext: prayer.type == nextType,
+            hasPassed: !prayer.time.isAfter(now),
+          ),
     ];
   }
 }

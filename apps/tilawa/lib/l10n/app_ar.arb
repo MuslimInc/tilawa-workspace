@@ -41,7 +41,7 @@
         "description": "Loading reciters message"
     },
     "homeTitle": "الصفحة الرئيسية",
-    "homeGreeting": "السلام عليكم",
+    "homeGreeting": "السلام عليكم،",
     "homeInspirationTitle": "آية ودعاء",
     "homeComfortLine": "كل حاجة محتاجها هنا. ابدأ بهدوء",
     "@homeComfortLine": {
@@ -99,6 +99,25 @@
     },
     "homePrayerInMinutes": "{minutes, plural, =1{بعد دقيقة} =2{بعد دقيقتين} other{بعد {minutes} دقائق}}",
     "@homePrayerInMinutes": {
+        "placeholders": {
+            "minutes": {
+                "type": "int"
+            }
+        }
+    },
+    "homeNextPrayerCountdownHoursMinutes": "الصلاة التالية بعد {hours} س {minutes} د",
+    "@homeNextPrayerCountdownHoursMinutes": {
+        "placeholders": {
+            "hours": {
+                "type": "int"
+            },
+            "minutes": {
+                "type": "int"
+            }
+        }
+    },
+    "homeNextPrayerCountdownMinutes": "{minutes, plural, =1{الصلاة التالية بعد دقيقة} =2{الصلاة التالية بعد دقيقتين} other{الصلاة التالية بعد {minutes} دقائق}}",
+    "@homeNextPrayerCountdownMinutes": {
         "placeholders": {
             "minutes": {
                 "type": "int"

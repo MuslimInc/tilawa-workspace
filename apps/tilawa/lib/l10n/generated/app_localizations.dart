@@ -167,7 +167,7 @@ abstract class AppLocalizations {
   /// Default Home greeting
   ///
   /// In en, this message translates to:
-  /// **'Assalamu alaikum'**
+  /// **'Assalamu Alaikum,'**
   String get homeGreeting;
 
   /// Title for the daily inspiration section
@@ -289,6 +289,18 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'In {hours}h {minutes}m'**
   String homePrayerInHoursMinutes(int hours, int minutes);
+
+  /// Immersive Home header countdown with hours and minutes
+  ///
+  /// In en, this message translates to:
+  /// **'Next prayer in {hours}h {minutes}m'**
+  String homeNextPrayerCountdownHoursMinutes(int hours, int minutes);
+
+  /// Immersive Home header countdown under one hour
+  ///
+  /// In en, this message translates to:
+  /// **'{minutes, plural, =1{Next prayer in 1 minute} other{Next prayer in {minutes} minutes}}'**
+  String homeNextPrayerCountdownMinutes(int minutes);
 
   /// Home section title for secondary destinations that are not bottom-nav tabs
   ///

@@ -151,67 +151,44 @@ class _HomeNextPrayerTimeSliverState extends State<_HomeNextPrayerTimeSliver> {
 
   @override
   Widget build(BuildContext context) {
-    final MeMuslimDesignTokens tokens = context.tokens;
     final ThemeData theme = Theme.of(context);
     final TilawaHomeScreenTokens screenTokens =
         theme.componentTokens.homeScreen;
-    final double horizontalInset =
-        TilawaHomeScreenTokens.screenHorizontalPadding(tokens);
     final double topInset = MediaQuery.paddingOf(context).top;
     final HomeDashboard? dashboard = widget.ui.dashboard;
     final HomeNextPrayer? nextPrayer = dashboard?.nextPrayer;
     final String? locationName = dashboard?.locationLabel;
-    final Color canvasBottom = screenTokens.backgroundGradientEnd;
 
+    // Figma header-zone uses a fixed bright green ramp — not night/pre-dawn
+    // atmospheric phases (those make the strip and inactive copy look muddy).
     final TilawaHomeNextPrayerHeroTokens heroTokens =
-        HomeHeroGradientResolver.resolve(
-          now: DateTime.now(),
-          boundaries: dashboard?.prayerBoundaries,
-          debugPhaseOverride: HomeHeroGradientDebug.phaseOverride.value,
-        );
+        HomeHeroGradientDebug.phaseOverride.value != null
+        ? HomeHeroGradientResolver.tokensForPhase(
+            HomeHeroGradientDebug.phaseOverride.value!,
+          )
+        : TilawaHomeNextPrayerHeroTokens.day();
     final Color onHero = heroTokens.foregroundColor;
-    final Color muted = onHero.withValues(
-      alpha: heroTokens.mutedForegroundOpacity,
-    );
+    final Color muted = onHero.withValues(alpha: 0.7);
 
     return SliverToBoxAdapter(
       child: AnnotatedRegion<SystemUiOverlayStyle>(
         value: HomeHeroBackground.systemOverlayStyle(heroTokens),
         child: Stack(
-          clipBehavior: Clip.none,
+          clipBehavior: Clip.hardEdge,
           children: [
             Positioned.fill(
               child: HomeHeroBackground(
                 heroTokens: heroTokens,
                 screenTokens: screenTokens,
-              ),
-            ),
-            Positioned(
-              left: 0,
-              right: 0,
-              bottom: 0,
-              height: tokens.spaceMedium,
-              child: IgnorePointer(
-                child: DecoratedBox(
-                  decoration: BoxDecoration(
-                    gradient: LinearGradient(
-                      begin: Alignment.topCenter,
-                      end: Alignment.bottomCenter,
-                      colors: <Color>[
-                        canvasBottom.withValues(alpha: 0),
-                        canvasBottom,
-                      ],
-                    ),
-                  ),
-                ),
+                showDecorativeLayers: false,
               ),
             ),
             Padding(
               padding: EdgeInsetsDirectional.fromSTEB(
-                horizontalInset,
-                topInset + tokens.spaceMedium,
-                horizontalInset,
-                tokens.spaceLarge,
+                24,
+                topInset + 16,
+                24,
+                24,
               ),
               child: _HomeHeaderZoneBody(
                 displayName: dashboard?.displayName,
@@ -329,30 +306,27 @@ class _HomeHeaderZoneBody extends StatelessWidget {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
-        _HomeHeaderProfileRow(
-          displayName: displayName,
-          photoUrl: photoUrl,
-          onHero: onHero,
-          muted: muted,
-        ),
-        SizedBox(height: tokens.spaceMedium),
-        HomePrayerHeroContextRow(
-          locationName: locationName,
-          isRefreshingLocation: isRefreshingLocation,
-          onRefreshLocation: onRefreshLocation,
-          ink: onHero,
-          muted: muted,
-          chipBackground: onHero.withValues(
-            alpha: heroTokens.locationChipFillOpacity,
-          ),
-          chipBorder: onHero.withValues(
-            alpha: heroTokens.locationChipBorderOpacity,
+        Padding(
+          padding: const EdgeInsets.only(bottom: 20, top: 0),
+          child: _HomeHeaderProfileRow(
+            displayName: displayName,
+            photoUrl: photoUrl,
+            onHero: onHero,
           ),
         ),
-        SizedBox(height: tokens.spaceSmall),
+        Padding(
+          padding: const EdgeInsets.only(bottom: 12),
+          child: HomePrayerHeroContextRow(
+            locationName: locationName,
+            isRefreshingLocation: isRefreshingLocation,
+            onRefreshLocation: onRefreshLocation,
+            ink: onHero,
+            muted: muted,
+          ),
+        ),
         prayerBlock,
         if (!showFailure) ...[
-          SizedBox(height: tokens.spaceMedium),
+          const SizedBox(height: 14),
           HomePrayerScheduleStrip(
             slots: todayPrayers,
             onHero: onHero,
@@ -370,13 +344,11 @@ class _HomeHeaderProfileRow extends StatelessWidget {
     required this.displayName,
     required this.photoUrl,
     required this.onHero,
-    required this.muted,
   });
 
   final String? displayName;
   final String? photoUrl;
   final Color onHero;
-  final Color muted;
 
   @override
   Widget build(BuildContext context) {
@@ -384,7 +356,6 @@ class _HomeHeaderProfileRow extends StatelessWidget {
     final MeMuslimDesignTokens tokens = theme.tokens;
     final String? name = displayName?.trim();
     final bool hasName = name != null && name.isNotEmpty;
-    final double avatarSize = tokens.iconBoxSize;
 
     return Row(
       crossAxisAlignment: CrossAxisAlignment.center,
@@ -398,7 +369,8 @@ class _HomeHeaderProfileRow extends StatelessWidget {
                 context.l10n.homeGreeting,
                 style: theme.textTheme.headlineSmall?.copyWith(
                   color: onHero,
-                  fontWeight: FontWeight.w700,
+                  fontWeight: FontWeight.w600,
+                  fontSize: 22,
                   height: 1.15,
                 ),
               ),
@@ -408,8 +380,9 @@ class _HomeHeaderProfileRow extends StatelessWidget {
                   maxLines: 1,
                   overflow: TextOverflow.ellipsis,
                   style: theme.textTheme.titleSmall?.copyWith(
-                    color: muted,
+                    color: onHero.withValues(alpha: 0.8),
                     fontWeight: FontWeight.w500,
+                    fontSize: 14,
                     height: 1.2,
                   ),
                 ),
@@ -422,21 +395,21 @@ class _HomeHeaderProfileRow extends StatelessWidget {
           label: context.l10n.homeProfileLabel,
           child: TilawaInteractiveSurface(
             onTap: () => openHomeSettingsTab(context),
-            borderRadius: BorderRadius.circular(avatarSize / 2),
+            borderRadius: BorderRadius.circular(24),
             child: DecoratedBox(
               decoration: BoxDecoration(
                 shape: BoxShape.circle,
                 border: Border.all(
                   color: onHero.withValues(alpha: 0.2),
-                  width: tokens.focusRingWidth,
+                  width: 1.5,
                 ),
               ),
               child: Padding(
-                padding: EdgeInsets.all(tokens.borderWidthThin),
+                padding: const EdgeInsets.all(1.5),
                 child: ProfileAvatar(
                   photoUrl: photoUrl,
                   displayName: name,
-                  size: avatarSize - tokens.focusRingWidth * 2,
+                  size: 45,
                   backgroundColor: onHero.withValues(alpha: 0.14),
                   foregroundColor: onHero,
                   fallbackStyle: ProfileAvatarFallbackStyle.initial,
@@ -481,11 +454,13 @@ class _HomeNextPrayerTimeFocus extends StatelessWidget {
 
     final HomeNextPrayer prayer = nextPrayer!;
     final String prayerName = _localizedPrayerName(context, prayer.type);
-    final String timeLabel = _formatTime(context, prayer.time);
+    final String timeLabel = _formatHeroClock(prayer.time);
     final double textScale = MediaQuery.textScalerOf(context).scale(1);
-    final TextStyle? timeStyle = textScale > 1.15
-        ? theme.textTheme.displayMedium
-        : theme.textTheme.displayLarge;
+    final TextStyle? timeStyle =
+        (textScale > 1.15
+                ? theme.textTheme.displayMedium
+                : theme.textTheme.displayLarge)
+            ?.copyWith(fontSize: textScale > 1.15 ? null : 52);
 
     return Semantics(
       button: true,
@@ -495,7 +470,7 @@ class _HomeNextPrayerTimeFocus extends StatelessWidget {
         borderRadius: BorderRadius.circular(tokens.radiusLarge),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.center,
-          spacing: tokens.spaceTiny,
+          spacing: 2,
           children: [
             Text(
               prayerName.toUpperCase(),
@@ -506,6 +481,7 @@ class _HomeNextPrayerTimeFocus extends StatelessWidget {
                 color: muted,
                 fontWeight: FontWeight.w500,
                 letterSpacing: 1.5,
+                fontSize: 15,
                 height: 1.2,
               ),
             ),
@@ -514,10 +490,10 @@ class _HomeNextPrayerTimeFocus extends StatelessWidget {
               textAlign: TextAlign.center,
               style: timeStyle?.copyWith(
                 color: onHero,
-                fontWeight: FontWeight.w800,
+                fontWeight: FontWeight.w700,
                 fontFeatures: const [FontFeature.tabularFigures()],
                 height: 1.0,
-                letterSpacing: -0.5,
+                letterSpacing: 0,
               ),
             ),
             _HomeNextPrayerTimeRemainingText(
@@ -811,10 +787,10 @@ String _localizedPrayerName(BuildContext context, PrayerType type) {
   };
 }
 
-String _formatTime(BuildContext context, DateTime time) {
-  return MaterialLocalizations.of(context).formatTimeOfDay(
-    TimeOfDay.fromDateTime(time),
-  );
+String _formatHeroClock(DateTime time) {
+  final String hour = time.hour.toString().padLeft(2, '0');
+  final String minute = time.minute.toString().padLeft(2, '0');
+  return '$hour:$minute';
 }
 
 bool _isFiveDailyPrayer(PrayerType type) {
@@ -853,7 +829,7 @@ String _formatCountdown(
   final int hours = totalMinutes ~/ 60;
   final int minutes = totalMinutes % 60;
   if (hours == 0) {
-    return context.l10n.homePrayerInMinutes(minutes);
+    return context.l10n.homeNextPrayerCountdownMinutes(minutes);
   }
-  return context.l10n.homePrayerInHoursMinutes(hours, minutes);
+  return context.l10n.homeNextPrayerCountdownHoursMinutes(hours, minutes);
 }

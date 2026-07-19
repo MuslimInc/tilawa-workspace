@@ -1,13 +1,10 @@
-import 'dart:ui';
-
-import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:tilawa/core/extensions.dart';
 import 'package:tilawa/features/home/domain/entities/home_prayer_slot.dart';
 import 'package:tilawa/features/prayer_times/domain/entities/prayer_time_entity.dart';
 import 'package:tilawa_ui_kit/tilawa_ui_kit.dart';
 
-/// Compact five-prayer strip for the immersive Home header zone.
+/// Compact five-prayer strip matching MeMuslim Figma header-zone.
 class HomePrayerScheduleStrip extends StatelessWidget {
   const HomePrayerScheduleStrip({
     super.key,
@@ -23,54 +20,46 @@ class HomePrayerScheduleStrip extends StatelessWidget {
   final VoidCallback? onOpenPrayer;
 
   static const double _stripHeight = 52;
+  static const double _inactiveOpacity = 0.5;
+  static const double _fillOpacity = 0.1;
+  static const double _borderOpacity = 0.12;
+  static const double _activeFillOpacity = 0.2;
 
   @override
   Widget build(BuildContext context) {
-    if (slots.isEmpty) {
+    final List<HomePrayerSlot> five = [
+      for (final HomePrayerSlot slot in slots)
+        if (_isFiveDaily(slot.type)) slot,
+    ];
+    if (five.isEmpty) {
       return const SizedBox.shrink();
     }
 
-    final ThemeData theme = Theme.of(context);
-    final MeMuslimDesignTokens tokens = theme.tokens;
-    final BorderRadius radius = BorderRadius.circular(
-      tokens.resolveRadius(family: TilawaRadiusFamily.card),
-    );
-    final Color fill = onHero.withValues(
-      alpha: heroTokens.locationChipFillOpacity,
-    );
-    final Color border = onHero.withValues(
-      alpha: heroTokens.locationChipBorderOpacity,
-    );
+    final MeMuslimDesignTokens tokens = context.tokens;
+    final BorderRadius radius = BorderRadius.circular(16);
 
+    // Flat frosted fill — no BackdropFilter (muddies dark greens / adds haze).
     final Widget row = SizedBox(
       height: _stripHeight,
       child: DecoratedBox(
         decoration: BoxDecoration(
-          color: fill,
+          color: Colors.white.withValues(alpha: _fillOpacity),
           borderRadius: radius,
           border: Border.all(
-            color: border,
+            color: Colors.white.withValues(alpha: _borderOpacity),
             width: tokens.borderWidthThin,
           ),
         ),
         child: Row(
+          crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
-            for (final HomePrayerSlot slot in slots)
+            for (final HomePrayerSlot slot in five)
               Expanded(
-                child: _HomePrayerScheduleSlot(
-                  slot: slot,
-                  onHero: onHero,
-                  heroTokens: heroTokens,
-                ),
+                child: _HomePrayerScheduleSlot(slot: slot, onHero: onHero),
               ),
           ],
         ),
       ),
-    );
-
-    final Widget clipped = ClipRRect(
-      borderRadius: radius,
-      child: _maybeBlur(context, tokens, row),
     );
 
     return Semantics(
@@ -79,27 +68,10 @@ class HomePrayerScheduleStrip extends StatelessWidget {
       child: TilawaInteractiveSurface(
         onTap: onOpenPrayer,
         borderRadius: radius,
-        child: clipped,
+        enableInk: false,
+        enableStateLayer: false,
+        child: row,
       ),
-    );
-  }
-
-  Widget _maybeBlur(
-    BuildContext context,
-    MeMuslimDesignTokens tokens,
-    Widget child,
-  ) {
-    final bool useBlur =
-        !kIsWeb && defaultTargetPlatform != TargetPlatform.android;
-    if (!useBlur) {
-      return child;
-    }
-    return BackdropFilter(
-      filter: ImageFilter.blur(
-        sigmaX: tokens.blurGlass,
-        sigmaY: tokens.blurGlass,
-      ),
-      child: child,
     );
   }
 }
@@ -108,89 +80,109 @@ class _HomePrayerScheduleSlot extends StatelessWidget {
   const _HomePrayerScheduleSlot({
     required this.slot,
     required this.onHero,
-    required this.heroTokens,
   });
 
   final HomePrayerSlot slot;
   final Color onHero;
-  final TilawaHomeNextPrayerHeroTokens heroTokens;
 
   @override
   Widget build(BuildContext context) {
     final ThemeData theme = Theme.of(context);
-    final MeMuslimDesignTokens tokens = theme.tokens;
     final bool isActive = slot.isNext;
-    final Color muted = onHero.withValues(
-      alpha: heroTokens.mutedForegroundOpacity * (slot.hasPassed ? 0.75 : 1),
+    final Color muted = Colors.white.withValues(
+      alpha: HomePrayerScheduleStrip._inactiveOpacity,
     );
-    final Color labelColor = isActive ? onHero : muted;
-    final Color timeColor = isActive ? onHero : muted;
+    final Color labelColor = isActive ? Colors.white : muted;
+    final Color timeColor = isActive ? Colors.white : muted;
     final String name = _localizedPrayerName(context, slot.type);
-    final String timeLabel = MaterialLocalizations.of(context).formatTimeOfDay(
-      TimeOfDay.fromDateTime(slot.time),
-    );
+    final String timeLabel = _formatStripTime(slot.time);
 
-    final Widget content = Column(
-      mainAxisAlignment: MainAxisAlignment.center,
-      spacing: tokens.spaceTiny,
-      children: [
-        Row(
-          mainAxisAlignment: MainAxisAlignment.center,
-          mainAxisSize: MainAxisSize.min,
-          spacing: tokens.spaceExtraSmall,
-          children: [
-            if (isActive)
-              DecoratedBox(
-                decoration: BoxDecoration(
-                  color: theme.colorScheme.tertiary,
-                  shape: BoxShape.circle,
+    final Widget content = Padding(
+      padding: const EdgeInsets.symmetric(vertical: 8),
+      child: Column(
+        mainAxisAlignment: MainAxisAlignment.center,
+        spacing: 3,
+        children: [
+          Row(
+            mainAxisAlignment: MainAxisAlignment.center,
+            mainAxisSize: MainAxisSize.min,
+            spacing: 4,
+            children: [
+              if (isActive)
+                DecoratedBox(
+                  decoration: BoxDecoration(
+                    color: theme.colorScheme.tertiary,
+                    shape: BoxShape.circle,
+                  ),
+                  child: const SizedBox.square(dimension: 5),
                 ),
-                child: SizedBox.square(dimension: tokens.spaceExtraSmall),
-              ),
-            Flexible(
-              child: Text(
-                name.toUpperCase(),
-                maxLines: 1,
-                overflow: TextOverflow.ellipsis,
-                style: theme.textTheme.labelSmall?.copyWith(
-                  color: labelColor,
-                  fontWeight: isActive ? FontWeight.w700 : FontWeight.w500,
-                  letterSpacing: 0.5,
-                  height: 1.1,
+              Flexible(
+                child: Text(
+                  name.toUpperCase(),
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                  style: TextStyle(
+                    color: labelColor,
+                    fontWeight: isActive ? FontWeight.w600 : FontWeight.w500,
+                    letterSpacing: 0.5,
+                    fontSize: 10,
+                    height: 1.1,
+                  ),
                 ),
               ),
-            ),
-          ],
-        ),
-        Text(
-          timeLabel,
-          maxLines: 1,
-          overflow: TextOverflow.ellipsis,
-          style: theme.textTheme.labelMedium?.copyWith(
-            color: timeColor,
-            fontWeight: isActive ? FontWeight.w800 : FontWeight.w600,
-            fontFeatures: const [FontFeature.tabularFigures()],
-            height: 1.1,
+            ],
           ),
-        ),
-      ],
+          Text(
+            timeLabel,
+            maxLines: 1,
+            overflow: TextOverflow.ellipsis,
+            style: TextStyle(
+              color: timeColor,
+              fontWeight: isActive ? FontWeight.w700 : FontWeight.w600,
+              fontFeatures: const [FontFeature.tabularFigures()],
+              fontSize: 12,
+              height: 1.1,
+            ),
+          ),
+        ],
+      ),
     );
 
     if (!isActive) {
       return content;
     }
 
+    // Flat active wash — no outer padding chip / elevation.
     return Padding(
-      padding: EdgeInsets.all(tokens.spaceExtraSmall),
+      padding: const EdgeInsets.all(4),
       child: DecoratedBox(
         decoration: BoxDecoration(
-          color: onHero.withValues(alpha: 0.2),
-          borderRadius: BorderRadius.circular(tokens.radiusMedium),
+          color: Colors.white.withValues(
+            alpha: HomePrayerScheduleStrip._activeFillOpacity,
+          ),
+          borderRadius: BorderRadius.circular(12),
         ),
         child: content,
       ),
     );
   }
+}
+
+bool _isFiveDaily(PrayerType type) {
+  return switch (type) {
+    PrayerType.fajr ||
+    PrayerType.dhuhr ||
+    PrayerType.asr ||
+    PrayerType.maghrib ||
+    PrayerType.isha => true,
+    _ => false,
+  };
+}
+
+String _formatStripTime(DateTime time) {
+  final int hour = time.hour;
+  final String minute = time.minute.toString().padLeft(2, '0');
+  return '$hour:$minute';
 }
 
 String _localizedPrayerName(BuildContext context, PrayerType type) {

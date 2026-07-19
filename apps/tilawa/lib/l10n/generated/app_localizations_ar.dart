@@ -42,7 +42,7 @@ class AppLocalizationsAr extends AppLocalizations {
   String get homeTitle => 'الصفحة الرئيسية';
 
   @override
-  String get homeGreeting => 'السلام عليكم';
+  String get homeGreeting => 'السلام عليكم،';
 
   @override
   String get homeInspirationTitle => 'آية ودعاء';
@@ -116,6 +116,23 @@ class AppLocalizationsAr extends AppLocalizations {
   @override
   String homePrayerInHoursMinutes(int hours, int minutes) {
     return 'بعد $hours س $minutes د';
+  }
+
+  @override
+  String homeNextPrayerCountdownHoursMinutes(int hours, int minutes) {
+    return 'الصلاة التالية بعد $hours س $minutes د';
+  }
+
+  @override
+  String homeNextPrayerCountdownMinutes(int minutes) {
+    String _temp0 = intl.Intl.pluralLogic(
+      minutes,
+      locale: localeName,
+      other: 'الصلاة التالية بعد $minutes دقائق',
+      two: 'الصلاة التالية بعد دقيقتين',
+      one: 'الصلاة التالية بعد دقيقة',
+    );
+    return '$_temp0';
   }
 
   @override

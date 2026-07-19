@@ -42,7 +42,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get homeTitle => 'Home';
 
   @override
-  String get homeGreeting => 'Assalamu alaikum';
+  String get homeGreeting => 'Assalamu Alaikum,';
 
   @override
   String get homeInspirationTitle => 'Ayah & dua';
@@ -115,6 +115,22 @@ class AppLocalizationsEn extends AppLocalizations {
   @override
   String homePrayerInHoursMinutes(int hours, int minutes) {
     return 'In ${hours}h ${minutes}m';
+  }
+
+  @override
+  String homeNextPrayerCountdownHoursMinutes(int hours, int minutes) {
+    return 'Next prayer in ${hours}h ${minutes}m';
+  }
+
+  @override
+  String homeNextPrayerCountdownMinutes(int minutes) {
+    String _temp0 = intl.Intl.pluralLogic(
+      minutes,
+      locale: localeName,
+      other: 'Next prayer in $minutes minutes',
+      one: 'Next prayer in 1 minute',
+    );
+    return '$_temp0';
   }
 
   @override
