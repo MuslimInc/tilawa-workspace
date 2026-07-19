@@ -181,8 +181,8 @@ abstract final class AppColors {
   /// Day hero top — deep forest green (MeMuslim immersive header zone).
   static const Color homeNextPrayerGradientTop = Color(0xFF0A4D2E);
 
-  /// Day hero mid — accessible brand green between forest and emerald.
-  static const Color homeNextPrayerGradientDayMid = brandActionGreenAccessible;
+  /// Day hero mid — Figma 45% stop `#148047`.
+  static const Color homeNextPrayerGradientDayMid = Color(0xFF148047);
 
   /// Day hero bottom — brighter emerald easing into the content sheet.
   static const Color homeNextPrayerGradientBottom = Color(0xFF2EB870);

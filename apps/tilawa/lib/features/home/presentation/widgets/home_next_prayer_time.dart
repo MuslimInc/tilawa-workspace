@@ -168,7 +168,8 @@ class _HomeNextPrayerTimeSliverState extends State<_HomeNextPrayerTimeSliver> {
           )
         : TilawaHomeNextPrayerHeroTokens.day();
     final Color onHero = heroTokens.foregroundColor;
-    final Color muted = onHero.withValues(alpha: 0.7);
+    // Figma muted: rgba(255,255,255,0.698039)
+    const Color muted = Color.fromRGBO(255, 255, 255, 0.698);
 
     return SliverToBoxAdapter(
       child: AnnotatedRegion<SystemUiOverlayStyle>(
@@ -183,48 +184,47 @@ class _HomeNextPrayerTimeSliverState extends State<_HomeNextPrayerTimeSliver> {
                 showDecorativeLayers: false,
               ),
             ),
-            Padding(
-              padding: EdgeInsetsDirectional.fromSTEB(
-                24,
-                topInset + 16,
-                24,
-                24,
-              ),
-              child: _HomeHeaderZoneBody(
-                displayName: dashboard?.displayName,
-                photoUrl: dashboard?.photoUrl,
-                locationName: locationName,
-                isRefreshingLocation: widget.ui.isRefreshingLocation,
-                onRefreshLocation: widget.ui.showContent
-                    ? () {
-                        context.read<HomeDashboardBloc>().add(
-                          HomeDashboardLocationRefreshRequested(
-                            localeIdentifier: Localizations.localeOf(
-                              context,
-                            ).languageCode,
-                          ),
-                        );
-                      }
-                    : null,
-                nextPrayer: nextPrayer,
-                todayPrayers: dashboard?.todayPrayers ?? const [],
-                showFullSkeleton: widget.ui.showFullSkeleton,
-                showFailure: widget.ui.showFailure,
-                failureIsOffline: widget.ui.failureIsOffline,
-                onRetryDashboard: () {
-                  context.read<HomeDashboardBloc>().add(
-                    HomeDashboardRefreshRequested(
-                      localeIdentifier: Localizations.localeOf(
-                        context,
-                      ).languageCode,
-                    ),
-                  );
-                },
-                onOpenPrayer: widget.onOpenPrayer,
-                onHero: onHero,
-                muted: muted,
-                heroTokens: heroTokens,
-              ),
+            // Figma header-zone: column, padding 0 0 24. Status bar = system inset.
+            // profile-row inset 24; prayer-hero inset 20.
+            Column(
+              crossAxisAlignment: CrossAxisAlignment.stretch,
+              children: [
+                SizedBox(height: topInset),
+                _HomeHeaderZoneBody(
+                  displayName: dashboard?.displayName,
+                  photoUrl: dashboard?.photoUrl,
+                  locationName: locationName,
+                  isRefreshingLocation: widget.ui.isRefreshingLocation,
+                  onRefreshLocation: widget.ui.showContent
+                      ? () {
+                          context.read<HomeDashboardBloc>().add(
+                            HomeDashboardLocationRefreshRequested(
+                              localeIdentifier: Localizations.localeOf(
+                                context,
+                              ).languageCode,
+                            ),
+                          );
+                        }
+                      : null,
+                  nextPrayer: nextPrayer,
+                  todayPrayers: dashboard?.todayPrayers ?? const [],
+                  showFullSkeleton: widget.ui.showFullSkeleton,
+                  showFailure: widget.ui.showFailure,
+                  failureIsOffline: widget.ui.failureIsOffline,
+                  onRetryDashboard: () {
+                    context.read<HomeDashboardBloc>().add(
+                      HomeDashboardRefreshRequested(
+                        localeIdentifier: Localizations.localeOf(
+                          context,
+                        ).languageCode,
+                      ),
+                    );
+                  },
+                  onOpenPrayer: widget.onOpenPrayer,
+                  onHero: onHero,
+                  muted: muted,
+                ),
+              ],
             ),
           ],
         ),
@@ -249,7 +249,6 @@ class _HomeHeaderZoneBody extends StatelessWidget {
     required this.onOpenPrayer,
     required this.onHero,
     required this.muted,
-    required this.heroTokens,
   });
 
   final String? displayName;
@@ -266,24 +265,26 @@ class _HomeHeaderZoneBody extends StatelessWidget {
   final VoidCallback onOpenPrayer;
   final Color onHero;
   final Color muted;
-  final TilawaHomeNextPrayerHeroTokens heroTokens;
 
   @override
   Widget build(BuildContext context) {
     final MeMuslimDesignTokens tokens = context.tokens;
 
     if (showFullSkeleton) {
-      return _HomeHeroSkeletonScope(
-        onHero: onHero,
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.stretch,
-          spacing: tokens.spaceMedium,
-          children: const [
-            _HomeHeaderProfileSkeleton(),
-            _HomePrayerHeroContextRowSkeleton(),
-            _HomeNextPrayerTimeMetricsSkeleton(),
-            _HomePrayerScheduleStripSkeleton(),
-          ],
+      return Padding(
+        padding: const EdgeInsets.fromLTRB(24, 16, 24, 24),
+        child: _HomeHeroSkeletonScope(
+          onHero: onHero,
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            spacing: tokens.spaceMedium,
+            children: const [
+              _HomeHeaderProfileSkeleton(),
+              _HomePrayerHeroContextRowSkeleton(),
+              _HomeNextPrayerTimeMetricsSkeleton(),
+              _HomePrayerScheduleStripSkeleton(),
+            ],
+          ),
         ),
       );
     }
@@ -306,34 +307,39 @@ class _HomeHeaderZoneBody extends StatelessWidget {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
+        // profile-row: padding 16px 24px 20px
         Padding(
-          padding: const EdgeInsets.only(bottom: 20, top: 0),
+          padding: const EdgeInsets.fromLTRB(24, 16, 24, 20),
           child: _HomeHeaderProfileRow(
             displayName: displayName,
             photoUrl: photoUrl,
             onHero: onHero,
           ),
         ),
+        // prayer-hero: padding 0 20; header-zone bottom pad 24
         Padding(
-          padding: const EdgeInsets.only(bottom: 12),
-          child: HomePrayerHeroContextRow(
-            locationName: locationName,
-            isRefreshingLocation: isRefreshingLocation,
-            onRefreshLocation: onRefreshLocation,
-            ink: onHero,
-            muted: muted,
+          padding: const EdgeInsets.fromLTRB(20, 0, 20, 24),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            children: [
+              HomePrayerHeroContextRow(
+                locationName: locationName,
+                isRefreshingLocation: isRefreshingLocation,
+                onRefreshLocation: onRefreshLocation,
+                ink: onHero,
+                muted: muted,
+              ),
+              prayerBlock,
+              if (!showFailure) ...[
+                const SizedBox(height: 14),
+                HomePrayerScheduleStrip(
+                  slots: todayPrayers,
+                  onOpenPrayer: onOpenPrayer,
+                ),
+              ],
+            ],
           ),
         ),
-        prayerBlock,
-        if (!showFailure) ...[
-          const SizedBox(height: 14),
-          HomePrayerScheduleStrip(
-            slots: todayPrayers,
-            onHero: onHero,
-            heroTokens: heroTokens,
-            onOpenPrayer: onOpenPrayer,
-          ),
-        ],
       ],
     );
   }
@@ -353,7 +359,6 @@ class _HomeHeaderProfileRow extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final ThemeData theme = Theme.of(context);
-    final MeMuslimDesignTokens tokens = theme.tokens;
     final String? name = displayName?.trim();
     final bool hasName = name != null && name.isNotEmpty;
 
@@ -363,7 +368,7 @@ class _HomeHeaderProfileRow extends StatelessWidget {
         Expanded(
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
-            spacing: tokens.spaceExtraSmall,
+            spacing: 4,
             children: [
               Text(
                 context.l10n.homeGreeting,
@@ -371,7 +376,7 @@ class _HomeHeaderProfileRow extends StatelessWidget {
                   color: onHero,
                   fontWeight: FontWeight.w600,
                   fontSize: 22,
-                  height: 1.15,
+                  height: 33 / 22,
                 ),
               ),
               if (hasName)
@@ -383,13 +388,12 @@ class _HomeHeaderProfileRow extends StatelessWidget {
                     color: onHero.withValues(alpha: 0.8),
                     fontWeight: FontWeight.w500,
                     fontSize: 14,
-                    height: 1.2,
+                    height: 21 / 14,
                   ),
                 ),
             ],
           ),
         ),
-        SizedBox(width: tokens.spaceMedium),
         Semantics(
           button: true,
           label: context.l10n.homeProfileLabel,
@@ -404,16 +408,13 @@ class _HomeHeaderProfileRow extends StatelessWidget {
                   width: 1.5,
                 ),
               ),
-              child: Padding(
-                padding: const EdgeInsets.all(1.5),
-                child: ProfileAvatar(
-                  photoUrl: photoUrl,
-                  displayName: name,
-                  size: 45,
-                  backgroundColor: onHero.withValues(alpha: 0.14),
-                  foregroundColor: onHero,
-                  fallbackStyle: ProfileAvatarFallbackStyle.initial,
-                ),
+              child: ProfileAvatar(
+                photoUrl: photoUrl,
+                displayName: name,
+                size: 48,
+                backgroundColor: onHero.withValues(alpha: 0.14),
+                foregroundColor: onHero,
+                fallbackStyle: ProfileAvatarFallbackStyle.initial,
               ),
             ),
           ),
@@ -482,7 +483,7 @@ class _HomeNextPrayerTimeFocus extends StatelessWidget {
                 fontWeight: FontWeight.w500,
                 letterSpacing: 1.5,
                 fontSize: 15,
-                height: 1.2,
+                height: 22 / 15,
               ),
             ),
             Text(
@@ -492,7 +493,7 @@ class _HomeNextPrayerTimeFocus extends StatelessWidget {
                 color: onHero,
                 fontWeight: FontWeight.w700,
                 fontFeatures: const [FontFeature.tabularFigures()],
-                height: 1.0,
+                height: 78 / 52,
                 letterSpacing: 0,
               ),
             ),
@@ -589,7 +590,8 @@ class _HomeNextPrayerTimeRemainingTextState
         color: widget.foregroundColor,
         fontWeight: FontWeight.w400,
         letterSpacing: 0.2,
-        height: 1.2,
+        fontSize: 12,
+        height: 18 / 12,
       ),
     );
   }
