@@ -64,6 +64,6 @@ class LiveLiveKitRtcSessionHandle implements LiveKitRtcSessionHandle {
 
   @override
   Future<void> setSpeakerEnabled(bool enabled) async {
-    await Hardware.instance.setSpeakerphoneOn(enabled);
+    await AudioManager.instance.setSpeakerOutputPreferred(enabled);
   }
 }

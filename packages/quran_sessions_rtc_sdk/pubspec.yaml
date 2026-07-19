@@ -14,7 +14,9 @@ dependencies:
     sdk: flutter
 
   agora_rtc_engine: ^6.6.3
-  livekit_client: 2.8.1
+  # 2.9.0-dev.0 pins WebRTC-SDK 144.7559.09 (drops deprecated UIScreen.mainScreen
+  # that Apple App Review rejects under Guideline 2.5.1 on iOS 26).
+  livekit_client: 2.9.0-dev.0
   get_it: ^9.2.1
   permission_handler: ^12.0.1
   quran_sessions:
@@ -33,3 +35,4 @@ dev_dependencies:
 
 flutter:
   uses-material-design: true
+
