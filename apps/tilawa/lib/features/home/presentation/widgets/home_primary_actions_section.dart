@@ -153,21 +153,7 @@ class _AthkarPrimaryTile extends StatelessWidget {
           icon: icon,
           label: label,
           subtitle: _athkarSubtitle(context, row),
-          onTap: () {
-            if (row == null) {
-              const AthkarCategoriesRoute().push<void>(context);
-              return;
-            }
-            final String title = localizedAthkarCategoryTitle(
-              context,
-              row.category,
-            );
-            AthkarDetailsRoute(
-              categoryId: row.category.id,
-              categoryName: title,
-              source: 'home_primary',
-            ).push(context);
-          },
+          onTap: () => const AthkarCategoriesRoute().push<void>(context),
         );
       },
     );
