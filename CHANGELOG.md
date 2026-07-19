@@ -7,6 +7,31 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [2.1.9+88] - 2026-07-20 [Google Play Production]
+
+### Added
+
+- **Islamic Reels**: Short faith video feed from Home → More.
+- **Islamic Radio**: Live radio stations from Home → More (favorites,
+  recent, search).
+- **Home**: Immersive prayer header with greeting, next-prayer metrics, and
+  today’s five-prayer schedule strip.
+
+### Changed
+
+- **Home / Athkar**: Primary Athkar tile opens the full category list;
+  subtitle still hints at the relevant daily athkar.
+- **Design**: MeMuslim UI refresh across home and shared surfaces (from
+  2.1.8 TestFlight builds, now on Play).
+- **Reciters**: Catalog JSON updates.
+
+### Fixed
+
+- **Prayer alarms**: Hardened native adhan tap delivery on Android cold start.
+- **UI**: Dropped extra floating bottom inset that could mis-pad shell content.
+- **Notifications**: Admin FCM broadcast to all users (paginated scans,
+  chunked multicast).
+
 ## [2.1.8+86] - 2026-07-18 [TestFlight Production]
 
 ### Added

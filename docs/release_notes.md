@@ -12,6 +12,37 @@ the changelog for full engineering detail.
 
 | Field | Value |
 |-------|--------|
+| Version | **2.1.9** (build **88**) |
+| Git tag | `v2.1.9+88` (pending) |
+| Date | 2026-07-20 |
+| Track | Google Play Production |
+
+### What's new (en-US) — copy for Play Console
+
+```text
+• Immersive home prayer header with today’s schedule
+• Islamic Reels — short faith videos from Home
+• Islamic Radio — live stations from Home
+• Athkar opens the full category list from Home
+• More reliable prayer-alarm taps after cold start
+```
+
+### ما الجديد (ar) — نص متجر Play
+
+```text
+• رأس صلاة غامر في الرئيسية مع جدول اليوم
+• ريلز إسلامية — مقاطع قصيرة من الرئيسية
+• راديو إسلامي — محطات مباشرة من الرئيسية
+• الأذكار تفتح قائمة الفئات كاملة من الرئيسية
+• تنبيهات صلاة أوثق بعد التشغيل البارد
+```
+
+---
+
+## Previous current release (2.1.8+86)
+
+| Field | Value |
+|-------|--------|
 | Version | **2.1.8** (build **86**) |
 | Git tag | `v2.1.8+86` (pending) |
 | Date | 2026-07-18 |
@@ -670,5 +701,6 @@ Tilawa keeps **one shared version** in [`apps/tilawa/pubspec.yaml`](../apps/tila
      `dart run melos run tilawa:build:android:production`.
    - iOS: archive the **production** flavor for TestFlight (`com.memuslim.app`).
 5. Android checklist: [`google_play_release_checklist.md`](google_play_release_checklist.md)
+
 
 
