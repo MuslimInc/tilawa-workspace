@@ -1,3 +1,4 @@
+import 'package:flutter/foundation.dart';
 import 'package:sentry_flutter/sentry_flutter.dart';
 
 import 'core/bootstrap/app_environment.dart';
@@ -19,7 +20,11 @@ Future<void> _runTilawaApp() async {
 
 Future<void> main() async {
   // Required before any plugin (PackageInfo, device_info, MethodChannel) runs.
-  SentryWidgetsFlutterBinding.ensureInitialized();
+  // Construct directly when absent — SentryWidgetsFlutterBinding.ensureInitialized()
+  // probes WidgetsBinding.instance first, which throws FlutterError on cold start.
+  if (BindingBase.debugBindingType() == null) {
+    SentryWidgetsFlutterBinding();
+  }
 
   AppEnvironment.assertProductionSafety();
 
