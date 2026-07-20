@@ -34,6 +34,7 @@ flutter:
     - assets/icons/athkar_misbaha_icon.svg
     - assets/icons/tasbih_outline_icon.svg
     - assets/icons/google_g_logo.svg
+    - assets/icons/apple_logo.svg
     - assets/icons/quran_icon.svg
 
   fonts:
