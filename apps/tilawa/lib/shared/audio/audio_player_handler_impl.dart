@@ -209,9 +209,13 @@ class AudioPlayerHandlerImpl extends audio_service.BaseAudioHandler
   Future<void> _init() async {
     try {
       final AudioSession session = _testSession ?? await AudioSession.instance;
-      await session.configure(const AudioSessionConfiguration.speech());
-    } catch (e) {
-      log('AudioSession initialization failed: $e');
+      await session.configure(const AudioSessionConfiguration.music());
+    } catch (e, stackTrace) {
+      logger.w(
+        'AudioSession initialization failed: $e',
+        error: e,
+        stackTrace: stackTrace,
+      );
     }
 
     speed.debounceTime(const Duration(milliseconds: 250)).listen((speed) {
@@ -916,23 +920,19 @@ class AudioPlayerHandlerImpl extends audio_service.BaseAudioHandler
   }
 
   Future<void> _configureSessionForQueue(
-    List<audio_service.MediaItem> queue,
+    List<audio_service.MediaItem> _,
   ) async {
-    final bool isRadio = queue.any(
-      (item) =>
-          item.extras?['source'] == 'radio' ||
-          item.extras?['live'] == true ||
-          item.id.startsWith('radio:'),
-    );
+    // music() keeps AVAudioSessionCategory.playback for background audio
+    // (Guideline 2.5.4) with clearer Control Center / Now Playing semantics.
     try {
       final AudioSession session = _testSession ?? await AudioSession.instance;
-      await session.configure(
-        isRadio
-            ? const AudioSessionConfiguration.music()
-            : const AudioSessionConfiguration.speech(),
+      await session.configure(const AudioSessionConfiguration.music());
+    } catch (e, stackTrace) {
+      logger.w(
+        'AudioSession reconfigure failed: $e',
+        error: e,
+        stackTrace: stackTrace,
       );
-    } catch (e) {
-      log('AudioSession reconfigure failed: $e');
     }
   }
 
