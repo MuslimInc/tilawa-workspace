@@ -9,11 +9,10 @@ name: PR Checks
 # payments have failed or spending limit needs to be increased", fix GitHub
 # billing (Settings → Billing & plans) — not a workflow defect.
 
+# Temporarily disabled automatic runs — GitHub Actions minutes/quota exhausted
+# and billing failures were spamming failure emails on every master push.
+# Re-enable pull_request + push triggers when quota is restored.
 on:
-  pull_request:
-    branches: [master]
-  push:
-    branches: [master]
   workflow_dispatch:
 
 permissions:
@@ -162,3 +161,4 @@ jobs:
 
       - name: Firestore rules tests (emulator)
         run: npm run test:rules
+
