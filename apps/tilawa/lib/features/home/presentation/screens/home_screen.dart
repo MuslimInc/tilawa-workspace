@@ -36,7 +36,8 @@ class HomeScreen extends StatefulWidget {
 }
 
 class _HomeScreenState extends State<HomeScreen> {
-  final ScrollController _scrollController = ScrollController();
+  final GlobalKey<NestedScrollViewState> _nestedScrollKey =
+      GlobalKey<NestedScrollViewState>();
 
   @override
   void initState() {
@@ -59,12 +60,6 @@ class _HomeScreenState extends State<HomeScreen> {
     );
   }
 
-  @override
-  void dispose() {
-    _scrollController.dispose();
-    super.dispose();
-  }
-
   Future<void> _refreshHome() async {
     final String locale = Localizations.localeOf(context).languageCode;
     final HomeDashboardBloc bloc = context.read<HomeDashboardBloc>();
@@ -77,14 +72,37 @@ class _HomeScreenState extends State<HomeScreen> {
     ]);
   }
 
+  Future<void> _scrollToTopOrRefresh() async {
+    final NestedScrollViewState? nested = _nestedScrollKey.currentState;
+    if (nested == null) {
+      await _refreshHome();
+      return;
+    }
+
+    final ScrollController outer = nested.outerController;
+    final ScrollController inner = nested.innerController;
+    const double threshold = ShellTabReselect.scrollTopThreshold;
+    final bool scrolledDown =
+        (outer.hasClients && outer.offset > threshold) ||
+        (inner.hasClients && inner.offset > threshold);
+
+    if (!scrolledDown) {
+      await _refreshHome();
+      return;
+    }
+
+    final Duration duration = context.tokens.durationFast;
+    const Curve curve = Curves.easeOutCubic;
+    await Future.wait<void>([
+      if (outer.hasClients)
+        outer.animateTo(0, duration: duration, curve: curve),
+      if (inner.hasClients)
+        inner.animateTo(0, duration: duration, curve: curve),
+    ]);
+  }
+
   void _onShellTabReselect() {
-    unawaited(
-      ShellTabReselect.scrollToTopOrRefresh(
-        scrollController: _scrollController,
-        refresh: _refreshHome,
-        duration: context.tokens.durationFast,
-      ),
-    );
+    unawaited(_scrollToTopOrRefresh());
   }
 
   @override
@@ -136,38 +154,38 @@ class _HomeScreenState extends State<HomeScreen> {
               children: [
                 const Positioned.fill(child: HomeScreenBackground()),
                 Positioned.fill(
-                  child: TilawaRefreshIndicator.adaptive(
-                    edgeOffset: topInset,
-                    displacement: context.tokens.spaceExtraLarge,
-                    onRefresh: _refreshHome,
-                    child: NotificationListener<ScrollNotification>(
-                      onNotification: (notification) =>
-                          _onScrollNotification(context, notification),
-                      // Debug-only review toggle (Settings → Developer → Force
-                      // Home skeleton). [HomeSkeletonDebug.isForced] is always
-                      // false in release, so this wrapper is inert in production.
-                      child: ValueListenableBuilder<bool>(
-                        valueListenable: HomeSkeletonDebug.forceSkeleton,
-                        builder: (context, _, _) =>
-                            BlocBuilder<HomeDashboardBloc, HomeDashboardState>(
-                              builder: (context, blocState) {
-                                final HomeDashboardState state =
-                                    HomeSkeletonDebug.isForced
-                                    ? const HomeDashboardLoading()
-                                    : blocState;
-                                final HomeDashboardUiState ui =
-                                    HomeDashboardUiState.from(state);
-                                final Widget scrollView = CustomScrollView(
-                                  controller: _scrollController,
+                  child: NotificationListener<ScrollNotification>(
+                    onNotification: (notification) =>
+                        _onScrollNotification(context, notification),
+                    // Debug-only review toggle (Settings → Developer → Force
+                    // Home skeleton). [HomeSkeletonDebug.isForced] is always
+                    // false in release, so this wrapper is inert in production.
+                    child: ValueListenableBuilder<bool>(
+                      valueListenable: HomeSkeletonDebug.forceSkeleton,
+                      builder: (context, _, _) =>
+                          BlocBuilder<HomeDashboardBloc, HomeDashboardState>(
+                            builder: (context, blocState) {
+                              final HomeDashboardState state =
+                                  HomeSkeletonDebug.isForced
+                                  ? const HomeDashboardLoading()
+                                  : blocState;
+                              final HomeDashboardUiState ui =
+                                  HomeDashboardUiState.from(state);
+                              final Widget dashboard = NestedScrollView(
+                                key: _nestedScrollKey,
+                                headerSliverBuilder:
+                                    (BuildContext context, bool _) {
+                                      return HomeNextPrayerTime.buildSlivers(
+                                        context: context,
+                                        state: state,
+                                        onOpenPrayer: widget.onOpenPrayer,
+                                      );
+                                    },
+                                body: CustomScrollView(
                                   physics: const AlwaysScrollableScrollPhysics(
                                     parent: BouncingScrollPhysics(),
                                   ),
                                   slivers: [
-                                    ...HomeNextPrayerTime.buildSlivers(
-                                      context: context,
-                                      state: state,
-                                      onOpenPrayer: widget.onOpenPrayer,
-                                    ),
                                     HomeDashboardContentSliver(
                                       child: AnimatedSwitcher(
                                         duration: context.tokens.durationMedium,
@@ -193,17 +211,17 @@ class _HomeScreenState extends State<HomeScreen> {
                                       ),
                                     ),
                                   ],
-                                );
+                                ),
+                              );
 
-                                if (ui.showFullSkeleton) {
-                                  return scrollView;
-                                }
-                                return HomeLearningEntryScope(
-                                  child: scrollView,
-                                );
-                              },
-                            ),
-                      ),
+                              // Keep scope above [NestedScrollView] for the
+                              // whole load cycle so GlobalKey reparent does not
+                              // drop Learn providers mid-AnimatedSwitcher.
+                              return HomeLearningEntryScope(
+                                child: dashboard,
+                              );
+                            },
+                          ),
                     ),
                   ),
                 ),
