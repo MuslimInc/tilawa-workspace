@@ -7,6 +7,13 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [2.1.9+89] - 2026-07-20 [Google Play Production]
+
+### Changed
+
+- **Release**: Clean rebuild of 2.1.9 for Play after `flutter clean` — same
+  user-facing changes as 2.1.9+88 (home header, Reels, Radio, Athkar entry).
+
 ## [2.1.9+88] - 2026-07-20 [Google Play Production]
 
 ### Added

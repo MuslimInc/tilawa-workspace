@@ -1,7 +1,29 @@
 {
   "schemaVersion": 1,
-  "lastUpdatedAt": "2026-07-20T00:00:00Z",
+  "lastUpdatedAt": "2026-07-20T01:00:00Z",
   "releases": [
+    {
+      "id": "2.1.9+89",
+      "version": "2.1.9",
+      "buildNumber": 89,
+      "highlights": {
+        "en": [
+          "Immersive home prayer header with today’s schedule",
+          "Islamic Reels — short faith videos from Home",
+          "Islamic Radio — live stations from Home",
+          "Athkar opens the full category list from Home",
+          "More reliable prayer-alarm taps after cold start"
+        ],
+        "ar": [
+          "الشاشة الرئيسية أوضح: مواقيت الصلاة وجدول اليوم",
+          "ريلز إسلامية: فيديوهات قصيرة من الرئيسية",
+          "راديو إسلامي: محطات مباشرة من الرئيسية",
+          "زر الأذكار بيفتح كل الفئات من الرئيسية",
+          "تنبيهات الصلاة أضمن لما التطبيق يفتح تاني"
+        ]
+      },
+      "publishedAt": "2026-07-20T01:00:00Z"
+    },
     {
       "id": "2.1.9+88",
       "version": "2.1.9",
@@ -329,5 +351,6 @@
     }
   ]
 }
+
 
 
