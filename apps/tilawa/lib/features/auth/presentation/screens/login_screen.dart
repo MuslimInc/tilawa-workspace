@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'dart:io' show Platform;
 
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
@@ -179,6 +180,11 @@ class _LoginScreenBodyState extends State<_LoginScreenBody>
     await _launchInteractiveSignIn(trigger: GoogleSignInLaunchTrigger.manual);
   }
 
+  void _onAppleSignInPressed() {
+    _logGoogleSignInButton('manual Apple sign-in tap');
+    context.read<AuthBloc>().add(const SignInWithAppleEvent());
+  }
+
   Future<void> _launchInteractiveSignIn({
     required GoogleSignInLaunchTrigger trigger,
   }) async {
@@ -336,6 +342,7 @@ class _LoginScreenBodyState extends State<_LoginScreenBody>
                         perfEvent: 'login_actions',
                         child: _LoginGoogleSignInActions(
                           onPressed: _onGoogleSignInPressed,
+                          onApplePressed: _onAppleSignInPressed,
                           logButtonStateIfChanged: _logButtonStateIfChanged,
                           logAuthStateIfChanged: _logAuthStateIfChanged,
                         ),
@@ -396,7 +403,9 @@ class _LoginHeroContent extends StatelessWidget {
               textAlign: TextAlign.center,
             ),
             Text(
-              context.l10n.signInWithGoogleDescription,
+              Platform.isIOS
+                  ? context.l10n.signInWithAppleDescription
+                  : context.l10n.signInWithGoogleDescription,
               style: theme.textTheme.bodyMedium?.copyWith(
                 color: colorScheme.onSurfaceVariant,
               ),
@@ -430,11 +439,13 @@ class _LoginLanguageSwitcherBar extends StatelessWidget {
 class _LoginGoogleSignInActions extends StatefulWidget {
   const _LoginGoogleSignInActions({
     required this.onPressed,
+    required this.onApplePressed,
     required this.logButtonStateIfChanged,
     required this.logAuthStateIfChanged,
   });
 
   final Future<void> Function() onPressed;
+  final VoidCallback onApplePressed;
   final void Function(bool isLoading) logButtonStateIfChanged;
   final void Function(AuthState state) logAuthStateIfChanged;
 
@@ -459,8 +470,8 @@ class _LoginGoogleSignInActionsState extends State<_LoginGoogleSignInActions>
 
   @override
   void didChangeAppLifecycleState(AppLifecycleState state) {
-    if (state == AppLifecycleState.resumed &&
-        _isGoogleSignInSessionInFlight()) {
+    if (state == AppLifecycleState.resumed) {
+      // Re-read [GoogleSignInSessionTracker.inFlight] after native sheets.
       setState(() {});
     }
   }
@@ -481,6 +492,38 @@ class _LoginGoogleSignInActionsState extends State<_LoginGoogleSignInActions>
       crossAxisAlignment: CrossAxisAlignment.stretch,
       spacing: tokens.spaceSmall,
       children: <Widget>[
+        if (Platform.isIOS)
+          RepaintBoundary(
+            child: BlocBuilder<AuthBloc, AuthState>(
+              buildWhen: loginAuthAffectsGoogleSignInButtonLoading,
+              builder: (BuildContext context, AuthState authState) {
+                return BlocBuilder<
+                  LoginGoogleSignInCubit,
+                  LoginGoogleSignInState
+                >(
+                  buildWhen: loginLaunchAffectsGoogleSignInButtonLoading,
+                  builder:
+                      (
+                        BuildContext context,
+                        LoginGoogleSignInState launchState,
+                      ) {
+                        final bool isLoading = loginSignInButtonsLoading(
+                          authState: authState,
+                          isLaunchPending: launchState.isLaunchPending,
+                          sessionInFlight: _isGoogleSignInSessionInFlight(),
+                        );
+                        return TilawaAppleSignInButton(
+                          label: context.l10n.continueWithApple,
+                          semanticLabel: context.l10n.continueWithApple,
+                          appearance: AppleSignInButtonAppearance.black,
+                          isLoading: isLoading,
+                          onPressed: isLoading ? null : widget.onApplePressed,
+                        );
+                      },
+                );
+              },
+            ),
+          ),
         RepaintBoundary(
           child: BlocBuilder<AuthBloc, AuthState>(
             buildWhen: loginAuthAffectsGoogleSignInButtonLoading,
@@ -496,10 +539,11 @@ class _LoginGoogleSignInActionsState extends State<_LoginGoogleSignInActions>
                       BuildContext context,
                       LoginGoogleSignInState launchState,
                     ) {
-                      final bool isLoading =
-                          authState is AuthLoading ||
-                          launchState.isLaunchPending ||
-                          _isGoogleSignInSessionInFlight();
+                      final bool isLoading = loginSignInButtonsLoading(
+                        authState: authState,
+                        isLaunchPending: launchState.isLaunchPending,
+                        sessionInFlight: _isGoogleSignInSessionInFlight(),
+                      );
                       widget.logButtonStateIfChanged(isLoading);
                       return Listener(
                         onPointerDown: (_) {
@@ -522,16 +566,18 @@ class _LoginGoogleSignInActionsState extends State<_LoginGoogleSignInActions>
             },
           ),
         ),
-        _LoginEmailAuthLinks(isGoogleLoading: _isGoogleSignInSessionInFlight()),
+        _LoginEmailAuthLinks(
+          sessionInFlight: _isGoogleSignInSessionInFlight(),
+        ),
       ],
     );
   }
 }
 
 class _LoginEmailAuthLinks extends StatelessWidget {
-  const _LoginEmailAuthLinks({required this.isGoogleLoading});
+  const _LoginEmailAuthLinks({required this.sessionInFlight});
 
-  final bool isGoogleLoading;
+  final bool sessionInFlight;
 
   @override
   Widget build(BuildContext context) {
@@ -540,7 +586,11 @@ class _LoginEmailAuthLinks extends StatelessWidget {
 
     return BlocBuilder<AuthBloc, AuthState>(
       builder: (BuildContext context, AuthState authState) {
-        final bool isLoading = authState is AuthLoading || isGoogleLoading;
+        final bool isLoading = loginSignInButtonsLoading(
+          authState: authState,
+          isLaunchPending: false,
+          sessionInFlight: sessionInFlight,
+        );
         return Column(
           crossAxisAlignment: CrossAxisAlignment.stretch,
           spacing: tokens.spaceSmall,

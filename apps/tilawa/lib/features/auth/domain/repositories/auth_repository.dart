@@ -6,6 +6,8 @@ abstract class AuthRepository {
 
   Future<AuthResult> signInWithGoogle();
 
+  Future<AuthResult> signInWithApple();
+
   Future<AuthResult> signInWithEmailPassword({
     required String email,
     required String password,

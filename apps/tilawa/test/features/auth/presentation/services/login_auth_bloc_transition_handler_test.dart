@@ -34,6 +34,9 @@ class _NoopAuthRepository implements AuthRepository {
   Future<AuthResult> signInWithGoogle() async => const AuthResult.cancelled();
 
   @override
+  Future<AuthResult> signInWithApple() async => const AuthResult.cancelled();
+
+  @override
   Future<AuthResult> signInWithEmailPassword({
     required String email,
     required String password,

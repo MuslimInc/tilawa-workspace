@@ -92,6 +92,9 @@ class _ThrowingAuthRepositoryForPrepare implements AuthRepository {
   Future<AuthResult> signInWithGoogle() async => const AuthResult.cancelled();
 
   @override
+  Future<AuthResult> signInWithApple() async => const AuthResult.cancelled();
+
+  @override
   Future<AuthResult> signInWithEmailPassword({
     required String email,
     required String password,
@@ -116,6 +119,7 @@ void main() {
   final GetIt getIt = GetIt.instance;
 
   late MockSignInWithGoogleUseCase mockSignInWithGoogleUseCase;
+  late MockSignInWithAppleUseCase mockSignInWithAppleUseCase;
   late MockSignInWithEmailUseCase mockSignInWithEmailUseCase;
   late MockRegisterWithEmailUseCase mockRegisterWithEmailUseCase;
   late MockSignOut mockSignOut;
@@ -161,6 +165,7 @@ void main() {
     );
     await getIt.reset();
     mockSignInWithGoogleUseCase = MockSignInWithGoogleUseCase();
+    mockSignInWithAppleUseCase = MockSignInWithAppleUseCase();
     mockSignInWithEmailUseCase = MockSignInWithEmailUseCase();
     mockRegisterWithEmailUseCase = MockRegisterWithEmailUseCase();
     mockSignOut = MockSignOut();
@@ -208,6 +213,7 @@ void main() {
 
     authBloc = AuthBloc(
       mockSignInWithGoogleUseCase,
+      mockSignInWithAppleUseCase,
       mockSignInWithEmailUseCase,
       mockRegisterWithEmailUseCase,
       mockSignOut,
@@ -518,11 +524,13 @@ void main() {
     });
 
     testWidgets(
-      'keeps the button loading while the Google session is in flight',
+      'keeps the button loading while authenticated session is in flight',
       (
         WidgetTester tester,
       ) async {
         await pumpLoginScreen(tester);
+        await pumpLoginInitFrames(tester);
+        authBloc.emit(AuthState.authenticated(user: testUser));
         sessionTracker.markStarted();
         binding.handleAppLifecycleStateChanged(AppLifecycleState.inactive);
         binding.handleAppLifecycleStateChanged(AppLifecycleState.resumed);
@@ -530,6 +538,22 @@ void main() {
 
         expect(isGoogleButtonLoading(tester), isTrue);
         expect(sessionTracker.inFlight, isTrue);
+      },
+    );
+
+    testWidgets(
+      'clears button loading after cancel even if session flag lags',
+      (
+        WidgetTester tester,
+      ) async {
+        await pumpLoginScreen(tester);
+        await pumpLoginInitFrames(tester);
+        sessionTracker.markStarted();
+        authBloc.emit(const AuthState.unauthenticated());
+        await tester.pump();
+
+        expect(sessionTracker.inFlight, isTrue);
+        expect(isGoogleButtonLoading(tester), isFalse);
       },
     );
 
@@ -633,6 +657,7 @@ void main() {
         await tester.pump(const Duration(milliseconds: 400));
 
         expect(authBloc.state, isA<AuthUnauthenticated>());
+        expect(isGoogleButtonLoading(tester), isFalse);
         expect(
           find.textContaining('No Google account found on this device'),
           findsNothing,

@@ -19,6 +19,7 @@ import 'package:tilawa/features/auth/domain/usecases/get_current_user_use_case.d
 import 'package:tilawa/features/auth/domain/usecases/get_persisted_authenticated_user_use_case.dart';
 import 'package:tilawa/features/auth/domain/usecases/register_with_email_use_case.dart';
 import 'package:tilawa/features/auth/domain/usecases/sign_in_with_email_use_case.dart';
+import 'package:tilawa/features/auth/domain/usecases/sign_in_with_apple_use_case.dart';
 import 'package:tilawa/features/auth/domain/usecases/sign_in_with_google_use_case.dart';
 import 'package:tilawa/features/auth/domain/usecases/sign_out.dart';
 import 'package:tilawa/features/auth/domain/usecases/sync_device_token_use_case.dart';
@@ -36,6 +37,7 @@ import 'auth_bloc_test.mocks.dart';
 
 @GenerateMocks([
   SignInWithGoogleUseCase,
+  SignInWithAppleUseCase,
   SignInWithEmailUseCase,
   RegisterWithEmailUseCase,
   SignOut,
@@ -50,6 +52,7 @@ import 'auth_bloc_test.mocks.dart';
 void main() {
   late AuthBloc authBloc;
   late MockSignInWithGoogleUseCase mockSignInWithGoogleUseCase;
+  late MockSignInWithAppleUseCase mockSignInWithAppleUseCase;
   late MockSignInWithEmailUseCase mockSignInWithEmailUseCase;
   late MockRegisterWithEmailUseCase mockRegisterWithEmailUseCase;
   late MockSignOut mockSignOut;
@@ -82,6 +85,7 @@ void main() {
   AuthBloc buildAuthBloc({bool multiDeviceLoginEnabled = false}) {
     return AuthBloc(
       mockSignInWithGoogleUseCase,
+      mockSignInWithAppleUseCase,
       mockSignInWithEmailUseCase,
       mockRegisterWithEmailUseCase,
       mockSignOut,
@@ -104,6 +108,7 @@ void main() {
       () => defaultRevokePrefs.prefs,
     );
     mockSignInWithGoogleUseCase = MockSignInWithGoogleUseCase();
+    mockSignInWithAppleUseCase = MockSignInWithAppleUseCase();
     mockSignInWithEmailUseCase = MockSignInWithEmailUseCase();
     mockRegisterWithEmailUseCase = MockRegisterWithEmailUseCase();
     mockSignOut = MockSignOut();
@@ -620,6 +625,62 @@ void main() {
           verify(mockSignInWithGoogleUseCase()).called(1);
           verifyNever(mockSyncDeviceTokenUseCase(any));
         },
+      );
+    });
+
+    group('SignInWithAppleEvent', () {
+      blocTest<AuthBloc, AuthState>(
+        'emits [loading, authenticated] when Apple sign in is successful',
+        build: () {
+          when(
+            mockSignInWithAppleUseCase(),
+          ).thenAnswer((_) async => AuthResult.success(user: tUser));
+          return authBloc;
+        },
+        act: (bloc) => bloc.add(const SignInWithAppleEvent()),
+        expect: () => [
+          const AuthState.loading(),
+          AuthState.authenticated(user: tUser),
+        ],
+        verify: (_) {
+          verify(mockSignInWithAppleUseCase()).called(1);
+        },
+      );
+
+      blocTest<AuthBloc, AuthState>(
+        'emits [loading, unauthenticated] when Apple sign in is cancelled',
+        build: () {
+          when(
+            mockSignInWithAppleUseCase(),
+          ).thenAnswer((_) async => const AuthResult.cancelled());
+          return authBloc;
+        },
+        act: (bloc) => bloc.add(const SignInWithAppleEvent()),
+        expect: () => [
+          const AuthState.loading(),
+          const AuthState.unauthenticated(),
+        ],
+        verify: (_) {
+          expect(signInSessionTracker.inFlight, isFalse);
+        },
+      );
+
+      blocTest<AuthBloc, AuthState>(
+        'emits [loading, error] when Apple sign in fails',
+        build: () {
+          when(mockSignInWithAppleUseCase()).thenAnswer(
+            (_) async => const AuthResult.failure(
+              message: 'apple-failed',
+              code: 'apple',
+            ),
+          );
+          return authBloc;
+        },
+        act: (bloc) => bloc.add(const SignInWithAppleEvent()),
+        expect: () => [
+          const AuthState.loading(),
+          const AuthState.error(message: 'apple-failed'),
+        ],
       );
     });
 

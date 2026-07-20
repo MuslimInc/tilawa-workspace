@@ -2587,6 +2587,18 @@ abstract class AppLocalizations {
   /// **'Signing in...'**
   String get signingIn;
 
+  /// Primary CTA for Sign in with Apple on the login screen
+  ///
+  /// In en, this message translates to:
+  /// **'Sign in with Apple'**
+  String get continueWithApple;
+
+  /// Login hero copy when Sign in with Apple is available
+  ///
+  /// In en, this message translates to:
+  /// **'Sign in with Apple, Google, or email to continue'**
+  String get signInWithAppleDescription;
+
   /// Sign in with Google button text (Google Identity branding)
   ///
   /// In en, this message translates to:

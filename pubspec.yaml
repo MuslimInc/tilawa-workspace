@@ -32,6 +32,9 @@ dev_dependencies:
 dependency_overrides:
   ffi: ^2.1.4
   device_info_plus: ^13.1.0
+  # 2.6.0 FFI throws caught ArgumentError (OBJC_CLASS_$_NSArray) on iOS
+  # simulator Debug; 2.5.1 is last plugin-based release (see changelog).
+  path_provider_foundation: 2.5.1
 
 melos:
   command:

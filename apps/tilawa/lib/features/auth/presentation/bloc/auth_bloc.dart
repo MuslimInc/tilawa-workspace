@@ -24,6 +24,7 @@ import '../../domain/usecases/delete_account.dart';
 import '../../domain/usecases/get_persisted_authenticated_user_use_case.dart';
 import '../../domain/usecases/get_current_user_use_case.dart';
 import '../../domain/usecases/register_with_email_use_case.dart';
+import '../../domain/usecases/sign_in_with_apple_use_case.dart';
 import '../../domain/usecases/sign_in_with_email_use_case.dart';
 import '../../domain/usecases/sign_in_with_google_use_case.dart';
 import '../../domain/usecases/sign_out.dart';
@@ -38,6 +39,7 @@ part 'auth_state.dart';
 class AuthBloc extends Bloc<AuthEvent, AuthState> {
   AuthBloc(
     this._signInWithGoogle,
+    this._signInWithApple,
     this._signInWithEmail,
     this._registerWithEmail,
     this._signOut,
@@ -53,6 +55,7 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
     this._multiDeviceLoginEnabled = isMultiDeviceLoginEnabled,
   }) : super(const AuthState.initial()) {
     on<SignInWithGoogleEvent>(_onSignInWithGoogle);
+    on<SignInWithAppleEvent>(_onSignInWithApple);
     on<SignInWithEmailEvent>(_onSignInWithEmail);
     on<RegisterWithEmailEvent>(_onRegisterWithEmail);
     on<SignOutEvent>(_onSignOut);
@@ -66,6 +69,7 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
   int _interactiveSignInGeneration = 0;
 
   final SignInWithGoogleUseCase _signInWithGoogle;
+  final SignInWithAppleUseCase _signInWithApple;
   final SignInWithEmailUseCase _signInWithEmail;
   final RegisterWithEmailUseCase _registerWithEmail;
   final SignOut _signOut;
@@ -120,9 +124,11 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
             detail,
             stackTrace: details == null ? null : StackTrace.fromString(details),
           );
+          _signInSessionTracker.markFinished();
           emit(AuthState.error(message: message));
         case AuthCancelled():
           logger.d('[GoogleSignIn] cancelled by user');
+          _signInSessionTracker.markFinished();
           if (authenticatedBeforeSignIn != null) {
             emit(authenticatedBeforeSignIn);
           } else {
@@ -130,6 +136,7 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
           }
         case AuthResultNoGoogleAccounts():
           logger.d('[GoogleSignIn] no Google accounts on device');
+          _signInSessionTracker.markFinished();
           emit(const AuthState.noGoogleAccounts());
       }
     } catch (error, stackTrace) {
@@ -141,6 +148,79 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
         error: error,
         stackTrace: stackTrace,
       );
+      _signInSessionTracker.markFinished();
+      emit(
+        const AuthState.error(message: EmailAuthFailureKey.generic),
+      );
+    } finally {
+      _signInSessionTracker.markFinished();
+    }
+  }
+
+  Future<void> _onSignInWithApple(
+    SignInWithAppleEvent event,
+    Emitter<AuthState> emit,
+  ) async {
+    final int generation = ++_interactiveSignInGeneration;
+    final AuthState? authenticatedBeforeSignIn = switch (state) {
+      AuthAuthenticated() => state,
+      _ => null,
+    };
+
+    try {
+      _signInSessionTracker.markStarted();
+      await PendingSessionRevokeStore.clear();
+      emit(const AuthState.loading());
+
+      final AuthResult result = await _signInWithApple();
+
+      if (generation != _interactiveSignInGeneration) {
+        return;
+      }
+
+      switch (result) {
+        case AuthSuccess(:final user):
+          await _handleSignInSuccess(
+            user: user,
+            generation: generation,
+            emit: emit,
+          );
+        case AuthFailure(
+          :final message,
+          :final code,
+          :final details,
+        ):
+          final String detail = code == null
+              ? 'Apple sign-in failed: $message'
+              : 'Apple sign-in failed: $message (code: $code)';
+          logger.w(
+            detail,
+            stackTrace: details == null ? null : StackTrace.fromString(details),
+          );
+          _signInSessionTracker.markFinished();
+          emit(AuthState.error(message: message));
+        case AuthCancelled():
+          logger.d('[AppleSignIn] cancelled by user');
+          _signInSessionTracker.markFinished();
+          if (authenticatedBeforeSignIn != null) {
+            emit(authenticatedBeforeSignIn);
+          } else {
+            emit(const AuthState.unauthenticated());
+          }
+        case AuthResultNoGoogleAccounts():
+          _signInSessionTracker.markFinished();
+          emit(const AuthState.unauthenticated());
+      }
+    } catch (error, stackTrace) {
+      if (generation != _interactiveSignInGeneration) {
+        return;
+      }
+      logger.e(
+        'Apple sign-in failed',
+        error: error,
+        stackTrace: stackTrace,
+      );
+      _signInSessionTracker.markFinished();
       emit(
         const AuthState.error(message: EmailAuthFailureKey.generic),
       );
@@ -182,10 +262,13 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
                 : 'Email sign-in failed: $message (code: $code)',
             stackTrace: details == null ? null : StackTrace.fromString(details),
           );
+          _signInSessionTracker.markFinished();
           emit(AuthState.error(message: message));
         case AuthCancelled():
+          _signInSessionTracker.markFinished();
           emit(const AuthState.unauthenticated());
         case AuthResultNoGoogleAccounts():
+          _signInSessionTracker.markFinished();
           emit(const AuthState.unauthenticated());
       }
     } catch (error, stackTrace) {
@@ -193,6 +276,7 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
         return;
       }
       logger.e('Email sign-in failed', error: error, stackTrace: stackTrace);
+      _signInSessionTracker.markFinished();
       emit(
         const AuthState.error(message: EmailAuthFailureKey.generic),
       );
@@ -243,6 +327,7 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
                 : 'Email registration failed: $message (code: $code)',
             stackTrace: details == null ? null : StackTrace.fromString(details),
           );
+          _signInSessionTracker.markFinished();
           emit(AuthState.error(message: message));
       }
     } catch (error, stackTrace) {
@@ -254,6 +339,7 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
         error: error,
         stackTrace: stackTrace,
       );
+      _signInSessionTracker.markFinished();
       emit(const AuthState.error(message: 'Authentication failed'));
     } finally {
       _signInSessionTracker.markFinished();
