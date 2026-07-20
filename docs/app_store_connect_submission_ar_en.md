@@ -383,7 +383,14 @@ Store Connect.
 ```text
 MeMuslim is a Quran, prayer-times, Qibla, and Athkar app.
 
-A test account is provided in the Sign-In Information section. After signing in, the reviewer can access the main features from the home screen.
+Sign-in options: Sign in with Apple, Google Sign-In, and email/password.
+A test account is provided in the Sign-In Information section. After signing in,
+the reviewer can access the main features from the home screen.
+
+Background audio (Guideline 2.5.4): After sign-in → Reciters → pick a reciter →
+play a Surah. Press Home (or swipe up) so the app is backgrounded. Audio should
+continue; Control Center / lock screen show playback controls. UIBackgroundModes
+includes audio because MeMuslim is a Quran listening app.
 
 Location permission is optional and is used to calculate local prayer times and Qibla direction. Notifications are optional and are used for prayer and Adhan reminders. Camera or photo-library access is requested only when the user chooses a profile image. Microphone access is requested only if an enabled recitation or live-session feature is opened.
 

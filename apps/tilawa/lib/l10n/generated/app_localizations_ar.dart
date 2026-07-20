@@ -1446,6 +1446,13 @@ class AppLocalizationsAr extends AppLocalizations {
   String get signingIn => 'جاري تسجيل الدخول...';
 
   @override
+  String get continueWithApple => 'تسجيل الدخول باستخدام Apple';
+
+  @override
+  String get signInWithAppleDescription =>
+      'سجّل الدخول باستخدام Apple أو Google أو البريد للمتابعة';
+
+  @override
   String get continueWithGoogle => 'تسجيل الدخول باستخدام Google';
 
   @override

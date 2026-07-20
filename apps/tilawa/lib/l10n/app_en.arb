@@ -1731,6 +1731,14 @@
     "@signingIn": {
         "description": "Signing in progress text"
     },
+    "continueWithApple": "Sign in with Apple",
+    "@continueWithApple": {
+        "description": "Primary CTA for Sign in with Apple on the login screen"
+    },
+    "signInWithAppleDescription": "Sign in with Apple, Google, or email to continue",
+    "@signInWithAppleDescription": {
+        "description": "Login hero copy when Sign in with Apple is available"
+    },
     "continueWithGoogle": "Sign in with Google",
     "@continueWithGoogle": {
         "description": "Sign in with Google button text (Google Identity branding)"

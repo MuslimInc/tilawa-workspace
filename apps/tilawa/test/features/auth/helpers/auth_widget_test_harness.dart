@@ -23,6 +23,7 @@ class AuthWidgetTestHarness {
     accountDeletionFlowTracker = AccountDeletionFlowTracker();
 
     mockSignInWithGoogle = MockSignInWithGoogleUseCase();
+    mockSignInWithApple = MockSignInWithAppleUseCase();
     mockSignInWithEmail = MockSignInWithEmailUseCase();
     mockRegisterWithEmail = MockRegisterWithEmailUseCase();
     mockSignOut = MockSignOut();
@@ -53,6 +54,7 @@ class AuthWidgetTestHarness {
 
     authBloc = AuthBloc(
       mockSignInWithGoogle,
+      mockSignInWithApple,
       mockSignInWithEmail,
       mockRegisterWithEmail,
       mockSignOut,
@@ -70,6 +72,7 @@ class AuthWidgetTestHarness {
 
   late AuthBloc authBloc;
   late MockSignInWithGoogleUseCase mockSignInWithGoogle;
+  late MockSignInWithAppleUseCase mockSignInWithApple;
   late MockSignInWithEmailUseCase mockSignInWithEmail;
   late MockRegisterWithEmailUseCase mockRegisterWithEmail;
   late MockSignOut mockSignOut;

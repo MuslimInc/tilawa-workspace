@@ -1,4 +1,3 @@
-import 'package:checks/checks.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:tilawa/features/auth/domain/entities/user_entity.dart';
 import 'package:tilawa/features/auth/presentation/bloc/auth_bloc.dart';
@@ -7,37 +6,65 @@ import 'package:tilawa/features/auth/presentation/services/login_auth_state_diag
 void main() {
   final UserEntity user = UserEntity(
     id: '1',
-    email: 'a@b.com',
-    displayName: 'User',
+    email: 'a@b.c',
+    displayName: 'A',
     createdAt: DateTime.utc(2024),
   );
 
-  group('loginAuthStateLabel', () {
-    test('maps each auth state to a debug label', () {
-      check(loginAuthStateLabel(const AuthState.initial())).equals('initial');
-      check(loginAuthStateLabel(const AuthState.loading())).equals('loading');
-      check(
-        loginAuthStateLabel(AuthState.authenticated(user: user)),
-      ).equals('authenticated');
-      check(
-        loginAuthStateLabel(const AuthState.unauthenticated()),
-      ).equals('unauthenticated');
-      check(
-        loginAuthStateLabel(const AuthState.error(message: 'boom')),
-      ).equals('error(boom)');
-      check(
-        loginAuthStateLabel(const AuthState.noGoogleAccounts()),
-      ).equals('noGoogleAccounts');
+  group('loginSignInButtonsLoading', () {
+    test('true while AuthBloc is loading', () {
+      expect(
+        loginSignInButtonsLoading(
+          authState: const AuthState.loading(),
+          isLaunchPending: false,
+          sessionInFlight: false,
+        ),
+        isTrue,
+      );
     });
-  });
 
-  group('loginAuthButtonEnabled', () {
-    test('is false only while loading', () {
-      check(loginAuthButtonEnabled(const AuthState.initial())).isTrue();
-      check(loginAuthButtonEnabled(const AuthState.loading())).isFalse();
-      check(
-        loginAuthButtonEnabled(AuthState.authenticated(user: user)),
-      ).isTrue();
+    test('true while launch is pending', () {
+      expect(
+        loginSignInButtonsLoading(
+          authState: const AuthState.unauthenticated(),
+          isLaunchPending: true,
+          sessionInFlight: false,
+        ),
+        isTrue,
+      );
+    });
+
+    test('true after authenticated while session still in flight', () {
+      expect(
+        loginSignInButtonsLoading(
+          authState: AuthState.authenticated(user: user),
+          isLaunchPending: false,
+          sessionInFlight: true,
+        ),
+        isTrue,
+      );
+    });
+
+    test('false after cancel even if session flag still in flight', () {
+      expect(
+        loginSignInButtonsLoading(
+          authState: const AuthState.unauthenticated(),
+          isLaunchPending: false,
+          sessionInFlight: true,
+        ),
+        isFalse,
+      );
+    });
+
+    test('false after error even if session flag still in flight', () {
+      expect(
+        loginSignInButtonsLoading(
+          authState: const AuthState.error(message: 'x'),
+          isLaunchPending: false,
+          sessionInFlight: true,
+        ),
+        isFalse,
+      );
     });
   });
 }

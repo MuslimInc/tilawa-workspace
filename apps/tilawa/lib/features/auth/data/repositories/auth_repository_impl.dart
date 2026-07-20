@@ -2,6 +2,7 @@ import 'package:injectable/injectable.dart';
 
 import '../../domain/entities/auth_result.dart';
 import '../../domain/entities/user_entity.dart';
+import '../../domain/gateways/apple_auth_gateway.dart';
 import '../../domain/gateways/email_password_auth_gateway.dart';
 import '../../domain/providers/auth_provider_interface.dart';
 import '../../domain/repositories/auth_repository.dart';
@@ -13,13 +14,16 @@ class AuthRepositoryImpl implements AuthRepository {
     AuthProviderInterface authProvider,
     GoogleSignInPrepareDataSource googleSignInPrepare,
     EmailPasswordAuthGateway emailPasswordAuth,
+    AppleAuthGateway appleAuth,
   ) : _authProvider = authProvider,
       _googleSignInPrepare = googleSignInPrepare,
-      _emailPasswordAuth = emailPasswordAuth;
+      _emailPasswordAuth = emailPasswordAuth,
+      _appleAuth = appleAuth;
 
   final AuthProviderInterface _authProvider;
   final GoogleSignInPrepareDataSource _googleSignInPrepare;
   final EmailPasswordAuthGateway _emailPasswordAuth;
+  final AppleAuthGateway _appleAuth;
 
   @override
   Stream<UserEntity?> get authStateChanges => _authProvider.authStateChanges;
@@ -44,6 +48,11 @@ class AuthRepositoryImpl implements AuthRepository {
       email: email,
       password: password,
     );
+  }
+
+  @override
+  Future<AuthResult> signInWithApple() {
+    return _appleAuth.signInWithApple();
   }
 
   @override

@@ -239,6 +239,9 @@ final class _FakeAuthRepository implements AuthRepository {
   }
 
   @override
+  Future<AuthResult> signInWithApple() async => const AuthResult.cancelled();
+
+  @override
   Future<AuthResult> signInWithEmailPassword({
     required String email,
     required String password,

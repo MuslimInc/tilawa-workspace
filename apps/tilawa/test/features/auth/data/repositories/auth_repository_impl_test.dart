@@ -1,6 +1,7 @@
 import 'package:flutter_test/flutter_test.dart';
 import 'package:mockito/annotations.dart';
 import 'package:mockito/mockito.dart';
+import 'package:tilawa/features/auth/domain/gateways/apple_auth_gateway.dart';
 import 'package:tilawa/features/auth/domain/gateways/email_password_auth_gateway.dart';
 import 'package:tilawa/features/auth/data/datasources/google_sign_in_prepare_data_source.dart';
 import 'package:tilawa/features/auth/data/repositories/auth_repository_impl.dart';
@@ -16,17 +17,20 @@ import 'auth_repository_impl_test.mocks.dart';
   UserRepository,
   GoogleSignInPrepareDataSource,
   EmailPasswordAuthGateway,
+  AppleAuthGateway,
 ])
 void main() {
   late AuthRepositoryImpl authRepository;
   late MockAuthProviderInterface mockAuthProvider;
   late MockGoogleSignInPrepareDataSource mockPrepare;
   late MockEmailPasswordAuthGateway mockEmailAuth;
+  late MockAppleAuthGateway mockAppleAuth;
 
   setUp(() {
     mockAuthProvider = MockAuthProviderInterface();
     mockPrepare = MockGoogleSignInPrepareDataSource();
     mockEmailAuth = MockEmailPasswordAuthGateway();
+    mockAppleAuth = MockAppleAuthGateway();
 
     when(mockPrepare.prepare()).thenAnswer((_) async {
       return;
@@ -39,6 +43,7 @@ void main() {
       mockAuthProvider,
       mockPrepare,
       mockEmailAuth,
+      mockAppleAuth,
     );
   });
 
@@ -83,6 +88,28 @@ void main() {
       final AuthResult result = await authRepository.signInWithGoogle();
 
       // Assert
+      expect(result, const AuthResult.cancelled());
+    });
+
+    test('signInWithApple should delegate to AppleAuthGateway', () async {
+      when(
+        mockAppleAuth.signInWithApple(),
+      ).thenAnswer((_) async => AuthResult.success(user: tUser));
+
+      final AuthResult result = await authRepository.signInWithApple();
+
+      expect(result, AuthResult.success(user: tUser));
+      verify(mockAppleAuth.signInWithApple()).called(1);
+      verifyNever(mockAuthProvider.signIn());
+    });
+
+    test('signInWithApple should return cancelled on cancellation', () async {
+      when(
+        mockAppleAuth.signInWithApple(),
+      ).thenAnswer((_) async => const AuthResult.cancelled());
+
+      final AuthResult result = await authRepository.signInWithApple();
+
       expect(result, const AuthResult.cancelled());
     });
 

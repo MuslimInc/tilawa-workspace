@@ -7,6 +7,7 @@ export 'tilawa_divider.dart';
 export 'tilawa_dropdown_field.dart';
 export 'tilawa_empty_state.dart';
 export 'tilawa_error_state.dart';
+export 'tilawa_apple_sign_in_button.dart';
 export 'tilawa_google_sign_in_button.dart';
 export 'tilawa_icon_box.dart';
 export 'tilawa_icon_button.dart';

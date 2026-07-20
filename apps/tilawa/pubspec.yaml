@@ -3,7 +3,7 @@ resolution: workspace
 description: An Audio Quran Player project.
 
 publish_to: none
-version: 2.1.9+89
+version: 2.1.9+90
 
 environment:
   sdk: ^3.12.2
@@ -50,6 +50,8 @@ dependencies:
   get_it: ^9.2.1
   go_router: ^17.2.2
   google_sign_in: ^7.2.0
+  sign_in_with_apple: ^8.1.0
+  crypto: ^3.0.6
   hive_ce: ^2.19.3
   http: ^1.6.0
   hydrated_bloc: ^11.0.0

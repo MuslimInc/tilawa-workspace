@@ -30,6 +30,7 @@ import 'auth_bloc_test.mocks.dart';
 void main() {
   late AuthBloc authBloc;
   late MockSignInWithGoogleUseCase mockSignInWithGoogleUseCase;
+  late MockSignInWithAppleUseCase mockSignInWithAppleUseCase;
   late MockSignInWithEmailUseCase mockSignInWithEmailUseCase;
   late MockRegisterWithEmailUseCase mockRegisterWithEmailUseCase;
   late MockSignOut mockSignOut;
@@ -75,6 +76,7 @@ void main() {
   AuthBloc buildAuthBloc({bool multiDeviceLoginEnabled = false}) {
     return AuthBloc(
       mockSignInWithGoogleUseCase,
+      mockSignInWithAppleUseCase,
       mockSignInWithEmailUseCase,
       mockRegisterWithEmailUseCase,
       mockSignOut,
@@ -97,6 +99,7 @@ void main() {
       () => revokePrefs.prefs,
     );
     mockSignInWithGoogleUseCase = MockSignInWithGoogleUseCase();
+    mockSignInWithAppleUseCase = MockSignInWithAppleUseCase();
     mockSignInWithEmailUseCase = MockSignInWithEmailUseCase();
     mockRegisterWithEmailUseCase = MockRegisterWithEmailUseCase();
     mockSignOut = MockSignOut();
