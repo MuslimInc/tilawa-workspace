@@ -618,7 +618,7 @@ class _ExpandedProgressBar extends StatelessWidget {
                 slider: true,
                 child: SliderTheme(
                   data: SliderTheme.of(context).copyWith(
-                    trackHeight: 3,
+                    trackHeight: tokens.progressHeight,
                     thumbShape: const RoundSliderThumbShape(
                       enabledThumbRadius: 0,
                     ),

@@ -26,8 +26,8 @@ class _YtMusicPlayerHeader extends StatelessWidget {
             child: IconButton(
               icon: Icon(
                 FluentIcons.chevron_down_24_regular,
-                color: palette.foreground,
-                size: tokens.iconSizeLarge,
+                color: palette.secondary,
+                size: tokens.iconSizeMedium,
               ),
               onPressed: onCollapse,
               tooltip: MaterialLocalizations.of(context).backButtonTooltip,
@@ -40,7 +40,8 @@ class _YtMusicPlayerHeader extends StatelessWidget {
             child: IconButton(
               icon: Icon(
                 FluentIcons.more_vertical_24_regular,
-                color: palette.foreground,
+                color: palette.secondary,
+                size: tokens.iconSizeMedium,
               ),
               onPressed: () => _showExpandedPlayerMenu(context, state),
             ),
@@ -150,13 +151,13 @@ class _PlayerPlaybackCluster extends StatelessWidget {
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
         const _ExpandedProgressBar(),
-        SizedBox(height: tokens.spaceSmall),
+        SizedBox(height: tokens.spaceMedium),
         _PlayerTransportRow(
           state: state,
           isPlaying: state.isPlaying,
           isPlaybackStalled: state.isPlaybackStalled,
         ),
-        SizedBox(height: tokens.spaceMedium),
+        SizedBox(height: tokens.spaceLarge),
         _PlayerActionPillsMolecule(state: state),
         SizedBox(height: tokens.spaceSmall + queueInset),
       ],
@@ -184,8 +185,8 @@ class _PlayerMetadataMolecule extends StatelessWidget {
     final tokens = Theme.of(context).tokens;
     final palette = _ExpandedPlayerPalette.of(context);
     final TextStyle? titleStyle = context
-        .responsiveStyle((t) => t.titleLarge)
-        ?.copyWith(color: palette.foreground, fontWeight: FontWeight.w600);
+        .responsiveStyle((t) => t.headlineSmall)
+        ?.copyWith(color: palette.foreground, fontWeight: FontWeight.w700);
     final TextStyle? subtitleStyle = context
         .responsiveStyle((t) => t.bodyMedium)
         ?.copyWith(color: palette.secondary);
@@ -304,6 +305,7 @@ class _PlayerTransportRow extends StatelessWidget {
 
     // App locale is RTL for Arabic; keep transport LTR so skip sides do not
     // mirror twice (Row flip would undo the Arabic-only swap).
+    // Hierarchy: play (circle) > skip > shuffle/repeat (mode toggles).
     return Directionality(
       textDirection: TextDirection.ltr,
       child: Row(
@@ -316,7 +318,7 @@ class _PlayerTransportRow extends StatelessWidget {
               icon: Icon(
                 shuffleIcon,
                 color: shuffleOn ? enabled : disabled,
-                size: tokens.iconSizeLarge,
+                size: tokens.iconSizeMedium,
               ),
               onPressed: () {
                 context.read<AudioPlayerBloc>().add(
@@ -354,7 +356,7 @@ class _PlayerTransportRow extends StatelessWidget {
               icon: Icon(
                 repeatIcon,
                 color: repeatActive ? enabled : disabled,
-                size: tokens.iconSizeLarge,
+                size: tokens.iconSizeMedium,
               ),
               onPressed: () {
                 context.read<AudioPlayerBloc>().add(
@@ -504,15 +506,15 @@ class _YtMusicActionPill extends StatelessWidget {
               children: [
                 Icon(
                   icon,
-                  color: palette.foreground,
+                  color: palette.secondary,
                   size: tokens.iconSizeMedium,
                 ),
                 if (label != null)
                   Text(
                     label!,
-                    style: Theme.of(context).textTheme.labelLarge?.copyWith(
-                      color: palette.foreground,
-                      fontWeight: FontWeight.w600,
+                    style: Theme.of(context).textTheme.labelMedium?.copyWith(
+                      color: palette.secondary,
+                      fontWeight: FontWeight.w500,
                     ),
                   ),
               ],
