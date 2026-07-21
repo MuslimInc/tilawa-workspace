@@ -71,14 +71,19 @@ List<AppShellNavDestination> buildPhoneShellNavDestinations(
         final double iconSize = Theme.of(
           context,
         ).componentTokens.adaptiveShell.navButtonIconSize;
-        return TilawaIcons.quran.svg(color: color, size: iconSize);
+        return TilawaIcons.quranNav.svg(color: color, size: iconSize);
       },
       semanticsIdentifier: 'quran_index_nav',
     ),
     AppShellNavDestination(
       tabIndex: kAppShellRecitersTabIndex,
-      icon: TilawaIcons.micOutline,
-      activeIcon: TilawaIcons.mic,
+      icon: TilawaIcons.reciter,
+      iconBuilder: (context, {required Color color}) {
+        final double iconSize = Theme.of(
+          context,
+        ).componentTokens.adaptiveShell.navButtonIconSize;
+        return TilawaIcons.qari.svg(color: color, size: iconSize);
+      },
       label: l10n.bottomNavReciters,
       semanticsIdentifier: 'reciters_tab',
     ),
