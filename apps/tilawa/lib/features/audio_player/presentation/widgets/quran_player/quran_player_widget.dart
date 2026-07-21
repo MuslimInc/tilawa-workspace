@@ -1473,12 +1473,7 @@ class QuranPlayerWidgetState extends State<QuranPlayerWidget>
             : null;
 
         return AnimatedBuilder(
-          animation: Listenable.merge(
-            <Listenable>[
-              _expandController,
-              if (!_isUserDraggingExpand) _presentation,
-            ],
-          ),
+          animation: _expandController,
           child: footerMiniGestureChild != null
               ? _PlayerAnimatedSubtree(
                   expandedPlayer: expandedPlayer,
