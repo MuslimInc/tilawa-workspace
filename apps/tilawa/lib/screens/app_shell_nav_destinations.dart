@@ -77,8 +77,8 @@ List<AppShellNavDestination> buildPhoneShellNavDestinations(
     ),
     AppShellNavDestination(
       tabIndex: kAppShellRecitersTabIndex,
-      icon: TilawaIcons.reciters,
-      activeIcon: TilawaIcons.recitersActive,
+      icon: TilawaIcons.micOutline,
+      activeIcon: TilawaIcons.mic,
       label: l10n.bottomNavReciters,
       semanticsIdentifier: 'reciters_tab',
     ),

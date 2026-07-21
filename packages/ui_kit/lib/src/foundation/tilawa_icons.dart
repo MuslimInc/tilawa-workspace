@@ -233,6 +233,7 @@ abstract final class TilawaIcons {
   static const IconData accessTimeFilled = Icons.access_time_filled;
 
   // ── Media / Share ───────────────────────────────────────────────────────────
+  static const IconData micOutline = Icons.mic_none_rounded;
   static const IconData mic = Icons.mic_rounded;
   static const IconData movie = Icons.movie_creation_outlined;
   static const IconData screenshot = Icons.screenshot_rounded;

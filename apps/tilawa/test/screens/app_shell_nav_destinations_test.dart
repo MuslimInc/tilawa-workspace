@@ -42,6 +42,18 @@ void main() {
         .toSet();
     expect(tabIndices, kPhoneShellNavTabIndices);
     expect(tabIndices, contains(kAppShellRecitersTabIndex));
+    expect(
+      destinations
+          .singleWhere((d) => d.tabIndex == kAppShellRecitersTabIndex)
+          .icon,
+      TilawaIcons.micOutline,
+    );
+    expect(
+      destinations
+          .singleWhere((d) => d.tabIndex == kAppShellRecitersTabIndex)
+          .activeIcon,
+      TilawaIcons.mic,
+    );
 
     expect(
       destinations.singleWhere((d) => d.isPushRoute).label,
