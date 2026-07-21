@@ -324,7 +324,7 @@ class _HistoryScreenState extends State<HistoryScreen> {
       AudioPlayerEvent.playFromQueue(
         [audio],
         0,
-        initialPosition: history.lastPosition,
+        initialPosition: history.resumeInitialPosition,
       ),
     );
   }

@@ -194,7 +194,7 @@ class _HomePrimaryListeningCard extends StatelessWidget {
       AudioPlayerEvent.playFromQueue(
         [audio],
         0,
-        initialPosition: Duration(milliseconds: state.lastPositionMs),
+        initialPosition: state.resumeInitialPosition,
       ),
     );
   }

@@ -41,6 +41,7 @@ class HomeListeningResumeCubit extends Cubit<HomeListeningResumeState> {
           moshafName: latest.moshafName,
           lastPositionMs: latest.lastPositionMs,
           durationMs: latest.durationMs,
+          completed: latest.completed,
           artworkUrl: latest.artworkUrl,
         ),
       );

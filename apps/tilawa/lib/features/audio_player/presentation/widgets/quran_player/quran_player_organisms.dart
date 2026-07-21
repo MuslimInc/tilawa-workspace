@@ -1099,12 +1099,9 @@ class _PlayerReciterHistorySectionState
     }
     final AudioPlayerBloc bloc = context.read<AudioPlayerBloc>();
     bloc.add(AudioPlayerEvent.skipToQueueItem(index));
-    if (history.lastPositionMs > 0 && !history.completed) {
-      bloc.add(
-        AudioPlayerEvent.seekTo(
-          Duration(milliseconds: history.lastPositionMs),
-        ),
-      );
+    final Duration? resumeAt = history.resumeInitialPosition;
+    if (resumeAt != null) {
+      bloc.add(AudioPlayerEvent.seekTo(resumeAt));
     }
   }
 
