@@ -2041,6 +2041,12 @@ abstract class AppLocalizations {
   /// **'Playback & storage'**
   String get settingsPlaybackAndStorage;
 
+  /// Merged content and playback section header on settings screen
+  ///
+  /// In en, this message translates to:
+  /// **'Content & playback'**
+  String get settingsContentAndPlayback;
+
   /// Reciters section header on settings screen
   ///
   /// In en, this message translates to:

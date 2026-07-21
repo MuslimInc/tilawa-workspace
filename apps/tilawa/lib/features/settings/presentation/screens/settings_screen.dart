@@ -136,6 +136,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
                   if (!isGuest &&
                       quranSessionsFeatureConfig().quranSessionsEnabled)
                     const SettingsTeachingOnMemuslimSection(),
+                  // Preference cluster — daily controls under identity.
                   TilawaSettingsGroup(
                     title: l10n.settingsAppearance,
                     leadingIcon: FluentIcons.weather_moon_24_regular,
@@ -197,21 +198,11 @@ class _SettingsScreenState extends State<SettingsScreen> {
                       ),
                     ],
                   ),
-                  if (!isGuest)
-                    TilawaSettingsGroup(
-                      title: l10n.settingsSecuritySection,
-                      leadingIcon: FluentIcons.phone_24_regular,
-                      children: [
-                        TilawaSettingsTile(
-                          title: l10n.settingsManageDevicesTile,
-                          onTap: () => const ManageDevicesRoute().push(context),
-                          showDivider: false,
-                        ),
-                      ],
-                    ),
+                  // Content & playback — merged reciters display, daily
+                  // guidance, and playback/storage to cut single-tile headers.
                   TilawaSettingsGroup(
-                    title: l10n.settingsRecitersSection,
-                    leadingIcon: Icons.record_voice_over_rounded,
+                    title: l10n.settingsContentAndPlayback,
+                    leadingIcon: FluentIcons.storage_24_regular,
                     children: [
                       BlocBuilder<SettingsCubit, SettingsState>(
                         builder: (context, state) {
@@ -221,28 +212,14 @@ class _SettingsScreenState extends State<SettingsScreen> {
                             onChanged: context
                                 .read<SettingsCubit>()
                                 .setShowRecitersAlphabetIndex,
-                            showDivider: false,
                           );
                         },
                       ),
-                    ],
-                  ),
-                  TilawaSettingsGroup(
-                    title: l10n.dailyGuidanceSettingsSection,
-                    leadingIcon: Icons.local_florist,
-                    children: [
                       TilawaSettingsTile(
                         title: l10n.dailyGuidanceSettings,
                         subtitle: l10n.dailyGuidanceSettingsSubtitle,
                         onTap: () => const DailyGuidanceRoute().push(context),
-                        showDivider: false,
                       ),
-                    ],
-                  ),
-                  TilawaSettingsGroup(
-                    title: l10n.settingsPlaybackAndStorage,
-                    leadingIcon: FluentIcons.storage_24_regular,
-                    children: [
                       BlocBuilder<SettingsCubit, SettingsState>(
                         builder: (context, state) {
                           return TilawaSettingsSwitchTile(
@@ -277,9 +254,24 @@ class _SettingsScreenState extends State<SettingsScreen> {
                       ),
                     ],
                   ),
+                  if (!isGuest)
+                    TilawaSettingsGroup(
+                      title: l10n.settingsSecuritySection,
+                      leadingIcon: FluentIcons.phone_24_regular,
+                      children: [
+                        TilawaSettingsTile(
+                          title: l10n.settingsManageDevicesTile,
+                          onTap: () => const ManageDevicesRoute().push(context),
+                          showDivider: false,
+                        ),
+                      ],
+                    ),
+                  // Support / legal cluster — larger gap from preferences.
+                  SizedBox(height: tokens.spaceExtraLarge),
                   TilawaSettingsGroup(
                     title: l10n.settingsSupportSection,
                     leadingIcon: FluentIcons.person_support_24_regular,
+                    includeTopGap: false,
                     children: [
                       if (widget.supportTilawaEnabled)
                         TilawaSettingsTile(
