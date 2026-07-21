@@ -30,7 +30,7 @@ class OnboardingTitleBlock extends StatelessWidget {
         : '';
 
     final TextStyle headlineStyle =
-        theme.textTheme.titleLarge?.copyWith(
+        theme.textTheme.headlineSmall?.copyWith(
           fontWeight: FontWeight.w700,
           color: colorScheme.primary,
           height: _titleLineHeight,
@@ -39,17 +39,17 @@ class OnboardingTitleBlock extends StatelessWidget {
           fontWeight: FontWeight.w700,
           color: colorScheme.primary,
           height: _titleLineHeight,
-          fontSize: 22,
+          fontSize: 24,
         );
     final TextStyle sublineStyle =
-        theme.textTheme.titleMedium?.copyWith(
-          fontWeight: FontWeight.w600,
-          color: colorScheme.onSurface,
+        theme.textTheme.bodyLarge?.copyWith(
+          fontWeight: FontWeight.w400,
+          color: colorScheme.onSurfaceVariant,
           height: _titleLineHeight,
         ) ??
         TextStyle(
-          fontWeight: FontWeight.w600,
-          color: colorScheme.onSurface,
+          fontWeight: FontWeight.w400,
+          color: colorScheme.onSurfaceVariant,
           height: _titleLineHeight,
           fontSize: 16,
         );
