@@ -213,7 +213,6 @@ class _ExpandedPlayerPalette {
     required this.seekActive,
     required this.seekBuffered,
     required this.seekInactive,
-    required this.artOverlay,
   });
 
   final Color foreground;
@@ -228,7 +227,6 @@ class _ExpandedPlayerPalette {
   final Color seekActive;
   final Color seekBuffered;
   final Color seekInactive;
-  final Color artOverlay;
 
   factory _ExpandedPlayerPalette.resolve(
     BuildContext context, {
@@ -238,7 +236,6 @@ class _ExpandedPlayerPalette {
     final colorScheme = theme.colorScheme;
     final tokens = theme.tokens;
     final barTokens = theme.componentTokens.mediaPlayerBar;
-    final bgTokens = theme.componentTokens.playerBackground;
 
     if (onImageBackdrop) {
       return _ExpandedPlayerPalette(
@@ -268,9 +265,6 @@ class _ExpandedPlayerPalette {
         seekInactive: colorScheme.onInverseSurface.withValues(
           alpha: tokens.opacitySubtle,
         ),
-        artOverlay: bgTokens.overlayColor.withValues(
-          alpha: bgTokens.defaultOverlayOpacity,
-        ),
       );
     }
 
@@ -291,9 +285,6 @@ class _ExpandedPlayerPalette {
       seekActive: colorScheme.primary,
       seekBuffered: colorScheme.primary.withValues(alpha: tokens.opacityMedium),
       seekInactive: barTokens.progressTrackBackgroundColor,
-      artOverlay: bgTokens.overlayColor.withValues(
-        alpha: bgTokens.defaultOverlayOpacity,
-      ),
     );
   }
 
@@ -683,14 +674,13 @@ class _ExpandedPlayerOrganismState extends State<_ExpandedPlayerOrganism> {
     final bool hasCustomBackground =
         bgState.config.type == PlayerBackgroundType.custom &&
         bgState.config.customImagePath != null;
-    final bool onImageBackdrop =
-        hasCustomBackground || widget.audio.artUri != null;
     final _ExpandedPlayerPalette palette = _ExpandedPlayerPalette.resolve(
       context,
-      onImageBackdrop: onImageBackdrop,
+      onImageBackdrop: hasCustomBackground,
     );
-    final Brightness statusBarIconBrightness =
-        theme.brightness == Brightness.dark
+    final Brightness statusBarIconBrightness = hasCustomBackground
+        ? Brightness.light
+        : theme.brightness == Brightness.dark
         ? Brightness.light
         : Brightness.dark;
     final Color queueSheetColor = quranPlayerQueueSheetColor(colorScheme);
@@ -722,30 +712,6 @@ class _ExpandedPlayerOrganismState extends State<_ExpandedPlayerOrganism> {
             fit: StackFit.expand,
             children: [
               const PlayerBackgroundLayer(),
-              Positioned.fill(
-                child:
-                    BlocBuilder<PlayerBackgroundCubit, PlayerBackgroundState>(
-                      builder: (context, bgState) {
-                        if (bgState.config.type ==
-                            PlayerBackgroundType.custom) {
-                          return const SizedBox.shrink();
-                        }
-                        if (widget.audio.artUri == null) {
-                          return const SizedBox.shrink();
-                        }
-                        return Stack(
-                          fit: StackFit.expand,
-                          children: [
-                            CachedNetworkImage(
-                              imageUrl: widget.audio.artUri!,
-                              fit: BoxFit.cover,
-                            ),
-                            ColoredBox(color: palette.artOverlay),
-                          ],
-                        );
-                      },
-                    ),
-              ),
               if (isLandscape)
                 _ExpandedPlayerLandscape(
                   state: widget.state,

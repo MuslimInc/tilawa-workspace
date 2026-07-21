@@ -46,18 +46,10 @@ bool _recitersRefreshNotificationPredicate(ScrollNotification notification) {
   return notification.depth == 0 || notification.depth == 2;
 }
 
-/// Positions the refresh spinner below the collapsible search row.
-double _recitersRefreshIndicatorEdgeOffset(BuildContext context) {
-  return TilawaAppBarConfig.catalogSearchRowHeight(context);
-}
-
-/// Alphabet rail top inset from [Scaffold.body] top (below the app bar).
-///
-/// Includes the collapsible search row so the rail keeps a stable screen
-/// position when the nested header scrolls away.
+/// Alphabet rail top inset from [Scaffold.body] top (below the pinned
+/// catalog app bar + search row).
 double _recitersLetterIndexTopInsetFromScaffoldBody(BuildContext context) {
-  final MeMuslimDesignTokens tokens = Theme.of(context).tokens;
-  return _recitersRefreshIndicatorEdgeOffset(context) + tokens.spaceSmall;
+  return Theme.of(context).tokens.spaceSmall;
 }
 
 /// Main-shell system back: collapse expanded player, focus the Home tab,
@@ -634,10 +626,6 @@ class _RecitersScreenState extends State<RecitersScreen> {
               final bool showLetterIndex = context.select<SettingsCubit, bool>(
                 (cubit) => cubit.state.showRecitersAlphabetIndex,
               );
-              final headerChrome = _RecitersHeaderChrome(
-                onOpenSearch: () => const RecitersSearchRoute().push(context),
-              );
-
               return ValueListenableBuilder<bool>(
                 valueListenable: _alphabetScrubbingNotifier,
                 builder: (context, notifierScrubbing, _) {
@@ -656,13 +644,10 @@ class _RecitersScreenState extends State<RecitersScreen> {
                           physics: alphabetScrubbing
                               ? const NeverScrollableScrollPhysics()
                               : null,
+                          // Search stays pinned in the app bar — empty outer
+                          // header keeps NestedScrollView for alphabet scrub.
                           headerSliverBuilder: (context, innerBoxIsScrolled) {
-                            return [
-                              _RecitersScrollingHeaderSliver(
-                                title: context.l10n.reciters,
-                                headerChrome: headerChrome,
-                              ),
-                            ];
+                            return const <Widget>[];
                           },
                           body: _RecitersSliverScreen(
                             pageStorageKey: const PageStorageKey<String>(
@@ -673,6 +658,7 @@ class _RecitersScreenState extends State<RecitersScreen> {
                             showLetterIndex: showLetterIndex,
                             scrollController: _allScrollController,
                             onClearAll: _clearAllFilters,
+                            onClearLetter: _clearLetterFilter,
                             alphabetScrubbing: alphabetScrubbing,
                             onLetterSelected: _onLetterSelected,
                             onAlphabetScrubStart: _onAlphabetScrubStart,
@@ -695,20 +681,29 @@ class _RecitersScreenState extends State<RecitersScreen> {
                       ? nestedScrollView
                       : RefreshIndicator.adaptive(
                           onRefresh: _refreshReciters,
-                          edgeOffset: _recitersRefreshIndicatorEdgeOffset(
-                            context,
-                          ),
                           notificationPredicate:
                               _recitersRefreshNotificationPredicate,
                           child: nestedScrollView,
                         );
 
                   return TilawaShellChildScaffold(
-                    appBar: TilawaCatalogAppBar.titleOnly(
+                    appBar: TilawaCatalogAppBar(
                       title: context.l10n.reciters,
                       showBottomHairline: false,
                       showElevationShadow: false,
+                      bottomContentHeight:
+                          TilawaAppBarConfig.catalogSearchRowHeight(context),
+                      bottomContent: TourTarget(
+                        targetId: RecitersTourTargets.searchField,
+                        child: RecitersCatalogSearchField.launcher(
+                          semanticsIdentifier:
+                              ReciterSemanticsIds.recitersSearchLauncher,
+                          onTap: () =>
+                              const RecitersSearchRoute().push(context),
+                        ),
+                      ),
                       actions: [
+                        const _RecitersFavoritesAction(),
                         _RecitersAlphabetIndexToggle(visible: showLetterIndex),
                       ],
                     ),
@@ -778,6 +773,23 @@ class _RecitersAlphabetIndexToggle extends StatelessWidget {
   }
 }
 
+/// One-tap path to saved reciters — avoids burying favorites in Home → More.
+class _RecitersFavoritesAction extends StatelessWidget {
+  const _RecitersFavoritesAction();
+
+  @override
+  Widget build(BuildContext context) {
+    return Semantics(
+      identifier: ReciterSemanticsIds.recitersViewFavorites,
+      child: TilawaIconActionButton(
+        icon: Icons.favorite_outline_rounded,
+        tooltip: context.l10n.favorites,
+        onTap: () => unawaited(const FavoritesRoute().push<void>(context)),
+      ),
+    );
+  }
+}
+
 class _RecitersStartupLitePane extends StatelessWidget {
   const _RecitersStartupLitePane();
 
@@ -822,6 +834,7 @@ class _RecitersSliverScreen extends StatelessWidget {
     required this.showLetterIndex,
     required this.scrollController,
     required this.onClearAll,
+    required this.onClearLetter,
     required this.alphabetScrubbing,
     required this.onLetterSelected,
     required this.onAlphabetScrubStart,
@@ -835,6 +848,7 @@ class _RecitersSliverScreen extends StatelessWidget {
   final bool showLetterIndex;
   final ScrollController scrollController;
   final VoidCallback onClearAll;
+  final VoidCallback onClearLetter;
   final bool alphabetScrubbing;
   final ValueChanged<String?> onLetterSelected;
   final VoidCallback onAlphabetScrubStart;
@@ -869,6 +883,7 @@ class _RecitersSliverScreen extends StatelessWidget {
           reserveScrollbarSpace: showLetterIndexRail,
           reserveScrollbarOnLeading: isRtl,
           onClearAll: onClearAll,
+          onClearLetter: onClearLetter,
           onRetry: onRetry,
         ),
       ],
@@ -976,6 +991,7 @@ class _RecitersResultSection extends StatelessWidget {
     required this.reserveScrollbarSpace,
     required this.reserveScrollbarOnLeading,
     required this.onClearAll,
+    required this.onClearLetter,
     required this.onRetry,
   });
 
@@ -984,6 +1000,7 @@ class _RecitersResultSection extends StatelessWidget {
   final bool reserveScrollbarSpace;
   final bool reserveScrollbarOnLeading;
   final VoidCallback onClearAll;
+  final VoidCallback onClearLetter;
   final Future<void> Function() onRetry;
 
   @override
@@ -1020,12 +1037,14 @@ class _RecitersResultSection extends StatelessWidget {
           state: loadedState,
           reserveScrollbarSpace: reserveScrollbarSpace,
           reserveScrollbarOnLeading: reserveScrollbarOnLeading,
+          onClearLetter: onClearLetter,
         );
       }
       return _ReciterGridSliver(
         state: loadedState,
         reserveScrollbarSpace: reserveScrollbarSpace,
         reserveScrollbarOnLeading: reserveScrollbarOnLeading,
+        onClearLetter: onClearLetter,
       );
     }
 
@@ -1105,25 +1124,33 @@ class _RecitersEmptyStateContent extends StatelessWidget {
   Widget build(BuildContext context) {
     final ThemeData theme = Theme.of(context);
     final MeMuslimDesignTokens tokens = theme.tokens;
+    final String? selectedLetter = state.selectedLetter;
     final bool showClearAll = _hasActiveFilters(state);
     final String title = context.l10n.noRecitersFound;
+    final String? subtitle = selectedLetter == null
+        ? null
+        : context.l10n.recitersFilterChipLetter(selectedLetter);
     const IconData icon = Icons.person_off_outlined;
 
     final Widget? primaryAction = showClearAll
-        ? TilawaButton(
-            text: context.l10n.clearAll,
-            variant: TilawaButtonVariant.outline,
-            leadingIcon: Icon(
-              Icons.clear_all_rounded,
-              size: tokens.iconSizeSmall,
+        ? Semantics(
+            identifier: ReciterSemanticsIds.recitersClearAllFilters,
+            child: TilawaButton(
+              text: context.l10n.clearAll,
+              variant: TilawaButtonVariant.outline,
+              leadingIcon: Icon(
+                Icons.clear_all_rounded,
+                size: tokens.iconSizeSmall,
+              ),
+              onPressed: onClearAll,
             ),
-            onPressed: onClearAll,
           )
         : null;
 
     return TilawaIllustratedState(
       icon: icon,
       title: title,
+      subtitle: subtitle,
       semanticLabel: title,
       primaryAction: primaryAction,
     );
@@ -1132,46 +1159,6 @@ class _RecitersEmptyStateContent extends StatelessWidget {
 
 Alignment _recitersEmptyContentAlignment(BuildContext context) {
   return const Alignment(0, -0.2);
-}
-
-class _RecitersHeaderChrome {
-  const _RecitersHeaderChrome({
-    required this.onOpenSearch,
-  });
-
-  final VoidCallback onOpenSearch;
-}
-
-class _RecitersScrollingHeaderSliver extends StatelessWidget {
-  const _RecitersScrollingHeaderSliver({
-    required this.title,
-    required this.headerChrome,
-  });
-
-  final String title;
-  final _RecitersHeaderChrome headerChrome;
-
-  @override
-  Widget build(BuildContext context) {
-    final ThemeData theme = Theme.of(context);
-    final MeMuslimDesignTokens tokens = theme.tokens;
-
-    return SliverToBoxAdapter(
-      child: ColoredBox(
-        color: theme.colorScheme.surface,
-        child: Padding(
-          padding: TilawaAppBarConfig.catalogChromePadding(tokens),
-          child: TourTarget(
-            targetId: RecitersTourTargets.searchField,
-            child: RecitersCatalogSearchField.launcher(
-              semanticsIdentifier: ReciterSemanticsIds.recitersSearchLauncher,
-              onTap: headerChrome.onOpenSearch,
-            ),
-          ),
-        ),
-      ),
-    );
-  }
 }
 
 class _RecitersAmbientBackground extends StatelessWidget {
@@ -1310,11 +1297,13 @@ class _ReciterListSliver extends StatelessWidget {
     required this.state,
     required this.reserveScrollbarSpace,
     required this.reserveScrollbarOnLeading,
+    required this.onClearLetter,
   });
 
   final RecitersLoaded state;
   final bool reserveScrollbarSpace;
   final bool reserveScrollbarOnLeading;
+  final VoidCallback onClearLetter;
 
   @override
   Widget build(BuildContext context) {
@@ -1341,7 +1330,11 @@ class _ReciterListSliver extends StatelessWidget {
           sliver: SliverMainAxisGroup(
             slivers: [
               if (showResultSummary)
-                _RecitersResultSummarySliver(count: reciterCount),
+                _RecitersActiveFiltersSliver(
+                  letter: state.selectedLetter!,
+                  count: reciterCount,
+                  onClearLetter: onClearLetter,
+                ),
               SliverList.builder(
                 itemCount: itemCount,
                 itemBuilder: (context, index) {
@@ -1376,32 +1369,60 @@ bool _shouldShowRecitersResultSummary(RecitersLoaded state) {
   return state.selectedLetter != null;
 }
 
-class _RecitersResultSummarySliver extends StatelessWidget {
-  const _RecitersResultSummarySliver({required this.count});
+/// Visible letter filter with one-tap clear — avoids re-scrubbing the rail.
+class _RecitersActiveFiltersSliver extends StatelessWidget {
+  const _RecitersActiveFiltersSliver({
+    required this.letter,
+    required this.count,
+    required this.onClearLetter,
+  });
 
+  final String letter;
   final int count;
+  final VoidCallback onClearLetter;
 
   @override
   Widget build(BuildContext context) {
-    final theme = Theme.of(context);
-    final tokens = theme.tokens;
+    final ThemeData theme = Theme.of(context);
+    final MeMuslimDesignTokens tokens = theme.tokens;
+    final ColorScheme colorScheme = theme.colorScheme;
+    final String chipLabel = context.l10n.recitersFilterChipLetter(letter);
     final String summary = context.l10n.recitersResultCount(count);
 
     return SliverToBoxAdapter(
       child: Padding(
         padding: EdgeInsets.only(bottom: tokens.spaceSmall),
-        child: Align(
-          alignment: AlignmentDirectional.centerStart,
-          child: Text(
-            summary,
-            maxLines: 1,
-            overflow: TextOverflow.ellipsis,
-            textAlign: TextAlign.start,
-            style: theme.textTheme.labelLarge?.copyWith(
-              color: theme.colorScheme.onSurfaceVariant,
-              fontWeight: FontWeight.w500,
+        child: Row(
+          children: [
+            Flexible(
+              child: Align(
+                alignment: AlignmentDirectional.centerStart,
+                widthFactor: 1,
+                child: Semantics(
+                  identifier: ReciterSemanticsIds.recitersLetterFilterChip,
+                  child: TilawaChip(
+                    label: chipLabel,
+                    icon: Icons.close_rounded,
+                    semanticsSelected: true,
+                    onTap: onClearLetter,
+                    backgroundColor: colorScheme.surfaceContainerHigh,
+                    foregroundColor: colorScheme.onSurface,
+                  ),
+                ),
+              ),
             ),
-          ),
+            SizedBox(width: tokens.spaceSmall),
+            Text(
+              summary,
+              maxLines: 1,
+              overflow: TextOverflow.ellipsis,
+              textAlign: TextAlign.end,
+              style: theme.textTheme.labelLarge?.copyWith(
+                color: colorScheme.onSurfaceVariant,
+                fontWeight: FontWeight.w500,
+              ),
+            ),
+          ],
         ),
       ),
     );
@@ -1413,11 +1434,13 @@ class _ReciterGridSliver extends StatelessWidget {
     required this.state,
     required this.reserveScrollbarSpace,
     required this.reserveScrollbarOnLeading,
+    required this.onClearLetter,
   });
 
   final RecitersLoaded state;
   final bool reserveScrollbarSpace;
   final bool reserveScrollbarOnLeading;
+  final VoidCallback onClearLetter;
 
   @override
   Widget build(BuildContext context) {
@@ -1426,20 +1449,14 @@ class _ReciterGridSliver extends StatelessWidget {
     final tokens = theme.tokens;
     final double crossAxisSpacing = tokens.spaceSmall + tokens.spaceTiny;
     final double mainAxisSpacing = tokens.spaceSmall + tokens.spaceTiny;
-    // Tile height must fit [ReciterCard]'s text block: a two-line name
-    // (titleMedium, height 1.2) over a two-line moshaf label (bodySmall,
-    // height 1.35) — multi-column layouts wrap both — plus card padding.
+    // Tile height fits name-only [ReciterCard] (two-line titleMedium) +
+    // card padding — moshaf metadata lives on the details screen.
     final TextScaler textScaler = MediaQuery.textScalerOf(context);
     final TextTheme textTheme = theme.textTheme;
     final double nameBlockHeight =
         2 * textScaler.scale((textTheme.titleMedium?.fontSize ?? 16) * 1.2);
-    final double moshafBlockHeight =
-        2 * textScaler.scale((textTheme.bodySmall?.fontSize ?? 12) * 1.35);
     final double targetItemHeight =
-        nameBlockHeight +
-        moshafBlockHeight +
-        tokens.spaceExtraSmall +
-        2 * tokens.spaceLarge;
+        nameBlockHeight + 2 * tokens.spaceMedium;
 
     return SliverLayoutBuilder(
       builder: (context, constraints) {
@@ -1459,8 +1476,10 @@ class _ReciterGridSliver extends StatelessWidget {
           sliver: SliverMainAxisGroup(
             slivers: [
               if (showResultSummary)
-                _RecitersResultSummarySliver(
+                _RecitersActiveFiltersSliver(
+                  letter: state.selectedLetter!,
                   count: state.filteredReciters.length,
+                  onClearLetter: onClearLetter,
                 ),
               SliverGrid.builder(
                 gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(

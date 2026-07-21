@@ -56,8 +56,16 @@ void main() {
         findsNothing,
       );
       expect(
+        find.bySemanticsIdentifier(ReciterSemanticsIds.recitersViewFavorites),
+        findsOneWidget,
+      );
+      expect(
         find.bySemanticsIdentifier(ReciterSemanticsIds.recitersViewDownloads),
         findsNothing,
+      );
+      expect(
+        find.bySemanticsIdentifier(ReciterSemanticsIds.recitersSearchLauncher),
+        findsOneWidget,
       );
       expect(tester.takeException(), isNull);
     });
@@ -235,6 +243,47 @@ void main() {
 
       expect(find.byType(SliverGrid), findsNothing);
       expect(find.byType(SliverList), findsWidgets);
+      expect(tester.takeException(), isNull);
+    });
+
+    
+
+    testWidgets('letter filter shows dismissible chip that clears filter', (
+      tester,
+    ) async {
+      await recitersBloc.close();
+      recitersBloc = loadedRecitersBloc(
+        selectedLetter: 'A',
+        filteredReciters: [kRecitersTestReciters.first],
+      );
+
+      await tester.pumpWidget(
+        buildRecitersScreenTestApp(
+          recitersBloc: recitersBloc,
+          favoritesCubit: favoritesCubit,
+        ),
+      );
+      await pumpRecitersScreen(tester);
+
+      expect(
+        find.bySemanticsIdentifier(ReciterSemanticsIds.recitersLetterFilterChip),
+        findsOneWidget,
+      );
+      expect(find.textContaining('Starts with'), findsOneWidget);
+
+      await tester.tap(
+        find.bySemanticsIdentifier(ReciterSemanticsIds.recitersLetterFilterChip),
+      );
+      await tester.pumpAndSettle();
+
+      expect(
+        recitersBloc.state,
+        isA<RecitersLoaded>().having(
+          (RecitersLoaded s) => s.selectedLetter,
+          'selectedLetter',
+          isNull,
+        ),
+      );
       expect(tester.takeException(), isNull);
     });
 

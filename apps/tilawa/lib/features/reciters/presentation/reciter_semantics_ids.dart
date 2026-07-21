@@ -35,6 +35,9 @@ abstract final class ReciterSemanticsIds {
   /// Heart / favourites filter toggle button in the Reciters screen header.
   static const String recitersFavoritesToggle = 'reciters_favorites_toggle';
 
+  /// Opens the Favorites screen from the Reciters catalog app bar.
+  static const String recitersViewFavorites = 'reciters_view_favorites';
+
   /// Letter-index toggle in the Reciters screen header bar.
   static const String recitersLetterIndexToggle =
       'reciters_letter_index_toggle';
