@@ -346,7 +346,11 @@ class _HomeLearningNextSessionCardState
             width: double.infinity,
             child: TilawaButton(
               text: context.quranSessionsL10n.joinSessionNow,
-              variant: TilawaButtonVariant.primary,
+              // Filled primary only while live — otherwise tonal so prayer
+              // remains the sole filled accent on Home.
+              variant: isLive
+                  ? TilawaButtonVariant.primary
+                  : TilawaButtonVariant.secondary,
               leadingIcon: const Icon(Icons.video_call_rounded),
               onPressed: () {
                 logHomeLearnQuranCardAction(
@@ -561,7 +565,7 @@ class HomeLearningRevisionCard extends StatelessWidget {
             width: double.infinity,
             child: TilawaButton(
               text: context.quranSessionsL10n.sessionRevisionPracticeAction,
-              variant: TilawaButtonVariant.primary,
+              variant: TilawaButtonVariant.secondary,
               leadingIcon: Icon(
                 Icons.menu_book_rounded,
                 size: tokens.iconSizeMedium,

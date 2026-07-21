@@ -81,10 +81,15 @@ class _QuranPrimaryTile extends StatelessWidget {
       color: accent,
     );
     final String label = context.l10n.homeQuickQuranReader;
+    final Color wash = HomeFeaturePastel.ceremonialWash(
+      accent: accent,
+      colorScheme: Theme.of(context).colorScheme,
+    );
 
     if (cubit == null) {
       return HomePrimaryActionTile(
         accent: accent,
+        surfaceColor: wash,
         icon: icon,
         label: label,
         onTap: () => const QuranLastReadRoute().push<void>(context),
@@ -100,6 +105,7 @@ class _QuranPrimaryTile extends StatelessWidget {
       builder: (context, state) {
         return HomePrimaryActionTile(
           accent: accent,
+          surfaceColor: wash,
           icon: icon,
           label: label,
           subtitle: _quranResumeSubtitle(context, state),
