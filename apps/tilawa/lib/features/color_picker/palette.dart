@@ -7,6 +7,7 @@ import 'dart:math';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:tilawa_ui_kit/tilawa_ui_kit.dart';
 
 import 'utils.dart';
 
@@ -1010,18 +1011,15 @@ class _ColorPickerLabelState extends State<ColorPickerLabel> {
     return Row(
       mainAxisAlignment: MainAxisAlignment.center,
       children: <Widget>[
-        DropdownButton(
+        TilawaDropdownField<ColorLabelType>(
           value: _colorType,
-          onChanged: (ColorLabelType? type) {
-            if (type != null) {
-              setState(() => _colorType = type);
-            }
-          },
-          items: [
+          shrinkWrapWidth: true,
+          onChanged: (type) => setState(() => _colorType = type),
+          items: <TilawaDropdownItem<ColorLabelType>>[
             for (final ColorLabelType type in widget.colorLabelTypes)
-              DropdownMenuItem(
+              TilawaDropdownItem(
                 value: type,
-                child: Text(type.toString().split('.').last.toUpperCase()),
+                label: type.toString().split('.').last.toUpperCase(),
               ),
           ],
         ),
@@ -1080,18 +1078,14 @@ class _ColorPickerInputState extends State<ColorPickerInput> {
           SizedBox(
             width:
                 (Theme.of(context).textTheme.bodyMedium?.fontSize ?? 14) * 10,
-            child: TextField(
+            child: TilawaTextField(
               enabled: !widget.disable,
               controller: textEditingController,
               inputFormatters: [
                 UpperCaseTextFormatter(),
                 FilteringTextInputFormatter.allow(RegExp(kValidHexPattern)),
               ],
-              decoration: InputDecoration(
-                isDense: true,
-                label: widget.embeddedText ? const Text('Hex') : null,
-                contentPadding: const EdgeInsets.symmetric(vertical: 5),
-              ),
+              label: widget.embeddedText ? 'Hex' : null,
               onChanged: (String value) {
                 var input = value;
                 if (value.length == 9) {

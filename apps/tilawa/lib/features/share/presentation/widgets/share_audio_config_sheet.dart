@@ -633,51 +633,15 @@ class _VerseDropdown extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final clampedValue = value.clamp(min, max);
-    final tokens = Theme.of(context).tokens;
-    final fieldRadius = _shareComposerChromeRadius(tokens);
-
-    return DropdownButtonFormField<int>(
-      initialValue: clampedValue,
-      onChanged: enabled ? (value) => onChanged(value!) : null,
-      iconEnabledColor: AppShareComposerColors.deepGreen,
-      dropdownColor: AppShareComposerColors.cream,
-      decoration: InputDecoration(
-        labelText: label,
-        filled: true,
-        fillColor: AppShareComposerColors.cream,
-        labelStyle: const TextStyle(
-          color: AppShareComposerColors.deepGreen,
-          fontWeight: FontWeight.w600,
-        ),
-        contentPadding: const EdgeInsets.symmetric(
-          horizontal: 16,
-          vertical: 14,
-        ),
-        enabledBorder: OutlineInputBorder(
-          borderRadius: fieldRadius,
-          borderSide: BorderSide(
-            color: AppShareComposerColors.deepGreen.withValues(alpha: 0.08),
-          ),
-        ),
-        disabledBorder: OutlineInputBorder(
-          borderRadius: fieldRadius,
-          borderSide: BorderSide(
-            color: AppShareComposerColors.deepGreen.withValues(alpha: 0.04),
-          ),
-        ),
-        focusedBorder: OutlineInputBorder(
-          borderRadius: fieldRadius,
-          borderSide: const BorderSide(color: AppShareComposerColors.gold),
-        ),
-      ),
-      style: Theme.of(context).textTheme.titleSmall?.copyWith(
-        color: AppShareComposerColors.deepGreen,
-        fontWeight: FontWeight.w700,
-      ),
-      items: List.generate(max - min + 1, (index) {
-        final current = min + index;
-        return DropdownMenuItem<int>(value: current, child: Text('$current'));
-      }),
+    return TilawaDropdownField<int>(
+      value: clampedValue,
+      labelText: label,
+      enabled: enabled,
+      onChanged: enabled ? onChanged : null,
+      items: [
+        for (int current = min; current <= max; current++)
+          TilawaDropdownItem(value: current, label: '$current'),
+      ],
     );
   }
 }

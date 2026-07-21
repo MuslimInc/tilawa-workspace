@@ -165,7 +165,7 @@ void main() {
       expect(find.text('V'), findsWidgets);
 
       // Find dropdown and tap to switch
-      final Finder dropdown = find.byType(DropdownButton<ColorLabelType>);
+      final Finder dropdown = find.text('HSV');
       expect(dropdown, findsOneWidget);
 
       await tester.tap(dropdown);

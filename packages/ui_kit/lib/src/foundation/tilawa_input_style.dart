@@ -225,7 +225,7 @@ class TilawaInputStyle {
       borderRadius: effectiveRadius,
       border: Border.all(
         color: borderColor,
-        width: hasError ? tokens.focusRingWidth : 1,
+        width: hasError ? tokens.focusRingWidth : tokens.borderWidthThin,
       ),
       boxShadow: showShadow
           ? [
@@ -270,6 +270,8 @@ class TilawaInputStyle {
   }
 
   EdgeInsetsGeometry get searchContentPadding => searchTokens!.contentPadding;
+
+  EdgeInsets get formScrollPadding => EdgeInsets.all(tokens.spaceLarge);
 
   EdgeInsets get searchScrollPadding => searchTokens!.scrollPadding;
 }
