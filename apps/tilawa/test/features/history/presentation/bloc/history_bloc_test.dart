@@ -3,6 +3,7 @@ import 'package:dartz_plus/dartz_plus.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:mocktail/mocktail.dart';
 import 'package:tilawa/features/history/domain/entities/history_entity.dart';
+import 'package:tilawa/features/history/domain/usecases/add_or_update_history_use_case.dart';
 import 'package:tilawa/features/history/domain/usecases/clear_all_history_use_case.dart';
 import 'package:tilawa/features/history/domain/usecases/delete_history_use_case.dart';
 import 'package:tilawa/features/history/domain/usecases/get_all_history_use_case.dart';
@@ -18,6 +19,9 @@ class MockGetRecentHistoryUseCase extends Mock
 
 class MockDeleteHistoryUseCase extends Mock implements DeleteHistoryUseCase {}
 
+class MockAddOrUpdateHistoryUseCase extends Mock
+    implements AddOrUpdateHistoryUseCase {}
+
 class MockClearAllHistoryUseCase extends Mock
     implements ClearAllHistoryUseCase {}
 
@@ -28,6 +32,7 @@ void main() {
   late MockGetAllHistoryUseCase mockGetAllHistoryUseCase;
   late MockGetRecentHistoryUseCase mockGetRecentHistoryUseCase;
   late MockDeleteHistoryUseCase mockDeleteHistoryUseCase;
+  late MockAddOrUpdateHistoryUseCase mockAddOrUpdateHistoryUseCase;
   late MockClearAllHistoryUseCase mockClearAllHistoryUseCase;
   late MockSearchHistoryUseCase mockSearchHistoryUseCase;
 
@@ -35,6 +40,7 @@ void main() {
     mockGetAllHistoryUseCase = MockGetAllHistoryUseCase();
     mockGetRecentHistoryUseCase = MockGetRecentHistoryUseCase();
     mockDeleteHistoryUseCase = MockDeleteHistoryUseCase();
+    mockAddOrUpdateHistoryUseCase = MockAddOrUpdateHistoryUseCase();
     mockClearAllHistoryUseCase = MockClearAllHistoryUseCase();
     mockSearchHistoryUseCase = MockSearchHistoryUseCase();
 
@@ -42,6 +48,7 @@ void main() {
       mockGetAllHistoryUseCase,
       mockGetRecentHistoryUseCase,
       mockDeleteHistoryUseCase,
+      mockAddOrUpdateHistoryUseCase,
       mockClearAllHistoryUseCase,
       mockSearchHistoryUseCase,
     );
@@ -183,6 +190,43 @@ void main() {
           historyList: [],
           filteredList: [],
           totalListeningTimeMs: 0,
+        ),
+      ],
+    );
+
+    blocTest<HistoryBloc, HistoryState>(
+      'reloads history when RestoreHistory is added',
+      seed: () => const HistoryState(status: HistoryStatus.empty),
+      build: () {
+        when(
+          () => mockAddOrUpdateHistoryUseCase.call(
+            surahId: any(named: 'surahId'),
+            surahName: any(named: 'surahName'),
+            surahNameEn: any(named: 'surahNameEn'),
+            reciterId: any(named: 'reciterId'),
+            reciterName: any(named: 'reciterName'),
+            moshafId: any(named: 'moshafId'),
+            moshafName: any(named: 'moshafName'),
+            lastPositionMs: any(named: 'lastPositionMs'),
+            durationMs: any(named: 'durationMs'),
+            audioUrl: any(named: 'audioUrl'),
+            artworkUrl: any(named: 'artworkUrl'),
+            completed: any(named: 'completed'),
+          ),
+        ).thenAnswer((_) async => Right(tHistoryEntity));
+        when(
+          () => mockGetAllHistoryUseCase.call(),
+        ).thenAnswer((_) async => Right([tHistoryEntity]));
+        return bloc;
+      },
+      act: (bloc) => bloc.add(HistoryEvent.restoreHistory(tHistoryEntity)),
+      expect: () => [
+        const HistoryState(status: HistoryStatus.loading),
+        HistoryState(
+          status: HistoryStatus.loaded,
+          historyList: [tHistoryEntity],
+          filteredList: [tHistoryEntity],
+          totalListeningTimeMs: 1000,
         ),
       ],
     );

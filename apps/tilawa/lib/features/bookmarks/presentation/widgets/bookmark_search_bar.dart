@@ -40,6 +40,7 @@ class _BookmarkSearchBarState extends State<BookmarkSearchBar> {
       hintText: context.l10n.searchBookmarks,
       prefixIcon: FluentIcons.search_24_regular,
       clearIcon: FluentIcons.dismiss_24_regular,
+      clearButtonTooltip: context.l10n.a11yClearSearch,
       onChanged: widget.onSearchChanged,
       onClear: () {
         _controller.clear();

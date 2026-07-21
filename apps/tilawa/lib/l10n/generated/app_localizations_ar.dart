@@ -964,6 +964,9 @@ class AppLocalizationsAr extends AppLocalizations {
   String get a11yClearRecitersSearch => 'مسح نص البحث';
 
   @override
+  String get a11yClearSearch => 'مسح نص البحث';
+
+  @override
   String get filteredByLetter => 'مفلتر بالحرف:';
 
   @override

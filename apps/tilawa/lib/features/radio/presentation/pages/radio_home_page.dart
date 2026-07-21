@@ -32,19 +32,35 @@ class _RadioHomePageState extends State<RadioHomePage> {
   Widget build(BuildContext context) {
     final tokens = context.tokens;
     final l10n = context.l10n;
+    final double keyboardInset = context.keyboardInset;
 
     return TilawaShellChildScaffold(
-      appBar: TilawaAppBar(
+      appBar: TilawaCatalogAppBar(
         title: l10n.radioTitle,
         actions: [
-          IconButton(
+          TilawaIconActionButton(
+            icon: Icons.refresh_rounded,
             tooltip: l10n.retry,
-            onPressed: () => context.read<RadioCubit>().refresh(
+            onTap: () => context.read<RadioCubit>().refresh(
               language: RadioPlaybackActions.apiLanguage(context),
             ),
-            icon: const Icon(Icons.refresh_rounded),
           ),
         ],
+        bottomContentHeight: TilawaAppBarConfig.catalogSearchRowHeight(context),
+        bottomContent: TilawaSearchField(
+          controller: _searchController,
+          hintText: l10n.radioSearchHint,
+          clearButtonTooltip: l10n.a11yClearSearch,
+          showShadow: false,
+          scrollPadding: EdgeInsets.only(
+            bottom: keyboardInset + tokens.spaceLarge,
+          ),
+          onChanged: context.read<RadioCubit>().search,
+          onClear: () {
+            _searchController.clear();
+            context.read<RadioCubit>().search('');
+          },
+        ),
       ),
       body: BlocBuilder<RadioCubit, RadioState>(
         builder: (context, state) {
@@ -76,6 +92,8 @@ class _RadioHomePageState extends State<RadioHomePage> {
                 language: RadioPlaybackActions.apiLanguage(context),
               ),
               child: CustomScrollView(
+                keyboardDismissBehavior:
+                    ScrollViewKeyboardDismissBehavior.onDrag,
                 slivers: [
                   if (state.isOffline)
                     SliverToBoxAdapter(
@@ -112,32 +130,22 @@ class _RadioHomePageState extends State<RadioHomePage> {
                           ),
                         if (state.featured != null && !state.hasSearch)
                           SizedBox(height: tokens.spaceLarge),
-                        TilawaSearchField(
-                          controller: _searchController,
-                          hintText: l10n.radioSearchHint,
-                          onChanged: context.read<RadioCubit>().search,
-                          onClear: () {
-                            _searchController.clear();
-                            context.read<RadioCubit>().search('');
-                          },
-                        ),
                         if (!state.hasSearch && state.favorites.isNotEmpty) ...[
-                          SizedBox(height: tokens.spaceLarge),
                           _SectionTitle(title: l10n.radioFavorites),
                           SizedBox(height: tokens.spaceSmall),
                           _HorizontalStations(
                             stations: state.favorites,
                           ),
+                          SizedBox(height: tokens.spaceLarge),
                         ],
                         if (!state.hasSearch && state.recent.isNotEmpty) ...[
-                          SizedBox(height: tokens.spaceLarge),
                           _SectionTitle(title: l10n.radioRecentlyPlayed),
                           SizedBox(height: tokens.spaceSmall),
                           _HorizontalStations(
                             stations: state.recent,
                           ),
+                          SizedBox(height: tokens.spaceLarge),
                         ],
-                        SizedBox(height: tokens.spaceLarge),
                         _SectionTitle(
                           title: state.hasSearch
                               ? l10n.radioSearchResults
@@ -260,60 +268,70 @@ class _FeaturedStation extends StatelessWidget {
     final tokens = context.tokens;
     final theme = Theme.of(context);
     final product = theme.productColors;
-    return TilawaCard(
-      onTap: () => RadioPlaybackActions.openFullPlayer(context, station),
-      child: Container(
-        decoration: BoxDecoration(
-          gradient: LinearGradient(
-            colors: [
-              product.featuredGradientStart,
-              product.featuredGradientEnd,
-            ],
-          ),
-          borderRadius: BorderRadius.circular(tokens.radiusLarge),
-        ),
-        padding: EdgeInsets.all(tokens.spaceMedium),
-        child: Row(
-          children: [
-            RadioStationArtwork(
-              stationId: station.id,
-              size: 88,
-            ),
-            SizedBox(width: tokens.spaceMedium),
-            Expanded(
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
+    // Play is a sibling of TilawaCard so it does not conflict with card onTap.
+    return Row(
+      crossAxisAlignment: CrossAxisAlignment.center,
+      children: [
+        Expanded(
+          child: TilawaCard(
+            onTap: () => RadioPlaybackActions.openFullPlayer(context, station),
+            child: Container(
+              decoration: BoxDecoration(
+                gradient: LinearGradient(
+                  colors: [
+                    product.featuredGradientStart,
+                    product.featuredGradientEnd,
+                  ],
+                ),
+                borderRadius: BorderRadius.circular(tokens.radiusLarge),
+              ),
+              padding: EdgeInsets.all(tokens.spaceMedium),
+              child: Row(
                 children: [
-                  Text(
-                    context.l10n.radioFeatured,
-                    style: theme.textTheme.labelMedium?.copyWith(
-                      color: product.featuredGradientForeground.withValues(
-                        alpha: 0.85,
-                      ),
+                  RadioStationArtwork(
+                    stationId: station.id,
+                    size: 88,
+                  ),
+                  SizedBox(width: tokens.spaceMedium),
+                  Expanded(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          context.l10n.radioFeatured,
+                          style: theme.textTheme.labelMedium?.copyWith(
+                            color: product.featuredGradientForeground
+                                .withValues(
+                                  alpha: 0.85,
+                                ),
+                          ),
+                        ),
+                        SizedBox(height: tokens.spaceExtraSmall),
+                        Text(
+                          station.name,
+                          maxLines: 2,
+                          overflow: TextOverflow.ellipsis,
+                          style: theme.textTheme.titleMedium?.copyWith(
+                            color: product.featuredGradientForeground,
+                            fontWeight: FontWeight.w700,
+                          ),
+                        ),
+                        SizedBox(height: tokens.spaceSmall),
+                        const RadioLiveBadge(),
+                      ],
                     ),
                   ),
-                  SizedBox(height: tokens.spaceExtraSmall),
-                  Text(
-                    station.name,
-                    maxLines: 2,
-                    overflow: TextOverflow.ellipsis,
-                    style: theme.textTheme.titleMedium?.copyWith(
-                      color: product.featuredGradientForeground,
-                      fontWeight: FontWeight.w700,
-                    ),
-                  ),
-                  SizedBox(height: tokens.spaceSmall),
-                  const RadioLiveBadge(),
                 ],
               ),
             ),
-            TilawaButton(
-              onPressed: () => RadioPlaybackActions.play(context, station),
-              text: context.l10n.play,
-            ),
-          ],
+          ),
         ),
-      ),
+        SizedBox(width: tokens.spaceSmall),
+        TilawaButton(
+          onPressed: () => RadioPlaybackActions.play(context, station),
+          text: context.l10n.play,
+        ),
+      ],
     );
   }
 }

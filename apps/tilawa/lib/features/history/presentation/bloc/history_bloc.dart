@@ -18,6 +18,8 @@ class HistoryEvent with _$HistoryEvent {
   const factory HistoryEvent.searchHistory(String query) = _SearchHistory;
   const factory HistoryEvent.clearSearch() = _ClearSearch;
   const factory HistoryEvent.deleteHistory(String id) = _DeleteHistory;
+  const factory HistoryEvent.restoreHistory(HistoryEntity history) =
+      _RestoreHistory;
   const factory HistoryEvent.clearAllHistory() = _ClearAllHistory;
   const factory HistoryEvent.refreshHistory() = _RefreshHistory;
 }
@@ -43,6 +45,7 @@ class HistoryBloc extends Bloc<HistoryEvent, HistoryState> {
     this._getAllHistoryUseCase,
     this._getRecentHistoryUseCase,
     this._deleteHistoryUseCase,
+    this._addOrUpdateHistoryUseCase,
     this._clearAllHistoryUseCase,
     this._searchHistoryUseCase,
   ) : super(const HistoryState()) {
@@ -51,6 +54,7 @@ class HistoryBloc extends Bloc<HistoryEvent, HistoryState> {
     on<_SearchHistory>(_onSearchHistory);
     on<_ClearSearch>(_onClearSearch);
     on<_DeleteHistory>(_onDeleteHistory);
+    on<_RestoreHistory>(_onRestoreHistory);
     on<_ClearAllHistory>(_onClearAllHistory);
     on<_RefreshHistory>(_onRefreshHistory);
   }
@@ -58,6 +62,7 @@ class HistoryBloc extends Bloc<HistoryEvent, HistoryState> {
   final GetAllHistoryUseCase _getAllHistoryUseCase;
   final GetRecentHistoryUseCase _getRecentHistoryUseCase;
   final DeleteHistoryUseCase _deleteHistoryUseCase;
+  final AddOrUpdateHistoryUseCase _addOrUpdateHistoryUseCase;
   final ClearAllHistoryUseCase _clearAllHistoryUseCase;
   final SearchHistoryUseCase _searchHistoryUseCase;
 
@@ -200,6 +205,37 @@ class HistoryBloc extends Bloc<HistoryEvent, HistoryState> {
             totalListeningTimeMs: totalTime,
           ),
         );
+      },
+    );
+  }
+
+  Future<void> _onRestoreHistory(
+    _RestoreHistory event,
+    Emitter<HistoryState> emit,
+  ) async {
+    final HistoryEntity history = event.history;
+    final Either<Failure, HistoryEntity> result =
+        await _addOrUpdateHistoryUseCase.call(
+          surahId: history.surahId,
+          surahName: history.surahName,
+          surahNameEn: history.surahNameEn,
+          reciterId: history.reciterId,
+          reciterName: history.reciterName,
+          moshafId: history.moshafId,
+          moshafName: history.moshafName,
+          lastPositionMs: history.lastPositionMs,
+          durationMs: history.durationMs,
+          audioUrl: history.audioUrl,
+          artworkUrl: history.artworkUrl,
+          completed: history.completed,
+        );
+
+    result.fold(
+      (failure) =>
+          emit(state.copyWith(status: HistoryStatus.error, failure: failure)),
+      (_) {
+        // Reload so sorting / ids match the data source after undo.
+        add(const HistoryEvent.loadAllHistory());
       },
     );
   }

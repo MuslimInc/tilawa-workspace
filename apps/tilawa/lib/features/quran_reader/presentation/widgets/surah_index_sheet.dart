@@ -243,6 +243,7 @@ class _IndexSearchBar extends StatelessWidget {
         focusNode: focusNode,
         hintText: l10n.searchSurah,
         textInputAction: TextInputAction.search,
+        clearButtonTooltip: l10n.a11yClearSearch,
         scrollPadding: EdgeInsets.only(bottom: keyboardInset + 24),
         onChanged: onChanged,
         onClear: onClear,

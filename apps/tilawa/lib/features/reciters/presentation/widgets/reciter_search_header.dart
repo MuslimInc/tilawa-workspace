@@ -46,6 +46,7 @@ class ReciterDetailsSearchBar extends StatelessWidget {
                 hintText: context.l10n.searchSurah,
                 prefixIcon: FluentIcons.search_24_regular,
                 clearIcon: FluentIcons.dismiss_24_regular,
+                clearButtonTooltip: context.l10n.a11yClearSearch,
                 showShadow: false,
                 // Pinned in [SliverAppBar.bottom]; shell already insets for
                 // keyboard — default scrollPadding scrolls the surah list away.

@@ -1663,6 +1663,12 @@ abstract class AppLocalizations {
   /// **'Clear search text'**
   String get a11yClearRecitersSearch;
 
+  /// Tooltip for clearing a search field
+  ///
+  /// In en, this message translates to:
+  /// **'Clear search text'**
+  String get a11yClearSearch;
+
   /// Filtered by letter indicator
   ///
   /// In en, this message translates to:

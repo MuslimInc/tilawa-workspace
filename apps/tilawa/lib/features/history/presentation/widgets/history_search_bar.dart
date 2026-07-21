@@ -24,6 +24,7 @@ class HistorySearchBar extends StatelessWidget {
       hintText: context.l10n.searchHistory,
       onChanged: onChanged,
       onClear: onClear,
+      clearButtonTooltip: context.l10n.a11yClearSearch,
       showShadow: false,
       scrollPadding: scrollPadding,
     );

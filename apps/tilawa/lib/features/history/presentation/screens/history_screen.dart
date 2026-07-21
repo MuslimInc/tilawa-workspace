@@ -254,16 +254,7 @@ class _HistoryScreenState extends State<HistoryScreen> {
                     color: Theme.of(context).colorScheme.onError,
                   ),
                 ),
-                onDismissed: (_) {
-                  context.read<HistoryBloc>().add(
-                    HistoryEvent.deleteHistory(item.id),
-                  );
-                  TilawaFeedback.showToast(
-                    context,
-                    message: context.l10n.historyDeleted,
-                    variant: TilawaFeedbackVariant.success,
-                  );
-                },
+                onDismissed: (_) => _onHistoryDismissed(context, item),
                 child: HistoryCard(
                   history: item,
                   onTap: () => _onHistoryTap(context, item),
@@ -303,6 +294,23 @@ class _HistoryScreenState extends State<HistoryScreen> {
     } else {
       return DateTimeHelper.formatDate(date);
     }
+  }
+
+  void _onHistoryDismissed(BuildContext context, HistoryEntity history) {
+    final HistoryBloc bloc = context.read<HistoryBloc>();
+    bloc.add(HistoryEvent.deleteHistory(history.id));
+    TilawaFeedback.showActionable(
+      context,
+      message: context.l10n.historyDeleted,
+      variant: TilawaFeedbackVariant.success,
+      dedupeKey: 'history-undo-${history.id}',
+      actions: <TilawaFeedbackAction>[
+        TilawaFeedbackAction(
+          label: context.l10n.undo,
+          onPressed: () => bloc.add(HistoryEvent.restoreHistory(history)),
+        ),
+      ],
+    );
   }
 
   void _onHistoryTap(BuildContext context, HistoryEntity history) {

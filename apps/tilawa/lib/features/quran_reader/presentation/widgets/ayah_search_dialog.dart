@@ -44,6 +44,7 @@ class _AyahSearchDialogState extends State<AyahSearchDialog> {
               controller: _searchController,
               hintText: context.l10n.searchAyahsHint,
               textInputAction: TextInputAction.search,
+              clearButtonTooltip: context.l10n.a11yClearSearch,
               showShadow: false,
               onClear: () {
                 _searchController.clear();
@@ -69,15 +70,13 @@ class _AyahSearchDialogState extends State<AyahSearchDialog> {
                   }
 
                   if (state.searchResults.isEmpty) {
-                    return Center(
-                      child: Text(
-                        state.searchQuery.isEmpty
-                            ? context.l10n.enterSearchQuery
-                            : context.l10n.noSearchResults,
-                        style: theme.textTheme.bodyMedium?.copyWith(
-                          color: theme.colorScheme.onSurfaceVariant,
-                        ),
-                      ),
+                    return TilawaEmptyState(
+                      icon: state.searchQuery.isEmpty
+                          ? Icons.search_rounded
+                          : Icons.search_off_rounded,
+                      title: state.searchQuery.isEmpty
+                          ? context.l10n.enterSearchQuery
+                          : context.l10n.noSearchResults,
                     );
                   }
 

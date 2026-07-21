@@ -57,54 +57,63 @@ class RadioStationCard extends StatelessWidget {
       );
     }
 
-    return TilawaCard(
-      onTap: onTap ?? onPlay,
-      child: Padding(
-        padding: EdgeInsets.all(tokens.spaceMedium),
-        child: Row(
-          children: [
-            RadioStationArtwork(
-              stationId: station.id,
-              compact: true,
-              size: tokens.iconBoxSize,
-            ),
-            SizedBox(width: tokens.spaceMedium),
-            Expanded(
-              child: Text(
-                station.name,
-                maxLines: 2,
-                overflow: TextOverflow.ellipsis,
-                style: theme.textTheme.titleSmall?.copyWith(
-                  fontWeight: FontWeight.w600,
-                ),
+    // Favorite/play are siblings of TilawaCard — nested IconButtons would
+    // conflict with card onTap (open player vs play / favorite).
+    return Row(
+      crossAxisAlignment: CrossAxisAlignment.center,
+      children: [
+        Expanded(
+          child: TilawaCard(
+            onTap: onTap ?? onPlay,
+            child: Padding(
+              padding: EdgeInsets.all(tokens.spaceMedium),
+              child: Row(
+                children: [
+                  RadioStationArtwork(
+                    stationId: station.id,
+                    compact: true,
+                    size: tokens.iconBoxSize,
+                  ),
+                  SizedBox(width: tokens.spaceMedium),
+                  Expanded(
+                    child: Text(
+                      station.name,
+                      maxLines: 2,
+                      overflow: TextOverflow.ellipsis,
+                      style: theme.textTheme.titleSmall?.copyWith(
+                        fontWeight: FontWeight.w600,
+                      ),
+                    ),
+                  ),
+                ],
               ),
             ),
-            IconButton(
-              tooltip: station.isFavorite
-                  ? context.l10n.radioRemoveFavorite
-                  : context.l10n.radioAddFavorite,
-              onPressed: onFavorite,
-              icon: AnimatedSwitcher(
-                duration: const Duration(milliseconds: 200),
-                child: Icon(
-                  station.isFavorite
-                      ? Icons.favorite_rounded
-                      : Icons.favorite_border_rounded,
-                  key: ValueKey<bool>(station.isFavorite),
-                  color: station.isFavorite
-                      ? theme.colorScheme.error
-                      : theme.colorScheme.onSurfaceVariant,
-                ),
-              ),
-            ),
-            IconButton(
-              tooltip: context.l10n.play,
-              onPressed: onPlay,
-              icon: const Icon(Icons.play_arrow_rounded),
-            ),
-          ],
+          ),
         ),
-      ),
+        IconButton(
+          tooltip: station.isFavorite
+              ? context.l10n.radioRemoveFavorite
+              : context.l10n.radioAddFavorite,
+          onPressed: onFavorite,
+          icon: AnimatedSwitcher(
+            duration: const Duration(milliseconds: 200),
+            child: Icon(
+              station.isFavorite
+                  ? Icons.favorite_rounded
+                  : Icons.favorite_border_rounded,
+              key: ValueKey<bool>(station.isFavorite),
+              color: station.isFavorite
+                  ? theme.colorScheme.error
+                  : theme.colorScheme.onSurfaceVariant,
+            ),
+          ),
+        ),
+        IconButton(
+          tooltip: context.l10n.play,
+          onPressed: onPlay,
+          icon: const Icon(Icons.play_arrow_rounded),
+        ),
+      ],
     );
   }
 }

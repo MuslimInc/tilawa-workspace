@@ -968,6 +968,9 @@ class AppLocalizationsEn extends AppLocalizations {
   String get a11yClearRecitersSearch => 'Clear search text';
 
   @override
+  String get a11yClearSearch => 'Clear search text';
+
+  @override
   String get filteredByLetter => 'Filtered by letter:';
 
   @override
