@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:intl/intl.dart';
@@ -7,6 +9,7 @@ import 'package:tilawa/features/auth/domain/entities/registered_device.dart';
 import 'package:tilawa/features/auth/presentation/bloc/auth_bloc.dart';
 import 'package:tilawa/features/auth/presentation/cubit/manage_devices_cubit.dart';
 import 'package:tilawa/l10n/generated/app_localizations.dart';
+import 'package:tilawa/router/app_router_config.dart';
 import 'package:tilawa_ui_kit/tilawa_ui_kit.dart';
 
 /// Manage Devices — lists the signed-in devices and lets the user sign out any
@@ -27,12 +30,32 @@ class ManageDevicesScreen extends StatelessWidget {
     if (userId == null) {
       return TilawaShellChildScaffold(
         appBar: TilawaAppBar(title: context.l10n.manageDevicesTitle),
-        body: const SizedBox.shrink(),
+        body: Center(
+          child: Padding(
+            padding: EdgeInsets.all(context.tokens.spaceLarge),
+            child: TilawaIllustratedState(
+              icon: Icons.devices_other_rounded,
+              title: context.l10n.manageDevicesGuestTitle,
+              subtitle: context.l10n.manageDevicesGuestSubtitle,
+              primaryAction: TilawaButton(
+                text: context.l10n.signIn,
+                variant: TilawaButtonVariant.primary,
+                onPressed: () => unawaited(
+                  const LoginRoute().push<void>(context),
+                ),
+              ),
+            ),
+          ),
+        ),
       );
     }
 
     return BlocProvider<ManageDevicesCubit>(
-      create: (_) => getIt<ManageDevicesCubit>()..load(userId),
+      create: (_) {
+        final ManageDevicesCubit cubit = getIt<ManageDevicesCubit>();
+        unawaited(cubit.load(userId));
+        return cubit;
+      },
       child: _ManageDevicesView(userId: userId),
     );
   }
@@ -88,10 +111,12 @@ class _ManageDevicesView extends StatelessWidget {
           return switch (state.status) {
             ManageDevicesStatus.initial ||
             ManageDevicesStatus.loading => const Center(
-              child: CircularProgressIndicator(),
+              child: TilawaLoadingIndicator(),
             ),
-            ManageDevicesStatus.error => _ErrorView(
-              message: l10n.manageDevicesError,
+            ManageDevicesStatus.error => TilawaErrorState(
+              icon: Icons.error_outline_rounded,
+              title: l10n.manageDevicesError,
+              retryLabel: l10n.retry,
               onRetry: () => context.read<ManageDevicesCubit>().load(userId),
             ),
             ManageDevicesStatus.loaded => _DevicesList(
@@ -156,12 +181,14 @@ class _DevicesList extends StatelessWidget {
         SizedBox(height: tokens.spaceMedium),
         if (!state.hasOtherActiveDevices)
           Padding(
-            padding: EdgeInsets.only(top: tokens.spaceMedium),
-            child: Text(
-              l10n.manageDevicesEmpty,
-              style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                color: Theme.of(context).colorScheme.onSurfaceVariant,
-              ),
+            padding: EdgeInsets.only(
+              top: tokens.spaceSmall,
+              bottom: tokens.spaceMedium,
+            ),
+            child: TilawaEmptyState(
+              icon: Icons.phonelink_rounded,
+              title: l10n.manageDevicesEmptyTitle,
+              subtitle: l10n.manageDevicesEmpty,
             ),
           ),
         for (final device in devices) ...[
@@ -212,7 +239,7 @@ class _DeviceRow extends StatelessWidget {
       child: Row(
         crossAxisAlignment: CrossAxisAlignment.center,
         spacing: tokens.spaceSmall,
-        mainAxisSize: .min,
+        mainAxisSize: MainAxisSize.min,
         children: [
           Icon(_platformIcon, color: scheme.primary),
           Expanded(
@@ -262,7 +289,10 @@ class _DeviceRow extends StatelessWidget {
     if (busy) {
       return SizedBox.square(
         dimension: context.tokens.iconSizeMedium,
-        child: const CircularProgressIndicator(strokeWidth: 2),
+        child: const TilawaLoadingIndicator(
+          centered: false,
+          strokeWidth: 2,
+        ),
       );
     }
     return TilawaButton(
@@ -311,34 +341,6 @@ class _Badge extends StatelessWidget {
       child: Text(
         text,
         style: Theme.of(context).textTheme.labelSmall?.copyWith(color: color),
-      ),
-    );
-  }
-}
-
-class _ErrorView extends StatelessWidget {
-  const _ErrorView({required this.message, required this.onRetry});
-
-  final String message;
-  final VoidCallback onRetry;
-
-  @override
-  Widget build(BuildContext context) {
-    final tokens = context.tokens;
-    return Center(
-      child: Padding(
-        padding: EdgeInsets.all(tokens.spaceLarge),
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            Text(message, textAlign: TextAlign.center),
-            SizedBox(height: tokens.spaceMedium),
-            TilawaButton(
-              text: context.l10n.retry,
-              onPressed: onRetry,
-            ),
-          ],
-        ),
       ),
     );
   }

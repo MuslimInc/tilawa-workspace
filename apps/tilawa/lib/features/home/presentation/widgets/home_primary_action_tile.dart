@@ -12,6 +12,7 @@ class HomePrimaryActionTile extends StatelessWidget {
     required this.icon,
     required this.label,
     this.subtitle,
+    this.progress,
     required this.onTap,
     required this.accent,
   });
@@ -19,6 +20,9 @@ class HomePrimaryActionTile extends StatelessWidget {
   final Widget icon;
   final String label;
   final String? subtitle;
+
+  /// Optional 0–1 goal-gradient cue under the subtitle. Null or ≤0 hides it.
+  final double? progress;
   final VoidCallback onTap;
   final Color accent;
 
@@ -33,6 +37,8 @@ class HomePrimaryActionTile extends StatelessWidget {
     );
     final BorderRadius borderRadius = BorderRadius.circular(radius);
     final String? subtitleText = subtitle;
+    final double? clampedProgress = progress?.clamp(0.0, 1.0);
+    final bool showProgress = clampedProgress != null && clampedProgress > 0;
 
     return HomeDashboardElevatedSurface.interactive(
       context: context,
@@ -73,6 +79,18 @@ class HomePrimaryActionTile extends StatelessWidget {
                 style: theme.textTheme.bodySmall?.copyWith(
                   color: HomeDashboardSection.secondaryTextColor(context),
                   height: 1.35,
+                ),
+              ),
+            ],
+            if (showProgress) ...[
+              SizedBox(height: tokens.spaceSmall),
+              ClipRRect(
+                borderRadius: BorderRadius.circular(tokens.radiusSmall),
+                child: LinearProgressIndicator(
+                  value: clampedProgress,
+                  minHeight: tokens.progressHeight,
+                  backgroundColor: accent.withValues(alpha: 0.12),
+                  color: accent,
                 ),
               ),
             ],

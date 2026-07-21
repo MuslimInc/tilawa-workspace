@@ -255,6 +255,13 @@
             "surah": { "type": "String" }
         }
     },
+    "homeListeningResumePercent": "{percent}%",
+    "@homeListeningResumePercent": {
+        "description": "Home continue listening progress percent cue",
+        "placeholders": {
+            "percent": { "type": "int" }
+        }
+    },
     "homeAthkarDone": "Finished",
     "@homeAthkarDone": {
         "description": "Athkar compact card completed state"
@@ -344,7 +351,7 @@
     "@homeContinueQuranTitle": {
         "description": "Home Today row title for opening the last-read Quran page"
     },
-    "homeContinueQuranSubtitle": "Resume from your last read page",
+    "homeContinueQuranSubtitle": "Continue your reading",
     "@homeContinueQuranSubtitle": {
         "description": "Home Today row subtitle for opening the last-read Quran page"
     },
@@ -494,7 +501,7 @@
     "@homeQuickQuranReader": {
         "description": "Home quick action tile label for opening the Mushaf reader"
     },
-    "homeQuickQuranReaderSubtitle": "Resume from your last read page",
+    "homeQuickQuranReaderSubtitle": "Continue your reading",
     "@homeQuickQuranReaderSubtitle": {
         "description": "Subtitle for the Quran Reader primary action card"
     },
@@ -1084,7 +1091,7 @@
     "@noSurahsMatchSearch": {
         "description": "No surahs match search message"
     },
-    "continueListening": "Continue listening",
+    "continueListening": "Continue your listening",
     "@continueListening": {
         "description": "Continue listening section title"
     },
@@ -1723,7 +1730,7 @@
     "@welcomeToApp": {
         "description": "Welcome message on login screen"
     },
-    "signInWithGoogleDescription": "Sign in with your Google account to continue",
+    "signInWithGoogleDescription": "Sign in with Google to keep your prayer setup and preferences across devices",
     "@signInWithGoogleDescription": {
         "description": "Description text for Google sign in"
     },
@@ -1735,7 +1742,7 @@
     "@continueWithApple": {
         "description": "Primary CTA for Sign in with Apple on the login screen"
     },
-    "signInWithAppleDescription": "Sign in with Apple, Google, or email to continue",
+    "signInWithAppleDescription": "Sign in with Apple, Google, or email to keep your prayer setup and preferences across devices",
     "@signInWithAppleDescription": {
         "description": "Login hero copy when Sign in with Apple is available"
     },
@@ -1795,11 +1802,11 @@
     "@authErrorGenericMessage": {
         "description": "Fallback shown for unmapped auth errors so raw exception text never reaches users"
     },
-    "signInWithEmailDescription": "Sign in with your email and password",
+    "signInWithEmailDescription": "Sign in with email to keep your setup on this device and others",
     "@signInWithEmailDescription": {
         "description": "Subtitle on email login screen"
     },
-    "createAccountDescription": "Create an account with email and password",
+    "createAccountDescription": "Create an account to keep your prayer setup and preferences",
     "@createAccountDescription": {
         "description": "Subtitle on registration screen"
     },
@@ -1838,7 +1845,7 @@
             }
         }
     },
-    "registrationStepAccountTitle": "Account",
+    "registrationStepAccountTitle": "Your account",
     "@registrationStepAccountTitle": {
         "description": "Registration step 1 title"
     },
@@ -1846,11 +1853,11 @@
     "@registrationStepAccountDescription": {
         "description": "Registration step 1 subtitle"
     },
-    "registrationStepPersonalTitle": "Personal details",
+    "registrationStepPersonalTitle": "About you",
     "@registrationStepPersonalTitle": {
         "description": "Registration step 2 title"
     },
-    "registrationStepPersonalDescription": "Tell us about yourself",
+    "registrationStepPersonalDescription": "A few details for your profile",
     "@registrationStepPersonalDescription": {
         "description": "Registration step 2 subtitle"
     },
@@ -1862,7 +1869,7 @@
     "@registrationStepLearningDescription": {
         "description": "Registration step 3 subtitle"
     },
-    "registrationStepReviewTitle": "Review",
+    "registrationStepReviewTitle": "Almost done",
     "@registrationStepReviewTitle": {
         "description": "Registration step 5 title"
     },
@@ -2222,6 +2229,18 @@
     "@chooseLanguage": {
         "description": "Choose language dialog title"
     },
+    "firstRunFunnelStepProgress": "Step {current} of {total}",
+    "@firstRunFunnelStepProgress": {
+        "description": "Calm goal-gradient cue for first-run funnel screens",
+        "placeholders": {
+            "current": { "type": "int" },
+            "total": { "type": "int" }
+        }
+    },
+    "languageWelcomeProgressSubtitle": "Choose the language for your setup",
+    "@languageWelcomeProgressSubtitle": {
+        "description": "Language welcome subtitle reinforcing underway setup"
+    },
     "manageStorage": "Manage Storage",
     "@manageStorage": {
         "description": "Manage storage setting title"
@@ -2248,9 +2267,13 @@
     "@guestUser": {
         "description": "Guest user display name"
     },
-    "signInToSync": "Sign in to sync your data",
+    "signInToSync": "Sign in to keep your prayer setup and preferences",
     "@signInToSync": {
-        "description": "Sign in prompt subtitle"
+        "description": "Guest settings profile header — endowment tone"
+    },
+    "settingsProfileCompleteHint": "Add a photo and name",
+    "@settingsProfileCompleteHint": {
+        "description": "Soft completeness cue on Settings profile card when name or photo missing"
     },
     "logoutConfirmation": "Are you sure you want to logout?",
     "@logoutConfirmation": {
@@ -2861,9 +2884,9 @@
     "@onboardingVisualHint2": {
         "description": "Short caption under onboarding slide 2 device preview"
     },
-    "startJourney": "Get started",
+    "startJourney": "Continue with your setup",
     "@startJourney": {
-        "description": "Start button text"
+        "description": "Onboarding complete CTA — ownership tone after slides"
     },
     "recitationDuration": "Recitation Duration",
     "@recitationDuration": {
@@ -4111,9 +4134,17 @@
     "@prayerAlertsPermissionNotificationsTitle": {
         "description": "Title for prayer alerts notification permission setup screen"
     },
-    "prayerAlertsPermissionNotificationsBody": "To make sure you never miss a prayer time, allow notifications. You will be reminded when each prayer begins.",
+    "prayerAlertsPermissionNotificationsBody": "Allow notifications so you can be reminded when each prayer begins.",
     "@prayerAlertsPermissionNotificationsBody": {
         "description": "Body for prayer alerts notification permission setup screen"
+    },
+    "prayerAlertsPermissionStepProgress": "Step {current} of {total}",
+    "@prayerAlertsPermissionStepProgress": {
+        "description": "Goal-gradient label inside the prayer alerts permission wizard",
+        "placeholders": {
+            "current": { "type": "int" },
+            "total": { "type": "int" }
+        }
     },
     "prayerAlertsPermissionExactAlarmTitle": "Alarms & reminders",
     "@prayerAlertsPermissionExactAlarmTitle": {
@@ -4970,6 +5001,18 @@
     "@manageDevicesSignOutOthersConfirm": { "description": "Confirm dialog body for sign out others" },
     "manageDevicesEmpty": "No other devices are signed in.",
     "@manageDevicesEmpty": { "description": "Empty state when only the current device is present" },
+    "manageDevicesEmptyTitle": "Only this device",
+    "@manageDevicesEmptyTitle": {
+        "description": "Title when Manage Devices has no other signed-in devices"
+    },
+    "manageDevicesGuestTitle": "Sign in to manage devices",
+    "@manageDevicesGuestTitle": {
+        "description": "Manage Devices guest empty title"
+    },
+    "manageDevicesGuestSubtitle": "See which devices use your account and sign them out if needed",
+    "@manageDevicesGuestSubtitle": {
+        "description": "Manage Devices guest empty subtitle"
+    },
     "manageDevicesError": "Couldn't load your devices.",
     "@manageDevicesError": { "description": "Error state for the devices list" },
     "manageDevicesSignOutFailed": "Couldn't sign out that device. Please try again.",

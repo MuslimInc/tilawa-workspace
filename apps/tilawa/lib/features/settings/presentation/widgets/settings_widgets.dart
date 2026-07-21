@@ -150,9 +150,10 @@ class SettingsProfileHeader extends StatelessWidget {
         final tokens = theme.tokens;
         final colorScheme = theme.colorScheme;
         final isGuest = user == null;
+        final String displayName = user?.displayName.trim() ?? '';
         final title = switch (user) {
           null => context.l10n.signInToSync,
-          final u when u.displayName.trim().isNotEmpty => u.displayName.trim(),
+          final _ when displayName.isNotEmpty => displayName,
           _ => context.l10n.guestUser,
         };
         final subtitle = switch (user) {
@@ -160,16 +161,24 @@ class SettingsProfileHeader extends StatelessWidget {
           final u => settingsMemberSinceLabel(context, u.createdAt),
         };
         final photoUrl = user?.photoUrl?.trim() ?? '';
+        final bool profileIncomplete =
+            !isGuest && (displayName.isEmpty || photoUrl.isEmpty);
         final VoidCallback onTap = isGuest
             ? () => const LoginRoute().push<void>(context)
             : () => const EditProfileRoute().push<void>(context);
+
+        final String? semanticsHint = isGuest
+            ? null
+            : profileIncomplete
+            ? '${context.l10n.editProfileTitle}. ${context.l10n.settingsProfileCompleteHint}'
+            : context.l10n.editProfileTitle;
 
         return TilawaSettingsGroupHorizontalInset(
           child: Semantics(
             button: true,
             label: title,
             value: subtitle,
-            hint: isGuest ? null : context.l10n.editProfileTitle,
+            hint: semanticsHint,
             onTap: onTap,
             excludeSemantics: true,
             child: TilawaCard(
@@ -205,6 +214,18 @@ class SettingsProfileHeader extends StatelessWidget {
                             overflow: TextOverflow.ellipsis,
                             style: theme.textTheme.bodyMedium?.copyWith(
                               color: colorScheme.onSurfaceVariant,
+                              height: tokens.textHeightLoose,
+                            ),
+                          ),
+                        ],
+                        if (profileIncomplete) ...[
+                          SizedBox(height: tokens.spaceExtraSmall),
+                          Text(
+                            context.l10n.settingsProfileCompleteHint,
+                            maxLines: 1,
+                            overflow: TextOverflow.ellipsis,
+                            style: theme.textTheme.bodySmall?.copyWith(
+                              color: colorScheme.primary,
                               height: tokens.textHeightLoose,
                             ),
                           ),
@@ -601,7 +622,6 @@ class _SettingsAccountActionsState extends State<SettingsAccountActions> {
         }
 
         final tokens = context.tokens;
-        final colorScheme = Theme.of(context).colorScheme;
 
         return TilawaSettingsGroupHorizontalInset(
           child: Padding(
@@ -612,9 +632,7 @@ class _SettingsAccountActionsState extends State<SettingsAccountActions> {
               children: [
                 TilawaButton(
                   text: context.l10n.logout,
-                  variant: TilawaButtonVariant.primary,
-                  backgroundColor: colorScheme.onSurface,
-                  foregroundColor: colorScheme.surface,
+                  variant: TilawaButtonVariant.ghost,
                   isFullWidth: true,
                   onPressed: () => unawaited(
                     _guardAndRun(ServerActionType.logout, widget.onLogout),

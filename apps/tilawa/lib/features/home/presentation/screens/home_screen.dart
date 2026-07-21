@@ -23,6 +23,11 @@ import '../widgets/home_next_prayer_time.dart';
 import '../widgets/home_screen_background.dart';
 
 /// Main daily dashboard for the app shell.
+///
+/// Orchestrates the calm habit loop: prayer hero as cue → primary resume
+/// actions → visible progress reward (body children). Scroll snap and
+/// skeleton→content switch keep the surface calm; section order stays
+/// approved (see home-dashboard-patterns).
 class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key, required this.onOpenPrayer});
 

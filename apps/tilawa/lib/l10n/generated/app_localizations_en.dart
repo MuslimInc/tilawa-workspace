@@ -205,6 +205,11 @@ class AppLocalizationsEn extends AppLocalizations {
   }
 
   @override
+  String homeListeningResumePercent(int percent) {
+    return '$percent%';
+  }
+
+  @override
   String get homeAthkarDone => 'Finished';
 
   @override
@@ -272,7 +277,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get homeContinueQuranTitle => 'Continue Quran';
 
   @override
-  String get homeContinueQuranSubtitle => 'Resume from your last read page';
+  String get homeContinueQuranSubtitle => 'Continue your reading';
 
   @override
   String homeQuranResumeSurahPage(String surah, int page) {
@@ -385,7 +390,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get homeQuickQuranReader => 'Mushaf';
 
   @override
-  String get homeQuickQuranReaderSubtitle => 'Resume from your last read page';
+  String get homeQuickQuranReaderSubtitle => 'Continue your reading';
 
   @override
   String get homeLearnQuranWithTutor => 'Learn Quran with your hafiz';
@@ -978,7 +983,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get noSurahsMatchSearch => 'No surahs match your search';
 
   @override
-  String get continueListening => 'Continue listening';
+  String get continueListening => 'Continue your listening';
 
   @override
   String get play => 'Play';
@@ -1446,7 +1451,7 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get signInWithGoogleDescription =>
-      'Sign in with your Google account to continue';
+      'Sign in with Google to keep your prayer setup and preferences across devices';
 
   @override
   String get signingIn => 'Signing in...';
@@ -1456,7 +1461,7 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get signInWithAppleDescription =>
-      'Sign in with Apple, Google, or email to continue';
+      'Sign in with Apple, Google, or email to keep your prayer setup and preferences across devices';
 
   @override
   String get continueWithGoogle => 'Sign in with Google';
@@ -1510,11 +1515,11 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get signInWithEmailDescription =>
-      'Sign in with your email and password';
+      'Sign in with email to keep your setup on this device and others';
 
   @override
   String get createAccountDescription =>
-      'Create an account with email and password';
+      'Create an account to keep your prayer setup and preferences';
 
   @override
   String get emailAddress => 'Email address';
@@ -1537,17 +1542,18 @@ class AppLocalizationsEn extends AppLocalizations {
   }
 
   @override
-  String get registrationStepAccountTitle => 'Account';
+  String get registrationStepAccountTitle => 'Your account';
 
   @override
   String get registrationStepAccountDescription =>
       'Choose your email and password';
 
   @override
-  String get registrationStepPersonalTitle => 'Personal details';
+  String get registrationStepPersonalTitle => 'About you';
 
   @override
-  String get registrationStepPersonalDescription => 'Tell us about yourself';
+  String get registrationStepPersonalDescription =>
+      'A few details for your profile';
 
   @override
   String get registrationStepLearningTitle => 'Quran learning';
@@ -1557,7 +1563,7 @@ class AppLocalizationsEn extends AppLocalizations {
       'What would you like to learn?';
 
   @override
-  String get registrationStepReviewTitle => 'Review';
+  String get registrationStepReviewTitle => 'Almost done';
 
   @override
   String get registrationStepReviewDescription =>
@@ -1816,6 +1822,15 @@ class AppLocalizationsEn extends AppLocalizations {
   String get chooseLanguage => 'Choose Language';
 
   @override
+  String firstRunFunnelStepProgress(int current, int total) {
+    return 'Step $current of $total';
+  }
+
+  @override
+  String get languageWelcomeProgressSubtitle =>
+      'Choose the language for your setup';
+
+  @override
   String get manageStorage => 'Manage Storage';
 
   @override
@@ -1833,7 +1848,11 @@ class AppLocalizationsEn extends AppLocalizations {
   String get guestUser => 'Guest User';
 
   @override
-  String get signInToSync => 'Sign in to sync your data';
+  String get signInToSync =>
+      'Sign in to keep your prayer setup and preferences';
+
+  @override
+  String get settingsProfileCompleteHint => 'Add a photo and name';
 
   @override
   String get logoutConfirmation => 'Are you sure you want to logout?';
@@ -2302,7 +2321,7 @@ class AppLocalizationsEn extends AppLocalizations {
       'Browse reciters with search and favorites';
 
   @override
-  String get startJourney => 'Get started';
+  String get startJourney => 'Continue with your setup';
 
   @override
   String get recitationDuration => 'Recitation Duration';
@@ -3246,7 +3265,12 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get prayerAlertsPermissionNotificationsBody =>
-      'To make sure you never miss a prayer time, allow notifications. You will be reminded when each prayer begins.';
+      'Allow notifications so you can be reminded when each prayer begins.';
+
+  @override
+  String prayerAlertsPermissionStepProgress(int current, int total) {
+    return 'Step $current of $total';
+  }
 
   @override
   String get prayerAlertsPermissionExactAlarmTitle => 'Alarms & reminders';
@@ -4102,6 +4126,16 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get manageDevicesEmpty => 'No other devices are signed in.';
+
+  @override
+  String get manageDevicesEmptyTitle => 'Only this device';
+
+  @override
+  String get manageDevicesGuestTitle => 'Sign in to manage devices';
+
+  @override
+  String get manageDevicesGuestSubtitle =>
+      'See which devices use your account and sign them out if needed';
 
   @override
   String get manageDevicesError => 'Couldn\'t load your devices.';

@@ -35,10 +35,16 @@ class HomeListeningResumeRow extends StatelessWidget {
         );
         final BorderRadius borderRadius = BorderRadius.circular(radius);
         final String resumeLabel = context.l10n.continueListening;
-        final String subtitle = context.l10n.homeListeningResumeSubtitle(
+        final String baseSubtitle = context.l10n.homeListeningResumeSubtitle(
           state.reciterName!,
           state.surahName!,
         );
+        final double? progressFraction = _listeningProgressFraction(state);
+        final String subtitle = progressFraction == null
+            ? baseSubtitle
+            : '$baseSubtitle · ${context.l10n.homeListeningResumePercent(
+                (progressFraction * 100).round(),
+              )}';
 
         return Semantics(
           button: true,
@@ -57,50 +63,67 @@ class HomeListeningResumeRow extends StatelessWidget {
                 horizontal: tokens.spaceMedium,
                 vertical: tokens.spaceSmall,
               ),
-              child: Row(
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                crossAxisAlignment: CrossAxisAlignment.stretch,
                 spacing: tokens.spaceSmall,
                 children: [
-                  HomeDashboardIconWell(
-                    accent: accent,
-                    fillAlpha: HomeFeaturePastel.iconWellFillAlpha,
-                    extent: tokens.iconBoxSize,
-                    child: Icon(
-                      Icons.headphones_rounded,
-                      color: accent,
-                      size: tokens.iconSizeSmall,
-                    ),
-                  ),
-                  Expanded(
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      mainAxisSize: MainAxisSize.min,
-                      spacing: tokens.spaceExtraSmall,
-                      children: [
-                        TilawaStatusChip(
-                          label: resumeLabel,
-                          backgroundColor:
-                              HomeFeaturePastel.statusChipBackground(
-                                accent: accent,
-                                colorScheme: colorScheme,
+                  Row(
+                    spacing: tokens.spaceSmall,
+                    children: [
+                      HomeDashboardIconWell(
+                        accent: accent,
+                        fillAlpha: HomeFeaturePastel.iconWellFillAlpha,
+                        extent: tokens.iconBoxSize,
+                        child: Icon(
+                          Icons.headphones_rounded,
+                          color: accent,
+                          size: tokens.iconSizeSmall,
+                        ),
+                      ),
+                      Expanded(
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          mainAxisSize: MainAxisSize.min,
+                          spacing: tokens.spaceExtraSmall,
+                          children: [
+                            TilawaStatusChip(
+                              label: resumeLabel,
+                              backgroundColor:
+                                  HomeFeaturePastel.statusChipBackground(
+                                    accent: accent,
+                                    colorScheme: colorScheme,
+                                  ),
+                              foregroundColor: accent,
+                            ),
+                            Text(
+                              subtitle,
+                              maxLines: 2,
+                              overflow: TextOverflow.ellipsis,
+                              style: theme.textTheme.bodyMedium?.copyWith(
+                                fontWeight: FontWeight.w600,
+                                color: colorScheme.onSurface,
                               ),
-                          foregroundColor: accent,
+                            ),
+                          ],
                         ),
-                        Text(
-                          subtitle,
-                          maxLines: 2,
-                          overflow: TextOverflow.ellipsis,
-                          style: theme.textTheme.bodyMedium?.copyWith(
-                            fontWeight: FontWeight.w600,
-                            color: colorScheme.onSurface,
-                          ),
-                        ),
-                      ],
+                      ),
+                      Icon(
+                        Icons.chevron_right_rounded,
+                        color: HomeDashboardSection.secondaryTextColor(context),
+                      ),
+                    ],
+                  ),
+                  if (progressFraction != null)
+                    ClipRRect(
+                      borderRadius: BorderRadius.circular(tokens.radiusSmall),
+                      child: LinearProgressIndicator(
+                        value: progressFraction,
+                        minHeight: tokens.progressHeight,
+                        backgroundColor: accent.withValues(alpha: 0.12),
+                        color: accent,
+                      ),
                     ),
-                  ),
-                  Icon(
-                    Icons.chevron_right_rounded,
-                    color: HomeDashboardSection.secondaryTextColor(context),
-                  ),
                 ],
               ),
             ),
@@ -108,6 +131,14 @@ class HomeListeningResumeRow extends StatelessWidget {
         );
       },
     );
+  }
+
+  /// Goal-gradient fraction when duration is known; null otherwise.
+  static double? _listeningProgressFraction(HomeListeningResumeState state) {
+    if (state.durationMs <= 0) {
+      return null;
+    }
+    return (state.lastPositionMs / state.durationMs).clamp(0.0, 1.0);
   }
 
   void _resumePlayback(

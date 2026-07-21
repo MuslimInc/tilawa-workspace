@@ -205,6 +205,11 @@ class AppLocalizationsAr extends AppLocalizations {
   }
 
   @override
+  String homeListeningResumePercent(int percent) {
+    return '$percent٪';
+  }
+
+  @override
   String get homeAthkarDone => 'خلصت';
 
   @override
@@ -271,7 +276,7 @@ class AppLocalizationsAr extends AppLocalizations {
   String get homeContinueQuranTitle => 'تابع القرآن';
 
   @override
-  String get homeContinueQuranSubtitle => 'كمّل من آخر قراءة';
+  String get homeContinueQuranSubtitle => 'كمّل قراءتك';
 
   @override
   String homeQuranResumeSurahPage(String surah, int page) {
@@ -383,7 +388,7 @@ class AppLocalizationsAr extends AppLocalizations {
   String get homeQuickQuranReader => 'المصحف';
 
   @override
-  String get homeQuickQuranReaderSubtitle => 'كمّل من آخر قراءة';
+  String get homeQuickQuranReaderSubtitle => 'كمّل قراءتك';
 
   @override
   String get homeLearnQuranWithTutor => 'تعلّم القرآن مع محفظك';
@@ -974,7 +979,7 @@ class AppLocalizationsAr extends AppLocalizations {
   String get noSurahsMatchSearch => 'لا توجد سور تطابق البحث';
 
   @override
-  String get continueListening => 'أكمل الاستماع';
+  String get continueListening => 'أكمل استماعك';
 
   @override
   String get play => 'تشغيل';
@@ -1440,7 +1445,8 @@ class AppLocalizationsAr extends AppLocalizations {
   String get welcomeToApp => 'مرحباً بك في أنا مسلم';
 
   @override
-  String get signInWithGoogleDescription => 'سجل الدخول بحساب جوجل للمتابعة';
+  String get signInWithGoogleDescription =>
+      'سجّل الدخول بجوجل للاحتفاظ بإعدادات الصلاة وتفضيلاتك عبر أجهزتك';
 
   @override
   String get signingIn => 'جاري تسجيل الدخول...';
@@ -1450,7 +1456,7 @@ class AppLocalizationsAr extends AppLocalizations {
 
   @override
   String get signInWithAppleDescription =>
-      'سجّل الدخول باستخدام Apple أو Google أو البريد للمتابعة';
+      'سجّل الدخول بـ Apple أو Google أو البريد للاحتفاظ بإعدادات الصلاة وتفضيلاتك عبر أجهزتك';
 
   @override
   String get continueWithGoogle => 'تسجيل الدخول باستخدام Google';
@@ -1504,11 +1510,11 @@ class AppLocalizationsAr extends AppLocalizations {
 
   @override
   String get signInWithEmailDescription =>
-      'سجّل الدخول ببريدك الإلكتروني وكلمة المرور';
+      'سجّل الدخول بالبريد للاحتفاظ بإعداداتك على هذا الجهاز وغيره';
 
   @override
   String get createAccountDescription =>
-      'أنشئ حساباً بالبريد الإلكتروني وكلمة المرور';
+      'أنشئ حساباً للاحتفاظ بإعدادات الصلاة وتفضيلاتك';
 
   @override
   String get emailAddress => 'البريد الإلكتروني';
@@ -1531,17 +1537,17 @@ class AppLocalizationsAr extends AppLocalizations {
   }
 
   @override
-  String get registrationStepAccountTitle => 'الحساب';
+  String get registrationStepAccountTitle => 'حسابك';
 
   @override
   String get registrationStepAccountDescription =>
       'اختر بريدك الإلكتروني وكلمة المرور';
 
   @override
-  String get registrationStepPersonalTitle => 'البيانات الشخصية';
+  String get registrationStepPersonalTitle => 'عنك';
 
   @override
-  String get registrationStepPersonalDescription => 'أخبرنا عن نفسك';
+  String get registrationStepPersonalDescription => 'بعض التفاصيل لملفك الشخصي';
 
   @override
   String get registrationStepLearningTitle => 'تعلّم القرآن';
@@ -1550,7 +1556,7 @@ class AppLocalizationsAr extends AppLocalizations {
   String get registrationStepLearningDescription => 'ماذا تريد أن تتعلّم؟';
 
   @override
-  String get registrationStepReviewTitle => 'المراجعة';
+  String get registrationStepReviewTitle => 'أوشكت على الانتهاء';
 
   @override
   String get registrationStepReviewDescription => 'راجع بياناتك ثم أنشئ حسابك';
@@ -1803,6 +1809,14 @@ class AppLocalizationsAr extends AppLocalizations {
   String get chooseLanguage => 'اختر اللغة';
 
   @override
+  String firstRunFunnelStepProgress(int current, int total) {
+    return 'الخطوة $current من $total';
+  }
+
+  @override
+  String get languageWelcomeProgressSubtitle => 'اختر لغة إعدادك';
+
+  @override
   String get manageStorage => 'إدارة التخزين';
 
   @override
@@ -1820,7 +1834,10 @@ class AppLocalizationsAr extends AppLocalizations {
   String get guestUser => 'زائر';
 
   @override
-  String get signInToSync => 'سجل الدخول لمزامنة بياناتك';
+  String get signInToSync => 'سجّل الدخول للاحتفاظ بإعدادات الصلاة وتفضيلاتك';
+
+  @override
+  String get settingsProfileCompleteHint => 'أضف صورة واسماً';
 
   @override
   String get logoutConfirmation => 'هل أنت متأكد أنك تريد تسجيل الخروج؟';
@@ -2281,7 +2298,7 @@ class AppLocalizationsAr extends AppLocalizations {
   String get onboardingVisualHint2 => 'تصفّح القرّاء مع البحث والمفضلة';
 
   @override
-  String get startJourney => 'ابدأ';
+  String get startJourney => 'تابع إعدادك';
 
   @override
   String get recitationDuration => 'مدة التلاوة';
@@ -3226,7 +3243,12 @@ class AppLocalizationsAr extends AppLocalizations {
 
   @override
   String get prayerAlertsPermissionNotificationsBody =>
-      'للتأكد من عدم تفويت أي وقت للصلاة، يُرجى السماح بالإشعارات. ستُذكّرك الإشعارات عند حلول وقت كل صلاة.';
+      'اسمح بالإشعارات ليُذكَّرك التطبيق عند حلول وقت كل صلاة.';
+
+  @override
+  String prayerAlertsPermissionStepProgress(int current, int total) {
+    return 'الخطوة $current من $total';
+  }
 
   @override
   String get prayerAlertsPermissionExactAlarmTitle => 'التنبيهات والتذكيرات';
@@ -4068,6 +4090,16 @@ class AppLocalizationsAr extends AppLocalizations {
 
   @override
   String get manageDevicesEmpty => 'لا توجد أجهزة أخرى مُسجَّلة الدخول.';
+
+  @override
+  String get manageDevicesEmptyTitle => 'هذا الجهاز فقط';
+
+  @override
+  String get manageDevicesGuestTitle => 'سجّل الدخول لإدارة الأجهزة';
+
+  @override
+  String get manageDevicesGuestSubtitle =>
+      'اطّلع على الأجهزة التي تستخدم حسابك وسجّل الخروج منها عند الحاجة';
 
   @override
   String get manageDevicesError => 'تعذّر تحميل أجهزتك.';

@@ -56,7 +56,10 @@ void main() {
   ) async {
     await pumpHeader(tester, const AuthState.unauthenticated());
 
-    expect(find.text('Sign in to sync your data'), findsOneWidget);
+    expect(
+      find.text('Sign in to keep your prayer setup and preferences'),
+      findsOneWidget,
+    );
     expect(find.text('Signed In User'), findsNothing);
     expect(find.byType(TilawaCard), findsOneWidget);
     expect(find.byIcon(TilawaIcons.chevronRightSmall), findsOneWidget);
@@ -67,7 +70,10 @@ void main() {
   ) async {
     await pumpHeader(tester, const AuthState.initial());
 
-    expect(find.text('Sign in to sync your data'), findsOneWidget);
+    expect(
+      find.text('Sign in to keep your prayer setup and preferences'),
+      findsOneWidget,
+    );
   });
 
   testWidgets('shows guest prompt when AuthBloc is loading after restart', (
@@ -75,7 +81,10 @@ void main() {
   ) async {
     await pumpHeader(tester, const AuthState.loading());
 
-    expect(find.text('Sign in to sync your data'), findsOneWidget);
+    expect(
+      find.text('Sign in to keep your prayer setup and preferences'),
+      findsOneWidget,
+    );
   });
 
   testWidgets('shows profile when AuthBloc is authenticated', (tester) async {
@@ -87,7 +96,10 @@ void main() {
     );
 
     expect(find.text('Signed In User'), findsOneWidget);
-    expect(find.text('Sign in to sync your data'), findsNothing);
+    expect(
+      find.text('Sign in to keep your prayer setup and preferences'),
+      findsNothing,
+    );
     expect(find.byType(TilawaCard), findsOneWidget);
     expect(find.byIcon(Icons.edit_outlined), findsNothing);
     expect(find.byType(TilawaIconBox), findsOneWidget);
@@ -104,11 +116,13 @@ void main() {
       matchesSemantics(
         label: 'Signed In User',
         value: 'Member since Jan 2024',
-        hint: 'Edit Profile',
+        hint: 'Edit Profile. Add a photo and name',
         isButton: true,
         hasTapAction: true,
       ),
     );
+    expect(find.text('Add a photo and name'), findsOneWidget);
     semanticsHandle.dispose();
   });
 }
+

@@ -2,6 +2,9 @@ import 'package:flutter/material.dart';
 import 'package:tilawa_ui_kit/tilawa_ui_kit.dart';
 
 /// Linear step progress for the email registration wizard.
+///
+/// Goal gradient: progress is never cold-zero while a step is active —
+/// step 1 of N already fills 1/N of the bar.
 class EmailRegistrationStepIndicator extends StatelessWidget {
   const EmailRegistrationStepIndicator({
     super.key,
@@ -18,9 +21,9 @@ class EmailRegistrationStepIndicator extends StatelessWidget {
   Widget build(BuildContext context) {
     final ThemeData theme = Theme.of(context);
     final MeMuslimDesignTokens tokens = theme.tokens;
-    final double progress = totalSteps <= 0
-        ? 0
-        : (currentStep / totalSteps).clamp(0.0, 1.0);
+    final int safeTotal = totalSteps <= 0 ? 1 : totalSteps;
+    final int safeCurrent = currentStep.clamp(1, safeTotal);
+    final double progress = (safeCurrent / safeTotal).clamp(0.0, 1.0);
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
@@ -36,7 +39,7 @@ class EmailRegistrationStepIndicator extends StatelessWidget {
           borderRadius: BorderRadius.circular(tokens.radiusSmall),
           child: LinearProgressIndicator(
             value: progress,
-            minHeight: tokens.spaceExtraSmall,
+            minHeight: tokens.progressHeight,
           ),
         ),
       ],

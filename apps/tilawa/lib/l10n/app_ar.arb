@@ -162,6 +162,12 @@
             "surah": { "type": "String" }
         }
     },
+    "homeListeningResumePercent": "{percent}٪",
+    "@homeListeningResumePercent": {
+        "placeholders": {
+            "percent": { "type": "int" }
+        }
+    },
     "homeAthkarDone": "خلصت",
     "homeAthkarRemaining": "متبقٍ {count}",
     "@homeAthkarRemaining": {
@@ -197,7 +203,7 @@
     "homeStartQuranTitle": "افتح المصحف",
     "homeStartQuranSubtitle": "ابدأ قراءة القرآن اليوم",
     "homeContinueQuranTitle": "تابع القرآن",
-    "homeContinueQuranSubtitle": "كمّل من آخر قراءة",
+    "homeContinueQuranSubtitle": "كمّل قراءتك",
     "homeQuranResumeSurahPage": "{surah} · صفحة {page}",
     "@homeQuranResumeSurahPage": {
         "placeholders": {
@@ -251,7 +257,7 @@
     "teacherApplicationLaterCta": "لاحقاً",
     "teacherApplicationFormOpenFailed": "تعذّر فتح نموذج التقديم. حاول مرة أخرى.",
     "homeQuickQuranReader": "المصحف",
-    "homeQuickQuranReaderSubtitle": "كمّل من آخر قراءة",
+    "homeQuickQuranReaderSubtitle": "كمّل قراءتك",
     "homeLearnQuranWithTutor": "تعلّم القرآن مع محفظك",
     "homeQuickReciters": "القرّاء",
     "homeQuickRecitersSubtitle": "اسمع القرآن بصوت قرّاء",
@@ -677,7 +683,7 @@
     "@noSurahsMatchSearch": {
         "description": "No surahs match search message"
     },
-    "continueListening": "أكمل الاستماع",
+    "continueListening": "أكمل استماعك",
     "@continueListening": {
         "description": "Continue listening section title"
     },
@@ -1207,7 +1213,7 @@
     "@welcomeToApp": {
         "description": "Welcome message on login screen"
     },
-    "signInWithGoogleDescription": "سجل الدخول بحساب جوجل للمتابعة",
+    "signInWithGoogleDescription": "سجّل الدخول بجوجل للاحتفاظ بإعدادات الصلاة وتفضيلاتك عبر أجهزتك",
     "@signInWithGoogleDescription": {
         "description": "Description text for Google sign in"
     },
@@ -1219,7 +1225,7 @@
     "@continueWithApple": {
         "description": "Primary CTA for Sign in with Apple on the login screen"
     },
-    "signInWithAppleDescription": "سجّل الدخول باستخدام Apple أو Google أو البريد للمتابعة",
+    "signInWithAppleDescription": "سجّل الدخول بـ Apple أو Google أو البريد للاحتفاظ بإعدادات الصلاة وتفضيلاتك عبر أجهزتك",
     "@signInWithAppleDescription": {
         "description": "Login hero copy when Sign in with Apple is available"
     },
@@ -1279,11 +1285,11 @@
     "@authErrorGenericMessage": {
         "description": "Fallback shown for unmapped auth errors so raw exception text never reaches users"
     },
-    "signInWithEmailDescription": "سجّل الدخول ببريدك الإلكتروني وكلمة المرور",
+    "signInWithEmailDescription": "سجّل الدخول بالبريد للاحتفاظ بإعداداتك على هذا الجهاز وغيره",
     "@signInWithEmailDescription": {
         "description": "Subtitle on email login screen"
     },
-    "createAccountDescription": "أنشئ حساباً بالبريد الإلكتروني وكلمة المرور",
+    "createAccountDescription": "أنشئ حساباً للاحتفاظ بإعدادات الصلاة وتفضيلاتك",
     "@createAccountDescription": {
         "description": "Subtitle on registration screen"
     },
@@ -1322,7 +1328,7 @@
             }
         }
     },
-    "registrationStepAccountTitle": "الحساب",
+    "registrationStepAccountTitle": "حسابك",
     "@registrationStepAccountTitle": {
         "description": "Registration step 1 title"
     },
@@ -1330,11 +1336,11 @@
     "@registrationStepAccountDescription": {
         "description": "Registration step 1 subtitle"
     },
-    "registrationStepPersonalTitle": "البيانات الشخصية",
+    "registrationStepPersonalTitle": "عنك",
     "@registrationStepPersonalTitle": {
         "description": "Registration step 2 title"
     },
-    "registrationStepPersonalDescription": "أخبرنا عن نفسك",
+    "registrationStepPersonalDescription": "بعض التفاصيل لملفك الشخصي",
     "@registrationStepPersonalDescription": {
         "description": "Registration step 2 subtitle"
     },
@@ -1346,7 +1352,7 @@
     "@registrationStepLearningDescription": {
         "description": "Registration step 3 subtitle"
     },
-    "registrationStepReviewTitle": "المراجعة",
+    "registrationStepReviewTitle": "أوشكت على الانتهاء",
     "@registrationStepReviewTitle": {
         "description": "Registration step 5 title"
     },
@@ -1703,6 +1709,17 @@
     "@chooseLanguage": {
         "description": "Choose language dialog title"
     },
+    "firstRunFunnelStepProgress": "الخطوة {current} من {total}",
+    "@firstRunFunnelStepProgress": {
+        "placeholders": {
+            "current": { "type": "int" },
+            "total": { "type": "int" }
+        }
+    },
+    "languageWelcomeProgressSubtitle": "اختر لغة إعدادك",
+    "@languageWelcomeProgressSubtitle": {
+        "description": "Language welcome subtitle reinforcing underway setup"
+    },
     "manageStorage": "إدارة التخزين",
     "@manageStorage": {
         "description": "Manage storage setting title"
@@ -1729,9 +1746,13 @@
     "@guestUser": {
         "description": "Guest user display name"
     },
-    "signInToSync": "سجل الدخول لمزامنة بياناتك",
+    "signInToSync": "سجّل الدخول للاحتفاظ بإعدادات الصلاة وتفضيلاتك",
     "@signInToSync": {
-        "description": "Sign in prompt subtitle"
+        "description": "Guest settings profile header — endowment tone"
+    },
+    "settingsProfileCompleteHint": "أضف صورة واسماً",
+    "@settingsProfileCompleteHint": {
+        "description": "Soft completeness cue on Settings profile card when name or photo missing"
     },
     "logoutConfirmation": "هل أنت متأكد أنك تريد تسجيل الخروج؟",
     "@logoutConfirmation": {
@@ -2342,7 +2363,7 @@
     "@onboardingVisualHint2": {
         "description": "Short caption under onboarding slide 2 device preview"
     },
-    "startJourney": "ابدأ",
+    "startJourney": "تابع إعدادك",
     "@startJourney": {
         "description": "Start button text"
     },
@@ -3583,7 +3604,14 @@
     "prayerAlertsPermissionLocationTitle": "الموقع",
     "prayerAlertsPermissionLocationBody": "اسمح بالوصول إلى الموقع لحساب أوقات الصلاة حسب مكانك. تُحدَّث الأوقات تلقائياً عند السفر.",
     "prayerAlertsPermissionNotificationsTitle": "السماح بالإشعارات",
-    "prayerAlertsPermissionNotificationsBody": "للتأكد من عدم تفويت أي وقت للصلاة، يُرجى السماح بالإشعارات. ستُذكّرك الإشعارات عند حلول وقت كل صلاة.",
+    "prayerAlertsPermissionNotificationsBody": "اسمح بالإشعارات ليُذكَّرك التطبيق عند حلول وقت كل صلاة.",
+    "prayerAlertsPermissionStepProgress": "الخطوة {current} من {total}",
+    "@prayerAlertsPermissionStepProgress": {
+        "placeholders": {
+            "current": { "type": "int" },
+            "total": { "type": "int" }
+        }
+    },
     "prayerAlertsPermissionExactAlarmTitle": "التنبيهات والتذكيرات",
     "prayerAlertsPermissionExactAlarmBody": "اسمح بإذن التنبيهات والتذكيرات حتى يعمل الأذان وتنبيهات الصلاة في وقتها، حتى عندما يكون الهاتف في وضع السكون أو الشاشة مغلقة.",
     "prayerAlertsPermissionBatteryTitle": "تحسين البطارية",
@@ -4334,6 +4362,18 @@
     "@manageDevicesSignOutOthersConfirm": { "description": "Confirm dialog body for sign out others" },
     "manageDevicesEmpty": "لا توجد أجهزة أخرى مُسجَّلة الدخول.",
     "@manageDevicesEmpty": { "description": "Empty state when only the current device is present" },
+    "manageDevicesEmptyTitle": "هذا الجهاز فقط",
+    "@manageDevicesEmptyTitle": {
+        "description": "Title when Manage Devices has no other signed-in devices"
+    },
+    "manageDevicesGuestTitle": "سجّل الدخول لإدارة الأجهزة",
+    "@manageDevicesGuestTitle": {
+        "description": "Manage Devices guest empty title"
+    },
+    "manageDevicesGuestSubtitle": "اطّلع على الأجهزة التي تستخدم حسابك وسجّل الخروج منها عند الحاجة",
+    "@manageDevicesGuestSubtitle": {
+        "description": "Manage Devices guest empty subtitle"
+    },
     "manageDevicesError": "تعذّر تحميل أجهزتك.",
     "@manageDevicesError": { "description": "Error state for the devices list" },
     "manageDevicesSignOutFailed": "تعذّر تسجيل الخروج من هذا الجهاز. حاول مرة أخرى.",

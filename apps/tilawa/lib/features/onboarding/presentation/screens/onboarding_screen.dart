@@ -156,12 +156,31 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
                       padding: EdgeInsets.symmetric(
                         vertical: tokens.spaceSmall,
                       ),
-                      child: Semantics(
-                        label: '${_currentPage + 1} / $pageCount',
-                        child: OnboardingPageIndicator(
-                          count: pageCount,
-                          currentIndex: _currentPage,
-                        ),
+                      child: Column(
+                        mainAxisSize: MainAxisSize.min,
+                        spacing: tokens.spaceExtraSmall,
+                        children: <Widget>[
+                          Text(
+                            context.l10n.onboardingPageSemantics(
+                              _currentPage + 1,
+                              pageCount,
+                            ),
+                            style: theme.textTheme.labelLarge?.copyWith(
+                              color: theme.colorScheme.onSurfaceVariant,
+                            ),
+                            textAlign: TextAlign.center,
+                          ),
+                          Semantics(
+                            label: context.l10n.onboardingPageSemantics(
+                              _currentPage + 1,
+                              pageCount,
+                            ),
+                            child: OnboardingPageIndicator(
+                              count: pageCount,
+                              currentIndex: _currentPage,
+                            ),
+                          ),
+                        ],
                       ),
                     ),
                   ],

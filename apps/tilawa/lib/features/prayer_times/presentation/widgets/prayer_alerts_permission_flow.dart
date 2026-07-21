@@ -117,21 +117,63 @@ class _PrayerAlertsPermissionFlowState
   Widget build(BuildContext context) {
     final ThemeData theme = Theme.of(context);
     final MeMuslimDesignTokens tokens = theme.tokens;
+    final int stepCount = widget.steps.length;
+    final int displayStep = _currentPage + 1;
+    final double progress = stepCount <= 0
+        ? 0
+        : (displayStep / stepCount).clamp(0.0, 1.0);
 
     return Scaffold(
       body: TilawaThumbReachLayout(
         useSafeArea: true,
-        content: PageView.builder(
-          controller: _pageController,
-          physics: const NeverScrollableScrollPhysics(),
-          itemCount: widget.steps.length,
-          itemBuilder: (BuildContext context, int index) {
-            return _PermissionStepPage(
-              step: widget.steps[index],
-              tokens: tokens,
-              theme: theme,
-            );
-          },
+        content: Column(
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          children: <Widget>[
+            Padding(
+              padding: EdgeInsets.fromLTRB(
+                tokens.spaceLarge,
+                tokens.spaceSmall,
+                tokens.spaceLarge,
+                0,
+              ),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.stretch,
+                spacing: tokens.spaceSmall,
+                children: <Widget>[
+                  Text(
+                    context.l10n.prayerAlertsPermissionStepProgress(
+                      displayStep,
+                      stepCount,
+                    ),
+                    style: theme.textTheme.labelLarge?.copyWith(
+                      color: theme.colorScheme.onSurfaceVariant,
+                    ),
+                  ),
+                  ClipRRect(
+                    borderRadius: BorderRadius.circular(tokens.radiusSmall),
+                    child: LinearProgressIndicator(
+                      value: progress,
+                      minHeight: tokens.progressHeight,
+                    ),
+                  ),
+                ],
+              ),
+            ),
+            Expanded(
+              child: PageView.builder(
+                controller: _pageController,
+                physics: const NeverScrollableScrollPhysics(),
+                itemCount: stepCount,
+                itemBuilder: (BuildContext context, int index) {
+                  return _PermissionStepPage(
+                    step: widget.steps[index],
+                    tokens: tokens,
+                    theme: theme,
+                  );
+                },
+              ),
+            ),
+          ],
         ),
         actions: _PermissionStepFooter(
           step: widget.steps[_currentPage],

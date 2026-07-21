@@ -54,9 +54,17 @@ class LanguageWelcomeScreen extends StatelessWidget {
                     style: welcomeStyle,
                     maxLines: 2,
                   ),
+                  SizedBox(height: tokens.spaceSmall),
+                  Text(
+                    context.l10n.firstRunFunnelStepProgress(1, 4),
+                    style: theme.textTheme.labelLarge?.copyWith(
+                      color: colorScheme.onSurfaceVariant,
+                    ),
+                    textAlign: TextAlign.center,
+                  ),
                   SizedBox(height: tokens.spaceMedium),
                   Text(
-                    context.l10n.chooseLanguage,
+                    context.l10n.languageWelcomeProgressSubtitle,
                     style: theme.textTheme.bodyLarge?.copyWith(
                       color: colorScheme.onSurfaceVariant,
                     ),

@@ -95,7 +95,10 @@ void main() {
       (tester) async {
         await pumpSettingsHarness(tester);
 
-        expect(find.text('Sign in to sync your data'), findsOneWidget);
+        expect(
+          find.text('Sign in to keep your prayer setup and preferences'),
+          findsOneWidget,
+        );
         expect(find.text('Signed In User'), findsNothing);
       },
     );
@@ -119,7 +122,10 @@ void main() {
         });
         await tester.pump();
 
-        expect(find.text('Sign in to sync your data'), findsOneWidget);
+        expect(
+          find.text('Sign in to keep your prayer setup and preferences'),
+          findsOneWidget,
+        );
       },
     );
 
@@ -129,7 +135,10 @@ void main() {
         tester,
       ) async {
         await pumpSettingsHarness(tester);
-        expect(find.text('Sign in to sync your data'), findsOneWidget);
+        expect(
+          find.text('Sign in to keep your prayer setup and preferences'),
+          findsOneWidget,
+        );
 
         authHarness.authBloc.add(const CheckAuthStatusEvent());
         await tester.runAsync(() async {
@@ -140,7 +149,10 @@ void main() {
         await tester.pump();
 
         expect(find.text('Signed In User'), findsOneWidget);
-        expect(find.text('Sign in to sync your data'), findsNothing);
+        expect(
+          find.text('Sign in to keep your prayer setup and preferences'),
+          findsNothing,
+        );
       },
     );
 
@@ -148,7 +160,10 @@ void main() {
       tester,
     ) async {
       await pumpSettingsHarness(tester);
-      expect(find.text('Sign in to sync your data'), findsOneWidget);
+      expect(
+        find.text('Sign in to keep your prayer setup and preferences'),
+        findsOneWidget,
+      );
 
       binding.handleAppLifecycleStateChanged(AppLifecycleState.inactive);
       binding.handleAppLifecycleStateChanged(AppLifecycleState.paused);

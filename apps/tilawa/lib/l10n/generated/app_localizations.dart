@@ -428,6 +428,12 @@ abstract class AppLocalizations {
   /// **'{reciter} · {surah}'**
   String homeListeningResumeSubtitle(String reciter, String surah);
 
+  /// Home continue listening progress percent cue
+  ///
+  /// In en, this message translates to:
+  /// **'{percent}%'**
+  String homeListeningResumePercent(int percent);
+
   /// Athkar compact card completed state
   ///
   /// In en, this message translates to:
@@ -551,7 +557,7 @@ abstract class AppLocalizations {
   /// Home Today row subtitle for opening the last-read Quran page
   ///
   /// In en, this message translates to:
-  /// **'Resume from your last read page'**
+  /// **'Continue your reading'**
   String get homeContinueQuranSubtitle;
 
   /// Home Quran resume subtitle with surah and page
@@ -749,7 +755,7 @@ abstract class AppLocalizations {
   /// Subtitle for the Quran Reader primary action card
   ///
   /// In en, this message translates to:
-  /// **'Resume from your last read page'**
+  /// **'Continue your reading'**
   String get homeQuickQuranReaderSubtitle;
 
   /// Home quick action for Quran teaching sessions with a hafiz
@@ -1690,7 +1696,7 @@ abstract class AppLocalizations {
   /// Continue listening section title
   ///
   /// In en, this message translates to:
-  /// **'Continue listening'**
+  /// **'Continue your listening'**
   String get continueListening;
 
   /// Play button text
@@ -2578,7 +2584,7 @@ abstract class AppLocalizations {
   /// Description text for Google sign in
   ///
   /// In en, this message translates to:
-  /// **'Sign in with your Google account to continue'**
+  /// **'Sign in with Google to keep your prayer setup and preferences across devices'**
   String get signInWithGoogleDescription;
 
   /// Signing in progress text
@@ -2596,7 +2602,7 @@ abstract class AppLocalizations {
   /// Login hero copy when Sign in with Apple is available
   ///
   /// In en, this message translates to:
-  /// **'Sign in with Apple, Google, or email to continue'**
+  /// **'Sign in with Apple, Google, or email to keep your prayer setup and preferences across devices'**
   String get signInWithAppleDescription;
 
   /// Sign in with Google button text (Google Identity branding)
@@ -2686,13 +2692,13 @@ abstract class AppLocalizations {
   /// Subtitle on email login screen
   ///
   /// In en, this message translates to:
-  /// **'Sign in with your email and password'**
+  /// **'Sign in with email to keep your setup on this device and others'**
   String get signInWithEmailDescription;
 
   /// Subtitle on registration screen
   ///
   /// In en, this message translates to:
-  /// **'Create an account with email and password'**
+  /// **'Create an account to keep your prayer setup and preferences'**
   String get createAccountDescription;
 
   /// Email field label
@@ -2734,7 +2740,7 @@ abstract class AppLocalizations {
   /// Registration step 1 title
   ///
   /// In en, this message translates to:
-  /// **'Account'**
+  /// **'Your account'**
   String get registrationStepAccountTitle;
 
   /// Registration step 1 subtitle
@@ -2746,13 +2752,13 @@ abstract class AppLocalizations {
   /// Registration step 2 title
   ///
   /// In en, this message translates to:
-  /// **'Personal details'**
+  /// **'About you'**
   String get registrationStepPersonalTitle;
 
   /// Registration step 2 subtitle
   ///
   /// In en, this message translates to:
-  /// **'Tell us about yourself'**
+  /// **'A few details for your profile'**
   String get registrationStepPersonalDescription;
 
   /// Registration step 3 title
@@ -2770,7 +2776,7 @@ abstract class AppLocalizations {
   /// Registration step 5 title
   ///
   /// In en, this message translates to:
-  /// **'Review'**
+  /// **'Almost done'**
   String get registrationStepReviewTitle;
 
   /// Registration step 5 subtitle
@@ -3211,6 +3217,18 @@ abstract class AppLocalizations {
   /// **'Choose Language'**
   String get chooseLanguage;
 
+  /// Calm goal-gradient cue for first-run funnel screens
+  ///
+  /// In en, this message translates to:
+  /// **'Step {current} of {total}'**
+  String firstRunFunnelStepProgress(int current, int total);
+
+  /// Language welcome subtitle reinforcing underway setup
+  ///
+  /// In en, this message translates to:
+  /// **'Choose the language for your setup'**
+  String get languageWelcomeProgressSubtitle;
+
   /// Manage storage setting title
   ///
   /// In en, this message translates to:
@@ -3241,11 +3259,17 @@ abstract class AppLocalizations {
   /// **'Guest User'**
   String get guestUser;
 
-  /// Sign in prompt subtitle
+  /// Guest settings profile header — endowment tone
   ///
   /// In en, this message translates to:
-  /// **'Sign in to sync your data'**
+  /// **'Sign in to keep your prayer setup and preferences'**
   String get signInToSync;
+
+  /// Soft completeness cue on Settings profile card when name or photo missing
+  ///
+  /// In en, this message translates to:
+  /// **'Add a photo and name'**
+  String get settingsProfileCompleteHint;
 
   /// Logout confirmation dialog message
   ///
@@ -3979,10 +4003,10 @@ abstract class AppLocalizations {
   /// **'Browse reciters with search and favorites'**
   String get onboardingVisualHint2;
 
-  /// Start button text
+  /// Onboarding complete CTA — ownership tone after slides
   ///
   /// In en, this message translates to:
-  /// **'Get started'**
+  /// **'Continue with your setup'**
   String get startJourney;
 
   /// Sleep timer dialog title
@@ -5698,8 +5722,14 @@ abstract class AppLocalizations {
   /// Body for prayer alerts notification permission setup screen
   ///
   /// In en, this message translates to:
-  /// **'To make sure you never miss a prayer time, allow notifications. You will be reminded when each prayer begins.'**
+  /// **'Allow notifications so you can be reminded when each prayer begins.'**
   String get prayerAlertsPermissionNotificationsBody;
+
+  /// Goal-gradient label inside the prayer alerts permission wizard
+  ///
+  /// In en, this message translates to:
+  /// **'Step {current} of {total}'**
+  String prayerAlertsPermissionStepProgress(int current, int total);
 
   /// Title for exact alarm permission setup screen
   ///
@@ -7182,6 +7212,24 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'No other devices are signed in.'**
   String get manageDevicesEmpty;
+
+  /// Title when Manage Devices has no other signed-in devices
+  ///
+  /// In en, this message translates to:
+  /// **'Only this device'**
+  String get manageDevicesEmptyTitle;
+
+  /// Manage Devices guest empty title
+  ///
+  /// In en, this message translates to:
+  /// **'Sign in to manage devices'**
+  String get manageDevicesGuestTitle;
+
+  /// Manage Devices guest empty subtitle
+  ///
+  /// In en, this message translates to:
+  /// **'See which devices use your account and sign them out if needed'**
+  String get manageDevicesGuestSubtitle;
 
   /// Error state for the devices list
   ///

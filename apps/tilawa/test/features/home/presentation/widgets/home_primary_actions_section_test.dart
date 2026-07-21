@@ -2,6 +2,7 @@ import 'package:dartz_plus/dartz_plus.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:go_router/go_router.dart';
 import 'package:tilawa/features/athkar/domain/entities/athkar_category.dart';
 import 'package:tilawa/features/history/domain/entities/history_entity.dart';
 import 'package:tilawa/features/history/domain/repositories/history_repository.dart';
@@ -54,9 +55,10 @@ void main() {
     expect(find.byType(HomePrimaryActionTile), findsNWidgets(2));
     expect(find.text(l10n.homeQuickAthkar), findsOneWidget);
     expect(find.text(expected), findsOneWidget);
+    expect(find.byType(LinearProgressIndicator), findsOneWidget);
   });
 
-  testWidgets('Quran tile omits subtitle when resume is a fresh start', (
+  testWidgets('Quran tile shows page-1 resume as underway progress', (
     tester,
   ) async {
     final cubit = HomeQuranResumeCubit(
@@ -85,9 +87,13 @@ void main() {
     final l10n = AppLocalizations.of(
       tester.element(find.byType(HomePrimaryActionsSection)),
     );
+    final String expected = l10n.homeQuranResumeSurahPage(
+      SurahNames.getEnglishSurahName(1),
+      1,
+    );
     expect(find.text(l10n.homeQuickQuranReader), findsOneWidget);
-    expect(find.text(l10n.homeContinueQuranSubtitle), findsNothing);
-    expect(find.text(l10n.homeQuranResumePage(1)), findsNothing);
+    expect(find.text(expected), findsOneWidget);
+    expect(find.byType(LinearProgressIndicator), findsOneWidget);
   });
 
   testWidgets('Athkar tile shows remaining count for in-progress ritual', (
@@ -137,11 +143,79 @@ void main() {
       findsOneWidget,
     );
   });
+
+  testWidgets('Athkar tile deep-links to urgent category details', (
+    tester,
+  ) async {
+    const AthkarCategory morning = AthkarCategory(
+      id: 1,
+      nameAr: 'أذكار الصباح',
+      nameEn: 'Morning Athkar',
+      icon: 'wb_sunny_rounded',
+    );
+    final athkarCubit = _FakeAthkarCompactCubit(
+      const HomeAthkarCompactState(
+        status: HomeAthkarRowStatus.ready,
+        rows: <HomeAthkarRowState>[
+          HomeAthkarRowState(
+            category: morning,
+            completion: HomeAthkarCompletionState.inProgress,
+            remainingCount: 3,
+          ),
+        ],
+      ),
+    );
+    addTearDown(athkarCubit.close);
+
+    String? openedLocation;
+    final GoRouter router = GoRouter(
+      routes: [
+        GoRoute(
+          path: '/',
+          builder: (context, _) => Scaffold(
+            body: BlocProvider<HomeAthkarCompactCubit>.value(
+              value: athkarCubit,
+              child: const HomePrimaryActionsSection(),
+            ),
+          ),
+        ),
+        GoRoute(
+          path: '/athkar/:categoryId',
+          builder: (context, state) {
+            openedLocation = state.uri.toString();
+            return const Scaffold(body: Text('Athkar details'));
+          },
+        ),
+      ],
+    );
+
+    await tester.pumpWidget(
+      MaterialApp.router(
+        theme: AppTheme.getLightTheme(primaryColor: AppColors.defaultPrimary),
+        locale: const Locale('en'),
+        localizationsDelegates: AppLocalizations.localizationsDelegates,
+        supportedLocales: AppLocalizations.supportedLocales,
+        routerConfig: router,
+      ),
+    );
+    await tester.pumpAndSettle();
+
+    final l10n = AppLocalizations.of(
+      tester.element(find.byType(HomePrimaryActionsSection)),
+    );
+    await tester.tap(find.text(l10n.homeQuickAthkar));
+    await tester.pumpAndSettle();
+
+    expect(openedLocation, isNotNull);
+    expect(openedLocation, contains('/athkar/1'));
+    expect(openedLocation, contains('source=home_primary'));
+    expect(find.text('Athkar details'), findsOneWidget);
+  });
 }
 
 class _FakeAthkarCompactCubit extends Cubit<HomeAthkarCompactState>
     implements HomeAthkarCompactCubit {
-  _FakeAthkarCompactCubit(super.initial);
+  _FakeAthkarCompactCubit(super.initialState);
 
   @override
   Future<void> load({DateTime? now}) async {}

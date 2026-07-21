@@ -342,6 +342,12 @@ void main() {
 
       expect(find.text('Welcome to MeMuslim'), findsOneWidget);
       expect(find.text('Sign in with Google'), findsOneWidget);
+      expect(
+        find.text(
+          'Sign in with Google to keep your prayer setup and preferences across devices',
+        ),
+        findsOneWidget,
+      );
       expect(find.byType(AppLanguageSwitcher), findsOneWidget);
       expect(find.text('English'), findsOneWidget);
       expect(find.text('العربية'), findsOneWidget);

@@ -1,7 +1,10 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:tilawa/core/extensions.dart';
 import 'package:tilawa/features/athkar/presentation/athkar_category_presentation.dart';
+import 'package:tilawa/features/home/domain/constants/quran_mushaf_constants.dart';
 import 'package:tilawa/features/home/presentation/cubit/home_athkar_compact_cubit.dart';
 import 'package:tilawa/features/home/presentation/cubit/home_athkar_compact_state.dart';
 import 'package:tilawa/features/home/presentation/cubit/home_quran_resume_cubit.dart';
@@ -15,7 +18,8 @@ import 'package:tilawa_ui_kit/tilawa_ui_kit.dart';
 /// Two primary daily-action tiles under the Sliver Prayer Hero.
 ///
 /// No visible section title — tiles self-label. Subtitles show resume /
-/// athkar progress when available.
+/// athkar progress when available (goal-gradient cue; never a cold blank
+/// when the user already has a position).
 class HomePrimaryActionsSection extends StatelessWidget {
   const HomePrimaryActionsSection({super.key});
 
@@ -99,6 +103,7 @@ class _QuranPrimaryTile extends StatelessWidget {
           icon: icon,
           label: label,
           subtitle: _quranResumeSubtitle(context, state),
+          progress: state.progressFraction(QuranMushafConstants.pageCount),
           onTap: () => const QuranLastReadRoute().push<void>(context),
         );
       },
@@ -153,9 +158,24 @@ class _AthkarPrimaryTile extends StatelessWidget {
           icon: icon,
           label: label,
           subtitle: _athkarSubtitle(context, row),
-          onTap: () => const AthkarCategoriesRoute().push<void>(context),
+          onTap: () => _openAthkar(context, row),
         );
       },
+    );
+  }
+
+  void _openAthkar(BuildContext context, HomeAthkarRowState? row) {
+    if (row == null) {
+      unawaited(const AthkarCategoriesRoute().push<void>(context));
+      return;
+    }
+    final String title = localizedAthkarCategoryTitle(context, row.category);
+    unawaited(
+      AthkarDetailsRoute(
+        categoryId: row.category.id,
+        categoryName: title,
+        source: 'home_primary',
+      ).push<void>(context),
     );
   }
 
@@ -169,24 +189,30 @@ class _AthkarPrimaryTile extends StatelessWidget {
 }
 
 /// Factual last-read line; null when there is nothing useful to show.
+///
+/// Page 1 still counts as underway progress (goal gradient) when a resume
+/// position exists — never blank the tile for a cold “start at zero” feel.
 String? _quranResumeSubtitle(BuildContext context, HomeQuranResumeState state) {
   if (!state.hasResumePosition) {
     return null;
   }
-  final int? page = state.page;
-  if (page == null || page <= 1) {
-    return null;
-  }
 
   final l10n = context.l10n;
+  final int? page = state.page;
   final int? surahNumber = state.surahNumber;
   if (surahNumber != null) {
     final String surahName = context.isArabic
         ? SurahNames.getArabicSurahName(surahNumber)
         : SurahNames.getEnglishSurahName(surahNumber);
-    return l10n.homeQuranResumeSurahPage(surahName, page);
+    if (page != null) {
+      return l10n.homeQuranResumeSurahPage(surahName, page);
+    }
+    return surahName;
   }
-  return l10n.homeQuranResumePage(page);
+  if (page != null) {
+    return l10n.homeQuranResumePage(page);
+  }
+  return l10n.homeContinueQuranSubtitle;
 }
 
 String? _athkarSubtitle(BuildContext context, HomeAthkarRowState? row) {

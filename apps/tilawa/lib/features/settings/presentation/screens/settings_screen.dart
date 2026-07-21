@@ -121,11 +121,6 @@ class _SettingsScreenState extends State<SettingsScreen> {
           appBar: TilawaCatalogAppBar.titleOnly(
             title: l10n.settings,
             automaticallyImplyLeading: false,
-            actions: [
-              SettingsLogoutAppBarAction(
-                onLogout: () => SettingsSheets.showLogoutConfirmation(context),
-              ),
-            ],
           ),
           body: TilawaCatalogSettingsBody(
             child: SettingsTeacherCapabilityScope(
@@ -286,6 +281,11 @@ class _SettingsScreenState extends State<SettingsScreen> {
                     title: l10n.settingsSupportSection,
                     leadingIcon: FluentIcons.person_support_24_regular,
                     children: [
+                      if (widget.supportTilawaEnabled)
+                        TilawaSettingsTile(
+                          title: l10n.supportTilawa,
+                          onTap: () => const SupportRoute().push(context),
+                        ),
                       const SettingsRateAppTile(),
                       const SentryReportBugTile(),
                       TilawaSettingsTile(
@@ -296,7 +296,6 @@ class _SettingsScreenState extends State<SettingsScreen> {
                       BlocBuilder<SettingsCubit, SettingsState>(
                         builder: (context, state) {
                           return SettingsShareAppTile(
-                            isLast: !widget.supportTilawaEnabled,
                             onShareRequested: () {
                               final shareText = buildSettingsShareAppText(
                                 l10n,
@@ -309,11 +308,6 @@ class _SettingsScreenState extends State<SettingsScreen> {
                           );
                         },
                       ),
-                      if (widget.supportTilawaEnabled)
-                        TilawaSettingsTile(
-                          title: l10n.supportTilawa,
-                          onTap: () => const SupportRoute().push(context),
-                        ),
                       TilawaSettingsTile(
                         title: l10n.privacyPolicy,
                         onTap: () => openLegalUrl(AppLegalUrls.privacyPolicy),
