@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:tilawa_ui_kit/src/atoms/tilawa_text_field.dart';
 
@@ -225,6 +226,25 @@ void main() {
 
       // Counter should show current/max format
       expect(find.textContaining('4'), findsOneWidget);
+    });
+
+    testWidgets('applies input formatters before reporting text changes', (
+      tester,
+    ) async {
+      final controller = TextEditingController();
+
+      await tester.pumpWidget(
+        testWrapper(
+          child: TilawaTextField(
+            controller: controller,
+            inputFormatters: [FilteringTextInputFormatter.digitsOnly],
+          ),
+        ),
+      );
+
+      await tester.enterText(find.byType(TextField), 'a1b2');
+
+      expect(controller.text, '12');
     });
   });
 

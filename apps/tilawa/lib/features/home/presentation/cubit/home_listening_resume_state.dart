@@ -16,6 +16,7 @@ final class HomeListeningResumeState extends Equatable {
     this.moshafName,
     this.lastPositionMs = 0,
     this.durationMs = 0,
+    this.completed = false,
     this.artworkUrl,
   });
 
@@ -30,6 +31,7 @@ final class HomeListeningResumeState extends Equatable {
   final String? moshafName;
   final int lastPositionMs;
   final int durationMs;
+  final bool completed;
   final String? artworkUrl;
 
   bool get isVisible =>
@@ -37,6 +39,23 @@ final class HomeListeningResumeState extends Equatable {
       reciterName != null &&
       surahName != null &&
       audioUrl != null;
+
+  /// Seek when resuming; `null` restarts from the beginning.
+  ///
+  /// Matches [HistoryEntity.resumeInitialPosition]: completed / ≥97% progress
+  /// must not seek to the saved end position.
+  Duration? get resumeInitialPosition {
+    if (completed) {
+      return null;
+    }
+    if (durationMs > 0 && lastPositionMs / durationMs >= 0.97) {
+      return null;
+    }
+    if (lastPositionMs <= 0) {
+      return null;
+    }
+    return Duration(milliseconds: lastPositionMs);
+  }
 
   HomeListeningResumeState copyWith({
     HomeListeningResumeStatus? status,
@@ -50,6 +69,7 @@ final class HomeListeningResumeState extends Equatable {
     String? moshafName,
     int? lastPositionMs,
     int? durationMs,
+    bool? completed,
     String? artworkUrl,
     bool clearHistory = false,
   }) {
@@ -65,6 +85,7 @@ final class HomeListeningResumeState extends Equatable {
       moshafName: clearHistory ? null : moshafName ?? this.moshafName,
       lastPositionMs: clearHistory ? 0 : lastPositionMs ?? this.lastPositionMs,
       durationMs: clearHistory ? 0 : durationMs ?? this.durationMs,
+      completed: !clearHistory && (completed ?? this.completed),
       artworkUrl: clearHistory ? null : artworkUrl ?? this.artworkUrl,
     );
   }
@@ -82,6 +103,7 @@ final class HomeListeningResumeState extends Equatable {
     moshafName,
     lastPositionMs,
     durationMs,
+    completed,
     artworkUrl,
   ];
 }

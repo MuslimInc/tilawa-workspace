@@ -51,6 +51,61 @@ void main() {
       expect(entity.progress, 0.0);
     });
 
+    test('progress getter should return 1.0 when completed', () {
+      final entity = tHistoryEntity.copyWith(
+        durationMs: 10000,
+        lastPositionMs: 0,
+        completed: true,
+      );
+      expect(entity.progress, 1.0);
+    });
+
+    test('progress getter should return 1.0 when within 3% of end', () {
+      final entity = tHistoryEntity.copyWith(
+        durationMs: 10000,
+        lastPositionMs: 9700,
+      );
+      expect(entity.progress, 1.0);
+    });
+
+    group('resumeInitialPosition', () {
+      test('returns last position for in-progress entry', () {
+        final entity = tHistoryEntity.copyWith(
+          durationMs: 44834,
+          lastPositionMs: 12000,
+        );
+        expect(
+          entity.resumeInitialPosition,
+          const Duration(milliseconds: 12000),
+        );
+      });
+
+      test('returns null when completed so replay starts from beginning', () {
+        final entity = tHistoryEntity.copyWith(
+          durationMs: 44834,
+          lastPositionMs: 44826,
+          completed: true,
+        );
+        expect(entity.resumeInitialPosition, isNull);
+      });
+
+      test('returns null when within 3% of end', () {
+        final entity = tHistoryEntity.copyWith(
+          durationMs: 10000,
+          lastPositionMs: 9800,
+        );
+        expect(entity.resumeInitialPosition, isNull);
+      });
+
+      test('returns null when last position is zero', () {
+        final entity = tHistoryEntity.copyWith(
+          durationMs: 10000,
+          lastPositionMs: 0,
+        );
+        expect(entity.resumeInitialPosition, isNull);
+      });
+    });
+
     test('progressPercentage getter should return correct percentage', () {
       final entity = tHistoryEntity.copyWith(
         durationMs: 10000,

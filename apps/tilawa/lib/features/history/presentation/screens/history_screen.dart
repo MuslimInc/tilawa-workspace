@@ -77,9 +77,9 @@ class _HistoryScreenState extends State<HistoryScreen> {
                     ],
                   ),
                 ],
-                bottomContentHeight: Theme.of(
+                bottomContentHeight: TilawaAppBarConfig.catalogSearchRowHeight(
                   context,
-                ).componentTokens.searchField.height,
+                ),
                 bottomContent: HistorySearchBar(
                   controller: _searchController,
                   scrollPadding: EdgeInsets.only(bottom: keyboardInset + 24),
@@ -324,7 +324,7 @@ class _HistoryScreenState extends State<HistoryScreen> {
       AudioPlayerEvent.playFromQueue(
         [audio],
         0,
-        initialPosition: history.lastPosition,
+        initialPosition: history.resumeInitialPosition,
       ),
     );
   }

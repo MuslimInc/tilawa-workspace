@@ -36,6 +36,8 @@ flutter:
     - assets/icons/google_g_logo.svg
     - assets/icons/apple_logo.svg
     - assets/icons/quran_icon.svg
+    - assets/icons/quran_nav_icon.svg
+    - assets/icons/qari_icon.svg
 
   fonts:
     # Bundled IBM Plex Sans Arabic (SIL Open Font License 1.1) so the brand
@@ -68,4 +70,3 @@ flutter:
           weight: 600
         - asset: assets/fonts/Poppins-Bold.ttf
           weight: 700
-

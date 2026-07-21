@@ -62,24 +62,17 @@ class _ReportConcernSheetBodyState extends State<_ReportConcernSheetBody> {
                 children: [
                   Text(l10n.reportConcernSubtitle),
                   SizedBox(height: tokens.spaceLarge),
-                  DropdownButtonFormField<SessionReportCategory>(
-                    initialValue: _category,
-                    decoration: InputDecoration(
-                      labelText: l10n.reportConcernCategory,
-                    ),
-                    items: SessionReportCategory.values
-                        .map(
-                          (category) => DropdownMenuItem(
-                            value: category,
-                            child: Text(_categoryLabel(l10n, category)),
-                          ),
-                        )
-                        .toList(),
-                    onChanged: (value) {
-                      if (value != null) {
-                        setState(() => _category = value);
-                      }
-                    },
+                  TilawaDropdownField<SessionReportCategory>(
+                    value: _category,
+                    labelText: l10n.reportConcernCategory,
+                    items: [
+                      for (final category in SessionReportCategory.values)
+                        TilawaDropdownItem(
+                          value: category,
+                          label: _categoryLabel(l10n, category),
+                        ),
+                    ],
+                    onChanged: (value) => setState(() => _category = value),
                   ),
                   SizedBox(height: tokens.spaceMedium),
                   TilawaTextField(

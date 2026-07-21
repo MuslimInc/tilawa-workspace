@@ -42,22 +42,22 @@ class OnboardingPage extends StatelessWidget {
                       assetPath: content.imagePath,
                       style: content.heroStyle,
                     ),
-                    if (content.visualHint != null) ...[
-                      SizedBox(height: tokens.spaceSmall),
-                      Text(
-                        content.visualHint!,
-                        textAlign: TextAlign.center,
-                        style: theme.textTheme.labelMedium?.copyWith(
-                          color: colorScheme.onSurfaceVariant,
-                          height: tokens.textHeightLoose,
-                        ),
-                      ),
-                    ],
                     SizedBox(height: stateTokens.titleSpacing),
                     OnboardingTitleBlock(
                       title: content.title,
                       lineSpacing: tokens.spaceSmall,
                     ),
+                    if (content.visualHint != null) ...[
+                      SizedBox(height: tokens.spaceExtraSmall),
+                      Text(
+                        content.visualHint!,
+                        textAlign: TextAlign.center,
+                        style: theme.textTheme.labelSmall?.copyWith(
+                          color: colorScheme.onSurfaceVariant,
+                          height: tokens.textHeightLoose,
+                        ),
+                      ),
+                    ],
                     SizedBox(height: stateTokens.subtitleSpacing),
                     TilawaReservedTextLines(
                       text: content.description,

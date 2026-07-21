@@ -1338,6 +1338,10 @@
     "@settingsPlaybackAndStorage": {
         "description": "Playback and storage section header on settings screen"
     },
+    "settingsContentAndPlayback": "Content & playback",
+    "@settingsContentAndPlayback": {
+        "description": "Merged content and playback section header on settings screen"
+    },
     "settingsRecitersSection": "Reciters",
     "@settingsRecitersSection": {
         "description": "Reciters section header on settings screen"

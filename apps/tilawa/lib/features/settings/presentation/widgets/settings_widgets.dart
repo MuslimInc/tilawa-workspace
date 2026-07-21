@@ -174,85 +174,91 @@ class SettingsProfileHeader extends StatelessWidget {
             : context.l10n.editProfileTitle;
 
         return TilawaSettingsGroupHorizontalInset(
-          child: Semantics(
-            button: true,
-            label: title,
-            value: subtitle,
-            hint: semanticsHint,
-            onTap: onTap,
-            excludeSemantics: true,
-            child: TilawaCard(
+          child: Padding(
+            // Identity card owns the top of Settings; space below separates
+            // it from preference groups (proximity / progressive scan).
+            padding: EdgeInsets.only(bottom: tokens.spaceLarge),
+            child: Semantics(
+              button: true,
+              label: title,
+              value: subtitle,
+              hint: semanticsHint,
               onTap: onTap,
-              padding: EdgeInsets.all(tokens.spaceLarge),
-              child: Row(
-                children: [
-                  ProfileAvatar(
-                    photoUrl: photoUrl,
-                    displayName: user?.displayName,
-                    size: tokens.iconHubExtent,
-                  ),
-                  SizedBox(width: tokens.spaceLarge),
-                  Expanded(
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      mainAxisSize: MainAxisSize.min,
-                      children: [
-                        Text(
-                          title,
-                          maxLines: 2,
-                          overflow: TextOverflow.ellipsis,
-                          style: theme.textTheme.titleLarge?.copyWith(
-                            fontWeight: FontWeight.w700,
-                            color: colorScheme.onSurface,
-                          ),
-                        ),
-                        if (subtitle != null) ...[
-                          SizedBox(height: tokens.spaceExtraSmall),
+              excludeSemantics: true,
+              child: TilawaCard(
+                onTap: onTap,
+                padding: EdgeInsets.all(tokens.spaceLarge),
+                child: Row(
+                  children: [
+                    ProfileAvatar(
+                      photoUrl: photoUrl,
+                      displayName: user?.displayName,
+                      size: tokens.iconHubExtent,
+                    ),
+                    SizedBox(width: tokens.spaceLarge),
+                    Expanded(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
                           Text(
-                            subtitle,
+                            title,
                             maxLines: 2,
                             overflow: TextOverflow.ellipsis,
-                            style: theme.textTheme.bodyMedium?.copyWith(
-                              color: colorScheme.onSurfaceVariant,
-                              height: tokens.textHeightLoose,
+                            style: theme.textTheme.titleLarge?.copyWith(
+                              fontWeight: FontWeight.w700,
+                              color: colorScheme.onSurface,
                             ),
                           ),
-                        ],
-                        if (profileIncomplete) ...[
-                          SizedBox(height: tokens.spaceExtraSmall),
-                          Text(
-                            context.l10n.settingsProfileCompleteHint,
-                            maxLines: 1,
-                            overflow: TextOverflow.ellipsis,
-                            style: theme.textTheme.bodySmall?.copyWith(
-                              color: colorScheme.primary,
-                              height: tokens.textHeightLoose,
+                          if (subtitle != null) ...[
+                            SizedBox(height: tokens.spaceExtraSmall),
+                            Text(
+                              subtitle,
+                              maxLines: 2,
+                              overflow: TextOverflow.ellipsis,
+                              style: theme.textTheme.bodyMedium?.copyWith(
+                                color: colorScheme.onSurfaceVariant,
+                                height: tokens.textHeightLoose,
+                              ),
                             ),
-                          ),
+                          ],
+                          if (profileIncomplete) ...[
+                            SizedBox(height: tokens.spaceExtraSmall),
+                            Text(
+                              context.l10n.settingsProfileCompleteHint,
+                              maxLines: 1,
+                              overflow: TextOverflow.ellipsis,
+                              style: theme.textTheme.bodySmall?.copyWith(
+                                color: colorScheme.primary,
+                                height: tokens.textHeightLoose,
+                              ),
+                            ),
+                          ],
+                          if (!isGuest) ...[
+                            const _SettingsAdminBadge(),
+                            if (quranSessionsFeatureConfig()
+                                .showProfileTeacherEntry)
+                              _SettingsVerifiedTeacherBadge(isGuest: isGuest),
+                          ],
                         ],
-                        if (!isGuest) ...[
-                          const _SettingsAdminBadge(),
-                          if (quranSessionsFeatureConfig()
-                              .showProfileTeacherEntry)
-                            _SettingsVerifiedTeacherBadge(isGuest: isGuest),
-                        ],
-                      ],
+                      ),
                     ),
-                  ),
-                  SizedBox(width: tokens.spaceMedium),
-                  if (isGuest)
-                    Icon(
-                      TilawaIcons.chevronRightSmall,
-                      size: tokens.iconSizeSmall,
-                      color: colorScheme.onSurfaceVariant,
-                    )
-                  else
-                    TilawaIconBox(
-                      icon: FluentIcons.edit_24_regular,
-                      iconColor: colorScheme.primary,
-                      variant: TilawaIconBoxVariant.plain,
-                    ),
-                ],
+                    SizedBox(width: tokens.spaceMedium),
+                    if (isGuest)
+                      Icon(
+                        TilawaIcons.chevronRightSmall,
+                        size: tokens.iconSizeSmall,
+                        color: colorScheme.onSurfaceVariant,
+                      )
+                    else
+                      TilawaIconBox(
+                        icon: FluentIcons.edit_24_regular,
+                        // Mute chrome — name + completeness hint carry accent.
+                        iconColor: colorScheme.onSurfaceVariant,
+                        variant: TilawaIconBoxVariant.plain,
+                      ),
+                  ],
+                ),
               ),
             ),
           ),
@@ -625,7 +631,9 @@ class _SettingsAccountActionsState extends State<SettingsAccountActions> {
 
         return TilawaSettingsGroupHorizontalInset(
           child: Padding(
-            padding: EdgeInsets.only(top: tokens.spaceLarge),
+            // Extra gap before destructive zone — separate from preference/
+            // support scan path (proximity chunking).
+            padding: EdgeInsets.only(top: tokens.spaceExtraLarge),
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.stretch,
               spacing: tokens.spaceSmall,
@@ -685,7 +693,7 @@ class SettingsVersionFooter extends StatelessWidget {
   Widget build(BuildContext context) {
     final tokens = Theme.of(context).tokens;
     final muted = Theme.of(context).colorScheme.onSurfaceVariant;
-    final textStyle = context.textTheme.bodySmall?.copyWith(color: muted);
+    final textStyle = context.textTheme.labelSmall?.copyWith(color: muted);
 
     return BlocBuilder<SettingsCubit, SettingsState>(
       builder: (context, state) {

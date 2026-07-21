@@ -22,15 +22,13 @@ class LanguageWelcomeScreen extends StatelessWidget {
           statusBarBackgroundColor: theme.scaffoldBackgroundColor,
           navigationBarColor: theme.scaffoldBackgroundColor,
         );
-    final TextStyle? baseWelcomeStyle = theme.textTheme.headlineLarge;
-    final double welcomeFontSize = baseWelcomeStyle?.fontSize ?? 32;
-    final double welcomeHeightFactor = baseWelcomeStyle?.height ?? 1.25;
+    // Brand badge owns first glance; welcome sits one step below.
+    final TextStyle? baseWelcomeStyle = theme.textTheme.headlineSmall;
     final TextStyle welcomeStyle = (baseWelcomeStyle ?? const TextStyle())
         .copyWith(
           color: colorScheme.onSurface,
-          fontWeight: FontWeight.bold,
-          fontSize: welcomeFontSize,
-          height: welcomeHeightFactor,
+          fontWeight: FontWeight.w600,
+          height: baseWelcomeStyle?.height ?? 1.25,
         );
 
     return AnnotatedRegion<SystemUiOverlayStyle>(
@@ -48,7 +46,7 @@ class LanguageWelcomeScreen extends StatelessWidget {
                 crossAxisAlignment: CrossAxisAlignment.stretch,
                 children: <Widget>[
                   const Center(child: TilawaAppBrandBadge()),
-                  SizedBox(height: tokens.spaceExtraLarge),
+                  SizedBox(height: tokens.spaceMedium),
                   TilawaReservedTextLines(
                     text: context.l10n.welcomeToApp,
                     style: welcomeStyle,
@@ -57,15 +55,15 @@ class LanguageWelcomeScreen extends StatelessWidget {
                   SizedBox(height: tokens.spaceSmall),
                   Text(
                     context.l10n.firstRunFunnelStepProgress(1, 4),
-                    style: theme.textTheme.labelLarge?.copyWith(
+                    style: theme.textTheme.labelMedium?.copyWith(
                       color: colorScheme.onSurfaceVariant,
                     ),
                     textAlign: TextAlign.center,
                   ),
-                  SizedBox(height: tokens.spaceMedium),
+                  SizedBox(height: tokens.spaceExtraSmall),
                   Text(
                     context.l10n.languageWelcomeProgressSubtitle,
-                    style: theme.textTheme.bodyLarge?.copyWith(
+                    style: theme.textTheme.bodyMedium?.copyWith(
                       color: colorScheme.onSurfaceVariant,
                     ),
                     textAlign: TextAlign.center,

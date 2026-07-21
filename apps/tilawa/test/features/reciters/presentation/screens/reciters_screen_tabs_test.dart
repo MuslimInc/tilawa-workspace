@@ -246,8 +246,6 @@ void main() {
       expect(tester.takeException(), isNull);
     });
 
-    
-
     testWidgets('letter filter shows dismissible chip that clears filter', (
       tester,
     ) async {
@@ -266,13 +264,17 @@ void main() {
       await pumpRecitersScreen(tester);
 
       expect(
-        find.bySemanticsIdentifier(ReciterSemanticsIds.recitersLetterFilterChip),
+        find.bySemanticsIdentifier(
+          ReciterSemanticsIds.recitersLetterFilterChip,
+        ),
         findsOneWidget,
       );
       expect(find.textContaining('Starts with'), findsOneWidget);
 
       await tester.tap(
-        find.bySemanticsIdentifier(ReciterSemanticsIds.recitersLetterFilterChip),
+        find.bySemanticsIdentifier(
+          ReciterSemanticsIds.recitersLetterFilterChip,
+        ),
       );
       await tester.pumpAndSettle();
 

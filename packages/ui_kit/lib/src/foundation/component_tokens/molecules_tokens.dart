@@ -1009,9 +1009,9 @@ class TilawaSearchFieldTokens {
     return TilawaSearchFieldTokens(
       height: kMeMuslimMinInteractiveDimension,
       backgroundColor: backgroundColor,
-      contentPadding: EdgeInsets.symmetric(vertical: tokens.spaceMedium),
+      contentPadding: EdgeInsets.zero,
       scrollPadding: EdgeInsets.all(tokens.spaceLarge),
-      iconSize: 18,
+      iconSize: tokens.iconSizeMedium,
       focusedBorderOpacity: focusedBorderOpacity,
       unfocusedBorderOpacity: unfocusedBorderOpacity,
       shadowOpacity: shadowOpacity,

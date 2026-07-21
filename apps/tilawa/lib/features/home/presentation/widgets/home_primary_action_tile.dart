@@ -15,6 +15,7 @@ class HomePrimaryActionTile extends StatelessWidget {
     this.progress,
     required this.onTap,
     required this.accent,
+    this.surfaceColor,
   });
 
   final Widget icon;
@@ -26,12 +27,15 @@ class HomePrimaryActionTile extends StatelessWidget {
   final VoidCallback onTap;
   final Color accent;
 
+  /// Optional resting fill; defaults to elevated [ColorScheme.surface].
+  final Color? surfaceColor;
+
   @override
   Widget build(BuildContext context) {
     final tokens = context.tokens;
     final theme = Theme.of(context);
     final colorScheme = theme.colorScheme;
-    final Color surface = colorScheme.surface;
+    final Color surface = surfaceColor ?? colorScheme.surface;
     final double radius = tokens.resolveRadius(
       family: TilawaRadiusFamily.hero,
     );

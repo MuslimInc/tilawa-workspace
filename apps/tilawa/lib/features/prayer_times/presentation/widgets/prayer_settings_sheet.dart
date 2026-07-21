@@ -196,43 +196,12 @@ class _SettingsDropdown<T> extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final theme = Theme.of(context);
-    final tokens = theme.tokens;
-    final colorScheme = theme.colorScheme;
-
-    return DropdownButtonFormField<T>(
-      key: ValueKey<Object?>(value),
-      initialValue: value,
-      decoration: InputDecoration(
-        filled: true,
-        fillColor: colorScheme.surfaceContainerLow,
-        border: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(tokens.radiusMedium),
-          borderSide: BorderSide(
-            color: colorScheme.outlineVariant.withValues(
-              alpha: tokens.opacityMedium,
-            ),
-          ),
-        ),
-        enabledBorder: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(tokens.radiusMedium),
-          borderSide: BorderSide(
-            color: colorScheme.outlineVariant.withValues(
-              alpha: tokens.opacityMedium,
-            ),
-          ),
-        ),
-        contentPadding: EdgeInsets.symmetric(
-          horizontal: tokens.spaceMedium,
-          vertical: tokens.spaceSmall,
-        ),
-      ),
-      items: items.map((item) {
-        return DropdownMenuItem<T>(
-          value: item,
-          child: Text(labelBuilder(item), style: theme.textTheme.bodyMedium),
-        );
-      }).toList(),
+    return TilawaDropdownField<T>(
+      value: value,
+      items: [
+        for (final item in items)
+          TilawaDropdownItem(value: item, label: labelBuilder(item)),
+      ],
       onChanged: onChanged,
     );
   }

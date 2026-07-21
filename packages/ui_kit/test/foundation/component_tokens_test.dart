@@ -219,8 +219,8 @@ void main() {
       final tokens = TilawaSearchFieldTokens.defaults();
       expect(tokens.height, kMeMuslimMinInteractiveDimension);
       expect(tokens.backgroundColor, isA<Color>());
-      expect(tokens.contentPadding, const EdgeInsets.symmetric(vertical: 12));
-      expect(tokens.iconSize, 18.0);
+      expect(tokens.contentPadding, EdgeInsets.zero);
+      expect(tokens.iconSize, MeMuslimDesignTokens.light().iconSizeMedium);
       expect(tokens.focusedBorderOpacity, 0.28);
       expect(tokens.shadowBlur, 12.0 * kElevationMultiplier);
       expect(tokens.shadowOffset, const Offset(0, 4 * kElevationMultiplier));

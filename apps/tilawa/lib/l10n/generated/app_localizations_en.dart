@@ -1167,6 +1167,9 @@ class AppLocalizationsEn extends AppLocalizations {
   String get settingsPlaybackAndStorage => 'Playback & storage';
 
   @override
+  String get settingsContentAndPlayback => 'Content & playback';
+
+  @override
   String get settingsRecitersSection => 'Reciters';
 
   @override

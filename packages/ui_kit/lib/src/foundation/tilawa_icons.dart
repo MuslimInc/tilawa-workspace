@@ -36,6 +36,19 @@ abstract final class TilawaIcons {
     'packages/tilawa_ui_kit/assets/icons/quran_icon.svg',
   );
 
+  /// Navigation-sized Quran glyph normalized to Fluent's 1.5dp line weight.
+  static const TilawaSvgIcon quranNav = TilawaSvgIcon(
+    'packages/tilawa_ui_kit/assets/icons/quran_nav_icon.svg',
+  );
+
+  /// A Quran reciter wearing a kufi with a voice wave.
+  ///
+  /// Used for the Reciters destination where a microphone alone is too
+  /// generic and the Quran book glyph would duplicate the reader destination.
+  static const TilawaSvgIcon qari = TilawaSvgIcon(
+    'packages/tilawa_ui_kit/assets/icons/qari_icon.svg',
+  );
+
   static const IconData reciters = FluentIcons.headphones_sound_wave_24_regular;
   static const IconData recitersActive =
       FluentIcons.headphones_sound_wave_24_filled;
@@ -233,6 +246,7 @@ abstract final class TilawaIcons {
   static const IconData accessTimeFilled = Icons.access_time_filled;
 
   // ── Media / Share ───────────────────────────────────────────────────────────
+  static const IconData micOutline = Icons.mic_none_rounded;
   static const IconData mic = Icons.mic_rounded;
   static const IconData movie = Icons.movie_creation_outlined;
   static const IconData screenshot = Icons.screenshot_rounded;

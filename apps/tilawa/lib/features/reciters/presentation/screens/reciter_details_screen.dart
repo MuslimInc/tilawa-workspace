@@ -89,7 +89,7 @@ class _ReciterDetailsScreenState extends State<ReciterDetailsScreen> {
     _scrollController.animateTo(
       0,
       duration: context.tokens.durationMedium,
-      curve: Curves.easeOut,
+      curve: context.tokens.curveEmphasized,
     );
   }
 
@@ -140,13 +140,8 @@ class _ReciterDetailsScreenState extends State<ReciterDetailsScreen> {
     double itemOffset = 0.0;
     final tokens = context.tokens;
     if (isGrid) {
-      final double itemHeight =
-          tokens.iconBadgeSize +
-          tokens.spaceSmall +
-          tokens.spaceExtraLarge * 2 +
-          tokens.spaceLarge +
-          tokens.spaceMedium * 2;
-      final int row = playingIndex ~/ 2;
+      final double itemHeight = _reciterGridMainAxisExtent(context);
+      final int row = playingIndex ~/ _reciterGridColumnCount(context);
       itemOffset = row * (itemHeight + tokens.spaceSmall);
     } else {
       final double tileHeight = tokens.iconBadgeSize + tokens.spaceLarge * 2;
@@ -173,7 +168,7 @@ class _ReciterDetailsScreenState extends State<ReciterDetailsScreen> {
     Scrollable.ensureVisible(
       key.currentContext!,
       duration: context.tokens.durationFast,
-      curve: Curves.easeOut,
+      curve: context.tokens.curveEmphasized,
       alignment: 0.0,
     );
   }
@@ -183,8 +178,9 @@ class _ReciterDetailsScreenState extends State<ReciterDetailsScreen> {
       return;
     }
     _playbackTourAttempted = true;
+    final Duration tourDelay = context.tokens.durationSlow;
     WidgetsBinding.instance.addPostFrameCallback((_) {
-      Future<void>.delayed(const Duration(milliseconds: 600), () {
+      Future<void>.delayed(tourDelay, () {
         if (!mounted) {
           return;
         }
@@ -346,7 +342,10 @@ class _ReciterDetailsScreenState extends State<ReciterDetailsScreen> {
                           state.searchQuery.isEmpty)
                         SliverToBoxAdapter(
                           child: Padding(
-                            padding: const EdgeInsets.only(top: 8, bottom: 4),
+                            padding: EdgeInsets.only(
+                              top: tokens.spaceSmall,
+                              bottom: tokens.spaceExtraSmall,
+                            ),
                             child: ReciterHistorySection(
                               historyList: state.listeningHistory,
                               onPlay: (history) =>
@@ -383,6 +382,11 @@ class _ReciterDetailsScreenState extends State<ReciterDetailsScreen> {
                         state: state,
                         listBottomPadding: layout.listBottomPadding,
                         playingSurahKey: _playingSurahKey,
+                        onClearSearch: () {
+                          context.read<ReciterDetailsBloc>().add(
+                            const FilterSurahs(''),
+                          );
+                        },
                         onPlaySurah: (surah) {
                           HapticFeedback.lightImpact();
                           context.read<ReciterDetailsBloc>().add(
@@ -420,8 +424,7 @@ class _ReciterDetailsScreenState extends State<ReciterDetailsScreen> {
   }
 }
 
-/// Row containing "Surahs (count)" on the left and the Download All
-/// button on the right. Keeps the row to a single line.
+/// Section heading with the result count and its supporting bulk action.
 class _SurahHeaderRow extends StatelessWidget {
   const _SurahHeaderRow({
     required this.count,
@@ -443,18 +446,16 @@ class _SurahHeaderRow extends StatelessWidget {
     return Padding(
       padding: EdgeInsets.symmetric(
         horizontal: tokens.spaceLarge,
-        vertical: tokens.spaceSmall,
+        vertical: tokens.spaceMedium,
       ),
       child: Row(
+        spacing: tokens.spaceSmall,
         children: [
-          Text(
-            '${context.l10n.surahs} ($count)',
-            style: theme.textTheme.labelMedium?.copyWith(
-              fontWeight: FontWeight.w600,
-              color: theme.colorScheme.onSurfaceVariant,
+          Expanded(
+            child: TilawaSectionTitle(
+              title: '${context.l10n.surahs} ($count)',
             ),
           ),
-          const Spacer(),
           if (showDownload) DownloadAllButton(reciter: reciter, surahs: surahs),
         ],
       ),
@@ -469,80 +470,53 @@ class _ReciterDetailsContent extends StatelessWidget {
     required this.listBottomPadding,
     required this.onPlaySurah,
     required this.playingSurahKey,
+    required this.onClearSearch,
   });
   final ReciterEntity reciter;
   final ReciterDetailsState state;
   final double listBottomPadding;
-  final Function(SurahEntity) onPlaySurah;
+  final ValueChanged<SurahEntity> onPlaySurah;
   final GlobalKey playingSurahKey;
+  final VoidCallback onClearSearch;
 
   @override
   Widget build(BuildContext context) {
     final ThemeData theme = Theme.of(context);
     final tokens = theme.tokens;
     final double bottomPadding = listBottomPadding;
-    final double emptyStateIconSize =
-        tokens.iconSizeExtraLarge + tokens.iconSizeSmall;
     final currentAudio = context.select(
       (AudioPlayerBloc bloc) => bloc.state.currentAudio,
     );
+
+    void retry() {
+      if (reciter.moshaf.isEmpty) return;
+      context.read<ReciterDetailsBloc>().add(
+        LoadSurahList(reciter: reciter, moshaf: reciter.moshaf.first),
+      );
+    }
+
     switch (state.status) {
       case ReciterDetailsStatus.error:
         return SliverFillRemaining(
-          child: Center(
-            child: Column(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                Icon(
-                  Icons.error_outline_rounded,
-                  size: emptyStateIconSize,
-                  color: theme.colorScheme.error,
-                ),
-                SizedBox(height: tokens.spaceLarge),
-                Text(
-                  state.errorMessage ?? context.l10n.anErrorOccurred,
-                  style: theme.textTheme.bodyLarge,
-                ),
-                SizedBox(height: tokens.spaceLarge),
-                TilawaButton(
-                  text: context.l10n.retry,
-                  variant: TilawaButtonVariant.primary,
-                  leadingIcon: const Icon(Icons.refresh_rounded),
-                  onPressed: () {
-                    if (reciter.moshaf.isNotEmpty) {
-                      context.read<ReciterDetailsBloc>().add(
-                        LoadSurahList(
-                          reciter: reciter,
-                          moshaf: reciter.moshaf.first,
-                        ),
-                      );
-                    }
-                  },
-                ),
-              ],
-            ),
+          hasScrollBody: false,
+          child: TilawaErrorState(
+            icon: Icons.cloud_off_rounded,
+            title: state.errorMessage ?? context.l10n.anErrorOccurred,
+            retryLabel: context.l10n.retry,
+            onRetry: retry,
           ),
         );
       case ReciterDetailsStatus.loaded:
         if (state.surahList.isEmpty) {
           return SliverFillRemaining(
-            child: Center(
-              child: Column(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  Icon(
-                    Icons.music_off_rounded,
-                    size: emptyStateIconSize,
-                    color: theme.colorScheme.onSurfaceVariant,
-                  ),
-                  SizedBox(height: tokens.spaceLarge),
-                  Text(
-                    context.l10n.noSurahsAvailable,
-                    style: theme.textTheme.bodyLarge?.copyWith(
-                      color: theme.colorScheme.onSurfaceVariant,
-                    ),
-                  ),
-                ],
+            hasScrollBody: false,
+            child: TilawaEmptyState(
+              icon: Icons.library_music_outlined,
+              title: context.l10n.noSurahsAvailable,
+              action: TilawaButton(
+                text: context.l10n.retry,
+                leadingIcon: const Icon(Icons.refresh_rounded),
+                onPressed: retry,
               ),
             ),
           );
@@ -551,23 +525,14 @@ class _ReciterDetailsContent extends StatelessWidget {
         final List<SurahEntity> filteredSurahs = state.filteredSurahs;
         if (filteredSurahs.isEmpty) {
           return SliverFillRemaining(
-            child: Center(
-              child: Column(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  Icon(
-                    Icons.search_off_rounded,
-                    size: emptyStateIconSize,
-                    color: theme.colorScheme.onSurfaceVariant,
-                  ),
-                  SizedBox(height: tokens.spaceLarge),
-                  Text(
-                    context.l10n.noSurahsMatchSearch,
-                    style: theme.textTheme.bodyLarge?.copyWith(
-                      color: theme.colorScheme.onSurfaceVariant,
-                    ),
-                  ),
-                ],
+            hasScrollBody: false,
+            child: TilawaEmptyState(
+              icon: Icons.search_off_rounded,
+              title: context.l10n.noSurahsMatchSearch,
+              action: TilawaButton(
+                text: context.l10n.reset,
+                leadingIcon: const Icon(Icons.close_rounded),
+                onPressed: onClearSearch,
               ),
             ),
           );
@@ -577,22 +542,57 @@ class _ReciterDetailsContent extends StatelessWidget {
           return SliverPadding(
             padding: EdgeInsets.only(
               top: tokens.spaceExtraSmall,
-              left: tokens.spaceLarge,
-              right: tokens.spaceLarge,
               bottom: bottomPadding,
             ),
-            sliver: SliverGrid(
-              gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
-                crossAxisCount: 2,
-                mainAxisSpacing: tokens.spaceSmall,
-                crossAxisSpacing: tokens.spaceSmall,
-                // badge(48) + gap(8) + name(2 lines≈40) + padding(12×2)
-                mainAxisExtent:
-                    tokens.iconSizeLarge +
-                    tokens.spaceExtraLarge +
-                    tokens.spaceExtraLarge * 2 +
-                    tokens.spaceMedium * 2,
+            sliver: SliverPadding(
+              padding: EdgeInsets.symmetric(horizontal: tokens.spaceLarge),
+              sliver: SliverGrid(
+                gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+                  crossAxisCount: _reciterGridColumnCount(context),
+                  mainAxisSpacing: tokens.spaceSmall,
+                  crossAxisSpacing: tokens.spaceSmall,
+                  mainAxisExtent: _reciterGridMainAxisExtent(context),
+                ),
+                delegate: SliverChildBuilderDelegate((context, index) {
+                  final SurahEntity surah = filteredSurahs[index];
+                  final ReciterSurahListItem item =
+                      ReciterSurahListItem.fromSurahEntity(
+                        surah,
+                        reciterId: reciter.id,
+                        reciterName: reciter.name,
+                        listIndex: index,
+                      );
+                  final bool isPlaying =
+                      currentAudio?.id == item.audioId ||
+                      (currentAudio != null &&
+                          currentAudio.url == item.audioUrl);
+                  final key = isPlaying ? playingSurahKey : null;
+                  final Widget gridItem = SurahGridItem(
+                    key: key,
+                    item: item,
+                    onTap: () => onPlaySurah(surah),
+                  );
+                  if (isPlaying) {
+                    return TourTarget(
+                      targetId: RecitersTourTargets.playingSurah,
+                      child: gridItem,
+                    );
+                  }
+                  return gridItem;
+                }, childCount: filteredSurahs.length),
               ),
+            ),
+          );
+        }
+
+        return SliverPadding(
+          padding: EdgeInsets.only(
+            top: tokens.spaceExtraSmall,
+            bottom: bottomPadding,
+          ),
+          sliver: SliverPadding(
+            padding: EdgeInsets.symmetric(horizontal: tokens.spaceLarge),
+            sliver: SliverList(
               delegate: SliverChildBuilderDelegate((context, index) {
                 final SurahEntity surah = filteredSurahs[index];
                 final ReciterSurahListItem item =
@@ -606,68 +606,136 @@ class _ReciterDetailsContent extends StatelessWidget {
                     currentAudio?.id == item.audioId ||
                     (currentAudio != null && currentAudio.url == item.audioUrl);
                 final key = isPlaying ? playingSurahKey : null;
-                final Widget gridItem = SurahGridItem(
-                  key: key,
-                  item: item,
-                  onTap: () => onPlaySurah(surah),
+                final Widget tile = Padding(
+                  padding: EdgeInsets.symmetric(
+                    vertical: tokens.spaceTiny,
+                  ),
+                  child: SurahListTile(
+                    key: key,
+                    item: item,
+                    onTap: () => onPlaySurah(surah),
+                  ),
                 );
                 if (isPlaying) {
                   return TourTarget(
                     targetId: RecitersTourTargets.playingSurah,
-                    child: gridItem,
+                    child: tile,
                   );
                 }
-                return gridItem;
+                return tile;
               }, childCount: filteredSurahs.length),
             ),
-          );
-        }
-
-        return SliverPadding(
-          padding: EdgeInsets.only(
-            top: tokens.spaceExtraSmall,
-            left: tokens.spaceLarge,
-            right: tokens.spaceLarge,
-            bottom: bottomPadding,
-          ),
-          sliver: SliverList(
-            delegate: SliverChildBuilderDelegate((context, index) {
-              final SurahEntity surah = filteredSurahs[index];
-              final ReciterSurahListItem item =
-                  ReciterSurahListItem.fromSurahEntity(
-                    surah,
-                    reciterId: reciter.id,
-                    reciterName: reciter.name,
-                    listIndex: index,
-                  );
-              final bool isPlaying =
-                  currentAudio?.id == item.audioId ||
-                  (currentAudio != null && currentAudio.url == item.audioUrl);
-              final key = isPlaying ? playingSurahKey : null;
-              final Widget tile = Padding(
-                padding: EdgeInsets.symmetric(vertical: tokens.spaceExtraSmall),
-                child: SurahListTile(
-                  key: key,
-                  item: item,
-                  onTap: () => onPlaySurah(surah),
-                ),
-              );
-              if (isPlaying) {
-                return TourTarget(
-                  targetId: RecitersTourTargets.playingSurah,
-                  child: tile,
-                );
-              }
-              return tile;
-            }, childCount: filteredSurahs.length),
           ),
         );
       case ReciterDetailsStatus.initial:
       case ReciterDetailsStatus.loading:
-        return const SliverFillRemaining(
-          hasScrollBody: false,
-          child: TilawaLoadingIndicator(),
+        return SliverPadding(
+          padding: EdgeInsets.only(bottom: bottomPadding),
+          sliver: const _ReciterDetailsLoadingSliver(),
         );
     }
+  }
+}
+
+int _reciterGridColumnCount(BuildContext context) {
+  return switch (context.windowSize) {
+    TilawaWindowSize.narrow => 2,
+    TilawaWindowSize.medium => 3,
+    TilawaWindowSize.expanded || TilawaWindowSize.large => 4,
+  };
+}
+
+double _reciterGridMainAxisExtent(BuildContext context) {
+  final ThemeData theme = Theme.of(context);
+  final MeMuslimDesignTokens tokens = theme.tokens;
+  final TextStyle titleStyle = theme.textTheme.titleSmall!.copyWith(
+    height: 1.2,
+  );
+  final double titleHeight = MediaQuery.textScalerOf(
+    context,
+  ).scale(titleStyle.fontSize! * titleStyle.height! * 2);
+
+  return tokens.iconBadgeSize +
+      tokens.spaceSmall +
+      titleHeight +
+      tokens.spaceMedium * 2;
+}
+
+class _ReciterDetailsLoadingSliver extends StatelessWidget {
+  const _ReciterDetailsLoadingSliver();
+
+  @override
+  Widget build(BuildContext context) {
+    final ThemeData theme = Theme.of(context);
+    final MeMuslimDesignTokens tokens = theme.tokens;
+
+    return SliverToBoxAdapter(
+      child: Padding(
+        padding: EdgeInsets.symmetric(
+          horizontal: tokens.spaceLarge,
+          vertical: tokens.spaceSmall,
+        ),
+        child: TilawaSkeleton(
+          semanticLabel: context.l10n.loading,
+          child: Column(
+            spacing: tokens.spaceExtraSmall,
+            children: const <Widget>[
+              _ReciterDetailsSkeletonTile(),
+              _ReciterDetailsSkeletonTile(),
+              _ReciterDetailsSkeletonTile(),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+class _ReciterDetailsSkeletonTile extends StatelessWidget {
+  const _ReciterDetailsSkeletonTile();
+
+  @override
+  Widget build(BuildContext context) {
+    final ThemeData theme = Theme.of(context);
+    final MeMuslimDesignTokens tokens = theme.tokens;
+
+    return TilawaCard(
+      surface: TilawaCardSurface.flat,
+      backgroundColor: theme.colorScheme.surfaceContainerLowest,
+      borderColor: theme.colorScheme.surfaceContainerLowest,
+      borderRadius: tokens.radiusMedium,
+      padding: EdgeInsets.symmetric(
+        horizontal: tokens.spaceSmall,
+        vertical: tokens.spaceMedium,
+      ),
+      child: Row(
+        spacing: tokens.spaceMedium,
+        children: [
+          SizedBox(
+            width: tokens.iconBadgeSize,
+            child: Center(
+              child: TilawaSkeletonLine(
+                width: tokens.iconSizeSmall,
+                style: theme.textTheme.titleMedium,
+              ),
+            ),
+          ),
+          Expanded(
+            child: Column(
+              spacing: tokens.spaceExtraSmall,
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                TilawaSkeletonLine(style: theme.textTheme.titleSmall),
+                TilawaSkeletonLine(
+                  width: tokens.contentMaxWidthForm / 4,
+                  style: theme.textTheme.bodySmall,
+                ),
+              ],
+            ),
+          ),
+          TilawaSkeletonBone.circle(dimension: tokens.minInteractiveDimension),
+        ],
+      ),
+    );
   }
 }

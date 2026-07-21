@@ -746,35 +746,19 @@ class _ExpandedPlayerOrganismState extends State<_ExpandedPlayerOrganism> {
                                 _queueFullSize,
                               ];
                               return ListenableBuilder(
-                                listenable: Listenable.merge(
-                                  <Listenable>[
-                                    _queueController,
-                                    widget.expandAnimation,
-                                  ],
-                                ),
+                                listenable: _queueController,
                                 builder: (context, _) {
-                                  final double expandProgress =
-                                      widget.expandAnimation.value;
-                                  final PlayerExpandTransitionMetrics
-                                  expandMetrics =
-                                      PlayerExpandMetricsScope.maybeOf(
-                                        context,
-                                      ) ??
-                                      PlayerExpandTransitionMetrics.compute(
-                                        progress: expandProgress,
-                                        miniPlayerHeight: 0,
-                                      );
                                   final double sheetHeight =
                                       _queueController.isAttached
                                       ? _queueController.size *
                                             constraints.maxHeight
                                       : _queuePeekSize * constraints.maxHeight;
-                                  final double stageBottomInset =
-                                      sheetHeight * expandMetrics.queueChromeT;
-                                  final double queueReveal =
-                                      expandMetrics.queueChromeT < 0.5
-                                      ? 0
-                                      : _queueReveal;
+                                  // Expand progress chrome is applied by
+                                  // [_ExpandDrivenStageChrome] via
+                                  // [PlayerExpandMetricsScope] so this heavy
+                                  // stage+queue subtree does not rebuild on
+                                  // every expand tick.
+                                  final double queueReveal = _queueReveal;
 
                                   final Widget stage = _YtMusicNowPlayingStage(
                                     state: widget.state,
@@ -803,71 +787,43 @@ class _ExpandedPlayerOrganismState extends State<_ExpandedPlayerOrganism> {
                                         _handleStageVerticalDragEnd,
                                   );
 
-                                  return Stack(
-                                    children: [
-                                      // Sheet first so the stage (header buttons)
-                                      // stays above it for hit testing.
-                                      Visibility(
-                                        visible:
-                                            expandMetrics.queueChromeT > 0.01,
-                                        maintainState: true,
-                                        maintainAnimation: true,
-                                        child: Opacity(
-                                          opacity: expandMetrics.queueChromeT,
-                                          child: IgnorePointer(
-                                            ignoring:
-                                                expandMetrics.queueChromeT <
-                                                0.5,
-                                            child: DraggableScrollableSheet(
-                                              controller: _queueController,
-                                              initialChildSize: _queuePeekSize,
-                                              minChildSize: _queuePeekSize,
-                                              maxChildSize: _queueFullSize,
-                                              snap: true,
-                                              snapSizes: snapSizes,
-                                              builder:
-                                                  (
-                                                    context,
-                                                    scrollController,
-                                                  ) {
-                                                    return _PlayerQueueSheet(
-                                                      scrollController:
-                                                          scrollController,
-                                                      queueController:
-                                                          _queueController,
-                                                      queueIndexCache:
-                                                          _queueIndexCache,
-                                                      sheetParentHeight:
-                                                          constraints.maxHeight,
-                                                      peekSize: _queuePeekSize,
-                                                      snapSizes: snapSizes,
-                                                      state: widget.state,
-                                                      currentAudio:
-                                                          widget.audio,
-                                                      onCollapseToPeek:
-                                                          _collapseQueueSheetToPeek,
-                                                      onHandleTap:
-                                                          _onQueueHandleTap,
-                                                      onHandleDragStart:
-                                                          _onQueueHandleDragStart,
-                                                      onHandleDragUpdate:
-                                                          _onQueueHandleDragUpdate,
-                                                      onHandleDragEnd:
-                                                          _onQueueHandleDragEnd,
-                                                    );
-                                                  },
-                                            ),
-                                          ),
-                                        ),
-                                      ),
-                                      Positioned(
-                                        top: 0,
-                                        left: 0,
-                                        right: 0,
-                                        bottom: stageBottomInset,
-                                        child: stage,
-                                      ),
-                                    ],
+                                  final Widget queueSheet =
+                                      DraggableScrollableSheet(
+                                        controller: _queueController,
+                                        initialChildSize: _queuePeekSize,
+                                        minChildSize: _queuePeekSize,
+                                        maxChildSize: _queueFullSize,
+                                        snap: true,
+                                        snapSizes: snapSizes,
+                                        builder: (context, scrollController) {
+                                          return _PlayerQueueSheet(
+                                            scrollController: scrollController,
+                                            queueController: _queueController,
+                                            queueIndexCache: _queueIndexCache,
+                                            sheetParentHeight:
+                                                constraints.maxHeight,
+                                            peekSize: _queuePeekSize,
+                                            snapSizes: snapSizes,
+                                            state: widget.state,
+                                            currentAudio: widget.audio,
+                                            onCollapseToPeek:
+                                                _collapseQueueSheetToPeek,
+                                            onHandleTap: _onQueueHandleTap,
+                                            onHandleDragStart:
+                                                _onQueueHandleDragStart,
+                                            onHandleDragUpdate:
+                                                _onQueueHandleDragUpdate,
+                                            onHandleDragEnd:
+                                                _onQueueHandleDragEnd,
+                                          );
+                                        },
+                                      );
+
+                                  return _ExpandDrivenStageChrome(
+                                    sheetHeight: sheetHeight,
+                                    queueSheet: queueSheet,
+                                    stage: stage,
+                                    expandAnimation: widget.expandAnimation,
                                   );
                                 },
                               );
@@ -882,6 +838,78 @@ class _ExpandedPlayerOrganismState extends State<_ExpandedPlayerOrganism> {
           ),
         ),
       ),
+    );
+  }
+}
+
+/// Fades centered stage chrome from [PlayerExpandMetricsScope] without
+/// rebuilding artwork/metadata on every expand tick.
+class _StageChromeFade extends StatelessWidget {
+  const _StageChromeFade({required this.child});
+
+  final Widget child;
+
+  @override
+  Widget build(BuildContext context) {
+    final double opacity =
+        PlayerExpandMetricsScope.maybeOf(context)?.stageChromeOpacity ?? 1;
+    return Opacity(
+      opacity: opacity.clamp(0.0, 1.0),
+      child: child,
+    );
+  }
+}
+
+/// Applies expand-progress chrome (queue fade + stage inset) without
+/// rebuilding the heavy stage/queue subtrees on every animation tick.
+///
+/// Depends on [PlayerExpandMetricsScope] from the overlay builder so only
+/// this lightweight shell rebuilds when expand progress changes.
+class _ExpandDrivenStageChrome extends StatelessWidget {
+  const _ExpandDrivenStageChrome({
+    required this.sheetHeight,
+    required this.queueSheet,
+    required this.stage,
+    required this.expandAnimation,
+  });
+
+  final double sheetHeight;
+  final Widget queueSheet;
+  final Widget stage;
+  final Animation<double> expandAnimation;
+
+  @override
+  Widget build(BuildContext context) {
+    final PlayerExpandTransitionMetrics expandMetrics =
+        PlayerExpandMetricsScope.maybeOf(context) ??
+        PlayerExpandTransitionMetrics.compute(
+          progress: expandAnimation.value,
+          miniPlayerHeight: 0,
+        );
+    final double stageBottomInset = sheetHeight * expandMetrics.queueChromeT;
+
+    return Stack(
+      children: [
+        Visibility(
+          visible: expandMetrics.queueChromeT > 0.01,
+          maintainState: true,
+          maintainAnimation: true,
+          child: Opacity(
+            opacity: expandMetrics.queueChromeT,
+            child: IgnorePointer(
+              ignoring: expandMetrics.queueChromeT < 0.5,
+              child: queueSheet,
+            ),
+          ),
+        ),
+        Positioned(
+          top: 0,
+          left: 0,
+          right: 0,
+          bottom: stageBottomInset,
+          child: stage,
+        ),
+      ],
     );
   }
 }
@@ -960,10 +988,6 @@ class _YtMusicNowPlayingStage extends StatelessWidget {
           }
 
           final tokens = Theme.of(context).tokens;
-          final PlayerExpandTransitionMetrics? expandMetrics =
-              PlayerExpandMetricsScope.maybeOf(context);
-          final double stageChromeOpacity =
-              expandMetrics?.stageChromeOpacity ?? 1;
 
           return QuranPlayerExpandedStageDefaultLayout(
             header: _YtMusicPlayerHeader(state: state, onCollapse: onCollapse),
@@ -972,8 +996,7 @@ class _YtMusicNowPlayingStage extends StatelessWidget {
             onVerticalDragEnd: onStageVerticalDragEnd,
             centeredChrome: Padding(
               padding: EdgeInsets.symmetric(horizontal: tokens.spaceLarge),
-              child: Opacity(
-                opacity: stageChromeOpacity.clamp(0.0, 1.0),
+              child: _StageChromeFade(
                 child: Column(
                   mainAxisAlignment: .center,
                   mainAxisSize: .min,
@@ -1076,12 +1099,9 @@ class _PlayerReciterHistorySectionState
     }
     final AudioPlayerBloc bloc = context.read<AudioPlayerBloc>();
     bloc.add(AudioPlayerEvent.skipToQueueItem(index));
-    if (history.lastPositionMs > 0 && !history.completed) {
-      bloc.add(
-        AudioPlayerEvent.seekTo(
-          Duration(milliseconds: history.lastPositionMs),
-        ),
-      );
+    final Duration? resumeAt = history.resumeInitialPosition;
+    if (resumeAt != null) {
+      bloc.add(AudioPlayerEvent.seekTo(resumeAt));
     }
   }
 

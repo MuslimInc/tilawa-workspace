@@ -135,6 +135,9 @@ class HomeListeningResumeRow extends StatelessWidget {
 
   /// Goal-gradient fraction when duration is known; null otherwise.
   static double? _listeningProgressFraction(HomeListeningResumeState state) {
+    if (state.completed) {
+      return 1.0;
+    }
     if (state.durationMs <= 0) {
       return null;
     }
@@ -164,7 +167,7 @@ class HomeListeningResumeRow extends StatelessWidget {
       AudioPlayerEvent.playFromQueue(
         [audio],
         0,
-        initialPosition: Duration(milliseconds: state.lastPositionMs),
+        initialPosition: state.resumeInitialPosition,
       ),
     );
   }

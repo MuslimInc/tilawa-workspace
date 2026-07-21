@@ -1162,6 +1162,9 @@ class AppLocalizationsAr extends AppLocalizations {
   String get settingsPlaybackAndStorage => 'التشغيل والتخزين';
 
   @override
+  String get settingsContentAndPlayback => 'المحتوى والتشغيل';
+
+  @override
   String get settingsRecitersSection => 'القراء';
 
   @override

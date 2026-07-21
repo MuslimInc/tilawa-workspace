@@ -82,6 +82,18 @@ abstract class HistoryEntity with _$HistoryEntity {
   /// Get progress percentage (0 - 100)
   double get progressPercentage => progress * 100;
 
+  /// Seek position when replaying this entry.
+  ///
+  /// Returns `null` (start from beginning) when the entry is completed or
+  /// within 3% of the end — seeking to the saved end position would finish
+  /// playback immediately.
+  Duration? get resumeInitialPosition {
+    if (progress >= 1.0 || lastPositionMs <= 0) {
+      return null;
+    }
+    return lastPosition;
+  }
+
   /// Get formatted last position string (mm:ss or hh:mm:ss)
   String get formattedLastPosition => _formatDuration(lastPosition);
 

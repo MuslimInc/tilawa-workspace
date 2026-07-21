@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 
 import '../foundation/tilawa_input_style.dart';
 
@@ -22,6 +23,7 @@ class TilawaTextField extends StatefulWidget {
     this.prefixIcon,
     this.suffixIcon,
     this.keyboardType,
+    this.inputFormatters,
     this.textInputAction,
     this.maxLines = 1,
     this.minLines,
@@ -98,6 +100,9 @@ class TilawaTextField extends StatefulWidget {
 
   /// The type of information for which to optimize the text input control.
   final TextInputType? keyboardType;
+
+  /// Optional formatters applied before text reaches the controller.
+  final List<TextInputFormatter>? inputFormatters;
 
   /// The type of action button to use for the keyboard.
   final TextInputAction? textInputAction;
@@ -276,6 +281,7 @@ class _TilawaTextFieldState extends State<TilawaTextField> {
         readOnly: widget.readOnly,
         obscureText: _isObscured,
         keyboardType: widget.keyboardType,
+        inputFormatters: widget.inputFormatters,
         textInputAction: widget.textInputAction,
         maxLines: widget.isPassword ? 1 : widget.maxLines,
         minLines: widget.minLines,
@@ -287,7 +293,7 @@ class _TilawaTextFieldState extends State<TilawaTextField> {
         textAlignVertical:
             widget.textAlignVertical ??
             (isMultiline ? TextAlignVertical.top : null),
-        scrollPadding: widget.scrollPadding ?? const EdgeInsets.all(20),
+        scrollPadding: widget.scrollPadding ?? inputStyle.formScrollPadding,
         style: theme.textTheme.bodyLarge,
         maxLength: widget.maxLength,
         buildCounter: widget.showCounter

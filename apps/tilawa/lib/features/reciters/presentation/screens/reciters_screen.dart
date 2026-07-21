@@ -1455,8 +1455,7 @@ class _ReciterGridSliver extends StatelessWidget {
     final TextTheme textTheme = theme.textTheme;
     final double nameBlockHeight =
         2 * textScaler.scale((textTheme.titleMedium?.fontSize ?? 16) * 1.2);
-    final double targetItemHeight =
-        nameBlockHeight + 2 * tokens.spaceMedium;
+    final double targetItemHeight = nameBlockHeight + 2 * tokens.spaceMedium;
 
     return SliverLayoutBuilder(
       builder: (context, constraints) {

@@ -396,9 +396,9 @@ class _LoginHeroContent extends StatelessWidget {
             ),
             Text(
               context.l10n.welcomeToApp,
-              style: theme.textTheme.headlineLarge?.copyWith(
+              style: theme.textTheme.headlineSmall?.copyWith(
                 color: colorScheme.onSurface,
-                fontWeight: FontWeight.bold,
+                fontWeight: FontWeight.w600,
               ),
               textAlign: TextAlign.center,
             ),
@@ -490,82 +490,92 @@ class _LoginGoogleSignInActionsState extends State<_LoginGoogleSignInActions>
     return Column(
       mainAxisSize: MainAxisSize.min,
       crossAxisAlignment: CrossAxisAlignment.stretch,
-      spacing: tokens.spaceSmall,
       children: <Widget>[
-        if (Platform.isIOS)
-          RepaintBoundary(
-            child: BlocBuilder<AuthBloc, AuthState>(
-              buildWhen: loginAuthAffectsGoogleSignInButtonLoading,
-              builder: (BuildContext context, AuthState authState) {
-                return BlocBuilder<
-                  LoginGoogleSignInCubit,
-                  LoginGoogleSignInState
-                >(
-                  buildWhen: loginLaunchAffectsGoogleSignInButtonLoading,
-                  builder:
-                      (
-                        BuildContext context,
-                        LoginGoogleSignInState launchState,
-                      ) {
-                        final bool isLoading = loginSignInButtonsLoading(
-                          authState: authState,
-                          isLaunchPending: launchState.isLaunchPending,
-                          sessionInFlight: _isGoogleSignInSessionInFlight(),
-                        );
-                        return TilawaAppleSignInButton(
-                          label: context.l10n.continueWithApple,
-                          semanticLabel: context.l10n.continueWithApple,
-                          appearance: AppleSignInButtonAppearance.black,
-                          isLoading: isLoading,
-                          onPressed: isLoading ? null : widget.onApplePressed,
-                        );
-                      },
-                );
-              },
-            ),
-          ),
-        RepaintBoundary(
-          child: BlocBuilder<AuthBloc, AuthState>(
-            buildWhen: loginAuthAffectsGoogleSignInButtonLoading,
-            builder: (BuildContext context, AuthState authState) {
-              widget.logAuthStateIfChanged(authState);
-              return BlocBuilder<
-                LoginGoogleSignInCubit,
-                LoginGoogleSignInState
-              >(
-                buildWhen: loginLaunchAffectsGoogleSignInButtonLoading,
-                builder:
-                    (
-                      BuildContext context,
-                      LoginGoogleSignInState launchState,
-                    ) {
-                      final bool isLoading = loginSignInButtonsLoading(
-                        authState: authState,
-                        isLaunchPending: launchState.isLaunchPending,
-                        sessionInFlight: _isGoogleSignInSessionInFlight(),
-                      );
-                      widget.logButtonStateIfChanged(isLoading);
-                      return Listener(
-                        onPointerDown: (_) {
-                          _logGoogleSignInButton(
-                            'pointerDown on button (isLoading=$isLoading)',
+        // OAuth cluster — tight proximity; Apple stays first on iOS.
+        Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          spacing: tokens.spaceSmall,
+          children: <Widget>[
+            if (Platform.isIOS)
+              RepaintBoundary(
+                child: BlocBuilder<AuthBloc, AuthState>(
+                  buildWhen: loginAuthAffectsGoogleSignInButtonLoading,
+                  builder: (BuildContext context, AuthState authState) {
+                    return BlocBuilder<
+                      LoginGoogleSignInCubit,
+                      LoginGoogleSignInState
+                    >(
+                      buildWhen: loginLaunchAffectsGoogleSignInButtonLoading,
+                      builder:
+                          (
+                            BuildContext context,
+                            LoginGoogleSignInState launchState,
+                          ) {
+                            final bool isLoading = loginSignInButtonsLoading(
+                              authState: authState,
+                              isLaunchPending: launchState.isLaunchPending,
+                              sessionInFlight: _isGoogleSignInSessionInFlight(),
+                            );
+                            return TilawaAppleSignInButton(
+                              label: context.l10n.continueWithApple,
+                              semanticLabel: context.l10n.continueWithApple,
+                              appearance: AppleSignInButtonAppearance.black,
+                              isLoading: isLoading,
+                              onPressed: isLoading
+                                  ? null
+                                  : widget.onApplePressed,
+                            );
+                          },
+                    );
+                  },
+                ),
+              ),
+            RepaintBoundary(
+              child: BlocBuilder<AuthBloc, AuthState>(
+                buildWhen: loginAuthAffectsGoogleSignInButtonLoading,
+                builder: (BuildContext context, AuthState authState) {
+                  widget.logAuthStateIfChanged(authState);
+                  return BlocBuilder<
+                    LoginGoogleSignInCubit,
+                    LoginGoogleSignInState
+                  >(
+                    buildWhen: loginLaunchAffectsGoogleSignInButtonLoading,
+                    builder:
+                        (
+                          BuildContext context,
+                          LoginGoogleSignInState launchState,
+                        ) {
+                          final bool isLoading = loginSignInButtonsLoading(
+                            authState: authState,
+                            isLaunchPending: launchState.isLaunchPending,
+                            sessionInFlight: _isGoogleSignInSessionInFlight(),
+                          );
+                          widget.logButtonStateIfChanged(isLoading);
+                          return Listener(
+                            onPointerDown: (_) {
+                              _logGoogleSignInButton(
+                                'pointerDown on button (isLoading=$isLoading)',
+                              );
+                            },
+                            child: TilawaGoogleSignInButton(
+                              label: context.l10n.continueWithGoogle,
+                              semanticLabel: context.l10n.continueWithGoogle,
+                              appearance: GoogleSignInButtonAppearance.dark,
+                              isLoading: isLoading,
+                              onPressed: isLoading
+                                  ? null
+                                  : () => unawaited(widget.onPressed()),
+                            ),
                           );
                         },
-                        child: TilawaGoogleSignInButton(
-                          label: context.l10n.continueWithGoogle,
-                          semanticLabel: context.l10n.continueWithGoogle,
-                          appearance: GoogleSignInButtonAppearance.dark,
-                          isLoading: isLoading,
-                          onPressed: isLoading
-                              ? null
-                              : () => unawaited(widget.onPressed()),
-                        ),
-                      );
-                    },
-              );
-            },
-          ),
+                  );
+                },
+              ),
+            ),
+          ],
         ),
+        SizedBox(height: tokens.spaceLarge),
         _LoginEmailAuthLinks(
           sessionInFlight: _isGoogleSignInSessionInFlight(),
         ),
@@ -595,6 +605,7 @@ class _LoginEmailAuthLinks extends StatelessWidget {
           crossAxisAlignment: CrossAxisAlignment.stretch,
           spacing: tokens.spaceSmall,
           children: <Widget>[
+            // Email cluster — secondary path under OAuth.
             Row(
               children: <Widget>[
                 Expanded(child: Divider(color: theme.dividerColor)),

@@ -879,6 +879,7 @@
     "whatsNewGotIt": "تم",
     "settingsAppearance": "المظهر",
     "settingsPlaybackAndStorage": "التشغيل والتخزين",
+    "settingsContentAndPlayback": "المحتوى والتشغيل",
     "settingsRecitersSection": "القراء",
     "@settingsRecitersSection": {
         "description": "Reciters section header on settings screen"

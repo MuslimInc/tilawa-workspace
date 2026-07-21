@@ -1,5 +1,8 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:tilawa/core/extensions.dart';
 import 'package:tilawa/features/audio_player/presentation/bloc/audio_player_bloc.dart';
 import 'package:tilawa/features/downloads/presentation/widgets/download_button.dart';
 import 'package:tilawa_core/entities/audio.dart';
@@ -25,13 +28,11 @@ class SurahListTile extends StatelessWidget {
     final tokens = theme.tokens;
     final colorScheme = theme.colorScheme;
     final double tileRadius = tokens.resolveRadius(
-      family: TilawaRadiusFamily.card,
+      family: TilawaRadiusFamily.chrome,
     );
     final double badgeSize = tokens.iconBadgeSize;
     final Color activeFill = ReciterCatalogChrome.activeFill(colorScheme);
-    final Color activeOnFill = ReciterCatalogChrome.activeOnFill(colorScheme);
-    final Color idleFill = ReciterCatalogChrome.idleFill(colorScheme);
-    final Color idleFg = colorScheme.primary;
+    final Color rowFill = colorScheme.surfaceContainerLowest;
 
     final (bool isPlaying, bool isCurrentItem) = context
         .select<AudioPlayerBloc, (bool, bool)>((bloc) {
@@ -48,6 +49,11 @@ class SurahListTile extends StatelessWidget {
 
           return (playing, isCurrent);
         });
+    final Color rowSurface = isCurrentItem
+        ? colorScheme.surfaceContainerHigh
+        : rowFill;
+    final String trackNumber =
+        int.tryParse(item.formattedNumber)?.toString() ?? item.formattedNumber;
 
     void handleTap() {
       if (isCurrentItem) {
@@ -65,89 +71,207 @@ class SurahListTile extends StatelessWidget {
       }
     }
 
-    return Semantics(
-      identifier: ReciterSemanticsIds.surahRow(item.semanticsKey),
-      button: true,
-      child: TilawaCard(
-        surface: TilawaCardSurface.raised,
-        backgroundColor: isCurrentItem
-            ? colorScheme.primaryContainer.withValues(
-                alpha: tokens.opacitySubtle * 2,
-              )
-            : colorScheme.surface,
-        borderColor: isCurrentItem ? activeFill : colorScheme.outlineVariant,
-        borderWidth: isCurrentItem
-            ? tokens.borderWidthThin * 4
-            : tokens.borderWidthThin,
-        borderRadius: tileRadius,
-        padding: EdgeInsets.symmetric(
-          horizontal: tokens.spaceLarge,
-          vertical: tokens.spaceLarge,
-        ),
-        onTap: handleTap,
-        child: Row(
-          crossAxisAlignment: CrossAxisAlignment.center,
-          children: [
-            AnimatedContainer(
-              duration: tokens.durationFast,
-              width: badgeSize,
-              height: badgeSize,
-              alignment: Alignment.center,
-              decoration: BoxDecoration(
-                color: isCurrentItem ? activeFill : idleFill,
-                borderRadius: BorderRadius.circular(tokens.radiusLarge),
-                border: Border.all(
-                  color: isCurrentItem
-                      ? activeFill
-                      : idleFg.withValues(alpha: tokens.opacityShadow),
-                  width: tokens.borderWidthThin * 2,
+    return AnimatedContainer(
+      duration: tokens.durationFast,
+      curve: tokens.curveStandard,
+      decoration: BoxDecoration(
+        color: rowSurface,
+        borderRadius: BorderRadius.circular(tileRadius),
+      ),
+      child: Row(
+        crossAxisAlignment: CrossAxisAlignment.center,
+        children: [
+          Expanded(
+            child: Semantics(
+              identifier: ReciterSemanticsIds.surahRow(item.semanticsKey),
+              button: true,
+              label: item.displayName,
+              value: isCurrentItem ? context.l10n.currentPlaying : null,
+              hint: isPlaying ? context.l10n.pause : context.l10n.play,
+              excludeSemantics: true,
+              child: TilawaCard(
+                surface: TilawaCardSurface.flat,
+                backgroundColor: rowSurface,
+                borderColor: rowSurface,
+                borderWidth: tokens.borderWidthThin,
+                borderRadius: tileRadius,
+                padding: EdgeInsets.symmetric(
+                  horizontal: tokens.spaceSmall,
+                  vertical: tokens.spaceMedium,
                 ),
-              ),
-              child: isCurrentItem
-                  ? Icon(
-                      isPlaying
-                          ? Icons.pause_rounded
-                          : Icons.play_arrow_rounded,
-                      color: activeOnFill,
-                      size: tokens.iconSizeMedium,
-                    )
-                  : Text(
-                      item.formattedNumber,
-                      style: theme.textTheme.labelSmall?.copyWith(
-                        color: idleFg,
-                        fontWeight: FontWeight.w700,
-                        letterSpacing: 0,
+                onTap: handleTap,
+                child: Row(
+                  spacing: tokens.spaceMedium,
+                  children: [
+                    SizedBox(
+                      width: badgeSize,
+                      child: Center(
+                        child: isCurrentItem
+                            ? Icon(
+                                Icons.graphic_eq_rounded,
+                                color: activeFill,
+                                size: tokens.iconSizeLarge,
+                              )
+                            : Text(
+                                trackNumber,
+                                style: theme.textTheme.titleMedium?.copyWith(
+                                  color: colorScheme.onSurface,
+                                  fontWeight: FontWeight.w600,
+                                  letterSpacing: 0,
+                                ),
+                              ),
                       ),
                     ),
-            ),
-            SizedBox(width: tokens.spaceMedium),
-            Expanded(
-              child: Text(
-                item.displayName,
-                style: theme.textTheme.titleMedium?.copyWith(
-                  fontWeight: FontWeight.w700,
-                  color: colorScheme.onSurface,
-                  height: 1.2,
+                    Expanded(
+                      child: Column(
+                        spacing: tokens.spaceExtraSmall,
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          Text(
+                            item.displayName,
+                            style: theme.textTheme.titleSmall?.copyWith(
+                              fontWeight: FontWeight.w600,
+                              color: colorScheme.onSurface,
+                              height: 1.2,
+                            ),
+                            maxLines: 1,
+                            overflow: TextOverflow.ellipsis,
+                          ),
+                          Text(
+                            isCurrentItem
+                                ? '${context.l10n.currentPlaying} · ${item.reciterName}'
+                                : item.reciterName,
+                            maxLines: 1,
+                            overflow: TextOverflow.ellipsis,
+                            style: theme.textTheme.bodySmall?.copyWith(
+                              color: colorScheme.onSurfaceVariant,
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                  ],
                 ),
-                maxLines: 1,
-                overflow: TextOverflow.ellipsis,
               ),
             ),
-            DownloadButton(
-              url: item.audioId,
-              surahTitle: item.displayName,
-              reciterName: item.reciterName,
-              reciterId: item.reciterId,
-              catalogChrome: true,
-              initialIsDownloaded: item.isDownloaded,
-              initialIsDownloading: item.isDownloading,
-              initialProgress: item.downloadProgress,
-              identifier: ReciterSemanticsIds.surahDownloadButton(
-                item.semanticsKey,
-              ),
+          ),
+          _SurahOverflowButton(
+            item: item,
+            backgroundColor: rowSurface,
+          ),
+          SizedBox(width: tokens.spaceExtraSmall),
+        ],
+      ),
+    );
+  }
+}
+
+class _SurahOverflowButton extends StatelessWidget {
+  const _SurahOverflowButton({
+    required this.item,
+    required this.backgroundColor,
+  });
+
+  final ReciterSurahListItem item;
+  final Color backgroundColor;
+
+  @override
+  Widget build(BuildContext context) {
+    return TilawaIconActionButton(
+      icon: Icons.more_vert_rounded,
+      backgroundColor: backgroundColor,
+      tooltip: context.l10n.moreOptions,
+      onTap: () {
+        unawaited(
+          showTilawaModalBottomSheet<void>(
+            context: context,
+            builder: (sheetContext) => _SurahActionsSheet(item: item),
+          ),
+        );
+      },
+    );
+  }
+}
+
+class _SurahActionsSheet extends StatelessWidget {
+  const _SurahActionsSheet({required this.item});
+
+  final ReciterSurahListItem item;
+
+  @override
+  Widget build(BuildContext context) {
+    final ThemeData theme = Theme.of(context);
+    final MeMuslimDesignTokens tokens = theme.tokens;
+    final ColorScheme colorScheme = theme.colorScheme;
+
+    return Padding(
+      padding: EdgeInsets.only(bottom: context.floatingBottomPadding),
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          const TilawaSheetHandle(),
+          Padding(
+            padding: EdgeInsets.all(tokens.spaceLarge),
+            child: Column(
+              spacing: tokens.spaceLarge,
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Column(
+                  spacing: tokens.spaceExtraSmall,
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      item.displayName,
+                      style: theme.textTheme.titleMedium?.copyWith(
+                        color: colorScheme.onSurface,
+                        fontWeight: FontWeight.w700,
+                      ),
+                    ),
+                    Text(
+                      item.reciterName,
+                      style: theme.textTheme.bodySmall?.copyWith(
+                        color: colorScheme.onSurfaceVariant,
+                      ),
+                    ),
+                  ],
+                ),
+                Row(
+                  spacing: tokens.spaceMedium,
+                  children: [
+                    Icon(
+                      Icons.download_rounded,
+                      color: colorScheme.onSurfaceVariant,
+                      size: tokens.iconSizeMedium,
+                    ),
+                    Expanded(
+                      child: Text(
+                        context.l10n.download,
+                        style: theme.textTheme.bodyLarge?.copyWith(
+                          color: colorScheme.onSurface,
+                          fontWeight: FontWeight.w600,
+                        ),
+                      ),
+                    ),
+                    DownloadButton(
+                      url: item.audioId,
+                      surahTitle: item.displayName,
+                      reciterName: item.reciterName,
+                      reciterId: item.reciterId,
+                      catalogChrome: true,
+                      initialIsDownloaded: item.isDownloaded,
+                      initialIsDownloading: item.isDownloading,
+                      initialProgress: item.downloadProgress,
+                      identifier: ReciterSemanticsIds.surahDownloadButton(
+                        item.semanticsKey,
+                      ),
+                    ),
+                  ],
+                ),
+              ],
             ),
-          ],
-        ),
+          ),
+        ],
       ),
     );
   }

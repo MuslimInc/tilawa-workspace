@@ -17,7 +17,6 @@ class HomePrayerScheduleStrip extends StatelessWidget {
 
   /// Figma: height 52, radius 16, fill 0.1 / border 0.12.
   static const double stripHeight = 52;
-  static const Color _activeDot = Color(0xFFF2BF33);
 
   @override
   Widget build(BuildContext context) {
@@ -79,6 +78,8 @@ class _HomePrayerScheduleSlot extends StatelessWidget {
     final Color timeColor = isActive ? Colors.white : inactive;
     final String name = _localizedPrayerName(context, slot.type);
     final String timeLabel = _formatStripTime(slot.time);
+    // Brand tertiary (gilding) — token, not a hard-coded second accent system.
+    final Color activeDot = Theme.of(context).colorScheme.tertiary;
 
     // Figma active fills the whole flex cell (padding 8 0, radius 12) — no inset chip.
     return DecoratedBox(
@@ -100,12 +101,12 @@ class _HomePrayerScheduleSlot extends StatelessWidget {
               spacing: 4,
               children: [
                 if (isActive)
-                  const DecoratedBox(
+                  DecoratedBox(
                     decoration: BoxDecoration(
-                      color: HomePrayerScheduleStrip._activeDot,
+                      color: activeDot,
                       shape: BoxShape.circle,
                     ),
-                    child: SizedBox.square(dimension: 5),
+                    child: const SizedBox.square(dimension: 5),
                   ),
                 Flexible(
                   child: Text(
