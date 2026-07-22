@@ -22,13 +22,13 @@ import 'package:tilawa/features/home/presentation/bloc/home_dashboard_bloc.dart'
 import 'package:tilawa/features/home/presentation/bloc/home_dashboard_event.dart';
 import 'package:tilawa/features/home/presentation/cubit/home_listening_resume_cubit.dart';
 import 'package:tilawa/features/home/presentation/screens/home_screen.dart';
-import 'package:tilawa/features/home/presentation/widgets/home_next_prayer_time.dart';
 import 'package:tilawa/features/quran_sessions/domain/entities/quran_sessions_platform_config.dart';
 import 'package:tilawa/features/quran_sessions/quran_sessions_platform_config_store.dart';
 import 'package:tilawa/features/home/presentation/widgets/home_daily_inspiration_section.dart';
 import 'package:tilawa/features/home/presentation/widgets/home_dashboard_body_skeleton.dart';
 import 'package:tilawa/features/home/presentation/widgets/home_more_actions_group.dart';
 import 'package:tilawa/features/home/presentation/widgets/home_primary_actions_section.dart';
+import 'package:tilawa/features/home/presentation/widgets/home_prayer_schedule_strip.dart';
 import 'package:tilawa/features/home/presentation/widgets/home_quick_tools_section.dart';
 import 'package:tilawa/features/prayer_times/application/prayer_location_update_notifier.dart';
 import 'package:tilawa/features/prayer_times/domain/entities/prayer_time_entity.dart';
@@ -345,7 +345,7 @@ void main() {
     );
   });
 
-  testWidgets('home screen hero does not pin', (
+  testWidgets('home screen pins only the profile row', (
     tester,
   ) async {
     final view = tester.view;
@@ -380,10 +380,28 @@ void main() {
       await tester.pump(const Duration(milliseconds: 16));
     }
 
-    expect(find.byType(SliverPersistentHeader), findsNothing);
+    expect(find.byType(SliverPersistentHeader), findsOneWidget);
+
+    final Finder profileHeader = find.byKey(
+      const Key('home_pinned_profile_header'),
+    );
+    final double profileTopBeforeScroll = tester.getTopLeft(profileHeader).dy;
+    final NestedScrollViewState nested = tester.state<NestedScrollViewState>(
+      find.byType(NestedScrollView),
+    );
+    nested.outerController.jumpTo(
+      nested.outerController.position.maxScrollExtent,
+    );
+    await tester.pump();
 
     final BuildContext homeContext = tester.element(find.byType(HomeScreen));
-    expect(HomeNextPrayerTime.collapseScrollExtent(homeContext), 0);
+    final l10n = AppLocalizations.of(homeContext);
+    expect(
+      tester.getTopLeft(profileHeader).dy,
+      closeTo(profileTopBeforeScroll, 0.5),
+    );
+    expect(find.text(l10n.homeGreeting).hitTestable(), findsOneWidget);
+    expect(find.byType(HomePrayerScheduleStrip).hitTestable(), findsNothing);
   });
 
   testWidgets('keeps transparent status bar spacer for immersive hero', (
@@ -633,7 +651,6 @@ void main() {
         await tester.pump(const Duration(milliseconds: 16));
       }
 
-      expect(find.byType(SliverPersistentHeader), findsNothing);
       expect(find.byType(HomeLearningInterestCard), findsOneWidget);
       expect(
         tester.getTopLeft(find.byType(HomeLearningInterestCard)).dy,

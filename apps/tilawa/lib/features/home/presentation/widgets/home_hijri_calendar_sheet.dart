@@ -8,6 +8,8 @@ import 'package:tilawa_ui_kit/tilawa_ui_kit.dart';
 Future<void> showHomeHijriCalendarSheet(BuildContext context) {
   return showTilawaModalBottomSheet<void>(
     context: context,
+    // Root navigator so sheet covers [TilawaAdaptiveShell] bottom nav.
+    useRootNavigator: true,
     sheetSemanticsLabel: context.l10n.hijriCalendarTitle,
     builder: (context) => const HomeHijriCalendarSheet(),
   );

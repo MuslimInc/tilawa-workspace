@@ -82,7 +82,8 @@ tools is an approved exception (selects existing tab).
 
 ## Motion & interaction
 
-- Hero snap at 35% collapse extent (`home_screen.dart`)
+- The profile row pins while prayer context, metrics, and strip scroll away
+  beneath it without snapping (`home_screen.dart`)
 - Pull-to-refresh reloads dashboard + listening resume state
 - Shell tab reselect: scroll to top or refresh
 - Inspiration section: subtle entrance animation; must not dominate first screen
@@ -104,5 +105,4 @@ Do not implement from: `docs/product/home_screen_redesign.md`,
 `docs/plans/home_screen_redesign_plan.md`,
 `docs/migrations/home_screen_redesign_migration.md`,
 `docs/specs/home_screen_acceptance_criteria.md`.
-
 

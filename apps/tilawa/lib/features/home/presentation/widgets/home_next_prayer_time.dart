@@ -42,7 +42,7 @@ abstract final class HomeNextPrayerTime {
     ];
   }
 
-  /// Hero scrolls away entirely — no expanded-to-pinned transition.
+  /// Hero snap remains disabled; only the profile row stays pinned.
   static double collapseScrollExtent(BuildContext context) => 0;
 
   static double contentSheetOverlap(BuildContext context) {
@@ -66,12 +66,37 @@ abstract final class HomeNextPrayerTime {
     final bool tightCard =
         MediaQuery.sizeOf(context).width - horizontalGutter < 320;
 
-    // Profile + date/location + centered prayer + glass strip.
-    // Calibrated at 360dp / textScale 1 against MeMuslim header-zone.
-    final double body = 384 * textScale;
-    final double tightSlack = tightCard ? tokens.spaceExtraLarge : 0;
+    // Preserve the approved expanded header height while allowing text growth.
+    final double body = 282 * textScale;
+    final double tightSlack = tightCard
+        ? tokens.spaceExtraLarge + tokens.spaceTiny
+        : 0;
 
     return body + tightSlack;
+  }
+
+  static double _resolvePinnedProfileExtent(
+    BuildContext context,
+    HomeDashboardUiState ui,
+  ) {
+    final MeMuslimDesignTokens tokens = Theme.of(context).tokens;
+    final String? displayName = ui.dashboard?.displayName?.trim();
+    final double textHeight = _HomeHeaderProfileRow.resolveTextHeight(
+      context,
+      displayName: displayName,
+      forceSecondLine: ui.showFullSkeleton,
+    );
+    final double rowHeight = textHeight > tokens.minInteractiveDimension
+        ? textHeight
+        : tokens.minInteractiveDimension;
+    final double bottomPadding = ui.showFullSkeleton
+        ? tokens.spaceMedium
+        : tokens.spaceMedium + tokens.spaceExtraSmall;
+
+    return MediaQuery.paddingOf(context).top +
+        tokens.spaceMedium +
+        rowHeight +
+        bottomPadding;
   }
 }
 
@@ -154,10 +179,6 @@ class _HomeNextPrayerTimeSliverState extends State<_HomeNextPrayerTimeSliver> {
     final ThemeData theme = Theme.of(context);
     final TilawaHomeScreenTokens screenTokens =
         theme.componentTokens.homeScreen;
-    final double topInset = MediaQuery.paddingOf(context).top;
-    final HomeDashboard? dashboard = widget.ui.dashboard;
-    final HomeNextPrayer? nextPrayer = dashboard?.nextPrayer;
-    final String? locationName = dashboard?.locationLabel;
 
     // Figma header-zone uses a fixed bright green ramp — not night/pre-dawn
     // atmospheric phases (those make the strip and inactive copy look muddy).
@@ -171,72 +192,179 @@ class _HomeNextPrayerTimeSliverState extends State<_HomeNextPrayerTimeSliver> {
     // Figma muted: rgba(255,255,255,0.698039)
     const Color muted = Color.fromRGBO(255, 255, 255, 0.698);
 
-    return SliverToBoxAdapter(
-      child: AnnotatedRegion<SystemUiOverlayStyle>(
-        value: HomeHeroBackground.systemOverlayStyle(heroTokens),
-        child: Stack(
-          clipBehavior: Clip.hardEdge,
-          children: [
-            Positioned.fill(
-              child: HomeHeroBackground(
-                heroTokens: heroTokens,
-                screenTokens: screenTokens,
-                showDecorativeLayers: false,
-              ),
+    return SliverPersistentHeader(
+      pinned: true,
+      delegate: _HomeNextPrayerTimeDelegate(
+        ui: widget.ui,
+        onRefreshLocation: widget.ui.showContent
+            ? () {
+                context.read<HomeDashboardBloc>().add(
+                  HomeDashboardLocationRefreshRequested(
+                    localeIdentifier: Localizations.localeOf(
+                      context,
+                    ).languageCode,
+                  ),
+                );
+              }
+            : null,
+        onRetryDashboard: () {
+          context.read<HomeDashboardBloc>().add(
+            HomeDashboardRefreshRequested(
+              localeIdentifier: Localizations.localeOf(context).languageCode,
             ),
-            // Figma header-zone: column, padding 0 0 24. Status bar = system inset.
-            // profile-row inset 24; prayer-hero inset 20.
-            Column(
-              crossAxisAlignment: CrossAxisAlignment.stretch,
-              children: [
-                SizedBox(height: topInset),
-                _HomeHeaderZoneBody(
-                  displayName: dashboard?.displayName,
-                  photoUrl: dashboard?.photoUrl,
-                  locationName: locationName,
-                  isRefreshingLocation: widget.ui.isRefreshingLocation,
-                  onRefreshLocation: widget.ui.showContent
-                      ? () {
-                          context.read<HomeDashboardBloc>().add(
-                            HomeDashboardLocationRefreshRequested(
-                              localeIdentifier: Localizations.localeOf(
-                                context,
-                              ).languageCode,
-                            ),
-                          );
-                        }
-                      : null,
-                  nextPrayer: nextPrayer,
-                  todayPrayers: dashboard?.todayPrayers ?? const [],
-                  showFullSkeleton: widget.ui.showFullSkeleton,
-                  showFailure: widget.ui.showFailure,
-                  failureIsOffline: widget.ui.failureIsOffline,
-                  onRetryDashboard: () {
-                    context.read<HomeDashboardBloc>().add(
-                      HomeDashboardRefreshRequested(
-                        localeIdentifier: Localizations.localeOf(
-                          context,
-                        ).languageCode,
-                      ),
-                    );
-                  },
-                  onOpenPrayer: widget.onOpenPrayer,
-                  onHero: onHero,
-                  muted: muted,
-                ),
-              ],
-            ),
-          ],
+          );
+        },
+        onOpenPrayer: widget.onOpenPrayer,
+        heroTokens: heroTokens,
+        screenTokens: screenTokens,
+        onHero: onHero,
+        muted: muted,
+        minExtent: HomeNextPrayerTime._resolvePinnedProfileExtent(
+          context,
+          widget.ui,
         ),
+        maxExtent: HomeNextPrayerTime.expandedLayoutExtent(context),
       ),
     );
   }
 }
 
+class _HomeNextPrayerTimeDelegate extends SliverPersistentHeaderDelegate {
+  const _HomeNextPrayerTimeDelegate({
+    required this.ui,
+    required this.onRefreshLocation,
+    required this.onRetryDashboard,
+    required this.onOpenPrayer,
+    required this.heroTokens,
+    required this.screenTokens,
+    required this.onHero,
+    required this.muted,
+    required this.minExtent,
+    required this.maxExtent,
+  });
+
+  final HomeDashboardUiState ui;
+  final VoidCallback? onRefreshLocation;
+  final VoidCallback onRetryDashboard;
+  final VoidCallback onOpenPrayer;
+  final TilawaHomeNextPrayerHeroTokens heroTokens;
+  final TilawaHomeScreenTokens screenTokens;
+  final Color onHero;
+  final Color muted;
+
+  @override
+  final double minExtent;
+
+  @override
+  final double maxExtent;
+
+  @override
+  Widget build(
+    BuildContext context,
+    double shrinkOffset,
+    bool overlapsContent,
+  ) {
+    final MeMuslimDesignTokens tokens = context.tokens;
+    final HomeDashboard? dashboard = ui.dashboard;
+    final double scrollingContentExtent = maxExtent - minExtent;
+    final double profileBottomPadding = ui.showFullSkeleton
+        ? tokens.spaceMedium
+        : tokens.spaceMedium + tokens.spaceExtraSmall;
+    final Widget profileRow = ui.showFullSkeleton
+        ? const _HomeHeaderProfileSkeleton()
+        : _HomeHeaderProfileRow(
+            displayName: dashboard?.displayName,
+            photoUrl: dashboard?.photoUrl,
+            onHero: onHero,
+          );
+
+    final Widget header = ClipRect(
+      child: Stack(
+        fit: StackFit.expand,
+        children: [
+          HomeHeroBackground(
+            heroTokens: heroTokens,
+            screenTokens: screenTokens,
+            showDecorativeLayers: false,
+          ),
+          Positioned(
+            top: minExtent,
+            left: 0,
+            right: 0,
+            bottom: 0,
+            child: ClipRect(
+              child: OverflowBox(
+                alignment: Alignment.topCenter,
+                minHeight: scrollingContentExtent,
+                maxHeight: scrollingContentExtent,
+                child: Transform.translate(
+                  offset: Offset(0, -shrinkOffset),
+                  child: SizedBox(
+                    height: scrollingContentExtent,
+                    child: _HomeHeaderZoneBody(
+                      locationName: dashboard?.locationLabel,
+                      isRefreshingLocation: ui.isRefreshingLocation,
+                      onRefreshLocation: onRefreshLocation,
+                      nextPrayer: dashboard?.nextPrayer,
+                      todayPrayers: dashboard?.todayPrayers ?? const [],
+                      showFullSkeleton: ui.showFullSkeleton,
+                      showFailure: ui.showFailure,
+                      failureIsOffline: ui.failureIsOffline,
+                      onRetryDashboard: onRetryDashboard,
+                      onOpenPrayer: onOpenPrayer,
+                      onHero: onHero,
+                      muted: muted,
+                    ),
+                  ),
+                ),
+              ),
+            ),
+          ),
+          Positioned(
+            top: 0,
+            left: 0,
+            right: 0,
+            height: minExtent,
+            child: Padding(
+              key: const Key('home_pinned_profile_header'),
+              padding: EdgeInsets.fromLTRB(
+                tokens.spaceLarge,
+                MediaQuery.paddingOf(context).top + tokens.spaceMedium,
+                tokens.spaceLarge,
+                profileBottomPadding,
+              ),
+              child: profileRow,
+            ),
+          ),
+        ],
+      ),
+    );
+
+    return AnnotatedRegion<SystemUiOverlayStyle>(
+      value: HomeHeroBackground.systemOverlayStyle(heroTokens),
+      child: ui.showFullSkeleton
+          ? _HomeHeroSkeletonScope(onHero: onHero, child: header)
+          : header,
+    );
+  }
+
+  @override
+  bool shouldRebuild(covariant _HomeNextPrayerTimeDelegate oldDelegate) {
+    return oldDelegate.ui != ui ||
+        oldDelegate.onRefreshLocation != onRefreshLocation ||
+        oldDelegate.onRetryDashboard != onRetryDashboard ||
+        oldDelegate.onOpenPrayer != onOpenPrayer ||
+        oldDelegate.heroTokens != heroTokens ||
+        oldDelegate.screenTokens != screenTokens ||
+        oldDelegate.onHero != onHero ||
+        oldDelegate.muted != muted ||
+        oldDelegate.minExtent != minExtent ||
+        oldDelegate.maxExtent != maxExtent;
+  }
+}
+
 class _HomeHeaderZoneBody extends StatelessWidget {
   const _HomeHeaderZoneBody({
-    required this.displayName,
-    required this.photoUrl,
     required this.locationName,
     required this.isRefreshingLocation,
     required this.onRefreshLocation,
@@ -251,8 +379,6 @@ class _HomeHeaderZoneBody extends StatelessWidget {
     required this.muted,
   });
 
-  final String? displayName;
-  final String? photoUrl;
   final String? locationName;
   final bool isRefreshingLocation;
   final VoidCallback? onRefreshLocation;
@@ -272,19 +398,20 @@ class _HomeHeaderZoneBody extends StatelessWidget {
 
     if (showFullSkeleton) {
       return Padding(
-        padding: const EdgeInsets.fromLTRB(24, 16, 24, 24),
-        child: _HomeHeroSkeletonScope(
-          onHero: onHero,
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.stretch,
-            spacing: tokens.spaceMedium,
-            children: const [
-              _HomeHeaderProfileSkeleton(),
-              _HomePrayerHeroContextRowSkeleton(),
-              _HomeNextPrayerTimeMetricsSkeleton(),
-              _HomePrayerScheduleStripSkeleton(),
-            ],
-          ),
+        padding: EdgeInsets.fromLTRB(
+          tokens.spaceLarge,
+          0,
+          tokens.spaceLarge,
+          tokens.spaceLarge,
+        ),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          spacing: tokens.spaceMedium,
+          children: const [
+            _HomePrayerHeroContextRowSkeleton(),
+            _HomeNextPrayerTimeMetricsSkeleton(),
+            _HomePrayerScheduleStripSkeleton(),
+          ],
         ),
       );
     }
@@ -307,15 +434,6 @@ class _HomeHeaderZoneBody extends StatelessWidget {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
-        // profile-row: padding 16px 24px 20px
-        Padding(
-          padding: const EdgeInsets.fromLTRB(24, 16, 24, 20),
-          child: _HomeHeaderProfileRow(
-            displayName: displayName,
-            photoUrl: photoUrl,
-            onHero: onHero,
-          ),
-        ),
         // prayer-hero: padding 0 20; header-zone bottom pad 24
         Padding(
           padding: const EdgeInsets.fromLTRB(20, 0, 20, 24),
@@ -352,6 +470,81 @@ class _HomeHeaderProfileRow extends StatelessWidget {
     required this.onHero,
   });
 
+  static const double greetingFontSize = 22;
+  static const double greetingLineHeight = 33 / greetingFontSize;
+  static const double nameFontSize = 14;
+  static const double nameLineHeight = 21 / nameFontSize;
+
+  static double resolveTextHeight(
+    BuildContext context, {
+    required String? displayName,
+    required bool forceSecondLine,
+  }) {
+    final ThemeData theme = Theme.of(context);
+    final MeMuslimDesignTokens tokens = theme.tokens;
+    final double reservedWidth =
+        (tokens.spaceLarge * 2) + tokens.minInteractiveDimension;
+    final double viewportWidth = MediaQuery.sizeOf(context).width;
+    final double availableWidth = viewportWidth > reservedWidth
+        ? viewportWidth - reservedWidth
+        : double.infinity;
+    final double greetingHeight = _measureTextHeight(
+      context,
+      context.l10n.homeGreeting,
+      _greetingStyle(theme, theme.colorScheme.onSurface),
+      availableWidth,
+    );
+    final bool hasSecondLine =
+        forceSecondLine || (displayName != null && displayName.isNotEmpty);
+    if (!hasSecondLine) {
+      return greetingHeight;
+    }
+
+    return greetingHeight +
+        tokens.spaceExtraSmall +
+        _measureTextHeight(
+          context,
+          displayName ?? context.l10n.homeProfileLabel,
+          _nameStyle(theme, theme.colorScheme.onSurface),
+          availableWidth,
+          maxLines: 1,
+        );
+  }
+
+  static double _measureTextHeight(
+    BuildContext context,
+    String text,
+    TextStyle style,
+    double maxWidth, {
+    int? maxLines,
+  }) {
+    final TextPainter painter = TextPainter(
+      text: TextSpan(text: text, style: style),
+      textDirection: Directionality.of(context),
+      textScaler: MediaQuery.textScalerOf(context),
+      maxLines: maxLines,
+    )..layout(maxWidth: maxWidth);
+    return painter.height;
+  }
+
+  static TextStyle _greetingStyle(ThemeData theme, Color onHero) {
+    return theme.textTheme.headlineSmall!.copyWith(
+      color: onHero,
+      fontWeight: FontWeight.w600,
+      fontSize: greetingFontSize,
+      height: greetingLineHeight,
+    );
+  }
+
+  static TextStyle _nameStyle(ThemeData theme, Color onHero) {
+    return theme.textTheme.titleSmall!.copyWith(
+      color: onHero.withValues(alpha: 0.8),
+      fontWeight: FontWeight.w500,
+      fontSize: nameFontSize,
+      height: nameLineHeight,
+    );
+  }
+
   final String? displayName;
   final String? photoUrl;
   final Color onHero;
@@ -359,6 +552,7 @@ class _HomeHeaderProfileRow extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final ThemeData theme = Theme.of(context);
+    final MeMuslimDesignTokens tokens = theme.tokens;
     final String? name = displayName?.trim();
     final bool hasName = name != null && name.isNotEmpty;
 
@@ -368,28 +562,18 @@ class _HomeHeaderProfileRow extends StatelessWidget {
         Expanded(
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
-            spacing: 4,
+            spacing: tokens.spaceExtraSmall,
             children: [
               Text(
                 context.l10n.homeGreeting,
-                style: theme.textTheme.headlineSmall?.copyWith(
-                  color: onHero,
-                  fontWeight: FontWeight.w600,
-                  fontSize: 22,
-                  height: 33 / 22,
-                ),
+                style: _greetingStyle(theme, onHero),
               ),
               if (hasName)
                 Text(
                   name,
                   maxLines: 1,
                   overflow: TextOverflow.ellipsis,
-                  style: theme.textTheme.titleSmall?.copyWith(
-                    color: onHero.withValues(alpha: 0.8),
-                    fontWeight: FontWeight.w500,
-                    fontSize: 14,
-                    height: 21 / 14,
-                  ),
+                  style: _nameStyle(theme, onHero),
                 ),
             ],
           ),
@@ -399,7 +583,9 @@ class _HomeHeaderProfileRow extends StatelessWidget {
           label: context.l10n.homeProfileLabel,
           child: TilawaInteractiveSurface(
             onTap: () => openHomeSettingsTab(context),
-            borderRadius: BorderRadius.circular(24),
+            borderRadius: BorderRadius.circular(
+              tokens.minInteractiveDimension / 2,
+            ),
             child: DecoratedBox(
               decoration: BoxDecoration(
                 shape: BoxShape.circle,
@@ -411,7 +597,7 @@ class _HomeHeaderProfileRow extends StatelessWidget {
               child: ProfileAvatar(
                 photoUrl: photoUrl,
                 displayName: name,
-                size: 48,
+                size: tokens.minInteractiveDimension,
                 backgroundColor: onHero.withValues(alpha: 0.14),
                 foregroundColor: onHero,
                 fallbackStyle: ProfileAvatarFallbackStyle.initial,

@@ -27,6 +27,7 @@ Future<T?> showTilawaModalBottomSheet<T>({
   bool useSafeArea = false,
   Color? barrierColor,
   bool isDismissible = true,
+  bool useRootNavigator = false,
   String? sheetSemanticsLabel,
 }) {
   final double maxHeight = MediaQuery.sizeOf(context).height * 0.9;
@@ -34,6 +35,7 @@ Future<T?> showTilawaModalBottomSheet<T>({
     context: context,
     isScrollControlled: isScrollControlled,
     useSafeArea: useSafeArea,
+    useRootNavigator: useRootNavigator,
     backgroundColor: backgroundColor,
     shape: shape,
     barrierColor: barrierColor,

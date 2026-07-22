@@ -67,7 +67,7 @@ Scaffold
         └── CustomScrollView
             ├── HomeNextPrayerTime (immersive header zone, full-bleed under status bar)
             │   ├── HomeHeroBackground (prayer-period green gradient)
-            │   ├── profile row (greeting + avatar)
+            │   ├── pinned profile row (greeting + avatar)
             │   ├── HomePrayerHeroContextRow (Hijri date + location)
             │   ├── centered next-prayer metrics
             │   └── HomePrayerScheduleStrip (today’s five prayers)
@@ -93,12 +93,12 @@ under the header zone. Greeting lives in the header, not the body.
 
 When `quranSessionsFeatureConfig().quranSessionsEnabled`:
 
-- Hero scrolls away — no pinned headers on Home
+- Prayer context, metrics, and strip scroll away; only the profile row pins
 - Urgent + soft Learn cards live in the body after primary worship tiles
 
 When the flag is off:
 
-- Hero scrolls away (no pin)
+- Prayer context, metrics, and strip scroll away; only the profile row pins
 - No Learn Quran soft / urgent cards
 
 ---
@@ -126,7 +126,8 @@ Shell tabs (`app_shell_nav_destinations.dart`): **Home**, **Quran** (push),
 
 File: `home_next_prayer_time.dart`
 
-- Scrollable `SliverToBoxAdapter` with prayer-period photo/gradient tokens
+- Pinned `SliverPersistentHeader` with prayer-period photo/gradient tokens
+- Greeting/profile row stays fixed; all prayer content scrolls away beneath it
 - Expanded: context row + featured next-prayer card
 - Hero text scale clamped 1.0–1.3 for extent math
 - Prayer day strip removed — hero owns prayer context
@@ -277,9 +278,8 @@ cd apps/tilawa && dart analyze
 flutter test test/features/home/
 ```
 
-Manual: light + dark, RTL Arabic, text scale 1.4, hero snap, tutor pin when
+Manual: light + dark, RTL Arabic, text scale 1.4, pinned profile row, tutor pin when
 flag on.
-
 
 
 

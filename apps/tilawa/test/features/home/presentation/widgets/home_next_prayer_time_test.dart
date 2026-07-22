@@ -144,7 +144,7 @@ void main() {
     expect(openPrayerTapped, isFalse);
   });
 
-  testWidgets('renders immersive header zone with prayer strip', (
+  testWidgets('renders immersive header zone with pinned profile row', (
     tester,
   ) async {
     final view = tester.view;
@@ -174,7 +174,7 @@ void main() {
     expect(find.text(dateLine), findsOneWidget);
     expect(find.text(l10n.homeGreeting), findsOneWidget);
     expect(find.text('Muhammad Kamel'), findsOneWidget);
-    expect(find.byType(SliverPersistentHeader), findsNothing);
+    expect(find.byType(SliverPersistentHeader), findsOneWidget);
     expect(find.byType(SliverToBoxAdapter), findsWidgets);
     expect(find.byIcon(FluentIcons.location_24_filled), findsOneWidget);
 
@@ -182,16 +182,32 @@ void main() {
     expect(find.byType(HomePrayerScheduleStrip), findsOneWidget);
   });
 
-  testWidgets('hero has no collapse scroll extent', (tester) async {
-    await tester.pumpWidget(
-      _HomeNextPrayerTimeHarness(controller: ScrollController()),
-    );
+  testWidgets('pins profile row while prayer content scrolls away', (
+    tester,
+  ) async {
+    final controller = ScrollController();
+    addTearDown(controller.dispose);
 
+    await tester.pumpWidget(_HomeNextPrayerTimeHarness(controller: controller));
+    await tester.pump();
+
+    final Finder profileHeader = find.byKey(
+      const Key('home_pinned_profile_header'),
+    );
+    final double profileTopBeforeScroll = tester.getTopLeft(profileHeader).dy;
     final BuildContext scrollContext = tester.element(
       find.byType(CustomScrollView),
     );
 
-    expect(HomeNextPrayerTime.collapseScrollExtent(scrollContext), 0);
+    controller.jumpTo(HomeNextPrayerTime.expandedLayoutExtent(scrollContext));
+    await tester.pump();
+
+    expect(
+      tester.getTopLeft(profileHeader).dy,
+      closeTo(profileTopBeforeScroll, 0.5),
+    );
+    expect(find.text('Cairo').hitTestable(), findsNothing);
+    expect(find.byType(HomePrayerScheduleStrip).hitTestable(), findsNothing);
   });
 
   testWidgets('scrolls without overflow on narrow viewport', (tester) async {
