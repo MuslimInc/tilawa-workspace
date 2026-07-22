@@ -6,10 +6,13 @@ import 'package:tilawa_ui_kit/tilawa_ui_kit.dart';
 
 /// Opens a month-view Hijri calendar sheet from the Home hero date lines.
 Future<void> showHomeHijriCalendarSheet(BuildContext context) {
+  final ColorScheme colorScheme = Theme.of(context).colorScheme;
   return showTilawaModalBottomSheet<void>(
     context: context,
     // Root navigator so sheet covers [TilawaAdaptiveShell] bottom nav.
     useRootNavigator: true,
+    backgroundColor: colorScheme.surface,
+    shape: TilawaBottomSheetScaffold.modalShape(context),
     sheetSemanticsLabel: context.l10n.hijriCalendarTitle,
     builder: (context) => const HomeHijriCalendarSheet(),
   );
@@ -116,122 +119,117 @@ class _HomeHijriCalendarSheetState extends State<HomeHijriCalendarSheet> {
     final int rowCount = (cellCount / 7).ceil();
     final List<int> weekdayOrder = _weekdayHeaderOrder(context);
 
-    return Material(
-      color: colorScheme.surface,
-      child: SafeArea(
-        top: false,
-        child: Padding(
-          padding: EdgeInsetsDirectional.only(
-            bottom: tokens.spaceLarge + context.keyboardInset,
-          ),
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              TilawaSheetHandle(
-                color: colorScheme.onSurfaceVariant.withValues(alpha: 0.28),
+    return SafeArea(
+      top: false,
+      child: Padding(
+        padding: EdgeInsetsDirectional.only(
+          bottom: tokens.spaceLarge + context.keyboardInset,
+        ),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            const TilawaSheetHandle(),
+            Padding(
+              padding: EdgeInsetsDirectional.fromSTEB(
+                tokens.spaceLarge,
+                tokens.spaceMedium,
+                tokens.spaceLarge,
+                tokens.spaceSmall,
               ),
-              Padding(
-                padding: EdgeInsetsDirectional.fromSTEB(
-                  tokens.spaceLarge,
-                  tokens.spaceMedium,
-                  tokens.spaceLarge,
-                  tokens.spaceSmall,
-                ),
-                child: Row(
-                  children: [
-                    TilawaIconActionButton(
-                      icon: Icons.chevron_left_rounded,
-                      tooltip: context.l10n.hijriCalendarPreviousMonth,
-                      onTap: () => _shiftMonth(-1),
+              child: Row(
+                children: [
+                  TilawaIconActionButton(
+                    icon: Icons.chevron_left_rounded,
+                    tooltip: context.l10n.hijriCalendarPreviousMonth,
+                    onTap: () => _shiftMonth(-1),
+                  ),
+                  Expanded(
+                    child: Text(
+                      month.toFormat('MMMM yyyy'),
+                      textAlign: TextAlign.center,
+                      style: theme.textTheme.titleMedium?.copyWith(
+                        fontWeight: FontWeight.w700,
+                      ),
                     ),
+                  ),
+                  TilawaIconActionButton(
+                    icon: Icons.chevron_right_rounded,
+                    tooltip: context.l10n.hijriCalendarNextMonth,
+                    onTap: () => _shiftMonth(1),
+                  ),
+                ],
+              ),
+            ),
+            Padding(
+              padding: EdgeInsetsDirectional.symmetric(
+                horizontal: tokens.spaceLarge,
+              ),
+              child: Row(
+                children: [
+                  for (final int weekday in weekdayOrder)
                     Expanded(
                       child: Text(
-                        month.toFormat('MMMM yyyy'),
+                        _shortWeekdayLabel(context, weekday),
                         textAlign: TextAlign.center,
-                        style: theme.textTheme.titleMedium?.copyWith(
-                          fontWeight: FontWeight.w700,
+                        style: theme.textTheme.labelSmall?.copyWith(
+                          color: colorScheme.onSurfaceVariant,
+                          fontWeight: FontWeight.w500,
                         ),
                       ),
                     ),
-                    TilawaIconActionButton(
-                      icon: Icons.chevron_right_rounded,
-                      tooltip: context.l10n.hijriCalendarNextMonth,
-                      onTap: () => _shiftMonth(1),
-                    ),
-                  ],
-                ),
+                ],
               ),
-              Padding(
-                padding: EdgeInsetsDirectional.symmetric(
-                  horizontal: tokens.spaceLarge,
-                ),
-                child: Row(
-                  children: [
-                    for (final int weekday in weekdayOrder)
-                      Expanded(
-                        child: Text(
-                          _shortWeekdayLabel(context, weekday),
-                          textAlign: TextAlign.center,
-                          style: theme.textTheme.labelSmall?.copyWith(
-                            color: colorScheme.onSurfaceVariant,
-                            fontWeight: FontWeight.w600,
-                          ),
-                        ),
+            ),
+            SizedBox(height: tokens.spaceSmall),
+            Padding(
+              padding: EdgeInsetsDirectional.symmetric(
+                horizontal: tokens.spaceLarge,
+              ),
+              child: Column(
+                children: [
+                  for (int row = 0; row < rowCount; row++)
+                    Padding(
+                      padding: EdgeInsets.only(
+                        bottom: tokens.spaceExtraSmall,
                       ),
-                  ],
-                ),
-              ),
-              SizedBox(height: tokens.spaceSmall),
-              Padding(
-                padding: EdgeInsetsDirectional.symmetric(
-                  horizontal: tokens.spaceLarge,
-                ),
-                child: Column(
-                  children: [
-                    for (int row = 0; row < rowCount; row++)
-                      Padding(
-                        padding: EdgeInsets.only(
-                          bottom: tokens.spaceExtraSmall,
-                        ),
-                        child: Row(
-                          children: [
-                            for (int col = 0; col < 7; col++)
-                              Expanded(
-                                child: _buildDayCell(
-                                  context,
-                                  row: row,
-                                  col: col,
-                                  leading: leading,
-                                  daysInMonth: daysInMonth,
-                                  today: today,
-                                ),
+                      child: Row(
+                        children: [
+                          for (int col = 0; col < 7; col++)
+                            Expanded(
+                              child: _buildDayCell(
+                                context,
+                                row: row,
+                                col: col,
+                                leading: leading,
+                                daysInMonth: daysInMonth,
+                                today: today,
                               ),
-                          ],
-                        ),
+                            ),
+                        ],
                       ),
-                  ],
+                    ),
+                ],
+              ),
+            ),
+            Padding(
+              padding: EdgeInsetsDirectional.fromSTEB(
+                tokens.spaceLarge,
+                tokens.spaceSmall,
+                tokens.spaceLarge,
+                0,
+              ),
+              child: Text(
+                formatHomeHijriDate(
+                  date: DateTime.now(),
+                  languageCode: _localeCode(context),
+                ),
+                textAlign: TextAlign.center,
+                style: theme.textTheme.bodySmall?.copyWith(
+                  color: colorScheme.onSurfaceVariant,
                 ),
               ),
-              Padding(
-                padding: EdgeInsetsDirectional.fromSTEB(
-                  tokens.spaceLarge,
-                  tokens.spaceSmall,
-                  tokens.spaceLarge,
-                  0,
-                ),
-                child: Text(
-                  formatHomeHijriDate(
-                    date: DateTime.now(),
-                    languageCode: _localeCode(context),
-                  ),
-                  textAlign: TextAlign.center,
-                  style: theme.textTheme.bodyMedium?.copyWith(
-                    color: colorScheme.onSurfaceVariant,
-                  ),
-                ),
-              ),
-            ],
-          ),
+            ),
+          ],
         ),
       ),
     );
@@ -257,13 +255,17 @@ class _HomeHijriCalendarSheetState extends State<HomeHijriCalendarSheet> {
 
     final bool isToday =
         today.hYear == _year && today.hMonth == _month && today.hDay == day;
+    final bool isDark = theme.brightness == Brightness.dark;
+    final Color? todayFill = isToday
+        ? colorScheme.primary.withValues(alpha: isDark ? 0.28 : 0.14)
+        : null;
 
     return SizedBox(
       height: 40,
       child: Center(
         child: DecoratedBox(
           decoration: BoxDecoration(
-            color: isToday ? colorScheme.primary.withValues(alpha: 0.14) : null,
+            color: todayFill,
             shape: BoxShape.circle,
           ),
           child: Padding(

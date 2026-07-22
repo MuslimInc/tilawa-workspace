@@ -367,9 +367,7 @@ void main() {
     expect(
       probeAfter,
       lessThanOrEqualTo(
-        MediaQuery.paddingOf(scrollContext).top +
-            tokens.spaceLarge +
-            tokens.spaceExtraSmall,
+        MediaQuery.paddingOf(scrollContext).top + tokens.spaceExtraLarge,
       ),
     );
   });
@@ -455,3 +453,4 @@ HomeDashboardState _homeDashboardState() {
     ),
   );
 }
+

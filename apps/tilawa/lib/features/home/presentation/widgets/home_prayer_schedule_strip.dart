@@ -4,7 +4,7 @@ import 'package:tilawa/features/home/domain/entities/home_prayer_slot.dart';
 import 'package:tilawa/features/prayer_times/domain/entities/prayer_time_entity.dart';
 import 'package:tilawa_ui_kit/tilawa_ui_kit.dart';
 
-/// Five-prayer strip — MeMuslim Figma `prayers-row` CSS.
+/// Five-prayer strip — soft sage panel on the green hero.
 class HomePrayerScheduleStrip extends StatelessWidget {
   const HomePrayerScheduleStrip({
     super.key,
@@ -15,7 +15,7 @@ class HomePrayerScheduleStrip extends StatelessWidget {
   final List<HomePrayerSlot> slots;
   final VoidCallback? onOpenPrayer;
 
-  /// Figma: height 52, radius 16, fill 0.1 / border 0.12.
+  /// Compact day strip height (name + time).
   static const double stripHeight = 52;
 
   @override
@@ -28,16 +28,30 @@ class HomePrayerScheduleStrip extends StatelessWidget {
       return const SizedBox.shrink();
     }
 
-    const BorderRadius radius = BorderRadius.all(Radius.circular(16));
+    final ThemeData theme = Theme.of(context);
+    final MeMuslimDesignTokens tokens = theme.tokens;
+    final ColorScheme colorScheme = theme.colorScheme;
+    final TilawaHomeScreenTokens screenTokens =
+        theme.componentTokens.homeScreen;
+    final BorderRadius radius = BorderRadius.all(
+      Radius.circular(
+        tokens.resolveRadius(family: TilawaRadiusFamily.chrome),
+      ),
+    );
+    final Color border = Color.alphaBlend(
+      screenTokens.homePrayerHeroBorder.withValues(alpha: 0.72),
+      colorScheme.outlineVariant.withValues(alpha: 0.28),
+    );
 
     final Widget row = SizedBox(
       height: stripHeight,
       child: DecoratedBox(
         decoration: BoxDecoration(
-          color: const Color.fromRGBO(255, 255, 255, 0.1),
+          color: screenTokens.homeHeaderChipBackground,
           borderRadius: radius,
           border: Border.all(
-            color: const Color.fromRGBO(255, 255, 255, 0.12),
+            color: border,
+            width: tokens.borderWidthThin,
           ),
         ),
         child: Row(
@@ -71,26 +85,47 @@ class _HomePrayerScheduleSlot extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final ThemeData theme = Theme.of(context);
+    final MeMuslimDesignTokens tokens = theme.tokens;
+    final ColorScheme colorScheme = theme.colorScheme;
+    final TilawaHomeScreenTokens screenTokens =
+        theme.componentTokens.homeScreen;
+    final bool isDark = theme.brightness == Brightness.dark;
     final bool isActive = slot.isNext;
-    // Figma inactive: rgba(255,255,255,0.501961)
-    const Color inactive = Color.fromRGBO(255, 255, 255, 0.5);
-    final Color labelColor = isActive ? Colors.white : inactive;
-    final Color timeColor = isActive ? Colors.white : inactive;
+    // Light: soft white chip + dark ink on sage strip.
+    // Dark: lifted dark glass + light ink (white chip reads as light-mode).
+    final Color activeFill = isDark
+        ? Color.alphaBlend(
+            Colors.white.withValues(alpha: 0.16),
+            colorScheme.surface,
+          )
+        : colorScheme.surface.withValues(alpha: 0.85);
+    final Color activeInk = colorScheme.onSurface;
+    final Color inactiveInk = isDark
+        ? colorScheme.onSurface.withValues(alpha: 0.72)
+        : screenTokens.homeHeaderSecondaryText;
+    final Color labelColor = isActive ? activeInk : inactiveInk;
+    final Color timeColor = labelColor;
     final String name = _localizedPrayerName(context, slot.type);
     final String timeLabel = _formatStripTime(slot.time);
     // Brand tertiary (gilding) — token, not a hard-coded second accent system.
-    final Color activeDot = Theme.of(context).colorScheme.tertiary;
+    final Color activeDot = colorScheme.tertiary;
+    final BorderRadius activeRadius = BorderRadius.all(
+      Radius.circular(
+        tokens.resolveRadius(family: TilawaRadiusFamily.chip),
+      ),
+    );
 
-    // Figma active fills the whole flex cell (padding 8 0, radius 12) — no inset chip.
+    // Active fills the whole flex cell — no inset chip.
     return DecoratedBox(
       decoration: isActive
-          ? const BoxDecoration(
-              color: Color.fromRGBO(255, 255, 255, 0.2),
-              borderRadius: BorderRadius.all(Radius.circular(12)),
+          ? BoxDecoration(
+              color: activeFill,
+              borderRadius: activeRadius,
             )
           : const BoxDecoration(),
       child: Padding(
-        padding: const EdgeInsets.symmetric(vertical: 8),
+        padding: EdgeInsets.symmetric(vertical: tokens.spaceSmall),
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           spacing: 3,
@@ -98,7 +133,7 @@ class _HomePrayerScheduleSlot extends StatelessWidget {
             Row(
               mainAxisAlignment: MainAxisAlignment.center,
               mainAxisSize: MainAxisSize.min,
-              spacing: 4,
+              spacing: tokens.spaceExtraSmall,
               children: [
                 if (isActive)
                   DecoratedBox(

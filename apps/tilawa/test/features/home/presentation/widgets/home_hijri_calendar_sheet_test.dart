@@ -21,4 +21,21 @@ void main() {
     expect(find.byIcon(Icons.chevron_right_rounded), findsOneWidget);
     expect(find.textContaining('144'), findsWidgets);
   });
+
+  testWidgets('builds under dark theme with default sheet handle', (
+    tester,
+  ) async {
+    await tester.pumpWidget(
+      MaterialApp(
+        theme: AppTheme.getDarkTheme(primaryColor: AppColors.defaultPrimary),
+        localizationsDelegates: AppLocalizations.localizationsDelegates,
+        supportedLocales: AppLocalizations.supportedLocales,
+        home: const Scaffold(body: HomeHijriCalendarSheet()),
+      ),
+    );
+    await tester.pumpAndSettle();
+
+    expect(find.byType(HomeHijriCalendarSheet), findsOneWidget);
+    expect(find.byType(TilawaSheetHandle), findsOneWidget);
+  });
 }
