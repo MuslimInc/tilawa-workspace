@@ -6,8 +6,9 @@ import android.os.PowerManager
 import android.os.Build
 import android.os.Bundle
 import android.util.Log
+import androidx.activity.enableEdgeToEdge
 import androidx.core.splashscreen.SplashScreen.Companion.installSplashScreen
-import com.ryanheise.audioservice.AudioServiceActivity
+import com.ryanheise.audioservice.AudioServiceFragmentActivity
 import com.tilawa.app.prayer.AdhanScheduler
 import com.tilawa.app.prayer.PrayerAdhanMethodChannel
 import com.tilawa.app.prayer.PrayerNotificationsWatchdogScheduler
@@ -19,7 +20,7 @@ import io.flutter.embedding.engine.FlutterEngine
 import io.flutter.plugin.common.MethodChannel
 import org.json.JSONObject
 
-class MainActivity : AudioServiceActivity() {
+class MainActivity : AudioServiceFragmentActivity() {
     companion object {
         private const val WATCHDOG_CHANNEL = "com.tilawa.app/prayer_watchdog"
         private const val LAUNCH_SPLASH_CHANNEL = "com.tilawa.app/launch_splash"
@@ -78,6 +79,9 @@ class MainActivity : AudioServiceActivity() {
             firstFrameLog("splash exit animation → LaunchSplashController")
             launchSplashController.onExitAnimation(splashScreenViewProvider)
         }
+        // Play Console: edge-to-edge for API < 35 (Flutter already uses
+        // SystemUiMode.edgeToEdge; this is the native enableEdgeToEdge path).
+        enableEdgeToEdge()
         // Buffer notification-tap payload BEFORE FlutterEngine/Dart start so an
         // early consumePendingNotificationTap (BootGate) still finds pendingTap.
         // register() later delivers the buffered tap over the method channel.
@@ -305,6 +309,3 @@ class MainActivity : AudioServiceActivity() {
      */
     override fun getRenderMode(): RenderMode = RenderMode.texture
 }
-
-
-
