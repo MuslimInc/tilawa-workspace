@@ -68,7 +68,7 @@ void main() {
     final DecoratedBox activeCell = tester
         .widgetList<DecoratedBox>(find.byType(DecoratedBox))
         .firstWhere((DecoratedBox box) {
-          final Decoration? decoration = box.decoration;
+          final Decoration decoration = box.decoration;
           return decoration is BoxDecoration &&
               decoration.color == expectedActiveFill;
         });
