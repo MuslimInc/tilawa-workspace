@@ -39,7 +39,7 @@ class HomeDashboardContentSliver extends StatelessWidget {
         ),
         child: _HomeDashboardSheetBody(
           horizontalInset: horizontalInset,
-          topPadding: topPadding ?? tokens.spaceLarge,
+          topPadding: topPadding ?? tokens.spaceExtraLarge,
           child: child,
         ),
       ),

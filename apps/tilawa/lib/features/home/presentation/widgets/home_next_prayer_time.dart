@@ -52,11 +52,22 @@ abstract final class HomeNextPrayerTime {
   /// Scroll offset that clears the hero from the dashboard viewport.
   ///
   /// Includes the status-bar inset painted inside the hero (full-bleed band).
-  static double expandedLayoutExtent(BuildContext context) {
-    return MediaQuery.paddingOf(context).top + _resolveHeroBodyHeight(context);
+  /// Pass [ui] when available so the pinned profile band matches the header.
+  static double expandedLayoutExtent(
+    BuildContext context, {
+    HomeDashboardUiState? ui,
+  }) {
+    final double pinned = ui != null
+        ? _resolvePinnedProfileExtent(context, ui)
+        : _estimatePinnedProfileExtent(context);
+    return pinned + _resolvePrayerZoneExtent(context);
   }
 
-  static double _resolveHeroBodyHeight(BuildContext context) {
+  /// Prayer zone below the pinned profile (context, focus, strip + bottom pad).
+  ///
+  /// Sized independently of the profile so a tall greeting cannot steal height
+  /// and overflow the OverflowBox-clamped column.
+  static double _resolvePrayerZoneExtent(BuildContext context) {
     final MeMuslimDesignTokens tokens = Theme.of(context).tokens;
     final double textScale = MediaQuery.textScalerOf(
       context,
@@ -66,13 +77,30 @@ abstract final class HomeNextPrayerTime {
     final bool tightCard =
         MediaQuery.sizeOf(context).width - horizontalGutter < 320;
 
-    // Preserve the approved expanded header height while allowing text growth.
-    final double body = 282 * textScale;
-    final double tightSlack = tightCard
-        ? tokens.spaceExtraLarge + tokens.spaceTiny
-        : 0;
+    // Calibrated at 360dp / textScale 1 with spaceMedium bottom pad.
+    // Includes slack so the loading skeleton (spaceLarge pad + spacing) fits.
+    const double zoneAtScaleOne = 244;
+    final double tightSlack = tightCard ? tokens.spaceExtraLarge : 0;
 
-    return body + tightSlack;
+    return zoneAtScaleOne * textScale + tightSlack;
+  }
+
+  static double _estimatePinnedProfileExtent(BuildContext context) {
+    final MeMuslimDesignTokens tokens = Theme.of(context).tokens;
+    final double textHeight = _HomeHeaderProfileRow.resolveTextHeight(
+      context,
+      displayName: null,
+      forceSecondLine: true,
+    );
+    final double rowHeight = textHeight > tokens.minInteractiveDimension
+        ? textHeight
+        : tokens.minInteractiveDimension;
+
+    return MediaQuery.paddingOf(context).top +
+        tokens.spaceMedium +
+        rowHeight +
+        tokens.spaceMedium +
+        tokens.spaceExtraSmall;
   }
 
   static double _resolvePinnedProfileExtent(
@@ -223,7 +251,10 @@ class _HomeNextPrayerTimeSliverState extends State<_HomeNextPrayerTimeSliver> {
           context,
           widget.ui,
         ),
-        maxExtent: HomeNextPrayerTime.expandedLayoutExtent(context),
+        maxExtent: HomeNextPrayerTime.expandedLayoutExtent(
+          context,
+          ui: widget.ui,
+        ),
       ),
     );
   }
@@ -434,9 +465,9 @@ class _HomeHeaderZoneBody extends StatelessWidget {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
-        // prayer-hero: padding 0 20; header-zone bottom pad 24
+        // prayer-hero: padding 0 20; header-zone bottom pad spaceMedium
         Padding(
-          padding: const EdgeInsets.fromLTRB(20, 0, 20, 24),
+          padding: EdgeInsets.fromLTRB(20, 0, 20, tokens.spaceMedium),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [

@@ -187,9 +187,6 @@ class _HomeScreenState extends State<HomeScreen> {
                                       );
                                     },
                                 body: CustomScrollView(
-                                  physics: const AlwaysScrollableScrollPhysics(
-                                    parent: BouncingScrollPhysics(),
-                                  ),
                                   slivers: [
                                     HomeDashboardContentSliver(
                                       child: AnimatedSwitcher(
