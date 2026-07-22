@@ -7,15 +7,20 @@ import 'package:flutter/services.dart' show rootBundle;
 import '../../../quran_qcf.dart';
 import '../../helpers/app_logger.dart';
 
+/// Compact wire format for one word (isolate → UI isolate).
+///
+/// Using primitives avoids shipping ~90k [WordData] instances through
+/// [compute], which blocks the UI isolate during deserialization (ANR).
+typedef _CompactWord = List<Object?>;
+
 /// A service to manage Quran data loading and caching.
 ///
 /// Implements [QuranMushafService] to provide a clean domain layer interface
 /// to raw Quran word data and special line operations. Register via
 /// [QuranQcfLocator.setup] and resolve with `quranQcfLocator<QuranMushafService>()`.
 class MushafService extends ChangeNotifier implements QuranMushafService {
-  /// Raw structure of the Mushaf after V4 JSON decoding.
-  /// A map for fast indexing of pages containing surahs and lines.
-  /// Format: pageNumber -> SurahNumber -> LineNumber -> [Verses]
+  /// pageNumber -> lines -> compact words (materialized to [WordData] on demand).
+  Map<int, List<List<_CompactWord>>>? _compactPageIndex;
   Map<int, List<List<WordData>>>? _processedPageIndex;
   Map<String, int>? _verseLastWordIndexByVerse;
   final Map<int, QuranSpecialLineCounts> _specialLineCountsCache = {};
@@ -26,7 +31,7 @@ class MushafService extends ChangeNotifier implements QuranMushafService {
   /// Returns true if the data is already loaded.
   @override
   bool get isLoaded =>
-      _processedPageIndex != null && _verseLastWordIndexByVerse != null;
+      _compactPageIndex != null && _verseLastWordIndexByVerse != null;
 
   /// Returns a future that completes when data is loaded.
   @override
@@ -58,8 +63,9 @@ class MushafService extends ChangeNotifier implements QuranMushafService {
         _decodeAndProcessData,
         responses,
       );
-      _processedPageIndex = result[0] as Map<int, List<List<WordData>>>;
+      _compactPageIndex = result[0] as Map<int, List<List<_CompactWord>>>;
       _verseLastWordIndexByVerse = result[1] as Map<String, int>;
+      _processedPageIndex = <int, List<List<WordData>>>{};
 
       final endTime = DateTime.now();
       if (!kReleaseMode) {
@@ -83,7 +89,22 @@ class MushafService extends ChangeNotifier implements QuranMushafService {
   /// Get the processed page data for a specific page.
   @override
   List<List<WordData>>? getPageData(int pageNumber) {
-    return _processedPageIndex?[pageNumber];
+    final cached = _processedPageIndex?[pageNumber];
+    if (cached != null) {
+      return cached;
+    }
+    final compact = _compactPageIndex?[pageNumber];
+    if (compact == null) {
+      return null;
+    }
+    final List<List<WordData>> lines = <List<WordData>>[
+      for (final List<_CompactWord> line in compact)
+        <WordData>[
+          for (final _CompactWord word in line) _wordFromCompact(word),
+        ],
+    ];
+    _processedPageIndex![pageNumber] = lines;
+    return lines;
   }
 
   @override
@@ -97,13 +118,18 @@ class MushafService extends ChangeNotifier implements QuranMushafService {
     return _verseLastWordIndexByVerse?['$surahNumber:$verseNumber'];
   }
 
-  /// Heavy lifting: decode JSON and pre-build the O(1) page lookup map.
+  /// Heavy lifting: decode JSON and build a compact page index.
+  ///
+  /// Returns `[compactPageIndex, verseLastWordIndexByVerse]` — no [WordData]
+  /// instances — so the UI isolate stays responsive when [compute] completes.
   static List<dynamic> _decodeAndProcessData(List<Uint8List> bytes) {
-    final qpc = json.decode(utf8.decode(bytes[0])) as Map<String, dynamic>;
-    final pageIndexRaw =
-        json.decode(utf8.decode(bytes[1])) as Map<String, dynamic>;
+    final Converter<List<int>, Object?> jsonBytes = utf8.decoder.fuse(
+      json.decoder,
+    );
+    final qpc = jsonBytes.convert(bytes[0])! as Map<String, dynamic>;
+    final pageIndexRaw = jsonBytes.convert(bytes[1])! as Map<String, dynamic>;
 
-    final processedIndex = <int, List<List<WordData>>>{};
+    final compactIndex = <int, List<List<_CompactWord>>>{};
     final verseLastWordIndexByVerse = <String, int>{};
 
     for (final MapEntry<String, dynamic> wordEntry in qpc.entries) {
@@ -122,9 +148,9 @@ class MushafService extends ChangeNotifier implements QuranMushafService {
       final int pageNum = int.parse(pageEntry.key);
       final lineMap = pageEntry.value as Map<String, dynamic>;
 
-      final List<List<WordData>> lines = List.generate(
+      final List<List<_CompactWord>> lines = List.generate(
         QuranConstants.linesPerPage,
-        (_) => <WordData>[],
+        (_) => <_CompactWord>[],
       );
 
       for (final MapEntry<String, dynamic> lineEntry in lineMap.entries) {
@@ -137,14 +163,40 @@ class MushafService extends ChangeNotifier implements QuranMushafService {
         for (final key in wordKeys) {
           final wordMap = qpc[key] as Map<String, dynamic>?;
           if (wordMap != null) {
-            lines[lineIndex].add(WordData.fromMap(wordMap));
+            lines[lineIndex].add(_compactFromMap(wordMap));
           }
         }
       }
-      processedIndex[pageNum] = lines;
+      compactIndex[pageNum] = lines;
     }
 
-    return [processedIndex, verseLastWordIndexByVerse];
+    return [compactIndex, verseLastWordIndexByVerse];
+  }
+
+  static _CompactWord _compactFromMap(Map<String, dynamic> map) {
+    return <Object?>[
+      map['text'] as String,
+      int.tryParse(map['surah'].toString()) ?? 0,
+      int.tryParse(map['ayah'].toString()) ?? 0,
+      int.tryParse(map['word'].toString()) ?? 0,
+      int.tryParse(map['page'].toString()) ?? 0,
+      int.tryParse(map['line'].toString()) ?? 0,
+      map['audio']?.toString(),
+      map['char_type']?.toString(),
+    ];
+  }
+
+  static WordData _wordFromCompact(_CompactWord word) {
+    return WordData(
+      text: word[0]! as String,
+      surah: word[1]! as int,
+      ayah: word[2]! as int,
+      wordIndex: word[3]! as int,
+      page: word[4]! as int,
+      line: word[5]! as int,
+      audio: word[6] as String?,
+      charType: word[7] as String?,
+    );
   }
 
   @override

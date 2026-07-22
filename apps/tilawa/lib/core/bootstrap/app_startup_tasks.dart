@@ -409,8 +409,22 @@ class AppStartupTasks {
     try {
       if (launchConfig.quranDataLoad) {
         timeline.resetPhase();
-        await quranQcfLocator<MushafService>().ensureLoaded();
-        timeline.log('Phase4 quranData');
+        // Heavy JSON decode runs in a worker isolate; do not await on the
+        // startup critical path — shipping the result onto the UI isolate can
+        // freeze frames long enough to ANR (see stacktrace.log / Thread-14).
+        unawaited(
+          quranQcfLocator<MushafService>()
+              .ensureLoaded()
+              .then((_) {
+                timeline.log('Phase4 quranData');
+              })
+              .catchError((Object e, StackTrace st) {
+                logger.d(
+                  '[AppLaunch] source=AppStartupTasks._runPhase4QuranAndFirebase: Quran data load failed at (${DateTime.now()}): $e',
+                );
+              }),
+        );
+        timeline.log('Phase4 quranData scheduled');
       } else {
         _logDisabled('QURAN_DATA_LOAD');
       }

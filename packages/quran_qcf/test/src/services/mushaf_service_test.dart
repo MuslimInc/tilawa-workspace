@@ -68,6 +68,19 @@ void main() {
       expect(mushafService.getLastWordIndexForVerse(1, 1), 5);
     });
 
+    test('materializes page words lazily', () {
+      final page = mushafService.getPageData(1);
+      expect(page, isNotNull);
+      expect(page!.first.map((w) => w.text).toList(), [
+        'A',
+        'B',
+        'C',
+        'D',
+        'E',
+      ]);
+      expect(mushafService.getPageData(1), same(page));
+    });
+
     test('identifies verse-end words correctly', () {
       expect(
         mushafService.isVerseEndWord(
