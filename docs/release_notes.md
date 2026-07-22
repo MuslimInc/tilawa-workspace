@@ -12,6 +12,37 @@ the changelog for full engineering detail.
 
 | Field | Value |
 |-------|--------|
+| Version | **2.1.9** (build **90**) |
+| Git tag | `v2.1.9+90` |
+| Date | 2026-07-22 |
+| Track | Google Play Production |
+
+### What's new (en-US) — copy for Play Console
+
+```text
+• Smoother home prayer schedule and Hijri calendar sheet
+• Better display on foldables and large screens
+• Edge-to-edge layout for newer Android versions
+• More reliable resume after finishing a surah
+• Catalog search and home/player polish
+```
+
+### ما الجديد (ar) — نص متجر Play
+
+```text
+• جدول الصلاة والتقويم الهجري أوضح على الرئيسية
+• عرض أفضل على الشاشات الكبيرة والأجهزة القابلة للطي
+• واجهة متوافقة مع أندرويد الحديث (من الحافة للحافة)
+• استئناف أوثق بعد إنهاء السورة
+• تحسينات البحث والرئيسية ومشغّل التلاوة
+```
+
+---
+
+## Previous current release (2.1.9+89)
+
+| Field | Value |
+|-------|--------|
 | Version | **2.1.9** (build **89**) |
 | Git tag | `v2.1.9+89` (pending) |
 | Date | 2026-07-20 |
@@ -732,6 +763,7 @@ Tilawa keeps **one shared version** in [`apps/tilawa/pubspec.yaml`](../apps/tila
      `dart run melos run tilawa:build:android:production`.
    - iOS: archive the **production** flavor for TestFlight (`com.memuslim.app`).
 5. Android checklist: [`google_play_release_checklist.md`](google_play_release_checklist.md)
+
 
 
 

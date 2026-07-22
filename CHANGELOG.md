@@ -7,6 +7,24 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [2.1.9+90] - 2026-07-22 [Google Play Production]
+
+### Fixed
+
+- **Home**: Hijri calendar sheet and prayer schedule layout — padding, hero
+  extent, bottom-nav coverage, and pinned profile row.
+- **Android**: Edge-to-edge display for Play Console API 35+ requirements.
+- **Android**: Allow rotation on large-screen devices (removed forced portrait).
+- **Android**: Downsample ayah home-widget bitmaps to avoid oversized images.
+- **Player**: Resume playback correctly after a completed listening session.
+- **Catalog**: Search UX majors (clearer empty/error and result handling).
+
+### Changed
+
+- **Home / player / settings**: UI polish pass (NestedScrollView home, player
+  surfaces, settings refinements).
+- **Playlists**: Remove unreachable stub UI paths.
+
 ## [2.1.9+89] - 2026-07-20 [Google Play Production]
 
 ### Changed
