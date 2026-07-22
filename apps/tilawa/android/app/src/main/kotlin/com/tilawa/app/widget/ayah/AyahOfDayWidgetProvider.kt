@@ -108,20 +108,48 @@ internal class AyahOfDayWidgetProvider : AppWidgetProvider() {
         return views
     }
 
-    /** Decodes the artifact; bounded by the render size. The widget background
-     *  is the brand-green gradient in BOTH themes, so the white-glyph (dark)
-     *  artifact is always the readable one; the light artifact is kept for a
-     *  future light-surface variant. */
+    /** Decodes the artifact with [BitmapFactory.Options.inSampleSize] so large
+     *  PNGs cannot spike widget-process RAM (Play Console bitmap-downsample
+     *  guidance). The widget background is the brand-green gradient in BOTH
+     *  themes, so the white-glyph (dark) artifact is always the readable one;
+     *  the light artifact is kept for a future light-surface variant. */
     private fun decodeArtwork(context: Context, payload: AyahWidgetPayload): Bitmap? {
         val path = payload.imagePathDark
         return try {
             val file = File(path)
             if (!file.exists()) return null
-            BitmapFactory.decodeFile(file.absolutePath)
+            val maxPx = context.resources.displayMetrics.widthPixels
+                .coerceIn(MIN_DECODE_PX, MAX_DECODE_PX)
+            val bounds = BitmapFactory.Options().apply { inJustDecodeBounds = true }
+            BitmapFactory.decodeFile(file.absolutePath, bounds)
+            if (bounds.outWidth <= 0 || bounds.outHeight <= 0) return null
+            val options = BitmapFactory.Options().apply {
+                inSampleSize = calculateInSampleSize(bounds, maxPx, maxPx)
+            }
+            BitmapFactory.decodeFile(file.absolutePath, options)
         } catch (t: Throwable) {
             Log.w(TAG, "Ayah artifact decode failed", t)
             null
         }
+    }
+
+    private fun calculateInSampleSize(
+        options: BitmapFactory.Options,
+        reqWidth: Int,
+        reqHeight: Int,
+    ): Int {
+        val (height, width) = options.outHeight to options.outWidth
+        var inSampleSize = 1
+        if (height > reqHeight || width > reqWidth) {
+            val halfHeight = height / 2
+            val halfWidth = width / 2
+            while (halfHeight / inSampleSize >= reqHeight &&
+                halfWidth / inSampleSize >= reqWidth
+            ) {
+                inSampleSize *= 2
+            }
+        }
+        return inSampleSize
     }
 
     private fun openMushafIntent(context: Context, pageNumber: Int?): PendingIntent {
@@ -184,6 +212,8 @@ internal class AyahOfDayWidgetProvider : AppWidgetProvider() {
         private const val REQUEST_REFRESH = 0x41595247 // 'AYRG'
         private const val REQUEST_OPEN_MUSHAF = 0x41594F4D // 'AYOM'
         private const val BOUNDARY_GRACE_MS = 2_000L
+        private const val MIN_DECODE_PX = 480
+        private const val MAX_DECODE_PX = 1080
 
         private fun widgetIds(context: Context, manager: AppWidgetManager): IntArray =
             manager.getAppWidgetIds(
