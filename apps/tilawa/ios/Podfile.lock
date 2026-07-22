@@ -1656,11 +1656,11 @@ PODS:
   - RecaptchaInterop (101.0.0)
   - record_ios (2.0.0):
     - Flutter
-  - Sentry/HybridSDK (8.58.3)
-  - sentry_flutter (9.24.0):
+  - Sentry/HybridSDK (8.58.4)
+  - sentry_flutter (9.25.0):
     - Flutter
     - FlutterMacOS
-    - Sentry/HybridSDK (= 8.58.3)
+    - Sentry/HybridSDK (= 8.58.4)
   - share_plus (0.0.1):
     - Flutter
   - shared_preferences_foundation (0.0.1):
@@ -1973,8 +1973,8 @@ SPEC CHECKSUMS:
   qibla: ed692a750f514f537d483ea7b6dc9df5891af1fe
   RecaptchaInterop: 11e0b637842dfb48308d242afc3f448062325aba
   record_ios: 41f9412c3311401689babe6d7ba69362f10b8325
-  Sentry: 108fdbb76299c4189af12246bf0308c09c278922
-  sentry_flutter: b9c59bc3a9fe2272f74961586afc08bd7300c2c3
+  Sentry: 5321d74bdd28d6f6f8beaa1ca06f1fdc746bff49
+  sentry_flutter: 61cb8758af33f065aa8df72d7790dc6f2388f575
   share_plus: 8b6f8b3447e494cca5317c8c3073de39b3600d1f
   shared_preferences_foundation: 5086985c1d43c5ba4d5e69a4e8083a389e2909e6
   sign_in_with_apple: fb98447f3dfb81e2926945ea43a8c9c7205eaca9
