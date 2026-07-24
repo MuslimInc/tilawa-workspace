@@ -63,12 +63,13 @@ class GoogleSignInPrepareDataSourceImpl
   }
 
   Future<void> _runInitialize() async {
+    // Web: GIS requires the Web OAuth client ID (also in index.html meta).
     // iOS: leave [clientId] null so google_sign_in_ios reads Info.plist
     // `GIDClientID` (same xcconfig as `CFBundleURLSchemes`). Passing a Dart
     // clientId that disagrees with the URL scheme (e.g. Archive without
     // APP_ENV dart-defines) breaks the OAuth redirect on TestFlight.
     await _googleSignIn.initialize(
-      clientId: null,
+      clientId: kIsWeb ? AppStrings.googleClientId : null,
       serverClientId: AppStrings.googleClientId,
     );
   }
