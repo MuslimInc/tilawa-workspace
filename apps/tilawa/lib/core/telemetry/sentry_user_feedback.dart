@@ -3,6 +3,7 @@ import 'package:flutter/widgets.dart';
 import 'package:sentry_flutter/sentry_flutter.dart';
 import 'package:tilawa/core/extensions.dart';
 import 'package:tilawa/core/telemetry/crash_reporting_context.dart';
+import 'package:tilawa/core/telemetry/report_bug_feature_flags.dart';
 import 'package:tilawa/core/telemetry/session_diagnostics_hub.dart';
 import 'package:tilawa/core/telemetry/tilawa_feedback_screenshot_session.dart';
 import 'package:tilawa/core/telemetry/tilawa_sentry_feedback_form.dart';
@@ -52,7 +53,7 @@ abstract final class SentryUserFeedback {
 
   /// Opens the Sentry feedback form from settings or other user actions.
   static Future<void> showManualReportBugForm() async {
-    if (!Sentry.isEnabled) {
+    if (!isReportBugEnabled() || !Sentry.isEnabled) {
       return;
     }
 
@@ -81,7 +82,7 @@ abstract final class SentryUserFeedback {
   /// recoverable errors, dev builds, emulators, and Sentry verify events.
   @visibleForTesting
   static bool shouldPromptFeedbackForEvent(SentryEvent event) {
-    if (!kReleaseMode || kIsWeb) {
+    if (!isReportBugEnabled() || !kReleaseMode || kIsWeb) {
       return false;
     }
 

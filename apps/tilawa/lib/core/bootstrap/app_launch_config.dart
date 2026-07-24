@@ -10,9 +10,13 @@ import 'package:flutter/foundation.dart';
 ///
 /// [supportTilawaEnabled] defaults to **true** (Settings/Profile Support entry).
 ///
+/// [reportBugEnabled] defaults to **false** (Settings "Report a bug" + Sentry
+/// feedback prompts) until explicitly enabled.
+///
 /// Example: `--dart-define=TILAWA_LAUNCH_FIREBASE_INIT=false`
 /// Example: `--dart-define=TILAWA_LAUNCH_SUBSCRIPTION_SERVICE_ENABLED=true`
 /// Example: `--dart-define=TILAWA_LAUNCH_SUPPORT_TILAWA_ENABLED=false`
+/// Example: `--dart-define=TILAWA_LAUNCH_REPORT_BUG_ENABLED=true`
 /// Example: `--dart-define=TILAWA_LAUNCH_RECITATION_PRACTICE_ENABLED=true`
 /// Example: `--dart-define=TILAWA_LAUNCH_SMART_KHATMA_ENABLED=true`
 /// Example: `--dart-define=TILAWA_LAUNCH_WIRD_WIDGET_ENABLED=true`
@@ -143,6 +147,10 @@ abstract final class _LaunchEnvironment {
     'TILAWA_LAUNCH_SUPPORT_TILAWA_ENABLED',
     defaultValue: true,
   );
+  static const bool reportBugEnabled = bool.fromEnvironment(
+    'TILAWA_LAUNCH_REPORT_BUG_ENABLED',
+    defaultValue: false,
+  );
   static const bool recitationPracticeEnabled = bool.fromEnvironment(
     'TILAWA_LAUNCH_RECITATION_PRACTICE_ENABLED',
     defaultValue: false,
@@ -225,6 +233,7 @@ class AppLaunchConfig extends Equatable {
     this.firebaseDataInit = true,
     this.subscriptionServiceEnabled = false,
     this.supportTilawaEnabled = true,
+    this.reportBugEnabled = false,
     this.recitationPracticeEnabled = false,
     this.smartKhatmaEnabled = false,
     this.wirdWidgetEnabled = false,
@@ -268,6 +277,7 @@ class AppLaunchConfig extends Equatable {
       firebaseDataInit: _LaunchEnvironment.firebaseDataInit,
       subscriptionServiceEnabled: _LaunchEnvironment.subscriptionServiceEnabled,
       supportTilawaEnabled: _LaunchEnvironment.supportTilawaEnabled,
+      reportBugEnabled: _LaunchEnvironment.reportBugEnabled,
       recitationPracticeEnabled: _LaunchEnvironment.recitationPracticeEnabled,
       smartKhatmaEnabled: _LaunchEnvironment.smartKhatmaEnabled,
       wirdWidgetEnabled: _LaunchEnvironment.wirdWidgetEnabled,
@@ -312,6 +322,11 @@ class AppLaunchConfig extends Equatable {
   final bool firebaseDataInit;
   final bool subscriptionServiceEnabled;
   final bool supportTilawaEnabled;
+
+  /// Settings "Report a bug" tile and Sentry user-feedback prompts.
+  /// Defaults to **false**. Enable with:
+  /// `--dart-define=TILAWA_LAUNCH_REPORT_BUG_ENABLED=true`
+  final bool reportBugEnabled;
   final bool recitationPracticeEnabled;
   final bool smartKhatmaEnabled;
   final bool wirdWidgetEnabled;
@@ -389,6 +404,7 @@ class AppLaunchConfig extends Equatable {
     firebaseDataInit,
     subscriptionServiceEnabled,
     supportTilawaEnabled,
+    reportBugEnabled,
     recitationPracticeEnabled,
     smartKhatmaEnabled,
     wirdWidgetEnabled,
