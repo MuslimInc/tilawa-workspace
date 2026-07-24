@@ -19,6 +19,7 @@ import 'package:tilawa_ui_kit/tilawa_ui_kit.dart';
 
 import 'app/app_providers.dart';
 import 'app/default_route_system_ui_overlay.dart';
+import 'core/bootstrap/app_launch_config.dart';
 import 'core/bootstrap/startup_blur_shader_warmup.dart';
 import 'core/telemetry/session_diagnostics_hub.dart';
 import 'core/debug/device_preview_app_builder.dart';
@@ -177,6 +178,13 @@ class _TilawaAppState extends State<TilawaApp> with WidgetsBindingObserver {
     required Duration delay,
     required String reason,
   }) {
+    if (!_isWhatsNewEnabled()) {
+      logger.d(
+        '[AppLaunch] source=Config: Disabled by config: WHATS_NEW '
+        'reason=$reason',
+      );
+      return;
+    }
     _whatsNewTimer?.cancel();
     logger.d(
       '[AppLaunch] source=Startup whats-new scheduled '
@@ -188,6 +196,13 @@ class _TilawaAppState extends State<TilawaApp> with WidgetsBindingObserver {
       );
       unawaited(_maybeShowWhatsNew());
     });
+  }
+
+  bool _isWhatsNewEnabled() {
+    if (!getIt.isRegistered<AppLaunchConfig>()) {
+      return AppLaunchConfig.fromEnvironment().whatsNewEnabled;
+    }
+    return getIt<AppLaunchConfig>().whatsNewEnabled;
   }
 
   Future<void> _maybeShowWhatsNew() async {

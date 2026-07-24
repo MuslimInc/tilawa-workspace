@@ -1,4 +1,6 @@
 import 'package:injectable/injectable.dart';
+import 'package:tilawa/core/bootstrap/app_launch_config.dart';
+import 'package:tilawa/core/di/injection.dart';
 import 'package:tilawa/core/logging/app_logger.dart';
 import 'package:tilawa/features/tour_guide/domain/services/tour_flow_guard.dart';
 import 'package:tilawa/router/app_router.dart';
@@ -36,7 +38,17 @@ class WhatsNewCoordinator {
   bool _autoPromptShownThisSession = false;
   Future<void>? _inFlightShow;
 
+  bool get _isEnabled {
+    if (!getIt.isRegistered<AppLaunchConfig>()) {
+      return AppLaunchConfig.fromEnvironment().whatsNewEnabled;
+    }
+    return getIt<AppLaunchConfig>().whatsNewEnabled;
+  }
+
   Future<void> maybeShowAfterLaunch() async {
+    if (!_isEnabled) {
+      return;
+    }
     if (_inFlightShow != null) {
       await _inFlightShow;
       return;
@@ -54,6 +66,9 @@ class WhatsNewCoordinator {
   }
 
   Future<void> showFromSettings() async {
+    if (!_isEnabled) {
+      return;
+    }
     final ChangelogRelease? release = await _resolveCurrentRelease();
     if (release == null) {
       await _logLoadFailed('missing_release');

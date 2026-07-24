@@ -13,10 +13,14 @@ import 'package:flutter/foundation.dart';
 /// [reportBugEnabled] defaults to **false** (Settings "Report a bug" + Sentry
 /// feedback prompts) until explicitly enabled.
 ///
+/// [whatsNewEnabled] defaults to **false** (auto prompt + Settings tile) until
+/// explicitly enabled.
+///
 /// Example: `--dart-define=TILAWA_LAUNCH_FIREBASE_INIT=false`
 /// Example: `--dart-define=TILAWA_LAUNCH_SUBSCRIPTION_SERVICE_ENABLED=true`
 /// Example: `--dart-define=TILAWA_LAUNCH_SUPPORT_TILAWA_ENABLED=false`
 /// Example: `--dart-define=TILAWA_LAUNCH_REPORT_BUG_ENABLED=true`
+/// Example: `--dart-define=TILAWA_LAUNCH_WHATS_NEW_ENABLED=true`
 /// Example: `--dart-define=TILAWA_LAUNCH_RECITATION_PRACTICE_ENABLED=true`
 /// Example: `--dart-define=TILAWA_LAUNCH_SMART_KHATMA_ENABLED=true`
 /// Example: `--dart-define=TILAWA_LAUNCH_WIRD_WIDGET_ENABLED=true`
@@ -151,6 +155,10 @@ abstract final class _LaunchEnvironment {
     'TILAWA_LAUNCH_REPORT_BUG_ENABLED',
     defaultValue: false,
   );
+  static const bool whatsNewEnabled = bool.fromEnvironment(
+    'TILAWA_LAUNCH_WHATS_NEW_ENABLED',
+    defaultValue: false,
+  );
   static const bool recitationPracticeEnabled = bool.fromEnvironment(
     'TILAWA_LAUNCH_RECITATION_PRACTICE_ENABLED',
     defaultValue: false,
@@ -234,6 +242,7 @@ class AppLaunchConfig extends Equatable {
     this.subscriptionServiceEnabled = false,
     this.supportTilawaEnabled = true,
     this.reportBugEnabled = false,
+    this.whatsNewEnabled = false,
     this.recitationPracticeEnabled = false,
     this.smartKhatmaEnabled = false,
     this.wirdWidgetEnabled = false,
@@ -278,6 +287,7 @@ class AppLaunchConfig extends Equatable {
       subscriptionServiceEnabled: _LaunchEnvironment.subscriptionServiceEnabled,
       supportTilawaEnabled: _LaunchEnvironment.supportTilawaEnabled,
       reportBugEnabled: _LaunchEnvironment.reportBugEnabled,
+      whatsNewEnabled: _LaunchEnvironment.whatsNewEnabled,
       recitationPracticeEnabled: _LaunchEnvironment.recitationPracticeEnabled,
       smartKhatmaEnabled: _LaunchEnvironment.smartKhatmaEnabled,
       wirdWidgetEnabled: _LaunchEnvironment.wirdWidgetEnabled,
@@ -327,6 +337,11 @@ class AppLaunchConfig extends Equatable {
   /// Defaults to **false**. Enable with:
   /// `--dart-define=TILAWA_LAUNCH_REPORT_BUG_ENABLED=true`
   final bool reportBugEnabled;
+
+  /// Auto "What's new" prompt and Settings tile.
+  /// Defaults to **false**. Enable with:
+  /// `--dart-define=TILAWA_LAUNCH_WHATS_NEW_ENABLED=true`
+  final bool whatsNewEnabled;
   final bool recitationPracticeEnabled;
   final bool smartKhatmaEnabled;
   final bool wirdWidgetEnabled;
@@ -405,6 +420,7 @@ class AppLaunchConfig extends Equatable {
     subscriptionServiceEnabled,
     supportTilawaEnabled,
     reportBugEnabled,
+    whatsNewEnabled,
     recitationPracticeEnabled,
     smartKhatmaEnabled,
     wirdWidgetEnabled,

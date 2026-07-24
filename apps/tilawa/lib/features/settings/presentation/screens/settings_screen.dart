@@ -49,10 +49,12 @@ class SettingsScreen extends StatefulWidget {
   const SettingsScreen({
     super.key,
     required this.supportTilawaEnabled,
+    required this.whatsNewEnabled,
     required this.shareContent,
   });
 
   final bool supportTilawaEnabled;
+  final bool whatsNewEnabled;
   final ShareContentUseCase shareContent;
 
   @override
@@ -280,11 +282,12 @@ class _SettingsScreenState extends State<SettingsScreen> {
                         ),
                       const SettingsRateAppTile(),
                       const SentryReportBugTile(),
-                      TilawaSettingsTile(
-                        title: l10n.whatsNewSettingsTile,
-                        onTap: () =>
-                            getIt<WhatsNewCoordinator>().showFromSettings(),
-                      ),
+                      if (widget.whatsNewEnabled)
+                        TilawaSettingsTile(
+                          title: l10n.whatsNewSettingsTile,
+                          onTap: () =>
+                              getIt<WhatsNewCoordinator>().showFromSettings(),
+                        ),
                       SettingsShareAppTile(
                         onShareRequested: () {
                           final shareText = buildSettingsShareAppText(l10n);
