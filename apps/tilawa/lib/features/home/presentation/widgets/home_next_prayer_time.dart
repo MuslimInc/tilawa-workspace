@@ -78,8 +78,9 @@ abstract final class HomeNextPrayerTime {
         MediaQuery.sizeOf(context).width - horizontalGutter < 320;
 
     // Calibrated at 360dp / textScale 1 with spaceMedium bottom pad.
-    // Includes slack so the loading skeleton (spaceLarge pad + spacing) fits.
-    const double zoneAtScaleOne = 244;
+    // Includes slack so the loading skeleton (spaceLarge pad + spacing) fits
+    // the taller prayer schedule strip (labelMedium + titleSmall).
+    const double zoneAtScaleOne = 260;
     final double tightSlack = tightCard ? tokens.spaceExtraLarge : 0;
 
     return zoneAtScaleOne * textScale + tightSlack;
@@ -944,7 +945,7 @@ class _HomePrayerScheduleStripSkeleton extends StatelessWidget {
 
     return TilawaSkeletonBone(
       width: double.infinity,
-      height: 52,
+      height: HomePrayerScheduleStrip.stripHeightFor(tokens),
       borderRadius: tokens.resolveRadius(family: TilawaRadiusFamily.card),
     );
   }
