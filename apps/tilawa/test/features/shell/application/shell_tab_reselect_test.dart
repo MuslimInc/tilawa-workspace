@@ -209,4 +209,3 @@ class _TestCollapsingHeaderDelegate extends SliverPersistentHeaderDelegate {
     return false;
   }
 }
-
