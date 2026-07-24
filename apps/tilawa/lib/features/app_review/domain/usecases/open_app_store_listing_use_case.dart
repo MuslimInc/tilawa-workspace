@@ -10,9 +10,9 @@ class OpenAppStoreListingUseCase {
 
   final AppReviewRepository _repository;
 
-  Future<Either<Failure, void>> call() async {
+  Future<Either<Failure, void>> call({bool writeReview = false}) async {
     try {
-      await _repository.openStoreListing();
+      await _repository.openStoreListing(writeReview: writeReview);
       return const Right(null);
     } on AppReviewFailure catch (failure) {
       return Left(failure);

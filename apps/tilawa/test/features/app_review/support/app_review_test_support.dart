@@ -89,7 +89,7 @@ class FakeAppReviewRepository implements AppReviewRepository {
   Future<bool> isAvailable() async => true;
 
   @override
-  Future<void> openStoreListing() async {
+  Future<void> openStoreListing({bool writeReview = false}) async {
     storeOpenCount++;
   }
 

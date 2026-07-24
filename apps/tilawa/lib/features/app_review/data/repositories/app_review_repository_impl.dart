@@ -28,9 +28,11 @@ class AppReviewRepositoryImpl implements AppReviewRepository {
   }
 
   @override
-  Future<void> openStoreListing() => _platform.openStoreListing(
-    appStoreId: _storeConfig.appStoreIdOrNull,
-    microsoftStoreId: _storeConfig.microsoftStoreIdOrNull,
-    androidPackageId: _storeConfig.androidPackageId,
-  );
+  Future<void> openStoreListing({bool writeReview = false}) =>
+      _platform.openStoreListing(
+        appStoreId: _storeConfig.appStoreIdOrNull,
+        microsoftStoreId: _storeConfig.microsoftStoreIdOrNull,
+        androidPackageId: _storeConfig.androidPackageId,
+        writeReview: writeReview,
+      );
 }

@@ -42,6 +42,9 @@ class AppReviewStoreConfig {
   /// Canonical production App Store listing (no country segment).
   Uri get appStoreListingUri => appStoreListingUriFor(appStoreId);
 
+  /// App Store write-review deep link for explicit “Rate MeMuslim” actions.
+  Uri get appStoreWriteReviewUri => appStoreWriteReviewUriFor(appStoreId);
+
   /// Canonical production Play listing for rate / forced-update redirects.
   Uri get playStoreListingUri => playStoreListingUriFor(androidPackageId);
 
@@ -51,6 +54,13 @@ class AppReviewStoreConfig {
         ? kProductionAppStoreId
         : appStoreId.trim();
     return Uri.https('apps.apple.com', '/app/id$resolved');
+  }
+
+  /// Builds the App Store write-review URI used by settings rating.
+  static Uri appStoreWriteReviewUriFor(String? appStoreId) {
+    return appStoreListingUriFor(appStoreId).replace(
+      queryParameters: const <String, String>{'action': 'write-review'},
+    );
   }
 
   /// Builds the Play details URI, falling back to [kProductionAndroidPackageId].

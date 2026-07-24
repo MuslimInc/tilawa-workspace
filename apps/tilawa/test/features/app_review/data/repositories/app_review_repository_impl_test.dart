@@ -10,6 +10,7 @@ class _FakePlatform implements AppReviewPlatformDataSource {
   int storeCount = 0;
   bool throwOnRequest = false;
   String? lastAndroidPackageId;
+  bool? lastWriteReview;
 
   @override
   Future<bool> isAvailable() async => available;
@@ -27,9 +28,11 @@ class _FakePlatform implements AppReviewPlatformDataSource {
     String? appStoreId,
     String? microsoftStoreId,
     String? androidPackageId,
+    bool writeReview = false,
   }) async {
     storeCount++;
     lastAndroidPackageId = androidPackageId;
+    lastWriteReview = writeReview;
   }
 }
 
@@ -70,6 +73,12 @@ void main() {
       platform.lastAndroidPackageId,
       AppReviewStoreConfig.kProductionAndroidPackageId,
     );
+    expect(platform.lastWriteReview, isFalse);
+  });
+
+  test('openStoreListing forwards writeReview flag', () async {
+    await repository.openStoreListing(writeReview: true);
+    expect(platform.lastWriteReview, isTrue);
   });
 
   test('requestReview propagates platform failures', () async {

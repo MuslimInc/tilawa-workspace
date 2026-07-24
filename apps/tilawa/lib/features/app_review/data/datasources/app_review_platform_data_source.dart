@@ -19,5 +19,6 @@ abstract class AppReviewPlatformDataSource {
     String? appStoreId,
     String? microsoftStoreId,
     String? androidPackageId,
+    bool writeReview = false,
   });
 }

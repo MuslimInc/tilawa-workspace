@@ -10,5 +10,7 @@ abstract class AppReviewRepository {
   Future<void> requestReview();
 
   /// Opens the platform store listing (fallback when review UI is unavailable).
-  Future<void> openStoreListing();
+  ///
+  /// When [writeReview] is true on iOS, opens the App Store write-review page.
+  Future<void> openStoreListing({bool writeReview = false});
 }

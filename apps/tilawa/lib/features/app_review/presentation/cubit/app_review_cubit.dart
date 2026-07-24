@@ -49,9 +49,9 @@ class AppReviewCubit extends Cubit<AppReviewState> {
 
   /// User-initiated rating from settings.
   ///
-  /// Opens the store listing directly. Play/App Store throttle the native
+  /// Opens the store rating page directly. Play/App Store throttle the native
   /// in-app dialog after dismissals and do not report when nothing is shown.
-  Future<void> rateFromSettings() => openStoreListing();
+  Future<void> rateFromSettings() => openStoreListing(writeReview: true);
 
   /// Shows the native review dialog when available; otherwise opens the store.
   Future<void> requestReview({bool openStoreOnUnavailable = true}) async {
@@ -67,7 +67,7 @@ class AppReviewCubit extends Cubit<AppReviewState> {
         if (openStoreOnUnavailable &&
             failure is AppReviewFailure &&
             failure.reason == AppReviewFailureReason.unavailable) {
-          await openStoreListing();
+          await openStoreListing(writeReview: true);
           return;
         }
         emit(
@@ -83,14 +83,14 @@ class AppReviewCubit extends Cubit<AppReviewState> {
     );
   }
 
-  Future<void> openStoreListing() async {
+  Future<void> openStoreListing({bool writeReview = false}) async {
     emit(
       state.copyWith(
         isOpeningStore: true,
         clearFailure: true,
       ),
     );
-    final result = await _openStoreListing();
+    final result = await _openStoreListing(writeReview: writeReview);
     result.fold(
       (Failure failure) => emit(
         state.copyWith(

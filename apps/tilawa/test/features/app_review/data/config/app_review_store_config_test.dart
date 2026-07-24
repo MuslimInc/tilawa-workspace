@@ -42,6 +42,21 @@ void main() {
     );
   });
 
+  test('appStoreWriteReviewUri uses production write-review URL', () {
+    const AppReviewStoreConfig config = AppReviewStoreConfig();
+    expect(
+      config.appStoreWriteReviewUri.toString(),
+      'https://apps.apple.com/app/id6791827426?action=write-review',
+    );
+  });
+
+  test('appStoreWriteReviewUriFor falls back when id is empty', () {
+    expect(
+      AppReviewStoreConfig.appStoreWriteReviewUriFor('').toString(),
+      'https://apps.apple.com/app/id6791827426?action=write-review',
+    );
+  });
+
   test('playStoreListingUri uses production android package by default', () {
     const AppReviewStoreConfig config = AppReviewStoreConfig();
     expect(
