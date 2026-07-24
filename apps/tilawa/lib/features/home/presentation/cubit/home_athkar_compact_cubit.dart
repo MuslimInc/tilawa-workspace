@@ -1,9 +1,9 @@
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:injectable/injectable.dart';
 import 'package:tilawa/features/athkar/data/datasources/athkar_daily_progress_local_datasource.dart';
+import 'package:tilawa/features/athkar/domain/athkar_context_recommendation.dart';
 import 'package:tilawa/features/athkar/domain/entities/athkar_category.dart';
 import 'package:tilawa/features/athkar/domain/entities/athkar_item.dart';
-import 'package:tilawa/features/athkar/domain/pinned_athkar_display_order.dart';
 import 'package:tilawa/features/athkar/domain/usecases/get_athkar_by_category_use_case.dart';
 import 'package:tilawa/features/athkar/domain/usecases/get_athkar_categories_use_case.dart';
 import 'package:tilawa_core/usecases/usecase.dart';
@@ -11,7 +11,7 @@ import 'package:tilawa_core/usecases/usecase.dart';
 import 'home_athkar_compact_state.dart';
 
 /// Canonical daily athkar categories shown on Home.
-const List<int> homeAthkarCompactCategoryIds = [1, 2, 3];
+const List<int> homeAthkarCompactCategoryIds = AthkarContextCategoryIds.daily;
 
 @injectable
 class HomeAthkarCompactCubit extends Cubit<HomeAthkarCompactState> {
@@ -79,15 +79,15 @@ class HomeAthkarCompactCubit extends Cubit<HomeAthkarCompactState> {
           category: category,
           completion: completion,
           remainingCount: remaining,
+          totalRequired: totalRequired,
         ),
       );
     }
 
-    final ordered = _orderRows(rows, effectiveNow);
     emit(
       HomeAthkarCompactState(
         status: HomeAthkarRowStatus.ready,
-        rows: ordered,
+        rows: rows,
       ),
     );
   }
@@ -105,35 +105,5 @@ class HomeAthkarCompactCubit extends Cubit<HomeAthkarCompactState> {
       remaining += savedCounts[item.id] ?? item.count;
     }
     return remaining;
-  }
-
-  List<HomeAthkarRowState> _orderRows(
-    List<HomeAthkarRowState> rows,
-    DateTime now,
-  ) {
-    if (rows.length <= 1) {
-      return rows;
-    }
-
-    final AthkarTimeRelevance priority = now.hour < 17
-        ? AthkarTimeRelevance.morning
-        : AthkarTimeRelevance.evening;
-
-    int rank(HomeAthkarRowState row) {
-      final AthkarTimeRelevance relevance = athkarTimeRelevanceForIcon(
-        row.category.icon,
-      );
-      if (relevance == priority) {
-        return 0;
-      }
-      if (relevance == AthkarTimeRelevance.neutral) {
-        return 1;
-      }
-      return 2;
-    }
-
-    final ordered = List<HomeAthkarRowState>.from(rows)
-      ..sort((a, b) => rank(a).compareTo(rank(b)));
-    return ordered;
   }
 }
