@@ -28,6 +28,9 @@ class AnalyticsEvents {
   static const String athkarItemReset = 'athkar_item_reset';
   static const String athkarNotificationOpen = 'athkar_notification_open';
   static const String athkarReadStart = 'athkar_read_start';
+  static const String athkarContextImpression = 'athkar_context_impression';
+  static const String athkarContextPrimaryTap = 'athkar_context_primary_tap';
+  static const String athkarContextLibraryTap = 'athkar_context_library_tap';
 
   // Commerce/Premium
   static const String purchase = 'purchase';
@@ -198,6 +201,9 @@ class AnalyticsParams {
   static const String itemId = 'item_id';
   static const String itemText = 'item_text';
   static const String remainingCount = 'remaining_count';
+  static const String athkarWindow = 'window';
+  static const String athkarIntent = 'intent';
+  static const String hasPrayerBounds = 'has_prayer_bounds';
 
   // Commerce
   static const String transactionId = 'transaction_id';
