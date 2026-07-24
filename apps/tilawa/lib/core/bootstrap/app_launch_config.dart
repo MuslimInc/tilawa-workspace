@@ -16,11 +16,15 @@ import 'package:flutter/foundation.dart';
 /// [whatsNewEnabled] defaults to **false** (auto prompt + Settings tile) until
 /// explicitly enabled.
 ///
+/// [privacyPolicyEnabled] defaults to **false** (Settings privacy policy tile)
+/// until explicitly enabled.
+///
 /// Example: `--dart-define=TILAWA_LAUNCH_FIREBASE_INIT=false`
 /// Example: `--dart-define=TILAWA_LAUNCH_SUBSCRIPTION_SERVICE_ENABLED=true`
 /// Example: `--dart-define=TILAWA_LAUNCH_SUPPORT_TILAWA_ENABLED=false`
 /// Example: `--dart-define=TILAWA_LAUNCH_REPORT_BUG_ENABLED=true`
 /// Example: `--dart-define=TILAWA_LAUNCH_WHATS_NEW_ENABLED=true`
+/// Example: `--dart-define=TILAWA_LAUNCH_PRIVACY_POLICY_ENABLED=true`
 /// Example: `--dart-define=TILAWA_LAUNCH_RECITATION_PRACTICE_ENABLED=true`
 /// Example: `--dart-define=TILAWA_LAUNCH_SMART_KHATMA_ENABLED=true`
 /// Example: `--dart-define=TILAWA_LAUNCH_WIRD_WIDGET_ENABLED=true`
@@ -159,6 +163,10 @@ abstract final class _LaunchEnvironment {
     'TILAWA_LAUNCH_WHATS_NEW_ENABLED',
     defaultValue: false,
   );
+  static const bool privacyPolicyEnabled = bool.fromEnvironment(
+    'TILAWA_LAUNCH_PRIVACY_POLICY_ENABLED',
+    defaultValue: false,
+  );
   static const bool recitationPracticeEnabled = bool.fromEnvironment(
     'TILAWA_LAUNCH_RECITATION_PRACTICE_ENABLED',
     defaultValue: false,
@@ -243,6 +251,7 @@ class AppLaunchConfig extends Equatable {
     this.supportTilawaEnabled = true,
     this.reportBugEnabled = false,
     this.whatsNewEnabled = false,
+    this.privacyPolicyEnabled = false,
     this.recitationPracticeEnabled = false,
     this.smartKhatmaEnabled = false,
     this.wirdWidgetEnabled = false,
@@ -288,6 +297,7 @@ class AppLaunchConfig extends Equatable {
       supportTilawaEnabled: _LaunchEnvironment.supportTilawaEnabled,
       reportBugEnabled: _LaunchEnvironment.reportBugEnabled,
       whatsNewEnabled: _LaunchEnvironment.whatsNewEnabled,
+      privacyPolicyEnabled: _LaunchEnvironment.privacyPolicyEnabled,
       recitationPracticeEnabled: _LaunchEnvironment.recitationPracticeEnabled,
       smartKhatmaEnabled: _LaunchEnvironment.smartKhatmaEnabled,
       wirdWidgetEnabled: _LaunchEnvironment.wirdWidgetEnabled,
@@ -342,6 +352,11 @@ class AppLaunchConfig extends Equatable {
   /// Defaults to **false**. Enable with:
   /// `--dart-define=TILAWA_LAUNCH_WHATS_NEW_ENABLED=true`
   final bool whatsNewEnabled;
+
+  /// Settings "Privacy policy" tile.
+  /// Defaults to **false**. Enable with:
+  /// `--dart-define=TILAWA_LAUNCH_PRIVACY_POLICY_ENABLED=true`
+  final bool privacyPolicyEnabled;
   final bool recitationPracticeEnabled;
   final bool smartKhatmaEnabled;
   final bool wirdWidgetEnabled;
@@ -421,6 +436,7 @@ class AppLaunchConfig extends Equatable {
     supportTilawaEnabled,
     reportBugEnabled,
     whatsNewEnabled,
+    privacyPolicyEnabled,
     recitationPracticeEnabled,
     smartKhatmaEnabled,
     wirdWidgetEnabled,

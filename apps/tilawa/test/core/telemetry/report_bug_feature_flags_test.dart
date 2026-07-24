@@ -24,6 +24,12 @@ void main() {
     expect(config.whatsNewEnabled, isFalse);
   });
 
+  test('privacy policy defaults to disabled in launch config', () {
+    const AppLaunchConfig config = AppLaunchConfig();
+
+    expect(config.privacyPolicyEnabled, isFalse);
+  });
+
   test('isReportBugEnabled reads registered launch config', () {
     getIt.registerSingleton<AppLaunchConfig>(
       const AppLaunchConfig(reportBugEnabled: true),

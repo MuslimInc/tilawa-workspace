@@ -50,11 +50,13 @@ class SettingsScreen extends StatefulWidget {
     super.key,
     required this.supportTilawaEnabled,
     required this.whatsNewEnabled,
+    required this.privacyPolicyEnabled,
     required this.shareContent,
   });
 
   final bool supportTilawaEnabled;
   final bool whatsNewEnabled;
+  final bool privacyPolicyEnabled;
   final ShareContentUseCase shareContent;
 
   @override
@@ -296,11 +298,12 @@ class _SettingsScreenState extends State<SettingsScreen> {
                           );
                         },
                       ),
-                      TilawaSettingsTile(
-                        title: l10n.privacyPolicy,
-                        onTap: () => openLegalUrl(AppLegalUrls.privacyPolicy),
-                        showDivider: false,
-                      ),
+                      if (widget.privacyPolicyEnabled)
+                        TilawaSettingsTile(
+                          title: l10n.privacyPolicy,
+                          onTap: () => openLegalUrl(AppLegalUrls.privacyPolicy),
+                          showDivider: false,
+                        ),
                     ],
                   ),
                   SettingsAccountActions(
