@@ -424,6 +424,51 @@ class AppLocalizationsAr extends AppLocalizations {
   String get homeQuickAthkarSubtitle => 'أذكار الصباح والمساء';
 
   @override
+  String get homeAthkarAll => 'كل الأذكار';
+
+  @override
+  String get homeAthkarMorningStart => 'ابدأ يومك بذكر الله';
+
+  @override
+  String get homeAthkarMorningContinue => 'تابع أذكار الصباح';
+
+  @override
+  String get homeAthkarMorningDone => 'أحسنت في أذكار الصباح';
+
+  @override
+  String get homeAthkarEveningStart => 'حان وقت أذكار المساء';
+
+  @override
+  String get homeAthkarEveningContinue => 'تابع أذكار المساء';
+
+  @override
+  String get homeAthkarEveningDone => 'أتممت أذكار المساء';
+
+  @override
+  String get homeAthkarSleepStart => 'اختم يومك بذكر الله';
+
+  @override
+  String get homeAthkarSleepContinue => 'تابع أذكار النوم';
+
+  @override
+  String get homeAthkarSleepDone => 'نام على ذكر الله';
+
+  @override
+  String get homeAthkarExploreTitle => 'تابع ذكرك';
+
+  @override
+  String get homeAthkarAllDoneTitle => 'ما شاء الله';
+
+  @override
+  String get homeAthkarExploreSubtitle => 'استكشف كل الأذكار';
+
+  @override
+  String get homeAthkarAllDoneSubtitle => 'أكملت أذكارك لليوم';
+
+  @override
+  String get homeAthkarBrowseRestSubtitle => 'تصفح الأذكار متى شئت';
+
+  @override
   String get homeQuickSettings => 'الإعدادات';
 
   @override

@@ -549,6 +549,66 @@
     "@homeQuickAthkarSubtitle": {
         "description": "Subtitle for the Athkar primary action card"
     },
+    "homeAthkarAll": "All athkar",
+    "@homeAthkarAll": {
+        "description": "Secondary Home CTA to open the full Athkar library"
+    },
+    "homeAthkarMorningStart": "Begin your day with dhikr",
+    "@homeAthkarMorningStart": {
+        "description": "Home Athkar tile title — morning, not started"
+    },
+    "homeAthkarMorningContinue": "Continue morning athkar",
+    "@homeAthkarMorningContinue": {
+        "description": "Home Athkar tile title — morning, in progress"
+    },
+    "homeAthkarMorningDone": "Morning athkar complete",
+    "@homeAthkarMorningDone": {
+        "description": "Home Athkar tile title — morning window done"
+    },
+    "homeAthkarEveningStart": "Time for evening athkar",
+    "@homeAthkarEveningStart": {
+        "description": "Home Athkar tile title — evening, not started"
+    },
+    "homeAthkarEveningContinue": "Continue evening athkar",
+    "@homeAthkarEveningContinue": {
+        "description": "Home Athkar tile title — evening, in progress"
+    },
+    "homeAthkarEveningDone": "Evening athkar complete",
+    "@homeAthkarEveningDone": {
+        "description": "Home Athkar tile title — evening window done"
+    },
+    "homeAthkarSleepStart": "Close your day with dhikr",
+    "@homeAthkarSleepStart": {
+        "description": "Home Athkar tile title — sleep, not started"
+    },
+    "homeAthkarSleepContinue": "Continue bedtime athkar",
+    "@homeAthkarSleepContinue": {
+        "description": "Home Athkar tile title — sleep, in progress"
+    },
+    "homeAthkarSleepDone": "Rest with remembrance",
+    "@homeAthkarSleepDone": {
+        "description": "Home Athkar tile title — sleep window done"
+    },
+    "homeAthkarExploreTitle": "Continue your athkar",
+    "@homeAthkarExploreTitle": {
+        "description": "Home Athkar tile title — neutral explore state"
+    },
+    "homeAthkarAllDoneTitle": "Well done today",
+    "@homeAthkarAllDoneTitle": {
+        "description": "Home Athkar tile title — all daily athkar done"
+    },
+    "homeAthkarExploreSubtitle": "Explore all athkar",
+    "@homeAthkarExploreSubtitle": {
+        "description": "Home Athkar tile subtitle — explore / library"
+    },
+    "homeAthkarAllDoneSubtitle": "You completed today's athkar",
+    "@homeAthkarAllDoneSubtitle": {
+        "description": "Home Athkar tile subtitle — all daily done"
+    },
+    "homeAthkarBrowseRestSubtitle": "Browse the rest whenever you like",
+    "@homeAthkarBrowseRestSubtitle": {
+        "description": "Home Athkar tile subtitle after window completion"
+    },
     "homeQuickSettings": "Settings",
     "@homeQuickSettings": {
         "description": "Home quick action for settings"

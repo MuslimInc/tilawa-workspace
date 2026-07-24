@@ -16,6 +16,8 @@ class HomePrimaryActionTile extends StatelessWidget {
     required this.onTap,
     required this.accent,
     this.surfaceColor,
+    this.secondaryLabel,
+    this.onSecondaryTap,
   });
 
   final Widget icon;
@@ -30,6 +32,10 @@ class HomePrimaryActionTile extends StatelessWidget {
   /// Optional resting fill; defaults to elevated [ColorScheme.surface].
   final Color? surfaceColor;
 
+  /// Quiet secondary path (e.g. Athkar library). Nested control at card bottom.
+  final String? secondaryLabel;
+  final VoidCallback? onSecondaryTap;
+
   @override
   Widget build(BuildContext context) {
     final tokens = context.tokens;
@@ -43,6 +49,60 @@ class HomePrimaryActionTile extends StatelessWidget {
     final String? subtitleText = subtitle;
     final double? clampedProgress = progress?.clamp(0.0, 1.0);
     final bool showProgress = clampedProgress != null && clampedProgress > 0;
+    final String? secondary = secondaryLabel;
+    final bool showSecondary =
+        secondary != null && secondary.isNotEmpty && onSecondaryTap != null;
+
+    final Widget titleCluster = Column(
+      spacing: tokens.spaceSmall,
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text(
+          label,
+          maxLines: 2,
+          overflow: TextOverflow.ellipsis,
+          style: theme.textTheme.titleMedium?.copyWith(
+            color: colorScheme.onSurface,
+            fontWeight: FontWeight.w700,
+            height: 1.25,
+          ),
+        ),
+        if (subtitleText != null && subtitleText.isNotEmpty)
+          Text(
+            subtitleText,
+            maxLines: 1,
+            overflow: TextOverflow.ellipsis,
+            style: theme.textTheme.bodySmall?.copyWith(
+              color: HomeDashboardSection.secondaryTextColor(context),
+              height: 1.4,
+            ),
+          ),
+      ],
+    );
+
+    final Widget body = Column(
+      spacing: tokens.spaceLarge,
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        HomeDashboardIconWell(
+          accent: accent,
+          fillAlpha: HomeFeaturePastel.iconWellFillAlpha,
+          extent: tokens.iconBoxSize,
+          child: icon,
+        ),
+        titleCluster,
+        if (showProgress)
+          ClipRRect(
+            borderRadius: BorderRadius.circular(tokens.radiusSmall),
+            child: LinearProgressIndicator(
+              value: clampedProgress,
+              minHeight: tokens.progressHeight,
+              backgroundColor: accent.withValues(alpha: 0.12),
+              color: accent,
+            ),
+          ),
+      ],
+    );
 
     return HomeDashboardElevatedSurface.interactive(
       context: context,
@@ -53,53 +113,34 @@ class HomePrimaryActionTile extends StatelessWidget {
       color: surface,
       tier: HomeDashboardElevationTier.primary,
       child: Padding(
-        padding: EdgeInsets.all(tokens.spaceMedium),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            HomeDashboardIconWell(
-              accent: accent,
-              fillAlpha: HomeFeaturePastel.iconWellFillAlpha,
-              extent: tokens.iconBoxSize,
-              child: icon,
-            ),
-            SizedBox(height: tokens.spaceMedium),
-            Text(
-              label,
-              maxLines: 1,
-              overflow: TextOverflow.ellipsis,
-              style: theme.textTheme.titleMedium?.copyWith(
-                color: colorScheme.onSurface,
-                fontWeight: FontWeight.w700,
-                height: 1.15,
-              ),
-            ),
-            if (subtitleText != null && subtitleText.isNotEmpty) ...[
-              SizedBox(height: tokens.spaceExtraSmall),
-              Text(
-                subtitleText,
-                maxLines: 2,
-                overflow: TextOverflow.ellipsis,
-                style: theme.textTheme.bodySmall?.copyWith(
-                  color: HomeDashboardSection.secondaryTextColor(context),
-                  height: 1.35,
-                ),
-              ),
-            ],
-            if (showProgress) ...[
-              SizedBox(height: tokens.spaceSmall),
-              ClipRRect(
-                borderRadius: BorderRadius.circular(tokens.radiusSmall),
-                child: LinearProgressIndicator(
-                  value: clampedProgress,
-                  minHeight: tokens.progressHeight,
-                  backgroundColor: accent.withValues(alpha: 0.12),
-                  color: accent,
-                ),
-              ),
-            ],
-          ],
-        ),
+        padding: EdgeInsets.all(tokens.spaceLarge),
+        child: showSecondary
+            ? Column(
+                spacing: tokens.spaceMedium,
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Expanded(child: body),
+                  TilawaButton(
+                    text: secondary,
+                    variant: TilawaButtonVariant.secondary,
+                    size: TilawaButtonSize.small,
+                    isFullWidth: true,
+                    backgroundColor: Color.alphaBlend(
+                      accent.withValues(
+                        alpha: HomeFeaturePastel.iconWellFillAlpha,
+                      ),
+                      surface,
+                    ),
+                    foregroundColor: accent,
+                    textStyle: theme.textTheme.labelMedium?.copyWith(
+                      color: accent,
+                      fontWeight: FontWeight.w700,
+                    ),
+                    onPressed: onSecondaryTap,
+                  ),
+                ],
+              )
+            : body,
       ),
     );
   }

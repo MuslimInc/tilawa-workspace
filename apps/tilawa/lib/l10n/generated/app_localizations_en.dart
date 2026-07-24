@@ -426,6 +426,52 @@ class AppLocalizationsEn extends AppLocalizations {
   String get homeQuickAthkarSubtitle => 'Morning and evening remembrance';
 
   @override
+  String get homeAthkarAll => 'All athkar';
+
+  @override
+  String get homeAthkarMorningStart => 'Begin your day with dhikr';
+
+  @override
+  String get homeAthkarMorningContinue => 'Continue morning athkar';
+
+  @override
+  String get homeAthkarMorningDone => 'Morning athkar complete';
+
+  @override
+  String get homeAthkarEveningStart => 'Time for evening athkar';
+
+  @override
+  String get homeAthkarEveningContinue => 'Continue evening athkar';
+
+  @override
+  String get homeAthkarEveningDone => 'Evening athkar complete';
+
+  @override
+  String get homeAthkarSleepStart => 'Close your day with dhikr';
+
+  @override
+  String get homeAthkarSleepContinue => 'Continue bedtime athkar';
+
+  @override
+  String get homeAthkarSleepDone => 'Rest with remembrance';
+
+  @override
+  String get homeAthkarExploreTitle => 'Continue your athkar';
+
+  @override
+  String get homeAthkarAllDoneTitle => 'Well done today';
+
+  @override
+  String get homeAthkarExploreSubtitle => 'Explore all athkar';
+
+  @override
+  String get homeAthkarAllDoneSubtitle => 'You completed today\'s athkar';
+
+  @override
+  String get homeAthkarBrowseRestSubtitle =>
+      'Browse the rest whenever you like';
+
+  @override
   String get homeQuickSettings => 'Settings';
 
   @override

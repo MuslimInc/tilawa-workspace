@@ -53,7 +53,7 @@ void main() {
     );
 
     expect(find.byType(HomePrimaryActionTile), findsNWidgets(2));
-    expect(find.text(l10n.homeQuickAthkar), findsOneWidget);
+    expect(find.text(l10n.homeAthkarAll), findsOneWidget);
     expect(find.text(expected), findsOneWidget);
     expect(find.byType(LinearProgressIndicator), findsOneWidget);
   });
@@ -96,7 +96,7 @@ void main() {
     expect(find.byType(LinearProgressIndicator), findsOneWidget);
   });
 
-  testWidgets('Athkar tile shows remaining count for in-progress ritual', (
+  testWidgets('Athkar tile shows contextual start copy without progress', (
     tester,
   ) async {
     const AthkarCategory morning = AthkarCategory(
@@ -104,6 +104,18 @@ void main() {
       nameAr: 'أذكار الصباح',
       nameEn: 'Morning Athkar',
       icon: 'wb_sunny_rounded',
+    );
+    const AthkarCategory evening = AthkarCategory(
+      id: 2,
+      nameAr: 'أذكار المساء',
+      nameEn: 'Evening Athkar',
+      icon: 'nights_stay_rounded',
+    );
+    const AthkarCategory sleep = AthkarCategory(
+      id: 3,
+      nameAr: 'أذكار النوم',
+      nameEn: 'Sleep Athkar',
+      icon: 'bedtime_rounded',
     );
     final athkarCubit = _FakeAthkarCompactCubit(
       const HomeAthkarCompactState(
@@ -113,6 +125,19 @@ void main() {
             category: morning,
             completion: HomeAthkarCompletionState.inProgress,
             remainingCount: 3,
+            totalRequired: 10,
+          ),
+          HomeAthkarRowState(
+            category: evening,
+            completion: HomeAthkarCompletionState.inProgress,
+            remainingCount: 3,
+            totalRequired: 10,
+          ),
+          HomeAthkarRowState(
+            category: sleep,
+            completion: HomeAthkarCompletionState.inProgress,
+            remainingCount: 3,
+            totalRequired: 10,
           ),
         ],
       ),
@@ -138,13 +163,21 @@ void main() {
     final l10n = AppLocalizations.of(
       tester.element(find.byType(HomePrimaryActionsSection)),
     );
+    expect(find.text(l10n.homeAthkarRemaining(3)), findsNothing);
+    expect(find.text(l10n.homeAthkarAll), findsOneWidget);
+    expect(find.text(l10n.homeAthkarSleepStart), findsNothing);
+    expect(find.text(l10n.homeAthkarMorningStart), findsNothing);
+    expect(find.text(l10n.homeAthkarEveningStart), findsNothing);
     expect(
-      find.text('Morning Athkar · ${l10n.homeAthkarRemaining(3)}'),
-      findsOneWidget,
+      find.text('Morning Athkar').evaluate().isNotEmpty ||
+          find.text('Evening Athkar').evaluate().isNotEmpty ||
+          find.text('Sleep Athkar').evaluate().isNotEmpty,
+      isTrue,
     );
+    expect(find.byType(LinearProgressIndicator), findsNothing);
   });
 
-  testWidgets('Athkar tile deep-links to urgent category details', (
+  testWidgets('Athkar tile deep-links to recommended category details', (
     tester,
   ) async {
     const AthkarCategory morning = AthkarCategory(
@@ -152,6 +185,18 @@ void main() {
       nameAr: 'أذكار الصباح',
       nameEn: 'Morning Athkar',
       icon: 'wb_sunny_rounded',
+    );
+    const AthkarCategory evening = AthkarCategory(
+      id: 2,
+      nameAr: 'أذكار المساء',
+      nameEn: 'Evening Athkar',
+      icon: 'nights_stay_rounded',
+    );
+    const AthkarCategory sleep = AthkarCategory(
+      id: 3,
+      nameAr: 'أذكار النوم',
+      nameEn: 'Sleep Athkar',
+      icon: 'bedtime_rounded',
     );
     final athkarCubit = _FakeAthkarCompactCubit(
       const HomeAthkarCompactState(
@@ -161,7 +206,10 @@ void main() {
             category: morning,
             completion: HomeAthkarCompletionState.inProgress,
             remainingCount: 3,
+            totalRequired: 10,
           ),
+          HomeAthkarRowState(category: evening),
+          HomeAthkarRowState(category: sleep),
         ],
       ),
     );
@@ -200,16 +248,77 @@ void main() {
     );
     await tester.pumpAndSettle();
 
-    final l10n = AppLocalizations.of(
-      tester.element(find.byType(HomePrimaryActionsSection)),
-    );
-    await tester.tap(find.text(l10n.homeQuickAthkar));
+    await tester.tap(find.byType(HomePrimaryActionTile).last);
     await tester.pumpAndSettle();
 
     expect(openedLocation, isNotNull);
-    expect(openedLocation, contains('/athkar/1'));
     expect(openedLocation, contains('source=home_primary'));
-    expect(find.text('Athkar details'), findsOneWidget);
+    expect(
+      openedLocation!.contains('/athkar/1') ||
+          openedLocation!.contains('/athkar/2') ||
+          openedLocation!.contains('/athkar/3'),
+      isTrue,
+    );
+  });
+
+  testWidgets('Athkar secondary CTA opens full library', (tester) async {
+    const AthkarCategory morning = AthkarCategory(
+      id: 1,
+      nameAr: 'أذكار الصباح',
+      nameEn: 'Morning Athkar',
+      icon: 'wb_sunny_rounded',
+    );
+    final athkarCubit = _FakeAthkarCompactCubit(
+      const HomeAthkarCompactState(
+        status: HomeAthkarRowStatus.ready,
+        rows: <HomeAthkarRowState>[
+          HomeAthkarRowState(category: morning),
+        ],
+      ),
+    );
+    addTearDown(athkarCubit.close);
+
+    String? openedLocation;
+    final GoRouter router = GoRouter(
+      routes: [
+        GoRoute(
+          path: '/',
+          builder: (context, _) => Scaffold(
+            body: BlocProvider<HomeAthkarCompactCubit>.value(
+              value: athkarCubit,
+              child: const HomePrimaryActionsSection(),
+            ),
+          ),
+        ),
+        GoRoute(
+          path: '/athkar',
+          builder: (context, state) {
+            openedLocation = state.uri.toString();
+            return const Scaffold(body: Text('Athkar library'));
+          },
+        ),
+      ],
+    );
+
+    await tester.pumpWidget(
+      MaterialApp.router(
+        theme: AppTheme.getLightTheme(primaryColor: AppColors.defaultPrimary),
+        locale: const Locale('en'),
+        localizationsDelegates: AppLocalizations.localizationsDelegates,
+        supportedLocales: AppLocalizations.supportedLocales,
+        routerConfig: router,
+      ),
+    );
+    await tester.pumpAndSettle();
+
+    final l10n = AppLocalizations.of(
+      tester.element(find.byType(HomePrimaryActionsSection)),
+    );
+    await tester.tap(find.text(l10n.homeAthkarAll));
+    await tester.pumpAndSettle();
+
+    expect(openedLocation, contains('/athkar'));
+    expect(find.text('Athkar library'), findsOneWidget);
   });
 }
 

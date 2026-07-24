@@ -824,6 +824,96 @@ abstract class AppLocalizations {
   /// **'Morning and evening remembrance'**
   String get homeQuickAthkarSubtitle;
 
+  /// Secondary Home CTA to open the full Athkar library
+  ///
+  /// In en, this message translates to:
+  /// **'All athkar'**
+  String get homeAthkarAll;
+
+  /// Home Athkar tile title — morning, not started
+  ///
+  /// In en, this message translates to:
+  /// **'Begin your day with dhikr'**
+  String get homeAthkarMorningStart;
+
+  /// Home Athkar tile title — morning, in progress
+  ///
+  /// In en, this message translates to:
+  /// **'Continue morning athkar'**
+  String get homeAthkarMorningContinue;
+
+  /// Home Athkar tile title — morning window done
+  ///
+  /// In en, this message translates to:
+  /// **'Morning athkar complete'**
+  String get homeAthkarMorningDone;
+
+  /// Home Athkar tile title — evening, not started
+  ///
+  /// In en, this message translates to:
+  /// **'Time for evening athkar'**
+  String get homeAthkarEveningStart;
+
+  /// Home Athkar tile title — evening, in progress
+  ///
+  /// In en, this message translates to:
+  /// **'Continue evening athkar'**
+  String get homeAthkarEveningContinue;
+
+  /// Home Athkar tile title — evening window done
+  ///
+  /// In en, this message translates to:
+  /// **'Evening athkar complete'**
+  String get homeAthkarEveningDone;
+
+  /// Home Athkar tile title — sleep, not started
+  ///
+  /// In en, this message translates to:
+  /// **'Close your day with dhikr'**
+  String get homeAthkarSleepStart;
+
+  /// Home Athkar tile title — sleep, in progress
+  ///
+  /// In en, this message translates to:
+  /// **'Continue bedtime athkar'**
+  String get homeAthkarSleepContinue;
+
+  /// Home Athkar tile title — sleep window done
+  ///
+  /// In en, this message translates to:
+  /// **'Rest with remembrance'**
+  String get homeAthkarSleepDone;
+
+  /// Home Athkar tile title — neutral explore state
+  ///
+  /// In en, this message translates to:
+  /// **'Continue your athkar'**
+  String get homeAthkarExploreTitle;
+
+  /// Home Athkar tile title — all daily athkar done
+  ///
+  /// In en, this message translates to:
+  /// **'Well done today'**
+  String get homeAthkarAllDoneTitle;
+
+  /// Home Athkar tile subtitle — explore / library
+  ///
+  /// In en, this message translates to:
+  /// **'Explore all athkar'**
+  String get homeAthkarExploreSubtitle;
+
+  /// Home Athkar tile subtitle — all daily done
+  ///
+  /// In en, this message translates to:
+  /// **'You completed today\'s athkar'**
+  String get homeAthkarAllDoneSubtitle;
+
+  /// Home Athkar tile subtitle after window completion
+  ///
+  /// In en, this message translates to:
+  /// **'Browse the rest whenever you like'**
+  String get homeAthkarBrowseRestSubtitle;
+
   /// Home quick action for settings
   ///
   /// In en, this message translates to:
