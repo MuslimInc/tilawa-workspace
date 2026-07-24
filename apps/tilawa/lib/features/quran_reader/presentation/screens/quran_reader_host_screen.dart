@@ -1,5 +1,6 @@
 import 'dart:async';
 
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:tilawa/core/di/injection.dart';
@@ -17,6 +18,9 @@ import 'package:tilawa_ui_kit/tilawa_ui_kit.dart';
 ///
 /// The active view is persisted in [ReaderSettingsEntity.viewMode] so users
 /// can switch without stacking routes.
+///
+/// On web, image Mushaf cache uses `dart:io` / path_provider and is unavailable;
+/// the host stays on ayah-list until a web-capable image cache exists.
 class QuranReaderHostScreen extends StatefulWidget {
   const QuranReaderHostScreen({
     super.key,
@@ -54,6 +58,11 @@ class _QuranReaderHostScreenState extends State<QuranReaderHostScreen> {
     _isLoadingLastRead = widget.surahNumber == 0;
     _activeSurah = widget.surahNumber > 0 ? widget.surahNumber : 1;
     _activeAyah = widget.initialAyah;
+    if (kIsWeb) {
+      // Image Mushaf prepare fails on web (MissingPluginException / dart:io).
+      _ayahListVisited = true;
+      unawaited(_settingsCubit.setViewMode(QuranReaderViewMode.ayahList));
+    }
     if (widget.surahNumber == 0) {
       unawaited(_loadLastReadSurah());
     }
@@ -85,6 +94,9 @@ class _QuranReaderHostScreenState extends State<QuranReaderHostScreen> {
   }
 
   Future<void> _switchToMushaf() {
+    if (kIsWeb) {
+      return Future<void>.value();
+    }
     return _settingsCubit.setViewMode(QuranReaderViewMode.mushaf);
   }
 
@@ -115,7 +127,7 @@ class _QuranReaderHostScreenState extends State<QuranReaderHostScreen> {
         buildWhen: (previous, current) => previous.viewMode != current.viewMode,
         builder: (context, settings) {
           final bool showAyahList =
-              settings.viewMode == QuranReaderViewMode.ayahList;
+              kIsWeb || settings.viewMode == QuranReaderViewMode.ayahList;
           return Stack(
             children: [
               Positioned.fill(

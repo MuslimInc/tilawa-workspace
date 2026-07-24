@@ -1,5 +1,6 @@
 import 'dart:async';
 
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:share_plus/share_plus.dart';
@@ -166,10 +167,11 @@ class _QuranSurahScreenState extends State<QuranSurahScreen> {
             tooltip: context.l10n.readerSettings,
             onTap: _openReaderSettings,
           ),
-          QuranReaderViewToggle(
-            currentMode: QuranReaderViewMode.ayahList,
-            onPressed: _switchToMushaf,
-          ),
+          if (!kIsWeb)
+            QuranReaderViewToggle(
+              currentMode: QuranReaderViewMode.ayahList,
+              onPressed: _switchToMushaf,
+            ),
         ],
       ),
       body: BlocBuilder<QuranSettingsCubit, ReaderSettingsEntity>(
