@@ -7,6 +7,14 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [2.2.0+92] - 2026-07-24
+
+### Fixed
+
+- **Shell / Reciters / Home**: Re-tapping the active tab no longer crashes when
+  a `ScrollController` is attached to multiple scroll views (`StateError: Too
+  many elements`, Sentry `FLUTTER-FP`).
+
 ## [2.1.9+90] - 2026-07-22 [Google Play Production]
 
 ### Fixed
