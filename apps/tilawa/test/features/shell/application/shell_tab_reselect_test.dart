@@ -66,5 +66,69 @@ void main() {
       expect(refreshed, isTrue);
       controller.dispose();
     });
+
+    testWidgets(
+      'isScrolledDown tolerates a controller with multiple clients',
+      (tester) async {
+        final controller = ScrollController();
+
+        await tester.pumpWidget(
+          MaterialApp(
+            home: Scaffold(
+              body: Column(
+                children: [
+                  Expanded(
+                    child: ListView.builder(
+                      controller: controller,
+                      itemCount: 40,
+                      itemBuilder: (_, index) =>
+                          SizedBox(height: 48, child: Text('a$index')),
+                    ),
+                  ),
+                  Expanded(
+                    child: ListView.builder(
+                      controller: controller,
+                      itemCount: 40,
+                      itemBuilder: (_, index) =>
+                          SizedBox(height: 48, child: Text('b$index')),
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ),
+        );
+        await tester.pump();
+
+        expect(controller.positions.length, greaterThan(1));
+        // .offset / .position use positions.single and throw when >1 client
+        // (AssertionError in debug, StateError in release).
+        expect(ShellTabReselect.isScrolledDown(controller), isFalse);
+
+        for (final position in controller.positions) {
+          position.jumpTo(240);
+        }
+        await tester.pump();
+
+        expect(ShellTabReselect.isScrolledDown(controller), isTrue);
+
+        var refreshed = false;
+        final future = ShellTabReselect.scrollToTopOrRefresh(
+          scrollController: controller,
+          refresh: () async {
+            refreshed = true;
+          },
+        );
+        await tester.pumpAndSettle();
+        await future;
+
+        expect(refreshed, isFalse);
+        for (final position in controller.positions) {
+          expect(position.pixels, 0);
+        }
+
+        controller.dispose();
+      },
+    );
   });
 }

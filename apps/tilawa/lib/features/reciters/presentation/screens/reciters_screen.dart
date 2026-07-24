@@ -386,8 +386,7 @@ class _RecitersScreenState extends State<RecitersScreen> {
       ?_nestedScrollViewKey.currentState?.innerController,
     ];
     for (final ScrollController controller in controllers) {
-      if (controller.hasClients &&
-          controller.offset > ShellTabReselect.scrollTopThreshold) {
+      if (ShellTabReselect.isScrolledDown(controller)) {
         return true;
       }
     }

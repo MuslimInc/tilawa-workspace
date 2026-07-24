@@ -86,10 +86,9 @@ class _HomeScreenState extends State<HomeScreen> {
 
     final ScrollController outer = nested.outerController;
     final ScrollController inner = nested.innerController;
-    const double threshold = ShellTabReselect.scrollTopThreshold;
     final bool scrolledDown =
-        (outer.hasClients && outer.offset > threshold) ||
-        (inner.hasClients && inner.offset > threshold);
+        ShellTabReselect.isScrolledDown(outer) ||
+        ShellTabReselect.isScrolledDown(inner);
 
     if (!scrolledDown) {
       await _refreshHome();
