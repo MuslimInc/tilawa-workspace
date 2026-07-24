@@ -21,6 +21,27 @@ void main() {
     expect(config.microsoftStoreIdOrNull, isNull);
   });
 
+  test('default appStoreId uses production App Store id', () {
+    const AppReviewStoreConfig config = AppReviewStoreConfig();
+    expect(config.appStoreId, AppReviewStoreConfig.kProductionAppStoreId);
+  });
+
+  test('appStoreListingUri uses production App Store id by default', () {
+    const AppReviewStoreConfig config = AppReviewStoreConfig();
+    expect(
+      config.appStoreListingUri.toString(),
+      'https://apps.apple.com/app/id${AppReviewStoreConfig.kProductionAppStoreId}',
+    );
+    expect(config.appStoreListingUri.path, isNot(contains('/us/')));
+  });
+
+  test('appStoreListingUriFor falls back when id is empty', () {
+    expect(
+      AppReviewStoreConfig.appStoreListingUriFor('').toString(),
+      'https://apps.apple.com/app/id${AppReviewStoreConfig.kProductionAppStoreId}',
+    );
+  });
+
   test('playStoreListingUri uses production android package by default', () {
     const AppReviewStoreConfig config = AppReviewStoreConfig();
     expect(
