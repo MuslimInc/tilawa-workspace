@@ -30,7 +30,7 @@ class _AthkarDetailsBodyState extends State<AthkarDetailsBody> {
   @override
   void initState() {
     super.initState();
-    _pageController = PageController();
+    _pageController = PageController(initialPage: 0);
   }
 
   @override

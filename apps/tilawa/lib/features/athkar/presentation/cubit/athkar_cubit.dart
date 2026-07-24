@@ -53,6 +53,9 @@ class AthkarCubit extends Cubit<AthkarState> {
   }
 
   /// Loads items for a specific category.
+  ///
+  /// Always starts from the first dhikr with full counts — daily saved
+  /// progress is not restored on entry (each visit is a fresh pass).
   Future<void> loadAthkar(int categoryId) async {
     emit(const AthkarState.loading());
     final Either<Failure, List<AthkarItem>> result = await _getAthkarByCategory(
@@ -61,18 +64,17 @@ class AthkarCubit extends Cubit<AthkarState> {
     await result.fold(
       (failure) async => emit(AthkarState.error(failure)),
       (items) async {
-        final String dateKey = athkarDailyProgressDateKey(DateTime.now());
-        final Map<int, int> savedCounts = await _dailyProgress.loadCounts(
-          categoryId: categoryId,
-          dateKey: dateKey,
+        final Map<int, int> counts = {
+          for (final AthkarItem item in items) item.id: item.count,
+        };
+        final AthkarItemsLoaded next = AthkarItemsLoaded(
+          items: items,
+          currentCounts: counts,
         );
-        final Map<int, int> counts = savedCounts.isEmpty
-            ? {for (final item in items) item.id: item.count}
-            : {
-                for (final item in items)
-                  item.id: savedCounts[item.id] ?? item.count,
-              };
-        emit(AthkarState.itemsLoaded(items: items, currentCounts: counts));
+        emit(next);
+        // Overwrite any mid-session snapshot so Home completion stays aligned
+        // with a fresh entry (not a resumed partial pass).
+        unawaited(_persistCounts(next));
       },
     );
   }
