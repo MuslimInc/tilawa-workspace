@@ -2275,6 +2275,22 @@ class AppLocalizationsAr extends AppLocalizations {
       'دقة البوصلة منخفضة. حرّك هاتفك على شكل رقم 8 لمعايرتها.';
 
   @override
+  String get qiblaUnavailableOnThisDevice =>
+      'تحديد القبلة يحتاج هاتفاً ببوصلة وموقع. افتح مسلماً على جهازك المحمول.';
+
+  @override
+  String get qiblaSensorUnavailableMessage =>
+      'تعذّر قراءة البوصلة. تأكد أن خدمة الموقع مفعّلة ثم حاول مرة أخرى.';
+
+  @override
+  String get qiblaLocationErrorMessage =>
+      'تعذّر الوصول إلى موقعك. فعّل خدمة الموقع ثم حاول مرة أخرى.';
+
+  @override
+  String get qiblaPermissionErrorMessage =>
+      'نحتاج إذن الموقع لإيجاد اتجاه القبلة.';
+
+  @override
   String get onboardingTitle1 => 'دقائق من القرآن…\nيغيّر يومك كله';
 
   @override

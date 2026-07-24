@@ -2,13 +2,25 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:tilawa/core/extensions.dart';
+import 'package:tilawa/l10n/generated/app_localizations.dart';
 import 'package:tilawa_ui_kit/tilawa_ui_kit.dart';
 
 import '../../domain/entities/qibla_direction_entity.dart';
 import '../../domain/qibla_heading_math.dart';
 import '../bloc/qibla_bloc.dart';
 import '../constants/qibla_constants.dart';
+import '../constants/qibla_error_codes.dart';
 import '../widgets/qibla_compass_widget.dart';
+
+String _qiblaErrorSubtitle(AppLocalizations l10n, String? code) {
+  return switch (code) {
+    QiblaErrorCodes.unsupportedPlatform => l10n.qiblaUnavailableOnThisDevice,
+    QiblaErrorCodes.locationFailed => l10n.qiblaLocationErrorMessage,
+    QiblaErrorCodes.permissionFailed => l10n.qiblaPermissionErrorMessage,
+    QiblaErrorCodes.sensorFailed => l10n.qiblaSensorUnavailableMessage,
+    _ => l10n.qiblaSensorUnavailableMessage,
+  };
+}
 
 class QiblaScreen extends StatefulWidget {
   const QiblaScreen({super.key});
@@ -156,15 +168,22 @@ class _PortraitContent extends StatelessWidget {
                         ),
                       );
                     case QiblaStatus.error:
+                      final bool canRetry =
+                          state.errorMessage !=
+                          QiblaErrorCodes.unsupportedPlatform;
                       return _QiblaUnavailableState(
                         icon: Icons.error_outline_rounded,
-                        title: context.l10n.error,
-                        subtitle:
-                            state.errorMessage ?? context.l10n.anErrorOccurred,
-                        retryLabel: context.l10n.tryAgain,
-                        onRetry: () => context.read<QiblaBloc>().add(
-                          const CheckLocationService(),
+                        title: context.l10n.unableToFindQibla,
+                        subtitle: _qiblaErrorSubtitle(
+                          context.l10n,
+                          state.errorMessage,
                         ),
+                        retryLabel: canRetry ? context.l10n.tryAgain : null,
+                        onRetry: canRetry
+                            ? () => context.read<QiblaBloc>().add(
+                                const CheckLocationService(),
+                              )
+                            : null,
                       );
                     case QiblaStatus.success:
                       return BlocSelector<
@@ -250,14 +269,22 @@ class _CompassArea extends StatelessWidget {
               ),
             );
           case QiblaStatus.error:
+            final bool canRetry =
+                state.errorMessage != QiblaErrorCodes.unsupportedPlatform;
             return _QiblaUnavailableState(
               icon: Icons.error_outline_rounded,
               visualTone: TilawaStateVisualTone.error,
-              title: context.l10n.error,
-              subtitle: state.errorMessage ?? context.l10n.anErrorOccurred,
-              retryLabel: context.l10n.tryAgain,
-              onRetry: () =>
-                  context.read<QiblaBloc>().add(const CheckLocationService()),
+              title: context.l10n.unableToFindQibla,
+              subtitle: _qiblaErrorSubtitle(
+                context.l10n,
+                state.errorMessage,
+              ),
+              retryLabel: canRetry ? context.l10n.tryAgain : null,
+              onRetry: canRetry
+                  ? () => context.read<QiblaBloc>().add(
+                      const CheckLocationService(),
+                    )
+                  : null,
             );
           case QiblaStatus.success:
             return BlocSelector<QiblaBloc, QiblaState, QiblaDirectionEntity?>(
@@ -281,8 +308,8 @@ class _QiblaUnavailableState extends StatelessWidget {
   const _QiblaUnavailableState({
     required this.icon,
     required this.title,
-    required this.retryLabel,
-    required this.onRetry,
+    this.retryLabel,
+    this.onRetry,
     this.visualTone = TilawaStateVisualTone.primary,
     this.subtitle,
   });
@@ -290,24 +317,28 @@ class _QiblaUnavailableState extends StatelessWidget {
   final IconData icon;
   final String title;
   final String? subtitle;
-  final String retryLabel;
-  final VoidCallback onRetry;
+  final String? retryLabel;
+  final VoidCallback? onRetry;
   final TilawaStateVisualTone visualTone;
 
   @override
   Widget build(BuildContext context) {
+    final String? retryLabel = this.retryLabel;
+    final VoidCallback? onRetry = this.onRetry;
     return TilawaIllustratedState(
       icon: icon,
       visualTone: visualTone,
       title: title,
       subtitle: subtitle,
       semanticLabel: title,
-      primaryAction: TilawaButton(
-        text: retryLabel,
-        variant: TilawaButtonVariant.secondary,
-        leadingIcon: const Icon(Icons.refresh_rounded),
-        onPressed: onRetry,
-      ),
+      primaryAction: retryLabel != null && onRetry != null
+          ? TilawaButton(
+              text: retryLabel,
+              variant: TilawaButtonVariant.secondary,
+              leadingIcon: const Icon(Icons.refresh_rounded),
+              onPressed: onRetry,
+            )
+          : null,
     );
   }
 }

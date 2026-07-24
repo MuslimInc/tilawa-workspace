@@ -2328,6 +2328,22 @@
     "@qiblaCompassAccuracyPoor": {
         "description": "SnackBar message shown when Qibla compass sensor accuracy is poor"
     },
+    "qiblaUnavailableOnThisDevice": "تحديد القبلة يحتاج هاتفاً ببوصلة وموقع. افتح مسلماً على جهازك المحمول.",
+    "@qiblaUnavailableOnThisDevice": {
+        "description": "Shown when Qibla cannot run (e.g. web) because device sensors are unavailable"
+    },
+    "qiblaSensorUnavailableMessage": "تعذّر قراءة البوصلة. تأكد أن خدمة الموقع مفعّلة ثم حاول مرة أخرى.",
+    "@qiblaSensorUnavailableMessage": {
+        "description": "Friendly subtitle when Qibla sensor or setup fails"
+    },
+    "qiblaLocationErrorMessage": "تعذّر الوصول إلى موقعك. فعّل خدمة الموقع ثم حاول مرة أخرى.",
+    "@qiblaLocationErrorMessage": {
+        "description": "Friendly subtitle when location service check fails for Qibla"
+    },
+    "qiblaPermissionErrorMessage": "نحتاج إذن الموقع لإيجاد اتجاه القبلة.",
+    "@qiblaPermissionErrorMessage": {
+        "description": "Friendly subtitle when location permission request fails for Qibla"
+    },
     "onboardingTitle1": "دقائق من القرآن…\nيغيّر يومك كله",
     "@onboardingTitle1": {
         "description": "Onboarding page 1 title (line break intentional)"

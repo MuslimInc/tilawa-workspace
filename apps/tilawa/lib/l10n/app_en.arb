@@ -2852,6 +2852,22 @@
     "@qiblaCompassAccuracyPoor": {
         "description": "SnackBar message shown when Qibla compass sensor accuracy is poor"
     },
+    "qiblaUnavailableOnThisDevice": "Qibla needs a phone with compass and location. Open MeMuslim on your mobile device.",
+    "@qiblaUnavailableOnThisDevice": {
+        "description": "Shown when Qibla cannot run (e.g. web) because device sensors are unavailable"
+    },
+    "qiblaSensorUnavailableMessage": "We could not read your compass. Check that location is on, then try again.",
+    "@qiblaSensorUnavailableMessage": {
+        "description": "Friendly subtitle when Qibla sensor or setup fails"
+    },
+    "qiblaLocationErrorMessage": "We could not access your location. Turn on location services, then try again.",
+    "@qiblaLocationErrorMessage": {
+        "description": "Friendly subtitle when location service check fails for Qibla"
+    },
+    "qiblaPermissionErrorMessage": "Location permission is needed to find the Qibla direction.",
+    "@qiblaPermissionErrorMessage": {
+        "description": "Friendly subtitle when location permission request fails for Qibla"
+    },
     "onboardingTitle1": "Minutes with the Quran…\nChanges your whole day",
     "@onboardingTitle1": {
         "description": "Onboarding page 1 title (line break intentional)"
