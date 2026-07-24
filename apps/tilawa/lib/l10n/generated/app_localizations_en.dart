@@ -3587,8 +3587,12 @@ class AppLocalizationsEn extends AppLocalizations {
   String get shareTilawa => 'Share MeMuslim';
 
   @override
-  String shareTilawaMessage(String appName, String storeUrl) {
-    return 'Check out $appName:\n$storeUrl';
+  String shareTilawaMessage(
+    String appName,
+    String iosStoreUrl,
+    String androidStoreUrl,
+  ) {
+    return 'Check out $appName:\niOS: $iosStoreUrl\nAndroid: $androidStoreUrl';
   }
 
   @override

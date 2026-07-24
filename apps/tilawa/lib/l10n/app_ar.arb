@@ -3864,14 +3864,17 @@
     "@shareTilawa": {
         "description": "Settings row to share the app with others"
     },
-    "shareTilawaMessage": "جرّب {appName}:\n{storeUrl}",
+    "shareTilawaMessage": "جرّب {appName}:\niOS: {iosStoreUrl}\nAndroid: {androidStoreUrl}",
     "@shareTilawaMessage": {
-        "description": "Text shared from settings to recommend Tilawa to others",
+        "description": "Text shared from settings to recommend Tilawa to others (both store links for cross-platform sharing)",
         "placeholders": {
             "appName": {
                 "type": "String"
             },
-            "storeUrl": {
+            "iosStoreUrl": {
+                "type": "String"
+            },
+            "androidStoreUrl": {
                 "type": "String"
             }
         }

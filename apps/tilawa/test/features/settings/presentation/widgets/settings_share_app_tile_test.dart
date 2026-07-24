@@ -2,18 +2,20 @@ import 'dart:async';
 
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:tilawa/features/app_review/data/config/app_review_store_config.dart';
 import 'package:tilawa/features/settings/presentation/formatters/settings_share_text_formatter.dart';
 import 'package:tilawa/features/settings/presentation/widgets/settings_widgets.dart';
 import 'package:tilawa/l10n/generated/app_localizations.dart';
-import 'package:tilawa_core/entities/app_info.dart';
 import 'package:tilawa_ui_kit/tilawa_ui_kit.dart';
 
-const AppInfo _testAppInfo = AppInfo(
-  version: '1.0.0',
-  buildNumber: '1',
-  appName: 'MeMuslim',
-  packageName: 'com.tilawa.app',
-);
+const String _iosStoreUrl =
+    'https://apps.apple.com/app/id${AppReviewStoreConfig.kProductionAppStoreId}';
+const String _androidStoreUrl =
+    'https://play.google.com/store/apps/details?id=${AppReviewStoreConfig.kProductionAndroidPackageId}';
+const String _expectedShareText =
+    'Check out MeMuslim:\n'
+    'iOS: $_iosStoreUrl\n'
+    'Android: $_androidStoreUrl';
 
 Widget _buildHarness({
   required Future<void> Function() onShareRequested,
@@ -44,18 +46,16 @@ void main() {
     expect(find.text('Share MeMuslim'), findsOneWidget);
   });
 
-  testWidgets('tap shares the Play Store link', (WidgetTester tester) async {
+  testWidgets('tap shares both production store links', (
+    WidgetTester tester,
+  ) async {
     String? sharedText;
     final l10n = lookupAppLocalizations(const Locale('en'));
 
     await tester.pumpWidget(
       _buildHarness(
         onShareRequested: () async {
-          sharedText = buildSettingsShareAppText(
-            l10n,
-            appInfo: _testAppInfo,
-            platform: TargetPlatform.android,
-          );
+          sharedText = buildSettingsShareAppText(l10n);
         },
       ),
     );
@@ -63,26 +63,63 @@ void main() {
     await tester.tap(find.text('Share MeMuslim'));
     await tester.pumpAndSettle();
 
-    expect(
-      sharedText,
-      'Check out MeMuslim:\n'
-      'https://play.google.com/store/apps/details?id=com.tilawa.app',
-    );
+    expect(sharedText, _expectedShareText);
   });
 
-  test('buildSettingsShareAppText uses App Store link on iOS', () {
+  group('settingsShareStoreUrls', () {
+    test('returns App Store link without country segment', () {
+      final urls = settingsShareStoreUrls();
+
+      expect(urls.iosStoreUrl, _iosStoreUrl);
+      expect(urls.iosStoreUrl, isNot(contains('/us/')));
+    });
+
+    test('returns production Play Store link', () {
+      expect(settingsShareStoreUrls().androidStoreUrl, _androidStoreUrl);
+    });
+  });
+
+  test('buildSettingsShareAppText includes both production store links', () {
     final l10n = lookupAppLocalizations(const Locale('en'));
 
-    final shareText = buildSettingsShareAppText(
-      l10n,
-      appInfo: _testAppInfo,
-      platform: TargetPlatform.iOS,
-      appStoreId: '123456789',
-    );
+    final shareText = buildSettingsShareAppText(l10n);
+
+    expect(shareText, _expectedShareText);
+    expect(shareText, contains(_iosStoreUrl));
+    expect(shareText, contains(_androidStoreUrl));
+    expect(shareText, isNot(contains('.dev')));
+    expect(shareText, isNot(contains('.staging')));
+  });
+
+  test(
+    'buildSettingsShareAppText ignores flavor package overrides by default',
+    () {
+      final l10n = lookupAppLocalizations(const Locale('en'));
+
+      // Call site no longer passes AppInfo; production IDs are always used.
+      final shareText = buildSettingsShareAppText(l10n);
+
+      expect(
+        shareText,
+        contains('id=${AppReviewStoreConfig.kProductionAndroidPackageId}'),
+      );
+      expect(
+        shareText,
+        isNot(contains('com.tilawa.app.dev')),
+      );
+    },
+  );
+
+  test('buildSettingsShareAppText Arabic includes both store links', () {
+    final l10n = lookupAppLocalizations(const Locale('ar'));
+
+    final shareText = buildSettingsShareAppText(l10n);
 
     expect(
       shareText,
-      'Check out MeMuslim:\nhttps://apps.apple.com/app/id123456789',
+      'جرّب MeMuslim:\n'
+      'iOS: $_iosStoreUrl\n'
+      'Android: $_androidStoreUrl',
     );
   });
 

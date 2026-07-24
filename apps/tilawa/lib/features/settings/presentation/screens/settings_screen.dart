@@ -285,18 +285,11 @@ class _SettingsScreenState extends State<SettingsScreen> {
                         onTap: () =>
                             getIt<WhatsNewCoordinator>().showFromSettings(),
                       ),
-                      BlocBuilder<SettingsCubit, SettingsState>(
-                        builder: (context, state) {
-                          return SettingsShareAppTile(
-                            onShareRequested: () {
-                              final shareText = buildSettingsShareAppText(
-                                l10n,
-                                appInfo: state.appInfo,
-                              );
-                              return widget.shareContent(
-                                ShareContent.text(text: shareText),
-                              );
-                            },
+                      SettingsShareAppTile(
+                        onShareRequested: () {
+                          final shareText = buildSettingsShareAppText(l10n);
+                          return widget.shareContent(
+                            ShareContent.text(text: shareText),
                           );
                         },
                       ),

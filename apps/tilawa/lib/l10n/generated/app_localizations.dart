@@ -6289,11 +6289,15 @@ abstract class AppLocalizations {
   /// **'Share MeMuslim'**
   String get shareTilawa;
 
-  /// Text shared from settings to recommend Tilawa to others
+  /// Text shared from settings to recommend Tilawa to others (both store links for cross-platform sharing)
   ///
   /// In en, this message translates to:
-  /// **'Check out {appName}:\n{storeUrl}'**
-  String shareTilawaMessage(String appName, String storeUrl);
+  /// **'Check out {appName}:\niOS: {iosStoreUrl}\nAndroid: {androidStoreUrl}'**
+  String shareTilawaMessage(
+    String appName,
+    String iosStoreUrl,
+    String androidStoreUrl,
+  );
 
   /// Error shown when sharing Tilawa from settings fails
   ///
