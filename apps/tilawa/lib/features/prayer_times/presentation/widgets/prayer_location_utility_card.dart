@@ -34,13 +34,13 @@ class PrayerLocationUtilityCard extends StatelessWidget {
       borderRadius: tokens.resolveRadius(family: TilawaRadiusFamily.card),
       backgroundColor: colorScheme.surface,
       onTap: isLoading ? null : onTap,
-      padding: EdgeInsets.symmetric(horizontal: tokens.spaceSmall),
+      padding: EdgeInsets.symmetric(horizontal: tokens.spaceLarge),
       child: ConstrainedBox(
         constraints: BoxConstraints(
           minHeight: tokens.minInteractiveDimension,
         ),
         child: Row(
-          spacing: tokens.spaceSmall,
+          spacing: tokens.spaceMedium,
           crossAxisAlignment: CrossAxisAlignment.center,
           children: [
             Icon(
