@@ -104,6 +104,7 @@ class NotificationDispatcher implements INotificationDispatcher {
 
       // Create high-importance channel only when explicitly requested.
       if (createHighImportanceChannel &&
+          !kIsWeb &&
           Platform.isAndroid &&
           !_highImportanceChannelCreated) {
         const AndroidNotificationChannel channel = AndroidNotificationChannel(
@@ -412,7 +413,7 @@ class NotificationDispatcher implements INotificationDispatcher {
 
   /// Check if running on Android (for platform-specific logic)
   @visibleForTesting
-  bool get isAndroid => Platform.isAndroid;
+  bool get isAndroid => !kIsWeb && Platform.isAndroid;
 
   @visibleForTesting
   Future<bool> routeNotificationForTest(NotificationResponse response) {

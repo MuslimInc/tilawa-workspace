@@ -458,6 +458,14 @@ abstract final class CrashReportingContext {
 
   static Future<({String kind, String name})> _resolveDeviceInfo() async {
     final DeviceInfoPlugin deviceInfo = DeviceInfoPlugin();
+    if (kIsWeb) {
+      try {
+        final WebBrowserInfo info = await deviceInfo.webBrowserInfo;
+        return (kind: 'web', name: info.browserName.name);
+      } on Object {
+        return (kind: 'web', name: 'browser');
+      }
+    }
     // coverage:ignore-start
     if (Platform.isAndroid) {
       final AndroidDeviceInfo info = await deviceInfo.androidInfo;

@@ -1,5 +1,6 @@
 import 'dart:io';
 
+import 'package:flutter/foundation.dart';
 import 'package:flutter/services.dart';
 import 'package:injectable/injectable.dart';
 import 'package:tilawa/core/logging/app_logger.dart';
@@ -17,7 +18,7 @@ class MethodChannelPrayerNotificationWatchdogScheduler
 
   @override
   Future<void> ensurePeriodicWatchdogScheduled() async {
-    if (!Platform.isAndroid) return;
+    if (kIsWeb || !Platform.isAndroid) return;
     try {
       await _channel.invokeMethod<void>('ensurePeriodicWatchdogScheduled');
     } on PlatformException catch (e) {
@@ -29,7 +30,7 @@ class MethodChannelPrayerNotificationWatchdogScheduler
 
   @override
   Future<void> runWatchdogNow() async {
-    if (!Platform.isAndroid) return;
+    if (kIsWeb || !Platform.isAndroid) return;
     try {
       await _channel.invokeMethod<void>('runPrayerNotificationWatchdogNow');
     } on PlatformException catch (e) {

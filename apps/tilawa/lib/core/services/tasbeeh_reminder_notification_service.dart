@@ -1,6 +1,7 @@
 import 'dart:io';
 import 'dart:ui';
 
+import 'package:flutter/foundation.dart';
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 import 'package:flutter_timezone/flutter_timezone.dart';
 import 'package:injectable/injectable.dart';
@@ -126,7 +127,7 @@ class TasbeehReminderNotificationService implements TasbeehReminderScheduler {
         handler: _handleNotificationResponse,
       );
 
-      if (Platform.isAndroid) {
+      if (!kIsWeb && Platform.isAndroid) {
         final AndroidFlutterLocalNotificationsPlugin? androidPlugin =
             _notifications
                 .resolvePlatformSpecificImplementation<

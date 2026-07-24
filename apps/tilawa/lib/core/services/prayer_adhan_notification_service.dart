@@ -3,10 +3,10 @@ import 'dart:convert';
 import 'dart:io';
 import 'dart:ui';
 
+import 'package:flutter/foundation.dart';
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 import 'package:flutter_timezone/flutter_timezone.dart';
 import 'package:injectable/injectable.dart';
-import 'package:meta/meta.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:sentry_flutter/sentry_flutter.dart';
 import 'package:tilawa/core/logging/app_logger.dart';
@@ -69,7 +69,7 @@ class PrayerAdhanNotificationService
   final bool? _isAndroidOverride;
   final PrayerWidgetScheduleSync _widgetSync;
 
-  bool get _isAndroid => _isAndroidOverride ?? Platform.isAndroid;
+  bool get _isAndroid => _isAndroidOverride ?? (!kIsWeb && Platform.isAndroid);
 
   bool _initialized = false;
 

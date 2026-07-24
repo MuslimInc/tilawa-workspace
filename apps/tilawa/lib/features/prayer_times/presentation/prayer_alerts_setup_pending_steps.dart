@@ -1,5 +1,6 @@
 import 'dart:io';
 
+import 'package:flutter/foundation.dart';
 import 'package:tilawa/features/prayer_times/domain/value_objects/prayer_alarm_capability.dart';
 import 'package:tilawa/features/prayer_times/presentation/widgets/prayer_alerts_permission_flow.dart';
 
@@ -22,7 +23,8 @@ List<PrayerAlertsPermissionStep> prayerAlertsSetupPendingSteps({
     steps.add(PrayerAlertsPermissionStep.notifications);
   }
 
-  if (!Platform.isAndroid) {
+  // Exact-alarm / OEM steps are Android-only; `dart:io` Platform throws on web.
+  if (kIsWeb || !Platform.isAndroid) {
     return steps;
   }
 

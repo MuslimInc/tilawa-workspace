@@ -71,7 +71,7 @@ class DownloadNotificationService implements IDownloadNotificationService {
       );
 
       // Create notification channel for Android
-      if (Platform.isAndroid) {
+      if (!kIsWeb && Platform.isAndroid) {
         final AndroidFlutterLocalNotificationsPlugin? androidPlugin =
             _notifications
                 .resolvePlatformSpecificImplementation<
