@@ -7,6 +7,7 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:mocktail/mocktail.dart';
 import 'package:tilawa/features/qibla/domain/entities/qibla_direction_entity.dart';
 import 'package:tilawa/features/qibla/presentation/bloc/qibla_bloc.dart';
+import 'package:tilawa/features/qibla/presentation/constants/qibla_error_codes.dart';
 import 'package:tilawa/features/qibla/presentation/screens/qibla_screen.dart';
 import 'package:tilawa/features/qibla/presentation/widgets/qibla_compass_widget.dart';
 import 'package:tilawa/l10n/generated/app_localizations.dart';
@@ -153,18 +154,17 @@ void main() {
         tester,
         state: const QiblaState(
           status: QiblaStatus.error,
-          errorMessage: 'Compass unavailable',
+          errorMessage: QiblaErrorCodes.sensorFailed,
         ),
       );
 
-      expect(find.text('Compass unavailable'), findsOneWidget);
-      await tester.tap(
-        find.text(
-          AppLocalizations.of(
-            tester.element(find.byType(QiblaScreen)),
-          ).tryAgain,
-        ),
+      final AppLocalizations l10n = AppLocalizations.of(
+        tester.element(find.byType(QiblaScreen)),
       );
+
+      expect(find.text(l10n.unableToFindQibla), findsOneWidget);
+      expect(find.text(l10n.qiblaSensorUnavailableMessage), findsOneWidget);
+      await tester.tap(find.text(l10n.tryAgain));
       await tester.pump();
 
       verify(() => bloc.add(const CheckLocationService())).called(2);
@@ -332,7 +332,8 @@ void main() {
         tester.element(find.byType(QiblaScreen)),
       );
 
-      expect(find.text(l10n.anErrorOccurred), findsOneWidget);
+      expect(find.text(l10n.unableToFindQibla), findsOneWidget);
+      expect(find.text(l10n.qiblaSensorUnavailableMessage), findsOneWidget);
       await tester.tap(find.text(l10n.tryAgain));
       await tester.pump();
 

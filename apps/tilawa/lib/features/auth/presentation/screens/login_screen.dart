@@ -1,9 +1,11 @@
 import 'dart:async';
-import 'dart:io' show Platform;
 
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:go_router/go_router.dart';
+import 'package:google_sign_in/google_sign_in.dart';
 import 'package:tilawa/core/bootstrap/splash_launch_handoff.dart';
 import 'package:tilawa/core/widgets/deferred_after_first_frame.dart';
 import 'package:tilawa/core/di/injection.dart';
@@ -13,7 +15,6 @@ import 'package:tilawa_core/errors/failures.dart';
 import 'package:tilawa_core/services/app_system_chrome_style.dart';
 import 'package:tilawa_ui_kit/tilawa_ui_kit.dart';
 
-import 'package:go_router/go_router.dart';
 import '../../../../router/app_router.dart';
 import '../../../../router/app_router_config.dart';
 import '../../../localization/presentation/widgets/app_language_switcher.dart';
@@ -29,6 +30,7 @@ import '../services/auth_post_sign_in_navigation.dart';
 import '../services/login_auth_bloc_transition_handler.dart';
 import '../services/login_auth_state_diagnostics.dart';
 import '../services/login_navigate_to_home_scheduler.dart';
+import '../widgets/google_sign_in_web_button.dart';
 import '../widgets/login_auth_bloc_listener.dart';
 
 /// Reference teal login canvas aligned with the brand-locked primary.
@@ -159,6 +161,10 @@ class _LoginScreenBodyState extends State<_LoginScreenBody>
   }
 
   bool _shouldSkipAutoSignIn() {
+    // Web uses GIS renderButton + authenticationEvents, not authenticate().
+    if (kIsWeb) {
+      return true;
+    }
     if (!getIt.isRegistered<AndroidSignInPlatformPolicy>()) {
       return false;
     }
@@ -324,31 +330,33 @@ class _LoginScreenBodyState extends State<_LoginScreenBody>
                   final GoRouter? router = GoRouter.maybeOf(context);
                   return router?.state.uri.path ?? const LoginRoute().location;
                 },
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.stretch,
-                  children: <Widget>[
-                    Expanded(
-                      child: SafeArea(
-                        bottom: false,
-                        child: RepaintBoundary(
-                          child: _LoginHeroContent(loginScheme: loginScheme),
+                child: _WebGoogleSignInEventBridge(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.stretch,
+                    children: <Widget>[
+                      Expanded(
+                        child: SafeArea(
+                          bottom: false,
+                          child: RepaintBoundary(
+                            child: _LoginHeroContent(loginScheme: loginScheme),
+                          ),
                         ),
                       ),
-                    ),
-                    TilawaBottomActionInset(
-                      top: tokens.spaceLarge,
-                      maxWidthKind: TilawaContentKind.form,
-                      child: DeferredAfterFirstFrame(
-                        perfEvent: 'login_actions',
-                        child: _LoginGoogleSignInActions(
-                          onPressed: _onGoogleSignInPressed,
-                          onApplePressed: _onAppleSignInPressed,
-                          logButtonStateIfChanged: _logButtonStateIfChanged,
-                          logAuthStateIfChanged: _logAuthStateIfChanged,
+                      TilawaBottomActionInset(
+                        top: tokens.spaceLarge,
+                        maxWidthKind: TilawaContentKind.form,
+                        child: DeferredAfterFirstFrame(
+                          perfEvent: 'login_actions',
+                          child: _LoginGoogleSignInActions(
+                            onPressed: _onGoogleSignInPressed,
+                            onApplePressed: _onAppleSignInPressed,
+                            logButtonStateIfChanged: _logButtonStateIfChanged,
+                            logAuthStateIfChanged: _logAuthStateIfChanged,
+                          ),
                         ),
                       ),
-                    ),
-                  ],
+                    ],
+                  ),
                 ),
               ),
               const _LoginLanguageSwitcherBar(),
@@ -403,7 +411,7 @@ class _LoginHeroContent extends StatelessWidget {
               textAlign: TextAlign.center,
             ),
             Text(
-              Platform.isIOS
+              defaultTargetPlatform == TargetPlatform.iOS
                   ? context.l10n.signInWithAppleDescription
                   : context.l10n.signInWithGoogleDescription,
               style: theme.textTheme.bodyMedium?.copyWith(
@@ -497,7 +505,7 @@ class _LoginGoogleSignInActionsState extends State<_LoginGoogleSignInActions>
           crossAxisAlignment: CrossAxisAlignment.stretch,
           spacing: tokens.spaceSmall,
           children: <Widget>[
-            if (Platform.isIOS)
+            if (defaultTargetPlatform == TargetPlatform.iOS)
               RepaintBoundary(
                 child: BlocBuilder<AuthBloc, AuthState>(
                   buildWhen: loginAuthAffectsGoogleSignInButtonLoading,
@@ -532,46 +540,54 @@ class _LoginGoogleSignInActionsState extends State<_LoginGoogleSignInActions>
                 ),
               ),
             RepaintBoundary(
-              child: BlocBuilder<AuthBloc, AuthState>(
-                buildWhen: loginAuthAffectsGoogleSignInButtonLoading,
-                builder: (BuildContext context, AuthState authState) {
-                  widget.logAuthStateIfChanged(authState);
-                  return BlocBuilder<
-                    LoginGoogleSignInCubit,
-                    LoginGoogleSignInState
-                  >(
-                    buildWhen: loginLaunchAffectsGoogleSignInButtonLoading,
-                    builder:
-                        (
-                          BuildContext context,
-                          LoginGoogleSignInState launchState,
-                        ) {
-                          final bool isLoading = loginSignInButtonsLoading(
-                            authState: authState,
-                            isLaunchPending: launchState.isLaunchPending,
-                            sessionInFlight: _isGoogleSignInSessionInFlight(),
-                          );
-                          widget.logButtonStateIfChanged(isLoading);
-                          return Listener(
-                            onPointerDown: (_) {
-                              _logGoogleSignInButton(
-                                'pointerDown on button (isLoading=$isLoading)',
-                              );
-                            },
-                            child: TilawaGoogleSignInButton(
-                              label: context.l10n.continueWithGoogle,
-                              semanticLabel: context.l10n.continueWithGoogle,
-                              appearance: GoogleSignInButtonAppearance.dark,
-                              isLoading: isLoading,
-                              onPressed: isLoading
-                                  ? null
-                                  : () => unawaited(widget.onPressed()),
-                            ),
-                          );
-                        },
-                  );
-                },
-              ),
+              child: kIsWeb
+                  ? Center(child: googleSignInRenderButton())
+                  : BlocBuilder<AuthBloc, AuthState>(
+                      buildWhen: loginAuthAffectsGoogleSignInButtonLoading,
+                      builder: (BuildContext context, AuthState authState) {
+                        widget.logAuthStateIfChanged(authState);
+                        return BlocBuilder<
+                          LoginGoogleSignInCubit,
+                          LoginGoogleSignInState
+                        >(
+                          buildWhen:
+                              loginLaunchAffectsGoogleSignInButtonLoading,
+                          builder:
+                              (
+                                BuildContext context,
+                                LoginGoogleSignInState launchState,
+                              ) {
+                                final bool isLoading =
+                                    loginSignInButtonsLoading(
+                                      authState: authState,
+                                      isLaunchPending:
+                                          launchState.isLaunchPending,
+                                      sessionInFlight:
+                                          _isGoogleSignInSessionInFlight(),
+                                    );
+                                widget.logButtonStateIfChanged(isLoading);
+                                return Listener(
+                                  onPointerDown: (_) {
+                                    _logGoogleSignInButton(
+                                      'pointerDown on button (isLoading=$isLoading)',
+                                    );
+                                  },
+                                  child: TilawaGoogleSignInButton(
+                                    label: context.l10n.continueWithGoogle,
+                                    semanticLabel:
+                                        context.l10n.continueWithGoogle,
+                                    appearance:
+                                        GoogleSignInButtonAppearance.dark,
+                                    isLoading: isLoading,
+                                    onPressed: isLoading
+                                        ? null
+                                        : () => unawaited(widget.onPressed()),
+                                  ),
+                                );
+                              },
+                        );
+                      },
+                    ),
             ),
           ],
         ),
@@ -642,4 +658,56 @@ class _LoginEmailAuthLinks extends StatelessWidget {
       },
     );
   }
+}
+
+/// Web: GIS [renderButton] → [authenticationEvents] → Firebase via [AuthBloc].
+class _WebGoogleSignInEventBridge extends StatefulWidget {
+  const _WebGoogleSignInEventBridge({required this.child});
+
+  final Widget child;
+
+  @override
+  State<_WebGoogleSignInEventBridge> createState() =>
+      _WebGoogleSignInEventBridgeState();
+}
+
+class _WebGoogleSignInEventBridgeState
+    extends State<_WebGoogleSignInEventBridge> {
+  StreamSubscription<GoogleSignInAuthenticationEvent>? _subscription;
+  bool _signInDispatched = false;
+
+  @override
+  void initState() {
+    super.initState();
+    if (!kIsWeb) {
+      return;
+    }
+    _subscription = GoogleSignIn.instance.authenticationEvents.listen(
+      (GoogleSignInAuthenticationEvent event) {
+        if (!mounted) {
+          return;
+        }
+        if (event is GoogleSignInAuthenticationEventSignOut) {
+          _signInDispatched = false;
+          return;
+        }
+        if (_signInDispatched ||
+            event is! GoogleSignInAuthenticationEventSignIn) {
+          return;
+        }
+        _signInDispatched = true;
+        _logGoogleSignInButton('web authenticationEvents → SignInWithGoogle');
+        context.read<AuthBloc>().add(const SignInWithGoogleEvent());
+      },
+    );
+  }
+
+  @override
+  void dispose() {
+    unawaited(_subscription?.cancel());
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) => widget.child;
 }

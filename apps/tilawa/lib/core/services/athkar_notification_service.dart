@@ -1,6 +1,6 @@
 import 'dart:io';
 
-import 'package:flutter/material.dart';
+import 'package:flutter/foundation.dart' show kIsWeb, visibleForTesting;
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 import 'package:flutter_timezone/flutter_timezone.dart';
 import 'package:injectable/injectable.dart';
@@ -646,7 +646,8 @@ class AthkarNotificationService implements IAthkarNotificationService {
   @visibleForTesting
   bool? debugIsAndroidOverride;
 
-  bool get _isAndroid => debugIsAndroidOverride ?? Platform.isAndroid;
+  bool get _isAndroid =>
+      debugIsAndroidOverride ?? (!kIsWeb && Platform.isAndroid);
 
   /// Check if app has permission to schedule exact alarms (Android 12+)
   /// On older Android versions, always returns true
@@ -940,7 +941,7 @@ class AthkarNotificationService implements IAthkarNotificationService {
   }
 
   @visibleForTesting
-  bool get isAndroid => Platform.isAndroid;
+  bool get isAndroid => !kIsWeb && Platform.isAndroid;
 
   @visibleForTesting
   String get morningAthkarPayloadPrefix => _morningAthkarPayloadPrefix;

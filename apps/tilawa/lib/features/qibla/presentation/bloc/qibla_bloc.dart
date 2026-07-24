@@ -3,6 +3,7 @@ import 'dart:developer' as developer;
 
 import 'package:dartz_plus/dartz_plus.dart';
 import 'package:equatable/equatable.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:injectable/injectable.dart';
 import 'package:qibla/qibla.dart';
@@ -14,6 +15,7 @@ import '../../domain/entities/qibla_direction_entity.dart';
 import '../../domain/usecases/check_location_service_use_case.dart';
 import '../../domain/usecases/get_qibla_direction_use_case.dart';
 import '../../domain/usecases/request_location_permission_use_case.dart';
+import '../constants/qibla_error_codes.dart';
 
 part 'qibla_event.dart';
 part 'qibla_state.dart';
@@ -62,6 +64,17 @@ class QiblaBloc extends Bloc<QiblaEvent, QiblaState> {
 
     emit(state.copyWith(status: QiblaStatus.loading, errorMessage: null));
 
+    // Web has no magnetometer / reliable compass for Qibla.
+    if (kIsWeb) {
+      emit(
+        state.copyWith(
+          status: QiblaStatus.error,
+          errorMessage: QiblaErrorCodes.unsupportedPlatform,
+        ),
+      );
+      return;
+    }
+
     // 1. Check if Location Services are enabled.
     final Either<Failure, bool> serviceResult = await _checkLocationService(
       const NoParams(),
@@ -71,7 +84,7 @@ class QiblaBloc extends Bloc<QiblaEvent, QiblaState> {
       (failure) async => emit(
         state.copyWith(
           status: QiblaStatus.error,
-          errorMessage: failure.message,
+          errorMessage: QiblaErrorCodes.locationFailed,
         ),
       ),
       (isServiceEnabled) async {
@@ -89,7 +102,7 @@ class QiblaBloc extends Bloc<QiblaEvent, QiblaState> {
           (failure) async => emit(
             state.copyWith(
               status: QiblaStatus.error,
-              errorMessage: failure.message,
+              errorMessage: QiblaErrorCodes.permissionFailed,
             ),
           ),
           (isGranted) async {
@@ -121,7 +134,7 @@ class QiblaBloc extends Bloc<QiblaEvent, QiblaState> {
       (failure) async => emit(
         state.copyWith(
           status: QiblaStatus.error,
-          errorMessage: failure.message,
+          errorMessage: QiblaErrorCodes.permissionFailed,
         ),
       ),
       (isGranted) async {
@@ -178,7 +191,7 @@ class QiblaBloc extends Bloc<QiblaEvent, QiblaState> {
               name: 'CompassSensor',
             ),
           );
-          add(QiblaErrorOccurred(error.toString()));
+          add(const QiblaErrorOccurred(QiblaErrorCodes.sensorFailed));
         },
         onDone: () {
           _qiblaCompassDebug(
@@ -203,7 +216,7 @@ class QiblaBloc extends Bloc<QiblaEvent, QiblaState> {
           name: 'CompassSensor',
         ),
       );
-      add(QiblaErrorOccurred(error.toString()));
+      add(const QiblaErrorOccurred(QiblaErrorCodes.sensorFailed));
     }
   }
 

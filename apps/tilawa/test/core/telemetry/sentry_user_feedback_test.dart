@@ -2,6 +2,8 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:sentry_flutter/sentry_flutter.dart';
+import 'package:tilawa/core/bootstrap/app_launch_config.dart';
+import 'package:tilawa/core/di/injection.dart';
 import 'package:tilawa/core/telemetry/crash_reporting_context.dart';
 import 'package:tilawa/core/telemetry/sentry_user_feedback.dart';
 import 'package:tilawa/core/telemetry/tilawa_feedback_screenshot_capture.dart';
@@ -128,7 +130,13 @@ void main() {
   });
 
   group('SentryUserFeedback.shouldPromptFeedbackForEvent', () {
-    test('prompts only for release fatal events on physical devices', () {
+    test('prompts only for release fatal events on physical devices', () async {
+      await getIt.reset();
+      getIt.registerSingleton<AppLaunchConfig>(
+        const AppLaunchConfig(reportBugEnabled: true),
+      );
+      addTearDown(getIt.reset);
+
       final SentryEvent eligible = SentryEvent(
         level: SentryLevel.fatal,
         tags: <String, String>{
@@ -304,6 +312,12 @@ void main() {
     testWidgets('opens feedback form when navigator context exists', (
       tester,
     ) async {
+      await getIt.reset();
+      getIt.registerSingleton<AppLaunchConfig>(
+        const AppLaunchConfig(reportBugEnabled: true),
+      );
+      addTearDown(getIt.reset);
+
       await ensureSentryInitializedForTests();
       final SentryFlutterOptions options = SentryFlutterOptions();
       SentryUserFeedback.bindFlutterOptions(options);

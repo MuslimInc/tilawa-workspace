@@ -130,5 +130,83 @@ void main() {
         controller.dispose();
       },
     );
+
+    testWidgets(
+      'scrollNestedToTop expands collapsed NestedScrollView header',
+      (tester) async {
+        final nestedKey = GlobalKey<NestedScrollViewState>();
+
+        await tester.pumpWidget(
+          MaterialApp(
+            home: Scaffold(
+              body: NestedScrollView(
+                key: nestedKey,
+                headerSliverBuilder: (context, _) => [
+                  SliverPersistentHeader(
+                    pinned: true,
+                    delegate: _TestCollapsingHeaderDelegate(),
+                  ),
+                ],
+                body: ListView.builder(
+                  itemCount: 40,
+                  itemBuilder: (_, index) =>
+                      SizedBox(height: 48, child: Text('row$index')),
+                ),
+              ),
+            ),
+          ),
+        );
+        await tester.pumpAndSettle();
+
+        final nested = nestedKey.currentState!;
+        final outer = nested.outerController;
+        final inner = nested.innerController;
+
+        outer.jumpTo(outer.position.maxScrollExtent);
+        await tester.pump();
+        inner.jumpTo(240);
+        await tester.pump();
+
+        expect(outer.offset, greaterThan(0));
+        expect(inner.offset, greaterThan(0));
+
+        final future = ShellTabReselect.scrollNestedToTop(
+          outer: outer,
+          inner: inner,
+          duration: const Duration(milliseconds: 40),
+        );
+        await tester.pumpAndSettle();
+        await future;
+
+        expect(outer.offset, 0);
+        expect(inner.offset, 0);
+      },
+    );
   });
 }
+
+class _TestCollapsingHeaderDelegate extends SliverPersistentHeaderDelegate {
+  @override
+  double get minExtent => 56;
+
+  @override
+  double get maxExtent => 200;
+
+  @override
+  Widget build(
+    BuildContext context,
+    double shrinkOffset,
+    bool overlapsContent,
+  ) {
+    return const ColoredBox(
+      color: Color(0xFF2E7D32),
+      child: Align(alignment: Alignment.bottomLeft, child: Text('header')),
+    );
+  }
+
+  @override
+  bool shouldRebuild(covariant _TestCollapsingHeaderDelegate oldDelegate) {
+    return false;
+  }
+}
+

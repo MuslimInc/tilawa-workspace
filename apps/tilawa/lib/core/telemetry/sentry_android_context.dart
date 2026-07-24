@@ -1,5 +1,4 @@
-import 'dart:io' show Platform;
-
+import 'package:flutter/foundation.dart';
 import 'package:flutter/services.dart';
 
 /// Restores Sentry's Android plugin context after hot restart.
@@ -13,9 +12,13 @@ abstract final class SentryAndroidContext {
     'com.tilawa.app/app_context',
   );
 
+  /// Avoids `dart:io` [Platform], which throws on web.
+  static bool get _isAndroid =>
+      !kIsWeb && defaultTargetPlatform == TargetPlatform.android;
+
   /// Best-effort restore before [SentryFlutter.init] on Android.
   static Future<void> ensurePluginContext() async {
-    if (!Platform.isAndroid) {
+    if (!_isAndroid) {
       return;
     }
     // coverage:ignore-start
@@ -31,7 +34,7 @@ abstract final class SentryAndroidContext {
 
   /// Whether the Android native SDK is still active after a Flutter hot restart.
   static Future<bool> isNativeSdkInitialized() async {
-    if (!Platform.isAndroid) {
+    if (!_isAndroid) {
       return false;
     }
     // coverage:ignore-start

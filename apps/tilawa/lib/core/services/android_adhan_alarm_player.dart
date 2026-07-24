@@ -64,7 +64,8 @@ class AndroidAdhanAlarmPlayer implements IAdhanAlarmPlayer {
   final bool? _isSupportedOverride;
 
   @override
-  bool get isSupported => _isSupportedOverride ?? Platform.isAndroid;
+  bool get isSupported =>
+      _isSupportedOverride ?? (!kIsWeb && Platform.isAndroid);
 
   void _emitNotificationTap(String payload) {
     logger.d('[AndroidAdhanAlarmPlayer] METHOD_CHANNEL_TAP_RECEIVED');

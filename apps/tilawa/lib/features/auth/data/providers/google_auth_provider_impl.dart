@@ -65,13 +65,16 @@ class GoogleAuthProviderImpl implements AuthProviderInterface {
     this._sessionTracker,
   ) {
     GoogleSignInAndroidResumeBridge.instance.ensureInitialized();
+    if (kIsWeb) {
+      _ensureWebAuthenticationCache();
+    }
   }
   static const Duration signInTimeout = Duration(seconds: 60);
 
   /// iOS has no Credential Manager sheet; after [GoogleSignIn.signOut] the
   /// lightweight path returns no account and must fall back to [authenticate].
   @visibleForTesting
-  static bool useIosInteractiveSignInFallback = Platform.isIOS;
+  static bool useIosInteractiveSignInFallback = !kIsWeb && Platform.isIOS;
 
   /// Transsion/XOS: GMS sign-in UI (CM sheet or account chooser) can be
   /// composited invisibly behind the Flutter window. Visible GMS UI takes
@@ -89,6 +92,49 @@ class GoogleAuthProviderImpl implements AuthProviderInterface {
   final GoogleSignIn _googleSignIn;
   final AndroidSignInPlatformPolicy _platformPolicy;
   final GoogleSignInSessionTracker _sessionTracker;
+
+  /// Web GIS [renderButton] delivers accounts via [authenticationEvents] only.
+  StreamSubscription<GoogleSignInAuthenticationEvent>? _webAuthEventsSub;
+  GoogleSignInAccount? _webSignedInAccount;
+  Completer<GoogleSignInAccount>? _webSignInCompleter;
+
+  void _ensureWebAuthenticationCache() {
+    if (_webAuthEventsSub != null) {
+      return;
+    }
+    _webAuthEventsSub = _googleSignIn.authenticationEvents.listen(
+      (GoogleSignInAuthenticationEvent event) {
+        switch (event) {
+          case GoogleSignInAuthenticationEventSignIn(:final user):
+            _webSignedInAccount = user;
+            final Completer<GoogleSignInAccount>? pending = _webSignInCompleter;
+            if (pending != null && !pending.isCompleted) {
+              pending.complete(user);
+            }
+          case GoogleSignInAuthenticationEventSignOut():
+            _webSignedInAccount = null;
+        }
+      },
+    );
+  }
+
+  Future<GoogleSignInAccount> _resolveWebSignInAccount() async {
+    _ensureWebAuthenticationCache();
+    final GoogleSignInAccount? cached = _webSignedInAccount;
+    if (cached != null) {
+      return cached;
+    }
+    final Completer<GoogleSignInAccount> completer =
+        Completer<GoogleSignInAccount>();
+    _webSignInCompleter = completer;
+    try {
+      return await completer.future.timeout(signInTimeout);
+    } finally {
+      if (identical(_webSignInCompleter, completer)) {
+        _webSignInCompleter = null;
+      }
+    }
+  }
 
   @override
   Stream<UserEntity?> get authStateChanges {
@@ -182,6 +228,11 @@ class GoogleAuthProviderImpl implements AuthProviderInterface {
 
   Future<GoogleSignInAccount> _signInAccount() async {
     await _platformPolicy.warmUp();
+
+    // Web: GIS forbids [authenticate]; account arrives from renderButton events.
+    if (kIsWeb) {
+      return _resolveWebSignInAccount();
+    }
 
     if (useIosInteractiveSignInFallback) {
       return _tryIosSignIn();
@@ -281,7 +332,7 @@ class GoogleAuthProviderImpl implements AuthProviderInterface {
     if (override != null) {
       return override;
     }
-    if (!Platform.isAndroid) {
+    if (kIsWeb || !Platform.isAndroid) {
       return null;
     }
     return GoogleSignInAndroidResumeBridge.instance.onCredentialUiDismissed;

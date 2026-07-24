@@ -34,7 +34,8 @@ class PrayerWidgetScheduleSync {
   final MethodChannel _channel;
   final bool? _isSupportedOverride;
 
-  bool get isSupported => _isSupportedOverride ?? Platform.isAndroid;
+  bool get isSupported =>
+      _isSupportedOverride ?? (!kIsWeb && Platform.isAndroid);
 
   /// Serialises [days] and hands the snapshot to the native widget store.
   /// No-ops silently off-Android or when [days] is empty.

@@ -3967,6 +3967,30 @@ abstract class AppLocalizations {
   /// **'Compass accuracy is low. Move your phone in a figure-eight motion to calibrate it.'**
   String get qiblaCompassAccuracyPoor;
 
+  /// Shown when Qibla cannot run (e.g. web) because device sensors are unavailable
+  ///
+  /// In en, this message translates to:
+  /// **'Qibla needs a phone with compass and location. Open MeMuslim on your mobile device.'**
+  String get qiblaUnavailableOnThisDevice;
+
+  /// Friendly subtitle when Qibla sensor or setup fails
+  ///
+  /// In en, this message translates to:
+  /// **'We could not read your compass. Check that location is on, then try again.'**
+  String get qiblaSensorUnavailableMessage;
+
+  /// Friendly subtitle when location service check fails for Qibla
+  ///
+  /// In en, this message translates to:
+  /// **'We could not access your location. Turn on location services, then try again.'**
+  String get qiblaLocationErrorMessage;
+
+  /// Friendly subtitle when location permission request fails for Qibla
+  ///
+  /// In en, this message translates to:
+  /// **'Location permission is needed to find the Qibla direction.'**
+  String get qiblaPermissionErrorMessage;
+
   /// Onboarding page 1 title (line break intentional)
   ///
   /// In en, this message translates to:

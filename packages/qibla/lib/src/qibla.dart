@@ -1,5 +1,4 @@
 import 'dart:async';
-import 'dart:io';
 
 import 'package:compass/flutter_compass.dart';
 import 'package:flutter/foundation.dart';
@@ -54,8 +53,10 @@ class Qibla {
 
   /* Instance methods that can be overridden for testing */
 
+  /// Prefer [defaultTargetPlatform] — `dart:io` [Platform] throws on web.
   @visibleForTesting
-  bool platformIsAndroid = Platform.isAndroid;
+  bool platformIsAndroid =
+      !kIsWeb && defaultTargetPlatform == TargetPlatform.android;
 
   Future<bool?> checkAndroidDeviceSensorSupport() async {
     if (platformIsAndroid) {

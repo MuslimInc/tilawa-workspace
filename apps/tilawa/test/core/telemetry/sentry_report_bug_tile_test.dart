@@ -3,6 +3,8 @@ import 'dart:typed_data';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:sentry_flutter/sentry_flutter.dart';
+import 'package:tilawa/core/bootstrap/app_launch_config.dart';
+import 'package:tilawa/core/di/injection.dart';
 import 'package:tilawa/core/telemetry/sentry_report_bug_tile.dart';
 import 'package:tilawa/core/telemetry/sentry_user_feedback.dart';
 import 'package:tilawa/core/telemetry/tilawa_feedback_screenshot_capture.dart';
@@ -83,7 +85,8 @@ final Uint8List _k1x1TransparentPng = Uint8List.fromList(<int>[
 ]);
 
 void main() {
-  setUp(() {
+  setUp(() async {
+    await getIt.reset();
     TilawaFeedbackScreenshotCapture.resetTestConfiguration();
     TilawaFeedbackScreenshotCapture.readyFrameCount = 0;
     TilawaFeedbackScreenshotCapture.boundaryReadyFrames = 0;
@@ -92,7 +95,11 @@ void main() {
         _k1x1TransparentPng;
   });
 
-  tearDown(TilawaFeedbackScreenshotCapture.resetTestConfiguration);
+  tearDown(() async {
+    TilawaFeedbackScreenshotCapture.resetTestConfiguration();
+    await getIt.reset();
+  });
+
   Future<void> pumpTile(WidgetTester tester) async {
     await tester.pumpWidget(
       MaterialApp(
@@ -106,13 +113,31 @@ void main() {
   }
 
   testWidgets('hides when Sentry is disabled', (tester) async {
+    getIt.registerSingleton<AppLaunchConfig>(
+      const AppLaunchConfig(reportBugEnabled: true),
+    );
     await pumpTile(tester);
     expect(find.byType(SentryReportBugTile), findsOneWidget);
     expect(find.byType(TilawaSettingsTile), findsNothing);
   });
 
-  testWidgets('shows settings tile when Sentry is enabled', (tester) async {
+  testWidgets('hides when report bug launch flag is off', (tester) async {
     await ensureSentryInitializedForTests();
+    getIt.registerSingleton<AppLaunchConfig>(
+      const AppLaunchConfig(reportBugEnabled: false),
+    );
+    await pumpTile(tester);
+
+    expect(find.byType(TilawaSettingsTile), findsNothing);
+  });
+
+  testWidgets('shows settings tile when Sentry and flag are enabled', (
+    tester,
+  ) async {
+    await ensureSentryInitializedForTests();
+    getIt.registerSingleton<AppLaunchConfig>(
+      const AppLaunchConfig(reportBugEnabled: true),
+    );
     await pumpTile(tester);
 
     expect(find.byType(TilawaSettingsTile), findsOneWidget);
@@ -121,6 +146,9 @@ void main() {
 
   testWidgets('opens feedback form when tile is tapped', (tester) async {
     await ensureSentryInitializedForTests();
+    getIt.registerSingleton<AppLaunchConfig>(
+      const AppLaunchConfig(reportBugEnabled: true),
+    );
     final SentryFlutterOptions options = SentryFlutterOptions();
     SentryUserFeedback.bindFlutterOptions(options);
 

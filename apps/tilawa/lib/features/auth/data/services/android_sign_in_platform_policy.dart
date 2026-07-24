@@ -11,7 +11,7 @@ import 'package:tilawa/features/auth/core/android_credential_manager_oem_policy.
 class AndroidSignInPlatformPolicy {
   AndroidSignInPlatformPolicy({DeviceInfoPlugin? deviceInfoPlugin})
     : _deviceInfoPlugin = deviceInfoPlugin ?? DeviceInfoPlugin(),
-      _isAndroid = Platform.isAndroid;
+      _isAndroid = !kIsWeb && Platform.isAndroid;
 
   @visibleForTesting
   AndroidSignInPlatformPolicy.test({

@@ -14,6 +14,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - **Shell / Reciters / Home**: Re-tapping the active tab no longer crashes when
   a `ScrollController` is attached to multiple scroll views (`StateError: Too
   many elements`, Sentry `FLUTTER-FP`).
+- **Home**: Double-tapping Home expands the nested prayer header fully (body
+  first, then outer) instead of leaving the pinned greeting strip.
 
 ## [2.1.9+90] - 2026-07-22 [Google Play Production]
 

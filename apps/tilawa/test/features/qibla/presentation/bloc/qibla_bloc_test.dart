@@ -9,6 +9,7 @@ import 'package:tilawa/features/qibla/domain/usecases/check_location_service_use
 import 'package:tilawa/features/qibla/domain/usecases/get_qibla_direction_use_case.dart';
 import 'package:tilawa/features/qibla/domain/usecases/request_location_permission_use_case.dart';
 import 'package:tilawa/features/qibla/presentation/bloc/qibla_bloc.dart';
+import 'package:tilawa/features/qibla/presentation/constants/qibla_error_codes.dart';
 import 'package:tilawa_core/errors/failures.dart';
 import 'package:tilawa_core/usecases/usecase.dart';
 import 'package:vibration_platform_interface/vibration_platform_interface.dart';
@@ -181,7 +182,7 @@ void main() {
         const QiblaState(status: QiblaStatus.loading),
         const QiblaState(
           status: QiblaStatus.error,
-          errorMessage: 'Exception: Stream error',
+          errorMessage: QiblaErrorCodes.sensorFailed,
         ),
       ],
     );
@@ -199,7 +200,7 @@ void main() {
         const QiblaState(status: QiblaStatus.loading),
         const QiblaState(
           status: QiblaStatus.error,
-          errorMessage: 'Service check failed',
+          errorMessage: QiblaErrorCodes.locationFailed,
         ),
       ],
     );
@@ -220,7 +221,7 @@ void main() {
         const QiblaState(status: QiblaStatus.loading),
         const QiblaState(
           status: QiblaStatus.error,
-          errorMessage: 'Permission check failed',
+          errorMessage: QiblaErrorCodes.permissionFailed,
         ),
       ],
     );
@@ -276,7 +277,7 @@ void main() {
         const QiblaState(status: QiblaStatus.loading),
         const QiblaState(
           status: QiblaStatus.error,
-          errorMessage: 'Permission request failed',
+          errorMessage: QiblaErrorCodes.permissionFailed,
         ),
       ],
     );
@@ -296,7 +297,7 @@ void main() {
         const QiblaState(status: QiblaStatus.loading),
         const QiblaState(
           status: QiblaStatus.error,
-          errorMessage: 'Exception: Setup failed',
+          errorMessage: QiblaErrorCodes.sensorFailed,
         ),
       ],
     );
@@ -348,11 +349,12 @@ void main() {
     blocTest<QiblaBloc, QiblaState>(
       'emits error state with message',
       build: () => qiblaBloc,
-      act: (bloc) => bloc.add(const QiblaErrorOccurred('sensor offline')),
+      act: (bloc) =>
+          bloc.add(const QiblaErrorOccurred(QiblaErrorCodes.sensorFailed)),
       expect: () => [
         const QiblaState(
           status: QiblaStatus.error,
-          errorMessage: 'sensor offline',
+          errorMessage: QiblaErrorCodes.sensorFailed,
         ),
       ],
     );

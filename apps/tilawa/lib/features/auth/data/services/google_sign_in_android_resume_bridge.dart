@@ -1,6 +1,7 @@
 import 'dart:async';
 import 'dart:io';
 
+import 'package:flutter/foundation.dart';
 import 'package:flutter/services.dart';
 
 /// Notifies Dart when [MainActivity.onResume] fires (Transsion sign-in recovery).
@@ -26,7 +27,7 @@ class GoogleSignInAndroidResumeBridge {
   bool _initialized = false;
 
   void ensureInitialized() {
-    if (_initialized || !Platform.isAndroid) {
+    if (_initialized || kIsWeb || !Platform.isAndroid) {
       return;
     }
     _initialized = true;

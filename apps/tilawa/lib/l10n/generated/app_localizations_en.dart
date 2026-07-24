@@ -2295,6 +2295,22 @@ class AppLocalizationsEn extends AppLocalizations {
       'Compass accuracy is low. Move your phone in a figure-eight motion to calibrate it.';
 
   @override
+  String get qiblaUnavailableOnThisDevice =>
+      'Qibla needs a phone with compass and location. Open MeMuslim on your mobile device.';
+
+  @override
+  String get qiblaSensorUnavailableMessage =>
+      'We could not read your compass. Check that location is on, then try again.';
+
+  @override
+  String get qiblaLocationErrorMessage =>
+      'We could not access your location. Turn on location services, then try again.';
+
+  @override
+  String get qiblaPermissionErrorMessage =>
+      'Location permission is needed to find the Qibla direction.';
+
+  @override
   String get onboardingTitle1 =>
       'Minutes with the Quran…\nChanges your whole day';
 

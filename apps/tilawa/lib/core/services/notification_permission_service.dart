@@ -1,5 +1,6 @@
 import 'dart:io';
 
+import 'package:flutter/foundation.dart';
 import 'package:injectable/injectable.dart';
 import 'package:permission_handler/permission_handler.dart';
 import 'package:shared_preferences/shared_preferences.dart';
@@ -15,6 +16,8 @@ class NotificationPermissionService {
   static const String _isFirstLaunchKey = 'is_first_launch';
 
   final SharedPreferencesAsync _prefs;
+
+  static bool get _isAndroid => !kIsWeb && Platform.isAndroid;
 
   /// Check if this is the first time the app is launched
   Future<bool> isFirstLaunch() async {
@@ -33,9 +36,8 @@ class NotificationPermissionService {
 
   /// Check if notification permission is granted
   Future<bool> isPermissionGranted() async {
-    if (!Platform.isAndroid) {
-      // iOS doesn't require explicit notification permission request
-      // The system will prompt automatically when needed
+    if (!_isAndroid) {
+      // iOS/web don't use this Android 13+ explicit request path
       return true;
     }
 
@@ -45,7 +47,7 @@ class NotificationPermissionService {
 
   /// Check if the app is ignoring battery optimizations
   Future<bool> isIgnoringBatteryOptimizations() async {
-    if (!Platform.isAndroid) {
+    if (!_isAndroid) {
       // Battery optimizations are an Android-only concept
       return true;
     }
@@ -58,9 +60,10 @@ class NotificationPermissionService {
   /// Request notification permission (only on Android 13+)
   /// Returns true if permission is granted, false otherwise
   Future<bool> requestPermission() async {
-    if (!Platform.isAndroid) {
-      // iOS doesn't require explicit notification permission request
-      logger.d('[NotificationPermissionService] iOS - permission not required');
+    if (!_isAndroid) {
+      logger.d(
+        '[NotificationPermissionService] Non-Android - permission not required',
+      );
       return true;
     }
 

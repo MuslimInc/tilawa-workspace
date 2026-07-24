@@ -355,8 +355,12 @@ class _ThemedMaterialApp extends StatelessWidget {
                   maxScaleFactor: textScaleClampMax,
                 ),
           ),
-          child: TilawaFeedbackHost(
-            child: SessionVerificationBanner(child: routedChild),
+          // Single wide-window letterbox so navigator, dialogs, sheets, and
+          // snackbars share a phone-width surface (see TilawaPhoneWidthShell).
+          child: TilawaPhoneWidthShell(
+            child: TilawaFeedbackHost(
+              child: SessionVerificationBanner(child: routedChild),
+            ),
           ),
         );
       },
