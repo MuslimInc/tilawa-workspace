@@ -27,10 +27,8 @@ class DefaultFirebaseOptions {
   /// with per-flavor `--ios-bundle-id` / `--ios-out` / `--android-out`.
   static FirebaseOptions optionsForEnvironment(AppEnvironment environment) {
     if (kIsWeb) {
-      throw UnsupportedError(
-        'DefaultFirebaseOptions have not been configured for web - '
-        'you can reconfigure this by running the FlutterFire CLI again.',
-      );
+      // Single web app in Firebase Console; flavors share this config.
+      return web;
     }
     switch (defaultTargetPlatform) {
       case TargetPlatform.android:
@@ -128,5 +126,15 @@ class DefaultFirebaseOptions {
     iosClientId:
         '181575856185-utien7qr321gnjecad9toqpi0j1kguoo.apps.googleusercontent.com',
     iosBundleId: 'com.memuslim.app',
+  );
+
+  static const FirebaseOptions web = FirebaseOptions(
+    apiKey: 'AIzaSyCbarh-SeVF7qEUXHvvnC1xZOUBY7GQOHo',
+    appId: '1:181575856185:web:f824b9966553d3e2381de8',
+    messagingSenderId: '181575856185',
+    projectId: 'quran-playera-app',
+    authDomain: 'quran-playera-app.firebaseapp.com',
+    storageBucket: 'quran-playera-app.firebasestorage.app',
+    measurementId: 'G-QG4MCHGQBN',
   );
 }
