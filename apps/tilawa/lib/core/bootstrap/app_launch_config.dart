@@ -8,7 +8,8 @@ import 'package:flutter/foundation.dart';
 /// Firestore usage in `SubscriptionPlansService` (catalog, premium status,
 /// purchase records) stays off until explicitly enabled.
 ///
-/// [supportTilawaEnabled] defaults to **true** (Settings/Profile Support entry).
+/// [supportTilawaEnabled] defaults to **true** on non-iOS (Settings/Home Support
+/// entry). Forced **false** on iOS until store payments ship there.
 ///
 /// [reportBugEnabled] defaults to **false** (Settings "Report a bug" + Sentry
 /// feedback prompts) until explicitly enabled.
@@ -268,7 +269,11 @@ class AppLaunchConfig extends Equatable {
   });
 
   factory AppLaunchConfig.fromEnvironment() {
-    return const AppLaunchConfig(
+    // HyperPay / store support not ready on iOS — hide Support entry until then.
+    final bool supportTilawaEnabled =
+        _LaunchEnvironment.supportTilawaEnabled &&
+        (kIsWeb || defaultTargetPlatform != TargetPlatform.iOS);
+    return AppLaunchConfig(
       resetLaunchState: _LaunchEnvironment.resetLaunchState,
       frameWatcher: _LaunchEnvironment.frameWatcher,
       perfInstrumentation: _LaunchEnvironment.perfInstrumentation,
@@ -294,7 +299,7 @@ class AppLaunchConfig extends Equatable {
       quranAssetsPrefetch: _LaunchEnvironment.quranAssetsPrefetch,
       firebaseDataInit: _LaunchEnvironment.firebaseDataInit,
       subscriptionServiceEnabled: _LaunchEnvironment.subscriptionServiceEnabled,
-      supportTilawaEnabled: _LaunchEnvironment.supportTilawaEnabled,
+      supportTilawaEnabled: supportTilawaEnabled,
       reportBugEnabled: _LaunchEnvironment.reportBugEnabled,
       whatsNewEnabled: _LaunchEnvironment.whatsNewEnabled,
       privacyPolicyEnabled: _LaunchEnvironment.privacyPolicyEnabled,
