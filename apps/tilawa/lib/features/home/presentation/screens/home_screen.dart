@@ -95,14 +95,12 @@ class _HomeScreenState extends State<HomeScreen> {
       return;
     }
 
-    final Duration duration = context.tokens.durationFast;
-    const Curve curve = Curves.easeOutCubic;
-    await Future.wait<void>([
-      if (outer.hasClients)
-        outer.animateTo(0, duration: duration, curve: curve),
-      if (inner.hasClients)
-        inner.animateTo(0, duration: duration, curve: curve),
-    ]);
+    await ShellTabReselect.scrollNestedToTop(
+      outer: outer,
+      inner: inner,
+      duration: context.tokens.durationFast,
+      curve: Curves.easeOutCubic,
+    );
   }
 
   void _onShellTabReselect() {
@@ -390,3 +388,6 @@ class _HomeTtfdScope extends StatelessWidget {
     }
   }
 }
+
+
+

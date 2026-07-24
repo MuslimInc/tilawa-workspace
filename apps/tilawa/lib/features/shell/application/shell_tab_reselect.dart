@@ -39,13 +39,67 @@ abstract final class ShellTabReselect {
       return;
     }
 
-    await Future.wait<void>([
-      for (final ScrollPosition position in scrollController.positions)
-        position.animateTo(
-          position.minScrollExtent,
-          duration: duration,
-          curve: curve,
-        ),
+    await _animatePositionsToTop(
+      scrollController,
+      duration: duration,
+      curve: curve,
+    );
+  }
+
+  /// Fully expands a [NestedScrollView]: body first, then header.
+  ///
+  /// Parallel [ScrollController.animateTo] on outer+inner leaves the outer
+  /// pinned at max (coordinator race). Drive inner to min, then outer, then
+  /// hard-jump settle.
+  static Future<void> scrollNestedToTop({
+    required ScrollController outer,
+    required ScrollController inner,
+    Duration duration = const Duration(milliseconds: 280),
+    Curve curve = Curves.easeOutCubic,
+  }) async {
+    if (inner.hasClients) {
+      await _animatePositionsToTop(inner, duration: duration, curve: curve);
+    }
+    _jumpPositionsToTop(inner);
+
+    if (outer.hasClients) {
+      await _animatePositionsToTop(outer, duration: duration, curve: curve);
+    }
+    _jumpPositionsToTop(outer);
+  }
+
+  static Future<void> _animatePositionsToTop(
+    ScrollController scrollController, {
+    required Duration duration,
+    required Curve curve,
+  }) {
+    return Future.wait<void>([
+      for (final ScrollPosition position in List<ScrollPosition>.of(
+        scrollController.positions,
+      ))
+        if (position.hasPixels)
+          position.animateTo(
+            position.minScrollExtent,
+            duration: duration,
+            curve: curve,
+          ),
     ]);
   }
+
+  static void _jumpPositionsToTop(ScrollController scrollController) {
+    if (!scrollController.hasClients) {
+      return;
+    }
+    for (final ScrollPosition position in List<ScrollPosition>.of(
+      scrollController.positions,
+    )) {
+      if (!position.hasPixels) {
+        continue;
+      }
+      if (position.pixels != position.minScrollExtent) {
+        position.jumpTo(position.minScrollExtent);
+      }
+    }
+  }
 }
+
