@@ -2968,9 +2968,13 @@
     "@onboardingVisualHint2": {
         "description": "Short caption under onboarding slide 2 device preview"
     },
-    "startJourney": "Continue with your setup",
+    "onboardingSkip": "Skip",
+    "@onboardingSkip": {
+        "description": "Skip first-run onboarding carousel"
+    },
+    "startJourney": "Get Started",
     "@startJourney": {
-        "description": "Onboarding complete CTA — ownership tone after slides"
+        "description": "Final onboarding CTA after benefit slides"
     },
     "recitationDuration": "Recitation Duration",
     "@recitationDuration": {

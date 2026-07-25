@@ -2399,9 +2399,13 @@
     "@onboardingVisualHint2": {
         "description": "Short caption under onboarding slide 2 device preview"
     },
-    "startJourney": "تابع إعدادك",
+    "onboardingSkip": "تخطّي",
+    "@onboardingSkip": {
+        "description": "Skip first-run onboarding carousel"
+    },
+    "startJourney": "ابدأ",
     "@startJourney": {
-        "description": "Start button text"
+        "description": "Final onboarding CTA after benefit slides"
     },
     "recitationDuration": "مدة التلاوة",
     "@recitationDuration": {

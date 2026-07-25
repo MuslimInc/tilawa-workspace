@@ -2365,7 +2365,10 @@ class AppLocalizationsAr extends AppLocalizations {
   String get onboardingVisualHint2 => 'تصفّح القرّاء مع البحث والمفضلة';
 
   @override
-  String get startJourney => 'تابع إعدادك';
+  String get onboardingSkip => 'تخطّي';
+
+  @override
+  String get startJourney => 'ابدأ';
 
   @override
   String get recitationDuration => 'مدة التلاوة';

@@ -4129,10 +4129,16 @@ abstract class AppLocalizations {
   /// **'Browse reciters with search and favorites'**
   String get onboardingVisualHint2;
 
-  /// Onboarding complete CTA — ownership tone after slides
+  /// Skip first-run onboarding carousel
   ///
   /// In en, this message translates to:
-  /// **'Continue with your setup'**
+  /// **'Skip'**
+  String get onboardingSkip;
+
+  /// Final onboarding CTA after benefit slides
+  ///
+  /// In en, this message translates to:
+  /// **'Get Started'**
   String get startJourney;
 
   /// Sleep timer dialog title

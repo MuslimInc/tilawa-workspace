@@ -17,6 +17,7 @@ import '../widgets/onboarding_footer_bar.dart';
 import '../widgets/onboarding_hero_visual.dart';
 import '../widgets/onboarding_page.dart';
 import '../widgets/onboarding_page_indicator.dart';
+import '../widgets/onboarding_page_scroll_fade.dart';
 
 /// First-run onboarding carousel before sign-in.
 class OnboardingScreen extends StatefulWidget {
@@ -71,11 +72,17 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
   }
 
   void _goToPage(int index) {
+    final MeMuslimDesignTokens tokens = Theme.of(context).tokens;
+    final bool reduceMotion = MediaQuery.disableAnimationsOf(context);
+    if (reduceMotion) {
+      _pageController.jumpToPage(index);
+      return;
+    }
     unawaited(
       _pageController.animateToPage(
         index,
-        duration: Theme.of(context).tokens.durationMedium,
-        curve: Curves.easeOutCubic,
+        duration: tokens.durationMedium,
+        curve: tokens.curveEmphasized,
       ),
     );
   }
@@ -84,10 +91,10 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
   Widget build(BuildContext context) {
     final List<OnboardingContent> pages = <OnboardingContent>[
       OnboardingContent(
-        imagePath: 'assets/images/listener.png',
+        imagePath: 'assets/lottie/muslim_man_praying_mosque.json',
         title: context.l10n.onboardingTitle1,
         description: context.l10n.onboardingDesc1,
-        heroStyle: OnboardingHeroStyle.illustration,
+        heroStyle: OnboardingHeroStyle.lottie,
       ),
       OnboardingContent(
         imagePath: 'assets/images/reciters.png',
@@ -120,6 +127,9 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
           },
           builder: (BuildContext context, OnboardingState state) {
             final MeMuslimDesignTokens tokens = theme.tokens;
+            final bool isLastPage = _currentPage == pageCount - 1;
+            void completeOnboarding() =>
+                context.read<OnboardingCubit>().completeOnboarding();
             return Scaffold(
               backgroundColor: pageBackground,
               body: TilawaThumbReachLayout(
@@ -128,6 +138,25 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
                 // Welcome / PrayerAlerts. Top padding separates copy from dots.
                 content: Column(
                   children: <Widget>[
+                    Padding(
+                      padding: EdgeInsetsDirectional.only(
+                        start: tokens.spaceLarge,
+                        end: tokens.spaceLarge,
+                        top: tokens.spaceExtraSmall,
+                      ),
+                      child: Align(
+                        alignment: AlignmentDirectional.centerEnd,
+                        child: isLastPage
+                            ? SizedBox(height: tokens.minInteractiveDimension)
+                            : TilawaButton(
+                                text: context.l10n.onboardingSkip,
+                                variant: TilawaButtonVariant.ghost,
+                                size: TilawaButtonSize.small,
+                                semanticLabel: context.l10n.onboardingSkip,
+                                onPressed: completeOnboarding,
+                              ),
+                      ),
+                    ),
                     Expanded(
                       child: PageView.builder(
                         controller: _pageController,
@@ -141,13 +170,18 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
                           }
                         },
                         itemBuilder: (BuildContext context, int index) {
-                          return OnboardingPage(
-                            content: pages[index],
-                            semanticsLabel: context.l10n
-                                .onboardingPageSemantics(
-                                  index + 1,
-                                  pageCount,
-                                ),
+                          return OnboardingPageScrollFade(
+                            controller: _pageController,
+                            index: index,
+                            child: OnboardingPage(
+                              content: pages[index],
+                              isActive: index == _currentPage,
+                              semanticsLabel: context.l10n
+                                  .onboardingPageSemantics(
+                                    index + 1,
+                                    pageCount,
+                                  ),
+                            ),
                           );
                         },
                       ),
@@ -177,8 +211,7 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
                   completeLabel: context.l10n.startJourney,
                   onBack: () => _goToPage(_currentPage - 1),
                   onNext: () => _goToPage(_currentPage + 1),
-                  onComplete: () =>
-                      context.read<OnboardingCubit>().completeOnboarding(),
+                  onComplete: completeOnboarding,
                 ),
               ),
             );

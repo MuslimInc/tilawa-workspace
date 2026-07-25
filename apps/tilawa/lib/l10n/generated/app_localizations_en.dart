@@ -2389,7 +2389,10 @@ class AppLocalizationsEn extends AppLocalizations {
       'Browse reciters with search and favorites';
 
   @override
-  String get startJourney => 'Continue with your setup';
+  String get onboardingSkip => 'Skip';
+
+  @override
+  String get startJourney => 'Get Started';
 
   @override
   String get recitationDuration => 'Recitation Duration';
