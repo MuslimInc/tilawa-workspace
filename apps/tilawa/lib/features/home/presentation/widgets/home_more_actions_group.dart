@@ -1,6 +1,8 @@
 import 'dart:async';
 
 import 'package:flutter/material.dart';
+import 'package:tilawa/core/bootstrap/app_launch_config.dart';
+import 'package:tilawa/core/di/injection.dart';
 import 'package:tilawa/core/extensions.dart';
 import 'package:tilawa/router/app_router_config.dart';
 import 'package:tilawa_ui_kit/tilawa_ui_kit.dart';
@@ -12,8 +14,8 @@ import 'home_grouped_list_row.dart';
 /// Grouped list of secondary non-nav destinations — More zone.
 ///
 /// Holds media discovery (Reels, Radio) plus library/account destinations
-/// (History, Favorites, Downloads, Support). One raised card with hairline
-/// dividers.
+/// (History, Favorites, Downloads; Support when enabled). One raised card with
+/// hairline dividers.
 class HomeMoreActionsGroup extends StatelessWidget {
   const HomeMoreActionsGroup({super.key});
 
@@ -106,14 +108,22 @@ abstract final class _MoreActionsCatalog {
         subtitle: l10n.homeDownloadsCarouselSubtitle,
         onTap: () => unawaited(const DownloadsRoute().push<void>(context)),
       ),
-      _MoreActionsItem(
-        icon: TilawaIcons.support,
-        iconTint: TilawaSemanticTint.success,
-        title: l10n.supportTilawa,
-        subtitle: l10n.homeSupportCarouselSubtitle,
-        onTap: () => unawaited(const SupportRoute().push<void>(context)),
-      ),
+      if (_isSupportTilawaEnabled)
+        _MoreActionsItem(
+          icon: TilawaIcons.support,
+          iconTint: TilawaSemanticTint.success,
+          title: l10n.supportTilawa,
+          subtitle: l10n.homeSupportCarouselSubtitle,
+          onTap: () => unawaited(const SupportRoute().push<void>(context)),
+        ),
     ];
+  }
+
+  static bool get _isSupportTilawaEnabled {
+    if (!getIt.isRegistered<AppLaunchConfig>()) {
+      return AppLaunchConfig.fromEnvironment().supportTilawaEnabled;
+    }
+    return getIt<AppLaunchConfig>().supportTilawaEnabled;
   }
 }
 

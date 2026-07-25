@@ -21,7 +21,7 @@ class _FakeRepository implements AppReviewRepository {
   }
 
   @override
-  Future<void> openStoreListing() async {}
+  Future<void> openStoreListing({bool writeReview = false}) async {}
 }
 
 void main() {

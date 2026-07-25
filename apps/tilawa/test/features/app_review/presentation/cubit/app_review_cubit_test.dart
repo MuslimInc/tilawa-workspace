@@ -14,7 +14,7 @@ class _FakeRepo implements AppReviewRepository {
   Future<bool> isAvailable() async => true;
 
   @override
-  Future<void> openStoreListing() async {}
+  Future<void> openStoreListing({bool writeReview = false}) async {}
 
   @override
   Future<void> requestReview() async {}
@@ -44,7 +44,8 @@ class _StubOpenStore extends OpenAppStoreListingUseCase {
   final Either<Failure, void> _result;
 
   @override
-  Future<Either<Failure, void>> call() async => _result;
+  Future<Either<Failure, void>> call({bool writeReview = false}) async =>
+      _result;
 }
 
 void main() {

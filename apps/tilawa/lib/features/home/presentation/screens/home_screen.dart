@@ -388,6 +388,3 @@ class _HomeTtfdScope extends StatelessWidget {
     }
   }
 }
-
-
-

@@ -102,6 +102,16 @@ void main() {
       expect(primary.center.dy, lessThan(back.center.dy));
     });
 
+    testWidgets('shows Get Started as primary on the last page', (
+      WidgetTester tester,
+    ) async {
+      await pumpFooterBar(tester, locale: const Locale('en'), currentPage: 2);
+
+      expect(find.text(en.startJourney), findsOneWidget);
+      expect(find.text(en.next), findsNothing);
+      expect(en.startJourney, 'Get Started');
+    });
+
     testWidgets(
       'uses a full-width back action when previous page is available',
       (

@@ -667,10 +667,19 @@ class _SettingsAccountActionsState extends State<SettingsAccountActions> {
 }
 
 class SettingsLegalSection extends StatelessWidget {
-  const SettingsLegalSection({super.key});
+  const SettingsLegalSection({
+    super.key,
+    this.privacyPolicyEnabled = false,
+  });
+
+  final bool privacyPolicyEnabled;
 
   @override
   Widget build(BuildContext context) {
+    if (!privacyPolicyEnabled) {
+      return const SizedBox.shrink();
+    }
+
     final l10n = context.l10n;
 
     return TilawaSettingsGroup(

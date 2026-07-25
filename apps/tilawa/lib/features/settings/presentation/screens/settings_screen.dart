@@ -40,6 +40,7 @@ import '../../../ui_kit_debug/tilawa_card_nested_tap_demo_tile.dart';
 import '../../../whats_new/whats_new.dart';
 import '../cubit/settings_cubit.dart';
 import '../formatters/settings_share_text_formatter.dart';
+import '../widgets/clear_app_preferences_debug_tile.dart';
 import '../widgets/settings_picker_sheets.dart';
 import '../widgets/settings_teacher_capability_scope.dart';
 import '../widgets/settings_teaching_on_memuslim_tile.dart';
@@ -49,10 +50,14 @@ class SettingsScreen extends StatefulWidget {
   const SettingsScreen({
     super.key,
     required this.supportTilawaEnabled,
+    required this.whatsNewEnabled,
+    required this.privacyPolicyEnabled,
     required this.shareContent,
   });
 
   final bool supportTilawaEnabled;
+  final bool whatsNewEnabled;
+  final bool privacyPolicyEnabled;
   final ShareContentUseCase shareContent;
 
   @override
@@ -280,31 +285,26 @@ class _SettingsScreenState extends State<SettingsScreen> {
                         ),
                       const SettingsRateAppTile(),
                       const SentryReportBugTile(),
-                      TilawaSettingsTile(
-                        title: l10n.whatsNewSettingsTile,
-                        onTap: () =>
-                            getIt<WhatsNewCoordinator>().showFromSettings(),
-                      ),
-                      BlocBuilder<SettingsCubit, SettingsState>(
-                        builder: (context, state) {
-                          return SettingsShareAppTile(
-                            onShareRequested: () {
-                              final shareText = buildSettingsShareAppText(
-                                l10n,
-                                appInfo: state.appInfo,
-                              );
-                              return widget.shareContent(
-                                ShareContent.text(text: shareText),
-                              );
-                            },
+                      if (widget.whatsNewEnabled)
+                        TilawaSettingsTile(
+                          title: l10n.whatsNewSettingsTile,
+                          onTap: () =>
+                              getIt<WhatsNewCoordinator>().showFromSettings(),
+                        ),
+                      SettingsShareAppTile(
+                        onShareRequested: () {
+                          final shareText = buildSettingsShareAppText(l10n);
+                          return widget.shareContent(
+                            ShareContent.text(text: shareText),
                           );
                         },
                       ),
-                      TilawaSettingsTile(
-                        title: l10n.privacyPolicy,
-                        onTap: () => openLegalUrl(AppLegalUrls.privacyPolicy),
-                        showDivider: false,
-                      ),
+                      if (widget.privacyPolicyEnabled)
+                        TilawaSettingsTile(
+                          title: l10n.privacyPolicy,
+                          onTap: () => openLegalUrl(AppLegalUrls.privacyPolicy),
+                          showDivider: false,
+                        ),
                     ],
                   ),
                   SettingsAccountActions(
@@ -339,7 +339,8 @@ class _SettingsScreenState extends State<SettingsScreen> {
                         const NotificationDebugLabTile(),
                         const TilawaCardNestedTapDemoTile(),
                         const TourGuideDebugResetTile(),
-                        const ForcedUpdateDebugTile(isLast: true),
+                        const ForcedUpdateDebugTile(),
+                        const ClearAppPreferencesDebugTile(isLast: true),
                       ],
                     ),
                   const SettingsVersionFooter(),

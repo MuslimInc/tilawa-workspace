@@ -50,11 +50,7 @@ class HomeLearningUrgentSection extends StatelessWidget {
       return const SizedBox.shrink();
     }
 
-    final MeMuslimDesignTokens tokens = context.tokens;
-    return Padding(
-      padding: EdgeInsets.only(top: tokens.spaceLarge),
-      child: cardWidget,
-    );
+    return cardWidget;
   }
 }
 

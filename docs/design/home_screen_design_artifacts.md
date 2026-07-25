@@ -42,7 +42,11 @@ RTL layout.
 6. **Reflection** — daily ayah + dua in one restrained card
 7. **Closure** — quiet watermark at scroll end (peak-end rule)
 
-Primary tiles use **hero radius** and elevated surfaces. Quick tools use
+Primary tiles use **hero radius** and elevated surfaces. The Athkar primary
+tile is **contextual** and destination-first: category title + window icon
+(morning / evening / sleep), with a quiet secondary CTA («كل الأذكار» / All
+athkar) pinned to the card bottom — equal visual weight with Mushaf. Quick
+tools use
 **decorative radius** and lighter treatment. More uses a **flat grouped list**
 with hairline dividers.
 
@@ -105,4 +109,6 @@ Do not implement from: `docs/product/home_screen_redesign.md`,
 `docs/plans/home_screen_redesign_plan.md`,
 `docs/migrations/home_screen_redesign_migration.md`,
 `docs/specs/home_screen_acceptance_criteria.md`.
+
+
 

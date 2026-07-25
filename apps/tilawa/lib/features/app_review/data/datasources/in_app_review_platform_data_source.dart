@@ -18,14 +18,27 @@ class InAppReviewPlatformDataSource implements AppReviewPlatformDataSource {
   InAppReviewPlatformDataSource(
     this._review, {
     @ignoreParam Future<bool> Function(Uri uri)? launchUrlFn,
-  }) : _launchUrl =
-           launchUrlFn ??
-           ((Uri uri) => launchUrl(uri, mode: LaunchMode.externalApplication));
+  }) : _launchUrl = launchUrlFn ?? _launchStoreUrlPreferNative;
 
   final InAppReview _review;
   final Future<bool> Function(Uri uri) _launchUrl;
 
   static const String _logName = 'tilawa.app_review';
+
+  /// Prefer the native store app; fall back to the browser / generic handler.
+  static Future<bool> _launchStoreUrlPreferNative(Uri uri) async {
+    try {
+      if (await launchUrl(
+        uri,
+        mode: LaunchMode.externalNonBrowserApplication,
+      )) {
+        return true;
+      }
+    } on Object {
+      // Native store unavailable; try browser / external handler.
+    }
+    return launchUrl(uri, mode: LaunchMode.externalApplication);
+  }
 
   @override
   Future<bool> isAvailable() async {
@@ -70,6 +83,7 @@ class InAppReviewPlatformDataSource implements AppReviewPlatformDataSource {
     String? appStoreId,
     String? microsoftStoreId,
     String? androidPackageId,
+    bool writeReview = false,
   }) async {
     if (kIsWeb) {
       throw const AppReviewFailure.platformUnsupported();
@@ -79,38 +93,29 @@ class InAppReviewPlatformDataSource implements AppReviewPlatformDataSource {
     // suffixes (.dev / .staging) open unpublished listings. Always deep-link
     // the production Play package instead.
     if (defaultTargetPlatform == TargetPlatform.android) {
-      await _openAndroidPlayListing(androidPackageId);
+      await _openStoreUri(
+        AppReviewStoreConfig.playStoreListingUriFor(androidPackageId),
+      );
       return;
     }
 
-    try {
-      await _review.openStoreListing(
-        appStoreId: appStoreId,
-        microsoftStoreId: microsoftStoreId,
-      );
-      developer.log('openStoreListing completed', name: _logName);
-    } on Object catch (e, stackTrace) {
-      developer.log(
-        'openStoreListing failed',
-        name: _logName,
-        error: e,
-        stackTrace: stackTrace,
-        level: 900,
-      );
-      throw AppReviewFailure.storeListingFailed(e.toString());
+    if (defaultTargetPlatform == TargetPlatform.iOS) {
+      final Uri uri = writeReview
+          ? AppReviewStoreConfig.appStoreWriteReviewUriFor(appStoreId)
+          : AppReviewStoreConfig.appStoreListingUriFor(appStoreId);
+      await _openStoreUri(uri);
+      return;
     }
+
+    throw const AppReviewFailure.platformUnsupported();
   }
 
-  Future<void> _openAndroidPlayListing(String? androidPackageId) async {
-    final Uri uri = AppReviewStoreConfig.playStoreListingUriFor(
-      androidPackageId,
-    );
-
+  Future<void> _openStoreUri(Uri uri) async {
     try {
       final bool launched = await _launchUrl(uri);
       if (!launched) {
         throw const AppReviewFailure.storeListingFailed(
-          'Could not open Play Store listing',
+          'Could not open store listing',
         );
       }
       developer.log(

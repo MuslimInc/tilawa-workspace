@@ -549,6 +549,66 @@
     "@homeQuickAthkarSubtitle": {
         "description": "Subtitle for the Athkar primary action card"
     },
+    "homeAthkarAll": "All athkar",
+    "@homeAthkarAll": {
+        "description": "Secondary Home CTA to open the full Athkar library"
+    },
+    "homeAthkarMorningStart": "Begin your day with dhikr",
+    "@homeAthkarMorningStart": {
+        "description": "Home Athkar tile title — morning, not started"
+    },
+    "homeAthkarMorningContinue": "Continue morning athkar",
+    "@homeAthkarMorningContinue": {
+        "description": "Home Athkar tile title — morning, in progress"
+    },
+    "homeAthkarMorningDone": "Morning athkar complete",
+    "@homeAthkarMorningDone": {
+        "description": "Home Athkar tile title — morning window done"
+    },
+    "homeAthkarEveningStart": "Time for evening athkar",
+    "@homeAthkarEveningStart": {
+        "description": "Home Athkar tile title — evening, not started"
+    },
+    "homeAthkarEveningContinue": "Continue evening athkar",
+    "@homeAthkarEveningContinue": {
+        "description": "Home Athkar tile title — evening, in progress"
+    },
+    "homeAthkarEveningDone": "Evening athkar complete",
+    "@homeAthkarEveningDone": {
+        "description": "Home Athkar tile title — evening window done"
+    },
+    "homeAthkarSleepStart": "Close your day with dhikr",
+    "@homeAthkarSleepStart": {
+        "description": "Home Athkar tile title — sleep, not started"
+    },
+    "homeAthkarSleepContinue": "Continue bedtime athkar",
+    "@homeAthkarSleepContinue": {
+        "description": "Home Athkar tile title — sleep, in progress"
+    },
+    "homeAthkarSleepDone": "Rest with remembrance",
+    "@homeAthkarSleepDone": {
+        "description": "Home Athkar tile title — sleep window done"
+    },
+    "homeAthkarExploreTitle": "Continue your athkar",
+    "@homeAthkarExploreTitle": {
+        "description": "Home Athkar tile title — neutral explore state"
+    },
+    "homeAthkarAllDoneTitle": "Well done today",
+    "@homeAthkarAllDoneTitle": {
+        "description": "Home Athkar tile title — all daily athkar done"
+    },
+    "homeAthkarExploreSubtitle": "Explore all athkar",
+    "@homeAthkarExploreSubtitle": {
+        "description": "Home Athkar tile subtitle — explore / library"
+    },
+    "homeAthkarAllDoneSubtitle": "You completed today's athkar",
+    "@homeAthkarAllDoneSubtitle": {
+        "description": "Home Athkar tile subtitle — all daily done"
+    },
+    "homeAthkarBrowseRestSubtitle": "Browse the rest whenever you like",
+    "@homeAthkarBrowseRestSubtitle": {
+        "description": "Home Athkar tile subtitle after window completion"
+    },
     "homeQuickSettings": "Settings",
     "@homeQuickSettings": {
         "description": "Home quick action for settings"
@@ -2868,27 +2928,27 @@
     "@qiblaPermissionErrorMessage": {
         "description": "Friendly subtitle when location permission request fails for Qibla"
     },
-    "onboardingTitle1": "Minutes with the Quran…\nChanges your whole day",
+    "onboardingTitle1": "A few quiet minutes\nWith the Quran",
     "@onboardingTitle1": {
         "description": "Onboarding page 1 title (line break intentional)"
     },
-    "onboardingDesc1": "Find verses that fit what you're going through, and take quiet minutes to read or listen.",
+    "onboardingDesc1": "Read or listen — find verses that meet you where you are.",
     "@onboardingDesc1": {
         "description": "Onboarding page 1 description"
     },
-    "onboardingTitle2": "Many reciter voices\nListen your way",
+    "onboardingTitle2": "Your day of worship\nIn one place",
     "@onboardingTitle2": {
         "description": "Onboarding page 2 title (line break intentional)"
     },
-    "onboardingDesc2": "Different reciters and riwayat — choose the voice and style that feels right.",
+    "onboardingDesc2": "Prayer times, Mushaf, Athkar, and shortcuts — ready on Home.",
     "@onboardingDesc2": {
         "description": "Onboarding page 2 description"
     },
-    "onboardingTitle3": "Every verse and dhikr\nOngoing charity for Abu Hudhayfah",
+    "onboardingTitle3": "For Abu Hudhayfah\nOngoing charity",
     "@onboardingTitle3": {
         "description": "Onboarding page 3 title (line break intentional)"
     },
-    "onboardingDesc3": "Every Qur'an listen and every dhikr you repeat is ongoing charity for our brother Abu Hudhayfah Ahmad Mahmud Toni — may God have mercy on him and forgive him.",
+    "onboardingDesc3": "Every Quran listen and every dhikr becomes sadaqah jariyah for our brother. May Allah have mercy on him.",
     "@onboardingDesc3": {
         "description": "Onboarding page 3 description"
     },
@@ -2904,13 +2964,17 @@
             }
         }
     },
-    "onboardingVisualHint2": "Browse reciters with search and favorites",
+    "onboardingVisualHint2": "Prayer, Mushaf, and Athkar on Home",
     "@onboardingVisualHint2": {
-        "description": "Short caption under onboarding slide 2 device preview"
+        "description": "Optional short caption under onboarding slide 2 device preview"
     },
-    "startJourney": "Continue with your setup",
+    "onboardingSkip": "Skip",
+    "@onboardingSkip": {
+        "description": "Skip first-run onboarding carousel"
+    },
+    "startJourney": "Get Started",
     "@startJourney": {
-        "description": "Onboarding complete CTA — ownership tone after slides"
+        "description": "Final onboarding CTA after benefit slides"
     },
     "recitationDuration": "Recitation Duration",
     "@recitationDuration": {
@@ -4491,14 +4555,17 @@
     "@shareTilawa": {
         "description": "Settings row to share the app with others"
     },
-    "shareTilawaMessage": "Check out {appName}:\n{storeUrl}",
+    "shareTilawaMessage": "Check out {appName}:\niOS: {iosStoreUrl}\nAndroid: {androidStoreUrl}",
     "@shareTilawaMessage": {
-        "description": "Text shared from settings to recommend Tilawa to others",
+        "description": "Text shared from settings to recommend Tilawa to others (both store links for cross-platform sharing)",
         "placeholders": {
             "appName": {
                 "type": "String"
             },
-            "storeUrl": {
+            "iosStoreUrl": {
+                "type": "String"
+            },
+            "androidStoreUrl": {
                 "type": "String"
             }
         }

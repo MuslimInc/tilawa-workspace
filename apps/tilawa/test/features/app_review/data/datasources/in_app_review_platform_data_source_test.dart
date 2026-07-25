@@ -54,6 +54,7 @@ void main() {
 
     await dataSource.openStoreListing(
       androidPackageId: AppReviewStoreConfig.kProductionAndroidPackageId,
+      writeReview: true,
     );
 
     expect(launchedUris, hasLength(1));
@@ -61,35 +62,44 @@ void main() {
       launchedUris.single.toString(),
       'https://play.google.com/store/apps/details?id=com.tilawa.app',
     );
-    verifyNever(
-      () => review.openStoreListing(
-        appStoreId: any(named: 'appStoreId'),
-        microsoftStoreId: any(named: 'microsoftStoreId'),
-      ),
-    );
   });
 
-  test('openStoreListing on iOS delegates to platform', () async {
-    debugDefaultTargetPlatformOverride = TargetPlatform.iOS;
-    addTearDown(() => debugDefaultTargetPlatformOverride = null);
+  test(
+    'openStoreListing on iOS opens write-review URL when requested',
+    () async {
+      debugDefaultTargetPlatformOverride = TargetPlatform.iOS;
+      addTearDown(() => debugDefaultTargetPlatformOverride = null);
 
-    when(
-      () => review.openStoreListing(
-        appStoreId: any(named: 'appStoreId'),
-        microsoftStoreId: any(named: 'microsoftStoreId'),
-      ),
-    ).thenAnswer((_) async {});
+      await dataSource.openStoreListing(
+        appStoreId: AppReviewStoreConfig.kProductionAppStoreId,
+        writeReview: true,
+      );
 
-    await dataSource.openStoreListing(appStoreId: '123');
+      expect(launchedUris, hasLength(1));
+      expect(
+        launchedUris.single.toString(),
+        'https://apps.apple.com/app/id6791827426?action=write-review',
+      );
+    },
+  );
 
-    verify(
-      () => review.openStoreListing(
-        appStoreId: '123',
-        microsoftStoreId: null,
-      ),
-    ).called(1);
-    expect(launchedUris, isEmpty);
-  });
+  test(
+    'openStoreListing on iOS opens listing URL without write-review',
+    () async {
+      debugDefaultTargetPlatformOverride = TargetPlatform.iOS;
+      addTearDown(() => debugDefaultTargetPlatformOverride = null);
+
+      await dataSource.openStoreListing(
+        appStoreId: AppReviewStoreConfig.kProductionAppStoreId,
+      );
+
+      expect(launchedUris, hasLength(1));
+      expect(
+        launchedUris.single.toString(),
+        'https://apps.apple.com/app/id6791827426',
+      );
+    },
+  );
 
   test('openStoreListing throws when Android launch fails', () async {
     debugDefaultTargetPlatformOverride = TargetPlatform.android;
@@ -108,20 +118,37 @@ void main() {
     );
   });
 
-  test('openStoreListing throws when iOS platform fails', () async {
+  test('openStoreListing throws when iOS launch fails', () async {
     debugDefaultTargetPlatformOverride = TargetPlatform.iOS;
     addTearDown(() => debugDefaultTargetPlatformOverride = null);
 
-    when(
-      () => review.openStoreListing(
-        appStoreId: any(named: 'appStoreId'),
-        microsoftStoreId: any(named: 'microsoftStoreId'),
-      ),
-    ).thenThrow(Exception('store'));
+    final failing = InAppReviewPlatformDataSource(
+      review,
+      launchUrlFn: (_) async => false,
+    );
 
     expect(
-      () => dataSource.openStoreListing(appStoreId: '123'),
+      () => failing.openStoreListing(
+        appStoreId: AppReviewStoreConfig.kProductionAppStoreId,
+        writeReview: true,
+      ),
       throwsA(isA<AppReviewFailure>()),
+    );
+  });
+
+  test('openStoreListing throws on unsupported platforms', () async {
+    debugDefaultTargetPlatformOverride = TargetPlatform.linux;
+    addTearDown(() => debugDefaultTargetPlatformOverride = null);
+
+    expect(
+      dataSource.openStoreListing,
+      throwsA(
+        isA<AppReviewFailure>().having(
+          (AppReviewFailure f) => f.reason,
+          'reason',
+          AppReviewFailureReason.platformUnsupported,
+        ),
+      ),
     );
   });
 }

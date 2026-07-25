@@ -426,6 +426,52 @@ class AppLocalizationsEn extends AppLocalizations {
   String get homeQuickAthkarSubtitle => 'Morning and evening remembrance';
 
   @override
+  String get homeAthkarAll => 'All athkar';
+
+  @override
+  String get homeAthkarMorningStart => 'Begin your day with dhikr';
+
+  @override
+  String get homeAthkarMorningContinue => 'Continue morning athkar';
+
+  @override
+  String get homeAthkarMorningDone => 'Morning athkar complete';
+
+  @override
+  String get homeAthkarEveningStart => 'Time for evening athkar';
+
+  @override
+  String get homeAthkarEveningContinue => 'Continue evening athkar';
+
+  @override
+  String get homeAthkarEveningDone => 'Evening athkar complete';
+
+  @override
+  String get homeAthkarSleepStart => 'Close your day with dhikr';
+
+  @override
+  String get homeAthkarSleepContinue => 'Continue bedtime athkar';
+
+  @override
+  String get homeAthkarSleepDone => 'Rest with remembrance';
+
+  @override
+  String get homeAthkarExploreTitle => 'Continue your athkar';
+
+  @override
+  String get homeAthkarAllDoneTitle => 'Well done today';
+
+  @override
+  String get homeAthkarExploreSubtitle => 'Explore all athkar';
+
+  @override
+  String get homeAthkarAllDoneSubtitle => 'You completed today\'s athkar';
+
+  @override
+  String get homeAthkarBrowseRestSubtitle =>
+      'Browse the rest whenever you like';
+
+  @override
   String get homeQuickSettings => 'Settings';
 
   @override
@@ -2311,27 +2357,25 @@ class AppLocalizationsEn extends AppLocalizations {
       'Location permission is needed to find the Qibla direction.';
 
   @override
-  String get onboardingTitle1 =>
-      'Minutes with the Quran…\nChanges your whole day';
+  String get onboardingTitle1 => 'A few quiet minutes\nWith the Quran';
 
   @override
   String get onboardingDesc1 =>
-      'Find verses that fit what you\'re going through, and take quiet minutes to read or listen.';
+      'Read or listen — find verses that meet you where you are.';
 
   @override
-  String get onboardingTitle2 => 'Many reciter voices\nListen your way';
+  String get onboardingTitle2 => 'Your day of worship\nIn one place';
 
   @override
   String get onboardingDesc2 =>
-      'Different reciters and riwayat — choose the voice and style that feels right.';
+      'Prayer times, Mushaf, Athkar, and shortcuts — ready on Home.';
 
   @override
-  String get onboardingTitle3 =>
-      'Every verse and dhikr\nOngoing charity for Abu Hudhayfah';
+  String get onboardingTitle3 => 'For Abu Hudhayfah\nOngoing charity';
 
   @override
   String get onboardingDesc3 =>
-      'Every Qur\'an listen and every dhikr you repeat is ongoing charity for our brother Abu Hudhayfah Ahmad Mahmud Toni — may God have mercy on him and forgive him.';
+      'Every Quran listen and every dhikr becomes sadaqah jariyah for our brother. May Allah have mercy on him.';
 
   @override
   String onboardingPageSemantics(int current, int total) {
@@ -2339,11 +2383,13 @@ class AppLocalizationsEn extends AppLocalizations {
   }
 
   @override
-  String get onboardingVisualHint2 =>
-      'Browse reciters with search and favorites';
+  String get onboardingVisualHint2 => 'Prayer, Mushaf, and Athkar on Home';
 
   @override
-  String get startJourney => 'Continue with your setup';
+  String get onboardingSkip => 'Skip';
+
+  @override
+  String get startJourney => 'Get Started';
 
   @override
   String get recitationDuration => 'Recitation Duration';
@@ -3541,8 +3587,12 @@ class AppLocalizationsEn extends AppLocalizations {
   String get shareTilawa => 'Share MeMuslim';
 
   @override
-  String shareTilawaMessage(String appName, String storeUrl) {
-    return 'Check out $appName:\n$storeUrl';
+  String shareTilawaMessage(
+    String appName,
+    String iosStoreUrl,
+    String androidStoreUrl,
+  ) {
+    return 'Check out $appName:\niOS: $iosStoreUrl\nAndroid: $androidStoreUrl';
   }
 
   @override

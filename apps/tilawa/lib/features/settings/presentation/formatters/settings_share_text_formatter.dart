@@ -1,46 +1,44 @@
 import 'package:flutter/foundation.dart';
+import 'package:tilawa/features/app_review/data/config/app_review_store_config.dart';
 import 'package:tilawa/l10n/generated/app_localizations.dart';
 import 'package:tilawa_core/constants/app_strings.dart';
-import 'package:tilawa_core/entities/app_info.dart';
 
-const String _fallbackSharePackageName = 'com.tilawa.app';
-const String _defaultAppStoreId = String.fromEnvironment('TILAWA_APP_STORE_ID');
-
+/// Builds the localized share text with both App Store and Play Store links.
+///
+/// Always uses production store IDs — flavor package suffixes (`.dev` /
+/// `.staging`) and flavor display names are ignored so shared links open the
+/// published listings.
 String buildSettingsShareAppText(
   AppLocalizations l10n, {
-  AppInfo? appInfo,
-  TargetPlatform? platform,
   String? appStoreId,
+  String? androidPackageId,
 }) {
-  final trimmedAppName = appInfo?.appName.trim();
-  final resolvedAppName = trimmedAppName == null || trimmedAppName.isEmpty
-      ? AppStrings.appName
-      : trimmedAppName;
-  final resolvedPlatform = platform ?? defaultTargetPlatform;
-  final storeUrl = _resolveShareStoreUrl(
-    platform: resolvedPlatform,
-    packageName: appInfo?.packageName ?? '',
-    appStoreId: appStoreId ?? _defaultAppStoreId,
+  final urls = settingsShareStoreUrls(
+    appStoreId: appStoreId,
+    androidPackageId: androidPackageId,
   );
 
-  return l10n.shareTilawaMessage(resolvedAppName, storeUrl);
+  return l10n.shareTilawaMessage(
+    AppStrings.appName,
+    urls.iosStoreUrl,
+    urls.androidStoreUrl,
+  );
 }
 
-String _resolveShareStoreUrl({
-  required TargetPlatform platform,
-  required String packageName,
+/// Production store listing URLs used in share text.
+///
+/// Optional overrides exist for tests only; production callers pass nothing.
+@visibleForTesting
+({String iosStoreUrl, String androidStoreUrl}) settingsShareStoreUrls({
   String? appStoreId,
+  String? androidPackageId,
 }) {
-  final resolvedPackageName = packageName.trim().isNotEmpty
-      ? packageName.trim()
-      : _fallbackSharePackageName;
-  final trimmedAppStoreId = appStoreId?.trim();
-
-  if (platform == TargetPlatform.iOS &&
-      trimmedAppStoreId != null &&
-      trimmedAppStoreId.isNotEmpty) {
-    return 'https://apps.apple.com/app/id$trimmedAppStoreId';
-  }
-
-  return 'https://play.google.com/store/apps/details?id=$resolvedPackageName';
+  return (
+    iosStoreUrl: AppReviewStoreConfig.appStoreListingUriFor(
+      appStoreId,
+    ).toString(),
+    androidStoreUrl: AppReviewStoreConfig.playStoreListingUriFor(
+      androidPackageId,
+    ).toString(),
+  );
 }

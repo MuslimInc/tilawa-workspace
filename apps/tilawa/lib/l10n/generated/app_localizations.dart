@@ -824,6 +824,96 @@ abstract class AppLocalizations {
   /// **'Morning and evening remembrance'**
   String get homeQuickAthkarSubtitle;
 
+  /// Secondary Home CTA to open the full Athkar library
+  ///
+  /// In en, this message translates to:
+  /// **'All athkar'**
+  String get homeAthkarAll;
+
+  /// Home Athkar tile title — morning, not started
+  ///
+  /// In en, this message translates to:
+  /// **'Begin your day with dhikr'**
+  String get homeAthkarMorningStart;
+
+  /// Home Athkar tile title — morning, in progress
+  ///
+  /// In en, this message translates to:
+  /// **'Continue morning athkar'**
+  String get homeAthkarMorningContinue;
+
+  /// Home Athkar tile title — morning window done
+  ///
+  /// In en, this message translates to:
+  /// **'Morning athkar complete'**
+  String get homeAthkarMorningDone;
+
+  /// Home Athkar tile title — evening, not started
+  ///
+  /// In en, this message translates to:
+  /// **'Time for evening athkar'**
+  String get homeAthkarEveningStart;
+
+  /// Home Athkar tile title — evening, in progress
+  ///
+  /// In en, this message translates to:
+  /// **'Continue evening athkar'**
+  String get homeAthkarEveningContinue;
+
+  /// Home Athkar tile title — evening window done
+  ///
+  /// In en, this message translates to:
+  /// **'Evening athkar complete'**
+  String get homeAthkarEveningDone;
+
+  /// Home Athkar tile title — sleep, not started
+  ///
+  /// In en, this message translates to:
+  /// **'Close your day with dhikr'**
+  String get homeAthkarSleepStart;
+
+  /// Home Athkar tile title — sleep, in progress
+  ///
+  /// In en, this message translates to:
+  /// **'Continue bedtime athkar'**
+  String get homeAthkarSleepContinue;
+
+  /// Home Athkar tile title — sleep window done
+  ///
+  /// In en, this message translates to:
+  /// **'Rest with remembrance'**
+  String get homeAthkarSleepDone;
+
+  /// Home Athkar tile title — neutral explore state
+  ///
+  /// In en, this message translates to:
+  /// **'Continue your athkar'**
+  String get homeAthkarExploreTitle;
+
+  /// Home Athkar tile title — all daily athkar done
+  ///
+  /// In en, this message translates to:
+  /// **'Well done today'**
+  String get homeAthkarAllDoneTitle;
+
+  /// Home Athkar tile subtitle — explore / library
+  ///
+  /// In en, this message translates to:
+  /// **'Explore all athkar'**
+  String get homeAthkarExploreSubtitle;
+
+  /// Home Athkar tile subtitle — all daily done
+  ///
+  /// In en, this message translates to:
+  /// **'You completed today\'s athkar'**
+  String get homeAthkarAllDoneSubtitle;
+
+  /// Home Athkar tile subtitle after window completion
+  ///
+  /// In en, this message translates to:
+  /// **'Browse the rest whenever you like'**
+  String get homeAthkarBrowseRestSubtitle;
+
   /// Home quick action for settings
   ///
   /// In en, this message translates to:
@@ -3994,37 +4084,37 @@ abstract class AppLocalizations {
   /// Onboarding page 1 title (line break intentional)
   ///
   /// In en, this message translates to:
-  /// **'Minutes with the Quran…\nChanges your whole day'**
+  /// **'A few quiet minutes\nWith the Quran'**
   String get onboardingTitle1;
 
   /// Onboarding page 1 description
   ///
   /// In en, this message translates to:
-  /// **'Find verses that fit what you\'re going through, and take quiet minutes to read or listen.'**
+  /// **'Read or listen — find verses that meet you where you are.'**
   String get onboardingDesc1;
 
   /// Onboarding page 2 title (line break intentional)
   ///
   /// In en, this message translates to:
-  /// **'Many reciter voices\nListen your way'**
+  /// **'Your day of worship\nIn one place'**
   String get onboardingTitle2;
 
   /// Onboarding page 2 description
   ///
   /// In en, this message translates to:
-  /// **'Different reciters and riwayat — choose the voice and style that feels right.'**
+  /// **'Prayer times, Mushaf, Athkar, and shortcuts — ready on Home.'**
   String get onboardingDesc2;
 
   /// Onboarding page 3 title (line break intentional)
   ///
   /// In en, this message translates to:
-  /// **'Every verse and dhikr\nOngoing charity for Abu Hudhayfah'**
+  /// **'For Abu Hudhayfah\nOngoing charity'**
   String get onboardingTitle3;
 
   /// Onboarding page 3 description
   ///
   /// In en, this message translates to:
-  /// **'Every Qur\'an listen and every dhikr you repeat is ongoing charity for our brother Abu Hudhayfah Ahmad Mahmud Toni — may God have mercy on him and forgive him.'**
+  /// **'Every Quran listen and every dhikr becomes sadaqah jariyah for our brother. May Allah have mercy on him.'**
   String get onboardingDesc3;
 
   /// TalkBack label for onboarding carousel page
@@ -4033,16 +4123,22 @@ abstract class AppLocalizations {
   /// **'Screen {current} of {total}'**
   String onboardingPageSemantics(int current, int total);
 
-  /// Short caption under onboarding slide 2 device preview
+  /// Optional short caption under onboarding slide 2 device preview
   ///
   /// In en, this message translates to:
-  /// **'Browse reciters with search and favorites'**
+  /// **'Prayer, Mushaf, and Athkar on Home'**
   String get onboardingVisualHint2;
 
-  /// Onboarding complete CTA — ownership tone after slides
+  /// Skip first-run onboarding carousel
   ///
   /// In en, this message translates to:
-  /// **'Continue with your setup'**
+  /// **'Skip'**
+  String get onboardingSkip;
+
+  /// Final onboarding CTA after benefit slides
+  ///
+  /// In en, this message translates to:
+  /// **'Get Started'**
   String get startJourney;
 
   /// Sleep timer dialog title
@@ -6199,11 +6295,15 @@ abstract class AppLocalizations {
   /// **'Share MeMuslim'**
   String get shareTilawa;
 
-  /// Text shared from settings to recommend Tilawa to others
+  /// Text shared from settings to recommend Tilawa to others (both store links for cross-platform sharing)
   ///
   /// In en, this message translates to:
-  /// **'Check out {appName}:\n{storeUrl}'**
-  String shareTilawaMessage(String appName, String storeUrl);
+  /// **'Check out {appName}:\niOS: {iosStoreUrl}\nAndroid: {androidStoreUrl}'**
+  String shareTilawaMessage(
+    String appName,
+    String iosStoreUrl,
+    String androidStoreUrl,
+  );
 
   /// Error shown when sharing Tilawa from settings fails
   ///

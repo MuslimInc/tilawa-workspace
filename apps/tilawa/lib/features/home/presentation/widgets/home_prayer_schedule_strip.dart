@@ -15,8 +15,10 @@ class HomePrayerScheduleStrip extends StatelessWidget {
   final List<HomePrayerSlot> slots;
   final VoidCallback? onOpenPrayer;
 
-  /// Compact day strip height (name + time).
-  static const double stripHeight = 52;
+  /// Day strip height — label + time + padding (readable at default scale).
+  static double stripHeightFor(MeMuslimDesignTokens tokens) {
+    return tokens.minInteractiveDimension + tokens.spaceLarge;
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -44,7 +46,7 @@ class HomePrayerScheduleStrip extends StatelessWidget {
     );
 
     final Widget row = SizedBox(
-      height: stripHeight,
+      height: stripHeightFor(tokens),
       child: DecoratedBox(
         decoration: BoxDecoration(
           color: screenTokens.homeHeaderChipBackground,
@@ -54,12 +56,15 @@ class HomePrayerScheduleStrip extends StatelessWidget {
             width: tokens.borderWidthThin,
           ),
         ),
-        child: Row(
-          crossAxisAlignment: CrossAxisAlignment.stretch,
-          children: [
-            for (final HomePrayerSlot slot in five)
-              Expanded(child: _HomePrayerScheduleSlot(slot: slot)),
-          ],
+        child: Padding(
+          padding: EdgeInsets.all(tokens.spaceExtraSmall),
+          child: Row(
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            children: [
+              for (final HomePrayerSlot slot in five)
+                Expanded(child: _HomePrayerScheduleSlot(slot: slot)),
+            ],
+          ),
         ),
       ),
     );
@@ -88,8 +93,6 @@ class _HomePrayerScheduleSlot extends StatelessWidget {
     final ThemeData theme = Theme.of(context);
     final MeMuslimDesignTokens tokens = theme.tokens;
     final ColorScheme colorScheme = theme.colorScheme;
-    final TilawaHomeScreenTokens screenTokens =
-        theme.componentTokens.homeScreen;
     final bool isDark = theme.brightness == Brightness.dark;
     final bool isActive = slot.isNext;
     // Light: soft white chip + dark ink on sage strip.
@@ -99,13 +102,15 @@ class _HomePrayerScheduleSlot extends StatelessWidget {
             Colors.white.withValues(alpha: 0.16),
             colorScheme.surface,
           )
-        : colorScheme.surface.withValues(alpha: 0.85);
+        : colorScheme.surface.withValues(alpha: 0.92);
     final Color activeInk = colorScheme.onSurface;
     final Color inactiveInk = isDark
-        ? colorScheme.onSurface.withValues(alpha: 0.72)
-        : screenTokens.homeHeaderSecondaryText;
-    final Color labelColor = isActive ? activeInk : inactiveInk;
-    final Color timeColor = labelColor;
+        ? colorScheme.onSurface.withValues(alpha: 0.78)
+        : colorScheme.onSurface.withValues(alpha: 0.64);
+    final Color labelColor = isActive
+        ? activeInk
+        : inactiveInk.withValues(alpha: isDark ? 0.72 : 0.55);
+    final Color timeColor = isActive ? activeInk : inactiveInk;
     final String name = _localizedPrayerName(context, slot.type);
     final String timeLabel = _formatStripTime(slot.time);
     // Brand tertiary (gilding) — token, not a hard-coded second accent system.
@@ -114,6 +119,17 @@ class _HomePrayerScheduleSlot extends StatelessWidget {
       Radius.circular(
         tokens.resolveRadius(family: TilawaRadiusFamily.chip),
       ),
+    );
+    final TextStyle labelStyle = theme.textTheme.labelMedium!.copyWith(
+      color: labelColor,
+      fontWeight: isActive ? FontWeight.w700 : FontWeight.w500,
+      height: 1.2,
+    );
+    final TextStyle timeStyle = theme.textTheme.titleSmall!.copyWith(
+      color: timeColor,
+      fontWeight: isActive ? FontWeight.w800 : FontWeight.w600,
+      fontFeatures: const [FontFeature.tabularFigures()],
+      height: 1.2,
     );
 
     // Active fills the whole flex cell — no inset chip.
@@ -125,10 +141,13 @@ class _HomePrayerScheduleSlot extends StatelessWidget {
             )
           : const BoxDecoration(),
       child: Padding(
-        padding: EdgeInsets.symmetric(vertical: tokens.spaceSmall),
+        padding: EdgeInsets.symmetric(
+          horizontal: tokens.spaceExtraSmall,
+          vertical: tokens.spaceSmall,
+        ),
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
-          spacing: 3,
+          spacing: tokens.spaceExtraSmall,
           children: [
             Row(
               mainAxisAlignment: MainAxisAlignment.center,
@@ -141,20 +160,15 @@ class _HomePrayerScheduleSlot extends StatelessWidget {
                       color: activeDot,
                       shape: BoxShape.circle,
                     ),
-                    child: const SizedBox.square(dimension: 5),
+                    child: SizedBox.square(dimension: tokens.spaceSmall),
                   ),
                 Flexible(
                   child: Text(
-                    name.toUpperCase(),
+                    name,
                     maxLines: 1,
                     overflow: TextOverflow.ellipsis,
-                    style: TextStyle(
-                      color: labelColor,
-                      fontWeight: isActive ? FontWeight.w600 : FontWeight.w500,
-                      letterSpacing: 0.5,
-                      fontSize: 10,
-                      height: 15 / 10,
-                    ),
+                    textAlign: TextAlign.center,
+                    style: labelStyle,
                   ),
                 ),
               ],
@@ -163,13 +177,8 @@ class _HomePrayerScheduleSlot extends StatelessWidget {
               timeLabel,
               maxLines: 1,
               overflow: TextOverflow.ellipsis,
-              style: TextStyle(
-                color: timeColor,
-                fontWeight: isActive ? FontWeight.w700 : FontWeight.w600,
-                fontFeatures: const [FontFeature.tabularFigures()],
-                fontSize: 12,
-                height: 18 / 12,
-              ),
+              textAlign: TextAlign.center,
+              style: timeStyle,
             ),
           ],
         ),

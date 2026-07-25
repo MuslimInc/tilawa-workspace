@@ -11,7 +11,7 @@ class _FakeRepository implements AppReviewRepository {
   Future<bool> isAvailable() async => true;
 
   @override
-  Future<void> openStoreListing() async {
+  Future<void> openStoreListing({bool writeReview = false}) async {
     if (throwFailure) {
       throw const AppReviewFailure.storeListingFailed('store');
     }

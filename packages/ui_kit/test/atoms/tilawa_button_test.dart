@@ -215,6 +215,10 @@ void main() {
         ),
         findsNothing,
       );
+      // Label must remain visible — max height must not collapse to 0.
+      final Size size = tester.getSize(find.byType(TilawaButton));
+      expect(size.height, greaterThan(0));
+      expect(find.text('Link'), findsOneWidget);
     });
 
     testWidgets('custom backgroundColor applies to enabled state', (

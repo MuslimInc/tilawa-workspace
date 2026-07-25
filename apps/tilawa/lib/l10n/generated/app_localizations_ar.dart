@@ -424,6 +424,51 @@ class AppLocalizationsAr extends AppLocalizations {
   String get homeQuickAthkarSubtitle => 'أذكار الصباح والمساء';
 
   @override
+  String get homeAthkarAll => 'كل الأذكار';
+
+  @override
+  String get homeAthkarMorningStart => 'ابدأ يومك بذكر الله';
+
+  @override
+  String get homeAthkarMorningContinue => 'تابع أذكار الصباح';
+
+  @override
+  String get homeAthkarMorningDone => 'أحسنت في أذكار الصباح';
+
+  @override
+  String get homeAthkarEveningStart => 'حان وقت أذكار المساء';
+
+  @override
+  String get homeAthkarEveningContinue => 'تابع أذكار المساء';
+
+  @override
+  String get homeAthkarEveningDone => 'أتممت أذكار المساء';
+
+  @override
+  String get homeAthkarSleepStart => 'اختم يومك بذكر الله';
+
+  @override
+  String get homeAthkarSleepContinue => 'تابع أذكار النوم';
+
+  @override
+  String get homeAthkarSleepDone => 'نام على ذكر الله';
+
+  @override
+  String get homeAthkarExploreTitle => 'تابع ذكرك';
+
+  @override
+  String get homeAthkarAllDoneTitle => 'ما شاء الله';
+
+  @override
+  String get homeAthkarExploreSubtitle => 'استكشف كل الأذكار';
+
+  @override
+  String get homeAthkarAllDoneSubtitle => 'أكملت أذكارك لليوم';
+
+  @override
+  String get homeAthkarBrowseRestSubtitle => 'تصفح الأذكار متى شئت';
+
+  @override
   String get homeQuickSettings => 'الإعدادات';
 
   @override
@@ -2291,25 +2336,24 @@ class AppLocalizationsAr extends AppLocalizations {
       'نحتاج إذن الموقع لإيجاد اتجاه القبلة.';
 
   @override
-  String get onboardingTitle1 => 'دقائق من القرآن…\nيغيّر يومك كله';
+  String get onboardingTitle1 => 'دقائق هادئة\nمع القرآن';
 
   @override
-  String get onboardingDesc1 =>
-      'ابحث عن آيات تلائم ما تعيشه، وخُذ لنفسك دقائق هادئة للقراءة أو الاستماع.';
+  String get onboardingDesc1 => 'اقرأ أو استمع — آيات تلائم ما تعيشه.';
 
   @override
-  String get onboardingTitle2 => 'أصوات قرّاء متعددة\nاستمع كما تريد';
+  String get onboardingTitle2 => 'عبادتك اليومية\nفي مكان واحد';
 
   @override
   String get onboardingDesc2 =>
-      'قرّاء وروايات مختلفة — اختر الصوت والأسلوب الذي يريحك.';
+      'مواقيت الصلاة والمصحف والأذكار والاختصارات — جاهزة في الرئيسية.';
 
   @override
-  String get onboardingTitle3 => 'كل آية وذكر\nصدقة جارية لأبي حذيفة';
+  String get onboardingTitle3 => 'صدقة جارية\nلأبي حذيفة';
 
   @override
   String get onboardingDesc3 =>
-      'كل ما تسمعه من القرآن وكل ذكر تردّده صدقة جارية لأخينا أبو حذيفة أحمد محمود توني رحمه الله وغفر له.';
+      'كل استماع للقرآن وكل ذكر صدقة جارية لأخينا. رحمه الله.';
 
   @override
   String onboardingPageSemantics(int current, int total) {
@@ -2317,10 +2361,13 @@ class AppLocalizationsAr extends AppLocalizations {
   }
 
   @override
-  String get onboardingVisualHint2 => 'تصفّح القرّاء مع البحث والمفضلة';
+  String get onboardingVisualHint2 => 'الصلاة والمصحف والأذكار في الرئيسية';
 
   @override
-  String get startJourney => 'تابع إعدادك';
+  String get onboardingSkip => 'تخطّي';
+
+  @override
+  String get startJourney => 'ابدأ';
 
   @override
   String get recitationDuration => 'مدة التلاوة';
@@ -3516,8 +3563,12 @@ class AppLocalizationsAr extends AppLocalizations {
   String get shareTilawa => 'شارك أنا مسلم';
 
   @override
-  String shareTilawaMessage(String appName, String storeUrl) {
-    return 'جرّب $appName:\n$storeUrl';
+  String shareTilawaMessage(
+    String appName,
+    String iosStoreUrl,
+    String androidStoreUrl,
+  ) {
+    return 'جرّب $appName:\niOS: $iosStoreUrl\nAndroid: $androidStoreUrl';
   }
 
   @override

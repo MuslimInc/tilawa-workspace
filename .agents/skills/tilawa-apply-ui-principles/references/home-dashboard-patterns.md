@@ -243,6 +243,7 @@ replace the body with patterns from superseded redesign docs.
 |---------|------|
 | Section rhythm | `home_dashboard_section.dart` |
 | Primary pair tiles | `home_primary_action_tile.dart` |
+| Contextual Athkar tile | `home_primary_actions_section.dart` (`_AthkarPrimaryTile`) — destination-first category title + window icon; quiet secondary «كل الأذكار» at card bottom |
 | Compact tool tile | `home_quick_tools_section.dart` (`_QuickToolTile`) |
 | Grouped list row | `home_grouped_list_row.dart` |
 | More actions | `home_more_actions_group.dart` |
@@ -280,6 +281,8 @@ flutter test test/features/home/
 
 Manual: light + dark, RTL Arabic, text scale 1.4, pinned profile row, tutor pin when
 flag on.
+
+
 
 
 

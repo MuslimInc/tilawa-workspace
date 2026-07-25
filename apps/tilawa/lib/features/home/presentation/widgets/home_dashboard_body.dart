@@ -43,6 +43,7 @@ class HomeDashboardBody extends StatelessWidget {
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
         const HomePrimaryActionsSection(),
+        SizedBox(height: sectionGap),
         const HomeLearningUrgentSection(),
         const HomeLearningSoftPrompt(),
         if (isSmartKhatmaEnabled()) ...[

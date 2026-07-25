@@ -25,7 +25,7 @@ class _FakeOpenAppStoreListingUseCase implements OpenAppStoreListingUseCase {
   int callCount = 0;
 
   @override
-  Future<Either<Failure, void>> call() async {
+  Future<Either<Failure, void>> call({bool writeReview = false}) async {
     callCount += 1;
     return const Right(null);
   }

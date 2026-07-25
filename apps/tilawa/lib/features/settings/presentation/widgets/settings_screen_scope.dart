@@ -22,6 +22,8 @@ class SettingsScreenScope extends StatelessWidget {
           child ??
           SettingsScreen(
             supportTilawaEnabled: getIt<AppLaunchConfig>().supportTilawaEnabled,
+            whatsNewEnabled: getIt<AppLaunchConfig>().whatsNewEnabled,
+            privacyPolicyEnabled: getIt<AppLaunchConfig>().privacyPolicyEnabled,
             shareContent: getIt<ShareContentUseCase>(),
           ),
     );

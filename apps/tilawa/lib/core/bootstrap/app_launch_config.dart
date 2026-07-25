@@ -8,15 +8,24 @@ import 'package:flutter/foundation.dart';
 /// Firestore usage in `SubscriptionPlansService` (catalog, premium status,
 /// purchase records) stays off until explicitly enabled.
 ///
-/// [supportTilawaEnabled] defaults to **true** (Settings/Profile Support entry).
+/// [supportTilawaEnabled] defaults to **true** on non-iOS (Settings/Home Support
+/// entry). Forced **false** on iOS until store payments ship there.
 ///
 /// [reportBugEnabled] defaults to **false** (Settings "Report a bug" + Sentry
 /// feedback prompts) until explicitly enabled.
+///
+/// [whatsNewEnabled] defaults to **false** (auto prompt + Settings tile) until
+/// explicitly enabled.
+///
+/// [privacyPolicyEnabled] defaults to **false** (Settings privacy policy tile)
+/// until explicitly enabled.
 ///
 /// Example: `--dart-define=TILAWA_LAUNCH_FIREBASE_INIT=false`
 /// Example: `--dart-define=TILAWA_LAUNCH_SUBSCRIPTION_SERVICE_ENABLED=true`
 /// Example: `--dart-define=TILAWA_LAUNCH_SUPPORT_TILAWA_ENABLED=false`
 /// Example: `--dart-define=TILAWA_LAUNCH_REPORT_BUG_ENABLED=true`
+/// Example: `--dart-define=TILAWA_LAUNCH_WHATS_NEW_ENABLED=true`
+/// Example: `--dart-define=TILAWA_LAUNCH_PRIVACY_POLICY_ENABLED=true`
 /// Example: `--dart-define=TILAWA_LAUNCH_RECITATION_PRACTICE_ENABLED=true`
 /// Example: `--dart-define=TILAWA_LAUNCH_SMART_KHATMA_ENABLED=true`
 /// Example: `--dart-define=TILAWA_LAUNCH_WIRD_WIDGET_ENABLED=true`
@@ -151,6 +160,14 @@ abstract final class _LaunchEnvironment {
     'TILAWA_LAUNCH_REPORT_BUG_ENABLED',
     defaultValue: false,
   );
+  static const bool whatsNewEnabled = bool.fromEnvironment(
+    'TILAWA_LAUNCH_WHATS_NEW_ENABLED',
+    defaultValue: false,
+  );
+  static const bool privacyPolicyEnabled = bool.fromEnvironment(
+    'TILAWA_LAUNCH_PRIVACY_POLICY_ENABLED',
+    defaultValue: false,
+  );
   static const bool recitationPracticeEnabled = bool.fromEnvironment(
     'TILAWA_LAUNCH_RECITATION_PRACTICE_ENABLED',
     defaultValue: false,
@@ -234,6 +251,8 @@ class AppLaunchConfig extends Equatable {
     this.subscriptionServiceEnabled = false,
     this.supportTilawaEnabled = true,
     this.reportBugEnabled = false,
+    this.whatsNewEnabled = false,
+    this.privacyPolicyEnabled = false,
     this.recitationPracticeEnabled = false,
     this.smartKhatmaEnabled = false,
     this.wirdWidgetEnabled = false,
@@ -250,7 +269,11 @@ class AppLaunchConfig extends Equatable {
   });
 
   factory AppLaunchConfig.fromEnvironment() {
-    return const AppLaunchConfig(
+    // HyperPay / store support not ready on iOS — hide Support entry until then.
+    final bool supportTilawaEnabled =
+        _LaunchEnvironment.supportTilawaEnabled &&
+        (kIsWeb || defaultTargetPlatform != TargetPlatform.iOS);
+    return AppLaunchConfig(
       resetLaunchState: _LaunchEnvironment.resetLaunchState,
       frameWatcher: _LaunchEnvironment.frameWatcher,
       perfInstrumentation: _LaunchEnvironment.perfInstrumentation,
@@ -276,8 +299,10 @@ class AppLaunchConfig extends Equatable {
       quranAssetsPrefetch: _LaunchEnvironment.quranAssetsPrefetch,
       firebaseDataInit: _LaunchEnvironment.firebaseDataInit,
       subscriptionServiceEnabled: _LaunchEnvironment.subscriptionServiceEnabled,
-      supportTilawaEnabled: _LaunchEnvironment.supportTilawaEnabled,
+      supportTilawaEnabled: supportTilawaEnabled,
       reportBugEnabled: _LaunchEnvironment.reportBugEnabled,
+      whatsNewEnabled: _LaunchEnvironment.whatsNewEnabled,
+      privacyPolicyEnabled: _LaunchEnvironment.privacyPolicyEnabled,
       recitationPracticeEnabled: _LaunchEnvironment.recitationPracticeEnabled,
       smartKhatmaEnabled: _LaunchEnvironment.smartKhatmaEnabled,
       wirdWidgetEnabled: _LaunchEnvironment.wirdWidgetEnabled,
@@ -327,6 +352,16 @@ class AppLaunchConfig extends Equatable {
   /// Defaults to **false**. Enable with:
   /// `--dart-define=TILAWA_LAUNCH_REPORT_BUG_ENABLED=true`
   final bool reportBugEnabled;
+
+  /// Auto "What's new" prompt and Settings tile.
+  /// Defaults to **false**. Enable with:
+  /// `--dart-define=TILAWA_LAUNCH_WHATS_NEW_ENABLED=true`
+  final bool whatsNewEnabled;
+
+  /// Settings "Privacy policy" tile.
+  /// Defaults to **false**. Enable with:
+  /// `--dart-define=TILAWA_LAUNCH_PRIVACY_POLICY_ENABLED=true`
+  final bool privacyPolicyEnabled;
   final bool recitationPracticeEnabled;
   final bool smartKhatmaEnabled;
   final bool wirdWidgetEnabled;
@@ -405,6 +440,8 @@ class AppLaunchConfig extends Equatable {
     subscriptionServiceEnabled,
     supportTilawaEnabled,
     reportBugEnabled,
+    whatsNewEnabled,
+    privacyPolicyEnabled,
     recitationPracticeEnabled,
     smartKhatmaEnabled,
     wirdWidgetEnabled,
