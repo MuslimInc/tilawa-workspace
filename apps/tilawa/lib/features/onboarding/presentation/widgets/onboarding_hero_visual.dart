@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:lottie/lottie.dart';
 import 'package:tilawa_ui_kit/tilawa_ui_kit.dart';
 
+import 'onboarding_device_frame.dart';
 import 'onboarding_home_preview.dart';
 
 /// Visual treatment for onboarding hero assets.
@@ -55,7 +56,7 @@ class OnboardingHeroVisual extends StatelessWidget {
           maxWidth: tokens.contentMaxWidthForm * 0.52,
           maxHeight: tokens.iconSizeExtraLarge * 6.5,
         ),
-        child: const _OnboardingPhoneFrame(
+        child: const OnboardingDeviceFrame(
           child: OnboardingHomePreview(),
         ),
       ),
@@ -183,84 +184,6 @@ class _OnboardingMemorialPortrait extends StatelessWidget {
           ),
         ),
       ),
-    );
-  }
-}
-
-/// Slim-bezel phone chrome for the onboarding Home preview.
-class _OnboardingPhoneFrame extends StatelessWidget {
-  const _OnboardingPhoneFrame({required this.child});
-
-  final Widget child;
-
-  /// Tall phone canvas for the Home miniature (9∶20).
-  static const double _screenAspectRatio = 9 / 20;
-
-  /// Outer corner radius as a fraction of frame width (~modern phone body).
-  static const double _outerCornerWidthFactor = 0.11;
-
-  @override
-  Widget build(BuildContext context) {
-    final ThemeData theme = Theme.of(context);
-    final MeMuslimDesignTokens tokens = theme.tokens;
-    final ColorScheme scheme = theme.colorScheme;
-    final Color bezelColor = scheme.brightness == Brightness.light
-        ? scheme.onSurface.withValues(alpha: 0.92)
-        : scheme.surfaceContainerHigh;
-
-    return LayoutBuilder(
-      builder: (BuildContext context, BoxConstraints constraints) {
-        final double frameWidth = constraints.maxWidth;
-        final double bezel = tokens.spaceSmall;
-        final double outerCorner = frameWidth.isFinite
-            ? (frameWidth * _outerCornerWidthFactor).clamp(
-                tokens.radiusLarge,
-                tokens.radiusExtraLarge + tokens.spaceSmall,
-              )
-            : tokens.radiusExtraLarge;
-        // Concentric corners: inner radius = outer − bezel padding.
-        final double innerCorner = (outerCorner - bezel).clamp(
-          tokens.radiusSmall,
-          outerCorner,
-        );
-        final BorderRadius outerRadius = BorderRadius.circular(outerCorner);
-        final BorderRadius innerRadius = BorderRadius.circular(innerCorner);
-
-        return DecoratedBox(
-          decoration: BoxDecoration(
-            color: bezelColor,
-            borderRadius: outerRadius,
-            border: Border.all(
-              color: scheme.outlineVariant.withValues(
-                alpha: tokens.opacitySubtle,
-              ),
-            ),
-            boxShadow: <BoxShadow>[
-              BoxShadow(
-                color: scheme.shadow.withValues(
-                  alpha: tokens.opacitySubtle * 1.5,
-                ),
-                blurRadius: tokens.spaceMedium,
-                offset: tokens.shadowOffsetMedium,
-              ),
-            ],
-          ),
-          child: Padding(
-            padding: EdgeInsets.all(bezel),
-            child: AspectRatio(
-              aspectRatio: _screenAspectRatio,
-              child: ClipRRect(
-                borderRadius: innerRadius,
-                clipBehavior: Clip.antiAlias,
-                child: ColoredBox(
-                  color: scheme.surface,
-                  child: child,
-                ),
-              ),
-            ),
-          ),
-        );
-      },
     );
   }
 }
