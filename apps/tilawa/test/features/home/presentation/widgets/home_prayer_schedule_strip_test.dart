@@ -56,10 +56,14 @@ void main() {
     await tester.pumpWidget(
       MaterialApp(
         theme: dark,
+        locale: const Locale('en'),
         localizationsDelegates: AppLocalizations.localizationsDelegates,
         supportedLocales: AppLocalizations.supportedLocales,
         home: Scaffold(
-          body: HomePrayerScheduleStrip(slots: slots),
+          body: HomePrayerScheduleStrip(
+            slots: slots,
+            use24HourFormat: true,
+          ),
         ),
       ),
     );
@@ -84,5 +88,26 @@ void main() {
       Brightness.light,
     );
     expect(find.textContaining('16:38'), findsWidgets);
+  });
+
+  testWidgets('strip respects 12-hour clock config', (tester) async {
+    await tester.pumpWidget(
+      MaterialApp(
+        theme: AppTheme.getLightTheme(primaryColor: AppColors.defaultPrimary),
+        locale: const Locale('en'),
+        localizationsDelegates: AppLocalizations.localizationsDelegates,
+        supportedLocales: AppLocalizations.supportedLocales,
+        home: Scaffold(
+          body: HomePrayerScheduleStrip(
+            slots: slots,
+            use24HourFormat: false,
+          ),
+        ),
+      ),
+    );
+    await tester.pumpAndSettle();
+
+    expect(find.textContaining('4:38'), findsWidgets);
+    expect(find.textContaining('16:38'), findsNothing);
   });
 }

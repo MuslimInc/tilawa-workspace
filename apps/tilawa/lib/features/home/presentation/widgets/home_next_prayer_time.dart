@@ -18,6 +18,7 @@ import 'package:tilawa/features/home/presentation/widgets/home_prayer_hero_conte
 import 'package:tilawa/features/home/presentation/widgets/home_prayer_schedule_strip.dart';
 import 'package:tilawa/features/home/presentation/widgets/home_shell_tab_navigation.dart';
 import 'package:tilawa/features/prayer_times/domain/entities/prayer_time_entity.dart';
+import 'package:tilawa/features/home/presentation/formatters/home_prayer_time_format.dart';
 import 'package:tilawa/shared/widgets/profile_avatar.dart';
 import 'package:tilawa_ui_kit/tilawa_ui_kit.dart';
 
@@ -339,6 +340,7 @@ class _HomeNextPrayerTimeDelegate extends SliverPersistentHeaderDelegate {
                       onRefreshLocation: onRefreshLocation,
                       nextPrayer: dashboard?.nextPrayer,
                       todayPrayers: dashboard?.todayPrayers ?? const [],
+                      use24HourFormat: dashboard?.use24HourFormat ?? false,
                       showFullSkeleton: ui.showFullSkeleton,
                       showFailure: ui.showFailure,
                       failureIsOffline: ui.failureIsOffline,
@@ -402,6 +404,7 @@ class _HomeHeaderZoneBody extends StatelessWidget {
     required this.onRefreshLocation,
     required this.nextPrayer,
     required this.todayPrayers,
+    required this.use24HourFormat,
     required this.showFullSkeleton,
     required this.showFailure,
     required this.failureIsOffline,
@@ -416,6 +419,7 @@ class _HomeHeaderZoneBody extends StatelessWidget {
   final VoidCallback? onRefreshLocation;
   final HomeNextPrayer? nextPrayer;
   final List<HomePrayerSlot> todayPrayers;
+  final bool use24HourFormat;
   final bool showFullSkeleton;
   final bool showFailure;
   final bool failureIsOffline;
@@ -458,6 +462,7 @@ class _HomeHeaderZoneBody extends StatelessWidget {
           )
         : _HomeNextPrayerTimeFocus(
             nextPrayer: nextPrayer,
+            use24HourFormat: use24HourFormat,
             onHero: onHero,
             muted: muted,
             onOpenPrayer: onOpenPrayer,
@@ -484,6 +489,7 @@ class _HomeHeaderZoneBody extends StatelessWidget {
                 const SizedBox(height: 14),
                 HomePrayerScheduleStrip(
                   slots: todayPrayers,
+                  use24HourFormat: use24HourFormat,
                   onOpenPrayer: onOpenPrayer,
                 ),
               ],
@@ -645,12 +651,14 @@ class _HomeHeaderProfileRow extends StatelessWidget {
 class _HomeNextPrayerTimeFocus extends StatelessWidget {
   const _HomeNextPrayerTimeFocus({
     required this.nextPrayer,
+    required this.use24HourFormat,
     required this.onHero,
     required this.muted,
     required this.onOpenPrayer,
   });
 
   final HomeNextPrayer? nextPrayer;
+  final bool use24HourFormat;
   final Color onHero;
   final Color muted;
   final VoidCallback onOpenPrayer;
@@ -673,7 +681,11 @@ class _HomeNextPrayerTimeFocus extends StatelessWidget {
 
     final HomeNextPrayer prayer = nextPrayer!;
     final String prayerName = _localizedPrayerName(context, prayer.type);
-    final String timeLabel = _formatHeroClock(prayer.time);
+    final String timeLabel = HomePrayerTimeFormat.formatClock(
+      prayer.time,
+      use24HourFormat: use24HourFormat,
+      isArabic: context.isArabic,
+    );
     final double textScale = MediaQuery.textScalerOf(context).scale(1);
     final TextStyle? timeStyle =
         (textScale > 1.15
@@ -1005,12 +1017,6 @@ String _localizedPrayerName(BuildContext context, PrayerType type) {
     PrayerType.midnight => context.l10n.midnight,
     PrayerType.lastThird => context.l10n.lastThird,
   };
-}
-
-String _formatHeroClock(DateTime time) {
-  final String hour = time.hour.toString().padLeft(2, '0');
-  final String minute = time.minute.toString().padLeft(2, '0');
-  return '$hour:$minute';
 }
 
 bool _isFiveDailyPrayer(PrayerType type) {

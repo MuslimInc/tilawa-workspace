@@ -382,6 +382,7 @@ class _PreviewHero extends StatelessWidget {
               SizedBox(height: tokens.spaceMedium),
               HomePrayerScheduleStrip(
                 slots: slots,
+                use24HourFormat: false,
                 onOpenPrayer: OnboardingHomePreview._noop,
               ),
             ],

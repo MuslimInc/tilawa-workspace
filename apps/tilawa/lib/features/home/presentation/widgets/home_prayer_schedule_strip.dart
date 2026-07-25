@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:tilawa/core/extensions.dart';
 import 'package:tilawa/features/home/domain/entities/home_prayer_slot.dart';
 import 'package:tilawa/features/prayer_times/domain/entities/prayer_time_entity.dart';
+import 'package:tilawa/features/home/presentation/formatters/home_prayer_time_format.dart';
 import 'package:tilawa_ui_kit/tilawa_ui_kit.dart';
 
 /// Five-prayer strip — soft sage panel on the green hero.
@@ -9,10 +10,12 @@ class HomePrayerScheduleStrip extends StatelessWidget {
   const HomePrayerScheduleStrip({
     super.key,
     required this.slots,
+    required this.use24HourFormat,
     this.onOpenPrayer,
   });
 
   final List<HomePrayerSlot> slots;
+  final bool use24HourFormat;
   final VoidCallback? onOpenPrayer;
 
   /// Day strip height — label + time + padding (readable at default scale).
@@ -62,7 +65,12 @@ class HomePrayerScheduleStrip extends StatelessWidget {
             crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
               for (final HomePrayerSlot slot in five)
-                Expanded(child: _HomePrayerScheduleSlot(slot: slot)),
+                Expanded(
+                  child: _HomePrayerScheduleSlot(
+                    slot: slot,
+                    use24HourFormat: use24HourFormat,
+                  ),
+                ),
             ],
           ),
         ),
@@ -84,9 +92,13 @@ class HomePrayerScheduleStrip extends StatelessWidget {
 }
 
 class _HomePrayerScheduleSlot extends StatelessWidget {
-  const _HomePrayerScheduleSlot({required this.slot});
+  const _HomePrayerScheduleSlot({
+    required this.slot,
+    required this.use24HourFormat,
+  });
 
   final HomePrayerSlot slot;
+  final bool use24HourFormat;
 
   @override
   Widget build(BuildContext context) {
@@ -112,7 +124,11 @@ class _HomePrayerScheduleSlot extends StatelessWidget {
         : inactiveInk.withValues(alpha: isDark ? 0.72 : 0.55);
     final Color timeColor = isActive ? activeInk : inactiveInk;
     final String name = _localizedPrayerName(context, slot.type);
-    final String timeLabel = _formatStripTime(slot.time);
+    final String timeLabel = HomePrayerTimeFormat.formatClock(
+      slot.time,
+      use24HourFormat: use24HourFormat,
+      isArabic: context.isArabic,
+    );
     // Brand tertiary (gilding) — token, not a hard-coded second accent system.
     final Color activeDot = colorScheme.tertiary;
     final BorderRadius activeRadius = BorderRadius.all(
@@ -196,12 +212,6 @@ bool _isFiveDaily(PrayerType type) {
     PrayerType.isha => true,
     _ => false,
   };
-}
-
-String _formatStripTime(DateTime time) {
-  final int hour = time.hour;
-  final String minute = time.minute.toString().padLeft(2, '0');
-  return '$hour:$minute';
 }
 
 String _localizedPrayerName(BuildContext context, PrayerType type) {
