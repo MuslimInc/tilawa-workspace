@@ -5,6 +5,7 @@ import 'package:tilawa/features/home/domain/entities/home_dashboard.dart';
 import 'package:tilawa/features/home/presentation/widgets/home_hero_photo_theme.dart';
 import 'package:tilawa/features/prayer_times/domain/entities/prayer_time_entity.dart';
 import 'package:tilawa/features/prayer_times/presentation/formatters/prayer_location_label_formatter.dart';
+import 'package:tilawa/features/home/presentation/formatters/home_prayer_time_format.dart';
 import 'package:tilawa_ui_kit/tilawa_ui_kit.dart';
 
 /// Premium pinned hero toolbar — location chip and prayer glance.
@@ -13,6 +14,7 @@ class HomeHeroCollapsedToolbar extends StatelessWidget {
     super.key,
     required this.nextPrayer,
     required this.locationName,
+    required this.use24HourFormat,
     required this.isRefreshingLocation,
     required this.onRefreshLocation,
     required this.onOpenPrayer,
@@ -20,6 +22,7 @@ class HomeHeroCollapsedToolbar extends StatelessWidget {
 
   final HomeNextPrayer? nextPrayer;
   final String? locationName;
+  final bool use24HourFormat;
   final bool isRefreshingLocation;
   final VoidCallback? onRefreshLocation;
   final VoidCallback onOpenPrayer;
@@ -94,6 +97,7 @@ class HomeHeroCollapsedToolbar extends StatelessWidget {
                 final prayer => _HomeHeroCollapsedPrayerCenter(
                   prayer: prayer,
                   prayerStyle: prayerStyle,
+                  use24HourFormat: use24HourFormat,
                   onOpenPrayer: onOpenPrayer,
                 ),
               },
@@ -190,18 +194,24 @@ class _HomeHeroCollapsedPrayerCenter extends StatelessWidget {
   const _HomeHeroCollapsedPrayerCenter({
     required this.prayer,
     required this.prayerStyle,
+    required this.use24HourFormat,
     required this.onOpenPrayer,
   });
 
   final HomeNextPrayer prayer;
   final TextStyle prayerStyle;
+  final bool use24HourFormat;
   final VoidCallback onOpenPrayer;
 
   @override
   Widget build(BuildContext context) {
     final MeMuslimDesignTokens tokens = context.tokens;
     final String name = _localizedPrayerName(context, prayer.type);
-    final String time = _formatTime(context, prayer.time);
+    final String time = HomePrayerTimeFormat.formatClock(
+      prayer.time,
+      use24HourFormat: use24HourFormat,
+      isArabic: context.isArabic,
+    );
 
     return Semantics(
       button: true,
@@ -241,10 +251,4 @@ String _localizedPrayerName(BuildContext context, PrayerType type) {
     PrayerType.midnight => context.l10n.midnight,
     PrayerType.lastThird => context.l10n.lastThird,
   };
-}
-
-String _formatTime(BuildContext context, DateTime time) {
-  return MaterialLocalizations.of(context).formatTimeOfDay(
-    TimeOfDay.fromDateTime(time),
-  );
 }
