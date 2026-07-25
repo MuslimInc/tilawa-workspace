@@ -2240,6 +2240,16 @@ class AppLocalizationsEn extends AppLocalizations {
       'Reset the count for this dhikr? Your progress on it will be cleared.';
 
   @override
+  String get athkarLeaveTitle => 'Leave athkar?';
+
+  @override
+  String get athkarLeaveMessage =>
+      'Are you sure you want to leave this athkar session?';
+
+  @override
+  String get athkarLeaveConfirm => 'Leave';
+
+  @override
   String get qibla => 'Qibla';
 
   @override

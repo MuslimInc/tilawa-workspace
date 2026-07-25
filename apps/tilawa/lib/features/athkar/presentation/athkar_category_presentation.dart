@@ -31,6 +31,8 @@ IconData athkarCategoryIcon(String iconName) {
       return Icons.auto_awesome_rounded;
     case 'tasbeeh':
       return Icons.radio_button_checked_rounded;
+    case 'health_and_safety_rounded':
+      return Icons.health_and_safety_rounded;
     default:
       return Icons.bookmark_added_rounded;
   }
@@ -72,6 +74,12 @@ Color athkarCategoryAccent(
     ),
     'prayer_times_rounded' => colorScheme.primary,
     'tasbeeh' => product.featuredGradientEnd,
+    // Ruqyah — healing teal-green, distinct from miscellaneous support teal.
+    'health_and_safety_rounded' => Color.lerp(
+      product.exploreFeatureIcon(HomeExploreFeature.reciters),
+      product.info,
+      0.4,
+    )!,
     _ => colorScheme.primary,
   };
 }

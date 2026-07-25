@@ -2220,6 +2220,15 @@ class AppLocalizationsAr extends AppLocalizations {
       'إعادة ضبط عدّاد هذا الذكر؟ سيتم مسح تقدّمك فيه.';
 
   @override
+  String get athkarLeaveTitle => 'خروج؟';
+
+  @override
+  String get athkarLeaveMessage => 'هل تريد الخروج من الأذكار؟';
+
+  @override
+  String get athkarLeaveConfirm => 'خروج';
+
+  @override
   String get qibla => 'القبلة';
 
   @override

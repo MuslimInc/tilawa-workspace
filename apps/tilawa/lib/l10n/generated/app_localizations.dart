@@ -3931,6 +3931,24 @@ abstract class AppLocalizations {
   /// **'Reset the count for this dhikr? Your progress on it will be cleared.'**
   String get athkarResetConfirmationMessage;
 
+  /// Title for confirmation when leaving an Athkar reading session
+  ///
+  /// In en, this message translates to:
+  /// **'Leave athkar?'**
+  String get athkarLeaveTitle;
+
+  /// Body for confirmation when leaving an Athkar reading session via back
+  ///
+  /// In en, this message translates to:
+  /// **'Are you sure you want to leave this athkar session?'**
+  String get athkarLeaveMessage;
+
+  /// Confirm button to leave the Athkar reading session
+  ///
+  /// In en, this message translates to:
+  /// **'Leave'**
+  String get athkarLeaveConfirm;
+
   /// Qibla tab label
   ///
   /// In en, this message translates to:

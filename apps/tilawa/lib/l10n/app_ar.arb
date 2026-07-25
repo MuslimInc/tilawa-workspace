@@ -2215,6 +2215,18 @@
     "@athkarResetConfirmationMessage": {
         "description": "Confirmation message before resetting Athkar count for the current item"
     },
+    "athkarLeaveTitle": "خروج؟",
+    "@athkarLeaveTitle": {
+        "description": "Title for confirmation when leaving an Athkar reading session"
+    },
+    "athkarLeaveMessage": "هل تريد الخروج من الأذكار؟",
+    "@athkarLeaveMessage": {
+        "description": "Body for confirmation when leaving an Athkar reading session via back"
+    },
+    "athkarLeaveConfirm": "خروج",
+    "@athkarLeaveConfirm": {
+        "description": "Confirm button to leave the Athkar reading session"
+    },
     "qibla": "القبلة",
     "@qibla": {
         "description": "Qibla tab label"
