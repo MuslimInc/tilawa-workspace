@@ -44,10 +44,12 @@ class DefaultFirebaseOptions {
           AppEnvironment.production => ios,
         };
       case TargetPlatform.macOS:
-        throw UnsupportedError(
-          'DefaultFirebaseOptions have not been configured for macos - '
-          'you can reconfigure this by running the FlutterFire CLI again.',
-        );
+        // Reuse Apple (iOS) Firebase apps — same GoogleService-Info.plist family.
+        return switch (environment) {
+          AppEnvironment.development => iosDevelopment,
+          AppEnvironment.staging => iosStaging,
+          AppEnvironment.production => ios,
+        };
       case TargetPlatform.windows:
         throw UnsupportedError(
           'DefaultFirebaseOptions have not been configured for windows - '
