@@ -12,10 +12,41 @@ the changelog for full engineering detail.
 
 | Field | Value |
 |-------|--------|
+| Version | **2.2.1** (build **93**) |
+| Git tag | `v2.2.1+93` (pending) |
+| Date | 2026-07-25 |
+| Track | Both (Google Play + App Store) — Preparing |
+
+### What's new (en-US) — copy for Play Console
+
+```text
+• Prayer-aware Athkar suggestion on Home
+• Calmer onboarding with live Home preview
+• Better layout on tablets and large screens
+• More reliable Rate & Share store links
+• Stable Home/Reciters when re-tapping tabs
+```
+
+### ما الجديد (ar) — نص متجر Play
+
+```text
+• اقتراح أذكار مناسب لوقت الصلاة على الرئيسية
+• تجربة ترحيب أوضح مع معاينة للرئيسية
+• عرض أفضل على الأجهزة اللوحية والشاشات الكبيرة
+• روابط التقييم والمشاركة أثبت لمتاجر التطبيقات
+• الرئيسية والقرّاء أثبت عند إعادة الضغط على التبويب
+```
+
+---
+
+## Previous current release (2.2.0+92)
+
+| Field | Value |
+|-------|--------|
 | Version | **2.2.0** (build **92**) |
-| Git tag | `v2.2.0+92` (pending) |
+| Git tag | `v2.2.0+92` (pending — superseded by 2.2.1+93) |
 | Date | 2026-07-24 |
-| Track | Preparing |
+| Track | Preparing (not uploaded) |
 
 ### What's new (en-US) — copy for Play Console
 
@@ -794,6 +825,7 @@ Tilawa keeps **one shared version** in [`apps/tilawa/pubspec.yaml`](../apps/tila
      `dart run melos run tilawa:build:android:production`.
    - iOS: archive the **production** flavor for TestFlight (`com.memuslim.app`).
 5. Android checklist: [`google_play_release_checklist.md`](google_play_release_checklist.md)
+
 
 
 

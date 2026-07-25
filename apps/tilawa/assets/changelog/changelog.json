@@ -1,7 +1,29 @@
 {
   "schemaVersion": 1,
-  "lastUpdatedAt": "2026-07-20T01:00:00Z",
+  "lastUpdatedAt": "2026-07-25T00:00:00Z",
   "releases": [
+    {
+      "id": "2.2.1+93",
+      "version": "2.2.1",
+      "buildNumber": 93,
+      "highlights": {
+        "en": [
+          "Prayer-aware Athkar suggestion on Home",
+          "Calmer onboarding with live Home preview",
+          "Better layout on tablets and large screens",
+          "More reliable Rate & Share store links",
+          "Stable Home/Reciters when re-tapping tabs"
+        ],
+        "ar": [
+          "اقتراح أذكار مناسب لوقت الصلاة على الرئيسية",
+          "تجربة ترحيب أوضح مع معاينة للرئيسية",
+          "عرض أفضل على الأجهزة اللوحية والشاشات الكبيرة",
+          "روابط التقييم والمشاركة أثبت لمتاجر التطبيقات",
+          "الرئيسية والقرّاء أثبت عند إعادة الضغط على التبويب"
+        ]
+      },
+      "publishedAt": "2026-07-25T00:00:00Z"
+    },
     {
       "id": "2.1.9+89",
       "version": "2.1.9",
@@ -351,6 +373,3 @@
     }
   ]
 }
-
-
-

@@ -7,6 +7,34 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [2.2.1+93] - 2026-07-25 [Both]
+
+### Added
+
+- **Home / Athkar**: Prayer-aware contextual Athkar on the primary Home tile
+  (destination-first category title, library secondary CTA).
+- **Onboarding**: Calmer first-run flow with Lottie praying hero, live Home
+  preview in a device frame, Skip / Get Started, and tighter EN/AR copy.
+- **Large screens**: Phone-width centered shell for tablet/desktop layouts.
+- **App review**: Production App Store / Play listing URLs for Rate & Share
+  (iOS write-review deep link; cross-platform share of both store links).
+
+### Changed
+
+- **Settings / Support**: Launch-gated What's New and privacy-policy tiles;
+  Support entry hidden on iOS until store payments ship.
+- **Home**: Larger prayer schedule strip; location card padded to 48dp tap
+  target.
+
+### Fixed
+
+- **Shell / Reciters / Home**: Re-tapping the active tab no longer crashes when
+  a `ScrollController` is attached to multiple scroll views (`StateError: Too
+  many elements`, Sentry `FLUTTER-FP`).
+- **Home**: Double-tapping Home expands the nested prayer header fully (body
+  first, then outer) instead of leaving the pinned greeting strip.
+- **UI Kit**: Shrink-wrap button labels stay visible.
+
 ## [2.2.0+92] - 2026-07-24
 
 ### Fixed
