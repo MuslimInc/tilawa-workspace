@@ -8,6 +8,7 @@ import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:quran_image/core/di/dependency_injection.dart';
 import 'package:quran_image/core/perf_logger.dart';
+import 'package:quran_image/core/quran_image_jump_debug.dart';
 import 'package:quran_image/domain/domain.dart';
 import 'package:quran_image/page_mapping.dart';
 import 'package:quran_image/presentation/presentation.dart';
@@ -70,13 +71,14 @@ class QuranImageReader extends StatefulWidget {
 
 class _QuranImageReaderState extends State<QuranImageReader>
     with WidgetsBindingObserver, RouteAware {
-  late final PageController _pageController;
+  late PageController _pageController;
   late int _lastSettledPageIndex;
 
   // Stable cacheWidth resolved from device metrics — updated in didChangeDependencies.
   int _cacheWidth = 0;
   String _warmViewportKey = '';
   bool _isLandscape = false;
+  double _viewportFraction = MushafSpreadLayout.viewportFractionSingle;
   late final QuranImagePrewarmer _imagePrewarmer;
   late final ValueNotifier<PageState?> _previewPageStateNotifier;
   late final ValueNotifier<Set<int>> _hiddenWarmupPagesNotifier;
@@ -168,6 +170,7 @@ class _QuranImageReaderState extends State<QuranImageReader>
   @override
   void didChangeDependencies() {
     super.didChangeDependencies();
+    _syncPageControllerViewportFraction();
 
     // Register for route changes so we can reapply system UI when returning from dialogs
     final route = ModalRoute.of(context);
@@ -294,6 +297,32 @@ class _QuranImageReaderState extends State<QuranImageReader>
     // This ensures the status bar and navigation bar colors are restored after the
     // video reel generator or other overlay is dismissed.
     _applySystemUiConfig();
+  }
+
+  void _syncPageControllerViewportFraction() {
+    final Size size = MediaQuery.sizeOf(context);
+    final double next = MushafSpreadLayout.viewportFraction(
+      viewportWidth: size.width,
+      viewportHeight: size.height,
+    );
+    if ((_viewportFraction - next).abs() < 0.001) {
+      return;
+    }
+    final int pageIndex = _pageController.positions.length == 1
+        ? (_pageController.page?.round() ?? _lastSettledPageIndex)
+        : _lastSettledPageIndex;
+    final PageController previous = _pageController;
+    previous.removeListener(_onScrollPositionChanged);
+    _viewportFraction = next;
+    _pageController = PageController(
+      initialPage: pageIndex.clamp(0, PageState.quranPageCount - 1),
+      viewportFraction: next,
+    );
+    _pageController.addListener(_onScrollPositionChanged);
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (mounted) setState(() {});
+      previous.dispose();
+    });
   }
 
   @override
@@ -437,12 +466,29 @@ class _QuranImageReaderState extends State<QuranImageReader>
     if (_isOrientationTransitionActive) {
       return;
     }
+    // PageController.page asserts when positions.length != 1 (e.g. dual↔single
+    // remount). Skip until a single ScrollPosition is attached.
+    if (_pageController.positions.length != 1) {
+      return;
+    }
     final page = _pageController.page;
     if (page == null) return;
     // Round to nearest page index (0-based) then convert to 1-based page number.
     final nearest = page.round() + 1;
     if (nearest == _lastScrollPrewarmPage) return;
     _lastScrollPrewarmPage = nearest;
+    // #region agent log
+    quranImageJumpLog(
+      'scrollPrewarm',
+      hypothesisId: 'H4',
+      location: 'quran_image_reader.dart:_onScrollPositionChanged',
+      data: <String, Object?>{
+        'nearest': nearest,
+        'pagePos': page.toStringAsFixed(3),
+        'cacheWidth': _cacheWidth,
+      },
+    );
+    // #endregion
     _imagePrewarmer.prewarmCurrentTarget(
       pageNumber: nearest,
       cacheWidth: _cacheWidth,
@@ -559,7 +605,9 @@ class _QuranImageReaderState extends State<QuranImageReader>
       return;
     }
 
-    final currentIndex = _pageController.page?.round() ?? 0;
+    final currentIndex = _pageController.positions.length == 1
+        ? (_pageController.page?.round() ?? _lastSettledPageIndex)
+        : _lastSettledPageIndex;
     final delta = (targetIndex - currentIndex).abs();
     final isLongJump = delta > 3;
     final useJumpSnapshot = quranReaderShouldUseJumpTransitionSnapshot(delta);
@@ -570,6 +618,29 @@ class _QuranImageReaderState extends State<QuranImageReader>
       'start fromPage=${currentIndex + 1} toPage=$safePageNumber delta=$delta '
           'snapshotRequested=$snapshotRequested',
     );
+    // #region agent log
+    final Size jumpSize = MediaQuery.sizeOf(context);
+    final bool dualJump = MushafSpreadLayout.shouldUseDualPage(
+      viewportWidth: jumpSize.width,
+      viewportHeight: jumpSize.height,
+    );
+    quranImageJumpLog(
+      'navigateStart',
+      hypothesisId: 'H2',
+      location: 'quran_image_reader.dart:_navigateToPageAsync',
+      data: <String, Object?>{
+        'fromPage': currentIndex + 1,
+        'toPage': safePageNumber,
+        'delta': delta,
+        'isLongJump': isLongJump,
+        'path': isLongJump ? 'jumpToPage' : 'animateToPage',
+        'dual': dualJump,
+        'viewportFraction': _viewportFraction,
+        'cacheWidth': _cacheWidth,
+        'prepareAlsoPage': dualJump ? safePageNumber + 1 : safePageNumber,
+      },
+    );
+    // #endregion
 
     if (isLongJump) {
       PerfLogger.log(
@@ -590,12 +661,37 @@ class _QuranImageReaderState extends State<QuranImageReader>
       pageNumber: safePageNumber,
       cacheWidth: _cacheWidth,
     );
+    // Dual spread shows toPage + neighbor; warm both before commit.
+    if (dualJump && safePageNumber < PageState.quranPageCount) {
+      _imagePrewarmer.prewarmJumpTarget(
+        pageNumber: safePageNumber + 1,
+        cacheWidth: _cacheWidth,
+      );
+    }
     _JumpTransitionSnapshot? jumpSnapshot;
     if (snapshotRequested) {
       jumpSnapshot = await _preparePageSnapshotForNavigation(safePageNumber);
     } else {
       await _preparePageForNavigation(safePageNumber);
     }
+    // #region agent log
+    quranImageJumpLog(
+      'prepareDone',
+      hypothesisId: 'H2',
+      location: 'quran_image_reader.dart:_navigateToPageAsync',
+      data: <String, Object?>{
+        'toPage': safePageNumber,
+        'neighborPage': dualJump && safePageNumber < PageState.quranPageCount
+            ? safePageNumber + 1
+            : null,
+        'prepareMs': navTimer.elapsedMilliseconds,
+        'snapshotRequested': snapshotRequested,
+        'note': dualJump
+            ? 'dual prepare warms toPage + facing neighbor'
+            : 'single prepare warms toPage only',
+      },
+    );
+    // #endregion
     final snapshotExecuted = jumpSnapshot != null;
     if (snapshotRequested) {
       PerfLogger.logQuranPerf(
@@ -628,6 +724,17 @@ class _QuranImageReaderState extends State<QuranImageReader>
         );
       }
       _jumpTransitionSnapshotNotifier.value = jumpSnapshot;
+      // #region agent log
+      quranImageJumpLog(
+        'jumpToPage',
+        hypothesisId: 'H3',
+        location: 'quran_image_reader.dart:_navigateToPageAsync',
+        data: <String, Object?>{
+          'targetIndex': targetIndex,
+          'elapsedMs': navTimer.elapsedMilliseconds,
+        },
+      );
+      // #endregion
       _pageController.jumpToPage(targetIndex);
       // Wait until the PageView reports the target page as settled.
       // onPageChanged fires from the scroll position callback — before the
@@ -676,11 +783,36 @@ class _QuranImageReaderState extends State<QuranImageReader>
       return;
     }
 
+    // #region agent log
+    final int animateStartMs = navTimer.elapsedMilliseconds;
+    quranImageJumpLog(
+      'animateStart',
+      hypothesisId: 'H1',
+      location: 'quran_image_reader.dart:_navigateToPageAsync',
+      data: <String, Object?>{
+        'targetIndex': targetIndex,
+        'prepareMs': animateStartMs,
+        'durationMs': 300,
+      },
+    );
+    // #endregion
     await _pageController.animateToPage(
       targetIndex,
       duration: const Duration(milliseconds: 300),
       curve: Curves.easeInOut,
     );
+    // #region agent log
+    quranImageJumpLog(
+      'animateEnd',
+      hypothesisId: 'H1',
+      location: 'quran_image_reader.dart:_navigateToPageAsync',
+      data: <String, Object?>{
+        'targetPage': safePageNumber,
+        'animateWallMs': navTimer.elapsedMilliseconds - animateStartMs,
+        'totalNavigateMs': navTimer.elapsedMilliseconds,
+      },
+    );
+    // #endregion
     PerfLogger.log(
       widgetName: 'QuranImageReader',
       message:
@@ -694,6 +826,21 @@ class _QuranImageReaderState extends State<QuranImageReader>
     final pageIndex = pageNumber - 1;
     _lastSettledPageIndex = pageIndex;
     _clearPreviewPage();
+    // #region agent log
+    final double? pagePos = _pageController.positions.length == 1
+        ? _pageController.page
+        : null;
+    quranImageJumpLog(
+      'onPageChanged',
+      hypothesisId: 'H3',
+      location: 'quran_image_reader.dart:_onReaderPageChanged',
+      data: <String, Object?>{
+        'pageNumber': pageNumber,
+        'pagePos': pagePos?.toStringAsFixed(3),
+        'viewportFraction': _viewportFraction,
+      },
+    );
+    // #endregion
     PerfLogger.log(widgetName: 'PageView', message: 'swiped page=$pageNumber');
     context.read<NavigationBloc>().add(PageChanged(pageNumber));
     final isSettledAfterLongJump = pageIndex == _pendingLongJumpTargetIndex;
@@ -773,6 +920,25 @@ class _QuranImageReaderState extends State<QuranImageReader>
             currentState.pageState.totalPages) {
       return;
     }
+    // #region agent log
+    final Size size = MediaQuery.sizeOf(context);
+    quranImageJumpLog(
+      'nextRequested',
+      hypothesisId: 'H2',
+      location: 'quran_image_reader.dart:_navigateToNextPage',
+      data: <String, Object?>{
+        'from': currentState.pageState.currentPage,
+        'to': currentState.pageState.currentPage + 1,
+        'viewportW': size.width.round(),
+        'viewportH': size.height.round(),
+        'dual': MushafSpreadLayout.shouldUseDualPage(
+          viewportWidth: size.width,
+          viewportHeight: size.height,
+        ),
+        'viewportFraction': _viewportFraction,
+      },
+    );
+    // #endregion
     PerfLogger.log(
       widgetName: 'QuranImageReader',
       message:
@@ -836,12 +1002,27 @@ class _QuranImageReaderState extends State<QuranImageReader>
       // Mirror PreloadingScreen: decode images and warm target-page marker
       // glyphs in parallel so the jump commit frame does not pay cold
       // TextPainter.layout() in _VerseMarkersPainter on first paint.
+      // Dual: also warm facing neighbor (PageView shows two columns).
+      final Size size = MediaQuery.sizeOf(context);
+      final bool dual = MushafSpreadLayout.shouldUseDualPage(
+        viewportWidth: size.width,
+        viewportHeight: size.height,
+      );
+      final int neighborPage = pageNumber + 1;
+      final bool warmNeighbor =
+          dual && neighborPage <= PageState.quranPageCount;
       await Future.wait<Object?>([
         _imagePrewarmer.ensurePageReady(
           pageNumber: pageNumber,
           cacheWidth: _cacheWidth,
         ),
         _warmVerseMarkersForPage(pageNumber),
+        if (warmNeighbor)
+          _imagePrewarmer.ensurePageReady(
+            pageNumber: neighborPage,
+            cacheWidth: _cacheWidth,
+          ),
+        if (warmNeighbor) _warmVerseMarkersForPage(neighborPage),
       ]);
     } catch (error) {
       PerfLogger.log(

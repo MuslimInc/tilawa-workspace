@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:quran_image/core/di/dependency_injection.dart';
 import 'package:quran_image/core/perf_logger.dart';
+import 'package:quran_image/core/quran_image_jump_debug.dart';
 import 'package:quran_image/domain/domain.dart';
 import 'package:quran_image/l10n/quran_image_localizations.dart';
 import 'package:quran_image/page_mapping.dart';
@@ -57,6 +58,9 @@ class _QuranImagePageState extends State<QuranImagePage> {
   List<SurahHeaderData> _headers = const <SurahHeaderData>[];
   List<ImageProvider<Object>?> _lineProviders =
       List<ImageProvider<Object>?>.filled(SurahHeaderConstants.lineCount, null);
+  // #region agent log
+  int _lastJumpBuildLogMs = 0;
+  // #endregion
 
   @override
   void initState() {
@@ -65,6 +69,14 @@ class _QuranImagePageState extends State<QuranImagePage> {
     _headerRepository = sl<SurahHeaderRepository>();
     _imageCacheRepository = sl<QuranImageCacheRepository>();
     _decodedImageCache = sl<DecodedQuranImageCache>();
+    // #region agent log
+    quranImageJumpLog(
+      'pageInit',
+      hypothesisId: 'H3',
+      location: 'quran_image_page.dart:initState',
+      data: <String, Object?>{'pageNumber': widget.pageNumber},
+    );
+    // #endregion
     _refreshPageData();
   }
 
@@ -169,15 +181,33 @@ class _QuranImagePageState extends State<QuranImagePage> {
       return _cachedLayoutMetrics!;
     }
 
-    final lineHeight = widget.surahHeaderLayoutPolicy.lineHeightForPageWidth(
-      layoutWidth,
-    );
+    final double widthBasedLineHeight = widget.surahHeaderLayoutPolicy
+        .lineHeightForPageWidth(layoutWidth);
+    final double lineHeight;
+    final double pageWidth;
+    if (isLandscape) {
+      lineHeight = widthBasedLineHeight;
+      pageWidth = layoutWidth;
+    } else {
+      lineHeight = QuranPageLayoutMetrics.portraitLineHeight(
+        layoutWidth: layoutWidth,
+        layoutHeight: layoutHeight,
+      );
+      // Keep glyph aspect: page width tracks the (possibly capped) line height.
+      pageWidth = QuranPageLayoutMetrics.widthForLineHeight(lineHeight).clamp(
+        0.0,
+        layoutWidth,
+      );
+    }
     final metrics = QuranPageLayoutMetrics.compute(
       layoutWidth: layoutWidth,
       layoutHeight: layoutHeight,
-      viewportHeight: _pageHeight > 0 ? _pageHeight : layoutHeight,
+      // Use the page column height, not the full window — app bar / safe area
+      // already removed by the LayoutBuilder constraints.
+      viewportHeight: layoutHeight,
       lineHeight: lineHeight,
       isLandscape: isLandscape,
+      pageWidth: pageWidth,
     );
     _layoutMetricsKey = key;
     _cachedLayoutMetrics = metrics;
@@ -207,7 +237,26 @@ class _QuranImagePageState extends State<QuranImagePage> {
   @override
   Widget build(BuildContext context) {
     PerfLogger.markBuild('QuranImagePage');
-
+    // #region agent log
+    final int nowMs = DateTime.now().millisecondsSinceEpoch;
+    if (nowMs - _lastJumpBuildLogMs > 80) {
+      _lastJumpBuildLogMs = nowMs;
+      quranImageJumpLog(
+        'pageBuild',
+        hypothesisId: 'H3',
+        location: 'quran_image_page.dart:build',
+        data: <String, Object?>{
+          'pageNumber': widget.pageNumber,
+          'cacheWidth': _cacheWidth,
+          'lineProvidersReady': _lineProviders
+              .where((ImageProvider<Object>? p) => p != null)
+              .length,
+        },
+      );
+    }
+    // #endregion
+    // Horizontal gutters are applied by [QuranReaderViewport] (outer edges of
+    // the dual spread only — no middle gap between facing pages).
     return Column(
       children: [
         QuranAppBar(
@@ -230,21 +279,28 @@ class _QuranImagePageState extends State<QuranImagePage> {
                 isLandscape: layoutIsLandscape,
               );
 
-              // Isolates line stack + markers from app bar / footer repaint
-              // boundaries so compositor can cache this subtree when possible.
-              return RepaintBoundary(
-                child: QuranImageContent(
-                  pageNumber: widget.pageNumber,
-                  layoutMetrics: layoutMetrics,
-                  headers: _headers,
-                  markers: _markers,
-                  lineProviders: _lineProviders,
-                  surahHeaderLayoutPolicy: widget.surahHeaderLayoutPolicy,
-                  imageCacheRepository: _imageCacheRepository,
-                  devicePixelRatio: _devicePixelRatio,
-                  headerImageFilter: widget.headerImageFilter,
-                ),
+              Widget content = QuranImageContent(
+                pageNumber: widget.pageNumber,
+                layoutMetrics: layoutMetrics,
+                headers: _headers,
+                markers: _markers,
+                lineProviders: _lineProviders,
+                surahHeaderLayoutPolicy: widget.surahHeaderLayoutPolicy,
+                imageCacheRepository: _imageCacheRepository,
+                devicePixelRatio: _devicePixelRatio,
+                headerImageFilter: widget.headerImageFilter,
               );
+              if (layoutMetrics.pageWidth < layoutPageWidth - 0.5) {
+                content = Align(
+                  alignment: Alignment.topCenter,
+                  child: SizedBox(
+                    width: layoutMetrics.pageWidth,
+                    height: layoutPageHeight,
+                    child: content,
+                  ),
+                );
+              }
+              return RepaintBoundary(child: content);
             },
           ),
         ),
@@ -367,3 +423,4 @@ String _toEasternArabicDigits(int value) {
       .map((character) => digits[int.parse(character)])
       .join();
 }
+

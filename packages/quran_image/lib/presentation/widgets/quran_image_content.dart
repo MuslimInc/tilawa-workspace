@@ -18,6 +18,7 @@ class QuranImageContent extends StatelessWidget {
     required this.devicePixelRatio,
     this.backgroundColor,
     this.headerImageFilter,
+    this.showLineDebugTracers = false,
   });
 
   final int pageNumber;
@@ -30,6 +31,9 @@ class QuranImageContent extends StatelessWidget {
   final double devicePixelRatio;
   final Color? backgroundColor;
   final ColorFilter? headerImageFilter;
+
+  /// Draws a 1px line at each of the 15 Ayah yOffsets (debug / layout trace).
+  final bool showLineDebugTracers;
 
   @override
   Widget build(BuildContext context) {
@@ -70,6 +74,18 @@ class QuranImageContent extends StatelessWidget {
                 colorFilter: headerImageFilter,
               ),
             ),
+          // Exactly 15 top-edge tracers at Ayah yOffsets (not box borders —
+          // full boxes overlap on wide columns and look like notebook rules).
+          if (showLineDebugTracers)
+            for (var index = 0; index < SurahHeaderConstants.lineCount; index++)
+              Positioned(
+                key: ValueKey<String>('line-trace:$index'),
+                left: 0,
+                right: 0,
+                top: layoutMetrics.yOffsets[index],
+                height: 1,
+                child: const ColoredBox(color: Color(0xFF2E7D32)),
+              ),
           if (markers.isNotEmpty)
             Positioned.fill(
               key: const ValueKey<String>('markers'),
