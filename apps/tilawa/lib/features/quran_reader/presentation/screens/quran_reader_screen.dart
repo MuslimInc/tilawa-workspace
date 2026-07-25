@@ -88,7 +88,7 @@ class _ReaderScaffoldState extends State<_ReaderScaffold>
       StandardQuranLayoutStrategy();
   static const int _visiblePageWindowRadius = 2;
 
-  late final PageController _pageController;
+  late PageController _pageController;
   late final ValueNotifier<int> _currentPageNotifier;
   late final ValueNotifier<double> _cacheExtentNotifier;
   late final ValueNotifier<PreparedQuranPageWindow?> _preparedWindowNotifier;
@@ -118,6 +118,7 @@ class _ReaderScaffoldState extends State<_ReaderScaffold>
   double _settledCacheExtent = 0;
   double? _lastPreparedViewportWidth;
   Orientation? _lastPreparedOrientation;
+  double _viewportFraction = MushafSpreadLayout.viewportFractionSingle;
   Future<void>? _pendingWindowPreparation;
   int? _pendingWindowCenterPage;
   bool _didReportInitialPreparedWindow = false;
@@ -202,12 +203,24 @@ class _ReaderScaffoldState extends State<_ReaderScaffold>
     final incomingReaderTheme = QuranReaderTheme.of(context);
     final incomingTheme = Theme.of(context);
     final Orientation currentOrientation = MediaQuery.orientationOf(context);
-    final double viewportWidth = context.resolveContentWidth(
+    final Size viewportSize = context.viewportSize;
+    final double singlePageMaxWidth = TilawaContentBounds.resolveMaxWidth(
+      context,
       TilawaContentKind.reader,
     );
+    final double pageColumnWidth = MushafSpreadLayout.pageColumnWidth(
+      viewportWidth: viewportSize.width,
+      viewportHeight: viewportSize.height,
+      singlePageMaxWidth: singlePageMaxWidth,
+    );
+    final double nextViewportFraction = MushafSpreadLayout.viewportFraction(
+      viewportWidth: viewportSize.width,
+      viewportHeight: viewportSize.height,
+    );
+    _syncPageControllerViewportFraction(nextViewportFraction);
     final bool didViewportChange =
         _lastPreparedViewportWidth == null ||
-        (_lastPreparedViewportWidth! - viewportWidth).abs() > 0.5;
+        (_lastPreparedViewportWidth! - pageColumnWidth).abs() > 0.5;
     final bool didOrientationChange =
         _lastPreparedOrientation != currentOrientation;
     final bool didThemeChange = _cachedAppTheme != incomingTheme;
@@ -224,7 +237,7 @@ class _ReaderScaffoldState extends State<_ReaderScaffold>
       unawaited(QuranFontService.precacheQuranAssets(context));
     }
     if (didViewportChange || didOrientationChange || didThemeChange) {
-      _lastPreparedViewportWidth = viewportWidth;
+      _lastPreparedViewportWidth = pageColumnWidth;
       _lastPreparedOrientation = currentOrientation;
       quranQcfLocator<QuranPagePreparationService>().clear();
     }
@@ -242,6 +255,28 @@ class _ReaderScaffoldState extends State<_ReaderScaffold>
     } else {
       _restoreCacheExtentIfReady();
     }
+  }
+
+  void _syncPageControllerViewportFraction(double nextViewportFraction) {
+    if ((_viewportFraction - nextViewportFraction).abs() < 0.001) {
+      return;
+    }
+    final int pageIndex = _currentPageNotifier.value - 1;
+    final PageController previous = _pageController;
+    _viewportFraction = nextViewportFraction;
+    _pageController = PageController(
+      initialPage: pageIndex.clamp(0, QuranConstants.totalPagesCount - 1),
+      viewportFraction: nextViewportFraction,
+    );
+    if (_didInitDependencies) {
+      // Rebuild after this frame so QuranPageView picks up the new controller.
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        if (mounted) setState(() {});
+      });
+    }
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      previous.dispose();
+    });
   }
 
   @override
@@ -376,6 +411,7 @@ class _ReaderScaffoldState extends State<_ReaderScaffold>
               showOverlaysNotifier: _showOverlaysNotifier,
               child: _ReaderStack(
                 pageController: _pageController,
+                viewportFraction: _viewportFraction,
                 currentPageNotifier: _currentPageNotifier,
                 cacheExtentNotifier: _cacheExtentNotifier,
                 preparedWindowNotifier: _preparedWindowNotifier,
@@ -465,11 +501,20 @@ class _ReaderScaffoldState extends State<_ReaderScaffold>
     }
 
     final Size viewportSize = context.viewportSize;
+    final double singlePageMaxWidth = TilawaContentBounds.resolveMaxWidth(
+      context,
+      TilawaContentKind.reader,
+    );
+    final double pageColumnWidth = MushafSpreadLayout.pageColumnWidth(
+      viewportWidth: viewportSize.width,
+      viewportHeight: viewportSize.height,
+      singlePageMaxWidth: singlePageMaxWidth,
+    );
     final QuranLayoutMetrics metrics = _pagePreparationLayoutStrategy
         .calculateMetrics(
           context,
           BoxConstraints(
-            maxWidth: viewportSize.width,
+            maxWidth: pageColumnWidth,
             maxHeight: viewportSize.height,
           ),
           pageNumber,
@@ -482,7 +527,7 @@ class _ReaderScaffoldState extends State<_ReaderScaffold>
         quranQcfLocator<QuranPagePreparationService>().preparePage(
           pageNumber: pageNumber,
           metrics: metrics,
-          viewportWidth: viewportSize.width,
+          viewportWidth: pageColumnWidth,
           textColor: _cachedReaderTheme!.textColor,
           mushafService: quranQcfLocator<MushafService>(),
         );
@@ -1258,6 +1303,7 @@ class _ReaderListener extends StatelessWidget {
 class _ReaderStack extends StatelessWidget {
   const _ReaderStack({
     required this.pageController,
+    required this.viewportFraction,
     required this.currentPageNotifier,
     required this.cacheExtentNotifier,
     required this.preparedWindowNotifier,
@@ -1281,6 +1327,7 @@ class _ReaderStack extends StatelessWidget {
   });
 
   final PageController pageController;
+  final double viewportFraction;
   final ValueNotifier<int> currentPageNotifier;
   final ValueNotifier<double> cacheExtentNotifier;
   final ValueNotifier<PreparedQuranPageWindow?> preparedWindowNotifier;
@@ -1330,17 +1377,17 @@ class _ReaderStack extends StatelessWidget {
             child: Listener(
               onPointerDown: (_) => onPointerDown?.call(),
               onPointerUp: (_) => onPointerUp?.call(),
-              child: TilawaContentBounds(
-                kind: TilawaContentKind.reader,
-                alignment: Alignment.center,
-                // QuranPageView is always mounted. Each PageContent listens to
-                // preparedWindowNotifier directly and rebuilds when its page
-                // becomes ready. There is no gate here — gating on null caused
-                // QuranPageView to unmount/remount, destroying PageContent state
-                // and missing the first notifier fire after mount.
-                child: _ReaderPageStage(
-                  readerTheme: readerTheme,
-                  child: isRecitationPracticeEnabled()
+              child: Builder(
+                builder: (context) {
+                  // QuranPageView is always mounted. Each PageContent listens to
+                  // preparedWindowNotifier directly and rebuilds when its page
+                  // becomes ready. There is no gate here — gating on null caused
+                  // QuranPageView to unmount/remount, destroying PageContent state
+                  // and missing the first notifier fire after mount.
+                  final bool dualPage =
+                      viewportFraction <
+                      MushafSpreadLayout.viewportFractionSingle;
+                  final Widget pageView = isRecitationPracticeEnabled()
                       ? BlocBuilder<
                           RecitationPracticeCubit,
                           RecitationPracticeState
@@ -1359,8 +1406,22 @@ class _ReaderStack extends StatelessWidget {
                             );
                           },
                         )
-                      : _buildQuranPageView(context),
-                ),
+                      : _buildQuranPageView(context);
+                  final Widget staged = _ReaderPageStage(
+                    readerTheme: readerTheme,
+                    elevated: !dualPage,
+                    child: pageView,
+                  );
+                  if (dualPage) {
+                    // Ayah-style spread: fill the window with two facing pages.
+                    return staged;
+                  }
+                  return TilawaContentBounds(
+                    kind: TilawaContentKind.reader,
+                    alignment: Alignment.center,
+                    child: staged,
+                  );
+                },
               ),
             ),
           ),
@@ -1388,6 +1449,7 @@ class _ReaderStack extends StatelessWidget {
       mushafService: quranQcfLocator<MushafService>(),
       pageSnapshotService: quranQcfLocator<PageSnapshotService>(),
       controller: pageController,
+      viewportFraction: viewportFraction,
       currentPageListenable: currentPageNotifier,
       cacheExtentListenable: cacheExtentNotifier,
       preparedWindowListenable: preparedWindowNotifier,
@@ -1550,10 +1612,12 @@ class _ReaderPageStage extends StatelessWidget {
   const _ReaderPageStage({
     required this.readerTheme,
     required this.child,
+    this.elevated = true,
   });
 
   final QuranReaderTheme readerTheme;
   final Widget child;
+  final bool elevated;
 
   @override
   Widget build(BuildContext context) {
@@ -1563,16 +1627,18 @@ class _ReaderPageStage extends StatelessWidget {
     return DecoratedBox(
       decoration: BoxDecoration(
         color: readerTheme.pageBackground,
-        boxShadow: [
-          BoxShadow(
-            color: theme.colorScheme.shadow.withValues(
-              alpha: tokens.opacityShadow * 0.35,
-            ),
-            blurRadius: tokens.blurShadow * 1.5,
-            spreadRadius: -tokens.spaceSmall,
-            offset: tokens.shadowOffsetSmall,
-          ),
-        ],
+        boxShadow: elevated
+            ? [
+                BoxShadow(
+                  color: theme.colorScheme.shadow.withValues(
+                    alpha: tokens.opacityShadow * 0.35,
+                  ),
+                  blurRadius: tokens.blurShadow * 1.5,
+                  spreadRadius: -tokens.spaceSmall,
+                  offset: tokens.shadowOffsetSmall,
+                ),
+              ]
+            : const <BoxShadow>[],
       ),
       child: child,
     );
