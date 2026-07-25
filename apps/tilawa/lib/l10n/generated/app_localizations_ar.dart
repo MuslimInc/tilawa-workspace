@@ -2336,25 +2336,24 @@ class AppLocalizationsAr extends AppLocalizations {
       'نحتاج إذن الموقع لإيجاد اتجاه القبلة.';
 
   @override
-  String get onboardingTitle1 => 'دقائق من القرآن…\nيغيّر يومك كله';
+  String get onboardingTitle1 => 'دقائق هادئة\nمع القرآن';
 
   @override
-  String get onboardingDesc1 =>
-      'ابحث عن آيات تلائم ما تعيشه، وخُذ لنفسك دقائق هادئة للقراءة أو الاستماع.';
+  String get onboardingDesc1 => 'اقرأ أو استمع — آيات تلائم ما تعيشه.';
 
   @override
-  String get onboardingTitle2 => 'أصوات قرّاء متعددة\nاستمع كما تريد';
+  String get onboardingTitle2 => 'عبادتك اليومية\nفي مكان واحد';
 
   @override
   String get onboardingDesc2 =>
-      'قرّاء وروايات مختلفة — اختر الصوت والأسلوب الذي يريحك.';
+      'مواقيت الصلاة والمصحف والأذكار والاختصارات — جاهزة في الرئيسية.';
 
   @override
-  String get onboardingTitle3 => 'كل آية وذكر\nصدقة جارية لأبي حذيفة';
+  String get onboardingTitle3 => 'صدقة جارية\nلأبي حذيفة';
 
   @override
   String get onboardingDesc3 =>
-      'كل ما تسمعه من القرآن وكل ذكر تردّده صدقة جارية لأخينا أبو حذيفة أحمد محمود توني رحمه الله وغفر له.';
+      'كل استماع للقرآن وكل ذكر صدقة جارية لأخينا. رحمه الله.';
 
   @override
   String onboardingPageSemantics(int current, int total) {
@@ -2362,7 +2361,7 @@ class AppLocalizationsAr extends AppLocalizations {
   }
 
   @override
-  String get onboardingVisualHint2 => 'تصفّح القرّاء مع البحث والمفضلة';
+  String get onboardingVisualHint2 => 'الصلاة والمصحف والأذكار في الرئيسية';
 
   @override
   String get onboardingSkip => 'تخطّي';

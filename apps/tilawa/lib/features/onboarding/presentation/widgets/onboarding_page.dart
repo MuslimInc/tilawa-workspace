@@ -170,15 +170,15 @@ class _OnboardingPageState extends State<OnboardingPage>
                       ),
                     ),
                     if (widget.content.visualHint != null) ...<Widget>[
-                      SizedBox(height: tokens.spaceSmall),
+                      SizedBox(height: tokens.spaceExtraSmall),
                       FadeTransition(
                         opacity: _bodyOpacity,
                         child: Text(
                           widget.content.visualHint!,
                           textAlign: TextAlign.center,
-                          style: theme.textTheme.labelLarge?.copyWith(
-                            color: colorScheme.primary,
-                            fontWeight: FontWeight.w600,
+                          style: theme.textTheme.bodySmall?.copyWith(
+                            color: colorScheme.onSurfaceVariant,
+                            fontWeight: FontWeight.w500,
                             height: tokens.textHeightLoose,
                           ),
                         ),
@@ -195,11 +195,11 @@ class _OnboardingPageState extends State<OnboardingPage>
                           style:
                               theme.textTheme.bodyMedium?.copyWith(
                                 color: colorScheme.onSurfaceVariant,
-                                height: 1.4,
+                                height: 1.35,
                               ) ??
                               TextStyle(
                                 color: colorScheme.onSurfaceVariant,
-                                height: 1.4,
+                                height: 1.35,
                                 fontSize: 14,
                               ),
                           maxLines: 3,

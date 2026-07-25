@@ -4084,37 +4084,37 @@ abstract class AppLocalizations {
   /// Onboarding page 1 title (line break intentional)
   ///
   /// In en, this message translates to:
-  /// **'Minutes with the Quran…\nChanges your whole day'**
+  /// **'A few quiet minutes\nWith the Quran'**
   String get onboardingTitle1;
 
   /// Onboarding page 1 description
   ///
   /// In en, this message translates to:
-  /// **'Find verses that fit what you\'re going through, and take quiet minutes to read or listen.'**
+  /// **'Read or listen — find verses that meet you where you are.'**
   String get onboardingDesc1;
 
   /// Onboarding page 2 title (line break intentional)
   ///
   /// In en, this message translates to:
-  /// **'Many reciter voices\nListen your way'**
+  /// **'Your day of worship\nIn one place'**
   String get onboardingTitle2;
 
   /// Onboarding page 2 description
   ///
   /// In en, this message translates to:
-  /// **'Different reciters and riwayat — choose the voice and style that feels right.'**
+  /// **'Prayer times, Mushaf, Athkar, and shortcuts — ready on Home.'**
   String get onboardingDesc2;
 
   /// Onboarding page 3 title (line break intentional)
   ///
   /// In en, this message translates to:
-  /// **'Every verse and dhikr\nOngoing charity for Abu Hudhayfah'**
+  /// **'For Abu Hudhayfah\nOngoing charity'**
   String get onboardingTitle3;
 
   /// Onboarding page 3 description
   ///
   /// In en, this message translates to:
-  /// **'Every Qur\'an listen and every dhikr you repeat is ongoing charity for our brother Abu Hudhayfah Ahmad Mahmud Toni — may God have mercy on him and forgive him.'**
+  /// **'Every Quran listen and every dhikr becomes sadaqah jariyah for our brother. May Allah have mercy on him.'**
   String get onboardingDesc3;
 
   /// TalkBack label for onboarding carousel page
@@ -4123,10 +4123,10 @@ abstract class AppLocalizations {
   /// **'Screen {current} of {total}'**
   String onboardingPageSemantics(int current, int total);
 
-  /// Short caption under onboarding slide 2 device preview
+  /// Optional short caption under onboarding slide 2 device preview
   ///
   /// In en, this message translates to:
-  /// **'Browse reciters with search and favorites'**
+  /// **'Prayer, Mushaf, and Athkar on Home'**
   String get onboardingVisualHint2;
 
   /// Skip first-run onboarding carousel

@@ -2359,27 +2359,27 @@
     "@qiblaPermissionErrorMessage": {
         "description": "Friendly subtitle when location permission request fails for Qibla"
     },
-    "onboardingTitle1": "دقائق من القرآن…\nيغيّر يومك كله",
+    "onboardingTitle1": "دقائق هادئة\nمع القرآن",
     "@onboardingTitle1": {
         "description": "Onboarding page 1 title (line break intentional)"
     },
-    "onboardingDesc1": "ابحث عن آيات تلائم ما تعيشه، وخُذ لنفسك دقائق هادئة للقراءة أو الاستماع.",
+    "onboardingDesc1": "اقرأ أو استمع — آيات تلائم ما تعيشه.",
     "@onboardingDesc1": {
         "description": "Onboarding page 1 description"
     },
-    "onboardingTitle2": "أصوات قرّاء متعددة\nاستمع كما تريد",
+    "onboardingTitle2": "عبادتك اليومية\nفي مكان واحد",
     "@onboardingTitle2": {
         "description": "Onboarding page 2 title (line break intentional)"
     },
-    "onboardingDesc2": "قرّاء وروايات مختلفة — اختر الصوت والأسلوب الذي يريحك.",
+    "onboardingDesc2": "مواقيت الصلاة والمصحف والأذكار والاختصارات — جاهزة في الرئيسية.",
     "@onboardingDesc2": {
         "description": "Onboarding page 2 description"
     },
-    "onboardingTitle3": "كل آية وذكر\nصدقة جارية لأبي حذيفة",
+    "onboardingTitle3": "صدقة جارية\nلأبي حذيفة",
     "@onboardingTitle3": {
         "description": "Onboarding page 3 title (line break intentional)"
     },
-    "onboardingDesc3": "كل ما تسمعه من القرآن وكل ذكر تردّده صدقة جارية لأخينا أبو حذيفة أحمد محمود توني رحمه الله وغفر له.",
+    "onboardingDesc3": "كل استماع للقرآن وكل ذكر صدقة جارية لأخينا. رحمه الله.",
     "@onboardingDesc3": {
         "description": "Onboarding page 3 description"
     },
@@ -2395,9 +2395,9 @@
             }
         }
     },
-    "onboardingVisualHint2": "تصفّح القرّاء مع البحث والمفضلة",
+    "onboardingVisualHint2": "الصلاة والمصحف والأذكار في الرئيسية",
     "@onboardingVisualHint2": {
-        "description": "Short caption under onboarding slide 2 device preview"
+        "description": "Optional short caption under onboarding slide 2 device preview"
     },
     "onboardingSkip": "تخطّي",
     "@onboardingSkip": {

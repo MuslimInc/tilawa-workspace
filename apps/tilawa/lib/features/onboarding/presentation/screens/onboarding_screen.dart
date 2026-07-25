@@ -101,7 +101,6 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
         title: context.l10n.onboardingTitle2,
         description: context.l10n.onboardingDesc2,
         heroStyle: OnboardingHeroStyle.devicePreview,
-        visualHint: context.l10n.onboardingVisualHint2,
       ),
       OnboardingContent(
         imagePath: 'assets/images/ahmed.png',
