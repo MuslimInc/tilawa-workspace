@@ -90,7 +90,32 @@ class StartupLaunchCoordinator {
 
   static const Duration _googlePrepareTimeout = Duration(seconds: 2);
 
+  static const bool _skipAuth = bool.fromEnvironment(
+    'TILAWA_SKIP_AUTH',
+    defaultValue: false,
+  );
+  static const String _skipAuthLaunchRoute = String.fromEnvironment(
+    'TILAWA_LAUNCH_ROUTE',
+    defaultValue: '/quran-reader/1',
+  );
+
   Future<StartupLaunchPlan> resolve() async {
+    // Dev/layout preview: skip login/onboarding and open a fixed route.
+    if (_skipAuth) {
+      final String route = _skipAuthLaunchRoute.trim().isEmpty
+          ? '/quran-reader/1'
+          : _skipAuthLaunchRoute.trim();
+      logger.d(
+        '[StartupLaunchCoordinator] TILAWA_SKIP_AUTH → $route',
+      );
+      await _readiness.waitUntilReady(prepareShell: true);
+      return StartupLaunchPlan.notification(
+        route,
+        timedOut: _readiness.timedOut,
+        recitersReady: _readiness.recitersDataReady,
+      );
+    }
+
     final SplashRouteResult result = await _getSplashNextRoute();
     await _prepareShellForDestination(result.destination);
 

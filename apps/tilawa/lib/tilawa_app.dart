@@ -1,6 +1,8 @@
 import 'dart:async';
 
 import 'package:equatable/equatable.dart';
+import 'package:flutter/foundation.dart'
+    show TargetPlatform, defaultTargetPlatform, kIsWeb;
 import 'package:flutter/material.dart';
 import 'package:flutter/scheduler.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
@@ -360,6 +362,18 @@ class _ThemedMaterialApp extends StatelessWidget {
         final routedChild = DefaultRouteSystemUiOverlay(
           child: app,
         );
+        final Widget feedbackHost = TilawaFeedbackHost(
+          child: SessionVerificationBanner(child: routedChild),
+        );
+        // Phone letterbox is for compact/mobile shells only. Desktop (and other
+        // wide hosts) must keep the real window width so Mushaf can show an
+        // Ayah-style dual-page spread — TilawaPhoneWidthShell caps at 600px.
+        // Keep phone letterbox on mobile + web; desktop needs full window
+        // width for Ayah-style dual-page Mushaf (shell caps at 600px).
+        final bool usePhoneWidthShell =
+            kIsWeb ||
+            defaultTargetPlatform == TargetPlatform.android ||
+            defaultTargetPlatform == TargetPlatform.iOS;
         return MediaQuery(
           data: MediaQuery.of(context).copyWith(
             textScaler:
@@ -370,13 +384,9 @@ class _ThemedMaterialApp extends StatelessWidget {
                   maxScaleFactor: textScaleClampMax,
                 ),
           ),
-          // Single wide-window letterbox so navigator, dialogs, sheets, and
-          // snackbars share a phone-width surface (see TilawaPhoneWidthShell).
-          child: TilawaPhoneWidthShell(
-            child: TilawaFeedbackHost(
-              child: SessionVerificationBanner(child: routedChild),
-            ),
-          ),
+          child: usePhoneWidthShell
+              ? TilawaPhoneWidthShell(child: feedbackHost)
+              : feedbackHost,
         );
       },
       theme: AppTheme.getLightTheme(

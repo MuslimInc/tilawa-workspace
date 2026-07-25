@@ -62,6 +62,9 @@ class _QuranReaderHostScreenState extends State<QuranReaderHostScreen> {
       // Image Mushaf prepare fails on web (MissingPluginException / dart:io).
       _ayahListVisited = true;
       unawaited(_settingsCubit.setViewMode(QuranReaderViewMode.ayahList));
+    } else if (const bool.fromEnvironment('TILAWA_SKIP_AUTH')) {
+      // Layout preview: always open image Mushaf (not ayah-list).
+      unawaited(_settingsCubit.setViewMode(QuranReaderViewMode.mushaf));
     }
     if (widget.surahNumber == 0) {
       unawaited(_loadLastReadSurah());
