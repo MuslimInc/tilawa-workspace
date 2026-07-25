@@ -7,35 +7,39 @@ import 'package:tilawa/core/extensions.dart';
 import 'package:tilawa/features/athkar/domain/athkar_context_recommendation.dart';
 import 'package:tilawa/features/athkar/presentation/athkar_category_presentation.dart';
 import 'package:tilawa/features/home/domain/constants/quran_mushaf_constants.dart';
-import 'package:tilawa/features/home/domain/entities/home_dashboard.dart';
+import 'package:tilawa/features/home/domain/entities/home_prayer_day_boundaries.dart';
+import 'package:tilawa/features/home/domain/entities/home_prayer_slot.dart';
 import 'package:tilawa/features/home/presentation/bloc/home_dashboard_bloc.dart';
 import 'package:tilawa/features/home/presentation/bloc/home_dashboard_state.dart';
 import 'package:tilawa/features/home/presentation/cubit/home_athkar_compact_cubit.dart';
 import 'package:tilawa/features/home/presentation/cubit/home_athkar_compact_state.dart';
 import 'package:tilawa/features/home/presentation/cubit/home_quran_resume_cubit.dart';
 import 'package:tilawa/features/home/presentation/cubit/home_quran_resume_state.dart';
-import 'package:tilawa/features/home/presentation/home_athkar_context.dart';
 import 'package:tilawa/features/home/presentation/home_athkar_context_copy.dart';
 import 'package:tilawa/features/home/presentation/widgets/home_feature_pastel.dart';
 import 'package:tilawa/features/home/presentation/widgets/home_primary_action_tile.dart';
+import 'package:tilawa/features/prayer_times/domain/entities/prayer_time_entity.dart';
 import 'package:tilawa/router/app_router_config.dart';
 import 'package:tilawa_core/constants/analytics_constants.dart';
 import 'package:tilawa_core/services/analytics_service.dart';
-import 'package:tilawa_core/utils/surah_names.dart';
 import 'package:tilawa_ui_kit/tilawa_ui_kit.dart';
 
 /// Two primary daily-action tiles under the Sliver Prayer Hero.
 ///
-/// No visible section title — tiles self-label. Mushaf shows resume when
-/// available; Athkar is destination-first (category + window icon) with a
-/// quiet library secondary pinned to the card bottom.
+/// No visible section title — tiles self-label. Mushaf shows a quiet Surah
+/// Index secondary; Athkar is destination-first (category + window icon) with
+/// a quiet library secondary pinned to the card bottom.
 class HomePrimaryActionsSection extends StatelessWidget {
   const HomePrimaryActionsSection({super.key});
 
   @override
   Widget build(BuildContext context) {
     final tokens = context.tokens;
-    final product = Theme.of(context).productColors;
+    final ThemeData theme = Theme.of(context);
+    final ColorScheme colorScheme = theme.colorScheme;
+    final Color surface = colorScheme.primary;
+    final Color chrome = colorScheme.onPrimary;
+    final product = theme.productColors;
     final Color quranAccent = HomeFeaturePastel.accentFor(
       HomeExploreFeature.quran,
       product,
@@ -58,12 +62,16 @@ class HomePrimaryActionsSection extends StatelessWidget {
               child: _QuranPrimaryTile(
                 accent: quranAccent,
                 iconSize: iconSize,
+                surface: surface,
+                chrome: chrome,
               ),
             ),
             Expanded(
               child: _AthkarPrimaryTile(
                 accent: athkarAccent,
                 iconSize: iconSize,
+                surface: surface,
+                chrome: chrome,
               ),
             ),
           ],
@@ -77,31 +85,36 @@ class _QuranPrimaryTile extends StatelessWidget {
   const _QuranPrimaryTile({
     required this.accent,
     required this.iconSize,
+    required this.surface,
+    required this.chrome,
   });
 
   final Color accent;
   final double iconSize;
+  final Color surface;
+  final Color chrome;
 
   @override
   Widget build(BuildContext context) {
     final HomeQuranResumeCubit? cubit = _maybeCubit(context);
     final Widget icon = TilawaIcons.quran.svg(
       size: iconSize,
-      color: accent,
+      color: chrome,
     );
     final String label = context.l10n.homeQuickQuranReader;
-    final Color wash = HomeFeaturePastel.ceremonialWash(
-      accent: accent,
-      colorScheme: Theme.of(context).colorScheme,
-    );
+    final String secondaryLabel = context.l10n.surahIndex;
+    void openIndex() => const QuranIndexRoute().push<void>(context);
+    void openResume() => const QuranLastReadRoute().push<void>(context);
 
     if (cubit == null) {
       return HomePrimaryActionTile(
         accent: accent,
-        surfaceColor: wash,
+        surfaceColor: surface,
         icon: icon,
         label: label,
-        onTap: () => const QuranLastReadRoute().push<void>(context),
+        secondaryLabel: secondaryLabel,
+        onSecondaryTap: openIndex,
+        onTap: openResume,
       );
     }
 
@@ -114,12 +127,13 @@ class _QuranPrimaryTile extends StatelessWidget {
       builder: (context, state) {
         return HomePrimaryActionTile(
           accent: accent,
-          surfaceColor: wash,
+          surfaceColor: surface,
           icon: icon,
           label: label,
-          subtitle: _quranResumeSubtitle(context, state),
-          progress: state.progressFraction(QuranMushafConstants.pageCount),
-          onTap: () => const QuranLastReadRoute().push<void>(context),
+          progress: _quranTileProgress(state),
+          secondaryLabel: secondaryLabel,
+          onSecondaryTap: openIndex,
+          onTap: openResume,
         );
       },
     );
@@ -138,10 +152,14 @@ class _AthkarPrimaryTile extends StatefulWidget {
   const _AthkarPrimaryTile({
     required this.accent,
     required this.iconSize,
+    required this.surface,
+    required this.chrome,
   });
 
   final Color accent;
   final double iconSize;
+  final Color surface;
+  final Color chrome;
 
   @override
   State<_AthkarPrimaryTile> createState() => _AthkarPrimaryTileState();
@@ -153,15 +171,19 @@ class _AthkarPrimaryTileState extends State<_AthkarPrimaryTile> {
   @override
   Widget build(BuildContext context) {
     final HomeAthkarCompactCubit? cubit = _maybeAthkarCubit(context);
-    final HomeDashboard? dashboard = _dashboardOrNull(context);
+    final AthkarPrayerAnchors? prayerAnchors = _athkarPrayerAnchorsOrNull(
+      context,
+    );
+    final bool hasPrayerBounds = prayerAnchors != null;
 
     if (cubit == null) {
       return HomePrimaryActionTile(
         accent: widget.accent,
+        surfaceColor: widget.surface,
         icon: Icon(
           Icons.brightness_5_outlined,
           size: widget.iconSize,
-          color: widget.accent,
+          color: widget.chrome,
         ),
         label: context.l10n.homeQuickAthkar,
         secondaryLabel: context.l10n.homeAthkarAll,
@@ -176,12 +198,12 @@ class _AthkarPrimaryTileState extends State<_AthkarPrimaryTile> {
           previous.status != current.status || previous.rows != current.rows,
       builder: (context, state) {
         final AthkarContextRecommendation recommendation =
-            resolveHomeAthkarRecommendation(
-              athkarState: state,
+            resolveAthkarContextRecommendation(
               now: DateTime.now(),
-              dashboard: dashboard,
+              prayerAnchors: prayerAnchors,
+              completions: homeAthkarCompletions(state),
             );
-        _logImpressionOnce(recommendation, dashboard != null);
+        _logImpressionOnce(recommendation, hasPrayerBounds);
 
         final HomeAthkarRowState? row = state.rowForCategoryId(
           recommendation.categoryId,
@@ -192,21 +214,14 @@ class _AthkarPrimaryTileState extends State<_AthkarPrimaryTile> {
           row: row,
           context: context,
         );
-        final Color wash = athkarCategorySurfaceWash(
-          accent: widget.accent,
-          colorScheme: Theme.of(context).colorScheme,
-          tintAlpha: athkarCategorySurfaceTintAlpha(
-            row?.category.icon ?? _iconKeyForWindow(recommendation.window),
-          ),
-        );
 
         return HomePrimaryActionTile(
           accent: widget.accent,
-          surfaceColor: wash,
+          surfaceColor: widget.surface,
           icon: Icon(
             homeAthkarContextIcon(recommendation),
             size: widget.iconSize,
-            color: widget.accent,
+            color: widget.chrome,
           ),
           label: copy.title,
           subtitle: copy.subtitle,
@@ -214,13 +229,13 @@ class _AthkarPrimaryTileState extends State<_AthkarPrimaryTile> {
           onSecondaryTap: () => _openLibrary(
             context,
             recommendation: recommendation,
-            hasPrayerBounds: dashboard?.prayerBoundaries != null,
+            hasPrayerBounds: hasPrayerBounds,
           ),
           onTap: () => _openPrimary(
             context,
             recommendation: recommendation,
             row: row,
-            hasPrayerBounds: dashboard?.prayerBoundaries != null,
+            hasPrayerBounds: hasPrayerBounds,
           ),
         );
       },
@@ -331,16 +346,46 @@ class _AthkarPrimaryTileState extends State<_AthkarPrimaryTile> {
     return getIt<AnalyticsService>();
   }
 
-  HomeDashboard? _dashboardOrNull(BuildContext context) {
+  /// Prayer anchors only — avoids rebuilding on countdown ticks in
+  /// [HomeDashboard.nextPrayer.timeUntil].
+  AthkarPrayerAnchors? _athkarPrayerAnchorsOrNull(BuildContext context) {
     try {
-      final HomeDashboardState state = context.watch<HomeDashboardBloc>().state;
-      if (state is HomeDashboardLoaded) {
-        return state.dashboard;
+      final ({HomePrayerDayBoundaries? boundaries, DateTime? asr}) selected =
+          context.select<
+            HomeDashboardBloc,
+            ({HomePrayerDayBoundaries? boundaries, DateTime? asr})
+          >((HomeDashboardBloc bloc) {
+            final HomeDashboardState state = bloc.state;
+            if (state is! HomeDashboardLoaded) {
+              return (boundaries: null, asr: null);
+            }
+            final List<HomePrayerSlot> todayPrayers =
+                state.dashboard.todayPrayers;
+            DateTime? asr;
+            for (final HomePrayerSlot slot in todayPrayers) {
+              if (slot.type == PrayerType.asr) {
+                asr = slot.time;
+                break;
+              }
+            }
+            return (
+              boundaries: state.dashboard.prayerBoundaries,
+              asr: asr,
+            );
+          });
+      final HomePrayerDayBoundaries? boundaries = selected.boundaries;
+      if (boundaries == null) {
+        return null;
       }
+      return AthkarPrayerAnchors(
+        fajr: boundaries.fajr,
+        asr: selected.asr,
+        maghrib: boundaries.maghrib,
+        isha: boundaries.isha,
+      );
     } on ProviderNotFoundException {
       return null;
     }
-    return null;
   }
 
   HomeAthkarCompactCubit? _maybeAthkarCubit(BuildContext context) {
@@ -350,40 +395,13 @@ class _AthkarPrimaryTileState extends State<_AthkarPrimaryTile> {
       return null;
     }
   }
-
-  String _iconKeyForWindow(AthkarContextWindow window) {
-    return switch (window) {
-      AthkarContextWindow.morning => 'wb_sunny_rounded',
-      AthkarContextWindow.evening => 'nights_stay_rounded',
-      AthkarContextWindow.sleep => 'bedtime_rounded',
-      AthkarContextWindow.neutral => 'wb_sunny_rounded',
-    };
-  }
 }
 
-/// Factual last-read line; null when there is nothing useful to show.
-///
-/// Page 1 still counts as underway progress (goal gradient) when a resume
-/// position exists — never blank the tile for a cold “start at zero” feel.
-String? _quranResumeSubtitle(BuildContext context, HomeQuranResumeState state) {
-  if (!state.hasResumePosition) {
+/// Mushaf progress only when reading is underway past a cold start.
+double? _quranTileProgress(HomeQuranResumeState state) {
+  final int? page = state.page;
+  if (page == null || page <= 1) {
     return null;
   }
-
-  final l10n = context.l10n;
-  final int? page = state.page;
-  final int? surahNumber = state.surahNumber;
-  if (surahNumber != null) {
-    final String surahName = context.isArabic
-        ? SurahNames.getArabicSurahName(surahNumber)
-        : SurahNames.getEnglishSurahName(surahNumber);
-    if (page != null) {
-      return l10n.homeQuranResumeSurahPage(surahName, page);
-    }
-    return surahName;
-  }
-  if (page != null) {
-    return l10n.homeQuranResumePage(page);
-  }
-  return l10n.homeContinueQuranSubtitle;
+  return state.progressFraction(QuranMushafConstants.pageCount);
 }

@@ -88,6 +88,7 @@ class _PrimaryActionTileSkeleton extends StatelessWidget {
       decoration: HomeDashboardElevatedSurface.decoration(
         context,
         borderRadius: BorderRadius.circular(radius),
+        color: theme.colorScheme.primary,
       ),
       child: Padding(
         padding: EdgeInsets.all(tokens.spaceMedium),

@@ -14,11 +14,10 @@ import 'package:tilawa/features/home/presentation/widgets/home_primary_actions_s
 import 'package:tilawa/features/quran_reader/domain/usecases/get_last_read_position_use_case.dart';
 import 'package:tilawa/l10n/generated/app_localizations.dart';
 import 'package:tilawa_core/errors/failures.dart';
-import 'package:tilawa_core/utils/surah_names.dart';
 import 'package:tilawa_ui_kit/tilawa_ui_kit.dart';
 
 void main() {
-  testWidgets('Quran tile shows resume surah and page when last read exists', (
+  testWidgets('Quran tile shows mushaf progress when last read is underway', (
     tester,
   ) async {
     final cubit = HomeQuranResumeCubit(
@@ -47,18 +46,15 @@ void main() {
     final l10n = AppLocalizations.of(
       tester.element(find.byType(HomePrimaryActionsSection)),
     );
-    final String expected = l10n.homeQuranResumeSurahPage(
-      SurahNames.getEnglishSurahName(2),
-      5,
-    );
 
     expect(find.byType(HomePrimaryActionTile), findsNWidgets(2));
     expect(find.text(l10n.homeAthkarAll), findsOneWidget);
-    expect(find.text(expected), findsOneWidget);
+    expect(find.text(l10n.surahIndex), findsOneWidget);
+    expect(find.text(l10n.homeQuickQuranReader), findsOneWidget);
     expect(find.byType(LinearProgressIndicator), findsOneWidget);
   });
 
-  testWidgets('Quran tile shows page-1 resume as underway progress', (
+  testWidgets('Quran tile shows page-1 resume without mushaf progress bar', (
     tester,
   ) async {
     final cubit = HomeQuranResumeCubit(
@@ -87,13 +83,95 @@ void main() {
     final l10n = AppLocalizations.of(
       tester.element(find.byType(HomePrimaryActionsSection)),
     );
-    final String expected = l10n.homeQuranResumeSurahPage(
-      SurahNames.getEnglishSurahName(1),
-      1,
+    expect(find.text(l10n.homeQuickQuranReader), findsOneWidget);
+    expect(find.text(l10n.surahIndex), findsOneWidget);
+    expect(find.byType(LinearProgressIndicator), findsNothing);
+  });
+
+  testWidgets('Quran tile has no subtitle when no resume position', (
+    tester,
+  ) async {
+    final cubit = HomeQuranResumeCubit(
+      _EmptyGetLastRead(),
+      _FakeHistoryRepository(),
+    );
+    addTearDown(cubit.close);
+    await cubit.load();
+
+    await tester.pumpWidget(
+      MaterialApp(
+        theme: AppTheme.getLightTheme(primaryColor: AppColors.defaultPrimary),
+        locale: const Locale('en'),
+        localizationsDelegates: AppLocalizations.localizationsDelegates,
+        supportedLocales: AppLocalizations.supportedLocales,
+        home: Scaffold(
+          body: BlocProvider<HomeQuranResumeCubit>.value(
+            value: cubit,
+            child: const HomePrimaryActionsSection(),
+          ),
+        ),
+      ),
+    );
+    await tester.pumpAndSettle();
+
+    final l10n = AppLocalizations.of(
+      tester.element(find.byType(HomePrimaryActionsSection)),
     );
     expect(find.text(l10n.homeQuickQuranReader), findsOneWidget);
-    expect(find.text(expected), findsOneWidget);
-    expect(find.byType(LinearProgressIndicator), findsOneWidget);
+    expect(find.text(l10n.homeStartQuranSubtitle), findsNothing);
+    expect(find.text(l10n.surahIndex), findsOneWidget);
+    expect(find.byType(LinearProgressIndicator), findsNothing);
+  });
+
+  testWidgets('Quran secondary CTA opens surah index', (tester) async {
+    final cubit = HomeQuranResumeCubit(
+      _EmptyGetLastRead(),
+      _FakeHistoryRepository(),
+    );
+    addTearDown(cubit.close);
+    await cubit.load();
+
+    String? openedLocation;
+    final GoRouter router = GoRouter(
+      routes: [
+        GoRoute(
+          path: '/',
+          builder: (context, _) => Scaffold(
+            body: BlocProvider<HomeQuranResumeCubit>.value(
+              value: cubit,
+              child: const HomePrimaryActionsSection(),
+            ),
+          ),
+        ),
+        GoRoute(
+          path: '/quran-index',
+          builder: (context, state) {
+            openedLocation = state.uri.toString();
+            return const Scaffold(body: Text('Surah index'));
+          },
+        ),
+      ],
+    );
+
+    await tester.pumpWidget(
+      MaterialApp.router(
+        theme: AppTheme.getLightTheme(primaryColor: AppColors.defaultPrimary),
+        locale: const Locale('en'),
+        localizationsDelegates: AppLocalizations.localizationsDelegates,
+        supportedLocales: AppLocalizations.supportedLocales,
+        routerConfig: router,
+      ),
+    );
+    await tester.pumpAndSettle();
+
+    final l10n = AppLocalizations.of(
+      tester.element(find.byType(HomePrimaryActionsSection)),
+    );
+    await tester.tap(find.text(l10n.surahIndex));
+    await tester.pumpAndSettle();
+
+    expect(openedLocation, contains('/quran-index'));
+    expect(find.text('Surah index'), findsOneWidget);
   });
 
   testWidgets('Athkar tile shows contextual start copy without progress', (
@@ -340,6 +418,14 @@ class _FixedGetLastRead implements GetLastReadPositionUseCase {
   Future<Either<Failure, ({int? surahNumber, int? ayahNumber, int? page})>>
   call() async {
     return Right((surahNumber: surahNumber, ayahNumber: 1, page: page));
+  }
+}
+
+class _EmptyGetLastRead implements GetLastReadPositionUseCase {
+  @override
+  Future<Either<Failure, ({int? surahNumber, int? ayahNumber, int? page})>>
+  call() async {
+    return const Right((surahNumber: null, ayahNumber: null, page: null));
   }
 }
 

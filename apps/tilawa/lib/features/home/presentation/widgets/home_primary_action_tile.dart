@@ -42,6 +42,14 @@ class HomePrimaryActionTile extends StatelessWidget {
     final theme = Theme.of(context);
     final colorScheme = theme.colorScheme;
     final Color surface = surfaceColor ?? colorScheme.surface;
+    final bool isPrimarySurface = surface == colorScheme.primary;
+    final Color foreground = isPrimarySurface
+        ? colorScheme.onPrimary
+        : colorScheme.onSurface;
+    final Color secondaryForeground = isPrimarySurface
+        ? colorScheme.onPrimary.withValues(alpha: 0.85)
+        : HomeDashboardSection.secondaryTextColor(context);
+    final Color chrome = isPrimarySurface ? colorScheme.onPrimary : accent;
     final double radius = tokens.resolveRadius(
       family: TilawaRadiusFamily.hero,
     );
@@ -62,7 +70,7 @@ class HomePrimaryActionTile extends StatelessWidget {
           maxLines: 2,
           overflow: TextOverflow.ellipsis,
           style: theme.textTheme.titleMedium?.copyWith(
-            color: colorScheme.onSurface,
+            color: foreground,
             fontWeight: FontWeight.w700,
             height: 1.25,
           ),
@@ -73,7 +81,7 @@ class HomePrimaryActionTile extends StatelessWidget {
             maxLines: 1,
             overflow: TextOverflow.ellipsis,
             style: theme.textTheme.bodySmall?.copyWith(
-              color: HomeDashboardSection.secondaryTextColor(context),
+              color: secondaryForeground,
               height: 1.4,
             ),
           ),
@@ -85,7 +93,7 @@ class HomePrimaryActionTile extends StatelessWidget {
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         HomeDashboardIconWell(
-          accent: accent,
+          accent: chrome,
           fillAlpha: HomeFeaturePastel.iconWellFillAlpha,
           extent: tokens.iconBoxSize,
           child: icon,
@@ -97,8 +105,8 @@ class HomePrimaryActionTile extends StatelessWidget {
             child: LinearProgressIndicator(
               value: clampedProgress,
               minHeight: tokens.progressHeight,
-              backgroundColor: accent.withValues(alpha: 0.12),
-              color: accent,
+              backgroundColor: chrome.withValues(alpha: 0.12),
+              color: chrome,
             ),
           ),
       ],
@@ -109,7 +117,7 @@ class HomePrimaryActionTile extends StatelessWidget {
       borderRadius: borderRadius,
       onTap: onTap,
       semanticLabel: label,
-      stateLayerColor: accent,
+      stateLayerColor: chrome,
       color: surface,
       tier: HomeDashboardElevationTier.primary,
       child: Padding(
@@ -126,14 +134,14 @@ class HomePrimaryActionTile extends StatelessWidget {
                     size: TilawaButtonSize.small,
                     isFullWidth: true,
                     backgroundColor: Color.alphaBlend(
-                      accent.withValues(
+                      chrome.withValues(
                         alpha: HomeFeaturePastel.iconWellFillAlpha,
                       ),
                       surface,
                     ),
-                    foregroundColor: accent,
+                    foregroundColor: chrome,
                     textStyle: theme.textTheme.labelMedium?.copyWith(
-                      color: accent,
+                      color: chrome,
                       fontWeight: FontWeight.w700,
                     ),
                     onPressed: onSecondaryTap,
