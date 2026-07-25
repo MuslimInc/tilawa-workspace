@@ -1,10 +1,14 @@
 import 'package:flutter/material.dart';
+import 'package:lottie/lottie.dart';
 import 'package:tilawa_ui_kit/tilawa_ui_kit.dart';
 
 /// Visual treatment for onboarding hero assets.
 enum OnboardingHeroStyle {
   /// Flat illustration — no chrome.
   illustration,
+
+  /// Lottie animation — play once, static under reduced motion.
+  lottie,
 
   /// App screenshot in a device-style frame.
   devicePreview,
@@ -37,6 +41,13 @@ class OnboardingHeroVisual extends StatelessWidget {
         ),
         child: Image.asset(assetPath, fit: BoxFit.contain),
       ),
+      OnboardingHeroStyle.lottie => ConstrainedBox(
+        constraints: BoxConstraints(
+          maxWidth: tokens.contentMaxWidthForm * 0.78,
+          maxHeight: tokens.iconSizeExtraLarge * 4.5,
+        ),
+        child: _OnboardingLottieHero(assetPath: assetPath),
+      ),
       OnboardingHeroStyle.devicePreview => ConstrainedBox(
         constraints: BoxConstraints(
           maxWidth: tokens.contentMaxWidthForm * 0.52,
@@ -51,6 +62,32 @@ class OnboardingHeroVisual extends StatelessWidget {
         maxWidth: tokens.contentMaxWidthForm * 0.36,
       ),
     };
+  }
+}
+
+/// Responsive Lottie hero — plays once; first frame under reduced motion.
+class _OnboardingLottieHero extends StatelessWidget {
+  const _OnboardingLottieHero({required this.assetPath});
+
+  final String assetPath;
+
+  /// Intrinsic size of `muslim_man_praying_mosque.json` (736×876).
+  static const double _aspectRatio = 736 / 876;
+
+  @override
+  Widget build(BuildContext context) {
+    final bool reduceMotion = MediaQuery.disableAnimationsOf(context);
+
+    return AspectRatio(
+      aspectRatio: _aspectRatio,
+      child: Lottie.asset(
+        assetPath,
+        fit: BoxFit.contain,
+        alignment: Alignment.center,
+        repeat: false,
+        animate: !reduceMotion,
+      ),
+    );
   }
 }
 
