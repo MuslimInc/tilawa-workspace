@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:tilawa/features/shell/application/shell_tab_primary_scroll.dart';
 import 'package:tilawa_ui_kit/tilawa_ui_kit.dart';
 
 import '../../features/home/presentation/widgets/home_screen_scope.dart';
@@ -73,7 +74,12 @@ class _MainTabViewportState extends State<MainTabViewport> {
               offstage: !isActive,
               child: TickerMode(
                 enabled: isActive,
-                child: _buildScreenForIndex(index),
+                // Offstage NestedScrollViews must not all attach to the shared
+                // PrimaryScrollController — see [ShellTabPrimaryScroll].
+                child: ShellTabPrimaryScroll.wrap(
+                  isActive: isActive,
+                  child: _buildScreenForIndex(index),
+                ),
               ),
             );
           }),
