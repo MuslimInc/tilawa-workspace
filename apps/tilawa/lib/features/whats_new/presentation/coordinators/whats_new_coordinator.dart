@@ -2,7 +2,6 @@ import 'package:injectable/injectable.dart';
 import 'package:tilawa/core/bootstrap/app_launch_config.dart';
 import 'package:tilawa/core/di/injection.dart';
 import 'package:tilawa/core/logging/app_logger.dart';
-import 'package:tilawa/features/tour_guide/domain/services/tour_flow_guard.dart';
 import 'package:tilawa/router/app_router.dart';
 import 'package:tilawa/router/shell_route_location.dart';
 import 'package:tilawa_core/constants/analytics_constants.dart';
@@ -25,7 +24,6 @@ class WhatsNewCoordinator {
     this._markSeen,
     this._presenter,
     this._analytics,
-    this._flowGuard,
   );
 
   final GetWhatsNewEligibilityUseCase _getEligibility;
@@ -33,7 +31,6 @@ class WhatsNewCoordinator {
   final MarkWhatsNewSeenUseCase _markSeen;
   final WhatsNewPresenter _presenter;
   final AnalyticsService _analytics;
-  final TourFlowGuard _flowGuard;
 
   bool _autoPromptShownThisSession = false;
   Future<void>? _inFlightShow;
@@ -94,7 +91,7 @@ class WhatsNewCoordinator {
     }
     final WhatsNewEligibility eligibility = await _getEligibility(
       currentRoutePath: routePath,
-      sacredFlowBlocked: _flowGuard.isBlocked,
+      sacredFlowBlocked: false,
       sessionAlreadyShown: _autoPromptShownThisSession,
     );
 

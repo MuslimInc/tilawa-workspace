@@ -15,13 +15,10 @@ import 'package:tilawa_ui_kit/tilawa_ui_kit.dart';
 import '../../../../shared/widgets/quran_player_chrome.dart';
 import '../../../audio_player/presentation/bloc/audio_player_bloc.dart';
 import '../../../surah/domain/entities/surah_entity.dart';
-import '../../../tour_guide/presentation/widgets/tour_target.dart';
 import '../bloc/reciter_details_bloc.dart';
 import '../bloc/reciter_download_bloc.dart';
 import '../layout/reciter_details_fab_layout.dart';
 import '../models/reciter_surah_list_item.dart';
-import '../tour/reciters_tour_launcher.dart';
-import '../tour/reciters_tour_targets.dart';
 import '../widgets/download_all_button.dart';
 import '../widgets/moshaf_selector.dart';
 import '../widgets/reciter_details_app_bar.dart';
@@ -44,7 +41,6 @@ class _ReciterDetailsScreenState extends State<ReciterDetailsScreen> {
   final GlobalKey _playingSurahKey = GlobalKey();
   bool _showScrollToTop = false;
   bool _hasScrolledToPlaying = false;
-  bool _playbackTourAttempted = false;
   ReciterViewMode _lastViewMode = ReciterViewMode.list;
 
   @override
@@ -173,32 +169,6 @@ class _ReciterDetailsScreenState extends State<ReciterDetailsScreen> {
     );
   }
 
-  void _schedulePlaybackTour() {
-    if (_playbackTourAttempted) {
-      return;
-    }
-    _playbackTourAttempted = true;
-    final Duration tourDelay = context.tokens.durationSlow;
-    WidgetsBinding.instance.addPostFrameCallback((_) {
-      Future<void>.delayed(tourDelay, () {
-        if (!mounted) {
-          return;
-        }
-        final bool showPlayer = context
-            .read<AudioPlayerBloc>()
-            .state
-            .shouldShowBottomPlayer;
-        if (!showPlayer) {
-          _playbackTourAttempted = false;
-          return;
-        }
-        unawaited(
-          getIt<RecitersTourLauncher>().maybeShowPlaybackTour(context),
-        );
-      });
-    });
-  }
-
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
@@ -294,7 +264,6 @@ class _ReciterDetailsScreenState extends State<ReciterDetailsScreen> {
                       command.initialIndex,
                     ),
                   );
-                  _schedulePlaybackTour();
                 }
 
                 if (state.status == ReciterDetailsStatus.loaded) {
@@ -567,18 +536,11 @@ class _ReciterDetailsContent extends StatelessWidget {
                       (currentAudio != null &&
                           currentAudio.url == item.audioUrl);
                   final key = isPlaying ? playingSurahKey : null;
-                  final Widget gridItem = SurahGridItem(
+                  return SurahGridItem(
                     key: key,
                     item: item,
                     onTap: () => onPlaySurah(surah),
                   );
-                  if (isPlaying) {
-                    return TourTarget(
-                      targetId: RecitersTourTargets.playingSurah,
-                      child: gridItem,
-                    );
-                  }
-                  return gridItem;
                 }, childCount: filteredSurahs.length),
               ),
             ),
@@ -606,7 +568,7 @@ class _ReciterDetailsContent extends StatelessWidget {
                     currentAudio?.id == item.audioId ||
                     (currentAudio != null && currentAudio.url == item.audioUrl);
                 final key = isPlaying ? playingSurahKey : null;
-                final Widget tile = Padding(
+                return Padding(
                   padding: EdgeInsets.symmetric(
                     vertical: tokens.spaceTiny,
                   ),
@@ -616,13 +578,6 @@ class _ReciterDetailsContent extends StatelessWidget {
                     onTap: () => onPlaySurah(surah),
                   ),
                 );
-                if (isPlaying) {
-                  return TourTarget(
-                    targetId: RecitersTourTargets.playingSurah,
-                    child: tile,
-                  );
-                }
-                return tile;
               }, childCount: filteredSurahs.length),
             ),
           ),

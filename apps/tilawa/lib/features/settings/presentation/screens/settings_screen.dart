@@ -35,7 +35,6 @@ import '../../../share/domain/entities/share_content.dart';
 import '../../../share/domain/usecases/share_content_use_case.dart';
 import '../../../theme/presentation/cubit/theme_cubit.dart';
 import '../../../theme/presentation/theme_state_material.dart';
-import '../../../tour_guide/presentation/widgets/tour_guide_debug_reset_tile.dart';
 import '../../../ui_kit_debug/tilawa_card_nested_tap_demo_tile.dart';
 import '../../../whats_new/whats_new.dart';
 import '../cubit/settings_cubit.dart';
@@ -338,7 +337,6 @@ class _SettingsScreenState extends State<SettingsScreen> {
                         const AdhanDebugTestTile(),
                         const NotificationDebugLabTile(),
                         const TilawaCardNestedTapDemoTile(),
-                        const TourGuideDebugResetTile(),
                         const ForcedUpdateDebugTile(),
                         const ClearAppPreferencesDebugTile(isLast: true),
                       ],

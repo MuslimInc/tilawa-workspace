@@ -31,9 +31,7 @@ import 'package:tilawa/features/auth/presentation/bloc/auth_bloc.dart';
 import 'package:tilawa/features/home/presentation/screens/home_screen.dart';
 import 'package:tilawa/features/prayer_times/domain/repositories/prayer_alerts_permission_onboarding_repository.dart';
 import 'package:tilawa/features/reciters/presentation/screens/reciters_screen.dart';
-import 'package:tilawa/features/reciters/presentation/tour/reciters_tour_launcher.dart';
 import 'package:tilawa/features/settings/presentation/cubit/settings_cubit.dart';
-import 'package:tilawa/features/tour_guide/domain/services/tour_target_registry.dart';
 import 'package:tilawa/l10n/generated/app_localizations.dart';
 import 'package:tilawa/screens/cubit/main_screen_cubit.dart';
 import 'package:tilawa/screens/main_screen.dart';
@@ -79,14 +77,6 @@ class _MockSettingsCubit extends MockCubit<SettingsState>
     implements SettingsCubit {}
 
 class _MockAuthBloc extends MockCubit<AuthState> implements AuthBloc {}
-
-class _NoopRecitersTourLauncher implements RecitersTourLauncher {
-  @override
-  Future<bool> maybeShowRecitersIntro(BuildContext context) async => false;
-
-  @override
-  Future<bool> maybeShowPlaybackTour(BuildContext context) async => false;
-}
 
 /// Skips [PrayerAlertsPermissionNavigation] during [MainScreen] startup tests.
 class _CompletedPrayerAlertsPermissionOnboardingRepository
@@ -174,8 +164,6 @@ void main() {
       mockAppReviewTriggerManager,
     );
 
-    getIt.registerSingleton<TourTargetRegistry>(TourTargetRegistry());
-    getIt.registerSingleton<RecitersTourLauncher>(_NoopRecitersTourLauncher());
     getIt.registerSingleton<PrayerAlertsPermissionOnboardingRepository>(
       _CompletedPrayerAlertsPermissionOnboardingRepository(),
     );

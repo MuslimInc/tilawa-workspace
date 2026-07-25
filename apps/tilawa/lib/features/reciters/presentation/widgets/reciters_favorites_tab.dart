@@ -165,7 +165,7 @@ class _FavoritesEmptySliver extends StatelessWidget {
       child: TilawaIllustratedState(
         icon: Icons.favorite_border_rounded,
         title: title,
-        subtitle: context.l10n.tourRecitersFavoritesDescription,
+        subtitle: context.l10n.favoritesEmptySubtitle,
         semanticLabel: title,
         maxWidth: tokens.contentMaxWidthForm * 0.6,
         // Mirrors the downloads tab CTA so both empty tabs lead the user

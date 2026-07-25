@@ -12,8 +12,6 @@ import 'package:tilawa_ui_kit/tilawa_ui_kit.dart';
 
 import '../features/audio_player/presentation/bloc/audio_player_bloc.dart';
 import '../features/auth/presentation/bloc/auth_bloc.dart';
-import '../features/reciters/presentation/tour/reciters_tour_targets.dart';
-import '../features/tour_guide/presentation/widgets/tour_target.dart';
 import '../router/app_router.dart';
 import '../router/app_router_config.dart';
 import '../shared/widgets/profile_avatar.dart';
@@ -436,10 +434,7 @@ class _AppShellChrome extends StatelessWidget {
           final Widget? shellFooterPlayer = showMiniPlayer
               ? SizedBox(
                   height: playerHeight + footerBottomSpacing,
-                  child: TourTarget(
-                    targetId: RecitersTourTargets.miniPlayer,
-                    child: player,
-                  ),
+                  child: player,
                 )
               : null;
 

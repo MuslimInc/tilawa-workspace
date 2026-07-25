@@ -17,9 +17,7 @@ import 'package:tilawa/features/reciters/presentation/bloc/reciters_bloc.dart';
 import 'package:tilawa/features/reciters/presentation/cubit/favorites_cubit.dart';
 import 'package:tilawa/features/reciters/presentation/cubit/favorites_state.dart';
 import 'package:tilawa/features/reciters/presentation/screens/reciters_screen.dart';
-import 'package:tilawa/features/reciters/presentation/tour/reciters_tour_launcher.dart';
 import 'package:tilawa/features/settings/presentation/cubit/settings_cubit.dart';
-import 'package:tilawa/features/tour_guide/domain/services/tour_target_registry.dart';
 import 'package:tilawa/features/theme/domain/primary_color_preset.dart';
 import 'package:tilawa/l10n/generated/app_localizations.dart';
 import 'package:tilawa/screens/cubit/main_screen_cubit.dart';
@@ -67,14 +65,6 @@ class _FakeHydratedStorage extends Fake implements Storage {
   Future<void> clear() async {}
 }
 
-class NoopRecitersTourLauncher implements RecitersTourLauncher {
-  @override
-  Future<bool> maybeShowRecitersIntro(BuildContext context) async => false;
-
-  @override
-  Future<bool> maybeShowPlaybackTour(BuildContext context) async => false;
-}
-
 const kRecitersTestReciters = <ReciterEntity>[
   ReciterEntity(
     id: 1,
@@ -108,8 +98,6 @@ Future<void> configureRecitersScreenTestGetIt({
   HydratedBloc.storage = _FakeHydratedStorage();
 
   getIt.registerSingleton<FavoritesCubit>(favoritesCubit);
-  getIt.registerSingleton<RecitersTourLauncher>(NoopRecitersTourLauncher());
-  getIt.registerSingleton<TourTargetRegistry>(TourTargetRegistry());
 
   final MockDownloadsBloc mockDownloadsBloc = MockDownloadsBloc();
   when(() => mockDownloadsBloc.state).thenReturn(

@@ -1071,6 +1071,10 @@
     "@noFavorites": {
         "description": "No favorites message"
     },
+    "favoritesEmptySubtitle": "اضغط على القلب لإبقاء القرّاء المفضّلين لديك في متناول يدك.",
+    "@favoritesEmptySubtitle": {
+        "description": "Empty-state subtitle on the favorites tab explaining how to save reciters"
+    },
     "recent": "الأحدث",
     "@recent": {
         "description": "Recent section title"
@@ -4118,78 +4122,6 @@
     "splashSlowLoadingNotice": "قد يستغرق بعض المحتوى لحظة للتحميل",
     "@splashSlowLoadingNotice": {
         "description": "Toast shown when startup times out and the app navigates to home in a degraded state"
-    },
-    "tourActionNext": "التالي",
-    "@tourActionNext": {
-        "description": "Button that advances to the next step in a product tour"
-    },
-    "tourActionFinish": "تم",
-    "@tourActionFinish": {
-        "description": "Button that closes the last step of a product tour"
-    },
-    "tourActionSkip": "تخطٍّ",
-    "@tourActionSkip": {
-        "description": "Button that dismisses a product tour without finishing it"
-    },
-    "tourStepSemantics": "الخطوة {current} من {total}",
-    "@tourStepSemantics": {
-        "description": "Screen-reader label announcing tour progress",
-        "placeholders": {
-            "current": {
-                "type": "int"
-            },
-            "total": {
-                "type": "int"
-            }
-        }
-    },
-    "tourRecitersSearchTitle": "ابحث عن قارئ",
-    "@tourRecitersSearchTitle": {
-        "description": "Title for the tour step highlighting the reciter search field"
-    },
-    "tourRecitersSearchDescription": "ابحث بالاسم للوصول السريع إلى أي قارئ.",
-    "@tourRecitersSearchDescription": {
-        "description": "Body text for the tour step highlighting the reciter search field"
-    },
-    "tourRecitersFavoritesTitle": "احفظ المفضّلين",
-    "@tourRecitersFavoritesTitle": {
-        "description": "Title for the tour step highlighting the favorites filter"
-    },
-    "tourRecitersFavoritesDescription": "اضغط على القلب لإبقاء القرّاء المفضّلين لديك في متناول يدك.",
-    "@tourRecitersFavoritesDescription": {
-        "description": "Body text for the tour step highlighting the favorites filter"
-    },
-    "tourRecitersOpenReciterTitle": "افتح قارئًا",
-    "@tourRecitersOpenReciterTitle": {
-        "description": "Title for the tour step that prompts opening a reciter from the list"
-    },
-    "tourRecitersOpenReciterDescription": "اضغط على قارئ لتصفّح تلاواته وبدء الاستماع.",
-    "@tourRecitersOpenReciterDescription": {
-        "description": "Body text for the tour step that prompts opening a reciter from the list"
-    },
-    "tourReciterPlaybackPlayingTitle": "قيد التشغيل الآن",
-    "@tourReciterPlaybackPlayingTitle": {
-        "description": "Title for the tour step highlighting the currently playing surah row"
-    },
-    "tourReciterPlaybackPlayingDescription": "السورة المميّزة تُشغَّل الآن. اضغط على أي سورة للتبديل.",
-    "@tourReciterPlaybackPlayingDescription": {
-        "description": "Body text for the tour step highlighting the currently playing surah row"
-    },
-    "tourReciterPlaybackMiniPlayerTitle": "المشغّل المصغّر",
-    "@tourReciterPlaybackMiniPlayerTitle": {
-        "description": "Title for the tour step highlighting the mini player bar"
-    },
-    "tourReciterPlaybackMiniPlayerDescription": "تحكّم في التشغيل من هنا أثناء متابعة التصفّح.",
-    "@tourReciterPlaybackMiniPlayerDescription": {
-        "description": "Body text for the tour step highlighting the mini player bar"
-    },
-    "tourDebugResetTitle": "إعادة تعيين الجولات التعريفية",
-    "@tourDebugResetTitle": {
-        "description": "Debug-only settings tile that clears completed product tours"
-    },
-    "tourDebugResetDone": "تمت إعادة تعيين الجولات التعريفية",
-    "@tourDebugResetDone": {
-        "description": "Confirmation shown after the debug reset clears tour progress"
     },
     "adhanDebugTestTitle": "اختبار الأذان بعد 10 ثوانٍ",
     "@adhanDebugTestTitle": {

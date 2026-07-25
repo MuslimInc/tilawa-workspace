@@ -1384,6 +1384,10 @@ class AppLocalizationsAr extends AppLocalizations {
   String get noFavorites => 'لا توجد مفضلة';
 
   @override
+  String get favoritesEmptySubtitle =>
+      'اضغط على القلب لإبقاء القرّاء المفضّلين لديك في متناول يدك.';
+
+  @override
   String get recent => 'الأحدث';
 
   @override
@@ -3761,61 +3765,6 @@ class AppLocalizationsAr extends AppLocalizations {
 
   @override
   String get splashSlowLoadingNotice => 'قد يستغرق بعض المحتوى لحظة للتحميل';
-
-  @override
-  String get tourActionNext => 'التالي';
-
-  @override
-  String get tourActionFinish => 'تم';
-
-  @override
-  String get tourActionSkip => 'تخطٍّ';
-
-  @override
-  String tourStepSemantics(int current, int total) {
-    return 'الخطوة $current من $total';
-  }
-
-  @override
-  String get tourRecitersSearchTitle => 'ابحث عن قارئ';
-
-  @override
-  String get tourRecitersSearchDescription =>
-      'ابحث بالاسم للوصول السريع إلى أي قارئ.';
-
-  @override
-  String get tourRecitersFavoritesTitle => 'احفظ المفضّلين';
-
-  @override
-  String get tourRecitersFavoritesDescription =>
-      'اضغط على القلب لإبقاء القرّاء المفضّلين لديك في متناول يدك.';
-
-  @override
-  String get tourRecitersOpenReciterTitle => 'افتح قارئًا';
-
-  @override
-  String get tourRecitersOpenReciterDescription =>
-      'اضغط على قارئ لتصفّح تلاواته وبدء الاستماع.';
-
-  @override
-  String get tourReciterPlaybackPlayingTitle => 'قيد التشغيل الآن';
-
-  @override
-  String get tourReciterPlaybackPlayingDescription =>
-      'السورة المميّزة تُشغَّل الآن. اضغط على أي سورة للتبديل.';
-
-  @override
-  String get tourReciterPlaybackMiniPlayerTitle => 'المشغّل المصغّر';
-
-  @override
-  String get tourReciterPlaybackMiniPlayerDescription =>
-      'تحكّم في التشغيل من هنا أثناء متابعة التصفّح.';
-
-  @override
-  String get tourDebugResetTitle => 'إعادة تعيين الجولات التعريفية';
-
-  @override
-  String get tourDebugResetDone => 'تمت إعادة تعيين الجولات التعريفية';
 
   @override
   String get adhanDebugTestTitle => 'اختبار الأذان بعد 10 ثوانٍ';

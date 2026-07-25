@@ -2473,6 +2473,12 @@ abstract class AppLocalizations {
   /// **'No favorites'**
   String get noFavorites;
 
+  /// Empty-state subtitle on the favorites tab explaining how to save reciters
+  ///
+  /// In en, this message translates to:
+  /// **'Tap the heart to keep the reciters you love within reach.'**
+  String get favoritesEmptySubtitle;
+
   /// Recent section title
   ///
   /// In en, this message translates to:
@@ -6658,102 +6664,6 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Some content may take a moment to load'**
   String get splashSlowLoadingNotice;
-
-  /// Button that advances to the next step in a product tour
-  ///
-  /// In en, this message translates to:
-  /// **'Next'**
-  String get tourActionNext;
-
-  /// Button that closes the last step of a product tour
-  ///
-  /// In en, this message translates to:
-  /// **'Done'**
-  String get tourActionFinish;
-
-  /// Button that dismisses a product tour without finishing it
-  ///
-  /// In en, this message translates to:
-  /// **'Skip'**
-  String get tourActionSkip;
-
-  /// Screen-reader label announcing tour progress
-  ///
-  /// In en, this message translates to:
-  /// **'Step {current} of {total}'**
-  String tourStepSemantics(int current, int total);
-
-  /// Title for the tour step highlighting the reciter search field
-  ///
-  /// In en, this message translates to:
-  /// **'Find a reciter'**
-  String get tourRecitersSearchTitle;
-
-  /// Body text for the tour step highlighting the reciter search field
-  ///
-  /// In en, this message translates to:
-  /// **'Search by name to quickly jump to any reciter.'**
-  String get tourRecitersSearchDescription;
-
-  /// Title for the tour step highlighting the favorites filter
-  ///
-  /// In en, this message translates to:
-  /// **'Save your favorites'**
-  String get tourRecitersFavoritesTitle;
-
-  /// Body text for the tour step highlighting the favorites filter
-  ///
-  /// In en, this message translates to:
-  /// **'Tap the heart to keep the reciters you love within reach.'**
-  String get tourRecitersFavoritesDescription;
-
-  /// Title for the tour step that prompts opening a reciter from the list
-  ///
-  /// In en, this message translates to:
-  /// **'Open a reciter'**
-  String get tourRecitersOpenReciterTitle;
-
-  /// Body text for the tour step that prompts opening a reciter from the list
-  ///
-  /// In en, this message translates to:
-  /// **'Tap a reciter to browse their recitations and start listening.'**
-  String get tourRecitersOpenReciterDescription;
-
-  /// Title for the tour step highlighting the currently playing surah row
-  ///
-  /// In en, this message translates to:
-  /// **'Now playing'**
-  String get tourReciterPlaybackPlayingTitle;
-
-  /// Body text for the tour step highlighting the currently playing surah row
-  ///
-  /// In en, this message translates to:
-  /// **'The highlighted surah is playing now. Tap any surah to switch.'**
-  String get tourReciterPlaybackPlayingDescription;
-
-  /// Title for the tour step highlighting the mini player bar
-  ///
-  /// In en, this message translates to:
-  /// **'Mini player'**
-  String get tourReciterPlaybackMiniPlayerTitle;
-
-  /// Body text for the tour step highlighting the mini player bar
-  ///
-  /// In en, this message translates to:
-  /// **'Control playback from here while you keep browsing.'**
-  String get tourReciterPlaybackMiniPlayerDescription;
-
-  /// Debug-only settings tile that clears completed product tours
-  ///
-  /// In en, this message translates to:
-  /// **'Reset product tours'**
-  String get tourDebugResetTitle;
-
-  /// Confirmation shown after the debug reset clears tour progress
-  ///
-  /// In en, this message translates to:
-  /// **'Product tours reset'**
-  String get tourDebugResetDone;
 
   /// Debug-only settings tile that schedules a manual Adhan test
   ///

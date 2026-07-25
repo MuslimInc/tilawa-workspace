@@ -15,7 +15,6 @@ import 'package:tilawa/features/reciters/presentation/widgets/reciter_card.dart'
 import 'package:tilawa/features/reciters/presentation/widgets/reciters_catalog_search_field.dart';
 import 'package:tilawa/features/settings/presentation/cubit/settings_cubit.dart';
 import 'package:tilawa/features/shell/application/shell_tab_reselect.dart';
-import 'package:tilawa/features/tour_guide/presentation/widgets/tour_target.dart';
 import 'package:tilawa/screens/app_shell_nav_destinations.dart';
 import 'package:tilawa_core/entities/reciter_entity.dart';
 import 'package:tilawa_ui_kit/tilawa_ui_kit.dart';
@@ -31,8 +30,6 @@ import '../bloc/reciters_bloc.dart';
 import '../cubit/favorites_cubit.dart';
 import '../cubit/favorites_state.dart';
 import '../reciter_semantics_ids.dart';
-import '../tour/reciters_tour_launcher.dart';
-import '../tour/reciters_tour_targets.dart';
 import '../utils/reciters_loaded_rebuild_policy.dart';
 
 /// [RefreshIndicator.notificationPredicate] for reciters [NestedScrollView].
@@ -151,7 +148,6 @@ class _RecitersScreenState extends State<RecitersScreen> {
   Timer? _startupLiteUiTimer;
   bool _isStartupLiteUi = true;
   bool _allowHeavyLoadedResults = false;
-  bool _introTourAttempted = false;
   bool _pendingStartupFavoriteOrdering = false;
   late final FavoritesCubit _favoritesCubit;
 
@@ -178,7 +174,6 @@ class _RecitersScreenState extends State<RecitersScreen> {
       _allowHeavyLoadedResults = true;
       _pendingStartupFavoriteOrdering = true;
       _ensureFavoritesLoaded();
-      _scheduleRecitersIntroTour();
       WidgetsBinding.instance.addPostFrameCallback((_) {
         _tryCommitStartupFavoriteOrdering();
       });
@@ -244,32 +239,6 @@ class _RecitersScreenState extends State<RecitersScreen> {
       if (!mounted || _allowHeavyLoadedResults) return;
       setState(() {
         _allowHeavyLoadedResults = true;
-      });
-      _scheduleRecitersIntroTour();
-    });
-  }
-
-  void _scheduleRecitersIntroTour() {
-    if (_introTourAttempted || !_allowHeavyLoadedResults) {
-      return;
-    }
-    final RecitersState state = context.read<RecitersBloc>().state;
-    if (state is! RecitersLoaded || state.filteredReciters.isEmpty) {
-      return;
-    }
-    _introTourAttempted = true;
-    WidgetsBinding.instance.addPostFrameCallback((_) {
-      Future<void>.delayed(const Duration(milliseconds: 450), () {
-        if (!mounted) {
-          return;
-        }
-        final RecitersState latest = context.read<RecitersBloc>().state;
-        if (latest is! RecitersLoaded || latest.filteredReciters.isEmpty) {
-          return;
-        }
-        unawaited(
-          getIt<RecitersTourLauncher>().maybeShowRecitersIntro(context),
-        );
       });
     });
   }
@@ -578,9 +547,7 @@ class _RecitersScreenState extends State<RecitersScreen> {
                   previous is! RecitersLoaded && current is RecitersLoaded,
               listener: (context, state) {
                 _scheduleLoadedResultsActivation();
-                if (_allowHeavyLoadedResults) {
-                  _scheduleRecitersIntroTour();
-                }
+                if (_allowHeavyLoadedResults) {}
               },
             ),
             BlocListener<FavoritesCubit, FavoritesState>(
@@ -692,14 +659,10 @@ class _RecitersScreenState extends State<RecitersScreen> {
                       showElevationShadow: false,
                       bottomContentHeight:
                           TilawaAppBarConfig.catalogSearchRowHeight(context),
-                      bottomContent: TourTarget(
-                        targetId: RecitersTourTargets.searchField,
-                        child: RecitersCatalogSearchField.launcher(
-                          semanticsIdentifier:
-                              ReciterSemanticsIds.recitersSearchLauncher,
-                          onTap: () =>
-                              const RecitersSearchRoute().push(context),
-                        ),
+                      bottomContent: RecitersCatalogSearchField.launcher(
+                        semanticsIdentifier:
+                            ReciterSemanticsIds.recitersSearchLauncher,
+                        onTap: () => const RecitersSearchRoute().push(context),
                       ),
                       actions: [
                         const _RecitersFavoritesAction(),
@@ -1343,17 +1306,10 @@ class _ReciterListSliver extends StatelessWidget {
 
                   final ReciterEntity reciter =
                       state.filteredReciters[index ~/ 2];
-                  final Widget card = ReciterCard(
+                  return ReciterCard(
                     key: ValueKey(reciter.id),
                     reciter: reciter,
                   );
-                  if (index == 0) {
-                    return TourTarget(
-                      targetId: RecitersTourTargets.firstReciterCard,
-                      child: card,
-                    );
-                  }
-                  return card;
                 },
               ),
             ],
