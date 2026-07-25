@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:tilawa/features/home/presentation/widgets/home_primary_action_tile.dart';
+import 'package:tilawa/features/onboarding/presentation/widgets/onboarding_device_frame.dart';
 import 'package:tilawa/features/onboarding/presentation/widgets/onboarding_hero_visual.dart';
 import 'package:tilawa/features/onboarding/presentation/widgets/onboarding_home_preview.dart';
 import 'package:tilawa/features/theme/domain/primary_color_preset.dart';
@@ -41,6 +42,7 @@ void main() {
   ) async {
     await pumpPreview(tester);
 
+    expect(find.byType(OnboardingDeviceFrame), findsOneWidget);
     expect(find.byType(OnboardingHomePreview), findsOneWidget);
     expect(find.byType(HomePrimaryActionTile), findsNWidgets(2));
     expect(find.byType(AbsorbPointer), findsWidgets);
@@ -65,5 +67,19 @@ void main() {
 
     // Still mounted; AbsorbPointer swallowed the gesture.
     expect(find.byType(OnboardingHomePreview), findsOneWidget);
+  });
+
+  testWidgets('injects mock top and bottom safe insets', (
+    WidgetTester tester,
+  ) async {
+    await pumpPreview(tester);
+
+    final BuildContext greetingContext = tester.element(
+      find.text(lookupAppLocalizations(const Locale('en')).homeGreeting),
+    );
+    final EdgeInsets padding = MediaQuery.paddingOf(greetingContext);
+
+    expect(padding.top, OnboardingHomePreview.mockTopSafeInset);
+    expect(padding.bottom, OnboardingHomePreview.mockBottomSafeInset);
   });
 }

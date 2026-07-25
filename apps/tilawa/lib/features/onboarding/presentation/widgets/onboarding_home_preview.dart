@@ -21,8 +21,14 @@ class OnboardingHomePreview extends StatelessWidget {
   /// Logical canvas width the preview is authored against before fit-scale.
   static const double designWidth = 320;
 
-  /// Matches phone-frame 9∶20 canvas.
-  static const double designHeight = designWidth * 20 / 9;
+  /// Matches phone-frame 9∶19.5 canvas.
+  static const double designHeight = designWidth * 19.5 / 9;
+
+  /// Mock status-bar / punch clearance inside the device chrome (design px).
+  static const double mockTopSafeInset = 40;
+
+  /// Mock home-indicator / gesture-nav clearance (design px).
+  static const double mockBottomSafeInset = 22;
 
   /// Mock profile name — preview-only, not live auth.
   static const String _mockDisplayName = 'Ahmad';
@@ -37,14 +43,27 @@ class OnboardingHomePreview extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return const AbsorbPointer(
+    final MediaQueryData host = MediaQuery.of(context);
+    return AbsorbPointer(
       child: FittedBox(
         fit: BoxFit.cover,
         alignment: Alignment.topCenter,
         child: SizedBox(
           width: designWidth,
           height: designHeight,
-          child: _OnboardingHomePreviewBody(),
+          child: MediaQuery(
+            data: host.copyWith(
+              padding: const EdgeInsets.only(
+                top: mockTopSafeInset,
+                bottom: mockBottomSafeInset,
+              ),
+              viewPadding: const EdgeInsets.only(
+                top: mockTopSafeInset,
+                bottom: mockBottomSafeInset,
+              ),
+            ),
+            child: const _OnboardingHomePreviewBody(),
+          ),
         ),
       ),
     );
@@ -92,7 +111,8 @@ class _OnboardingHomePreviewBody extends StatelessWidget {
             slots: mockSlots,
           ),
           Expanded(
-            child: Padding(
+            child: SingleChildScrollView(
+              physics: const NeverScrollableScrollPhysics(),
               padding: EdgeInsets.fromLTRB(
                 tokens.spaceLarge,
                 tokens.spaceLarge,
@@ -147,7 +167,6 @@ class _OnboardingHomePreviewBody extends StatelessWidget {
                   // Reuse the real quick-tools section; AbsorbPointer blocks
                   // its route pushes.
                   const HomeQuickToolsSection(),
-                  const Spacer(),
                 ],
               ),
             ),
@@ -231,7 +250,7 @@ class _PreviewHero extends StatelessWidget {
         Padding(
           padding: EdgeInsets.fromLTRB(
             tokens.spaceLarge,
-            tokens.spaceLarge,
+            MediaQuery.paddingOf(context).top + tokens.spaceMedium,
             tokens.spaceLarge,
             tokens.spaceMedium,
           ),
@@ -429,9 +448,11 @@ class _PreviewShellNav extends StatelessWidget {
         ),
       ),
       child: Padding(
-        padding: EdgeInsets.symmetric(
-          vertical: tokens.spaceExtraSmall,
-          horizontal: tokens.spaceExtraSmall,
+        padding: EdgeInsets.fromLTRB(
+          tokens.spaceExtraSmall,
+          tokens.spaceExtraSmall,
+          tokens.spaceExtraSmall,
+          tokens.spaceExtraSmall + MediaQuery.paddingOf(context).bottom,
         ),
         child: Row(
           children: <Widget>[
