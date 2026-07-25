@@ -40,6 +40,7 @@ import '../../../ui_kit_debug/tilawa_card_nested_tap_demo_tile.dart';
 import '../../../whats_new/whats_new.dart';
 import '../cubit/settings_cubit.dart';
 import '../formatters/settings_share_text_formatter.dart';
+import '../widgets/clear_app_preferences_debug_tile.dart';
 import '../widgets/settings_picker_sheets.dart';
 import '../widgets/settings_teacher_capability_scope.dart';
 import '../widgets/settings_teaching_on_memuslim_tile.dart';
@@ -338,7 +339,8 @@ class _SettingsScreenState extends State<SettingsScreen> {
                         const NotificationDebugLabTile(),
                         const TilawaCardNestedTapDemoTile(),
                         const TourGuideDebugResetTile(),
-                        const ForcedUpdateDebugTile(isLast: true),
+                        const ForcedUpdateDebugTile(),
+                        const ClearAppPreferencesDebugTile(isLast: true),
                       ],
                     ),
                   const SettingsVersionFooter(),
