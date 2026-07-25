@@ -85,3 +85,6 @@ sentry-wizard
 
 # Maestro local credentials (quran_sessions QA)
 .maestro/quran_sessions/.env
+
+# Local release outputs (AAB, obfuscation symbols)
+/artifacts/
