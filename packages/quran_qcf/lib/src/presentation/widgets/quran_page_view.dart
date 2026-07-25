@@ -41,6 +41,7 @@ class QuranPageView extends StatefulWidget {
     this.cacheExtentListenable,
     this.preparedWindowListenable,
     this.isScrollingListenable,
+    this.viewportFraction = MushafSpreadLayout.viewportFractionSingle,
     required this.mushafService,
     required this.pageSnapshotService,
   });
@@ -95,6 +96,12 @@ class QuranPageView extends StatefulWidget {
   /// of managing its own. This allows the reader screen to centrally control
   /// the scroll state for both this view and the background warming service.
   final ValueListenable<bool>? isScrollingListenable;
+
+  /// Fraction of the viewport each page occupies.
+  ///
+  /// Use [MushafSpreadLayout.viewportFractionDual] on wide landscape windows
+  /// so two facing pages are visible (Ayah-style mushaf spread).
+  final double viewportFraction;
 
   @override
   State<QuranPageView> createState() => _QuranPageViewState();
@@ -170,6 +177,7 @@ class _QuranPageViewState extends State<QuranPageView> {
             slivers: [
               SliverFillViewport(
                 padEnds: false,
+                viewportFraction: widget.viewportFraction,
                 delegate: SliverChildBuilderDelegate((context, index) {
                   final int pageNumber = index + 1;
                   return PageContent(
