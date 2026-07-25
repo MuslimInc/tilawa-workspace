@@ -2,6 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:lottie/lottie.dart';
 import 'package:tilawa_ui_kit/tilawa_ui_kit.dart';
 
+import 'onboarding_home_preview.dart';
+
 /// Visual treatment for onboarding hero assets.
 enum OnboardingHeroStyle {
   /// Flat illustration — no chrome.
@@ -10,7 +12,7 @@ enum OnboardingHeroStyle {
   /// Lottie animation — play once, static under reduced motion.
   lottie,
 
-  /// App screenshot in a device-style frame.
+  /// Live Home miniature in a device-style frame.
   devicePreview,
 
   /// Memorial portrait on a dark mat with a soft hairline frame.
@@ -53,8 +55,8 @@ class OnboardingHeroVisual extends StatelessWidget {
           maxWidth: tokens.contentMaxWidthForm * 0.52,
           maxHeight: tokens.iconSizeExtraLarge * 6.5,
         ),
-        child: _OnboardingPhoneFrame(
-          child: _OnboardingDeviceScreenshot(assetPath: assetPath),
+        child: const _OnboardingPhoneFrame(
+          child: OnboardingHomePreview(),
         ),
       ),
       OnboardingHeroStyle.portrait => _OnboardingMemorialPortrait(
@@ -185,55 +187,13 @@ class _OnboardingMemorialPortrait extends StatelessWidget {
   }
 }
 
-/// Full-device capture trimmed for mockup display (no clipped status bar).
-class _OnboardingDeviceScreenshot extends StatelessWidget {
-  const _OnboardingDeviceScreenshot({required this.assetPath});
-
-  final String assetPath;
-
-  /// Status bar band on the exported adb screencap (2400 px tall).
-  static const double _statusBarTrimFraction = 72 / 2400;
-
-  @override
-  Widget build(BuildContext context) {
-    return LayoutBuilder(
-      builder: (BuildContext context, BoxConstraints constraints) {
-        final double width = constraints.maxWidth;
-        final double height = constraints.maxHeight;
-        // Taller than the viewport so we can drop the status bar off the top
-        // while keeping the bottom edge of the capture flush with the frame.
-        final double expandedHeight = height / (1 - _statusBarTrimFraction);
-
-        return ClipRect(
-          child: OverflowBox(
-            maxWidth: width,
-            minWidth: width,
-            maxHeight: expandedHeight,
-            minHeight: expandedHeight,
-            alignment: Alignment.bottomCenter,
-            child: SizedBox(
-              width: width,
-              height: expandedHeight,
-              child: Image.asset(
-                assetPath,
-                fit: BoxFit.cover,
-                alignment: Alignment.topCenter,
-              ),
-            ),
-          ),
-        );
-      },
-    );
-  }
-}
-
-/// Slim-bezel phone chrome for onboarding app screenshots.
+/// Slim-bezel phone chrome for the onboarding Home preview.
 class _OnboardingPhoneFrame extends StatelessWidget {
   const _OnboardingPhoneFrame({required this.child});
 
   final Widget child;
 
-  /// Matches the onboarding home screenshot export (720×1600).
+  /// Tall phone canvas for the Home miniature (9∶20).
   static const double _screenAspectRatio = 9 / 20;
 
   /// Outer corner radius as a fraction of frame width (~modern phone body).

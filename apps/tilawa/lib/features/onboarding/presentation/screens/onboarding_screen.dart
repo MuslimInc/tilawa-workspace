@@ -97,7 +97,7 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
         heroStyle: OnboardingHeroStyle.lottie,
       ),
       OnboardingContent(
-        imagePath: 'assets/images/reciters.png',
+        imagePath: '',
         title: context.l10n.onboardingTitle2,
         description: context.l10n.onboardingDesc2,
         heroStyle: OnboardingHeroStyle.devicePreview,
