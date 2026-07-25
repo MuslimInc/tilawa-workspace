@@ -736,6 +736,7 @@ class AthkarNotificationService implements IAthkarNotificationService {
       const notificationDetails = NotificationDetails(
         android: androidDetails,
         iOS: iosDetails,
+        macOS: iosDetails,
       );
 
       await _notifications.zonedSchedule(
@@ -805,6 +806,7 @@ class AthkarNotificationService implements IAthkarNotificationService {
       const notificationDetails = NotificationDetails(
         android: androidDetails,
         iOS: iosDetails,
+        macOS: iosDetails,
       );
 
       final athkarPayload = isMorning
@@ -1004,6 +1006,12 @@ class AthkarNotificationService implements IAthkarNotificationService {
           color: AppColors.notificationAccent,
         ),
         iOS: DarwinNotificationDetails(
+          presentAlert: true,
+          presentBadge: true,
+          presentSound: true,
+          sound: 'default',
+        ),
+        macOS: DarwinNotificationDetails(
           presentAlert: true,
           presentBadge: true,
           presentSound: true,

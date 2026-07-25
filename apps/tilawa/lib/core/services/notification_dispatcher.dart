@@ -89,6 +89,7 @@ class NotificationDispatcher implements INotificationDispatcher {
         const initSettings = InitializationSettings(
           android: androidSettings,
           iOS: iosSettings,
+          macOS: iosSettings,
         );
 
         await _notifications.initialize(

@@ -1219,6 +1219,14 @@ class PrayerAdhanNotificationService
             ? PrayerNotificationConfig.adhanSoundFilename
             : 'default',
       ),
+      macOS: DarwinNotificationDetails(
+        presentAlert: true,
+        presentBadge: true,
+        presentSound: true,
+        sound: playAdhan
+            ? PrayerNotificationConfig.adhanSoundFilename
+            : 'default',
+      ),
     );
   }
 
