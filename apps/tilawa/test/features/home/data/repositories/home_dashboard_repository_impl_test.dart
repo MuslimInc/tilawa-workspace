@@ -42,11 +42,31 @@ void main() {
         expect(dashboard.nextPrayer?.timeUntil, const Duration(hours: 2));
         expect(dashboard.prayerBoundaries?.sunrise.hour, 5);
         expect(dashboard.prayerBoundaries?.maghrib.hour, 18);
+        expect(dashboard.use24HourFormat, isFalse);
         expect(prayerRepository.currentLocationRequests, 0);
         expect(prayerRepository.permissionRequests, 0);
         expect(prayerRepository.prayerTimesRequests, 1);
       },
     );
+
+    test('maps use24HourFormat from prayer settings', () async {
+      final prayerRepository = _FakePrayerTimesRepository(
+        settings: const PrayerSettingsEntity(
+          savedLatitude: 30.0444,
+          savedLongitude: 31.2357,
+          savedLocationName: 'Cairo',
+          use24HourFormat: true,
+        ),
+      );
+      final repository = _createRepository(
+        prayerRepository: prayerRepository,
+        now: () => DateTime(2026, 6, 15, 10),
+      );
+
+      final dashboard = await repository.getDashboard();
+
+      expect(dashboard.use24HourFormat, isTrue);
+    });
 
     test('includes Firebase Auth photo URL when available', () async {
       final prayerRepository = _FakePrayerTimesRepository(

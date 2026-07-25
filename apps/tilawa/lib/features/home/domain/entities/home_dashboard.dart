@@ -14,6 +14,7 @@ final class HomeDashboard extends Equatable {
     this.nextPrayer,
     this.prayerBoundaries,
     this.todayPrayers = const [],
+    this.use24HourFormat = false,
   });
 
   /// Time the dashboard snapshot was generated.
@@ -37,6 +38,12 @@ final class HomeDashboard extends Equatable {
   /// Main prayers for the compact Home schedule strip.
   final List<HomePrayerSlot> todayPrayers;
 
+  /// Clock display preference from prayer settings (12h vs 24h).
+  ///
+  /// Composed from prayer settings when the dashboard snapshot is built —
+  /// Home chrome must not hard-code a clock style.
+  final bool use24HourFormat;
+
   bool get hasPrayerLocation => locationLabel != null && locationLabel != '';
 
   @override
@@ -48,6 +55,7 @@ final class HomeDashboard extends Equatable {
     nextPrayer,
     prayerBoundaries,
     todayPrayers,
+    use24HourFormat,
   ];
 }
 

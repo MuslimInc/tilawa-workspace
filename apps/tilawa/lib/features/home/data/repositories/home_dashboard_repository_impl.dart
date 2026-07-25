@@ -111,6 +111,7 @@ final class HomeDashboardRepositoryImpl implements HomeDashboardRepository {
         displayName: displayName,
         photoUrl: photoUrl,
         locationLabel: settings.effectiveSchedulingLocationName,
+        use24HourFormat: settings.use24HourFormat,
       );
     }
 
@@ -128,6 +129,7 @@ final class HomeDashboardRepositoryImpl implements HomeDashboardRepository {
       nextPrayer: prayerSnapshot?.nextPrayer,
       prayerBoundaries: prayerSnapshot?.boundaries,
       todayPrayers: prayerSnapshot?.todayPrayers ?? const [],
+      use24HourFormat: settings.use24HourFormat,
     );
   }
 
