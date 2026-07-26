@@ -62,6 +62,7 @@ export class SadaqahJariyahEditComponent implements OnInit {
   readonly loading = signal(true);
   readonly saving = signal(false);
   readonly uploading = signal(false);
+  readonly selectedPhotoName = signal<string | null>(null);
   readonly errorMessage = signal<string | null>(null);
   readonly successMessage = signal<string | null>(null);
 
@@ -186,6 +187,7 @@ export class SadaqahJariyahEditComponent implements OnInit {
       return;
     }
 
+    this.selectedPhotoName.set(file.name);
     this.uploading.set(true);
     this.errorMessage.set(null);
     try {
@@ -198,6 +200,7 @@ export class SadaqahJariyahEditComponent implements OnInit {
       this.errorMessage.set(
         error instanceof Error ? error.message : 'Photo upload failed',
       );
+      this.selectedPhotoName.set(null);
     } finally {
       this.uploading.set(false);
       input.value = '';
@@ -319,3 +322,4 @@ export class SadaqahJariyahEditComponent implements OnInit {
     return DedicationsPaths.photoPath(this.dedicationId);
   }
 }
+

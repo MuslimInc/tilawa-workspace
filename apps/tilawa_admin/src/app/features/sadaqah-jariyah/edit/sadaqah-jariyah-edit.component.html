@@ -144,12 +144,27 @@
             readonly
           />
           @if (!isCreateMode) {
-            <input
-              type="file"
-              accept="image/webp,image/jpeg"
-              (change)="onPhotoSelected($event)"
-              [disabled]="uploading()"
-            />
+            <div class="flex flex-wrap items-center gap-2">
+              <input
+                #photoFileInput
+                type="file"
+                class="sr-only"
+                accept="image/webp,image/jpeg"
+                (change)="onPhotoSelected($event)"
+                [disabled]="uploading()"
+              />
+              <button
+                type="button"
+                class="tilawa-btn variant-secondary"
+                [disabled]="uploading()"
+                (click)="photoFileInput.click()"
+              >
+                {{ 'sadaqahJariyah_chooseFile' | t }}
+              </button>
+              <span class="text-xs text-[var(--tilawa-on-surface-variant)]">
+                {{ selectedPhotoName() ?? ('sadaqahJariyah_noFileChosen' | t) }}
+              </span>
+            </div>
             @if (uploading()) {
               <p class="text-xs">{{ 'sadaqahJariyah_uploadingPhoto' | t }}</p>
             }
@@ -204,3 +219,4 @@
     </app-tilawa-card>
   }
 </div>
+
