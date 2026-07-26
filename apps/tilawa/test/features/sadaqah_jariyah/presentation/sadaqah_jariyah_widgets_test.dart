@@ -28,7 +28,7 @@ void main() {
     expect(find.text('A'), findsOneWidget);
   });
 
-  testWidgets('list renders founding first in shared card structure', (
+  testWidgets('list renders photo and name without extra metadata', (
     WidgetTester tester,
   ) async {
     final List<Dedication> dedications = <Dedication>[
@@ -40,6 +40,7 @@ void main() {
         isFounding: true,
         isFeatured: false,
         sortOrder: 0,
+        note: 'Should not show',
       ),
       const Dedication(
         id: 'other',
@@ -63,7 +64,10 @@ void main() {
     );
 
     expect(find.byType(SadaqahJariyahDedicationCard), findsNWidgets(2));
-    expect(find.text('Founding'), findsOneWidget);
+    expect(find.byType(SadaqahJariyahLetterAvatar), findsOneWidget);
+    expect(find.text('Founding'), findsNothing);
+    expect(find.text('Should not show'), findsNothing);
+    expect(find.text('Remembered with love'), findsNothing);
 
     final Finder founding = find.text('Ahmed Mohamed Tony');
     final Finder other = find.text('Other Person');
@@ -73,6 +77,5 @@ void main() {
       tester.getTopLeft(founding).dy < tester.getTopLeft(other).dy,
       isTrue,
     );
-    expect(find.text('Remembered with love'), findsOneWidget);
   });
 }
