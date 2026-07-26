@@ -17,26 +17,25 @@ class SadaqahJariyahConfig extends Equatable {
 
   static const String defaultTitleAr = 'صدقة جارية';
   static const String defaultTitleEn = 'Sadaqah Jariyah';
-  static const String defaultSubtitleAr = 'نيات دعم';
-  static const String defaultSubtitleEn = 'Dedications of intention';
+  static const String defaultSubtitleAr = 'صدقة جارية';
+  static const String defaultSubtitleEn = 'Sadaqah Jariyah';
   static const String defaultWhatsappE164 = '+201060099009';
 
   static const String defaultMessageTemplateEn =
       'Assalamu alaikum,\n'
-      'I want to support MeMuslim as Sadaqah Jariyah.\n\n'
+      'I want to add a person to the Sadaqah Jariyah list in MeMuslim.\n\n'
       'Deceased name:\n'
       'Relation (optional):\n'
-      'Support amount / proof:\n\n'
-      'I intend this support as an ongoing charity for the deceased, '
-      'and I ask Allah to accept it.';
+      'Short note (optional):\n\n'
+      'Please add them to the list. May Allah accept.';
 
   static const String defaultMessageTemplateAr =
       'السلام عليكم،\n'
-      'أريد دعم أنا مسلم كصدقة جارية.\n\n'
+      'أريد إضافة اسم إلى قائمة الصدقة الجارية في أنا مسلم.\n\n'
       'اسم المتوفى:\n'
       'صلة القرابة (اختياري):\n'
-      'مبلغ الدعم / إثبات:\n\n'
-      'أنوي هذا الدعم صدقة جارية عن المتوفى، وأسأل الله القبول.';
+      'ملاحظة قصيرة (اختياري):\n\n'
+      'يرجى إضافتهم إلى القائمة. أسأل الله القبول.';
 
   final String featureTitleAr;
   final String featureTitleEn;

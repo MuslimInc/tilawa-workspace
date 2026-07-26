@@ -76,13 +76,13 @@ export interface SadaqahJariyahConfigRecord {
 const DEFAULT_CONFIG: SadaqahJariyahConfigRecord = {
   featureTitleAr: 'صدقة جارية',
   featureTitleEn: 'Sadaqah Jariyah',
-  featureSubtitleAr: 'نيات دعم',
-  featureSubtitleEn: 'Dedications of intention',
+  featureSubtitleAr: 'صدقة جارية',
+  featureSubtitleEn: 'Sadaqah Jariyah',
   whatsappE164: '+201060099009',
   messageTemplateAr:
-    'السلام عليكم،\nأريد دعم أنا مسلم كصدقة جارية.\n\nاسم المتوفى:\nصلة القرابة (اختياري):\nمبلغ الدعم / إثبات:\n\nأنوي هذا الدعم صدقة جارية عن المتوفى، وأسأل الله القبول.',
+    'السلام عليكم،\nأريد إضافة اسم إلى قائمة الصدقة الجارية في أنا مسلم.\n\nاسم المتوفى:\nصلة القرابة (اختياري):\nملاحظة قصيرة (اختياري):\n\nيرجى إضافتهم إلى القائمة. أسأل الله القبول.',
   messageTemplateEn:
-    'Assalamu alaikum,\nI want to support MeMuslim as Sadaqah Jariyah.\n\nDeceased name:\nRelation (optional):\nSupport amount / proof:\n\nI intend this support as an ongoing charity for the deceased, and I ask Allah to accept it.',
+    'Assalamu alaikum,\nI want to add a person to the Sadaqah Jariyah list in MeMuslim.\n\nDeceased name:\nRelation (optional):\nShort note (optional):\n\nPlease add them to the list. May Allah accept.',
   featureEnabled: true,
 };
 

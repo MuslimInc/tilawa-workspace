@@ -90,7 +90,7 @@ async function main() {
     slug: str(SLUG),
     relation: { nullValue: null },
     relationOther: { nullValue: null },
-    note: str('The reason MeMuslim began'),
+    note: { nullValue: null },
     photoStoragePath: { nullValue: null },
     status: str('published'),
     isFounding: bool(true),
@@ -112,14 +112,14 @@ async function main() {
   await patchDoc(accessToken, 'app_config/sadaqah_jariyah', {
     featureTitleAr: str('صدقة جارية'),
     featureTitleEn: str('Sadaqah Jariyah'),
-    featureSubtitleAr: str('نيات دعم'),
-    featureSubtitleEn: str('Dedications of intention'),
+    featureSubtitleAr: str('صدقة جارية'),
+    featureSubtitleEn: str('Sadaqah Jariyah'),
     whatsappE164: str('+201060099009'),
     messageTemplateAr: str(
-      'السلام عليكم،\nأريد دعم أنا مسلم كصدقة جارية.\n\nاسم المتوفى:\nصلة القرابة (اختياري):\nمبلغ الدعم / إثبات:\n\nأنوي هذا الدعم صدقة جارية عن المتوفى، وأسأل الله القبول.',
+      'السلام عليكم،\nأريد إضافة اسم إلى قائمة الصدقة الجارية في أنا مسلم.\n\nاسم المتوفى:\nصلة القرابة (اختياري):\nملاحظة قصيرة (اختياري):\n\nيرجى إضافتهم إلى القائمة. أسأل الله القبول.',
     ),
     messageTemplateEn: str(
-      'Assalamu alaikum,\nI want to support MeMuslim as Sadaqah Jariyah.\n\nDeceased name:\nRelation (optional):\nSupport amount / proof:\n\nI intend this support as an ongoing charity for the deceased, and I ask Allah to accept it.',
+      'Assalamu alaikum,\nI want to add a person to the Sadaqah Jariyah list in MeMuslim.\n\nDeceased name:\nRelation (optional):\nShort note (optional):\n\nPlease add them to the list. May Allah accept.',
     ),
     featureEnabled: bool(true),
   });
