@@ -4483,6 +4483,10 @@ class AppLocalizationsEn extends AppLocalizations {
   String get sadaqahJariyahDefaultSubtitle => 'Sadaqah Jariyah';
 
   @override
+  String get sadaqahJariyahSettingsSubtitle =>
+      'Registered names and share requests';
+
+  @override
   String get sadaqahJariyahIntroP1 => 'Registered names';
 
   @override

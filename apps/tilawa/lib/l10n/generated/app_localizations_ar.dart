@@ -4441,6 +4441,9 @@ class AppLocalizationsAr extends AppLocalizations {
   String get sadaqahJariyahDefaultSubtitle => 'صدقة جارية';
 
   @override
+  String get sadaqahJariyahSettingsSubtitle => 'الأسماء المسجلة وطلب سهم';
+
+  @override
   String get sadaqahJariyahIntroP1 => 'الأسماء المسجلة';
 
   @override

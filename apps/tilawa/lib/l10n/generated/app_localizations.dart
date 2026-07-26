@@ -7875,6 +7875,12 @@ abstract class AppLocalizations {
   /// **'Sadaqah Jariyah'**
   String get sadaqahJariyahDefaultSubtitle;
 
+  /// Calm Settings Support-row subtitle for Sadaqah Jariyah
+  ///
+  /// In en, this message translates to:
+  /// **'Registered names and share requests'**
+  String get sadaqahJariyahSettingsSubtitle;
+
   /// Section title above the dedications list
   ///
   /// In en, this message translates to:

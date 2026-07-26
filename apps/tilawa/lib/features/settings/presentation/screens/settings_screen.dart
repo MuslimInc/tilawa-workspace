@@ -41,6 +41,7 @@ import '../cubit/settings_cubit.dart';
 import '../formatters/settings_share_text_formatter.dart';
 import '../widgets/clear_app_preferences_debug_tile.dart';
 import '../widgets/settings_picker_sheets.dart';
+import '../widgets/settings_sadaqah_jariyah_tile.dart';
 import '../widgets/settings_teacher_capability_scope.dart';
 import '../widgets/settings_teaching_on_memuslim_tile.dart';
 import '../widgets/settings_widgets.dart';
@@ -280,11 +281,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
                     includeTopGap: false,
                     children: [
                       if (widget.sadaqahJariyahEnabled)
-                        TilawaSettingsTile(
-                          title: l10n.sadaqahJariyahDefaultTitle,
-                          onTap: () =>
-                              const SadaqahJariyahRoute().push<void>(context),
-                        ),
+                        const SettingsSadaqahJariyahTile(),
                       if (widget.supportTilawaEnabled)
                         TilawaSettingsTile(
                           title: l10n.supportTilawa,

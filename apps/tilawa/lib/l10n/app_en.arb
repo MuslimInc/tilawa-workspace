@@ -5305,6 +5305,8 @@
   "@sadaqahJariyahDefaultTitle": {"description": "Default Sadaqah Jariyah feature title"},
   "sadaqahJariyahDefaultSubtitle": "Sadaqah Jariyah",
   "@sadaqahJariyahDefaultSubtitle": {"description": "Default Sadaqah Jariyah subtitle"},
+  "sadaqahJariyahSettingsSubtitle": "Registered names and share requests",
+  "@sadaqahJariyahSettingsSubtitle": {"description": "Calm Settings Support-row subtitle for Sadaqah Jariyah"},
   "sadaqahJariyahIntroP1": "Registered names",
   "@sadaqahJariyahIntroP1": {"description": "Section title above the dedications list"},
   "sadaqahJariyahIntroP2": "Later, other Muslims wanted to dedicate their support for deceased loved ones.",

@@ -4618,6 +4618,8 @@
   "@sadaqahJariyahDefaultTitle": {"description": "Default Sadaqah Jariyah feature title"},
   "sadaqahJariyahDefaultSubtitle": "صدقة جارية",
   "@sadaqahJariyahDefaultSubtitle": {"description": "Default Sadaqah Jariyah subtitle"},
+  "sadaqahJariyahSettingsSubtitle": "الأسماء المسجلة وطلب سهم",
+  "@sadaqahJariyahSettingsSubtitle": {"description": "Calm Settings Support-row subtitle for Sadaqah Jariyah"},
   "sadaqahJariyahIntroP1": "الأسماء المسجلة",
   "@sadaqahJariyahIntroP1": {"description": "Section title above the dedications list"},
   "sadaqahJariyahIntroP2": "ثم أراد مسلمون آخرون أن يهبوا دعمهم عن أحبائهم المتوفين.",
