@@ -4498,7 +4498,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get sadaqahJariyahFoundingOrigin => 'The reason MeMuslim began';
 
   @override
-  String get sadaqahJariyahRahimahullah => 'May Allah have mercy on him';
+  String get sadaqahJariyahRahimahullah => 'May Allah have mercy on them';
 
   @override
   String get sadaqahJariyahFeaturedSection => 'Also remembered';

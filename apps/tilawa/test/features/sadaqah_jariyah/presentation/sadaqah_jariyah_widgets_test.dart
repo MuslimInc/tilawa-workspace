@@ -3,6 +3,7 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:tilawa/features/sadaqah_jariyah/domain/entities/dedication.dart';
 import 'package:tilawa/features/sadaqah_jariyah/domain/entities/sadaqah_jariyah_config.dart';
 import 'package:tilawa/features/sadaqah_jariyah/domain/enums/dedication_status.dart';
+import 'package:tilawa/features/sadaqah_jariyah/presentation/widgets/sadaqah_jariyah_dedication_card.dart';
 import 'package:tilawa/features/sadaqah_jariyah/presentation/widgets/sadaqah_jariyah_letter_avatar.dart';
 import 'package:tilawa/features/sadaqah_jariyah/presentation/widgets/sadaqah_jariyah_list.dart';
 import 'package:tilawa/features/sadaqah_jariyah/presentation/widgets/sadaqah_jariyah_participate_sheet.dart';
@@ -29,17 +30,10 @@ void main() {
     expect(find.text('A'), findsOneWidget);
   });
 
-  testWidgets('list keeps founding card first', (WidgetTester tester) async {
+  testWidgets('list renders founding first in shared card structure', (
+    WidgetTester tester,
+  ) async {
     final List<Dedication> dedications = <Dedication>[
-      const Dedication(
-        id: 'other',
-        displayName: 'Other Person',
-        slug: 'other-person',
-        status: DedicationStatus.published,
-        isFounding: false,
-        isFeatured: false,
-        sortOrder: 1,
-      ),
       const Dedication(
         id: 'founding',
         displayName: 'Ahmed Mohamed Tony',
@@ -48,6 +42,16 @@ void main() {
         isFounding: true,
         isFeatured: false,
         sortOrder: 0,
+      ),
+      const Dedication(
+        id: 'other',
+        displayName: 'Other Person',
+        slug: 'other-person',
+        status: DedicationStatus.published,
+        isFounding: false,
+        isFeatured: false,
+        sortOrder: 1,
+        note: 'Remembered with love',
       ),
     ];
 
@@ -60,14 +64,19 @@ void main() {
       ),
     );
 
-    final Finder names = find.textContaining('Ahmed Mohamed Tony');
-    final Finder other = find.text('Other Person');
-    expect(names, findsWidgets);
-    expect(other, findsOneWidget);
+    expect(find.byType(SadaqahJariyahDedicationCard), findsNWidgets(2));
+    expect(find.text('May Allah have mercy on them'), findsNWidgets(2));
 
-    final double foundingY = tester.getTopLeft(names.first).dy;
-    final double otherY = tester.getTopLeft(other).dy;
-    expect(foundingY < otherY, isTrue);
+    final Finder founding = find.text('Ahmed Mohamed Tony');
+    final Finder other = find.text('Other Person');
+    expect(founding, findsOneWidget);
+    expect(other, findsOneWidget);
+    expect(
+      tester.getTopLeft(founding).dy < tester.getTopLeft(other).dy,
+      isTrue,
+    );
+    expect(find.text('The reason MeMuslim began'), findsOneWidget);
+    expect(find.text('Remembered with love'), findsOneWidget);
   });
 
   testWidgets('participate sheet shows intention line', (

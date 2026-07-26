@@ -5313,7 +5313,7 @@
   "@sadaqahJariyahIntroP3": {"description": "Sadaqah Jariyah intro paragraph 3"},
   "sadaqahJariyahFoundingOrigin": "The reason MeMuslim began",
   "@sadaqahJariyahFoundingOrigin": {"description": "Founding dedication origin line"},
-  "sadaqahJariyahRahimahullah": "May Allah have mercy on him",
+  "sadaqahJariyahRahimahullah": "May Allah have mercy on them",
   "@sadaqahJariyahRahimahullah": {"description": "Honorific under dedication name"},
   "sadaqahJariyahFeaturedSection": "Also remembered",
   "@sadaqahJariyahFeaturedSection": {"description": "Optional featured dedications section title"},

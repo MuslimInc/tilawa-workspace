@@ -4626,7 +4626,7 @@
   "@sadaqahJariyahIntroP3": {"description": "Sadaqah Jariyah intro paragraph 3"},
   "sadaqahJariyahFoundingOrigin": "سبب بدء أنا مسلم",
   "@sadaqahJariyahFoundingOrigin": {"description": "Founding dedication origin line"},
-  "sadaqahJariyahRahimahullah": "رحمه الله",
+  "sadaqahJariyahRahimahullah": "رحمهم الله",
   "@sadaqahJariyahRahimahullah": {"description": "Honorific under dedication name"},
   "sadaqahJariyahFeaturedSection": "وأيضاً",
   "@sadaqahJariyahFeaturedSection": {"description": "Optional featured dedications section title"},

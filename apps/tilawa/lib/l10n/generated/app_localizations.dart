@@ -7902,7 +7902,7 @@ abstract class AppLocalizations {
   /// Honorific under dedication name
   ///
   /// In en, this message translates to:
-  /// **'May Allah have mercy on him'**
+  /// **'May Allah have mercy on them'**
   String get sadaqahJariyahRahimahullah;
 
   /// Optional featured dedications section title
