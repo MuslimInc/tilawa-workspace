@@ -9,7 +9,7 @@ class SadaqahJariyahConfig extends Equatable {
     this.featureTitleEn = defaultTitleEn,
     this.featureSubtitleAr = defaultSubtitleAr,
     this.featureSubtitleEn = defaultSubtitleEn,
-    this.whatsappE164 = '',
+    this.whatsappE164 = defaultWhatsappE164,
     this.messageTemplateAr = defaultMessageTemplateAr,
     this.messageTemplateEn = defaultMessageTemplateEn,
     this.featureEnabled = true,
@@ -19,6 +19,7 @@ class SadaqahJariyahConfig extends Equatable {
   static const String defaultTitleEn = 'Sadaqah Jariyah';
   static const String defaultSubtitleAr = 'نيات دعم';
   static const String defaultSubtitleEn = 'Dedications of intention';
+  static const String defaultWhatsappE164 = '+201060099009';
 
   static const String defaultMessageTemplateEn =
       'Assalamu alaikum,\n'

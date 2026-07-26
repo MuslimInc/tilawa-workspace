@@ -9,7 +9,7 @@ void main() {
     final SadaqahJariyahConfig config = mapSadaqahJariyahConfig(null);
     check(config.featureTitleEn).equals(SadaqahJariyahConfig.defaultTitleEn);
     check(config.featureEnabled).isTrue();
-    check(config.whatsappE164).equals('');
+    check(config.whatsappE164).equals(SadaqahJariyahConfig.defaultWhatsappE164);
   });
 
   test('mapSadaqahJariyahConfig empty titles keep empty for UI fallback', () {

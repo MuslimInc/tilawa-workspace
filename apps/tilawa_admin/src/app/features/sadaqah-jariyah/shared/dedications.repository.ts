@@ -78,7 +78,7 @@ const DEFAULT_CONFIG: SadaqahJariyahConfigRecord = {
   featureTitleEn: 'Sadaqah Jariyah',
   featureSubtitleAr: 'نيات دعم',
   featureSubtitleEn: 'Dedications of intention',
-  whatsappE164: '',
+  whatsappE164: '+201060099009',
   messageTemplateAr:
     'السلام عليكم،\nأريد دعم أنا مسلم كصدقة جارية.\n\nاسم المتوفى:\nصلة القرابة (اختياري):\nمبلغ الدعم / إثبات:\n\nأنوي هذا الدعم صدقة جارية عن المتوفى، وأسأل الله القبول.',
   messageTemplateEn:

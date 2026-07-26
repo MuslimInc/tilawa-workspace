@@ -114,7 +114,7 @@ async function main() {
     featureTitleEn: str('Sadaqah Jariyah'),
     featureSubtitleAr: str('نيات دعم'),
     featureSubtitleEn: str('Dedications of intention'),
-    whatsappE164: str(''),
+    whatsappE164: str('+201060099009'),
     messageTemplateAr: str(
       'السلام عليكم،\nأريد دعم أنا مسلم كصدقة جارية.\n\nاسم المتوفى:\nصلة القرابة (اختياري):\nمبلغ الدعم / إثبات:\n\nأنوي هذا الدعم صدقة جارية عن المتوفى، وأسأل الله القبول.',
     ),
@@ -131,3 +131,4 @@ main().catch((error) => {
   console.error(error.message ?? error);
   process.exit(1);
 });
+

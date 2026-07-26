@@ -21,7 +21,10 @@ SadaqahJariyahConfig mapSadaqahJariyahConfig(Map<String, dynamic>? data) {
       data['featureSubtitleEn'],
       SadaqahJariyahConfig.defaultSubtitleEn,
     ),
-    whatsappE164: _stringOr(data['whatsappE164'], ''),
+    whatsappE164: _stringOr(
+      data['whatsappE164'],
+      SadaqahJariyahConfig.defaultWhatsappE164,
+    ),
     messageTemplateAr: _stringOr(
       data['messageTemplateAr'],
       SadaqahJariyahConfig.defaultMessageTemplateAr,
