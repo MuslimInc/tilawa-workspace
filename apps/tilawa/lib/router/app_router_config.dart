@@ -3,6 +3,7 @@ import 'package:flutter/foundation.dart' show kReleaseMode;
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
+import 'package:tilawa/core/bootstrap/app_launch_config.dart';
 import 'package:tilawa/core/di/injection.dart';
 import 'package:tilawa/core/extensions.dart';
 import 'package:tilawa/features/home/presentation/cubit/home_quran_resume_cubit.dart';
@@ -312,6 +313,17 @@ class SupportRoute extends GoRouteData with $SupportRoute, TilawaRouteData {
 class SadaqahJariyahRoute extends GoRouteData
     with $SadaqahJariyahRoute, TilawaRouteData {
   const SadaqahJariyahRoute();
+
+  @override
+  String? redirect(BuildContext context, GoRouterState state) {
+    final bool enabled = getIt.isRegistered<AppLaunchConfig>()
+        ? getIt<AppLaunchConfig>().sadaqahJariyahEnabled
+        : AppLaunchConfig.fromEnvironment().sadaqahJariyahEnabled;
+    if (!enabled) {
+      return const SettingsRoute().location;
+    }
+    return null;
+  }
 
   @override
   Widget build(BuildContext context, GoRouterState state) {

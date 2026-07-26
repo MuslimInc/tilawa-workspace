@@ -8,6 +8,7 @@ export 'domain/entities/sadaqah_jariyah_config.dart';
 export 'domain/entities/sadaqah_jariyah_page_data.dart';
 export 'domain/enums/dedication_relation.dart';
 export 'domain/enums/dedication_status.dart';
+export 'domain/failures/sadaqah_jariyah_failure.dart';
 export 'domain/repositories/dedications_repository.dart';
 export 'domain/repositories/sadaqah_jariyah_config_repository.dart';
 export 'domain/services/dedication_photo_url_resolver.dart';

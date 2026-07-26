@@ -775,63 +775,63 @@ Map to PRD acceptance checklist (titles, WhatsApp, founding first, no amounts, o
 
 ### Backend
 
-- [ ] **SJ-01** Add Firestore rules for `app_config/sadaqah_jariyah` (public read, admin write)  
-- [ ] **SJ-02** Add Firestore rules for `dedications` published read + admin write  
-- [ ] **SJ-03** Add Firestore rules for `dedications/{id}/private/{doc}` admin-only  
-- [ ] **SJ-04** Add Firestore rules for `dedications_slugs` admin-only  
-- [ ] **SJ-05** Add composite index `dedications: status + sortOrder`  
-- [ ] **SJ-06** Add Storage rules for `photos/dedications/{file}`  
-- [ ] **SJ-07** Seed script: founding doc `ahmed-mohamed-tony` + slug pointer + default config  
+- [x] **SJ-01** Add Firestore rules for `app_config/sadaqah_jariyah` (public read, admin write)  
+- [x] **SJ-02** Add Firestore rules for `dedications` published read + admin write  
+- [x] **SJ-03** Add Firestore rules for `dedications/{id}/private/{doc}` admin-only  
+- [x] **SJ-04** Add Firestore rules for `dedications_slugs` admin-only  
+- [x] **SJ-05** Add composite index `dedications: status + sortOrder`  
+- [x] **SJ-06** Add Storage rules for `photos/dedications/{file}`  
+- [x] **SJ-07** Seed script: founding doc `ahmed-mohamed-tony` + slug pointer + default config  
 
 ### App domain/data
 
-- [ ] **SJ-08** Add `DedicationRelation` + `DedicationStatus` enums  
-- [ ] **SJ-09** Add `Dedication` + `SadaqahJariyahConfig` + `SadaqahJariyahPageData`  
-- [ ] **SJ-10** Add `SadaqahJariyahFailure`  
-- [ ] **SJ-11** Add repository interfaces + photo resolver interface  
-- [ ] **SJ-12** Implement Firestore dedications datasource + mapper  
-- [ ] **SJ-13** Implement config datasource + mapper (defaults)  
-- [ ] **SJ-14** Implement Storage download URL resolver with TTL cache  
-- [ ] **SJ-15** Implement repository impls + DI registration  
-- [ ] **SJ-16** Implement `GetSadaqahJariyahPageUseCase`  
-- [ ] **SJ-17** Implement `SortDedicationsForDisplayUseCase` + unit tests  
-- [ ] **SJ-18** Implement `BuildWhatsappParticipateUriUseCase` + unit tests  
+- [x] **SJ-08** Add `DedicationRelation` + `DedicationStatus` enums  
+- [x] **SJ-09** Add `Dedication` + `SadaqahJariyahConfig` + `SadaqahJariyahPageData`  
+- [x] **SJ-10** Add `SadaqahJariyahFailure`  
+- [x] **SJ-11** Add repository interfaces + photo resolver interface  
+- [x] **SJ-12** Implement Firestore dedications datasource + mapper  
+- [x] **SJ-13** Implement config datasource + mapper (defaults)  
+- [x] **SJ-14** Implement Storage download URL resolver with TTL cache  
+- [x] **SJ-15** Implement repository impls + DI registration  
+- [x] **SJ-16** Implement `GetSadaqahJariyahPageUseCase`  
+- [x] **SJ-17** Implement `SortDedicationsForDisplayUseCase` + unit tests  
+- [x] **SJ-18** Implement `BuildWhatsappParticipateUriUseCase` + unit tests  
 
 ### App UI / routing
 
-- [ ] **SJ-19** Add AR/EN l10n (title defaults, intro, CTA, sheet, relations, footer)  
-- [ ] **SJ-20** Build letter avatar + dedication card + founding card widgets  
-- [ ] **SJ-21** Build intro, list, footer, CTA widgets  
-- [ ] **SJ-22** Build participate bottom sheet  
-- [ ] **SJ-23** Implement `SadaqahJariyahCubit` + screen with loading/error/empty  
-- [ ] **SJ-24** Add `SadaqahJariyahRoute` `/sadaqah-jariyah` + codegen  
-- [ ] **SJ-25** Wire Settings + About + Support soft link entry points  
-- [ ] **SJ-26** Add launch flag `TILAWA_LAUNCH_SADAQAH_JARIYAH_ENABLED` gate  
-- [ ] **SJ-27** WhatsApp launch + fallback copy number/message  
+- [x] **SJ-19** Add AR/EN l10n (title defaults, intro, CTA, sheet, relations, footer)  
+- [x] **SJ-20** Build letter avatar + dedication card + founding card widgets  
+- [x] **SJ-21** Build intro, list, footer, CTA widgets  
+- [x] **SJ-22** Build participate bottom sheet  
+- [x] **SJ-23** Implement `SadaqahJariyahCubit` + screen with loading/error/empty  
+- [x] **SJ-24** Add `SadaqahJariyahRoute` `/sadaqah-jariyah` + codegen  
+- [x] **SJ-25** Wire Settings + About + Support soft link entry points  
+- [x] **SJ-26** Add launch flag `TILAWA_LAUNCH_SADAQAH_JARIYAH_ENABLED` gate  
+- [x] **SJ-27** WhatsApp launch + fallback copy number/message  
 
 ### Onboarding
 
-- [ ] **SJ-28** Remove Abu Hudhaifa onboarding page; update widget tests  
+- [x] **SJ-28** Remove Abu Hudhaifa onboarding page; update widget tests  
 
 ### Admin
 
-- [ ] **SJ-29** Add `dedications.paths.ts` + repository  
-- [ ] **SJ-30** Implement slug util + unit tests  
-- [ ] **SJ-31** List page (filters status / search)  
-- [ ] **SJ-32** Create/edit form (relation enum, featured, sortOrder, founding lock)  
-- [ ] **SJ-33** Photo upload to Storage + set `photoStoragePath`  
-- [ ] **SJ-34** Private ops editor  
-- [ ] **SJ-35** Publish/archive actions + slug immutability after publish  
-- [ ] **SJ-36** Config page (titles, WhatsApp, templates, featureEnabled)  
-- [ ] **SJ-37** Sidebar nav + admin l10n  
+- [x] **SJ-29** Add `dedications.paths.ts` + repository  
+- [x] **SJ-30** Implement slug util + unit tests  
+- [x] **SJ-31** List page (filters status / search)  
+- [x] **SJ-32** Create/edit form (relation enum, featured, sortOrder, founding lock)  
+- [x] **SJ-33** Photo upload to Storage + set `photoStoragePath`  
+- [x] **SJ-34** Private ops editor  
+- [x] **SJ-35** Publish/archive actions + slug immutability after publish  
+- [x] **SJ-36** Config page (titles, WhatsApp, templates, featureEnabled)  
+- [x] **SJ-37** Sidebar nav + admin l10n  
 
 ### QA
 
-- [ ] **SJ-38** Rules tests: draft hidden; published visible; private denied  
-- [ ] **SJ-39** Widget tests: banding order; avatar fallback; sheet intention text  
+- [x] **SJ-38** Rules tests: draft hidden; published visible; private denied  
+- [x] **SJ-39** Widget tests: banding order; avatar fallback; sheet intention text  
 - [ ] **SJ-40** Manual acceptance pass vs PRD checklist  
 - [ ] **SJ-41** Scholar/copy review sign-off before enabling prod flag  
-- [ ] **SJ-42** `dart run melos run fix:format` + analyze + targeted `flutter test`  
+- [x] **SJ-42** `dart run melos run fix:format` + analyze + targeted `flutter test`  
 
 ---
 

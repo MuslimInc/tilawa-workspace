@@ -3,6 +3,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:tilawa/core/di/injection.dart';
 import 'package:tilawa/core/extensions.dart';
+import 'package:tilawa_core/constants/analytics_constants.dart';
+import 'package:tilawa_core/services/analytics_service.dart';
 import 'package:tilawa_ui_kit/tilawa_ui_kit.dart';
 import 'package:url_launcher/url_launcher.dart';
 
@@ -141,6 +143,16 @@ class _SadaqahJariyahParticipateSheetState
     );
     if (!mounted) {
       return;
+    }
+    final AnalyticsService analytics = getIt<AnalyticsService>();
+    if (opened) {
+      unawaited(
+        analytics.logEvent(AnalyticsEvents.sadaqahJariyahWhatsappOpened),
+      );
+    } else {
+      unawaited(
+        analytics.logEvent(AnalyticsEvents.sadaqahJariyahWhatsappFailed),
+      );
     }
     setState(() {
       _launching = false;

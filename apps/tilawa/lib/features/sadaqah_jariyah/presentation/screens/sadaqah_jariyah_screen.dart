@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:tilawa/core/extensions.dart';
@@ -111,10 +113,15 @@ class _LoadedBody extends StatelessWidget {
             ),
             child: SadaqahJariyahSupportCta(
               enabled: ctaEnabled,
-              onPressed: () => showSadaqahJariyahParticipateSheet(
-                context: context,
-                config: config,
-              ),
+              onPressed: () {
+                unawaited(context.read<SadaqahJariyahCubit>().logCtaTapped());
+                unawaited(
+                  showSadaqahJariyahParticipateSheet(
+                    context: context,
+                    config: config,
+                  ),
+                );
+              },
             ),
           ),
         ),

@@ -4,6 +4,7 @@ import 'package:tilawa_core/errors/failures.dart';
 import 'package:tilawa_core/usecases/usecase.dart';
 
 import '../entities/sadaqah_jariyah_config.dart';
+import '../failures/sadaqah_jariyah_failure.dart';
 
 class BuildWhatsappParticipateUriParams {
   const BuildWhatsappParticipateUriParams({
@@ -27,7 +28,7 @@ class BuildWhatsappParticipateUriUseCase
       '',
     );
     if (digits.isEmpty) {
-      return const Left(ValidationFailure('whatsappUnavailable'));
+      return const Left(SadaqahJariyahFailures.whatsappUnavailable);
     }
     final String text = params.config.messageTemplateForLanguageCode(
       params.languageCode,

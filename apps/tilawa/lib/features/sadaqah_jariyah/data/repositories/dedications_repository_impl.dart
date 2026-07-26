@@ -1,9 +1,9 @@
 import 'package:dartz_plus/dartz_plus.dart';
 import 'package:injectable/injectable.dart';
-import 'package:tilawa_core/errors/failures.dart';
 import 'package:tilawa_core/utils/typedefs.dart';
 
 import '../../domain/entities/dedication.dart';
+import '../../domain/failures/sadaqah_jariyah_failure.dart';
 import '../../domain/repositories/dedications_repository.dart';
 import '../datasources/dedications_remote_data_source.dart';
 
@@ -18,8 +18,8 @@ class DedicationsRepositoryImpl implements DedicationsRepository {
     try {
       final List<Dedication> list = await _remote.getPublishedDedications();
       return Right(list);
-    } on Object catch (e) {
-      return Left(NetworkFailure(e.toString()));
+    } on Object catch (_) {
+      return const Left(SadaqahJariyahFailures.network);
     }
   }
 }
