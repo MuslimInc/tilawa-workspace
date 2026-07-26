@@ -1,12 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:tilawa/features/sadaqah_jariyah/domain/entities/dedication.dart';
-import 'package:tilawa/features/sadaqah_jariyah/domain/entities/sadaqah_jariyah_config.dart';
 import 'package:tilawa/features/sadaqah_jariyah/domain/enums/dedication_status.dart';
 import 'package:tilawa/features/sadaqah_jariyah/presentation/widgets/sadaqah_jariyah_dedication_card.dart';
 import 'package:tilawa/features/sadaqah_jariyah/presentation/widgets/sadaqah_jariyah_letter_avatar.dart';
 import 'package:tilawa/features/sadaqah_jariyah/presentation/widgets/sadaqah_jariyah_list.dart';
-import 'package:tilawa/features/sadaqah_jariyah/presentation/widgets/sadaqah_jariyah_participate_sheet.dart';
 import 'package:tilawa/l10n/generated/app_localizations.dart';
 import 'package:tilawa_ui_kit/tilawa_ui_kit.dart';
 
@@ -65,7 +63,7 @@ void main() {
     );
 
     expect(find.byType(SadaqahJariyahDedicationCard), findsNWidgets(2));
-    expect(find.text('May Allah have mercy on them'), findsNWidgets(2));
+    expect(find.text('Founding'), findsOneWidget);
 
     final Finder founding = find.text('Ahmed Mohamed Tony');
     final Finder other = find.text('Other Person');
@@ -75,24 +73,6 @@ void main() {
       tester.getTopLeft(founding).dy < tester.getTopLeft(other).dy,
       isTrue,
     );
-    expect(find.text('The reason MeMuslim began'), findsOneWidget);
     expect(find.text('Remembered with love'), findsOneWidget);
-  });
-
-  testWidgets('participate sheet shows intention line', (
-    WidgetTester tester,
-  ) async {
-    await tester.pumpWidget(
-      wrap(
-        const SadaqahJariyahParticipateSheet(
-          config: SadaqahJariyahConfig(),
-        ),
-      ),
-    );
-
-    expect(
-      find.textContaining('ongoing charity for the deceased'),
-      findsOneWidget,
-    );
   });
 }

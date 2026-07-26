@@ -7872,13 +7872,13 @@ abstract class AppLocalizations {
   /// Default Sadaqah Jariyah subtitle
   ///
   /// In en, this message translates to:
-  /// **'Dedications of intention'**
+  /// **'Sadaqah Jariyah'**
   String get sadaqahJariyahDefaultSubtitle;
 
-  /// Sadaqah Jariyah intro paragraph 1
+  /// Section title above the dedications list
   ///
   /// In en, this message translates to:
-  /// **'MeMuslim began as an ongoing charity for Ahmed Mohamed Tony (Abu Hudhaifa), may Allah have mercy on him.'**
+  /// **'Registered names'**
   String get sadaqahJariyahIntroP1;
 
   /// Sadaqah Jariyah intro paragraph 2
@@ -7899,6 +7899,12 @@ abstract class AppLocalizations {
   /// **'The reason MeMuslim began'**
   String get sadaqahJariyahFoundingOrigin;
 
+  /// Subtle status chip on founding list entry
+  ///
+  /// In en, this message translates to:
+  /// **'Founding'**
+  String get sadaqahJariyahFoundingLabel;
+
   /// Honorific under dedication name
   ///
   /// In en, this message translates to:
@@ -7917,10 +7923,10 @@ abstract class AppLocalizations {
   /// **'Others may join by supporting MeMuslim.'**
   String get sadaqahJariyahEmptyOthers;
 
-  /// Primary CTA on Sadaqah Jariyah page
+  /// Bottom CTA that opens WhatsApp to request a share (سهم)
   ///
   /// In en, this message translates to:
-  /// **'Support MeMuslim'**
+  /// **'Request a share'**
   String get sadaqahJariyahSupportCta;
 
   /// Quiet disclaimer under dedications list
@@ -7932,19 +7938,19 @@ abstract class AppLocalizations {
   /// Required intention wording on participate sheet
   ///
   /// In en, this message translates to:
-  /// **'The user intends this support as an ongoing charity for the deceased, and we ask Allah to accept it.'**
+  /// **'Ask to add a deceased loved one to this Sadaqah Jariyah list. We ask Allah to accept.'**
   String get sadaqahJariyahIntentionLine;
 
   /// Participate bottom sheet title
   ///
   /// In en, this message translates to:
-  /// **'How to participate'**
+  /// **'Add a person'**
   String get sadaqahJariyahSheetTitle;
 
   /// What to send via WhatsApp
   ///
   /// In en, this message translates to:
-  /// **'Send us on WhatsApp:\n• Deceased name\n• Relation (optional)\n• Support amount / proof'**
+  /// **'Send us on WhatsApp:\n• Deceased name\n• Relation (optional)\n• Short note (optional)'**
   String get sadaqahJariyahSheetChecklist;
 
   /// Sheet primary action

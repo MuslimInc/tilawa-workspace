@@ -2,18 +2,20 @@ import 'dart:async';
 
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:tilawa/core/di/injection.dart';
 import 'package:tilawa/core/extensions.dart';
+import 'package:tilawa_core/constants/analytics_constants.dart';
+import 'package:tilawa_core/services/analytics_service.dart';
 import 'package:tilawa_ui_kit/tilawa_ui_kit.dart';
 
 import '../../domain/entities/dedication.dart';
 import '../../domain/entities/sadaqah_jariyah_config.dart';
 import '../cubit/sadaqah_jariyah_cubit.dart';
 import '../cubit/sadaqah_jariyah_state.dart';
-import '../widgets/sadaqah_jariyah_footer.dart';
+import '../widgets/sadaqah_jariyah_add_cta.dart';
+import '../widgets/sadaqah_jariyah_add_person_sheet.dart';
 import '../widgets/sadaqah_jariyah_intro.dart';
 import '../widgets/sadaqah_jariyah_list.dart';
-import '../widgets/sadaqah_jariyah_participate_sheet.dart';
-import '../widgets/sadaqah_jariyah_support_cta.dart';
 
 class SadaqahJariyahScreen extends StatelessWidget {
   const SadaqahJariyahScreen({super.key});
@@ -91,38 +93,31 @@ class _LoadedBody extends StatelessWidget {
               tokens.spaceLarge,
             ),
             children: [
-              SadaqahJariyahIntro(config: config),
-              SizedBox(height: tokens.spaceExtraLarge),
+              const SadaqahJariyahIntro(),
+              SizedBox(height: tokens.spaceLarge),
               SadaqahJariyahList(
                 dedications: dedications,
                 photoUrls: photoUrls,
               ),
-              SizedBox(height: tokens.spaceLarge),
-              const SadaqahJariyahFooter(),
             ],
           ),
         ),
-        SafeArea(
-          top: false,
-          child: Padding(
-            padding: EdgeInsets.fromLTRB(
-              tokens.spaceLarge,
-              tokens.spaceSmall,
-              tokens.spaceLarge,
-              tokens.spaceMedium,
-            ),
-            child: SadaqahJariyahSupportCta(
-              enabled: ctaEnabled,
-              onPressed: () {
-                unawaited(context.read<SadaqahJariyahCubit>().logCtaTapped());
-                unawaited(
-                  showSadaqahJariyahParticipateSheet(
-                    context: context,
-                    config: config,
-                  ),
-                );
-              },
-            ),
+        TilawaBottomActionArea(
+          child: SadaqahJariyahAddCta(
+            enabled: ctaEnabled,
+            onPressed: () {
+              unawaited(
+                getIt<AnalyticsService>().logEvent(
+                  AnalyticsEvents.sadaqahJariyahCtaTapped,
+                ),
+              );
+              unawaited(
+                showSadaqahJariyahAddPersonSheet(
+                  context: context,
+                  config: config,
+                ),
+              );
+            },
           ),
         ),
       ],

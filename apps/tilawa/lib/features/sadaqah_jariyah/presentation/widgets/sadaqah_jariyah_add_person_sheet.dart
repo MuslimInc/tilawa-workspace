@@ -1,4 +1,5 @@
 import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:tilawa/core/di/injection.dart';
@@ -11,31 +12,33 @@ import 'package:url_launcher/url_launcher.dart';
 import '../../domain/entities/sadaqah_jariyah_config.dart';
 import '../../domain/usecases/build_whatsapp_participate_uri_use_case.dart';
 
-Future<void> showSadaqahJariyahParticipateSheet({
+Future<void> showSadaqahJariyahAddPersonSheet({
   required BuildContext context,
   required SadaqahJariyahConfig config,
 }) {
-  return showModalBottomSheet<void>(
+  final ThemeData theme = Theme.of(context);
+  return showTilawaModalBottomSheet<void>(
     context: context,
-    isScrollControlled: true,
+    backgroundColor: theme.colorScheme.surface,
+    shape: TilawaBottomSheetScaffold.modalShape(context),
     builder: (BuildContext sheetContext) {
-      return SadaqahJariyahParticipateSheet(config: config);
+      return SadaqahJariyahAddPersonSheet(config: config);
     },
   );
 }
 
-class SadaqahJariyahParticipateSheet extends StatefulWidget {
-  const SadaqahJariyahParticipateSheet({required this.config, super.key});
+class SadaqahJariyahAddPersonSheet extends StatefulWidget {
+  const SadaqahJariyahAddPersonSheet({required this.config, super.key});
 
   final SadaqahJariyahConfig config;
 
   @override
-  State<SadaqahJariyahParticipateSheet> createState() =>
-      _SadaqahJariyahParticipateSheetState();
+  State<SadaqahJariyahAddPersonSheet> createState() =>
+      _SadaqahJariyahAddPersonSheetState();
 }
 
-class _SadaqahJariyahParticipateSheetState
-    extends State<SadaqahJariyahParticipateSheet> {
+class _SadaqahJariyahAddPersonSheetState
+    extends State<SadaqahJariyahAddPersonSheet> {
   bool _launchFailed = false;
   bool _launching = false;
 

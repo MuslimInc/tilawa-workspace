@@ -41,8 +41,4 @@ class SadaqahJariyahCubit extends Cubit<SadaqahJariyahState> {
       },
     );
   }
-
-  Future<void> logCtaTapped() {
-    return _analytics.logEvent(AnalyticsEvents.sadaqahJariyahCtaTapped);
-  }
 }

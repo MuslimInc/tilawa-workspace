@@ -4480,11 +4480,10 @@ class AppLocalizationsEn extends AppLocalizations {
   String get sadaqahJariyahDefaultTitle => 'Sadaqah Jariyah';
 
   @override
-  String get sadaqahJariyahDefaultSubtitle => 'Dedications of intention';
+  String get sadaqahJariyahDefaultSubtitle => 'Sadaqah Jariyah';
 
   @override
-  String get sadaqahJariyahIntroP1 =>
-      'MeMuslim began as an ongoing charity for Ahmed Mohamed Tony (Abu Hudhaifa), may Allah have mercy on him.';
+  String get sadaqahJariyahIntroP1 => 'Registered names';
 
   @override
   String get sadaqahJariyahIntroP2 =>
@@ -4498,6 +4497,9 @@ class AppLocalizationsEn extends AppLocalizations {
   String get sadaqahJariyahFoundingOrigin => 'The reason MeMuslim began';
 
   @override
+  String get sadaqahJariyahFoundingLabel => 'Founding';
+
+  @override
   String get sadaqahJariyahRahimahullah => 'May Allah have mercy on them';
 
   @override
@@ -4508,7 +4510,7 @@ class AppLocalizationsEn extends AppLocalizations {
       'Others may join by supporting MeMuslim.';
 
   @override
-  String get sadaqahJariyahSupportCta => 'Support MeMuslim';
+  String get sadaqahJariyahSupportCta => 'Request a share';
 
   @override
   String get sadaqahJariyahFooterDisclaimer =>
@@ -4516,14 +4518,14 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get sadaqahJariyahIntentionLine =>
-      'The user intends this support as an ongoing charity for the deceased, and we ask Allah to accept it.';
+      'Ask to add a deceased loved one to this Sadaqah Jariyah list. We ask Allah to accept.';
 
   @override
-  String get sadaqahJariyahSheetTitle => 'How to participate';
+  String get sadaqahJariyahSheetTitle => 'Add a person';
 
   @override
   String get sadaqahJariyahSheetChecklist =>
-      'Send us on WhatsApp:\n• Deceased name\n• Relation (optional)\n• Support amount / proof';
+      'Send us on WhatsApp:\n• Deceased name\n• Relation (optional)\n• Short note (optional)';
 
   @override
   String get sadaqahJariyahContinueWhatsapp => 'Continue on WhatsApp';

@@ -6,7 +6,7 @@ import '../../domain/entities/dedication.dart';
 import '../l10n/dedication_relation_l10n.dart';
 import 'sadaqah_jariyah_letter_avatar.dart';
 
-/// Shared dedication row used for founding and all other published entries.
+/// Shared dedication row. Founding uses a slightly larger avatar + status chip.
 class SadaqahJariyahDedicationCard extends StatelessWidget {
   const SadaqahJariyahDedicationCard({
     required this.dedication,
@@ -18,7 +18,8 @@ class SadaqahJariyahDedicationCard extends StatelessWidget {
   final String? photoUrl;
 
   static const String foundingAsset = 'assets/images/ahmed.png';
-  static const double _avatarSize = 56;
+  static const double _avatarSize = 40;
+  static const double _foundingAvatarSize = 44;
 
   @override
   Widget build(BuildContext context) {
@@ -26,12 +27,17 @@ class SadaqahJariyahDedicationCard extends StatelessWidget {
     final tokens = theme.tokens;
     final ColorScheme scheme = theme.colorScheme;
     final l10n = context.l10n;
+    final bool isFounding = dedication.isFounding;
+    final double avatarSize = isFounding ? _foundingAvatarSize : _avatarSize;
     final String? relation = localizedDedicationRelation(
       context,
       dedication.relation,
       relationOther: dedication.relationOther,
     );
-    final String? note = _resolvedNote(context);
+    final String? note = dedication.note?.trim();
+    final String? resolvedNote = (note != null && note.isNotEmpty)
+        ? note
+        : null;
 
     return Semantics(
       label: dedication.displayName,
@@ -45,15 +51,19 @@ class SadaqahJariyahDedicationCard extends StatelessWidget {
           ),
         ),
         child: Padding(
-          padding: EdgeInsets.all(tokens.spaceMedium),
+          padding: EdgeInsets.symmetric(
+            horizontal: tokens.spaceMedium,
+            vertical: tokens.spaceSmall,
+          ),
           child: Row(
-            crossAxisAlignment: CrossAxisAlignment.start,
+            crossAxisAlignment: CrossAxisAlignment.center,
             children: [
-              _avatar(context),
-              SizedBox(width: tokens.spaceMedium),
+              _avatar(context, size: avatarSize),
+              SizedBox(width: tokens.spaceSmall),
               Expanded(
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
+                  mainAxisSize: MainAxisSize.min,
                   children: [
                     Text(
                       dedication.displayName,
@@ -61,13 +71,18 @@ class SadaqahJariyahDedicationCard extends StatelessWidget {
                         fontWeight: FontWeight.w700,
                       ),
                     ),
-                    SizedBox(height: tokens.spaceExtraSmall),
-                    Text(
-                      l10n.sadaqahJariyahRahimahullah,
-                      style: theme.textTheme.bodySmall?.copyWith(
-                        color: scheme.onSurfaceVariant,
+                    if (isFounding) ...[
+                      SizedBox(height: tokens.spaceExtraSmall),
+                      TilawaStatusChip(
+                        label: l10n.sadaqahJariyahFoundingLabel,
+                        backgroundColor: scheme.secondaryContainer,
+                        foregroundColor: scheme.onSecondaryContainer,
+                        padding: EdgeInsets.symmetric(
+                          horizontal: tokens.spaceSmall,
+                          vertical: tokens.spaceExtraSmall / 2,
+                        ),
                       ),
-                    ),
+                    ],
                     if (relation != null) ...[
                       SizedBox(height: tokens.spaceExtraSmall),
                       Text(
@@ -77,13 +92,12 @@ class SadaqahJariyahDedicationCard extends StatelessWidget {
                         ),
                       ),
                     ],
-                    if (note != null) ...[
-                      SizedBox(height: tokens.spaceSmall),
+                    if (resolvedNote != null) ...[
+                      SizedBox(height: tokens.spaceExtraSmall),
                       Text(
-                        note,
-                        style: theme.textTheme.bodyMedium?.copyWith(
+                        resolvedNote,
+                        style: theme.textTheme.bodySmall?.copyWith(
                           color: scheme.onSurfaceVariant,
-                          height: tokens.textHeightLoose,
                         ),
                       ),
                     ],
@@ -97,51 +111,40 @@ class SadaqahJariyahDedicationCard extends StatelessWidget {
     );
   }
 
-  String? _resolvedNote(BuildContext context) {
-    final String? note = dedication.note?.trim();
-    if (note != null && note.isNotEmpty) {
-      return note;
-    }
-    if (dedication.isFounding) {
-      return context.l10n.sadaqahJariyahFoundingOrigin;
-    }
-    return null;
-  }
-
-  Widget _avatar(BuildContext context) {
+  Widget _avatar(BuildContext context, {required double size}) {
     final String? url = photoUrl;
     if (url != null && url.isNotEmpty) {
       return ClipOval(
         child: Image.network(
           url,
-          width: _avatarSize,
-          height: _avatarSize,
+          width: size,
+          height: size,
           fit: BoxFit.cover,
-          errorBuilder: (_, _, _) => _fallbackAvatar(context),
+          errorBuilder: (_, _, _) => _fallbackAvatar(context, size: size),
         ),
       );
     }
-    return _fallbackAvatar(context);
+    return _fallbackAvatar(context, size: size);
   }
 
-  Widget _fallbackAvatar(BuildContext context) {
+  Widget _fallbackAvatar(BuildContext context, {required double size}) {
     if (dedication.isFounding) {
       return ClipOval(
         child: Image.asset(
           foundingAsset,
-          width: _avatarSize,
-          height: _avatarSize,
+          width: size,
+          height: size,
           fit: BoxFit.cover,
           errorBuilder: (_, _, _) => SadaqahJariyahLetterAvatar(
             name: dedication.displayName,
-            size: _avatarSize,
+            size: size,
           ),
         ),
       );
     }
     return SadaqahJariyahLetterAvatar(
       name: dedication.displayName,
-      size: _avatarSize,
+      size: size,
     );
   }
 }

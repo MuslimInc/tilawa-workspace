@@ -4438,11 +4438,10 @@ class AppLocalizationsAr extends AppLocalizations {
   String get sadaqahJariyahDefaultTitle => 'صدقة جارية';
 
   @override
-  String get sadaqahJariyahDefaultSubtitle => 'نيات دعم';
+  String get sadaqahJariyahDefaultSubtitle => 'صدقة جارية';
 
   @override
-  String get sadaqahJariyahIntroP1 =>
-      'بدأ «أنا مسلم» صدقةً جارية عن أحمد محمد طوني (أبي حذيفة)، رحمه الله.';
+  String get sadaqahJariyahIntroP1 => 'الأسماء المسجلة';
 
   @override
   String get sadaqahJariyahIntroP2 =>
@@ -4456,6 +4455,9 @@ class AppLocalizationsAr extends AppLocalizations {
   String get sadaqahJariyahFoundingOrigin => 'سبب بدء أنا مسلم';
 
   @override
+  String get sadaqahJariyahFoundingLabel => 'تأسيسي';
+
+  @override
   String get sadaqahJariyahRahimahullah => 'رحمهم الله';
 
   @override
@@ -4466,7 +4468,7 @@ class AppLocalizationsAr extends AppLocalizations {
       'يمكن للآخرين المشاركة بدعم أنا مسلم.';
 
   @override
-  String get sadaqahJariyahSupportCta => 'ادعم أنا مسلم';
+  String get sadaqahJariyahSupportCta => 'اطلب سهمًا';
 
   @override
   String get sadaqahJariyahFooterDisclaimer =>
@@ -4474,14 +4476,14 @@ class AppLocalizationsAr extends AppLocalizations {
 
   @override
   String get sadaqahJariyahIntentionLine =>
-      'يقصد المستخدم هذا الدعم صدقة جارية عن المتوفى، ونسأل الله القبول.';
+      'اطلب إضافة اسم راحل عزيز إلى قائمة الصدقة الجارية. نسأل الله القبول.';
 
   @override
-  String get sadaqahJariyahSheetTitle => 'كيف تشارك';
+  String get sadaqahJariyahSheetTitle => 'إضافة اسم';
 
   @override
   String get sadaqahJariyahSheetChecklist =>
-      'أرسل لنا عبر واتساب:\n• اسم المتوفى\n• صلة القرابة (اختياري)\n• مبلغ الدعم / إثبات';
+      'أرسل لنا عبر واتساب:\n• اسم المتوفى\n• صلة القرابة (اختياري)\n• ملاحظة قصيرة (اختياري)';
 
   @override
   String get sadaqahJariyahContinueWhatsapp => 'المتابعة عبر واتساب';

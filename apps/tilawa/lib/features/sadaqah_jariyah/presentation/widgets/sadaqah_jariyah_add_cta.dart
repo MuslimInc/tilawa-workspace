@@ -2,8 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:tilawa/core/extensions.dart';
 import 'package:tilawa_ui_kit/tilawa_ui_kit.dart';
 
-class SadaqahJariyahSupportCta extends StatelessWidget {
-  const SadaqahJariyahSupportCta({
+class SadaqahJariyahAddCta extends StatelessWidget {
+  const SadaqahJariyahAddCta({
     required this.onPressed,
     this.enabled = true,
     super.key,
@@ -16,6 +16,7 @@ class SadaqahJariyahSupportCta extends StatelessWidget {
   Widget build(BuildContext context) {
     return TilawaButton(
       text: context.l10n.sadaqahJariyahSupportCta,
+      isFullWidth: true,
       onPressed: enabled ? onPressed : null,
     );
   }
