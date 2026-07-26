@@ -4471,7 +4471,7 @@ class AppLocalizationsAr extends AppLocalizations {
       'يمكن للآخرين المشاركة بدعم أنا مسلم.';
 
   @override
-  String get sadaqahJariyahSupportCta => 'اطلب سهمًا';
+  String get sadaqahJariyahSupportCta => 'اطلب سهم';
 
   @override
   String get sadaqahJariyahFooterDisclaimer =>

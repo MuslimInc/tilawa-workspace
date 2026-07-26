@@ -4636,7 +4636,7 @@
   "@sadaqahJariyahFeaturedSection": {"description": "Optional featured dedications section title"},
   "sadaqahJariyahEmptyOthers": "يمكن للآخرين المشاركة بدعم أنا مسلم.",
   "@sadaqahJariyahEmptyOthers": {"description": "Empty state when only founding dedication exists"},
-  "sadaqahJariyahSupportCta": "اطلب سهمًا",
+  "sadaqahJariyahSupportCta": "اطلب سهم",
   "@sadaqahJariyahSupportCta": {"description": "Bottom CTA that opens WhatsApp to request a share (سهم)"},
   "sadaqahJariyahFooterDisclaimer": "الدعم يُبقي أنا مسلم مستمراً. هذا ليس إيصالاً لجمعية خيرية مسجّلة. راجع عالمك إن كنت غير متأكد.",
   "@sadaqahJariyahFooterDisclaimer": {"description": "Quiet disclaimer under dedications list"},
