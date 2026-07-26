@@ -114,6 +114,28 @@ service cloud.firestore {
       allow write: if isAdmin();
     }
 
+    // Sadaqah Jariyah — public titles/WhatsApp config; admin write.
+    match /app_config/sadaqah_jariyah {
+      allow read: if true;
+      allow write: if isAdmin();
+    }
+
+    // Public dedications list (published only for clients).
+    match /dedications/{dedicationId} {
+      allow read: if isAdmin()
+        || (resource.data.status == 'published');
+      allow create, update, delete: if isAdmin();
+
+      match /private/{docId} {
+        allow read, write: if isAdmin();
+      }
+    }
+
+    // Slug uniqueness pointers — admin only (MVP clients do not resolve by slug).
+    match /dedications_slugs/{slug} {
+      allow read, write: if isAdmin();
+    }
+
     // Subscription catalog — read-only for clients; seed via admin tools.
     match /subscription_plans/{planId} {
       allow read: if true;
