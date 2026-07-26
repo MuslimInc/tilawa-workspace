@@ -1,0 +1,90 @@
+<div class="tilawa-page-stack">
+  <app-page-header
+    [title]="'sadaqahJariyah_title' | t"
+    [subtitle]="'sadaqahJariyah_subtitle' | t"
+    [hasActions]="true"
+  >
+    <div actions class="flex flex-wrap gap-2">
+      <app-tilawa-button
+        variant="secondary"
+        [link]="['/sadaqah-jariyah/config']"
+        [label]="'sadaqahJariyah_configLink' | t"
+      />
+      <app-tilawa-button
+        variant="primary"
+        [link]="['/sadaqah-jariyah/new']"
+        [label]="'sadaqahJariyah_create' | t"
+      />
+    </div>
+  </app-page-header>
+
+  <app-tilawa-filter-bar (apply)="reload()">
+    <input
+      type="search"
+      class="tilawa-field"
+      [(ngModel)]="searchQuery"
+      (ngModelChange)="onSearchChange()"
+      (keyup.enter)="reload()"
+      [placeholder]="'sadaqahJariyah_searchPlaceholder' | t"
+    />
+    <select class="tilawa-field" [(ngModel)]="statusFilter" (change)="reload()">
+      <option value="">{{ 'common_allStatuses' | t }}</option>
+      @for (status of statusOptions; track status) {
+        <option [value]="status">{{ status | statusLabel }}</option>
+      }
+    </select>
+  </app-tilawa-filter-bar>
+
+  @if (loading()) {
+    <app-tilawa-loading-state [message]="'sadaqahJariyah_loading' | t" />
+  } @else if (errorMessage()) {
+    <app-tilawa-error-state
+      [message]="errorMessage() ?? 'Error'"
+      [showRetry]="true"
+      (retry)="reload()"
+    />
+  } @else if (filteredItems().length === 0) {
+    <app-tilawa-empty-state [boxed]="true" [title]="'sadaqahJariyah_empty' | t" />
+  } @else {
+    <app-tilawa-data-table pinMode="leading">
+      <thead>
+        <tr>
+          <th scope="col" class="tilawa-table-pin tilawa-table-leading tilawa-table-pin-edge">
+            {{ 'common_name' | t }}
+          </th>
+          <th scope="col">{{ 'common_status' | t }}</th>
+          <th scope="col">{{ 'sadaqahJariyah_featured' | t }}</th>
+          <th scope="col">{{ 'sadaqahJariyah_founding' | t }}</th>
+          <th scope="col">{{ 'sadaqahJariyah_sortOrder' | t }}</th>
+          <th scope="col">{{ 'common_updated' | t }}</th>
+        </tr>
+      </thead>
+      <tbody>
+        @for (item of filteredItems(); track item.id) {
+          <tr>
+            <td class="tilawa-table-pin tilawa-table-leading tilawa-table-pin-edge">
+              <div class="tilawa-table-leading-inner">
+                <span class="tilawa-table-leading-label">{{ item.displayName }}</span>
+                <div class="tilawa-table-leading-actions">
+                  <app-tilawa-button
+                    variant="primary"
+                    size="xs"
+                    [label]="'common_view' | t"
+                    [link]="['/sadaqah-jariyah', item.id]"
+                  />
+                </div>
+              </div>
+            </td>
+            <td>
+              <app-status-chip [label]="item.status | statusLabel" [status]="item.status" />
+            </td>
+            <td>{{ yesNo(item.isFeatured) }}</td>
+            <td>{{ yesNo(item.isFounding) }}</td>
+            <td>{{ item.sortOrder }}</td>
+            <td>{{ item.updatedAt | date: 'medium' }}</td>
+          </tr>
+        }
+      </tbody>
+    </app-tilawa-data-table>
+  }
+</div>

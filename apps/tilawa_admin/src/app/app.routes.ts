@@ -43,6 +43,13 @@ export const routes: Routes = [
           ),
       },
       {
+        path: 'sadaqah-jariyah',
+        loadChildren: () =>
+          import('./features/sadaqah-jariyah/sadaqah-jariyah.routes').then(
+            (m) => m.SADAQAH_JARIYAH_ROUTES,
+          ),
+      },
+      {
         path: 'quran-sessions/teacher-applications',
         loadComponent: () =>
           import('./features/quran-sessions/teacher-applications/teacher-applications.component').then(
@@ -174,3 +181,4 @@ export const routes: Routes = [
   },
   { path: '**', redirectTo: '' },
 ];
+
