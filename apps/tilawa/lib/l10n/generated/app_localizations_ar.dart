@@ -4433,4 +4433,102 @@ class AppLocalizationsAr extends AppLocalizations {
 
   @override
   String get homeQuickRadio => 'إذاعة';
+
+  @override
+  String get sadaqahJariyahDefaultTitle => 'صدقة جارية';
+
+  @override
+  String get sadaqahJariyahDefaultSubtitle => 'نيات دعم';
+
+  @override
+  String get sadaqahJariyahIntroP1 =>
+      'بدأ «أنا مسلم» صدقةً جارية عن أحمد محمد طوني (أبي حذيفة)، رحمه الله.';
+
+  @override
+  String get sadaqahJariyahIntroP2 =>
+      'ثم أراد مسلمون آخرون أن يهبوا دعمهم عن أحبائهم المتوفين.';
+
+  @override
+  String get sadaqahJariyahIntroP3 =>
+      'نسجّل هذه النيات هنا، ونسأل الله القبول للجميع.';
+
+  @override
+  String get sadaqahJariyahFoundingOrigin => 'سبب بدء أنا مسلم';
+
+  @override
+  String get sadaqahJariyahRahimahullah => 'رحمه الله';
+
+  @override
+  String get sadaqahJariyahFeaturedSection => 'وأيضاً';
+
+  @override
+  String get sadaqahJariyahEmptyOthers =>
+      'يمكن للآخرين المشاركة بدعم أنا مسلم.';
+
+  @override
+  String get sadaqahJariyahSupportCta => 'ادعم أنا مسلم';
+
+  @override
+  String get sadaqahJariyahFooterDisclaimer =>
+      'الدعم يُبقي أنا مسلم مستمراً. هذا ليس إيصالاً لجمعية خيرية مسجّلة. راجع عالمك إن كنت غير متأكد.';
+
+  @override
+  String get sadaqahJariyahIntentionLine =>
+      'يقصد المستخدم هذا الدعم صدقة جارية عن المتوفى، ونسأل الله القبول.';
+
+  @override
+  String get sadaqahJariyahSheetTitle => 'كيف تشارك';
+
+  @override
+  String get sadaqahJariyahSheetChecklist =>
+      'أرسل لنا عبر واتساب:\n• اسم المتوفى\n• صلة القرابة (اختياري)\n• مبلغ الدعم / إثبات';
+
+  @override
+  String get sadaqahJariyahContinueWhatsapp => 'المتابعة عبر واتساب';
+
+  @override
+  String get sadaqahJariyahNotNow => 'ليس الآن';
+
+  @override
+  String get sadaqahJariyahWhatsappUnavailable =>
+      'واتساب غير متاح. انسخ الرسالة وتواصل معنا بطريقة أخرى.';
+
+  @override
+  String get sadaqahJariyahCopyMessage => 'نسخ الرسالة';
+
+  @override
+  String get sadaqahJariyahMessageCopied => 'تم نسخ الرسالة';
+
+  @override
+  String get sadaqahJariyahLoadError => 'تعذر تحميل القائمة. حاول مرة أخرى.';
+
+  @override
+  String get dedicationRelationFather => 'أب';
+
+  @override
+  String get dedicationRelationMother => 'أم';
+
+  @override
+  String get dedicationRelationBrother => 'أخ';
+
+  @override
+  String get dedicationRelationSister => 'أخت';
+
+  @override
+  String get dedicationRelationHusband => 'زوج';
+
+  @override
+  String get dedicationRelationWife => 'زوجة';
+
+  @override
+  String get dedicationRelationSon => 'ابن';
+
+  @override
+  String get dedicationRelationDaughter => 'ابنة';
+
+  @override
+  String get dedicationRelationFriend => 'صديق';
+
+  @override
+  String get dedicationRelationOther => 'أخرى';
 }

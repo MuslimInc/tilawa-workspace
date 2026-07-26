@@ -49,12 +49,14 @@ class SettingsScreen extends StatefulWidget {
   const SettingsScreen({
     super.key,
     required this.supportTilawaEnabled,
+    required this.sadaqahJariyahEnabled,
     required this.whatsNewEnabled,
     required this.privacyPolicyEnabled,
     required this.shareContent,
   });
 
   final bool supportTilawaEnabled;
+  final bool sadaqahJariyahEnabled;
   final bool whatsNewEnabled;
   final bool privacyPolicyEnabled;
   final ShareContentUseCase shareContent;
@@ -277,10 +279,16 @@ class _SettingsScreenState extends State<SettingsScreen> {
                     leadingIcon: FluentIcons.person_support_24_regular,
                     includeTopGap: false,
                     children: [
+                      if (widget.sadaqahJariyahEnabled)
+                        TilawaSettingsTile(
+                          title: l10n.sadaqahJariyahDefaultTitle,
+                          onTap: () =>
+                              const SadaqahJariyahRoute().push<void>(context),
+                        ),
                       if (widget.supportTilawaEnabled)
                         TilawaSettingsTile(
                           title: l10n.supportTilawa,
-                          onTap: () => const SupportRoute().push(context),
+                          onTap: () => const SupportRoute().push<void>(context),
                         ),
                       const SettingsRateAppTile(),
                       const SentryReportBugTile(),

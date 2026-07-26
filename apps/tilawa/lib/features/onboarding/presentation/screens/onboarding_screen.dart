@@ -102,12 +102,6 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
         description: context.l10n.onboardingDesc2,
         heroStyle: OnboardingHeroStyle.devicePreview,
       ),
-      OnboardingContent(
-        imagePath: 'assets/images/ahmed.png',
-        title: context.l10n.onboardingTitle3,
-        description: context.l10n.onboardingDesc3,
-        heroStyle: OnboardingHeroStyle.portrait,
-      ),
     ];
     final int pageCount = pages.length;
     final ThemeData theme = Theme.of(context);

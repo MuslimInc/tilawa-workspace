@@ -7862,6 +7862,186 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Radio'**
   String get homeQuickRadio;
+
+  /// Default Sadaqah Jariyah feature title
+  ///
+  /// In en, this message translates to:
+  /// **'Sadaqah Jariyah'**
+  String get sadaqahJariyahDefaultTitle;
+
+  /// Default Sadaqah Jariyah subtitle
+  ///
+  /// In en, this message translates to:
+  /// **'Dedications of intention'**
+  String get sadaqahJariyahDefaultSubtitle;
+
+  /// Sadaqah Jariyah intro paragraph 1
+  ///
+  /// In en, this message translates to:
+  /// **'MeMuslim began as an ongoing charity for Ahmed Mohamed Tony (Abu Hudhaifa), may Allah have mercy on him.'**
+  String get sadaqahJariyahIntroP1;
+
+  /// Sadaqah Jariyah intro paragraph 2
+  ///
+  /// In en, this message translates to:
+  /// **'Later, other Muslims wanted to dedicate their support for deceased loved ones.'**
+  String get sadaqahJariyahIntroP2;
+
+  /// Sadaqah Jariyah intro paragraph 3
+  ///
+  /// In en, this message translates to:
+  /// **'We record those dedications here, and we ask Allah to accept from everyone.'**
+  String get sadaqahJariyahIntroP3;
+
+  /// Founding dedication origin line
+  ///
+  /// In en, this message translates to:
+  /// **'The reason MeMuslim began'**
+  String get sadaqahJariyahFoundingOrigin;
+
+  /// Honorific under dedication name
+  ///
+  /// In en, this message translates to:
+  /// **'May Allah have mercy on him'**
+  String get sadaqahJariyahRahimahullah;
+
+  /// Optional featured dedications section title
+  ///
+  /// In en, this message translates to:
+  /// **'Also remembered'**
+  String get sadaqahJariyahFeaturedSection;
+
+  /// Empty state when only founding dedication exists
+  ///
+  /// In en, this message translates to:
+  /// **'Others may join by supporting MeMuslim.'**
+  String get sadaqahJariyahEmptyOthers;
+
+  /// Primary CTA on Sadaqah Jariyah page
+  ///
+  /// In en, this message translates to:
+  /// **'Support MeMuslim'**
+  String get sadaqahJariyahSupportCta;
+
+  /// Quiet disclaimer under dedications list
+  ///
+  /// In en, this message translates to:
+  /// **'Support sustains MeMuslim. This is not a registered charity receipt. Ask your scholar if you are unsure.'**
+  String get sadaqahJariyahFooterDisclaimer;
+
+  /// Required intention wording on participate sheet
+  ///
+  /// In en, this message translates to:
+  /// **'The user intends this support as an ongoing charity for the deceased, and we ask Allah to accept it.'**
+  String get sadaqahJariyahIntentionLine;
+
+  /// Participate bottom sheet title
+  ///
+  /// In en, this message translates to:
+  /// **'How to participate'**
+  String get sadaqahJariyahSheetTitle;
+
+  /// What to send via WhatsApp
+  ///
+  /// In en, this message translates to:
+  /// **'Send us on WhatsApp:\n• Deceased name\n• Relation (optional)\n• Support amount / proof'**
+  String get sadaqahJariyahSheetChecklist;
+
+  /// Sheet primary action
+  ///
+  /// In en, this message translates to:
+  /// **'Continue on WhatsApp'**
+  String get sadaqahJariyahContinueWhatsapp;
+
+  /// Sheet dismiss action
+  ///
+  /// In en, this message translates to:
+  /// **'Not now'**
+  String get sadaqahJariyahNotNow;
+
+  /// Fallback when WhatsApp cannot open
+  ///
+  /// In en, this message translates to:
+  /// **'WhatsApp is not available. Copy the message and contact us another way.'**
+  String get sadaqahJariyahWhatsappUnavailable;
+
+  /// Copy WhatsApp template action
+  ///
+  /// In en, this message translates to:
+  /// **'Copy message'**
+  String get sadaqahJariyahCopyMessage;
+
+  /// Toast after copying template
+  ///
+  /// In en, this message translates to:
+  /// **'Message copied'**
+  String get sadaqahJariyahMessageCopied;
+
+  /// Error state title
+  ///
+  /// In en, this message translates to:
+  /// **'Unable to load dedications. Please try again.'**
+  String get sadaqahJariyahLoadError;
+
+  /// Dedication relation
+  ///
+  /// In en, this message translates to:
+  /// **'Father'**
+  String get dedicationRelationFather;
+
+  /// Dedication relation
+  ///
+  /// In en, this message translates to:
+  /// **'Mother'**
+  String get dedicationRelationMother;
+
+  /// Dedication relation
+  ///
+  /// In en, this message translates to:
+  /// **'Brother'**
+  String get dedicationRelationBrother;
+
+  /// Dedication relation
+  ///
+  /// In en, this message translates to:
+  /// **'Sister'**
+  String get dedicationRelationSister;
+
+  /// Dedication relation
+  ///
+  /// In en, this message translates to:
+  /// **'Husband'**
+  String get dedicationRelationHusband;
+
+  /// Dedication relation
+  ///
+  /// In en, this message translates to:
+  /// **'Wife'**
+  String get dedicationRelationWife;
+
+  /// Dedication relation
+  ///
+  /// In en, this message translates to:
+  /// **'Son'**
+  String get dedicationRelationSon;
+
+  /// Dedication relation
+  ///
+  /// In en, this message translates to:
+  /// **'Daughter'**
+  String get dedicationRelationDaughter;
+
+  /// Dedication relation
+  ///
+  /// In en, this message translates to:
+  /// **'Friend'**
+  String get dedicationRelationFriend;
+
+  /// Dedication relation
+  ///
+  /// In en, this message translates to:
+  /// **'Other'**
+  String get dedicationRelationOther;
 }
 
 class _AppLocalizationsDelegate

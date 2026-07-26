@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'package:flutter/foundation.dart' show kReleaseMode;
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
@@ -54,6 +55,8 @@ import '../features/smart_khatma/presentation/widgets/smart_khatma_hub_scope.dar
 import '../features/smart_khatma/smart_khatma_feature_flags.dart';
 import '../features/splash/presentation/screens/splash_screen.dart';
 import '../features/support/presentation/screens/support_tilawa_screen.dart';
+import '../features/sadaqah_jariyah/presentation/cubit/sadaqah_jariyah_cubit.dart';
+import '../features/sadaqah_jariyah/presentation/screens/sadaqah_jariyah_screen.dart';
 import '../features/daily_guidance/presentation/screens/daily_guidance_screen.dart';
 import '../features/ui_kit_debug/tilawa_card_nested_tap_demo_screen.dart';
 import '../screens/app_shell_screen.dart';
@@ -75,6 +78,7 @@ part 'app_router_config.g.dart';
     TypedGoRoute<RecitersSearchRoute>(path: '/reciters/search'),
     TypedGoRoute<ReciterDetailsRoute>(path: '/reciter/:reciterId'),
     TypedGoRoute<SupportRoute>(path: '/support'),
+    TypedGoRoute<SadaqahJariyahRoute>(path: '/sadaqah-jariyah'),
     TypedGoRoute<PremiumRoute>(path: '/premium'),
     TypedGoRoute<SettingsRoute>(path: '/settings'),
     TypedGoRoute<EditProfileRoute>(path: '/settings/edit-profile'),
@@ -301,6 +305,23 @@ class SupportRoute extends GoRouteData with $SupportRoute, TilawaRouteData {
     return BlocProvider(
       create: (_) => getIt<SupportBloc>()..add(const SupportEvent.started()),
       child: const SupportTilawaScreen(),
+    );
+  }
+}
+
+class SadaqahJariyahRoute extends GoRouteData
+    with $SadaqahJariyahRoute, TilawaRouteData {
+  const SadaqahJariyahRoute();
+
+  @override
+  Widget build(BuildContext context, GoRouterState state) {
+    return BlocProvider(
+      create: (_) {
+        final SadaqahJariyahCubit cubit = getIt<SadaqahJariyahCubit>();
+        unawaited(cubit.load());
+        return cubit;
+      },
+      child: const SadaqahJariyahScreen(),
     );
   }
 }

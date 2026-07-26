@@ -1,4 +1,8 @@
 import 'package:flutter/material.dart';
+import 'package:tilawa/core/bootstrap/app_launch_config.dart';
+import 'package:tilawa/core/di/injection.dart';
+import 'package:tilawa/core/extensions.dart';
+import 'package:tilawa/router/app_router_config.dart';
 import 'package:tilawa_ui_kit/tilawa_ui_kit.dart';
 
 import 'support_footer_lined_row.dart';
@@ -14,6 +18,10 @@ class SupportFooterSection extends StatelessWidget {
     final theme = Theme.of(context);
     final tokens = theme.tokens;
     final colorScheme = theme.colorScheme;
+    final l10n = context.l10n;
+    final bool sadaqahEnabled = getIt.isRegistered<AppLaunchConfig>()
+        ? getIt<AppLaunchConfig>().sadaqahJariyahEnabled
+        : AppLaunchConfig.fromEnvironment().sadaqahJariyahEnabled;
 
     final TextStyle trustStyle = theme.textTheme.labelSmall!.copyWith(
       color: colorScheme.onSurfaceVariant,
@@ -40,6 +48,17 @@ class SupportFooterSection extends StatelessWidget {
             color: colorScheme.outlineVariant,
           ),
           const SupportImpactSection(),
+          if (sadaqahEnabled)
+            Align(
+              alignment: AlignmentDirectional.centerStart,
+              child: TilawaButton(
+                text: l10n.sadaqahJariyahDefaultTitle,
+                variant: TilawaButtonVariant.ghost,
+                size: TilawaButtonSize.small,
+                onPressed: () =>
+                    const SadaqahJariyahRoute().push<void>(context),
+              ),
+            ),
         ],
       ),
     );
