@@ -4552,6 +4552,10 @@ class AppLocalizationsEn extends AppLocalizations {
       'Unable to load dedications. Please try again.';
 
   @override
+  String get sadaqahJariyahUnavailable =>
+      'Registered names are temporarily unavailable.';
+
+  @override
   String get dedicationRelationFather => 'Father';
 
   @override

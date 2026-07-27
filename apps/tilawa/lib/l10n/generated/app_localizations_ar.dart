@@ -4508,6 +4508,9 @@ class AppLocalizationsAr extends AppLocalizations {
   String get sadaqahJariyahLoadError => 'تعذر تحميل القائمة. حاول مرة أخرى.';
 
   @override
+  String get sadaqahJariyahUnavailable => 'الأسماء المسجلة غير متاحة مؤقتًا.';
+
+  @override
   String get dedicationRelationFather => 'أب';
 
   @override

@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:injectable/injectable.dart';
 import 'package:tilawa_core/constants/analytics_constants.dart';
@@ -21,8 +23,12 @@ class SadaqahJariyahCubit extends Cubit<SadaqahJariyahState> {
   final GetSadaqahJariyahPageUseCase _getPage;
   final DedicationPhotoUrlResolver _photoUrlResolver;
   final AnalyticsService _analytics;
+  int _loadGeneration = 0;
+
+  static const Duration _photoResolutionTimeout = Duration(seconds: 5);
 
   Future<void> load() async {
+    final int generation = ++_loadGeneration;
     emit(const SadaqahJariyahLoading());
     final result = await _getPage(const GetSadaqahJariyahPageParams());
     await result.foldAsync(
@@ -30,15 +36,40 @@ class SadaqahJariyahCubit extends Cubit<SadaqahJariyahState> {
         emit(SadaqahJariyahError(failure));
       },
       (SadaqahJariyahPageData pageData) async {
-        final Map<String, String?> photoUrls = <String, String?>{};
-        for (final Dedication d in pageData.dedications) {
-          photoUrls[d.id] = await _photoUrlResolver.resolveDownloadUrl(
-            d.photoStoragePath,
-          );
+        emit(
+          SadaqahJariyahLoaded(
+            pageData: pageData,
+            photoUrls: const <String, String?>{},
+          ),
+        );
+        if (pageData.config.featureEnabled) {
+          unawaited(_resolvePhotoUrls(pageData, generation));
         }
-        emit(SadaqahJariyahLoaded(pageData: pageData, photoUrls: photoUrls));
         await _analytics.logEvent(AnalyticsEvents.sadaqahJariyahScreenViewed);
       },
+    );
+  }
+
+  Future<void> _resolvePhotoUrls(
+    SadaqahJariyahPageData pageData,
+    int generation,
+  ) async {
+    final List<MapEntry<String, String?>> resolved = await Future.wait(
+      pageData.dedications.map((Dedication dedication) async {
+        final String? url = await _photoUrlResolver
+            .resolveDownloadUrl(dedication.photoStoragePath)
+            .timeout(_photoResolutionTimeout, onTimeout: () => null);
+        return MapEntry<String, String?>(dedication.id, url);
+      }),
+    );
+    if (isClosed || generation != _loadGeneration) {
+      return;
+    }
+    emit(
+      SadaqahJariyahLoaded(
+        pageData: pageData,
+        photoUrls: Map<String, String?>.fromEntries(resolved),
+      ),
     );
   }
 }

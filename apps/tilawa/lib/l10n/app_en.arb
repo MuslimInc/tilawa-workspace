@@ -5345,6 +5345,8 @@
   "@sadaqahJariyahMessageCopied": {"description": "Toast after copying template"},
   "sadaqahJariyahLoadError": "Unable to load dedications. Please try again.",
   "@sadaqahJariyahLoadError": {"description": "Error state title"},
+  "sadaqahJariyahUnavailable": "Registered names are temporarily unavailable.",
+  "@sadaqahJariyahUnavailable": {"description": "Shown when the remote feature switch disables the registered-names screen"},
   "dedicationRelationFather": "Father",
   "@dedicationRelationFather": {"description": "Dedication relation"},
   "dedicationRelationMother": "Mother",

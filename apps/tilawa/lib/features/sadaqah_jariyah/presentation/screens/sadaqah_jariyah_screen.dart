@@ -14,7 +14,6 @@ import '../cubit/sadaqah_jariyah_cubit.dart';
 import '../cubit/sadaqah_jariyah_state.dart';
 import '../widgets/sadaqah_jariyah_add_cta.dart';
 import '../widgets/sadaqah_jariyah_add_person_sheet.dart';
-import '../widgets/sadaqah_jariyah_intro.dart';
 import '../widgets/sadaqah_jariyah_list.dart';
 
 class SadaqahJariyahScreen extends StatelessWidget {
@@ -24,18 +23,9 @@ class SadaqahJariyahScreen extends StatelessWidget {
   Widget build(BuildContext context) {
     return BlocBuilder<SadaqahJariyahCubit, SadaqahJariyahState>(
       builder: (BuildContext context, SadaqahJariyahState state) {
-        final String languageCode = Localizations.localeOf(
-          context,
-        ).languageCode;
-        final String title = switch (state) {
-          SadaqahJariyahLoaded(:final pageData) =>
-            pageData.config.titleForLanguageCode(languageCode),
-          _ => context.l10n.sadaqahJariyahDefaultTitle,
-        };
-
         return TilawaShellChildScaffold(
           appBar: TilawaCatalogAppBar.titleOnly(
-            title: title,
+            title: context.l10n.sadaqahJariyahIntroP1,
             leading: TilawaAppBarChrome.catalogBackButton(
               context: context,
               onPressed: () => Navigator.maybePop(context),
@@ -50,6 +40,12 @@ class SadaqahJariyahScreen extends StatelessWidget {
               retryLabel: context.l10n.retry,
               onRetry: () => context.read<SadaqahJariyahCubit>().load(),
             ),
+            SadaqahJariyahLoaded(:final pageData)
+                when !pageData.config.featureEnabled =>
+              TilawaEmptyState(
+                icon: Icons.favorite_outline,
+                title: context.l10n.sadaqahJariyahUnavailable,
+              ),
             SadaqahJariyahLoaded(
               :final pageData,
               :final photoUrls,
@@ -80,7 +76,6 @@ class _LoadedBody extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final tokens = Theme.of(context).tokens;
-    final bool ctaEnabled = config.featureEnabled;
 
     return Column(
       children: [
@@ -93,8 +88,6 @@ class _LoadedBody extends StatelessWidget {
               tokens.spaceLarge,
             ),
             children: [
-              const SadaqahJariyahIntro(),
-              SizedBox(height: tokens.spaceLarge),
               SadaqahJariyahList(
                 dedications: dedications,
                 photoUrls: photoUrls,
@@ -104,7 +97,7 @@ class _LoadedBody extends StatelessWidget {
         ),
         TilawaBottomActionArea(
           child: SadaqahJariyahAddCta(
-            enabled: ctaEnabled,
+            enabled: true,
             onPressed: () {
               unawaited(
                 getIt<AnalyticsService>().logEvent(

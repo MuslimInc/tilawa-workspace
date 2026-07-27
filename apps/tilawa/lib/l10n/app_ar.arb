@@ -4658,6 +4658,8 @@
   "@sadaqahJariyahMessageCopied": {"description": "Toast after copying template"},
   "sadaqahJariyahLoadError": "تعذر تحميل القائمة. حاول مرة أخرى.",
   "@sadaqahJariyahLoadError": {"description": "Error state title"},
+  "sadaqahJariyahUnavailable": "الأسماء المسجلة غير متاحة مؤقتًا.",
+  "@sadaqahJariyahUnavailable": {"description": "Shown when the remote feature switch disables the registered-names screen"},
   "dedicationRelationFather": "أب",
   "@dedicationRelationFather": {"description": "Dedication relation"},
   "dedicationRelationMother": "أم",

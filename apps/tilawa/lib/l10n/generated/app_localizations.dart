@@ -7995,6 +7995,12 @@ abstract class AppLocalizations {
   /// **'Unable to load dedications. Please try again.'**
   String get sadaqahJariyahLoadError;
 
+  /// Shown when the remote feature switch disables the registered-names screen
+  ///
+  /// In en, this message translates to:
+  /// **'Registered names are temporarily unavailable.'**
+  String get sadaqahJariyahUnavailable;
+
   /// Dedication relation
   ///
   /// In en, this message translates to:
