@@ -38,7 +38,7 @@ class GetSadaqahJariyahPageUseCase
         final Either<Failure, SadaqahJariyahConfig> configResult =
             await _configRepository.getConfig();
         final SadaqahJariyahConfig config = configResult.fold(
-          (_) => const SadaqahJariyahConfig(),
+          (_) => const SadaqahJariyahConfig(featureEnabled: false),
           (SadaqahJariyahConfig c) => c,
         );
         return Right(

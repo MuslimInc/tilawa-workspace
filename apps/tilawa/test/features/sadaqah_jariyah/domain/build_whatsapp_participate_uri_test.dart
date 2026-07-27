@@ -9,11 +9,11 @@ void main() {
   final BuildWhatsappParticipateUriUseCase useCase =
       BuildWhatsappParticipateUriUseCase();
 
-  test('builds wa.me uri with digits and text', () async {
+  test('builds wa.me uri from canonical E.164 number', () async {
     final Either<Failure, Uri> result = await useCase(
       const BuildWhatsappParticipateUriParams(
         config: SadaqahJariyahConfig(
-          whatsappE164: '+20 100 123 4567',
+          whatsappE164: '+201001234567',
           messageTemplateEn: 'Hello',
         ),
         languageCode: 'en',
@@ -27,19 +27,28 @@ void main() {
     check(uri.queryParameters['text']).equals('Hello');
   });
 
-  test('empty phone returns ValidationFailure', () async {
-    final Either<Failure, Uri> result = await useCase(
-      const BuildWhatsappParticipateUriParams(
-        config: SadaqahJariyahConfig(whatsappE164: ''),
-        languageCode: 'en',
-      ),
-    );
+  for (final String invalidNumber in <String>[
+    '',
+    'abc1',
+    '+1',
+    '+001001234567',
+    '+2010012345678901',
+    '+20 100 123 4567',
+  ]) {
+    test('rejects malformed E.164 number "$invalidNumber"', () async {
+      final Either<Failure, Uri> result = await useCase(
+        BuildWhatsappParticipateUriParams(
+          config: SadaqahJariyahConfig(whatsappE164: invalidNumber),
+          languageCode: 'en',
+        ),
+      );
 
-    check(result.isLeft()).isTrue();
-    final Failure failure = result.fold(
-      (Failure l) => l,
-      (_) => throw StateError('expected left'),
-    );
-    check(failure).isA<ValidationFailure>();
-  });
+      check(result.isLeft()).isTrue();
+      final Failure failure = result.fold(
+        (Failure l) => l,
+        (_) => throw StateError('expected left'),
+      );
+      check(failure).isA<ValidationFailure>();
+    });
+  }
 }

@@ -14,7 +14,7 @@ class FirestoreDedicationsRemoteDataSource
     implements DedicationsRemoteDataSource {
   FirestoreDedicationsRemoteDataSource(this._firestore);
 
-  static const String collectionName = 'dedications';
+  static const String collectionName = 'published_dedications';
 
   final FirebaseFirestore _firestore;
 

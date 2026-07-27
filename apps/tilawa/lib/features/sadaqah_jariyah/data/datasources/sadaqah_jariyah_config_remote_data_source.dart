@@ -33,9 +33,9 @@ class FirestoreSadaqahJariyahConfigRemoteDataSource
     } on Object catch (e) {
       logger.d(
         '[SadaqahJariyahConfig] Failed to read Firestore config: $e. '
-        'Using defaults.',
+        'Disabling the feature until config is available.',
       );
-      return const SadaqahJariyahConfig();
+      return const SadaqahJariyahConfig(featureEnabled: false);
     }
   }
 }

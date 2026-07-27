@@ -15,8 +15,8 @@ class SadaqahJariyahConfig extends Equatable {
     this.featureEnabled = true,
   });
 
-  static const String defaultTitleAr = 'صدقة جارية';
-  static const String defaultTitleEn = 'Sadaqah Jariyah';
+  static const String defaultTitleAr = 'الأسماء المسجلة';
+  static const String defaultTitleEn = 'Registered names';
   static const String defaultSubtitleAr = 'صدقة جارية';
   static const String defaultSubtitleEn = 'Sadaqah Jariyah';
   static const String defaultWhatsappE164 = '+201060099009';

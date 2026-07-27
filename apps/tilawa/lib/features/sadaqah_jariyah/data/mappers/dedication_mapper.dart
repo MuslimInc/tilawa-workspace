@@ -12,8 +12,7 @@ Dedication? mapDedicationDocument(
     return null;
   }
   final String displayName = (data['displayName'] as String?)?.trim() ?? '';
-  final String slug = (data['slug'] as String?)?.trim() ?? '';
-  if (displayName.isEmpty || slug.isEmpty) {
+  if (displayName.isEmpty) {
     return null;
   }
   final DedicationStatus status =
@@ -22,7 +21,7 @@ Dedication? mapDedicationDocument(
   return Dedication(
     id: doc.id,
     displayName: displayName,
-    slug: slug,
+    slug: doc.id,
     relation: DedicationRelation.tryParse(data['relation'] as String?),
     relationOther: (data['relationOther'] as String?)?.trim(),
     note: (data['note'] as String?)?.trim(),

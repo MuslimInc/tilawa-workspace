@@ -23,13 +23,11 @@ class BuildWhatsappParticipateUriUseCase
   Future<Either<Failure, Uri>> call(
     BuildWhatsappParticipateUriParams params,
   ) async {
-    final String digits = params.config.whatsappE164.replaceAll(
-      RegExp(r'[^\d]'),
-      '',
-    );
-    if (digits.isEmpty) {
+    final String whatsappE164 = params.config.whatsappE164.trim();
+    if (!RegExp(r'^\+[1-9]\d{7,14}$').hasMatch(whatsappE164)) {
       return const Left(SadaqahJariyahFailures.whatsappUnavailable);
     }
+    final String digits = whatsappE164.substring(1);
     final String text = params.config.messageTemplateForLanguageCode(
       params.languageCode,
     );
