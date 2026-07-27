@@ -1,0 +1,134 @@
+<app-page-header
+  [title]="'sadaqahJariyah_configTitle' | t"
+  [subtitle]="'sadaqahJariyah_configSubtitle' | t"
+  [hasActions]="true"
+>
+  <div actions>
+    <app-tilawa-button
+      variant="secondary"
+      [link]="['/sadaqah-jariyah']"
+      [label]="'sadaqahJariyah_backToList' | t"
+    />
+  </div>
+</app-page-header>
+
+<div class="max-w-3xl mx-auto space-y-4">
+  @if (loading) {
+    <app-tilawa-loading-state [message]="'sadaqahJariyah_loading' | t" />
+  } @else {
+    @if (errorMessage) {
+      <app-tilawa-error-state [message]="errorMessage" />
+    }
+
+    @if (successMessage) {
+      <div
+        class="p-4 rounded-[var(--tilawa-radius-md)] border border-[var(--tilawa-success)]/30 bg-[var(--tilawa-success)]/10 text-[var(--tilawa-success)]"
+        role="status"
+      >
+        {{ successMessage | t }}
+      </div>
+    }
+
+    <app-tilawa-card [title]="'sadaqahJariyah_configCardTitle' | t">
+      <form [formGroup]="form" class="space-y-4" (ngSubmit)="save()">
+        <label class="tilawa-checkbox-label">
+          <input type="checkbox" class="tilawa-checkbox" formControlName="featureEnabled" />
+          <span>{{ 'sadaqahJariyah_featureEnabled' | t }}</span>
+        </label>
+
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <div>
+            <label class="block text-sm font-medium mb-1" for="featureTitleEn">
+              {{ 'sadaqahJariyah_featureTitleEn' | t }}
+            </label>
+            <input id="featureTitleEn" class="tilawa-field w-full" formControlName="featureTitleEn" />
+          </div>
+          <div>
+            <label class="block text-sm font-medium mb-1" for="featureTitleAr">
+              {{ 'sadaqahJariyah_featureTitleAr' | t }}
+            </label>
+            <input id="featureTitleAr" class="tilawa-field w-full" formControlName="featureTitleAr" />
+          </div>
+        </div>
+
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <div>
+            <label class="block text-sm font-medium mb-1" for="featureSubtitleEn">
+              {{ 'sadaqahJariyah_featureSubtitleEn' | t }}
+            </label>
+            <input
+              id="featureSubtitleEn"
+              class="tilawa-field w-full"
+              formControlName="featureSubtitleEn"
+            />
+          </div>
+          <div>
+            <label class="block text-sm font-medium mb-1" for="featureSubtitleAr">
+              {{ 'sadaqahJariyah_featureSubtitleAr' | t }}
+            </label>
+            <input
+              id="featureSubtitleAr"
+              class="tilawa-field w-full"
+              formControlName="featureSubtitleAr"
+            />
+          </div>
+        </div>
+
+        <div>
+          <label class="block text-sm font-medium mb-1" for="whatsappE164">
+            {{ 'sadaqahJariyah_whatsappE164' | t }}
+          </label>
+          <input
+            id="whatsappE164"
+            class="tilawa-field w-full"
+            formControlName="whatsappE164"
+            inputmode="tel"
+            autocomplete="tel"
+          />
+          @if (
+            form.get('whatsappE164')?.invalid &&
+            form.get('whatsappE164')?.touched
+          ) {
+            <p class="mt-1 text-xs text-[var(--tilawa-error)]">
+              {{ 'sadaqahJariyah_error_whatsappInvalid' | t }}
+            </p>
+          }
+        </div>
+
+        <div>
+          <label class="block text-sm font-medium mb-1" for="messageTemplateEn">
+            {{ 'sadaqahJariyah_messageTemplateEn' | t }}
+          </label>
+          <textarea
+            id="messageTemplateEn"
+            rows="6"
+            class="tilawa-field w-full"
+            formControlName="messageTemplateEn"
+          ></textarea>
+        </div>
+
+        <div>
+          <label class="block text-sm font-medium mb-1" for="messageTemplateAr">
+            {{ 'sadaqahJariyah_messageTemplateAr' | t }}
+          </label>
+          <textarea
+            id="messageTemplateAr"
+            rows="6"
+            class="tilawa-field w-full"
+            formControlName="messageTemplateAr"
+          ></textarea>
+        </div>
+
+        <div class="flex justify-end">
+          <app-tilawa-button
+            variant="primary"
+            type="submit"
+            [loading]="saving"
+            [disabled]="form.invalid || form.pristine || saving"
+            [label]="'common_save' | t"
+          />
+        </div>
+      </form>
+    </app-tilawa-card>
+  }
+</div>

@@ -7,6 +7,7 @@ import { getAuth, provideAuth } from '@angular/fire/auth';
 import { browserLocalPersistence, setPersistence } from 'firebase/auth';
 import { getFirestore, provideFirestore } from '@angular/fire/firestore';
 import { getFunctions, provideFunctions } from '@angular/fire/functions';
+import { getStorage, provideStorage } from '@angular/fire/storage';
 import { environment } from '../environments/environment';
 
 import { routes } from './app.routes';
@@ -67,6 +68,7 @@ export const appConfig: ApplicationConfig = {
       return auth;
     }),
     provideFirestore(() => getFirestore()),
+    provideStorage(() => getStorage()),
     provideFunctions(() => getFunctions()),
     { provide: NOTIFICATION_REPOSITORY, useClass: NotificationRepositoryImpl },
     {
@@ -123,3 +125,4 @@ export const appConfig: ApplicationConfig = {
     { provide: AUTH_ADMIN_GATEWAY, useClass: FirebaseAuthAdminGateway },
   ],
 };
+

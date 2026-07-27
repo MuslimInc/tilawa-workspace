@@ -1,5 +1,3 @@
-import 'dart:async';
-
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:tilawa/core/extensions.dart';
@@ -156,121 +154,20 @@ class SurahListTile extends StatelessWidget {
               ),
             ),
           ),
-          _SurahOverflowButton(
-            item: item,
-            backgroundColor: rowSurface,
-          ),
-          SizedBox(width: tokens.spaceExtraSmall),
-        ],
-      ),
-    );
-  }
-}
-
-class _SurahOverflowButton extends StatelessWidget {
-  const _SurahOverflowButton({
-    required this.item,
-    required this.backgroundColor,
-  });
-
-  final ReciterSurahListItem item;
-  final Color backgroundColor;
-
-  @override
-  Widget build(BuildContext context) {
-    return TilawaIconActionButton(
-      icon: Icons.more_vert_rounded,
-      backgroundColor: backgroundColor,
-      tooltip: context.l10n.moreOptions,
-      onTap: () {
-        unawaited(
-          showTilawaModalBottomSheet<void>(
-            context: context,
-            builder: (sheetContext) => _SurahActionsSheet(item: item),
-          ),
-        );
-      },
-    );
-  }
-}
-
-class _SurahActionsSheet extends StatelessWidget {
-  const _SurahActionsSheet({required this.item});
-
-  final ReciterSurahListItem item;
-
-  @override
-  Widget build(BuildContext context) {
-    final ThemeData theme = Theme.of(context);
-    final MeMuslimDesignTokens tokens = theme.tokens;
-    final ColorScheme colorScheme = theme.colorScheme;
-
-    return Padding(
-      padding: EdgeInsets.only(bottom: context.floatingBottomPadding),
-      child: Column(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          const TilawaSheetHandle(),
-          Padding(
-            padding: EdgeInsets.all(tokens.spaceLarge),
-            child: Column(
-              spacing: tokens.spaceLarge,
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Column(
-                  spacing: tokens.spaceExtraSmall,
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(
-                      item.displayName,
-                      style: theme.textTheme.titleMedium?.copyWith(
-                        color: colorScheme.onSurface,
-                        fontWeight: FontWeight.w700,
-                      ),
-                    ),
-                    Text(
-                      item.reciterName,
-                      style: theme.textTheme.bodySmall?.copyWith(
-                        color: colorScheme.onSurfaceVariant,
-                      ),
-                    ),
-                  ],
-                ),
-                Row(
-                  spacing: tokens.spaceMedium,
-                  children: [
-                    Icon(
-                      Icons.download_rounded,
-                      color: colorScheme.onSurfaceVariant,
-                      size: tokens.iconSizeMedium,
-                    ),
-                    Expanded(
-                      child: Text(
-                        context.l10n.download,
-                        style: theme.textTheme.bodyLarge?.copyWith(
-                          color: colorScheme.onSurface,
-                          fontWeight: FontWeight.w600,
-                        ),
-                      ),
-                    ),
-                    DownloadButton(
-                      url: item.audioId,
-                      surahTitle: item.displayName,
-                      reciterName: item.reciterName,
-                      reciterId: item.reciterId,
-                      catalogChrome: true,
-                      initialIsDownloaded: item.isDownloaded,
-                      initialIsDownloading: item.isDownloading,
-                      initialProgress: item.downloadProgress,
-                      identifier: ReciterSemanticsIds.surahDownloadButton(
-                        item.semanticsKey,
-                      ),
-                    ),
-                  ],
-                ),
-              ],
+          DownloadButton(
+            url: item.audioId,
+            surahTitle: item.displayName,
+            reciterName: item.reciterName,
+            reciterId: item.reciterId,
+            catalogChrome: true,
+            initialIsDownloaded: item.isDownloaded,
+            initialIsDownloading: item.isDownloading,
+            initialProgress: item.downloadProgress,
+            identifier: ReciterSemanticsIds.surahDownloadButton(
+              item.semanticsKey,
             ),
           ),
+          SizedBox(width: tokens.spaceExtraSmall),
         ],
       ),
     );

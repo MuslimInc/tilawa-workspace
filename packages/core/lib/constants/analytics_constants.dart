@@ -45,6 +45,15 @@ class AnalyticsEvents {
   static const String supportPurchaseFailed = 'support_purchase_failed';
   static const String supportRestoreTapped = 'support_restore_tapped';
 
+  // Sadaqah Jariyah (WhatsApp participation — no PII / amounts)
+  static const String sadaqahJariyahScreenViewed =
+      'sadaqah_jariyah_screen_viewed';
+  static const String sadaqahJariyahCtaTapped = 'sadaqah_jariyah_cta_tapped';
+  static const String sadaqahJariyahWhatsappOpened =
+      'sadaqah_jariyah_whatsapp_opened';
+  static const String sadaqahJariyahWhatsappFailed =
+      'sadaqah_jariyah_whatsapp_failed';
+
   // Engagement
   static const String search = 'search';
   static const String share = 'share';

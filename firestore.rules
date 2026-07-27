@@ -114,6 +114,66 @@ service cloud.firestore {
       allow write: if isAdmin();
     }
 
+    // Sadaqah Jariyah — public titles/WhatsApp config; admin write.
+    match /app_config/sadaqah_jariyah {
+      allow read: if true;
+      allow write: if isAdmin();
+    }
+
+    function isValidPublishedDedication() {
+      return request.resource.data.keys().hasOnly([
+          'displayName',
+          'photoStoragePath',
+          'status',
+          'isFounding',
+          'isFeatured',
+          'sortOrder',
+          'publishedAt',
+          'updatedAt',
+        ])
+        && request.resource.data.keys().hasAll([
+          'displayName',
+          'status',
+          'isFounding',
+          'isFeatured',
+          'sortOrder',
+          'publishedAt',
+          'updatedAt',
+        ])
+        && request.resource.data.displayName is string
+        && request.resource.data.displayName.size() > 0
+        && request.resource.data.displayName.size() <= 80
+        && (
+          request.resource.data.get('photoStoragePath', null) == null
+          || request.resource.data.get('photoStoragePath', null) is string
+        )
+        && request.resource.data.status == 'published'
+        && request.resource.data.isFounding is bool
+        && request.resource.data.isFeatured is bool
+        && request.resource.data.sortOrder is int;
+    }
+
+    // Admin-only source records include private relationship and audit fields.
+    match /dedications/{dedicationId} {
+      allow read, create, update, delete: if isAdmin();
+
+      match /private/{docId} {
+        allow read, write: if isAdmin();
+      }
+    }
+
+    // Public projection contains only fields required by the app list.
+    match /published_dedications/{dedicationId} {
+      allow read: if true;
+      allow create, update: if isAdmin() && isValidPublishedDedication();
+      allow delete: if isAdmin();
+    }
+
+    // Slug uniqueness pointers — admin only (MVP clients do not resolve by slug).
+    match /dedications_slugs/{slug} {
+      allow read, write: if isAdmin();
+    }
+
     // Subscription catalog — read-only for clients; seed via admin tools.
     match /subscription_plans/{planId} {
       allow read: if true;
@@ -526,5 +586,3 @@ service cloud.firestore {
     }
   }
 }
-
-

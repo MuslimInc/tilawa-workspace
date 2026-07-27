@@ -1,0 +1,222 @@
+<app-page-header
+  [title]="pageTitle()"
+  [subtitle]="'sadaqahJariyah_editSubtitle' | t"
+  [hasActions]="true"
+>
+  <div actions>
+    <app-tilawa-button
+      variant="secondary"
+      [link]="['/sadaqah-jariyah']"
+      [label]="'sadaqahJariyah_backToList' | t"
+    />
+  </div>
+</app-page-header>
+
+<div class="max-w-3xl mx-auto space-y-4">
+  @if (loading()) {
+    <app-tilawa-loading-state [message]="'sadaqahJariyah_loading' | t" />
+  } @else {
+    @if (errorMessage()) {
+      <app-tilawa-error-state [message]="errorMessage() ?? 'Error'" />
+    }
+
+    @if (successMessage()) {
+      <div
+        class="p-4 rounded-[var(--tilawa-radius-md)] border border-[var(--tilawa-success)]/30 bg-[var(--tilawa-success)]/10 text-[var(--tilawa-success)]"
+        role="status"
+      >
+        {{ successMessage() }}
+      </div>
+    }
+
+    <app-tilawa-card [title]="'sadaqahJariyah_formTitle' | t">
+      <form [formGroup]="form" class="space-y-4" (ngSubmit)="save()">
+        <div>
+          <label class="block text-sm font-medium mb-1" for="displayName">
+            {{ 'sadaqahJariyah_displayName' | t }}
+          </label>
+          <input
+            id="displayName"
+            class="tilawa-field w-full"
+            formControlName="displayName"
+            (blur)="onDisplayNameBlur()"
+          />
+        </div>
+
+        <div>
+          <label class="block text-sm font-medium mb-1" for="slug">
+            {{ 'sadaqahJariyah_slug' | t }}
+          </label>
+          <input id="slug" class="tilawa-field w-full" formControlName="slug" />
+          @if (slugLocked) {
+            <p class="mt-1 text-xs text-[var(--tilawa-on-surface-variant)]">
+              {{ 'sadaqahJariyah_slugFrozenHint' | t }}
+            </p>
+          }
+        </div>
+
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <div>
+            <label class="block text-sm font-medium mb-1" for="relation">
+              {{ 'sadaqahJariyah_relation' | t }}
+            </label>
+            <select id="relation" class="tilawa-field w-full" formControlName="relation">
+              <option value="">{{ 'common_none' | t }}</option>
+              @for (option of relationOptions; track option.value) {
+                <option [value]="option.value">{{ option.labelKey | t }}</option>
+              }
+            </select>
+          </div>
+
+          @if (showRelationOther()) {
+            <div>
+              <label class="block text-sm font-medium mb-1" for="relationOther">
+                {{ 'sadaqahJariyah_relationOther' | t }}
+              </label>
+              <input
+                id="relationOther"
+                class="tilawa-field w-full"
+                formControlName="relationOther"
+              />
+            </div>
+          }
+        </div>
+
+        <div>
+          <label class="block text-sm font-medium mb-1" for="note">
+            {{ 'sadaqahJariyah_note' | t }}
+          </label>
+          <textarea id="note" rows="3" class="tilawa-field w-full" formControlName="note"></textarea>
+        </div>
+
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+          <div>
+            <label class="block text-sm font-medium mb-1" for="status">
+              {{ 'common_status' | t }}
+            </label>
+            <select id="status" class="tilawa-field w-full" formControlName="status">
+              @for (status of statusOptions; track status) {
+                <option [value]="status">{{ status | statusLabel }}</option>
+              }
+            </select>
+          </div>
+
+          <div>
+            <label class="block text-sm font-medium mb-1" for="sortOrder">
+              {{ 'sadaqahJariyah_sortOrder' | t }}
+            </label>
+            <input
+              id="sortOrder"
+              type="number"
+              class="tilawa-field w-full"
+              formControlName="sortOrder"
+            />
+          </div>
+        </div>
+
+        <div class="flex flex-wrap gap-4">
+          <label class="tilawa-checkbox-label">
+            <input type="checkbox" class="tilawa-checkbox" formControlName="isFeatured" />
+            <span>{{ 'sadaqahJariyah_featured' | t }}</span>
+          </label>
+
+          <label class="tilawa-checkbox-label">
+            <input type="checkbox" class="tilawa-checkbox" formControlName="isFounding" />
+            <span>{{ 'sadaqahJariyah_founding' | t }}</span>
+          </label>
+        </div>
+
+        @if (foundingLocked && !isCreateMode) {
+          <p class="text-xs text-[var(--tilawa-on-surface-variant)]">
+            {{ 'sadaqahJariyah_foundingLockedHint' | t }}
+          </p>
+        }
+
+        <div class="pt-2 border-t border-[var(--tilawa-outline-variant)] space-y-2">
+          <h3 class="text-sm font-semibold">{{ 'sadaqahJariyah_photoTitle' | t }}</h3>
+          <p class="text-xs text-[var(--tilawa-on-surface-variant)]">
+            {{ expectedPhotoPath() }}
+          </p>
+          <input
+            type="text"
+            class="tilawa-field w-full"
+            formControlName="photoStoragePath"
+            readonly
+          />
+          @if (!isCreateMode) {
+            <div class="flex flex-wrap items-center gap-2">
+              <input
+                #photoFileInput
+                type="file"
+                class="sr-only"
+                accept="image/webp,image/jpeg"
+                (change)="onPhotoSelected($event)"
+                [disabled]="uploading()"
+              />
+              <button
+                type="button"
+                class="tilawa-btn variant-secondary"
+                [disabled]="uploading()"
+                (click)="photoFileInput.click()"
+              >
+                {{ 'sadaqahJariyah_chooseFile' | t }}
+              </button>
+              <span class="text-xs text-[var(--tilawa-on-surface-variant)]">
+                {{ selectedPhotoName() ?? ('sadaqahJariyah_noFileChosen' | t) }}
+              </span>
+            </div>
+            @if (uploading()) {
+              <p class="text-xs">{{ 'sadaqahJariyah_uploadingPhoto' | t }}</p>
+            }
+          } @else {
+            <p class="text-xs text-[var(--tilawa-on-surface-variant)]">
+              {{ 'sadaqahJariyah_photoAfterCreate' | t }}
+            </p>
+          }
+        </div>
+
+        <div class="pt-2 border-t border-[var(--tilawa-outline-variant)] space-y-3">
+          <h3 class="text-sm font-semibold">{{ 'sadaqahJariyah_privateOpsTitle' | t }}</h3>
+          <div>
+            <label class="block text-sm font-medium mb-1" for="internalOpsNote">
+              {{ 'sadaqahJariyah_internalOpsNote' | t }}
+            </label>
+            <textarea
+              id="internalOpsNote"
+              rows="3"
+              class="tilawa-field w-full"
+              formControlName="internalOpsNote"
+            ></textarea>
+          </div>
+          <div>
+            <label class="block text-sm font-medium mb-1" for="channelRef">
+              {{ 'sadaqahJariyah_channelRef' | t }}
+            </label>
+            <input id="channelRef" class="tilawa-field w-full" formControlName="channelRef" />
+          </div>
+        </div>
+
+        <div class="flex flex-wrap justify-end gap-2 pt-2">
+          @if (!isCreateMode) {
+            <button
+              type="button"
+              class="tilawa-btn variant-secondary"
+              [disabled]="saving()"
+              (click)="archive()"
+            >
+              {{ 'sadaqahJariyah_archive' | t }}
+            </button>
+          }
+          <app-tilawa-button
+            variant="primary"
+            type="submit"
+            [loading]="saving()"
+            [disabled]="form.invalid || saving()"
+            [label]="'common_save' | t"
+          />
+        </div>
+      </form>
+    </app-tilawa-card>
+  }
+</div>
+

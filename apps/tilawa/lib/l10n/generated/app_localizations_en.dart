@@ -4475,4 +4475,113 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get homeQuickRadio => 'Radio';
+
+  @override
+  String get sadaqahJariyahDefaultTitle => 'Sadaqah Jariyah';
+
+  @override
+  String get sadaqahJariyahDefaultSubtitle => 'Sadaqah Jariyah';
+
+  @override
+  String get sadaqahJariyahSettingsSubtitle =>
+      'Registered names and share requests';
+
+  @override
+  String get sadaqahJariyahIntroP1 => 'Registered names';
+
+  @override
+  String get sadaqahJariyahIntroP2 =>
+      'Later, other Muslims wanted to dedicate their support for deceased loved ones.';
+
+  @override
+  String get sadaqahJariyahIntroP3 =>
+      'We record those dedications here, and we ask Allah to accept from everyone.';
+
+  @override
+  String get sadaqahJariyahFoundingOrigin => 'The reason MeMuslim began';
+
+  @override
+  String get sadaqahJariyahFoundingLabel => 'Founding';
+
+  @override
+  String get sadaqahJariyahRahimahullah => 'May Allah have mercy on them';
+
+  @override
+  String get sadaqahJariyahFeaturedSection => 'Also remembered';
+
+  @override
+  String get sadaqahJariyahEmptyOthers =>
+      'Others may join by supporting MeMuslim.';
+
+  @override
+  String get sadaqahJariyahSupportCta => 'Request a share';
+
+  @override
+  String get sadaqahJariyahFooterDisclaimer =>
+      'Support sustains MeMuslim. This is not a registered charity receipt. Ask your scholar if you are unsure.';
+
+  @override
+  String get sadaqahJariyahIntentionLine =>
+      'Ask to add a deceased loved one to this Sadaqah Jariyah list. We ask Allah to accept.';
+
+  @override
+  String get sadaqahJariyahSheetTitle => 'Add a person';
+
+  @override
+  String get sadaqahJariyahSheetChecklist =>
+      'Send us on WhatsApp:\n• Deceased name\n• Relation (optional)\n• Short note (optional)';
+
+  @override
+  String get sadaqahJariyahContinueWhatsapp => 'Continue on WhatsApp';
+
+  @override
+  String get sadaqahJariyahNotNow => 'Not now';
+
+  @override
+  String get sadaqahJariyahWhatsappUnavailable =>
+      'WhatsApp is not available. Copy the message and contact us another way.';
+
+  @override
+  String get sadaqahJariyahCopyMessage => 'Copy message';
+
+  @override
+  String get sadaqahJariyahMessageCopied => 'Message copied';
+
+  @override
+  String get sadaqahJariyahLoadError =>
+      'Unable to load dedications. Please try again.';
+
+  @override
+  String get sadaqahJariyahUnavailable =>
+      'Registered names are temporarily unavailable.';
+
+  @override
+  String get dedicationRelationFather => 'Father';
+
+  @override
+  String get dedicationRelationMother => 'Mother';
+
+  @override
+  String get dedicationRelationBrother => 'Brother';
+
+  @override
+  String get dedicationRelationSister => 'Sister';
+
+  @override
+  String get dedicationRelationHusband => 'Husband';
+
+  @override
+  String get dedicationRelationWife => 'Wife';
+
+  @override
+  String get dedicationRelationSon => 'Son';
+
+  @override
+  String get dedicationRelationDaughter => 'Daughter';
+
+  @override
+  String get dedicationRelationFriend => 'Friend';
+
+  @override
+  String get dedicationRelationOther => 'Other';
 }

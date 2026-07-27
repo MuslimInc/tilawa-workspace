@@ -41,6 +41,7 @@ import '../cubit/settings_cubit.dart';
 import '../formatters/settings_share_text_formatter.dart';
 import '../widgets/clear_app_preferences_debug_tile.dart';
 import '../widgets/settings_picker_sheets.dart';
+import '../widgets/settings_sadaqah_jariyah_tile.dart';
 import '../widgets/settings_teacher_capability_scope.dart';
 import '../widgets/settings_teaching_on_memuslim_tile.dart';
 import '../widgets/settings_widgets.dart';
@@ -49,12 +50,14 @@ class SettingsScreen extends StatefulWidget {
   const SettingsScreen({
     super.key,
     required this.supportTilawaEnabled,
+    required this.sadaqahJariyahEnabled,
     required this.whatsNewEnabled,
     required this.privacyPolicyEnabled,
     required this.shareContent,
   });
 
   final bool supportTilawaEnabled;
+  final bool sadaqahJariyahEnabled;
   final bool whatsNewEnabled;
   final bool privacyPolicyEnabled;
   final ShareContentUseCase shareContent;
@@ -277,10 +280,12 @@ class _SettingsScreenState extends State<SettingsScreen> {
                     leadingIcon: FluentIcons.person_support_24_regular,
                     includeTopGap: false,
                     children: [
+                      if (widget.sadaqahJariyahEnabled)
+                        const SettingsSadaqahJariyahTile(),
                       if (widget.supportTilawaEnabled)
                         TilawaSettingsTile(
                           title: l10n.supportTilawa,
-                          onTap: () => const SupportRoute().push(context),
+                          onTap: () => const SupportRoute().push<void>(context),
                         ),
                       const SettingsRateAppTile(),
                       const SentryReportBugTile(),

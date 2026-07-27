@@ -156,6 +156,10 @@ abstract final class _LaunchEnvironment {
     'TILAWA_LAUNCH_SUPPORT_TILAWA_ENABLED',
     defaultValue: true,
   );
+  static const bool sadaqahJariyahEnabled = bool.fromEnvironment(
+    'TILAWA_LAUNCH_SADAQAH_JARIYAH_ENABLED',
+    defaultValue: true,
+  );
   static const bool reportBugEnabled = bool.fromEnvironment(
     'TILAWA_LAUNCH_REPORT_BUG_ENABLED',
     defaultValue: false,
@@ -250,6 +254,7 @@ class AppLaunchConfig extends Equatable {
     this.firebaseDataInit = true,
     this.subscriptionServiceEnabled = false,
     this.supportTilawaEnabled = true,
+    this.sadaqahJariyahEnabled = true,
     this.reportBugEnabled = false,
     this.whatsNewEnabled = false,
     this.privacyPolicyEnabled = false,
@@ -300,6 +305,7 @@ class AppLaunchConfig extends Equatable {
       firebaseDataInit: _LaunchEnvironment.firebaseDataInit,
       subscriptionServiceEnabled: _LaunchEnvironment.subscriptionServiceEnabled,
       supportTilawaEnabled: supportTilawaEnabled,
+      sadaqahJariyahEnabled: _LaunchEnvironment.sadaqahJariyahEnabled,
       reportBugEnabled: _LaunchEnvironment.reportBugEnabled,
       whatsNewEnabled: _LaunchEnvironment.whatsNewEnabled,
       privacyPolicyEnabled: _LaunchEnvironment.privacyPolicyEnabled,
@@ -347,6 +353,11 @@ class AppLaunchConfig extends Equatable {
   final bool firebaseDataInit;
   final bool subscriptionServiceEnabled;
   final bool supportTilawaEnabled;
+
+  /// Settings / Support soft-link for Sadaqah Jariyah.
+  /// Defaults to **true**. Disable with:
+  /// `--dart-define=TILAWA_LAUNCH_SADAQAH_JARIYAH_ENABLED=false`
+  final bool sadaqahJariyahEnabled;
 
   /// Settings "Report a bug" tile and Sentry user-feedback prompts.
   /// Defaults to **false**. Enable with:
@@ -439,6 +450,7 @@ class AppLaunchConfig extends Equatable {
     firebaseDataInit,
     subscriptionServiceEnabled,
     supportTilawaEnabled,
+    sadaqahJariyahEnabled,
     reportBugEnabled,
     whatsNewEnabled,
     privacyPolicyEnabled,

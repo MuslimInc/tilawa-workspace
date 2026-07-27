@@ -7862,6 +7862,204 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Radio'**
   String get homeQuickRadio;
+
+  /// Default Sadaqah Jariyah feature title
+  ///
+  /// In en, this message translates to:
+  /// **'Sadaqah Jariyah'**
+  String get sadaqahJariyahDefaultTitle;
+
+  /// Default Sadaqah Jariyah subtitle
+  ///
+  /// In en, this message translates to:
+  /// **'Sadaqah Jariyah'**
+  String get sadaqahJariyahDefaultSubtitle;
+
+  /// Calm Settings Support-row subtitle for Sadaqah Jariyah
+  ///
+  /// In en, this message translates to:
+  /// **'Registered names and share requests'**
+  String get sadaqahJariyahSettingsSubtitle;
+
+  /// Section title above the dedications list
+  ///
+  /// In en, this message translates to:
+  /// **'Registered names'**
+  String get sadaqahJariyahIntroP1;
+
+  /// Sadaqah Jariyah intro paragraph 2
+  ///
+  /// In en, this message translates to:
+  /// **'Later, other Muslims wanted to dedicate their support for deceased loved ones.'**
+  String get sadaqahJariyahIntroP2;
+
+  /// Sadaqah Jariyah intro paragraph 3
+  ///
+  /// In en, this message translates to:
+  /// **'We record those dedications here, and we ask Allah to accept from everyone.'**
+  String get sadaqahJariyahIntroP3;
+
+  /// Founding dedication origin line
+  ///
+  /// In en, this message translates to:
+  /// **'The reason MeMuslim began'**
+  String get sadaqahJariyahFoundingOrigin;
+
+  /// Subtle status chip on founding list entry
+  ///
+  /// In en, this message translates to:
+  /// **'Founding'**
+  String get sadaqahJariyahFoundingLabel;
+
+  /// Honorific under dedication name
+  ///
+  /// In en, this message translates to:
+  /// **'May Allah have mercy on them'**
+  String get sadaqahJariyahRahimahullah;
+
+  /// Optional featured dedications section title
+  ///
+  /// In en, this message translates to:
+  /// **'Also remembered'**
+  String get sadaqahJariyahFeaturedSection;
+
+  /// Empty state when only founding dedication exists
+  ///
+  /// In en, this message translates to:
+  /// **'Others may join by supporting MeMuslim.'**
+  String get sadaqahJariyahEmptyOthers;
+
+  /// Bottom CTA that opens WhatsApp to request a share (سهم)
+  ///
+  /// In en, this message translates to:
+  /// **'Request a share'**
+  String get sadaqahJariyahSupportCta;
+
+  /// Quiet disclaimer under dedications list
+  ///
+  /// In en, this message translates to:
+  /// **'Support sustains MeMuslim. This is not a registered charity receipt. Ask your scholar if you are unsure.'**
+  String get sadaqahJariyahFooterDisclaimer;
+
+  /// Required intention wording on participate sheet
+  ///
+  /// In en, this message translates to:
+  /// **'Ask to add a deceased loved one to this Sadaqah Jariyah list. We ask Allah to accept.'**
+  String get sadaqahJariyahIntentionLine;
+
+  /// Participate bottom sheet title
+  ///
+  /// In en, this message translates to:
+  /// **'Add a person'**
+  String get sadaqahJariyahSheetTitle;
+
+  /// What to send via WhatsApp
+  ///
+  /// In en, this message translates to:
+  /// **'Send us on WhatsApp:\n• Deceased name\n• Relation (optional)\n• Short note (optional)'**
+  String get sadaqahJariyahSheetChecklist;
+
+  /// Sheet primary action
+  ///
+  /// In en, this message translates to:
+  /// **'Continue on WhatsApp'**
+  String get sadaqahJariyahContinueWhatsapp;
+
+  /// Sheet dismiss action
+  ///
+  /// In en, this message translates to:
+  /// **'Not now'**
+  String get sadaqahJariyahNotNow;
+
+  /// Fallback when WhatsApp cannot open
+  ///
+  /// In en, this message translates to:
+  /// **'WhatsApp is not available. Copy the message and contact us another way.'**
+  String get sadaqahJariyahWhatsappUnavailable;
+
+  /// Copy WhatsApp template action
+  ///
+  /// In en, this message translates to:
+  /// **'Copy message'**
+  String get sadaqahJariyahCopyMessage;
+
+  /// Toast after copying template
+  ///
+  /// In en, this message translates to:
+  /// **'Message copied'**
+  String get sadaqahJariyahMessageCopied;
+
+  /// Error state title
+  ///
+  /// In en, this message translates to:
+  /// **'Unable to load dedications. Please try again.'**
+  String get sadaqahJariyahLoadError;
+
+  /// Shown when the remote feature switch disables the registered-names screen
+  ///
+  /// In en, this message translates to:
+  /// **'Registered names are temporarily unavailable.'**
+  String get sadaqahJariyahUnavailable;
+
+  /// Dedication relation
+  ///
+  /// In en, this message translates to:
+  /// **'Father'**
+  String get dedicationRelationFather;
+
+  /// Dedication relation
+  ///
+  /// In en, this message translates to:
+  /// **'Mother'**
+  String get dedicationRelationMother;
+
+  /// Dedication relation
+  ///
+  /// In en, this message translates to:
+  /// **'Brother'**
+  String get dedicationRelationBrother;
+
+  /// Dedication relation
+  ///
+  /// In en, this message translates to:
+  /// **'Sister'**
+  String get dedicationRelationSister;
+
+  /// Dedication relation
+  ///
+  /// In en, this message translates to:
+  /// **'Husband'**
+  String get dedicationRelationHusband;
+
+  /// Dedication relation
+  ///
+  /// In en, this message translates to:
+  /// **'Wife'**
+  String get dedicationRelationWife;
+
+  /// Dedication relation
+  ///
+  /// In en, this message translates to:
+  /// **'Son'**
+  String get dedicationRelationSon;
+
+  /// Dedication relation
+  ///
+  /// In en, this message translates to:
+  /// **'Daughter'**
+  String get dedicationRelationDaughter;
+
+  /// Dedication relation
+  ///
+  /// In en, this message translates to:
+  /// **'Friend'**
+  String get dedicationRelationFriend;
+
+  /// Dedication relation
+  ///
+  /// In en, this message translates to:
+  /// **'Other'**
+  String get dedicationRelationOther;
 }
 
 class _AppLocalizationsDelegate
