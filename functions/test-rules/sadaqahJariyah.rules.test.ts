@@ -22,11 +22,13 @@ let testEnv: RulesTestEnvironment;
 
 const publishedDedication = {
   displayName: "Published Person",
-  slug: "published-person",
+  photoStoragePath: null,
   status: "published",
   isFounding: false,
   isFeatured: false,
   sortOrder: 1,
+  publishedAt: new Date(),
+  updatedAt: new Date(),
 };
 
 const draftDedication = {
@@ -51,24 +53,34 @@ test.after(async () => {
   await testEnv.cleanup();
 });
 
-test("rules: client can read published dedications; draft denied", async () => {
+test("rules: client reads safe projection; source records remain private", async () => {
   await testEnv.clearFirestore();
   await testEnv.withSecurityRulesDisabled(async (context) => {
     const db = context.firestore();
     await setDoc(doc(db, "dedications/pub1"), publishedDedication);
     await setDoc(doc(db, "dedications/draft1"), draftDedication);
+    await setDoc(
+      doc(db, "published_dedications/pub1"),
+      publishedDedication,
+    );
   });
 
   const clientDb = testEnv.unauthenticatedContext().firestore();
-  await assertSucceeds(getDoc(doc(clientDb, "dedications/pub1")));
+  await assertSucceeds(
+    getDoc(doc(clientDb, "published_dedications/pub1")),
+  );
+  await assertFails(getDoc(doc(clientDb, "dedications/pub1")));
   await assertFails(getDoc(doc(clientDb, "dedications/draft1")));
 });
 
-test("rules: client published query succeeds; private ops denied", async () => {
+test("rules: client projection query succeeds; private ops denied", async () => {
   await testEnv.clearFirestore();
   await testEnv.withSecurityRulesDisabled(async (context) => {
     const db = context.firestore();
-    await setDoc(doc(db, "dedications/pub1"), publishedDedication);
+    await setDoc(
+      doc(db, "published_dedications/pub1"),
+      publishedDedication,
+    );
     await setDoc(doc(db, "dedications/pub1/private/ops"), {
       internalOpsNote: "secret",
       channelRef: "wa-1",
@@ -79,7 +91,7 @@ test("rules: client published query succeeds; private ops denied", async () => {
   await assertSucceeds(
     getDocs(
       query(
-        collection(clientDb, "dedications"),
+        collection(clientDb, "published_dedications"),
         where("status", "==", "published"),
       ),
     ),
@@ -101,6 +113,12 @@ test("rules: config public read; client cannot write dedications", async () => {
   await assertFails(
     setDoc(doc(clientDb, "dedications/hack"), publishedDedication),
   );
+  await assertFails(
+    setDoc(
+      doc(clientDb, "published_dedications/hack"),
+      publishedDedication,
+    ),
+  );
 });
 
 test("rules: admin can read draft and private ops", async () => {
@@ -118,4 +136,25 @@ test("rules: admin can read draft and private ops", async () => {
     .firestore();
   await assertSucceeds(getDoc(doc(adminDb, "dedications/draft1")));
   await assertSucceeds(getDoc(doc(adminDb, "dedications/draft1/private/ops")));
+});
+
+test("rules: admin projection rejects private fields", async () => {
+  await testEnv.clearFirestore();
+  const adminDb = testEnv
+    .authenticatedContext("admin1", { admin: true })
+    .firestore();
+
+  await assertSucceeds(
+    setDoc(
+      doc(adminDb, "published_dedications/safe"),
+      publishedDedication,
+    ),
+  );
+  await assertFails(
+    setDoc(doc(adminDb, "published_dedications/unsafe"), {
+      ...publishedDedication,
+      note: "private note",
+      updatedByAdminId: "admin1",
+    }),
+  );
 });

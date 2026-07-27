@@ -2055,7 +2055,7 @@
       ]
     },
     {
-      "collectionGroup": "dedications",
+      "collectionGroup": "published_dedications",
       "queryScope": "COLLECTION",
       "fields": [
         {
