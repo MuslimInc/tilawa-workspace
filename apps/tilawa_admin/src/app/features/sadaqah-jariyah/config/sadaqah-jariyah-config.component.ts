@@ -18,6 +18,7 @@ import {
   DedicationsRepository,
   SadaqahJariyahConfigRecord,
 } from '../shared/dedications.repository';
+import { WHATSAPP_E164_PATTERN } from '../shared/config-validation';
 
 @Component({
   selector: 'app-sadaqah-jariyah-config',
@@ -48,7 +49,10 @@ export class SadaqahJariyahConfigComponent implements OnInit {
     featureTitleEn: ['', Validators.required],
     featureSubtitleAr: [''],
     featureSubtitleEn: [''],
-    whatsappE164: [''],
+    whatsappE164: [
+      '',
+      [Validators.required, Validators.pattern(WHATSAPP_E164_PATTERN)],
+    ],
     messageTemplateAr: ['', Validators.required],
     messageTemplateEn: ['', Validators.required],
     featureEnabled: [true],

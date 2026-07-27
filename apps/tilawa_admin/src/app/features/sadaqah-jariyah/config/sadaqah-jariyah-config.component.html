@@ -78,7 +78,21 @@
           <label class="block text-sm font-medium mb-1" for="whatsappE164">
             {{ 'sadaqahJariyah_whatsappE164' | t }}
           </label>
-          <input id="whatsappE164" class="tilawa-field w-full" formControlName="whatsappE164" />
+          <input
+            id="whatsappE164"
+            class="tilawa-field w-full"
+            formControlName="whatsappE164"
+            inputmode="tel"
+            autocomplete="tel"
+          />
+          @if (
+            form.get('whatsappE164')?.invalid &&
+            form.get('whatsappE164')?.touched
+          ) {
+            <p class="mt-1 text-xs text-[var(--tilawa-error)]">
+              {{ 'sadaqahJariyah_error_whatsappInvalid' | t }}
+            </p>
+          }
         </div>
 
         <div>

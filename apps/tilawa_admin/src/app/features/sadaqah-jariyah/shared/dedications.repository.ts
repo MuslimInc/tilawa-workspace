@@ -23,6 +23,7 @@ import {
   DedicationRelation,
   DedicationStatus,
 } from './relation.options';
+import { isValidWhatsappE164 } from './config-validation';
 import { isValidSlug, noteContainsUrl } from './slug.util';
 
 export interface DedicationRecord {
@@ -74,8 +75,8 @@ export interface SadaqahJariyahConfigRecord {
 }
 
 const DEFAULT_CONFIG: SadaqahJariyahConfigRecord = {
-  featureTitleAr: 'صدقة جارية',
-  featureTitleEn: 'Sadaqah Jariyah',
+  featureTitleAr: 'الأسماء المسجلة',
+  featureTitleEn: 'Registered names',
   featureSubtitleAr: 'صدقة جارية',
   featureSubtitleEn: 'Sadaqah Jariyah',
   whatsappE164: '+201060099009',
@@ -85,6 +86,22 @@ const DEFAULT_CONFIG: SadaqahJariyahConfigRecord = {
     'Assalamu alaikum,\nI want to add a person to the Sadaqah Jariyah list in MeMuslim.\n\nDeceased name:\nRelation (optional):\nShort note (optional):\n\nPlease add them to the list. May Allah accept.',
   featureEnabled: true,
 };
+
+function publicDedicationData(
+  input: DedicationWriteInput,
+  publishedAt: unknown,
+): Record<string, unknown> {
+  return {
+    displayName: input.displayName.trim(),
+    photoStoragePath: input.photoStoragePath,
+    status: 'published',
+    isFounding: input.isFounding,
+    isFeatured: input.isFeatured,
+    sortOrder: Math.trunc(input.sortOrder),
+    publishedAt,
+    updatedAt: serverTimestamp(),
+  };
+}
 
 function asDate(value: unknown): Date | null {
   if (value instanceof Timestamp) {
@@ -281,14 +298,9 @@ export class DedicationsRepository {
       throw new Error(validationError);
     }
 
-    if (input.isFounding) {
-      const existingFounding = await this.getFoundingDedicationId();
-      if (existingFounding) {
-        throw new Error('sadaqahJariyah_error_foundingExists');
-      }
-    }
-
-    const id = doc(collection(this.firestore, DedicationsPaths.collection)).id;
+    const id = input.isFounding
+      ? FOUNDING_DEDICATION_ID
+      : doc(collection(this.firestore, DedicationsPaths.collection)).id;
     const slug = input.slug.trim();
     const nowPublished = input.status === 'published';
 
@@ -300,6 +312,13 @@ export class DedicationsRepository {
       }
 
       const dedicationRef = doc(this.firestore, DedicationsPaths.collection, id);
+      if (input.isFounding) {
+        const foundingSnap = await txn.get(dedicationRef);
+        if (foundingSnap.exists()) {
+          throw new Error('sadaqahJariyah_error_foundingExists');
+        }
+      }
+
       txn.set(slugRef, { dedicationId: id });
       txn.set(dedicationRef, {
         displayName: input.displayName.trim(),
@@ -319,6 +338,12 @@ export class DedicationsRepository {
         createdByAdminId: adminId,
         updatedByAdminId: adminId,
       });
+      if (nowPublished) {
+        txn.set(
+          doc(this.firestore, DedicationsPaths.publicCollection, id),
+          publicDedicationData(input, serverTimestamp()),
+        );
+      }
     });
 
     return id;
@@ -341,10 +366,7 @@ export class DedicationsRepository {
     }
 
     if (input.isFounding && id !== FOUNDING_DEDICATION_ID) {
-      const existingFounding = await this.getFoundingDedicationId();
-      if (existingFounding && existingFounding !== id) {
-        throw new Error('sadaqahJariyah_error_foundingExists');
-      }
+      throw new Error('sadaqahJariyah_error_foundingExists');
     }
 
     const slug = input.slug.trim();
@@ -363,6 +385,11 @@ export class DedicationsRepository {
 
     await runTransaction(this.firestore, async (txn) => {
       const dedicationRef = doc(this.firestore, DedicationsPaths.collection, id);
+      const publicDedicationRef = doc(
+        this.firestore,
+        DedicationsPaths.publicCollection,
+        id,
+      );
 
       if (slug !== previousSlug.trim()) {
         const oldSlugRef = doc(
@@ -399,6 +426,14 @@ export class DedicationsRepository {
         },
         { merge: true },
       );
+      if (nowPublished) {
+        txn.set(
+          publicDedicationRef,
+          publicDedicationData(input, publishedAt),
+        );
+      } else {
+        txn.delete(publicDedicationRef);
+      }
     });
   }
 
@@ -406,15 +441,20 @@ export class DedicationsRepository {
     if (id === FOUNDING_DEDICATION_ID) {
       throw new Error('sadaqahJariyah_error_foundingLocked');
     }
-    await setDoc(
-      doc(this.firestore, DedicationsPaths.collection, id),
-      {
-        status: 'archived',
-        updatedAt: serverTimestamp(),
-        updatedByAdminId: adminId,
-      },
-      { merge: true },
-    );
+    await runTransaction(this.firestore, async (txn) => {
+      txn.set(
+        doc(this.firestore, DedicationsPaths.collection, id),
+        {
+          status: 'archived',
+          updatedAt: serverTimestamp(),
+          updatedByAdminId: adminId,
+        },
+        { merge: true },
+      );
+      txn.delete(
+        doc(this.firestore, DedicationsPaths.publicCollection, id),
+      );
+    });
   }
 
   async uploadPhoto(dedicationId: string, file: File): Promise<string> {
@@ -438,6 +478,9 @@ export class DedicationsRepository {
   }
 
   async saveConfig(config: SadaqahJariyahConfigRecord): Promise<void> {
+    if (!isValidWhatsappE164(config.whatsappE164)) {
+      throw new Error('sadaqahJariyah_error_whatsappInvalid');
+    }
     await setDoc(
       doc(this.firestore, DedicationsPaths.configDoc),
       {

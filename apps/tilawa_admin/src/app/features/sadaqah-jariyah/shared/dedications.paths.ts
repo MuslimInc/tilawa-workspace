@@ -1,5 +1,6 @@
 export const DedicationsPaths = {
   collection: 'dedications',
+  publicCollection: 'published_dedications',
   slugCollection: 'dedications_slugs',
   configDoc: 'app_config/sadaqah_jariyah',
   photoPath: (dedicationId: string) => `photos/dedications/${dedicationId}.webp`,
