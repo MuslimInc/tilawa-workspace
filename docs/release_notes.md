@@ -12,8 +12,39 @@ the changelog for full engineering detail.
 
 | Field | Value |
 |-------|--------|
+| Version | **2.2.2** (build **95**) |
+| Git tag | `v2.2.2+95` (pending) |
+| Date | 2026-07-27 |
+| Track | Both (Google Play + App Store) — Preparing |
+
+### What's new (en-US) — copy for Play Console
+
+```text
+• Sadaqah Jariyah — dedicate ongoing charity for loved ones
+• Ruqyah athkar category, with leave confirmation
+• Home prayer times follow your 12/24-hour setting
+• Download a surah directly from the reciter list
+• More stable tabs when re-selecting Home or Reciters
+```
+
+### ما الجديد (ar) — نص متجر Play
+
+```text
+• صدقة جارية — أسماء مسجّلة وطلب سهم عبر واتساب
+• فئة الرقية الشرعية مع تأكيد قبل مغادرة الأذكار
+• مواقيت الصلاة على الرئيسية تتبع إعداد 12/24 ساعة
+• تحميل السورة مباشرة من قائمة القارئ
+• تبويبات أثبت عند إعادة الضغط على الرئيسية أو القرّاء
+```
+
+---
+
+## Previous current release (2.2.1+93)
+
+| Field | Value |
+|-------|--------|
 | Version | **2.2.1** (build **93**) |
-| Git tag | `v2.2.1+93` (pending) |
+| Git tag | `v2.2.1+93` (pending — superseded by 2.2.2+95) |
 | Date | 2026-07-25 |
 | Track | Both (Google Play + App Store) — Preparing |
 
@@ -825,6 +856,7 @@ Tilawa keeps **one shared version** in [`apps/tilawa/pubspec.yaml`](../apps/tila
      `dart run melos run tilawa:build:android:production`.
    - iOS: archive the **production** flavor for TestFlight (`com.memuslim.app`).
 5. Android checklist: [`google_play_release_checklist.md`](google_play_release_checklist.md)
+
 
 
 

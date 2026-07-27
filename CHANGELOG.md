@@ -7,6 +7,29 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [2.2.2+95] - 2026-07-27 [Both]
+
+### Added
+
+- **Sadaqah Jariyah**: Ongoing charity dedications — calm registered-names
+  list, WhatsApp "request a share" CTA, Settings entry; admin CRUD with a
+  field-limited `published_dedications` public projection.
+- **Athkar**: Ruqyah (الرقية الشرعية) category from Quran/Sunnah sources;
+  confirm before leaving any athkar reading session.
+
+### Changed
+
+- **Home**: Primary action tiles use brand fill with denser Quran CTA; prayer
+  header and schedule honor the 12/24-hour clock setting.
+- **Reciters**: Surah list rows show an inline download control instead of a
+  three-dot overflow sheet.
+- **Tours**: Removed unused in-app coach-mark tours and dependency.
+
+### Fixed
+
+- **Shell**: Inactive Offstage tabs no longer attach to the shared primary
+  scroll controller (`StateError: Too many elements`, Sentry `FLUTTER-FQ`).
+
 ## [2.2.1+93] - 2026-07-25 [Both]
 
 ### Added

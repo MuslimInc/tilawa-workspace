@@ -1,7 +1,29 @@
 {
   "schemaVersion": 1,
-  "lastUpdatedAt": "2026-07-25T00:00:00Z",
+  "lastUpdatedAt": "2026-07-27T00:00:00Z",
   "releases": [
+    {
+      "id": "2.2.2+95",
+      "version": "2.2.2",
+      "buildNumber": 95,
+      "highlights": {
+        "en": [
+          "Sadaqah Jariyah — dedicate ongoing charity for loved ones",
+          "Ruqyah athkar category, with leave confirmation",
+          "Home prayer times follow your 12/24-hour setting",
+          "Download a surah directly from the reciter list",
+          "More stable tabs when re-selecting Home or Reciters"
+        ],
+        "ar": [
+          "صدقة جارية — أسماء مسجّلة وطلب سهم عبر واتساب",
+          "فئة الرقية الشرعية مع تأكيد قبل مغادرة الأذكار",
+          "مواقيت الصلاة على الرئيسية تتبع إعداد 12/24 ساعة",
+          "تحميل السورة مباشرة من قائمة القارئ",
+          "تبويبات أثبت عند إعادة الضغط على الرئيسية أو القرّاء"
+        ]
+      },
+      "publishedAt": "2026-07-27T00:00:00Z"
+    },
     {
       "id": "2.2.1+93",
       "version": "2.2.1",
@@ -373,3 +395,4 @@
     }
   ]
 }
+
