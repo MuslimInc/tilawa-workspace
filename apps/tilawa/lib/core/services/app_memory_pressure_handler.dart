@@ -15,9 +15,16 @@ import 'package:tilawa/core/logging/app_logger.dart';
 /// [SevereMemoryPressureBridge]:
 /// - OPPO lock → `TRIM_MEMORY_UI_HIDDEN` / Flutter
 ///   [WidgetsBindingObserver.didHaveMemoryPressure] while invisible
-/// - Normal background → `TRIM_MEMORY_BACKGROUND` (level 40). Clearing the
-///   Flutter image cache then forced a full re-decode on unlock and
-///   regressed FLUTTER-9 on CPH2529.
+/// - Normal background → `TRIM_MEMORY_BACKGROUND` (level 40). Tilawa's
+///   *aggressive* path (live-image clear, Quran decoded-cache release, lowered
+///   ceiling) must not run for BACKGROUND; that path regressed FLUTTER-9 on
+///   CPH2529.
+///
+/// **Residual:** Flutter's embedding still forwards BACKGROUND (and other
+/// levels ≥ 10) via SystemChannel → [PaintingBinding.handleMemoryPressure] →
+/// `imageCache.clear()`. This handler does not suppress that built-in clear;
+/// it only gates Tilawa's extra severe release. Confirm via production
+/// CPH2529 telemetry after ship.
 ///
 /// This bridge is only invoked for severe levels from native.
 abstract final class AppMemoryPressureHandler {
@@ -124,3 +131,4 @@ abstract final class AppMemoryPressureHandler {
     releaseCallCount = 0;
   }
 }
+

@@ -47,6 +47,8 @@ void main() {
     );
   });
 
+  // Gates Tilawa's aggressive path only; Flutter embedding may still
+  // PaintingBinding.handleMemoryPressure → imageCache.clear() for level 40.
   test('BACKGROUND trim level 40 does not release caches', () async {
     AppMemoryPressureHandler.debugIsAndroidOverride = true;
     const MethodChannel channel = MethodChannel(
@@ -111,3 +113,4 @@ class _FakeDecodedCache implements DecodedQuranImageCache {
     throw UnimplementedError();
   }
 }
+
