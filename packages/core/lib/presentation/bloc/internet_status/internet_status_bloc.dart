@@ -1,13 +1,10 @@
 import 'dart:async';
 
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:injectable/injectable.dart';
-
 import '../../../network/network_info.dart';
 import 'internet_status_event.dart';
 import 'internet_status_state.dart';
 
-@injectable
 class InternetStatusBloc
     extends Bloc<InternetStatusEvent, InternetStatusState> {
   InternetStatusBloc(this._networkInfo)
