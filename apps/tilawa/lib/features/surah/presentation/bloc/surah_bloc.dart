@@ -2,8 +2,6 @@ import 'dart:async';
 
 import 'package:freezed_annotation/freezed_annotation.dart';
 import 'package:hydrated_bloc/hydrated_bloc.dart';
-import 'package:injectable/injectable.dart';
-
 import '../../domain/entities/surah_entity.dart';
 import '../../domain/usecases/check_surah_download_status_use_case.dart';
 import '../../domain/usecases/get_surahs_for_reciter_use_case.dart';
@@ -15,7 +13,6 @@ part 'surah_bloc.freezed.dart';
 part 'surah_event.dart';
 part 'surah_state.dart';
 
-@injectable
 class SurahBloc extends HydratedBloc<SurahEvent, SurahState> {
   SurahBloc(
     this._getSurahsForReciter,

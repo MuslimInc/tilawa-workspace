@@ -1,9 +1,6 @@
-import 'package:injectable/injectable.dart';
-
 import '../../domain/entities/surah_entity.dart';
 import '../../domain/repositories/surah_repository.dart';
 
-@LazySingleton(as: SurahRepository)
 class SurahRepositoryImpl implements SurahRepository {
   SurahRepositoryImpl();
 

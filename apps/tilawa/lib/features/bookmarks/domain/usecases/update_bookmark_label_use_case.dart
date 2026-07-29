@@ -1,11 +1,8 @@
 import 'package:dartz_plus/dartz_plus.dart';
-import 'package:injectable/injectable.dart';
-
 import 'package:tilawa_core/errors/failures.dart';
 import '../entities/bookmark_entity.dart';
 import '../repositories/bookmarks_repository.dart';
 
-@lazySingleton
 class UpdateBookmarkLabelUseCase {
   const UpdateBookmarkLabelUseCase(this._repository);
 

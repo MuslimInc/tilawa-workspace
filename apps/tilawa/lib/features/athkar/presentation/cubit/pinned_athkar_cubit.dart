@@ -1,5 +1,4 @@
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:injectable/injectable.dart';
 import 'package:tilawa_core/errors/failures.dart';
 import 'package:tilawa_core/usecases/usecase.dart';
 
@@ -10,7 +9,6 @@ import '../../domain/usecases/get_pinned_athkar_preference_use_case.dart';
 import '../../domain/usecases/save_pinned_athkar_category_ids_use_case.dart';
 import 'pinned_athkar_state.dart';
 
-@injectable
 class PinnedAthkarCubit extends Cubit<PinnedAthkarState> {
   PinnedAthkarCubit(
     this._getCategories,

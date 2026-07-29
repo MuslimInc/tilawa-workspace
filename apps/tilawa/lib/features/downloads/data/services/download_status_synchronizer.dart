@@ -1,6 +1,4 @@
 import 'package:flutter/services.dart';
-import 'package:injectable/injectable.dart';
-
 import 'package:tilawa/core/logging/app_logger.dart';
 import '../../domain/entities/download_item.dart';
 import 'download_queue_manager.dart';
@@ -9,7 +7,6 @@ import 'download_service_interface.dart';
 
 /// Service responsible for synchronizing local download state with the platform's
 /// active downloads and the download queue.
-@LazySingleton()
 class DownloadStatusSynchronizer {
   DownloadStatusSynchronizer(
     this._downloadService,

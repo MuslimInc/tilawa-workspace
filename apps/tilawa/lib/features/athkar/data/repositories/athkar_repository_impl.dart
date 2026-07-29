@@ -1,6 +1,4 @@
 import 'package:dartz_plus/dartz_plus.dart';
-import 'package:injectable/injectable.dart';
-
 import 'package:tilawa_core/constants/analytics_constants.dart';
 import 'package:tilawa_core/errors/failures.dart';
 import 'package:tilawa_core/services/analytics_service.dart';
@@ -12,7 +10,6 @@ import '../datasources/athkar_local_datasource.dart';
 import '../models/athkar_category_model.dart';
 import '../models/athkar_item_model.dart';
 
-@LazySingleton(as: AthkarRepository)
 class AthkarRepositoryImpl implements AthkarRepository {
   AthkarRepositoryImpl(this._localDataSource, this._analyticsService);
   final AthkarLocalDataSource _localDataSource;

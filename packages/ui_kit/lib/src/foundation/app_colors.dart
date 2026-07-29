@@ -314,14 +314,21 @@ abstract final class AppColors {
   /// Prayer Hero watermark — dark theme.
   static const Color homePrayerHeroWatermarkDark = homePrayerCardWatermarkDark;
 
-  /// Location chip fill on the Home hero header row.
-  static const Color homeHeaderChipBackground = Color(0xFFEDF5EF);
+  /// Soft gold wash for Home hero chips / prayer schedule strip.
+  ///
+  /// Pale featured-gold parchment — warmth without saturating the green hero.
+  /// Derived from [featuredGradientStart] toward warm white.
+  static const Color homeHeaderChipBackground = Color(0xFFF4ECDD);
 
   /// Hijri and secondary header copy on the Home hero.
   static const Color homeHeaderSecondaryText = tripGlideMuted;
 
-  /// Location chip fill — dark theme.
-  static const Color homeHeaderChipBackgroundDark = Color(0x33FFFFFF);
+  /// Opaque dark-parchment gold panel — dark counterpart of
+  /// [homeHeaderChipBackground] (parity with light; not translucent glass).
+  ///
+  /// Sits near [darkTertiaryContainer] temperature so tertiary ink / borders
+  /// remain coherent on the green hero.
+  static const Color homeHeaderChipBackgroundDark = Color(0xFF2F281C);
 
   /// Secondary header copy — dark theme.
   static const Color homeHeaderSecondaryTextDark = Color(0xFFB8B0A8);

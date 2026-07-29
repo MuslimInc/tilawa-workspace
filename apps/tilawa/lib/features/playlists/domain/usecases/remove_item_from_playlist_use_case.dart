@@ -1,11 +1,8 @@
 import 'package:dartz_plus/dartz_plus.dart';
-import 'package:injectable/injectable.dart';
-
 import 'package:tilawa_core/errors/failures.dart';
 import '../entities/playlist.dart';
 import '../repositories/playlists_repository.dart';
 
-@Singleton()
 class RemoveItemFromPlaylistUseCase {
   const RemoveItemFromPlaylistUseCase(this._repository);
 

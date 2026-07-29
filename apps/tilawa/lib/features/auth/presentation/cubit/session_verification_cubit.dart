@@ -2,7 +2,6 @@ import 'dart:async';
 
 import 'package:equatable/equatable.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:injectable/injectable.dart';
 import 'package:tilawa/features/auth/device_registry_feature_flags.dart';
 import 'package:tilawa/features/auth/domain/entities/user_entity.dart';
 import 'package:tilawa/features/auth/domain/repositories/auth_repository.dart';
@@ -58,14 +57,13 @@ class SessionVerificationState extends Equatable {
 /// (`SessionValidityCubit` / FCM / failed authenticated operations).
 ///
 /// Gated behind [isAuthLifecycleHardeningEnabled]; inert when off.
-@injectable
 class SessionVerificationCubit extends Cubit<SessionVerificationState> {
   SessionVerificationCubit(
     this._authRepository, {
     AuthLifecycleHardeningEnabledPredicate hardeningEnabled =
         isAuthLifecycleHardeningEnabled,
-    @ignoreParam Duration bannerThreshold = const Duration(seconds: 4),
-    @ignoreParam Duration verifyingCap = const Duration(seconds: 45),
+    Duration bannerThreshold = const Duration(seconds: 4),
+    Duration verifyingCap = const Duration(seconds: 45),
   }) : super(const SessionVerificationState()) {
     _hardeningEnabled = hardeningEnabled;
     _bannerThreshold = bannerThreshold;

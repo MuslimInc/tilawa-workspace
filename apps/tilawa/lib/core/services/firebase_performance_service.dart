@@ -1,6 +1,5 @@
 import 'package:firebase_performance/firebase_performance.dart';
 import 'package:flutter/foundation.dart';
-import 'package:injectable/injectable.dart';
 import 'package:tilawa/core/logging/app_logger.dart';
 import 'package:tilawa/router/app_router.dart';
 import 'package:tilawa_core/services/performance_monitoring_service.dart';
@@ -11,7 +10,6 @@ import 'package:tilawa_core/services/performance_trace.dart';
 /// RELEASE-ONLY: Tracking disabled in debug and profile modes.
 /// Following KISS: minimal validation, let Firebase SDK handle limits.
 /// Error-safe: all operations swallow exceptions (monitoring never breaks features).
-@Singleton(as: PerformanceMonitoringService)
 class FirebasePerformanceService implements PerformanceMonitoringService {
   FirebasePerformanceService(this._performance) {
     if (!_isReleaseMode) {

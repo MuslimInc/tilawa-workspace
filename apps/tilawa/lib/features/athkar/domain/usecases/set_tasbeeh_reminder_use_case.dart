@@ -1,5 +1,4 @@
 import 'package:dartz_plus/dartz_plus.dart';
-import 'package:injectable/injectable.dart';
 import 'package:tilawa_core/errors/failures.dart';
 import 'package:tilawa_core/usecases/usecase.dart';
 
@@ -20,7 +19,6 @@ class SetTasbeehReminderParams {
   final int? minute;
 }
 
-@lazySingleton
 class SetTasbeehReminderUseCase
     implements UseCase<TasbeehDhikr, SetTasbeehReminderParams> {
   SetTasbeehReminderUseCase(this._repository);

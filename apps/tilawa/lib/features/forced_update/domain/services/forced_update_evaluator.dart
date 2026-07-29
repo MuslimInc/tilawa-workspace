@@ -1,11 +1,8 @@
-import 'package:injectable/injectable.dart';
-
 import '../entities/forced_update_decision.dart';
 import '../entities/forced_update_host_platform.dart';
 import '../entities/forced_update_policy.dart';
 
 /// Pure comparison of installed build number vs remote platform minimum.
-@lazySingleton
 class ForcedUpdateEvaluator {
   const ForcedUpdateEvaluator();
 

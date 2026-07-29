@@ -3,7 +3,6 @@ import 'dart:async';
 import 'package:dartz_plus/dartz_plus.dart';
 import 'package:equatable/equatable.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:injectable/injectable.dart';
 import 'package:tilawa_core/entities/reciter_entity.dart';
 import 'package:tilawa_core/errors/failures.dart';
 
@@ -18,7 +17,6 @@ import '../../../surah/domain/entities/surah_entity.dart';
 part 'reciter_download_event.dart';
 part 'reciter_download_state.dart';
 
-@injectable
 class ReciterDownloadBloc
     extends Bloc<ReciterDownloadEvent, ReciterDownloadState> {
   ReciterDownloadBloc(

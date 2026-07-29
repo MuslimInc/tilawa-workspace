@@ -3,7 +3,6 @@ import 'dart:async';
 import 'package:bloc_concurrency/bloc_concurrency.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:freezed_annotation/freezed_annotation.dart';
-import 'package:injectable/injectable.dart';
 import 'package:tilawa_core/logger.dart';
 import 'package:tilawa_core/errors/failures.dart';
 
@@ -45,7 +44,6 @@ abstract class QuranFontLoaderState with _$QuranFontLoaderState {
   const factory QuranFontLoaderState.error(Failure failure) = _Error;
 }
 
-@injectable
 class QuranFontLoaderBloc
     extends Bloc<QuranFontLoaderEvent, QuranFontLoaderState> {
   QuranFontLoaderBloc(

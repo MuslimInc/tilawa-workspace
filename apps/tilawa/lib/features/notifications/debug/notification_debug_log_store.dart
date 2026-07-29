@@ -1,5 +1,4 @@
 import 'package:flutter/foundation.dart';
-import 'package:injectable/injectable.dart';
 
 @immutable
 class NotificationDebugLogEntry {
@@ -15,7 +14,6 @@ class NotificationDebugLogEntry {
 }
 
 /// In-memory log for the Notification Debug Lab only.
-@lazySingleton
 class NotificationDebugLogStore extends ChangeNotifier {
   NotificationDebugLogStore();
 

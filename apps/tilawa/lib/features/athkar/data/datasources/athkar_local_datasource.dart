@@ -1,8 +1,6 @@
 import 'dart:convert';
 
 import 'package:flutter/services.dart';
-import 'package:injectable/injectable.dart';
-
 import '../models/athkar_category_model.dart';
 import '../models/athkar_item_model.dart';
 
@@ -11,7 +9,6 @@ abstract class AthkarLocalDataSource {
   Future<List<AthkarItemModel>> getAthkarByCategory(int categoryId);
 }
 
-@LazySingleton(as: AthkarLocalDataSource)
 class AthkarLocalDataSourceImpl implements AthkarLocalDataSource {
   AthkarLocalDataSourceImpl({required this._assetBundle});
 

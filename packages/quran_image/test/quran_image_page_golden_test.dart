@@ -20,10 +20,14 @@ const _goldenViewports = <({String label, Size size})>[
 ];
 
 Widget wrapQuranImageGoldenTestApp(Widget home) {
+  const locale = Locale('en');
   return MaterialApp(
     debugShowCheckedModeBanner: false,
-    theme: AppTheme.getLightTheme(primaryColor: AppColors.defaultPrimary),
-    locale: const Locale('en'),
+    theme: AppTheme.getLightTheme(
+      primaryColor: AppColors.defaultPrimary,
+      locale: locale,
+    ),
+    locale: locale,
     localizationsDelegates: QuranImageLocalizations.localizationsDelegates,
     supportedLocales: QuranImageLocalizations.supportedLocales,
     home: home,
@@ -50,8 +54,14 @@ Future<void> pumpQuranImagePageGolden(
       ),
     ),
   );
-  await tester.pump();
-  await tester.pump(const Duration(milliseconds: 100));
+  // Precache line/header MemoryImage placeholders, then settle for paint.
+  await tester.runAsync(() async {
+    for (final element in find.byType(Image).evaluate()) {
+      final image = element.widget as Image;
+      await precacheImage(image.image, element);
+    }
+  });
+  await tester.pumpAndSettle();
 }
 
 String goldenPath({required int pageNumber, required String viewportLabel}) {

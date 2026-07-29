@@ -1,5 +1,4 @@
 import 'package:dartz_plus/dartz_plus.dart';
-import 'package:injectable/injectable.dart';
 import 'package:tilawa_core/errors/failures.dart';
 import 'package:tilawa_core/utils/typedefs.dart';
 
@@ -8,7 +7,6 @@ import '../../domain/entities/pinned_athkar_preference.dart';
 import '../../domain/repositories/pinned_athkar_repository.dart';
 import '../datasources/pinned_athkar_local_datasource.dart';
 
-@LazySingleton(as: PinnedAthkarRepository)
 class PinnedAthkarRepositoryImpl implements PinnedAthkarRepository {
   PinnedAthkarRepositoryImpl(this._localDataSource);
 

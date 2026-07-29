@@ -1,5 +1,4 @@
 import 'package:firebase_messaging/firebase_messaging.dart';
-import 'package:injectable/injectable.dart';
 
 abstract class NotificationsRemoteDataSource {
   Future<NotificationSettings> requestPermission();
@@ -9,7 +8,6 @@ abstract class NotificationsRemoteDataSource {
   Future<RemoteMessage?> getInitialMessage();
 }
 
-@LazySingleton(as: NotificationsRemoteDataSource)
 class NotificationsRemoteDataSourceImpl
     implements NotificationsRemoteDataSource {
   NotificationsRemoteDataSourceImpl(this._firebaseMessaging);

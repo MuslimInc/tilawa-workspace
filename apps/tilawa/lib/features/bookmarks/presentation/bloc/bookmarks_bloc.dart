@@ -1,8 +1,6 @@
 import 'package:dartz_plus/dartz_plus.dart';
 import 'package:freezed_annotation/freezed_annotation.dart';
 import 'package:hydrated_bloc/hydrated_bloc.dart';
-import 'package:injectable/injectable.dart';
-
 import 'package:tilawa_core/errors/failures.dart';
 import '../../domain/entities/bookmark_entity.dart';
 import '../../domain/usecases/usecases.dart';
@@ -11,7 +9,6 @@ part 'bookmarks_bloc.freezed.dart';
 part 'bookmarks_event.dart';
 part 'bookmarks_state.dart';
 
-@injectable
 class BookmarksBloc extends Bloc<BookmarksEvent, BookmarksState> {
   BookmarksBloc({
     required this._getAllBookmarksUseCase,

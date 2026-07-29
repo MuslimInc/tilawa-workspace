@@ -1,8 +1,5 @@
-import 'package:injectable/injectable.dart';
-
 import '../repositories/home_daily_ayah_bookmark_store.dart';
 
-@injectable
 class ToggleHomeDailyAyahBookmarkUseCase {
   ToggleHomeDailyAyahBookmarkUseCase(this._store);
 

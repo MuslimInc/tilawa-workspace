@@ -1,5 +1,6 @@
-import 'package:injectable/injectable.dart';
+import 'package:get_it/get_it.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:tilawa/core/di/get_it_idempotent.dart';
 import 'package:tilawa/core/di/injection.dart';
 import 'package:tilawa/core/services/hive_readiness.dart';
 import 'package:tilawa/features/auth/domain/usecases/get_current_user_use_case.dart';
@@ -19,28 +20,23 @@ import '../data/repositories/home_dashboard_repository_impl.dart';
 import '../domain/repositories/home_dashboard_cache.dart';
 import '../domain/repositories/home_dashboard_repository.dart';
 
-/// Injectable wiring for Home dashboard repository + cache.
-@module
-abstract class HomeScreenModule {
-  @lazySingleton
-  HomeDashboardCache homeDashboardCache() => HomeDashboardMemoryCache.shared;
+/// GetIt wiring for Home dashboard repository + cache.
+class HomeScreenModule {
+  HomeScreenModule._();
 
-  @lazySingleton
-  HomeDashboardRepository homeDashboardRepository(
-    GetCurrentUserUseCase getCurrentUser,
-    LoadPrayerSettingsUseCase loadPrayerSettings,
-    GetCurrentLocationUseCase getCurrentLocation,
-    GetLocationNameUseCase getLocationName,
-    GetPrayerTimesUseCase getPrayerTimes,
-    SavePrayerSettingsUseCase savePrayerSettings,
-  ) {
-    return HomeDashboardRepositoryImpl(
-      getCurrentUser: getCurrentUser,
-      loadPrayerSettings: loadPrayerSettings,
-      getCurrentLocation: getCurrentLocation,
-      getLocationName: getLocationName,
-      getPrayerTimes: getPrayerTimes,
-      savePrayerSettings: savePrayerSettings,
+  static void register(GetIt getIt) {
+    getIt.registerLazySingletonIfAbsent<HomeDashboardCache>(
+      () => HomeDashboardMemoryCache.shared,
+    );
+    getIt.registerLazySingletonIfAbsent<HomeDashboardRepository>(
+      () => HomeDashboardRepositoryImpl(
+        getCurrentUser: getIt<GetCurrentUserUseCase>(),
+        loadPrayerSettings: getIt<LoadPrayerSettingsUseCase>(),
+        getCurrentLocation: getIt<GetCurrentLocationUseCase>(),
+        getLocationName: getIt<GetLocationNameUseCase>(),
+        getPrayerTimes: getIt<GetPrayerTimesUseCase>(),
+        savePrayerSettings: getIt<SavePrayerSettingsUseCase>(),
+      ),
     );
   }
 }

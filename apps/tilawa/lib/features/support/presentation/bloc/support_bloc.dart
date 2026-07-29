@@ -2,7 +2,6 @@ import 'dart:async';
 
 import 'package:connectivity_plus/connectivity_plus.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:injectable/injectable.dart';
 import 'package:tilawa_core/constants/analytics_constants.dart';
 import 'package:tilawa_core/errors/failures.dart';
 import 'package:tilawa_core/services/analytics_service.dart';
@@ -15,7 +14,6 @@ import '../../domain/usecases/restore_purchases_use_case.dart';
 import 'support_event.dart';
 import 'support_state.dart';
 
-@injectable
 class SupportBloc extends Bloc<SupportEvent, SupportState> {
   SupportBloc(
     this._prepareSession,

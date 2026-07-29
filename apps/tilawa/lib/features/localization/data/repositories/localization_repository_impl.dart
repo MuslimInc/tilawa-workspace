@@ -1,12 +1,9 @@
 import 'package:dartz_plus/dartz_plus.dart';
-import 'package:injectable/injectable.dart';
-
 import 'package:tilawa_core/errors/failures.dart';
 import 'package:tilawa_core/utils/typedefs.dart';
 import '../../domain/repositories/localization_repository.dart';
 import '../datasources/localization_local_datasource.dart';
 
-@LazySingleton(as: LocalizationRepository)
 class LocalizationRepositoryImpl implements LocalizationRepository {
   const LocalizationRepositoryImpl(this._localDataSource);
 

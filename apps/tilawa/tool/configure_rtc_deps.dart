@@ -4,12 +4,12 @@ import 'dart:io';
 
 /// Switches Tilawa between RTC SDK and no-SDK dependency graphs.
 ///
-/// Play production AABs must run with `--stub` so Agora/LiveKit native libs are
-/// not linked. Dev/staging defaults use `--sdk`.
+/// Temporary default is `--stub` (no Agora/LiveKit native libs / livekit_client).
+/// Use `--sdk` only when re-enabling live video calls.
 ///
 /// ```sh
-/// dart run tool/configure_rtc_deps.dart --stub   # production
-/// dart run tool/configure_rtc_deps.dart --sdk    # restore dev default
+/// dart run tool/configure_rtc_deps.dart --stub   # default for now
+/// dart run tool/configure_rtc_deps.dart --sdk    # restore Agora + LiveKit
 /// ```
 void main(List<String> args) {
   final useStub = args.contains('--stub');
@@ -43,9 +43,8 @@ void _configureImplExport(Directory appRoot, {required bool useStub}) {
   final content =
       '''// RTC implementation barrel — swap via tool/configure_rtc_deps.dart.
 //
-// Default (dev/staging): exports quran_sessions_rtc_sdk with Agora/LiveKit.
-// Production Play builds: run `dart run tool/configure_rtc_deps.dart --stub`
-// to point here at quran_sessions_rtc_stub instead.
+// Temporary default: quran_sessions_rtc_stub (no Agora/LiveKit).
+// Re-enable with: dart run tool/configure_rtc_deps.dart --sdk
 $exportLine
 ''';
   File('${appRoot.path}/$implPath').writeAsStringSync(content);

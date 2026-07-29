@@ -1,5 +1,4 @@
 import 'package:dartz_plus/dartz_plus.dart';
-import 'package:injectable/injectable.dart';
 import 'package:tilawa/core/logging/app_logger.dart';
 import 'package:tilawa_core/errors/failures.dart';
 
@@ -14,7 +13,6 @@ import 'sync_device_token_use_case.dart';
 
 const _selfDeletionReason = 'Self-service account deletion from mobile app';
 
-@injectable
 class DeleteAccount {
   DeleteAccount(
     this._authRepository,

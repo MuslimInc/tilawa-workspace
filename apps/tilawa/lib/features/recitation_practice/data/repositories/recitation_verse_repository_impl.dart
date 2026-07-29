@@ -1,10 +1,8 @@
-import 'package:injectable/injectable.dart';
 import 'package:quran_qcf/quran_qcf.dart';
 
 import '../../domain/entities/recitation_target.dart';
 import '../../domain/repositories/recitation_verse_repository.dart';
 
-@LazySingleton(as: RecitationVerseRepository)
 class RecitationVerseRepositoryImpl implements RecitationVerseRepository {
   const RecitationVerseRepositoryImpl(this._verseService);
 

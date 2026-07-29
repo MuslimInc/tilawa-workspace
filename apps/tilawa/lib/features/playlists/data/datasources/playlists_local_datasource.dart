@@ -1,6 +1,5 @@
 import 'dart:convert';
 
-import 'package:injectable/injectable.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 import '../../domain/entities/playlist.dart';
@@ -18,7 +17,6 @@ abstract class PlaylistsLocalDataSource {
   Future<String> generatePlaylistId();
 }
 
-@LazySingleton(as: PlaylistsLocalDataSource)
 class PlaylistsLocalDataSourceImpl implements PlaylistsLocalDataSource {
   PlaylistsLocalDataSourceImpl(this._prefs);
   static const String _playlistsKey = 'playlists';

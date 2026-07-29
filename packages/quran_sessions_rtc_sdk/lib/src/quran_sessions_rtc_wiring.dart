@@ -3,12 +3,11 @@ import 'package:quran_sessions/quran_sessions.dart';
 
 import 'boundaries/call/agora_call_provider.dart';
 import 'boundaries/call/agora_rtc_engine_pool.dart';
-import 'boundaries/call/livekit_call_provider.dart';
-import 'boundaries/call/livekit_room_pool.dart';
 import 'presentation/agora_call_surface.dart';
-import 'presentation/livekit_call_surface.dart';
 
-/// Registers Agora/LiveKit pools and builds in-app call surfaces.
+/// Registers Agora pools and builds in-app call surfaces.
+///
+/// LiveKit registration is temporarily disabled (sources parked).
 class QuranSessionsRtcWiring {
   QuranSessionsRtcWiring._();
 
@@ -23,9 +22,7 @@ class QuranSessionsRtcWiring {
     if (registerAgora && !sl.isRegistered<AgoraRtcEnginePool>()) {
       sl.registerLazySingleton<AgoraRtcEnginePool>(() => AgoraRtcEnginePool());
     }
-    if (registerLivekit && !sl.isRegistered<LiveKitRoomPool>()) {
-      sl.registerLazySingleton<LiveKitRoomPool>(() => LiveKitRoomPool());
-    }
+    // LiveKit temporarily parked — [registerLivekit] ignored until restored.
   }
 
   static SessionCallProvider? createAgoraProvider(
@@ -54,16 +51,8 @@ class QuranSessionsRtcWiring {
     required Future<String> Function() resolveUserId,
     SessionCallProviderEventHub? eventHub,
   }) {
-    if (serverUrl.trim().isEmpty || !sl.isRegistered<LiveKitRoomPool>()) {
-      return null;
-    }
-    return LiveKitCallProvider(
-      serverUrl: serverUrl,
-      tokenProvider: tokenProvider,
-      resolveUserId: resolveUserId,
-      roomPool: sl<LiveKitRoomPool>(),
-      eventHub: eventHub,
-    );
+    // LiveKit temporarily parked.
+    return null;
   }
 
   static InAppCallSurfaceBuilder? buildInAppCallSurface({
@@ -76,19 +65,6 @@ class QuranSessionsRtcWiring {
       required callType,
       required callProviderKind,
     }) {
-      if (sl.isRegistered<LiveKitRoomPool>()) {
-        final livekitSurface = buildLiveKitCallSurface(
-          sessionId: sessionId,
-          callType: callType,
-          providerKind: callProviderKind,
-          roomPool: sl<LiveKitRoomPool>(),
-          eventHub: eventHub,
-        );
-        if (livekitSurface != null) {
-          return livekitSurface;
-        }
-      }
-
       if (!sl.isRegistered<AgoraRtcEnginePool>()) {
         return null;
       }

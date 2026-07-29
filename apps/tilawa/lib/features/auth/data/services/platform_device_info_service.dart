@@ -2,14 +2,12 @@ import 'dart:io';
 
 import 'package:device_info_plus/device_info_plus.dart';
 import 'package:flutter/foundation.dart';
-import 'package:injectable/injectable.dart';
 import 'package:tilawa_core/entities/app_info.dart';
 import 'package:tilawa_core/services/interfaces/app_info_service.dart';
 
 import '../../domain/entities/device_info_snapshot.dart';
 import '../../domain/services/device_info_service.dart';
 
-@LazySingleton(as: DeviceInfoService)
 class PlatformDeviceInfoService implements DeviceInfoService {
   PlatformDeviceInfoService(this._deviceInfoPlugin, this._appInfoService)
     : _isAndroid = !kIsWeb && Platform.isAndroid,

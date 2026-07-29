@@ -1,7 +1,5 @@
-import 'package:injectable/injectable.dart';
 import '../repositories/surah_repository.dart';
 
-@Singleton()
 class UpdateSurahDownloadProgressUseCase {
   const UpdateSurahDownloadProgressUseCase(this._surahRepository);
 

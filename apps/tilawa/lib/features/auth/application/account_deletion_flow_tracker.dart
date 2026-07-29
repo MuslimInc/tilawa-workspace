@@ -1,9 +1,7 @@
 import 'package:flutter/foundation.dart';
-import 'package:injectable/injectable.dart';
 
 /// Coordinates account-deletion UX: suppress login auto sign-in (Credential
 /// Manager) while deletion runs and after a successful delete.
-@lazySingleton
 class AccountDeletionFlowTracker extends ChangeNotifier {
   bool _deletionInProgress = false;
   bool _suppressLoginAutoSignIn = false;

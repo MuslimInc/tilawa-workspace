@@ -1,12 +1,9 @@
 import 'package:dartz_plus/dartz_plus.dart';
-import 'package:injectable/injectable.dart';
-
 import 'package:tilawa_core/errors/failures.dart';
 import 'package:tilawa_core/utils/typedefs.dart';
 import '../../../surah/domain/entities/surah_entity.dart';
 import '../repositories/batch_download_repository.dart';
 
-@Singleton()
 class DownloadAllSurahsUseCase {
   const DownloadAllSurahsUseCase(this._repository);
 

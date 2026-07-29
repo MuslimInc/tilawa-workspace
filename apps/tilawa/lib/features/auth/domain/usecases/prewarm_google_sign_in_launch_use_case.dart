@@ -1,4 +1,3 @@
-import 'package:injectable/injectable.dart';
 import 'package:tilawa/core/logging/app_logger.dart';
 
 import '../gateways/google_sign_in_launch_gateway.dart';
@@ -6,7 +5,6 @@ import '../services/google_sign_in_launch_readiness_store.dart';
 import 'prepare_google_sign_in_use_case.dart';
 
 /// Initializes Google sign-in and caches launch readiness before user taps.
-@injectable
 class PrewarmGoogleSignInLaunchUseCase {
   PrewarmGoogleSignInLaunchUseCase(
     this._prepareGoogleSignIn,

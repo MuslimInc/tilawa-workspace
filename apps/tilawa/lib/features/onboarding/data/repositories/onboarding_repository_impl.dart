@@ -1,9 +1,7 @@
-import 'package:injectable/injectable.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 import '../../domain/repositories/onboarding_repository.dart';
 
-@LazySingleton(as: OnboardingRepository)
 class OnboardingRepositoryImpl implements OnboardingRepository {
   OnboardingRepositoryImpl(this._prefs);
   final SharedPreferencesAsync _prefs;

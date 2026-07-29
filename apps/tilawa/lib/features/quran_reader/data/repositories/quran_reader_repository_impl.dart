@@ -1,11 +1,9 @@
-import 'package:injectable/injectable.dart';
 import 'package:quran_qcf/quran_qcf.dart';
 
 import '../../domain/entities/entities.dart';
 import '../../domain/repositories/quran_reader_repository.dart';
 import '../datasources/datasources.dart';
 
-@LazySingleton(as: QuranReaderRepository)
 class QuranReaderRepositoryImpl implements QuranReaderRepository {
   QuranReaderRepositoryImpl(
     this._quranDataSource,

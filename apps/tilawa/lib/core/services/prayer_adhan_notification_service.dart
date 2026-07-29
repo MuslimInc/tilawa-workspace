@@ -6,7 +6,6 @@ import 'dart:ui';
 import 'package:flutter/foundation.dart';
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 import 'package:flutter_timezone/flutter_timezone.dart';
-import 'package:injectable/injectable.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:sentry_flutter/sentry_flutter.dart';
 import 'package:tilawa/core/logging/app_logger.dart';
@@ -46,7 +45,6 @@ const List<PrayerType> _schedulablePrayers = [
   PrayerType.isha,
 ];
 
-@LazySingleton(as: IPrayerAdhanNotificationService)
 class PrayerAdhanNotificationService
     implements IPrayerAdhanNotificationService {
   PrayerAdhanNotificationService(
@@ -56,8 +54,8 @@ class PrayerAdhanNotificationService
     this._analytics,
     this._adhanPlayer,
     this._notificationPermissionService, {
-    @ignoreParam @visibleForTesting this._isAndroidOverride,
-    @ignoreParam @visibleForTesting PrayerWidgetScheduleSync? widgetSync,
+    @visibleForTesting this._isAndroidOverride,
+    @visibleForTesting PrayerWidgetScheduleSync? widgetSync,
   }) : _widgetSync = widgetSync ?? PrayerWidgetScheduleSync();
 
   final SharedPreferencesAsync _prefs;

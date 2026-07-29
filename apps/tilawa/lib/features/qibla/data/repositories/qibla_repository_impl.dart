@@ -1,14 +1,12 @@
 import 'dart:async';
 
 import 'package:geolocator/geolocator.dart';
-import 'package:injectable/injectable.dart';
 import 'package:rxdart/rxdart.dart';
 
 import '../../domain/entities/qibla_direction_entity.dart';
 import '../../domain/repositories/qibla_repository.dart';
 import '../datasources/qibla_data_source.dart';
 
-@LazySingleton(as: QiblaRepository)
 class QiblaRepositoryImpl implements QiblaRepository {
   QiblaRepositoryImpl(this._dataSource);
   final QiblaDataSource _dataSource;

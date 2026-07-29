@@ -3,9 +3,7 @@ import 'dart:isolate';
 import 'dart:ui';
 
 import 'package:flutter_downloader/flutter_downloader.dart';
-import 'package:injectable/injectable.dart';
 
-@lazySingleton
 class DownloadIsolateManager {
   static const String _portName = 'downloader_send_port';
   ReceivePort? _port;

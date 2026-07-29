@@ -1,7 +1,6 @@
 import 'package:flutter/animation.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/scheduler.dart';
-import 'package:injectable/injectable.dart';
 import 'package:tilawa/shared/widgets/quran_player_debug_log.dart';
 import 'package:tilawa/shared/widgets/quran_player_visual_mode.dart';
 import 'package:tilawa/shared/widgets/quran_player_expand_physics.dart';
@@ -27,7 +26,6 @@ import 'quran_player_presentation_entry.dart';
 ///
 /// Vocabulary: `docs/architecture/media-state-vocabulary.md`
 /// Boundaries: `docs/architecture/player-presentation.md`
-@lazySingleton
 class PlayerPresentationController extends ChangeNotifier {
   PlayerPresentationController(this._navigation);
 

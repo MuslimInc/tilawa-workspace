@@ -1,5 +1,4 @@
 import 'package:flutter/foundation.dart';
-import 'package:injectable/injectable.dart';
 import 'package:sentry_flutter/sentry_flutter.dart';
 import 'package:tilawa/core/logging/app_logger.dart';
 import 'package:tilawa_core/services/application_metrics_service.dart';
@@ -8,7 +7,6 @@ import 'package:tilawa_core/services/application_metrics_service.dart';
 ///
 /// Sentry's SDK is kept behind this adapter so app and feature layers can emit
 /// metrics without importing `sentry_flutter`.
-@Singleton(as: ApplicationMetricsService)
 class SentryApplicationMetricsService implements ApplicationMetricsService {
   /// Creates a Sentry-backed metrics service.
   SentryApplicationMetricsService() : _metrics = Sentry.metrics;

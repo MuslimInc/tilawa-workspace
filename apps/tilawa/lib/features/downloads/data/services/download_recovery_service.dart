@@ -1,6 +1,4 @@
 import 'package:flutter/services.dart';
-import 'package:injectable/injectable.dart';
-
 import 'package:tilawa/core/logging/app_logger.dart';
 import '../../domain/entities/download_item.dart';
 import 'download_queue_manager.dart';
@@ -13,7 +11,6 @@ import 'download_validator.dart';
 /// - Orphaned pending downloads (app killed while pending)
 /// - Stuck downloads (0% progress for too long)
 /// - Background download verification
-@LazySingleton()
 class DownloadRecoveryService {
   DownloadRecoveryService(
     this._downloadService,

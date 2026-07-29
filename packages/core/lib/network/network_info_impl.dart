@@ -1,15 +1,12 @@
 import 'dart:async';
 
 import 'package:connectivity_plus/connectivity_plus.dart';
-import 'package:injectable/injectable.dart';
-
 import 'network_info.dart';
 
-@Injectable(as: NetworkInfo)
 class NetworkInfoImpl implements NetworkInfo {
   NetworkInfoImpl(
     this._connectivity, {
-    @ignoreParam DateTime Function()? now,
+    DateTime Function()? now,
   }) : _now = now ?? DateTime.now;
 
   final Connectivity _connectivity;

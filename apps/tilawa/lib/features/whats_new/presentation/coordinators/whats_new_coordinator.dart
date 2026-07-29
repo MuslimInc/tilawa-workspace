@@ -1,4 +1,3 @@
-import 'package:injectable/injectable.dart';
 import 'package:tilawa/core/bootstrap/app_launch_config.dart';
 import 'package:tilawa/core/di/injection.dart';
 import 'package:tilawa/core/logging/app_logger.dart';
@@ -16,7 +15,6 @@ import '../../domain/usecases/mark_whats_new_seen_use_case.dart';
 import '../services/whats_new_presenter.dart';
 
 /// Orchestrates when and how the what's new sheet is shown.
-@singleton
 class WhatsNewCoordinator {
   WhatsNewCoordinator(
     this._getEligibility,

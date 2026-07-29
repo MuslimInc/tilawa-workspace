@@ -1,11 +1,9 @@
 import 'dart:async';
 
-import 'package:injectable/injectable.dart';
 import 'package:tilawa_core/logger.dart';
 
 import '../repositories/quran_font_repository.dart';
 
-@lazySingleton
 class LoadQuranFontsToEngineUseCase {
   const LoadQuranFontsToEngineUseCase(this._repository);
 

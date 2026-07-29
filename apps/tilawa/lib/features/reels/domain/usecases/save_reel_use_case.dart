@@ -1,5 +1,4 @@
 import 'package:equatable/equatable.dart';
-import 'package:injectable/injectable.dart';
 import 'package:tilawa_core/usecases/usecase.dart';
 import 'package:tilawa_core/utils/typedefs.dart';
 
@@ -15,7 +14,6 @@ class SaveReelParams extends Equatable {
   List<Object?> get props => [reel];
 }
 
-@lazySingleton
 class SaveReelUseCase extends UseCase<void, SaveReelParams> {
   SaveReelUseCase(this._repository);
 
@@ -35,7 +33,6 @@ class RemoveSavedReelParams extends Equatable {
   List<Object?> get props => [reelId];
 }
 
-@lazySingleton
 class RemoveSavedReelUseCase extends UseCase<void, RemoveSavedReelParams> {
   RemoveSavedReelUseCase(this._repository);
 

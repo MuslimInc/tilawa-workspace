@@ -1,9 +1,7 @@
-import 'package:injectable/injectable.dart';
 import 'package:tilawa/features/downloads/domain/repositories/downloads_repository.dart';
 import 'package:tilawa_core/utils/url_validator.dart';
 
 /// Resolves a network or on-disk URI for playback.
-@lazySingleton
 class PlaybackUriResolver {
   const PlaybackUriResolver(this._downloadsRepository);
 

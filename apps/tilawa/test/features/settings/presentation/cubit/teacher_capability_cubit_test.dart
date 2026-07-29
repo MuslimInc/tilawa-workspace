@@ -107,7 +107,7 @@ void main() {
       const FakeAuthSessionProvider(userId: 'user_1'),
     );
     scopeGetIt().registerSingleton<AppLaunchConfig>(
-      const AppLaunchConfig(),
+      const AppLaunchConfig(learnQuranStudentFeatureEnabled: true),
     );
     scopeGetIt().registerSingleton<QuranSessionsPlatformConfigStore>(
       QuranSessionsPlatformConfigStore()..setConfig(
@@ -169,7 +169,7 @@ void main() {
     'still loads capability when teacher application feature disabled',
     build: () {
       scopeGetIt().registerSingleton<AppLaunchConfig>(
-        const AppLaunchConfig(),
+        const AppLaunchConfig(learnQuranStudentFeatureEnabled: true),
       );
       scopeGetIt().registerSingleton<QuranSessionsPlatformConfigStore>(
         QuranSessionsPlatformConfigStore()..setConfig(

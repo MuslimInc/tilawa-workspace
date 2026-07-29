@@ -1,6 +1,5 @@
 import 'dart:async';
 
-import 'package:injectable/injectable.dart';
 import 'package:speech_to_text/speech_recognition_error.dart';
 import 'package:speech_to_text/speech_recognition_result.dart';
 import 'package:speech_to_text/speech_to_text.dart';
@@ -9,7 +8,6 @@ import 'package:tilawa/features/recitation_practice/domain/entities/speech_recog
 import 'package:tilawa/features/recitation_practice/domain/services/recitation_transcript_stitcher.dart';
 
 /// Platform speech-to-text adapter tuned for continuous Arabic recitation.
-@injectable
 class SpeechRecognitionDatasource {
   SpeechRecognitionDatasource() : _speech = SpeechToText();
 

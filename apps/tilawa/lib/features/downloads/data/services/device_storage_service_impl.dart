@@ -1,12 +1,10 @@
 import 'dart:io';
 
 import 'package:disk_space_plus/disk_space_plus.dart';
-import 'package:injectable/injectable.dart';
 import 'package:path_provider/path_provider.dart';
 
 import '../../domain/services/device_storage_service.dart';
 
-@LazySingleton(as: DeviceStorageService)
 class DeviceStorageServiceImpl implements DeviceStorageService {
   DeviceStorageServiceImpl(this._diskSpacePlus);
 

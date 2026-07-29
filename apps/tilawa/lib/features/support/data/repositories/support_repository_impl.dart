@@ -1,7 +1,6 @@
 import 'dart:async';
 import 'dart:developer' as developer;
 
-import 'package:injectable/injectable.dart';
 import 'package:tilawa_core/constants/analytics_constants.dart';
 import 'package:tilawa_core/errors/failures.dart';
 import 'package:tilawa_core/services/analytics_service.dart';
@@ -13,7 +12,6 @@ import '../datasources/play_billing_datasource.dart';
 import '../datasources/support_local_datasource.dart';
 import '../services/purchase_verification_client.dart';
 
-@LazySingleton(as: SupportRepository)
 class SupportRepositoryImpl implements SupportRepository {
   SupportRepositoryImpl(
     this._billing,

@@ -1,11 +1,8 @@
 import 'package:dartz_plus/dartz_plus.dart';
-import 'package:injectable/injectable.dart';
-
 import 'package:tilawa_core/errors/failures.dart';
 import '../entities/support_product.dart';
 import '../repositories/support_repository.dart';
 
-@lazySingleton
 class GetSupportProductsUseCase {
   const GetSupportProductsUseCase(this._repository);
 

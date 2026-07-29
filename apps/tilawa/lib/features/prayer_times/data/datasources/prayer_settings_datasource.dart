@@ -1,6 +1,5 @@
 import 'dart:convert';
 
-import 'package:injectable/injectable.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 import '../../domain/entities/entities.dart';
@@ -11,7 +10,6 @@ abstract class PrayerSettingsDataSource {
   Future<void> clearSettings();
 }
 
-@LazySingleton(as: PrayerSettingsDataSource)
 class PrayerSettingsDataSourceImpl implements PrayerSettingsDataSource {
   PrayerSettingsDataSourceImpl(this._prefs);
 

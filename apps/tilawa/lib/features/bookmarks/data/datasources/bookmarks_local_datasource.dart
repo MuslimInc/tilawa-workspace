@@ -1,6 +1,5 @@
 import 'dart:convert';
 
-import 'package:injectable/injectable.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 import '../../domain/entities/bookmark_entity.dart';
@@ -16,7 +15,6 @@ abstract class BookmarksLocalDataSource {
   Future<int> getBookmarkCount();
 }
 
-@LazySingleton(as: BookmarksLocalDataSource)
 class BookmarksLocalDataSourceImpl implements BookmarksLocalDataSource {
   BookmarksLocalDataSourceImpl(this._prefs);
 

@@ -1,11 +1,8 @@
 import 'dart:io';
 
-import 'package:injectable/injectable.dart';
-
 import 'package:tilawa/core/logging/app_logger.dart';
 import '../datasources/downloads_local_datasource.dart';
 
-@LazySingleton()
 class DownloadValidator {
   DownloadValidator(this._localDataSource);
 

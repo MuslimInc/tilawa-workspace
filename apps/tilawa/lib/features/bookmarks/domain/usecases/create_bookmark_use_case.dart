@@ -1,8 +1,6 @@
 import 'dart:async';
 
 import 'package:dartz_plus/dartz_plus.dart';
-import 'package:injectable/injectable.dart';
-
 import 'package:tilawa/features/app_review/domain/entities/app_review_prompt_moment.dart';
 import 'package:tilawa/features/app_review/domain/entities/app_review_signal.dart';
 import 'package:tilawa/features/app_review/domain/services/app_review_trigger_manager.dart';
@@ -10,7 +8,6 @@ import 'package:tilawa_core/errors/failures.dart';
 import '../entities/bookmark_entity.dart';
 import '../repositories/bookmarks_repository.dart';
 
-@lazySingleton
 class CreateBookmarkUseCase {
   CreateBookmarkUseCase(
     this._repository,

@@ -1,7 +1,6 @@
 import 'dart:convert';
 
 import 'package:hive_ce/hive.dart';
-import 'package:injectable/injectable.dart';
 import 'package:tilawa/core/services/hive_readiness.dart';
 
 import '../../domain/constants/tasbeeh_constants.dart';
@@ -15,7 +14,6 @@ abstract class TasbeehLocalDataSource {
   Future<void> deleteAllDhikr();
 }
 
-@LazySingleton(as: TasbeehLocalDataSource)
 class TasbeehLocalDataSourceImpl implements TasbeehLocalDataSource {
   TasbeehLocalDataSourceImpl(this._hive, this._hiveReadiness);
 

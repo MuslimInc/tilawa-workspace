@@ -3,7 +3,6 @@ import 'dart:math';
 
 import 'package:crypto/crypto.dart';
 import 'package:firebase_auth/firebase_auth.dart';
-import 'package:injectable/injectable.dart';
 import 'package:sign_in_with_apple/sign_in_with_apple.dart';
 import 'package:tilawa/core/network/network_error_message.dart';
 
@@ -13,7 +12,6 @@ import '../../domain/entities/user_entity.dart';
 import '../../domain/gateways/apple_auth_gateway.dart';
 import '../mappers/firebase_auth_exception_mapper.dart';
 
-@LazySingleton(as: AppleAuthGateway)
 class FirebaseAppleAuthGateway implements AppleAuthGateway {
   FirebaseAppleAuthGateway(this._firebaseAuth);
 

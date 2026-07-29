@@ -2,7 +2,6 @@ import 'dart:async';
 import 'dart:convert';
 import 'dart:ui';
 
-import 'package:injectable/injectable.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:tilawa_core/config/language_config.dart';
 
@@ -15,7 +14,6 @@ import '../models/download_progress.dart';
 import 'download_service_interface.dart';
 
 /// Manages batch downloads and their notifications
-@lazySingleton
 class BatchDownloadManager implements IBatchDownloadService {
   BatchDownloadManager(
     this._downloadService,

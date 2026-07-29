@@ -1,9 +1,6 @@
-import 'package:injectable/injectable.dart';
-
 import 'package:tilawa_core/entities/audio.dart';
 import '../repositories/audio_player_repository.dart';
 
-@injectable
 class GetAudioStreamsUseCase {
   const GetAudioStreamsUseCase(this._repository);
   final AudioPlayerRepository _repository;

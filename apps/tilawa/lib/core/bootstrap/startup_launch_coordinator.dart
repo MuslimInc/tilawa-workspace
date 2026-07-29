@@ -1,6 +1,5 @@
 import 'dart:async';
 
-import 'package:injectable/injectable.dart';
 import 'package:tilawa/core/bootstrap/app_startup_readiness.dart';
 import 'package:tilawa/core/logging/app_logger.dart';
 import 'package:tilawa/router/app_router.dart';
@@ -76,7 +75,6 @@ class StartupLaunchPlan {
 }
 
 /// Resolves the first in-app destination while the boot gate is still visible.
-@lazySingleton
 class StartupLaunchCoordinator {
   StartupLaunchCoordinator(
     this._getSplashNextRoute,

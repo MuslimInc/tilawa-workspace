@@ -1,6 +1,4 @@
 import 'package:hydrated_bloc/hydrated_bloc.dart';
-import 'package:injectable/injectable.dart';
-
 import '../../domain/entities/premium_status.dart';
 import '../../domain/entities/subscription_plan.dart';
 import '../../domain/usecases/cancel_subscription_use_case.dart';
@@ -13,7 +11,6 @@ import '../../domain/usecases/start_trial_use_case.dart';
 import 'premium_event.dart';
 import 'premium_state.dart';
 
-@injectable
 class PremiumBloc extends HydratedBloc<PremiumEvent, PremiumState> {
   PremiumBloc(
     this._getPremiumStatus,

@@ -1,7 +1,6 @@
 import 'dart:async';
 
 import 'package:firebase_core/firebase_core.dart';
-import 'package:injectable/injectable.dart';
 import 'package:tilawa/core/logging/app_logger.dart';
 import 'package:tilawa/core/network/network_error_message.dart';
 import 'package:tilawa_core/errors/failures.dart';
@@ -15,7 +14,6 @@ import '../gateways/email_password_auth_gateway.dart';
 import '../repositories/auth_repository.dart';
 import '../repositories/user_repository.dart';
 
-@injectable
 class RegisterWithEmailUseCase {
   RegisterWithEmailUseCase(
     this._authRepository,

@@ -1,5 +1,3 @@
-import 'package:injectable/injectable.dart';
-
 import '../repositories/support_repository.dart';
 
 /// Aborts a stuck in-flight Play purchase by failing the underlying waiter
@@ -8,7 +6,6 @@ import '../repositories/support_repository.dart';
 /// Used to recover from Play closing its sheet without emitting a stream
 /// event (e.g. the "not configured for billing" dialog) so the spinner does
 /// not hang until the 5-minute waiter timeout.
-@lazySingleton
 class AbortPendingPurchaseUseCase {
   const AbortPendingPurchaseUseCase(this._repository);
 

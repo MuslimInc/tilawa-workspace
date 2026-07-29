@@ -3,11 +3,8 @@
 
 import 'dart:convert';
 import 'package:flutter/services.dart';
-import 'package:injectable/injectable.dart';
-
 import '../models/daily_guidance_item_model.dart';
 
-@lazySingleton
 class DailyGuidanceSeedDataSource {
   static const String _seedAssetPath = 'assets/daily_guidance_seed.json';
 

@@ -20,12 +20,26 @@ Widget wrapQuranImageTestApp(Widget home) {
   );
 }
 
+/// Known-good 1×1 solid PNGs (avoids PictureRecorder encode flakiness in tests).
+final Uint8List _solidGrayPng = base64Decode(
+  'iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR4nGN49uzZfwAJGgOycDqAKAAAAABJRU5ErkJggg==',
+);
+final Uint8List _solidGoldPng = base64Decode(
+  'iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR4nGM4sSLvPwAG+ALeUK4u7QAAAABJRU5ErkJggg==',
+);
+
 /// 1×1 solid PNG for golden tests (visible when stretched with [BoxFit.fill]).
 Future<Uint8List> onePixelSolidPng({
   required int r,
   required int g,
   required int b,
 }) async {
+  if (r == 0xE6 && g == 0xE6 && b == 0xE6) {
+    return _solidGrayPng;
+  }
+  if (r == 0xC8 && g == 0xA8 && b == 0x6E) {
+    return _solidGoldPng;
+  }
   final recorder = ui.PictureRecorder();
   final canvas = ui.Canvas(recorder);
   canvas.drawRect(
@@ -151,16 +165,16 @@ class _BytesDecodedQuranImageCache implements DecodedQuranImageCache {
 
   final Map<String, Uint8List> _bytesByPath;
 
+  /// [cacheWidth] matches [DecodedQuranImageCache] but is unused: solid 1×1
+  /// placeholders are stretched by [BoxFit.fill], not [ResizeImage].
   ImageProvider<Object> _provider(String imagePath, {int? cacheWidth}) {
     final Uint8List? bytes = _bytesByPath[imagePath];
     if (bytes == null || bytes.isEmpty) {
       return MemoryImage(Uint8List(0));
     }
-    final MemoryImage memoryImage = MemoryImage(bytes);
-    if (cacheWidth == null) {
-      return memoryImage;
-    }
-    return ResizeImage.resizeIfNeeded(cacheWidth, null, memoryImage);
+    // Skip ResizeImage — upscaling tiny PNGs via ResizeImage can fail decode
+    // in widget tests (errorBuilder → blank page).
+    return MemoryImage(bytes);
   }
 
   @override

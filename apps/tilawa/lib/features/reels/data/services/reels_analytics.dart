@@ -1,4 +1,3 @@
-import 'package:injectable/injectable.dart';
 import 'package:tilawa_core/constants/analytics_constants.dart';
 import 'package:tilawa_core/services/analytics_service.dart';
 
@@ -6,7 +5,6 @@ import '../../domain/entities/reel_reaction.dart';
 import '../../domain/repositories/reels_repository.dart';
 
 /// Thin analytics facade for reels — swappable / testable.
-@lazySingleton
 class ReelsAnalytics {
   ReelsAnalytics(this._analytics);
 

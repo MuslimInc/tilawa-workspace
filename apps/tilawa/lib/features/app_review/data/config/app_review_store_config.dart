@@ -1,23 +1,17 @@
-import 'package:injectable/injectable.dart';
-
 /// Store identifiers and listing URLs for rate / share / forced-update.
 ///
 /// - Android: always the production Play package (flavor suffixes ignored).
 /// - iOS: App Store ID via `--dart-define=TILAWA_APP_STORE_ID=…`, defaulting
 ///   to [kProductionAppStoreId].
-@lazySingleton
 class AppReviewStoreConfig {
   const AppReviewStoreConfig({
-    @ignoreParam
     this.appStoreId = const String.fromEnvironment(
       'TILAWA_APP_STORE_ID',
       defaultValue: kProductionAppStoreId,
     ),
-    @ignoreParam
     this.microsoftStoreId = const String.fromEnvironment(
       'TILAWA_MICROSOFT_STORE_ID',
     ),
-    @ignoreParam
     this.androidPackageId = const String.fromEnvironment(
       'TILAWA_ANDROID_PACKAGE_ID',
       defaultValue: kProductionAndroidPackageId,

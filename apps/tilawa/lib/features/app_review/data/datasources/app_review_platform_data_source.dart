@@ -9,7 +9,8 @@
 /// 1. Add `app_review` to `pubspec.yaml`.
 /// 2. Implement this interface in a new data-source class (see
 ///    `in_app_review_platform_data_source.dart` for the reference mapping).
-/// 3. Change the `@LazySingleton(as: AppReviewPlatformDataSource)` binding.
+/// 3. Register the new class as `AppReviewPlatformDataSource` in
+///    `di/app_review_di.dart`.
 abstract class AppReviewPlatformDataSource {
   Future<bool> isAvailable();
 

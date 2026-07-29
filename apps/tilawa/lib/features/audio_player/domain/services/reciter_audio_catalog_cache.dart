@@ -1,7 +1,6 @@
 import 'dart:developer' show log;
 
 import 'package:dartz_plus/dartz_plus.dart';
-import 'package:injectable/injectable.dart';
 import 'package:tilawa/features/reciters/domain/repositories/reciters_repository.dart';
 import 'package:tilawa_core/entities/audio.dart';
 import 'package:tilawa_core/entities/reciter_entity.dart';
@@ -11,7 +10,6 @@ import '../entities/reciter_audio_catalog.dart';
 import 'reciter_audio_catalog_builder.dart';
 
 /// Loads and caches [ReciterAudioCatalog] for playback (5-minute TTL).
-@lazySingleton
 class ReciterAudioCatalogCache {
   ReciterAudioCatalogCache(
     this._recitersRepository,

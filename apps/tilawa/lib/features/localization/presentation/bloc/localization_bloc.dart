@@ -5,8 +5,6 @@ import 'dart:ui';
 import 'package:dartz_plus/dartz_plus.dart';
 import 'package:equatable/equatable.dart';
 import 'package:hydrated_bloc/hydrated_bloc.dart';
-import 'package:injectable/injectable.dart';
-
 import 'package:tilawa_core/config/language_config.dart';
 import 'package:tilawa_core/errors/failures.dart';
 import '../../domain/usecases/get_current_language_use_case.dart';
@@ -17,7 +15,6 @@ import '../../../reciters/domain/usecases/get_reciters_use_case.dart';
 part 'localization_event.dart';
 part 'localization_state.dart';
 
-@injectable
 class LocalizationBloc
     extends HydratedBloc<LocalizationEvent, LocalizationState> {
   LocalizationBloc(

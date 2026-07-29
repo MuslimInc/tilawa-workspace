@@ -1,4 +1,3 @@
-import 'package:injectable/injectable.dart';
 import 'package:tilawa/features/onboarding/domain/usecases/check_onboarding_status.dart';
 
 import '../entities/changelog_release.dart';
@@ -14,7 +13,6 @@ const Set<String> kWhatsNewBlockedAutoPromptPaths = <String>{
   '/onboarding',
 };
 
-@lazySingleton
 class GetWhatsNewEligibilityUseCase {
   GetWhatsNewEligibilityUseCase(
     this._getCurrentRelease,

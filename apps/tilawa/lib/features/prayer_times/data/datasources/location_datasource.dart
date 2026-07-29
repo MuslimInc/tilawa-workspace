@@ -3,8 +3,6 @@ import 'dart:ui';
 
 import 'package:geocoding/geocoding.dart';
 import 'package:geolocator/geolocator.dart';
-import 'package:injectable/injectable.dart';
-
 import '../../domain/repositories/prayer_times_repository.dart';
 import '../services/geolocator_client.dart';
 
@@ -26,7 +24,6 @@ abstract class LocationDataSource {
   Future<bool> isLocationServiceEnabled();
 }
 
-@LazySingleton(as: LocationDataSource)
 class LocationDataSourceImpl implements LocationDataSource {
   LocationDataSourceImpl(this._geolocatorClient);
 

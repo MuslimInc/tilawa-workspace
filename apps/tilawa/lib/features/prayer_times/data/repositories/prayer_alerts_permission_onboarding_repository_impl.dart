@@ -1,9 +1,7 @@
-import 'package:injectable/injectable.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 import '../../domain/repositories/prayer_alerts_permission_onboarding_repository.dart';
 
-@LazySingleton(as: PrayerAlertsPermissionOnboardingRepository)
 class PrayerAlertsPermissionOnboardingRepositoryImpl
     implements PrayerAlertsPermissionOnboardingRepository {
   PrayerAlertsPermissionOnboardingRepositoryImpl(this._prefs);

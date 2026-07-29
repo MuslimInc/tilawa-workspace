@@ -1,5 +1,4 @@
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:injectable/injectable.dart';
 import 'package:tilawa_core/config/language_config.dart';
 
 import '../../domain/entities/email_registration_draft.dart';
@@ -10,7 +9,6 @@ import '../../domain/policies/email_registration_form_policy.dart';
 import '../../domain/usecases/register_with_email_use_case.dart';
 import 'email_registration_state.dart';
 
-@injectable
 class EmailRegistrationCubit extends Cubit<EmailRegistrationState> {
   EmailRegistrationCubit(this._registerWithEmail)
     : super(

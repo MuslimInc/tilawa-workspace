@@ -1,5 +1,4 @@
 import 'package:equatable/equatable.dart';
-import 'package:injectable/injectable.dart';
 import 'package:tilawa_core/usecases/usecase.dart';
 import 'package:tilawa_core/utils/typedefs.dart';
 
@@ -18,7 +17,6 @@ class RecordReelViewParams extends Equatable {
   List<Object?> get props => [reelId, kind];
 }
 
-@lazySingleton
 class RecordReelViewUseCase extends UseCase<void, RecordReelViewParams> {
   RecordReelViewUseCase(this._repository);
 

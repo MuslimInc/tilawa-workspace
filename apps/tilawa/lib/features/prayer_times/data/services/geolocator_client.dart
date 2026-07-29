@@ -1,5 +1,4 @@
 import 'package:geolocator/geolocator.dart';
-import 'package:injectable/injectable.dart';
 
 abstract class GeolocatorClient {
   Future<bool> isLocationServiceEnabled();
@@ -10,7 +9,6 @@ abstract class GeolocatorClient {
   Future<Position?> getLastKnownPosition();
 }
 
-@LazySingleton(as: GeolocatorClient)
 class GeolocatorClientImpl implements GeolocatorClient {
   @override
   Future<bool> isLocationServiceEnabled() =>

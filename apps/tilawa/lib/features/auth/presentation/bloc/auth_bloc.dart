@@ -4,7 +4,6 @@ import 'dart:developer' as developer;
 import 'package:dartz_plus/dartz_plus.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:freezed_annotation/freezed_annotation.dart';
-import 'package:injectable/injectable.dart';
 import 'package:tilawa/core/logging/app_logger.dart';
 import 'package:tilawa_core/errors/failures.dart';
 
@@ -35,7 +34,6 @@ part 'auth_bloc.freezed.dart';
 part 'auth_event.dart';
 part 'auth_state.dart';
 
-@injectable
 class AuthBloc extends Bloc<AuthEvent, AuthState> {
   AuthBloc(
     this._signInWithGoogle,

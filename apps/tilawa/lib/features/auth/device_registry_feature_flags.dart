@@ -1,9 +1,8 @@
 import 'package:tilawa/core/bootstrap/app_launch_config.dart';
 import 'package:tilawa/core/di/injection.dart';
 
-/// Predicate type for launch-flag checks used as injectable constructor
-/// parameters. `injectable_generator` cannot resolve inline `bool Function()`
-/// types — a named typedef is required.
+/// Predicate type for launch-flag checks used as GetIt constructor
+/// parameters. Named typedef keeps constructor types explicit.
 typedef MultiDeviceLoginEnabledPredicate = bool Function();
 
 /// Whether the client opts into the non-exclusive device registry
@@ -34,7 +33,7 @@ bool isMultiDeviceLoginEnabled() {
   return getIt<AppLaunchConfig>().multiDeviceLoginEnabled;
 }
 
-/// Predicate type for the auth lifecycle hardening flag (injectable-friendly).
+/// Predicate type for the auth lifecycle hardening flag.
 typedef AuthLifecycleHardeningEnabledPredicate = bool Function();
 
 /// Whether the auth/App Check lifecycle hardening is enabled: transient

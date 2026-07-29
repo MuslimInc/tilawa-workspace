@@ -1,7 +1,5 @@
-import 'package:injectable/injectable.dart';
 import '../repositories/premium_repository.dart';
 
-@Singleton()
 class RestoreSubscriptionUseCase {
   const RestoreSubscriptionUseCase(this._premiumRepository);
 

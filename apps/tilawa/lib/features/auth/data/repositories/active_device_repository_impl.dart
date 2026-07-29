@@ -1,6 +1,5 @@
 import 'package:cloud_functions/cloud_functions.dart';
 import 'package:dartz_plus/dartz_plus.dart';
-import 'package:injectable/injectable.dart';
 import 'package:tilawa/core/firebase/app_check_failure.dart';
 import 'package:tilawa_core/errors/failures.dart';
 
@@ -11,7 +10,6 @@ import '../../domain/repositories/active_device_repository.dart';
 import '../datasources/active_device_remote_data_source.dart';
 import '../services/device_identity_service.dart';
 
-@LazySingleton(as: ActiveDeviceRepository)
 class ActiveDeviceRepositoryImpl implements ActiveDeviceRepository {
   ActiveDeviceRepositoryImpl(this._remoteDataSource, this._deviceIdentity);
 

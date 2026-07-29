@@ -3,14 +3,11 @@
 
 import 'dart:convert';
 import 'package:hive_ce/hive.dart';
-import 'package:injectable/injectable.dart';
-
 import '../../../../core/services/hive_readiness.dart';
 import '../models/daily_delivery_record_model.dart';
 import '../models/daily_guidance_item_model.dart';
 import 'daily_guidance_seed_data_source.dart';
 
-@lazySingleton
 class DailyGuidanceLocalDataSource {
   static const String itemsBoxName = 'daily_guidance_items';
   static const String recordsBoxName = 'daily_guidance_delivery_records';

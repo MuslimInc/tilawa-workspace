@@ -55,7 +55,7 @@ class FFmpegMediaInfo {
 }
 
 /// Port the data layer depends on. The default production binding is
-/// `FfmpegKitRunner` (registered via injectable as `@LazySingleton(as: FFmpegRunner)`).
+/// `FfmpegKitRunner` (register via GetIt as `FFmpegRunner` in ShareDi).
 abstract interface class FFmpegRunner {
   /// Runs [command] to completion and returns the result. Used for short
   /// one-shot operations like raw-frame → PNG extraction.

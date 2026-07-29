@@ -1,6 +1,5 @@
 import 'package:equatable/equatable.dart';
 import 'package:hydrated_bloc/hydrated_bloc.dart';
-import 'package:injectable/injectable.dart';
 import 'package:tilawa/features/theme/domain/app_theme_mode.dart';
 import 'package:tilawa/features/theme/domain/entities/app_theme_preset.dart';
 import 'package:tilawa/features/theme/domain/primary_color_preset.dart';
@@ -86,7 +85,6 @@ class ThemeState extends Equatable {
   ];
 }
 
-@injectable
 class ThemeCubit extends HydratedCubit<ThemeState> {
   ThemeCubit() : super(const ThemeState(mode: AppThemeMode.light));
 

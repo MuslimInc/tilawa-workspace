@@ -1,6 +1,5 @@
 import 'dart:convert';
 import 'package:dio/dio.dart';
-import 'package:injectable/injectable.dart';
 import 'package:path/path.dart' as p;
 import 'package:path_provider/path_provider.dart';
 import 'dart:io';
@@ -24,7 +23,6 @@ class AyahTiming {
 }
 
 /// Fetches and caches ayah-level timing data from Quran.com.
-@lazySingleton
 class AyahTimingService {
   AyahTimingService(this._dio);
 

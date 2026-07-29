@@ -3,7 +3,6 @@ import 'dart:io';
 
 import 'package:flutter/foundation.dart';
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
-import 'package:injectable/injectable.dart';
 import 'package:tilawa/core/logging/app_logger.dart';
 import 'package:tilawa/router/app_router.dart';
 import 'package:tilawa_core/services/interfaces/notification_dispatcher_interface.dart';
@@ -56,7 +55,6 @@ class _PayloadHandlerRegistration {
 ///
 /// This decouples notification services from each other by providing a central
 /// routing mechanism based on notification IDs and payload patterns.
-@LazySingleton(as: INotificationDispatcher)
 class NotificationDispatcher implements INotificationDispatcher {
   NotificationDispatcher();
 

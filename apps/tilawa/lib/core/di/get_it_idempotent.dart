@@ -28,4 +28,14 @@ extension GetItIdempotentRegistration on GetIt {
       registerSingleton<T>(instance, instanceName: instanceName);
     }
   }
+
+  /// Eager singleton (constructs immediately), matching injectable `@singleton`.
+  void registerEagerSingletonIfAbsent<T extends Object>(
+    T Function() factory, {
+    String? instanceName,
+  }) {
+    if (!isRegistered<T>(instanceName: instanceName)) {
+      registerSingleton<T>(factory(), instanceName: instanceName);
+    }
+  }
 }

@@ -5,7 +5,6 @@ import 'dart:math';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/services.dart';
-import 'package:injectable/injectable.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 /// Stable per-install device identity (Firebase Installations ID).
@@ -15,7 +14,6 @@ abstract class DeviceIdentityService {
   String get platform;
 }
 
-@LazySingleton(as: DeviceIdentityService)
 class DeviceIdentityServiceImpl implements DeviceIdentityService {
   DeviceIdentityServiceImpl(this._prefs);
 

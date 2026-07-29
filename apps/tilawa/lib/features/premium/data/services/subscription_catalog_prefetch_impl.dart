@@ -1,9 +1,6 @@
-import 'package:injectable/injectable.dart';
-
 import '../../domain/services/subscription_catalog_prefetch.dart';
 import 'subscription_plans_service.dart';
 
-@LazySingleton(as: SubscriptionCatalogPrefetch)
 class SubscriptionCatalogPrefetchImpl implements SubscriptionCatalogPrefetch {
   SubscriptionCatalogPrefetchImpl(this._subscriptionPlansService);
 

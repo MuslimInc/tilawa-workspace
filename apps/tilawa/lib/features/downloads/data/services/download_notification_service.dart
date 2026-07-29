@@ -3,7 +3,6 @@ import 'dart:io';
 
 import 'package:flutter/foundation.dart';
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
-import 'package:injectable/injectable.dart';
 import 'package:tilawa/core/config/notification_config.dart';
 import 'package:tilawa/core/logging/app_logger.dart';
 import 'package:tilawa_core/services/interfaces/notification_dispatcher_interface.dart';
@@ -14,7 +13,6 @@ import '../../domain/services/download_notification_navigator.dart';
 import '../../domain/services/download_notification_service_interface.dart';
 
 /// Service for showing custom download notifications with proper title formatting
-@LazySingleton(as: IDownloadNotificationService)
 class DownloadNotificationService implements IDownloadNotificationService {
   DownloadNotificationService(this._notificationNavigator, this._dispatcher);
 

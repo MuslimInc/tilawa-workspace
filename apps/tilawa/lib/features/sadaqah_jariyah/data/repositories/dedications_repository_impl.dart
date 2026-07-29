@@ -1,5 +1,4 @@
 import 'package:dartz_plus/dartz_plus.dart';
-import 'package:injectable/injectable.dart';
 import 'package:tilawa_core/utils/typedefs.dart';
 
 import '../../domain/entities/dedication.dart';
@@ -7,7 +6,6 @@ import '../../domain/failures/sadaqah_jariyah_failure.dart';
 import '../../domain/repositories/dedications_repository.dart';
 import '../datasources/dedications_remote_data_source.dart';
 
-@LazySingleton(as: DedicationsRepository)
 class DedicationsRepositoryImpl implements DedicationsRepository {
   DedicationsRepositoryImpl(this._remote);
 

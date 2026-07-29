@@ -215,7 +215,9 @@ void seedPlatformConfig({
     getIt.unregister<QuranSessionsPlatformConfigStore>();
   }
   if (!getIt.isRegistered<AppLaunchConfig>()) {
-    getIt.registerSingleton<AppLaunchConfig>(const AppLaunchConfig());
+    getIt.registerSingleton<AppLaunchConfig>(
+      const AppLaunchConfig(learnQuranStudentFeatureEnabled: true),
+    );
   }
   getIt.registerSingleton<QuranSessionsPlatformConfigStore>(store);
 }

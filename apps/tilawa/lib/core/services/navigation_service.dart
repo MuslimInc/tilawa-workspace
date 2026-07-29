@@ -1,6 +1,4 @@
 import 'package:go_router/go_router.dart';
-import 'package:injectable/injectable.dart';
-
 import '../navigation/notification_destination.dart';
 import '../../router/app_router.dart';
 
@@ -25,7 +23,6 @@ abstract class NavigationService {
   String? getCurrentLocation();
 }
 
-@LazySingleton(as: NavigationService)
 class NavigationServiceImpl implements NavigationService {
   @override
   Future<void> push(String location, {Object? extra}) async {

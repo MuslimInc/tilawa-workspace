@@ -1,7 +1,6 @@
 import 'package:bloc_concurrency/bloc_concurrency.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:freezed_annotation/freezed_annotation.dart';
-import 'package:injectable/injectable.dart';
 import 'package:stream_transform/stream_transform.dart';
 import 'package:tilawa_core/errors/failures.dart';
 
@@ -90,7 +89,6 @@ extension QuranReaderStateX on QuranReaderState {
   };
 }
 
-@injectable
 class QuranReaderBloc extends Bloc<QuranReaderEvent, QuranReaderState> {
   QuranReaderBloc(
     this._getSurahContentUseCase,

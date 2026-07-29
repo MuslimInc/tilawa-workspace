@@ -5,7 +5,7 @@ import 'package:tilawa/features/prayer_times/domain/entities/prayer_time_entity.
 import 'package:tilawa/features/home/presentation/formatters/home_prayer_time_format.dart';
 import 'package:tilawa_ui_kit/tilawa_ui_kit.dart';
 
-/// Five-prayer strip — soft sage panel on the green hero.
+/// Five-prayer strip — soft gold parchment panel on the green hero.
 class HomePrayerScheduleStrip extends StatelessWidget {
   const HomePrayerScheduleStrip({
     super.key,
@@ -36,6 +36,7 @@ class HomePrayerScheduleStrip extends StatelessWidget {
     final ThemeData theme = Theme.of(context);
     final MeMuslimDesignTokens tokens = theme.tokens;
     final ColorScheme colorScheme = theme.colorScheme;
+    final bool isDark = theme.brightness == Brightness.dark;
     final TilawaHomeScreenTokens screenTokens =
         theme.componentTokens.homeScreen;
     final BorderRadius radius = BorderRadius.all(
@@ -43,10 +44,21 @@ class HomePrayerScheduleStrip extends StatelessWidget {
         tokens.resolveRadius(family: TilawaRadiusFamily.chrome),
       ),
     );
-    final Color border = Color.alphaBlend(
-      screenTokens.homePrayerHeroBorder.withValues(alpha: 0.72),
-      colorScheme.outlineVariant.withValues(alpha: 0.28),
-    );
+    // Warm hairline — gold/tertiary on dark parchment; parchment border on light.
+    final Color border = isDark
+        ? colorScheme.tertiary.withValues(alpha: tokens.opacityMedium)
+        : Color.alphaBlend(
+            screenTokens.homePrayerHeroBorder.withValues(alpha: 0.88),
+            colorScheme.outlineVariant.withValues(alpha: 0.35),
+          );
+    final Color divider = isDark
+        ? colorScheme.tertiary.withValues(
+            alpha: (tokens.opacitySubtle + tokens.opacityMedium) / 2,
+          )
+        : Color.alphaBlend(
+            screenTokens.homePrayerHeroBorder.withValues(alpha: 0.72),
+            colorScheme.outlineVariant.withValues(alpha: 0.45),
+          );
 
     final Widget row = SizedBox(
       height: stripHeightFor(tokens),
@@ -64,13 +76,23 @@ class HomePrayerScheduleStrip extends StatelessWidget {
           child: Row(
             crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
-              for (final HomePrayerSlot slot in five)
+              for (int i = 0; i < five.length; i++) ...[
+                if (i > 0)
+                  VerticalDivider(
+                    // 0.5 line + 1.0 horizontal pad each side.
+                    width: tokens.borderWidthThin * 5,
+                    thickness: tokens.borderWidthThin,
+                    indent: tokens.spaceExtraSmall,
+                    endIndent: tokens.spaceExtraSmall,
+                    color: divider,
+                  ),
                 Expanded(
                   child: _HomePrayerScheduleSlot(
-                    slot: slot,
+                    slot: five[i],
                     use24HourFormat: use24HourFormat,
                   ),
                 ),
+              ],
             ],
           ),
         ),
@@ -105,23 +127,24 @@ class _HomePrayerScheduleSlot extends StatelessWidget {
     final ThemeData theme = Theme.of(context);
     final MeMuslimDesignTokens tokens = theme.tokens;
     final ColorScheme colorScheme = theme.colorScheme;
+    final TilawaHomeScreenTokens screenTokens =
+        theme.componentTokens.homeScreen;
     final bool isDark = theme.brightness == Brightness.dark;
     final bool isActive = slot.isNext;
-    // Light: soft white chip + dark ink on sage strip.
-    // Dark: lifted dark glass + light ink (white chip reads as light-mode).
+    // Light: soft white chip on parchment. Dark: lifted wash on opaque gold panel.
     final Color activeFill = isDark
         ? Color.alphaBlend(
-            Colors.white.withValues(alpha: 0.16),
-            colorScheme.surface,
+            colorScheme.onSurface.withValues(alpha: 0.14),
+            screenTokens.homeHeaderChipBackground,
           )
         : colorScheme.surface.withValues(alpha: 0.92);
     final Color activeInk = colorScheme.onSurface;
     final Color inactiveInk = isDark
-        ? colorScheme.onSurface.withValues(alpha: 0.78)
-        : colorScheme.onSurface.withValues(alpha: 0.64);
+        ? colorScheme.onSurface.withValues(alpha: 0.84)
+        : colorScheme.onSurface.withValues(alpha: 0.70);
     final Color labelColor = isActive
         ? activeInk
-        : inactiveInk.withValues(alpha: isDark ? 0.72 : 0.55);
+        : inactiveInk.withValues(alpha: isDark ? 0.80 : 0.60);
     final Color timeColor = isActive ? activeInk : inactiveInk;
     final String name = _localizedPrayerName(context, slot.type);
     final String timeLabel = HomePrayerTimeFormat.formatClock(
@@ -141,7 +164,7 @@ class _HomePrayerScheduleSlot extends StatelessWidget {
       fontWeight: isActive ? FontWeight.w700 : FontWeight.w500,
       height: 1.2,
     );
-    final TextStyle timeStyle = theme.textTheme.titleSmall!.copyWith(
+    final TextStyle timeStyle = theme.textTheme.bodySmall!.copyWith(
       color: timeColor,
       fontWeight: isActive ? FontWeight.w800 : FontWeight.w600,
       fontFeatures: const [FontFeature.tabularFigures()],

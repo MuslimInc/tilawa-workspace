@@ -2,7 +2,6 @@ import 'dart:async';
 
 import 'package:flutter/foundation.dart';
 import 'package:google_sign_in/google_sign_in.dart';
-import 'package:injectable/injectable.dart';
 import 'package:tilawa/features/auth/data/services/android_sign_in_platform_policy.dart';
 import 'package:tilawa_core/constants/app_strings.dart';
 
@@ -23,7 +22,6 @@ abstract class GoogleSignInPrepareDataSource {
   Future<void> prepare();
 }
 
-@LazySingleton(as: GoogleSignInPrepareDataSource)
 class GoogleSignInPrepareDataSourceImpl
     implements GoogleSignInPrepareDataSource {
   GoogleSignInPrepareDataSourceImpl(

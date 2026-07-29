@@ -1,6 +1,5 @@
 import 'dart:convert';
 
-import 'package:injectable/injectable.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:tilawa/core/logging/app_logger.dart';
 
@@ -12,7 +11,6 @@ abstract class PremiumLocalDataSource {
   Future<void> clearPremiumStatus();
 }
 
-@LazySingleton(as: PremiumLocalDataSource)
 class PremiumLocalDataSourceImpl implements PremiumLocalDataSource {
   PremiumLocalDataSourceImpl(this._prefs);
   static const String _premiumStatusKey = 'premium_status';

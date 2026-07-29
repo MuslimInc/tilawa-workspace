@@ -2,8 +2,6 @@ import 'package:collection/collection.dart';
 import 'package:dartz_plus/dartz_plus.dart';
 import 'package:freezed_annotation/freezed_annotation.dart';
 import 'package:hydrated_bloc/hydrated_bloc.dart';
-import 'package:injectable/injectable.dart';
-
 import 'package:tilawa_core/errors/failures.dart';
 import '../../domain/entities/playlist.dart';
 import '../../domain/usecases/usecases.dart';
@@ -12,7 +10,6 @@ part 'playlists_bloc.freezed.dart';
 part 'playlists_event.dart';
 part 'playlists_state.dart';
 
-@injectable
 class PlaylistsBloc extends HydratedBloc<PlaylistsEvent, PlaylistsState> {
   PlaylistsBloc({
     required this._getAllPlaylistsUseCase,

@@ -1,7 +1,6 @@
 import 'dart:convert';
 
 import 'package:hive_ce/hive.dart';
-import 'package:injectable/injectable.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:tilawa/core/services/hive_readiness.dart';
 
@@ -20,7 +19,6 @@ abstract class RadioLocalDataSource {
   Future<void> saveRecentStations(List<RadioStation> stations);
 }
 
-@LazySingleton(as: RadioLocalDataSource)
 class RadioLocalDataSourceImpl implements RadioLocalDataSource {
   RadioLocalDataSourceImpl(this._hive, this._hiveReadiness, this._prefs);
 

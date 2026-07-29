@@ -1,12 +1,10 @@
 import 'package:dartz_plus/dartz_plus.dart';
-import 'package:injectable/injectable.dart';
 import 'package:tilawa_core/errors/failures.dart';
 
 import '../../../../core/domain/server_action_guard.dart';
 import '../entities/email_auth_failure_key.dart';
 import '../gateways/email_password_auth_gateway.dart';
 
-@injectable
 class SendPasswordResetEmailUseCase {
   SendPasswordResetEmailUseCase(
     this._emailPasswordAuth,

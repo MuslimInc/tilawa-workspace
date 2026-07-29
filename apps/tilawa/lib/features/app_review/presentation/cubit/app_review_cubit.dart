@@ -1,5 +1,4 @@
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:injectable/injectable.dart';
 import 'package:tilawa_core/errors/failures.dart';
 
 import '../../domain/usecases/is_app_review_available_use_case.dart';
@@ -11,7 +10,6 @@ import 'app_review_state.dart';
 ///
 /// UI or other blocs can inject this cubit, call [checkAvailability], then
 /// [requestReview] or [openStoreListing] without importing platform packages.
-@injectable
 class AppReviewCubit extends Cubit<AppReviewState> {
   AppReviewCubit(
     this._isAvailable,

@@ -2,8 +2,6 @@ import 'dart:convert';
 
 import 'package:collection/collection.dart';
 import 'package:flutter/services.dart';
-import 'package:injectable/injectable.dart';
-
 import '../../domain/entities/entities.dart';
 
 abstract class QuranDataSource {
@@ -17,7 +15,6 @@ abstract class QuranDataSource {
   Future<List<AyahEntity>> searchAyahs(String query);
 }
 
-@LazySingleton(as: QuranDataSource)
 class QuranDataSourceImpl implements QuranDataSource {
   QuranDataSourceImpl();
 

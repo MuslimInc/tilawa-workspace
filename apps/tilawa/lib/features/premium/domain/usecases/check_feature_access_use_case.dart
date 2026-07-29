@@ -1,7 +1,5 @@
-import 'package:injectable/injectable.dart';
 import '../repositories/premium_repository.dart';
 
-@Singleton()
 class CheckFeatureAccessUseCase {
   const CheckFeatureAccessUseCase(this._premiumRepository);
 

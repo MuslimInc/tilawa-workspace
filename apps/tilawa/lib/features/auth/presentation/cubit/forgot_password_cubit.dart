@@ -1,6 +1,5 @@
 import 'package:equatable/equatable.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:injectable/injectable.dart';
 import 'package:tilawa_core/errors/failures.dart';
 
 import '../../domain/entities/email_auth_failure_key.dart';
@@ -34,7 +33,6 @@ final class ForgotPasswordFailure extends ForgotPasswordState {
   List<Object?> get props => <Object?>[messageKey];
 }
 
-@injectable
 class ForgotPasswordCubit extends Cubit<ForgotPasswordState> {
   ForgotPasswordCubit(this._sendPasswordResetEmail)
     : super(const ForgotPasswordInitial());

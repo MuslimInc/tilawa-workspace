@@ -1,8 +1,5 @@
-import 'package:injectable/injectable.dart';
-
 import '../repositories/prayer_times_repository.dart';
 
-@injectable
 class GetCountryCodeUseCase {
   GetCountryCodeUseCase(this._repository);
 

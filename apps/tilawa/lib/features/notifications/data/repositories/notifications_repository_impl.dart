@@ -2,7 +2,6 @@ import 'dart:convert';
 
 import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter/foundation.dart';
-import 'package:injectable/injectable.dart';
 import 'package:logger/logger.dart';
 import 'package:tilawa/core/services/prayer_notification_payload_classifier.dart';
 import 'package:tilawa_core/services/interfaces/notification_dispatcher_interface.dart';
@@ -18,7 +17,6 @@ import '../fcm_device_revoked_message.dart';
 import '../fcm_session_revoked_message.dart';
 import '../fcm_session_taken_over_message.dart';
 
-@LazySingleton(as: NotificationsRepository)
 class NotificationsRepositoryImpl implements NotificationsRepository {
   NotificationsRepositoryImpl(
     this._remoteDataSource,

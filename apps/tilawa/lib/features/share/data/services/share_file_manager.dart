@@ -1,6 +1,5 @@
 import 'dart:io';
 
-import 'package:injectable/injectable.dart';
 import 'package:path/path.dart' as p;
 import 'package:path_provider/path_provider.dart';
 
@@ -8,7 +7,6 @@ import 'package:path_provider/path_provider.dart';
 ///
 /// All share artifacts (screenshots, audio clips) are written to a dedicated
 /// temp subdirectory and cleaned up after the share sheet closes.
-@lazySingleton
 class ShareFileManager {
   static const _shareDirName = 'tilawa_share';
   static const _exportDirName = 'tilawa_exports';

@@ -1,6 +1,5 @@
 import 'package:equatable/equatable.dart';
 import 'package:hydrated_bloc/hydrated_bloc.dart';
-import 'package:injectable/injectable.dart';
 import 'package:tilawa/core/services/quran_assets_prefetch_policy_service.dart';
 import 'package:tilawa_core/entities/app_info.dart';
 import 'package:tilawa_core/services/interfaces/app_info_service.dart';
@@ -58,7 +57,6 @@ class SettingsState extends Equatable {
   ];
 }
 
-@lazySingleton
 class SettingsCubit extends HydratedCubit<SettingsState>
     implements SleepTimerSettings {
   SettingsCubit(

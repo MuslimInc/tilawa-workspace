@@ -2,8 +2,6 @@ import 'dart:async';
 
 import 'package:flutter/foundation.dart';
 import 'package:flutter_downloader/flutter_downloader.dart';
-import 'package:injectable/injectable.dart';
-
 import 'package:tilawa/core/logging/app_logger.dart';
 import '../../domain/entities/download_item.dart';
 import '../models/download_progress.dart';
@@ -14,7 +12,6 @@ import 'helpers/download_isolate_manager.dart';
 import 'helpers/download_status_mapper.dart';
 
 @pragma('vm:entry-point')
-@LazySingleton(as: DownloadServiceInterface)
 class DownloadServiceImpl implements DownloadServiceInterface {
   DownloadServiceImpl(
     this._flutterDownloader,

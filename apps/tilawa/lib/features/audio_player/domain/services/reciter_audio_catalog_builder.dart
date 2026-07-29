@@ -1,4 +1,3 @@
-import 'package:injectable/injectable.dart';
 import 'package:tilawa_core/entities/audio.dart';
 import 'package:tilawa_core/entities/audio_extras_keys.dart';
 import 'package:tilawa_core/entities/moshaf_entity.dart';
@@ -10,7 +9,6 @@ import 'package:tilawa_core/utils/url_validator.dart';
 import '../entities/reciter_audio_catalog.dart';
 
 /// Builds flat tracks and indexes in a single O(n) pass.
-@lazySingleton
 class ReciterAudioCatalogBuilder {
   const ReciterAudioCatalogBuilder();
 

@@ -1,10 +1,7 @@
-import 'package:injectable/injectable.dart';
-
 import '../../../downloads/domain/repositories/downloads_repository.dart';
 import '../entities/surah_entity.dart';
 import '../repositories/surah_repository.dart';
 
-@Singleton()
 class CheckSurahDownloadStatusUseCase {
   const CheckSurahDownloadStatusUseCase(
     this._surahRepository,

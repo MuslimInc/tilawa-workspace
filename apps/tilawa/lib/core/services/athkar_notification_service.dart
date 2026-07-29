@@ -3,7 +3,6 @@ import 'dart:io';
 import 'package:flutter/foundation.dart' show kIsWeb, visibleForTesting;
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 import 'package:flutter_timezone/flutter_timezone.dart';
-import 'package:injectable/injectable.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:tilawa/core/config/notification_config.dart';
 import 'package:tilawa/core/logging/app_logger.dart';
@@ -29,7 +28,6 @@ import '../di/injection.dart';
 /// - Evening athkar after Asr
 ///
 /// When prayer-time context is unavailable, it falls back to fixed daily times.
-@LazySingleton(as: IAthkarNotificationService)
 class AthkarNotificationService implements IAthkarNotificationService {
   AthkarNotificationService(
     this._prefs,

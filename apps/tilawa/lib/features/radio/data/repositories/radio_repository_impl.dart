@@ -1,7 +1,6 @@
 import 'dart:async';
 import 'package:connectivity_plus/connectivity_plus.dart';
 import 'package:dio/dio.dart';
-import 'package:injectable/injectable.dart';
 import 'package:tilawa_core/constants/analytics_constants.dart';
 import 'package:tilawa_core/errors/failures.dart';
 import 'package:tilawa_core/services/analytics_service.dart';
@@ -14,7 +13,6 @@ import '../datasources/radio_local_datasource.dart';
 import '../datasources/radio_remote_datasource.dart';
 import '../models/radio_station_mapper.dart';
 
-@LazySingleton(as: RadioRepository)
 class RadioRepositoryImpl implements RadioRepository {
   RadioRepositoryImpl(
     this._remote,

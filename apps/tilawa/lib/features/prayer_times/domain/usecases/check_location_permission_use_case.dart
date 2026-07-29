@@ -1,11 +1,9 @@
 import 'package:dartz_plus/dartz_plus.dart';
-import 'package:injectable/injectable.dart';
 import 'package:tilawa_core/core.dart';
 
 import '../repositories/prayer_times_repository.dart';
 
 /// Whether the app may read the device location for prayer times.
-@injectable
 class CheckLocationPermissionUseCase {
   const CheckLocationPermissionUseCase(this._repository);
 

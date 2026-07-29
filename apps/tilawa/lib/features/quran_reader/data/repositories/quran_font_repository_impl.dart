@@ -1,10 +1,8 @@
-import 'package:injectable/injectable.dart';
 import 'package:quran_qcf/quran_qcf.dart';
 import 'package:tilawa_core/logger.dart';
 
 import '../../domain/repositories/quran_font_repository.dart';
 
-@LazySingleton(as: QuranFontRepository)
 class QuranFontRepositoryImpl implements QuranFontRepository {
   QuranFontRepositoryImpl(this._fontService);
 

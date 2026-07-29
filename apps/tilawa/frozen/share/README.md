@@ -32,11 +32,12 @@ FFmpeg is turned back on.
    ```
 3. Copy `frozen/share/lib/data/ffmpeg/ffmpeg_kit_runner.dart` to
    `lib/features/share/data/ffmpeg/ffmpeg_kit_runner.dart`.
-4. Change injectable binding: remove `@LazySingleton(as: FFmpegRunner)` from
-   `disabled_ffmpeg_runner.dart` (or delete it) and use `FfmpegKitRunner`.
-5. Set `kShareFfmpegNativeEnabled` / `SHARE_FFMPEG_ENABLED=true` in
-   `share_feature_flags.dart` or via `--dart-define`.
-6. Merge any presentation widget changes from this folder if preview UI was
-   simplified while frozen.
-7. `melos run gen` (or `dart run build_runner build --workspace` from repo root)
-8. Full Shorebird **release** (not patch) — native binaries changed.
+ 4. Change GetIt binding in ShareDi: register `FfmpegKitRunner` as
+    `FFmpegRunner` instead of `DisabledFfmpegRunner`
+    (`getIt.registerLazySingletonIfAbsent<FFmpegRunner>(...)`).
+ 5. Set `kShareFfmpegNativeEnabled` / `SHARE_FFMPEG_ENABLED=true` in
+    `share_feature_flags.dart` or via `--dart-define`.
+ 6. Merge any presentation widget changes from this folder if preview UI was
+    simplified while frozen.
+ 7. Full Shorebird **release** (not patch) — native binaries changed.
+

@@ -1,2 +1,1 @@
-export 'injection.dart';
-export 'injection.module.dart';
+export 'tilawa_core_di.dart';

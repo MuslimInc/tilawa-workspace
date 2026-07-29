@@ -2,7 +2,6 @@ import 'dart:async';
 
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:dartz_plus/dartz_plus.dart';
-import 'package:injectable/injectable.dart';
 import 'package:tilawa/core/logging/app_logger.dart';
 import 'package:tilawa/core/network/network_error_message.dart';
 import 'package:tilawa_core/errors/failures.dart';
@@ -10,7 +9,6 @@ import 'package:tilawa_core/errors/failures.dart';
 import '../../domain/entities/server_session_snapshot.dart';
 import '../../domain/repositories/session_validity_repository.dart';
 
-@LazySingleton(as: SessionValidityRepository)
 class FirestoreSessionValidityRepository implements SessionValidityRepository {
   FirestoreSessionValidityRepository(this._firestore);
 

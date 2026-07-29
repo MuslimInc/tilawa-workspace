@@ -1,10 +1,8 @@
 import 'package:firebase_storage/firebase_storage.dart';
-import 'package:injectable/injectable.dart';
 import 'package:tilawa/core/logging/app_logger.dart';
 
 import '../../domain/services/dedication_photo_url_resolver.dart';
 
-@LazySingleton(as: DedicationPhotoUrlResolver)
 class FirebaseDedicationPhotoUrlResolver implements DedicationPhotoUrlResolver {
   FirebaseDedicationPhotoUrlResolver(this._storage);
 

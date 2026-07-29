@@ -1,7 +1,5 @@
 import 'dart:async';
 
-import 'package:injectable/injectable.dart';
-
 /// Broadcasts `device_revoked` FCM events (ADR-008 Phase 3, Manage Devices).
 ///
 /// Emitted when *this* device is signed out remotely. Unlike
@@ -9,7 +7,6 @@ import 'package:injectable/injectable.dart';
 /// ends the whole-app session on this device regardless of the multi-device
 /// login flag — it is a user-intended, definitive sign-out. A listener at the
 /// app root performs the local sign-out and routes to login.
-@lazySingleton
 class DeviceRevokedNotifier {
   final StreamController<void> _controller = StreamController<void>.broadcast();
 

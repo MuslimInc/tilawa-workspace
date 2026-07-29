@@ -1,10 +1,10 @@
 import 'package:flutter/foundation.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:get_it/get_it.dart';
-import 'package:injectable/injectable.dart';
 import 'package:quran_sessions/quran_sessions.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:tilawa/core/bootstrap/app_launch_config.dart';
+import 'package:tilawa/core/di/app_di_orchestrator.dart';
 import 'package:tilawa/features/auth/device_registry_feature_flags.dart';
 import 'package:tilawa/features/genui_assistant/di/genui_assistant_module.dart';
 import 'package:tilawa/features/quran_sessions/data/firebase/firestore_platform_config_data_source.dart';
@@ -15,29 +15,20 @@ import 'package:tilawa/features/quran_sessions/di/quran_sessions_firebase_module
 import 'package:tilawa/features/quran_sessions/di/quran_sessions_mvp_module.dart';
 import 'package:tilawa/features/quran_sessions/quran_sessions_platform_config_store.dart';
 import 'package:tilawa/features/settings/presentation/cubit/settings_cubit.dart';
-import 'package:tilawa_core/di/injection.module.dart';
 import 'package:tilawa_core/network/network_info.dart';
-
-import 'injection.config.dart';
 
 final GetIt getIt = GetIt.instance;
 
-/// True when injectable core services finished registering.
+/// True when core services finished registering.
 bool get isCoreDependencyGraphReady =>
     getIt.isRegistered<NetworkInfo>() && getIt.isRegistered<SettingsCubit>();
 
-/// True when tilawa_core, injectable graph, and Quran Sessions are wired.
+/// True when tilawa_core, feature graph, and Quran Sessions are wired.
 bool get isDependencyGraphReady =>
     isCoreDependencyGraphReady &&
     getIt.isRegistered<GetCurrentUserTeacherCapabilityUseCase>();
 
 /// Ensures app + core services are registered in [getIt].
-///
-/// [tilawa_core] is wired via [externalPackageModulesBefore] (injectable 3.x;
-/// `includeMicroPackages` was removed).
-@InjectableInit(
-  externalPackageModulesBefore: [ExternalModule(TilawaCorePackageModule)],
-)
 Future<void> configureDependencies({AppLaunchConfig? launchConfig}) async {
   if (isDependencyGraphReady) {
     return;
@@ -63,10 +54,8 @@ Future<void> configureDependencies({AppLaunchConfig? launchConfig}) async {
     getIt.unregister<AppLaunchConfig>();
   }
   getIt.registerSingleton<AppLaunchConfig>(config);
-  // Register the multi-device-login predicate so injectable-resolved
-  // constructors (AuthBloc, SessionValidityCubit, SyncDeviceTokenUseCase)
-  // receive the real flag reader. The typedef is required because
-  // injectable_generator cannot resolve inline `bool Function()` types.
+  // Multi-device-login predicate for AuthBloc / SessionValidityCubit /
+  // SyncDeviceTokenUseCase constructors (typedef required for GetIt).
   if (!getIt.isRegistered<MultiDeviceLoginEnabledPredicate>()) {
     getIt.registerSingleton<MultiDeviceLoginEnabledPredicate>(
       isMultiDeviceLoginEnabled,
@@ -80,18 +69,16 @@ Future<void> configureDependencies({AppLaunchConfig? launchConfig}) async {
   }
 
   if (!isCoreDependencyGraphReady) {
-    await getIt.init();
+    registerManualDependencyGraph(getIt);
 
     if (!getIt.isRegistered<NetworkInfo>()) {
       throw StateError(
-        'NetworkInfo was not registered after getIt.init(). '
-        'Run: melos run gen (from workspace root)',
+        'NetworkInfo was not registered after registerManualDependencyGraph().',
       );
     }
     if (!getIt.isRegistered<SettingsCubit>()) {
       throw StateError(
-        'SettingsCubit was not registered after getIt.init(). '
-        'Run: melos run gen (from workspace root)',
+        'SettingsCubit was not registered after registerManualDependencyGraph().',
       );
     }
   }

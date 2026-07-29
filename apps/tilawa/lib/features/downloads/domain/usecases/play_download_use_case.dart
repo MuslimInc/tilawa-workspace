@@ -1,13 +1,10 @@
 import 'package:audio_service/audio_service.dart';
 import 'package:dartz_plus/dartz_plus.dart';
-import 'package:injectable/injectable.dart';
-
 import 'package:tilawa_core/errors/failures.dart';
 import 'package:tilawa_core/usecases/usecase.dart';
 import '../../../../shared/audio/audio_player_handler.dart';
 import '../entities/download_item.dart';
 
-@lazySingleton
 class PlayDownloadUseCase implements UseCase<void, DownloadItem> {
   PlayDownloadUseCase(this._audioPlayerHandler);
   final AudioPlayerHandler _audioPlayerHandler;

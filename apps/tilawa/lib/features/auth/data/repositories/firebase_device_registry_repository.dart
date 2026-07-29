@@ -5,7 +5,6 @@ import 'package:cloud_functions/cloud_functions.dart';
 import 'package:dartz_plus/dartz_plus.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/services.dart';
-import 'package:injectable/injectable.dart';
 import 'package:tilawa_core/errors/failures.dart';
 
 import '../../domain/entities/registered_device.dart';
@@ -18,7 +17,6 @@ import '../services/device_identity_service.dart';
 /// id used during active-device registration. Management writes go through the
 /// `revokeDevice` / `signOutOtherDevices` Cloud Functions (registry docs are
 /// never client-writable).
-@LazySingleton(as: DeviceRegistryRepository)
 class FirebaseDeviceRegistryRepository implements DeviceRegistryRepository {
   FirebaseDeviceRegistryRepository(
     this._firestore,

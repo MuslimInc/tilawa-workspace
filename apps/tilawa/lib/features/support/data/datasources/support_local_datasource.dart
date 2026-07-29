@@ -1,4 +1,3 @@
-import 'package:injectable/injectable.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 abstract class SupportLocalDataSource {
@@ -12,7 +11,6 @@ abstract class SupportLocalDataSource {
   Future<String?> getLastSupportProductId();
 }
 
-@LazySingleton(as: SupportLocalDataSource)
 class SupportLocalDataSourceImpl implements SupportLocalDataSource {
   SupportLocalDataSourceImpl(this._prefs);
 

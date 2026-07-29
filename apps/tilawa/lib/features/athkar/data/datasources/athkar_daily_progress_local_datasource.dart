@@ -1,6 +1,5 @@
 import 'dart:convert';
 
-import 'package:injectable/injectable.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 /// Persists per-item remaining counts for canonical daily athkar categories.
@@ -17,7 +16,6 @@ abstract class AthkarDailyProgressLocalDataSource {
   });
 }
 
-@LazySingleton(as: AthkarDailyProgressLocalDataSource)
 class AthkarDailyProgressLocalDataSourceImpl
     implements AthkarDailyProgressLocalDataSource {
   AthkarDailyProgressLocalDataSourceImpl(this._prefs);

@@ -1,10 +1,7 @@
-import 'package:injectable/injectable.dart';
-
 /// Arms the post-prayer review prompt when the user next opens Reciters.
 ///
 /// Prayer times moved from a main tab to a pushed route; this replaces the
 /// old shell-tab leave handler that fired when leaving viewport index 2.
-@lazySingleton
 class PrayerTimesAppReviewCoordinator {
   bool _armLeftPrayerRecitersPrompt = false;
 

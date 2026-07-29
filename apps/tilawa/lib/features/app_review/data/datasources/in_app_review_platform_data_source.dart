@@ -2,7 +2,6 @@ import 'dart:developer' as developer;
 
 import 'package:flutter/foundation.dart';
 import 'package:in_app_review/in_app_review.dart';
-import 'package:injectable/injectable.dart';
 import 'package:tilawa/features/app_review/data/config/app_review_store_config.dart';
 import 'package:tilawa_core/errors/failures.dart';
 import 'package:url_launcher/url_launcher.dart';
@@ -13,11 +12,10 @@ import 'app_review_platform_data_source.dart';
 ///
 /// Alternative: implement [AppReviewPlatformDataSource] with
 /// [`app_review`](https://pub.dev/packages/app_review) and rebind in DI.
-@LazySingleton(as: AppReviewPlatformDataSource)
 class InAppReviewPlatformDataSource implements AppReviewPlatformDataSource {
   InAppReviewPlatformDataSource(
     this._review, {
-    @ignoreParam Future<bool> Function(Uri uri)? launchUrlFn,
+    Future<bool> Function(Uri uri)? launchUrlFn,
   }) : _launchUrl = launchUrlFn ?? _launchStoreUrlPreferNative;
 
   final InAppReview _review;

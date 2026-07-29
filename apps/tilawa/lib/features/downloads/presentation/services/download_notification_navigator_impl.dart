@@ -1,5 +1,4 @@
 import 'package:dartz_plus/dartz_plus.dart';
-import 'package:injectable/injectable.dart';
 import 'package:tilawa/core/logging/app_logger.dart';
 import 'package:tilawa/core/navigation/navigation_source.dart';
 import 'package:tilawa/core/navigation/notification_destination.dart';
@@ -11,7 +10,6 @@ import '../../../../router/app_router_config.dart';
 import '../../../reciters/domain/repositories/reciters_repository.dart';
 import '../../domain/services/download_notification_navigator.dart';
 
-@LazySingleton(as: DownloadNotificationNavigator)
 class DownloadNotificationNavigatorImpl
     implements DownloadNotificationNavigator {
   DownloadNotificationNavigatorImpl(this._recitersRepository, this._navigator);

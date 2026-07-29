@@ -1,7 +1,6 @@
 import 'package:dartz_plus/dartz_plus.dart';
 import 'package:equatable/equatable.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:injectable/injectable.dart';
 import 'package:tilawa_core/entities/reciter_entity.dart' as entity;
 import 'package:tilawa_core/errors/failures.dart';
 
@@ -12,7 +11,6 @@ import '../utils/reciter_list_order.dart';
 part 'reciters_event.dart';
 part 'reciters_state.dart';
 
-@lazySingleton
 class RecitersBloc extends Bloc<RecitersEvent, RecitersState> {
   RecitersBloc(
     this._getRecitersUseCase, {

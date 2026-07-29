@@ -1,6 +1,7 @@
 import 'package:dartz_plus/dartz_plus.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:quran_sessions/quran_sessions.dart';
+import 'package:tilawa/core/bootstrap/app_launch_config.dart';
 import 'package:tilawa/core/di/injection.dart';
 import 'package:tilawa/features/home/presentation/cubit/home_learning_cubit.dart';
 import 'package:tilawa/features/home/presentation/cubit/home_learning_state.dart';
@@ -99,6 +100,12 @@ void main() {
         getIt.unregister<QuranSessionsPlatformConfigStore>();
       }
       getIt.registerSingleton<QuranSessionsPlatformConfigStore>(configStore);
+      if (getIt.isRegistered<AppLaunchConfig>()) {
+        getIt.unregister<AppLaunchConfig>();
+      }
+      getIt.registerSingleton<AppLaunchConfig>(
+        const AppLaunchConfig(learnQuranStudentFeatureEnabled: true),
+      );
 
       fakeAuth = FakeAuthSessionProvider()..userId = 'student_123';
       if (getIt.isRegistered<AuthSessionProvider>()) {
@@ -118,6 +125,9 @@ void main() {
       }
       if (getIt.isRegistered<QuranSessionsPlatformConfigStore>()) {
         getIt.unregister<QuranSessionsPlatformConfigStore>();
+      }
+      if (getIt.isRegistered<AppLaunchConfig>()) {
+        getIt.unregister<AppLaunchConfig>();
       }
     });
 

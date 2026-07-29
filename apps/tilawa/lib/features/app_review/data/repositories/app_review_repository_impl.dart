@@ -1,11 +1,9 @@
-import 'package:injectable/injectable.dart';
 import 'package:tilawa_core/errors/failures.dart';
 
 import '../../domain/repositories/app_review_repository.dart';
 import '../config/app_review_store_config.dart';
 import '../datasources/app_review_platform_data_source.dart';
 
-@LazySingleton(as: AppReviewRepository)
 class AppReviewRepositoryImpl implements AppReviewRepository {
   AppReviewRepositoryImpl(
     this._platform,

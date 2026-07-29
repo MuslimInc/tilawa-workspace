@@ -1,6 +1,5 @@
 import 'dart:ui';
 
-import 'package:injectable/injectable.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:tilawa/core/logging/app_logger.dart';
 import 'package:tilawa_core/config/language_config.dart';
@@ -11,7 +10,6 @@ import '../../domain/services/downloads_initializer.dart';
 import 'batch_download_manager.dart';
 import 'download_queue_manager.dart';
 
-@Singleton(as: DownloadsInitializer)
 class DownloadsInitializationService implements DownloadsInitializer {
   DownloadsInitializationService(
     this._downloadsRepository,

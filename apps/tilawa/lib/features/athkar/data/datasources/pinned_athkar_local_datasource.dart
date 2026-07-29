@@ -1,4 +1,3 @@
-import 'package:injectable/injectable.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 import '../../domain/constants/pinned_athkar_constants.dart';
@@ -9,7 +8,6 @@ abstract interface class PinnedAthkarLocalDataSource {
   Future<void> writeCategoryIds(List<int> categoryIds);
 }
 
-@LazySingleton(as: PinnedAthkarLocalDataSource)
 class PinnedAthkarLocalDataSourceImpl implements PinnedAthkarLocalDataSource {
   PinnedAthkarLocalDataSourceImpl(this._prefs);
 

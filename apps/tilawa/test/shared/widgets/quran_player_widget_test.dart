@@ -140,7 +140,7 @@ void main() {
     });
 
     testWidgets(
-      'includes system safe area + buffer when viewPadding.bottom > 0',
+      'includes system safe area alone when viewPadding.bottom > 0',
       (tester) async {
         late double footprint;
         await tester.pumpWidget(
@@ -156,10 +156,7 @@ void main() {
         );
 
         final tokens = MeMuslimDesignTokens.light();
-        expect(
-          footprint,
-          tokens.playerCollapsedHeight + 34 + tokens.spaceSmall,
-        );
+        expect(footprint, tokens.playerCollapsedHeight + 34);
       },
     );
 

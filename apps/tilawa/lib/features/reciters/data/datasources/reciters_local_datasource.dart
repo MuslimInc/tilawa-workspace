@@ -1,7 +1,6 @@
 import 'dart:convert';
 
 import 'package:flutter/services.dart';
-import 'package:injectable/injectable.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 import '../models/reciter_model.dart';
@@ -14,7 +13,6 @@ abstract class RecitersLocalDataSource {
   Future<void> clearFavoriteReciterIds();
 }
 
-@LazySingleton(as: RecitersLocalDataSource)
 class RecitersLocalDataSourceImpl implements RecitersLocalDataSource {
   RecitersLocalDataSourceImpl(this._prefs);
   final SharedPreferencesAsync _prefs;

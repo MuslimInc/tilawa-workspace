@@ -1,11 +1,8 @@
-import 'package:injectable/injectable.dart';
-
 import '../../domain/entities/entities.dart';
 import '../../domain/repositories/prayer_times_repository.dart';
 import '../datasources/datasources.dart';
 import '../services/prayer_time_calculator.dart';
 
-@LazySingleton(as: PrayerTimesRepository)
 class PrayerTimesRepositoryImpl implements PrayerTimesRepository {
   PrayerTimesRepositoryImpl(this._settingsDataSource, this._locationDataSource);
 

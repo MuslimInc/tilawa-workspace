@@ -1,5 +1,4 @@
 import 'package:geolocator/geolocator.dart';
-import 'package:injectable/injectable.dart';
 import 'package:qibla/qibla.dart';
 import 'package:tilawa/core/wrappers/location_service_wrapper.dart';
 import 'package:tilawa/core/wrappers/qibla_service_wrapper.dart';
@@ -11,7 +10,6 @@ abstract class QiblaDataSource {
   Future<LocationPermission> requestPermission();
 }
 
-@LazySingleton(as: QiblaDataSource)
 class QiblaDataSourceImpl implements QiblaDataSource {
   QiblaDataSourceImpl(this._locationService, this._qiblaService);
 

@@ -103,7 +103,7 @@ void main() {
       child: const Text('Action'),
     );
 
-    expect(padding.bottom, systemBottom + tokens.spaceSmall);
+    expect(padding.bottom, systemBottom);
   });
 
   testWidgets('falls back to spaceExtraLarge when system inset is zero', (

@@ -1,12 +1,10 @@
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:injectable/injectable.dart';
 import 'package:tilawa_core/usecases/usecase.dart';
 
 import '../../domain/usecases/get_saved_reels_use_case.dart';
 import '../../domain/usecases/save_reel_use_case.dart';
 import 'saved_reels_state.dart';
 
-@injectable
 class SavedReelsCubit extends Cubit<SavedReelsState> {
   SavedReelsCubit(this._getSaved, this._removeSaved)
     : super(const SavedReelsState());

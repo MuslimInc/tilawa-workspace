@@ -1,9 +1,7 @@
-import 'package:injectable/injectable.dart';
 import '../entities/premium_status.dart';
 import '../entities/subscription_plan.dart';
 import '../repositories/premium_repository.dart';
 
-@Singleton()
 class GetPremiumStatusUseCase {
   const GetPremiumStatusUseCase(this._premiumRepository);
 

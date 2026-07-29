@@ -1,12 +1,9 @@
 import 'dart:async';
 
-import 'package:injectable/injectable.dart';
-
 /// Which screen initiated a saved prayer-location change.
 enum PrayerLocationUpdateSource { homeDashboard, prayerTimesTab }
 
 /// Broadcasts when saved prayer scheduling coordinates changed.
-@lazySingleton
 class PrayerLocationUpdateNotifier {
   final StreamController<PrayerLocationUpdate> _controller =
       StreamController<PrayerLocationUpdate>.broadcast();

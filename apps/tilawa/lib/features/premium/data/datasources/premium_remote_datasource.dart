@@ -1,7 +1,5 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
-import 'package:injectable/injectable.dart';
-
 import 'package:tilawa_core/config/currency_config.dart';
 import 'package:tilawa/core/logging/app_logger.dart';
 import '../../domain/entities/premium_status.dart';
@@ -16,7 +14,6 @@ abstract class PremiumRemoteDataSource {
   Future<bool> restoreSubscription();
 }
 
-@LazySingleton(as: PremiumRemoteDataSource)
 class PremiumRemoteDataSourceImpl implements PremiumRemoteDataSource {
   PremiumRemoteDataSourceImpl(this._firestore, this._auth);
   final FirebaseFirestore _firestore;

@@ -1,11 +1,8 @@
-import 'package:injectable/injectable.dart';
-
 import '../../domain/entities/app_review_engagement.dart';
 import '../../domain/entities/app_review_signal.dart';
 import '../../domain/repositories/app_review_engagement_repository.dart';
 import '../datasources/app_review_engagement_local_datasource.dart';
 
-@LazySingleton(as: AppReviewEngagementRepository)
 class AppReviewEngagementRepositoryImpl
     implements AppReviewEngagementRepository {
   AppReviewEngagementRepositoryImpl(this._local);

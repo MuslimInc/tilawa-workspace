@@ -1,8 +1,5 @@
-import 'package:injectable/injectable.dart';
-
 import 'session_epoch_provider.dart';
 
-@lazySingleton
 class CallableSessionPayloadBuilder {
   CallableSessionPayloadBuilder(this._sessionEpochProvider);
 

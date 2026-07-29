@@ -1,8 +1,6 @@
-import 'package:injectable/injectable.dart';
 import 'package:tilawa/core/logging/app_logger.dart';
 import 'package:tilawa/features/premium/domain/services/subscription_catalog_prefetch.dart';
 
-@lazySingleton
 class FirebaseInitializationService {
   FirebaseInitializationService(this._subscriptionCatalogPrefetch);
 

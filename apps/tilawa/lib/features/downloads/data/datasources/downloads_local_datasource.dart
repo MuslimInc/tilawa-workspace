@@ -1,7 +1,6 @@
 import 'dart:convert';
 import 'dart:io';
 
-import 'package:injectable/injectable.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
@@ -21,7 +20,6 @@ abstract class DownloadsLocalDataSource {
   Future<void> deleteFile(String filePath);
 }
 
-@LazySingleton(as: DownloadsLocalDataSource)
 class DownloadsLocalDataSourceImpl implements DownloadsLocalDataSource {
   DownloadsLocalDataSourceImpl(this._prefs);
   static const String _downloadsKey = 'downloads';

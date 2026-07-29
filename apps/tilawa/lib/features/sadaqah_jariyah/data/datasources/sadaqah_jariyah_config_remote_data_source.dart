@@ -1,5 +1,4 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:injectable/injectable.dart';
 import 'package:tilawa/core/logging/app_logger.dart';
 
 import '../../domain/entities/sadaqah_jariyah_config.dart';
@@ -9,7 +8,6 @@ abstract class SadaqahJariyahConfigRemoteDataSource {
   Future<SadaqahJariyahConfig> getConfig();
 }
 
-@LazySingleton(as: SadaqahJariyahConfigRemoteDataSource)
 class FirestoreSadaqahJariyahConfigRemoteDataSource
     implements SadaqahJariyahConfigRemoteDataSource {
   FirestoreSadaqahJariyahConfigRemoteDataSource(this._firestore);

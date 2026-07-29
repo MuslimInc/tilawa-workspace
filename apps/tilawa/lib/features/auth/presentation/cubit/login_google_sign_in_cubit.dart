@@ -1,6 +1,5 @@
 import 'package:equatable/equatable.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:injectable/injectable.dart';
 import 'package:tilawa/core/logging/app_logger.dart';
 import 'package:tilawa_core/errors/failures.dart';
 
@@ -71,7 +70,6 @@ class LoginGoogleSignInState extends Equatable {
 }
 
 /// Login-screen Google sign-in prewarm, readiness cache, and launch gating.
-@injectable
 class LoginGoogleSignInCubit extends Cubit<LoginGoogleSignInState> {
   LoginGoogleSignInCubit(
     this._prewarmLaunch,

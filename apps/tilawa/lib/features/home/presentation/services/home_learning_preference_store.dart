@@ -1,4 +1,3 @@
-import 'package:injectable/injectable.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 /// Abstract store for tracking learning interest preference and revision practice status.
@@ -23,7 +22,6 @@ abstract interface class HomeLearningPreferenceStore {
 }
 
 /// SharedPreferencesAsync implementation of [HomeLearningPreferenceStore].
-@LazySingleton(as: HomeLearningPreferenceStore)
 class SharedPreferencesHomeLearningPreferenceStore
     implements HomeLearningPreferenceStore {
   SharedPreferencesHomeLearningPreferenceStore(this._prefs);

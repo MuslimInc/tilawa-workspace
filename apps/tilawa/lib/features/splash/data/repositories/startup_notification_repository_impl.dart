@@ -1,13 +1,11 @@
 import 'dart:async';
 
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
-import 'package:injectable/injectable.dart';
 import 'package:tilawa/router/app_router.dart';
 import 'package:tilawa/router/deep_link_resolver.dart';
 
 import '../../domain/repositories/startup_notification_repository.dart';
 
-@LazySingleton(as: StartupNotificationRepository)
 class StartupNotificationRepositoryImpl
     implements StartupNotificationRepository {
   @override

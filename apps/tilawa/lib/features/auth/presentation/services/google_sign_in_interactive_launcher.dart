@@ -4,7 +4,6 @@ import 'package:flutter/scheduler.dart';
 import 'package:meta/meta.dart';
 import 'package:flutter/services.dart';
 import 'package:google_sign_in/google_sign_in.dart';
-import 'package:injectable/injectable.dart';
 import 'package:tilawa/core/logging/app_logger.dart';
 import 'package:tilawa/features/auth/data/services/android_sign_in_platform_policy.dart';
 import 'package:tilawa/features/auth/domain/entities/google_sign_in_launch_readiness.dart';
@@ -65,7 +64,6 @@ abstract final class SignInUiSettleTiming {
 
 /// Defers interactive Google sign-in until after the frame pipeline and OEM
 /// window managers (e.g. Transsion HubCore) have settled.
-@LazySingleton(as: GoogleSignInLaunchGateway)
 class GoogleSignInInteractiveLauncher implements GoogleSignInLaunchGateway {
   GoogleSignInInteractiveLauncher(
     this._googleSignIn,

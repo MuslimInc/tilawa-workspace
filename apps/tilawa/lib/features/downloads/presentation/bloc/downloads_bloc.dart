@@ -4,7 +4,6 @@ import 'package:bloc_concurrency/bloc_concurrency.dart';
 import 'package:dartz_plus/dartz_plus.dart';
 import 'package:freezed_annotation/freezed_annotation.dart';
 import 'package:hydrated_bloc/hydrated_bloc.dart';
-import 'package:injectable/injectable.dart';
 import 'package:stream_transform/stream_transform.dart';
 
 import 'package:tilawa_core/errors/failures.dart';
@@ -41,7 +40,6 @@ EventTransformer<T> debounce<T>(Duration duration) {
   return (events, mapper) => events.debounce(duration).switchMap(mapper);
 }
 
-@injectable
 class DownloadsBloc extends HydratedBloc<DownloadsEvent, DownloadsState> {
   DownloadsBloc({
     required this._getDownloadsByReciter,

@@ -1,5 +1,3 @@
-import 'package:injectable/injectable.dart';
-
 import '../entities/daily_guidance_preferences.dart';
 import '../repositories/daily_guidance_preferences_repository.dart';
 
@@ -12,7 +10,6 @@ abstract class DailyGuidanceNotificationService {
   Future<void> cancelDailyTrigger();
 }
 
-@injectable
 class ToggleDailyGuidanceUseCase {
   final DailyGuidancePreferencesRepository _repository;
   final DailyGuidanceNotificationService _notificationService;
@@ -42,7 +39,6 @@ class ToggleDailyGuidanceUseCase {
   }
 }
 
-@injectable
 class ScheduleDailyGuidanceUseCase {
   final DailyGuidancePreferencesRepository _repository;
   final DailyGuidanceNotificationService _notificationService;

@@ -3,7 +3,6 @@ import 'dart:io';
 
 import 'package:cloud_functions/cloud_functions.dart';
 import 'package:http/http.dart' as http;
-import 'package:injectable/injectable.dart';
 import 'package:tilawa_core/errors/failures.dart';
 
 import '../../domain/entities/compared_word.dart';
@@ -12,7 +11,6 @@ import '../../domain/entities/recitation_target.dart';
 import '../../domain/entities/word_match_status.dart';
 
 /// Calls the acoustic recitation verifier backend.
-@lazySingleton
 class RecitationAudioVerificationClient {
   RecitationAudioVerificationClient(
     this._functions, {

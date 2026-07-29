@@ -1,8 +1,6 @@
-import 'package:injectable/injectable.dart';
 import '../entities/surah_entity.dart';
 import '../repositories/surah_repository.dart';
 
-@Singleton()
 class GetSurahsForReciterUseCase {
   const GetSurahsForReciterUseCase(this._surahRepository);
 

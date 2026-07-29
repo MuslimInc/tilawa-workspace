@@ -1,7 +1,5 @@
 import 'package:equatable/equatable.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:injectable/injectable.dart';
-
 import '../../domain/policies/email_auth_form_policy.dart';
 
 /// Form field validation state for email/password auth screens.
@@ -82,7 +80,6 @@ class EmailAuthFormState extends Equatable {
   ];
 }
 
-@injectable
 class EmailAuthFormCubit extends Cubit<EmailAuthFormState> {
   EmailAuthFormCubit() : super(const EmailAuthFormState());
 
