@@ -130,7 +130,7 @@ class MeMuslimProductColors extends ThemeExtension<MeMuslimProductColors> {
       HomeExploreFeature.quran => AppColors.categoryAccentAmber,
       HomeExploreFeature.support => AppColors.brandActionGreenAccessible,
       HomeExploreFeature.sessions => AppColors.categoryAccentBlueGrey,
-      HomeExploreFeature.reels => AppColors.categoryAccentIndigo,
+      HomeExploreFeature.reels => AppColors.categoryAccentTealLight,
       HomeExploreFeature.radio => AppColors.featuredGradientStart,
     };
   }
