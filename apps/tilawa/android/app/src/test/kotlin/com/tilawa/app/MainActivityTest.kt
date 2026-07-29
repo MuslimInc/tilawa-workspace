@@ -53,7 +53,9 @@ class MainActivityTest {
 
     @Test
     fun `getRenderMode always uses texture to avoid surface ANR`() {
-        assert(activity.getRenderMode() == RenderMode.texture)
+        val method = MainActivity::class.java.getDeclaredMethod("getRenderMode")
+        method.isAccessible = true
+        assert(method.invoke(activity) == RenderMode.texture)
     }
 
     @Test
@@ -65,7 +67,7 @@ class MainActivityTest {
     }
 
     @Test
-    fun `onNewIntent consumes open prayer status action after routing once`() {
+    fun `handleIntent consumes open prayer status action after routing once`() {
         val intent = Intent(activity, MainActivity::class.java).apply {
             action = MainActivity.ACTION_OPEN_PRAYER_STATUS
             putExtra(AdhanScheduler.EXTRA_PRAYER_NAME, "fajr")
@@ -76,14 +78,13 @@ class MainActivityTest {
             putExtra("is_adhan_playing", true)
         }
 
-        MainActivity::class.java
-            .getDeclaredMethod("onNewIntent", Intent::class.java)
+        // Invoke handleIntent directly — onNewIntent hits FlutterFragmentActivity
+        // while flutterFragment is null under Robolectric .get()-only setup.
+        val handleIntent = MainActivity::class.java
+            .getDeclaredMethod("handleIntent", Intent::class.java)
             .apply { isAccessible = true }
-            .invoke(activity, intent)
-        MainActivity::class.java
-            .getDeclaredMethod("onNewIntent", Intent::class.java)
-            .apply { isAccessible = true }
-            .invoke(activity, intent)
+        handleIntent.invoke(activity, intent)
+        handleIntent.invoke(activity, intent)
 
         verify(exactly = 1) {
             PrayerAdhanMethodChannel.notifyNotificationTapped(
@@ -100,3 +101,5 @@ class MainActivityTest {
         assert(intent.action == null)
     }
 }
+
+

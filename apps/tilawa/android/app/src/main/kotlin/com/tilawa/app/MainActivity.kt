@@ -53,16 +53,18 @@ class MainActivity : AudioServiceFragmentActivity() {
             },
         )
 
-    private val severeMemoryPressureBridge = SevereMemoryPressureBridge(log = ::firstFrameLog)
-
     private fun firstFrameLog(message: String) {
         Log.d(FIRST_FRAME_TAG, message)
     }
 
+    private fun memoryPressureBridge(): SevereMemoryPressureBridge =
+        // No Activity-bound log — singleton must stay process-scoped.
+        SevereMemoryPressureBridge.get(this)
+
     override fun onCreate(savedInstanceState: Bundle?) {
         BootDeviceEventBreadcrumbs.resetForLaunch()
         BootDeviceEventBreadcrumbs.register(this)
-        severeMemoryPressureBridge.register(this)
+        memoryPressureBridge()
         Log.d(
             TAG,
             "MAIN_ACTIVITY_ON_CREATE_INTENT action=${intent?.action} extras=${intent?.extras?.keySet()} renderMode=texture"
@@ -136,7 +138,8 @@ class MainActivity : AudioServiceFragmentActivity() {
     override fun configureFlutterEngine(flutterEngine: FlutterEngine) {
         super.configureFlutterEngine(flutterEngine)
         registerAppMethodChannels(flutterEngine)
-        severeMemoryPressureBridge.attachChannel(
+        memoryPressureBridge().attachChannel(
+            this,
             MethodChannel(
                 flutterEngine.dartExecutor.binaryMessenger,
                 SevereMemoryPressureBridge.CHANNEL,
@@ -275,7 +278,9 @@ class MainActivity : AudioServiceFragmentActivity() {
 
     override fun onDestroy() {
         launchSplashController.onDestroy()
-        severeMemoryPressureBridge.unregister(this)
+        // Process-scoped bridge stays registered; only detach this Activity's
+        // Dart channel (owner-token) so recreate cannot miss RUNNING_*/COMPLETE.
+        memoryPressureBridge().detachChannel(this)
         BootDeviceEventBreadcrumbs.unregister(this)
         super.onDestroy()
     }
@@ -309,3 +314,5 @@ class MainActivity : AudioServiceFragmentActivity() {
      */
     override fun getRenderMode(): RenderMode = RenderMode.texture
 }
+
+

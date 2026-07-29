@@ -11,10 +11,22 @@ import 'package:tilawa/core/logging/app_logger.dart';
 /// TRIM_MEMORY_RUNNING_* / MODERATE / COMPLETE) so LMK is less likely to kill
 /// the process and force a cold-start ANR (Sentry FLUTTER-9 class).
 ///
-/// Mild OEM noise (e.g. OPPO lock → `TRIM_MEMORY_UI_HIDDEN` / Flutter
-/// [WidgetsBindingObserver.didHaveMemoryPressure] while invisible) stays
-/// handled in `quran_image` — this bridge is only invoked for severe levels
-/// from native [SevereMemoryPressureBridge].
+/// Mild OEM noise stays ignored — both here and in native
+/// [SevereMemoryPressureBridge]:
+/// - OPPO lock → `TRIM_MEMORY_UI_HIDDEN` / Flutter
+///   [WidgetsBindingObserver.didHaveMemoryPressure] while invisible
+/// - Normal background → `TRIM_MEMORY_BACKGROUND` (level 40). Tilawa's
+///   *aggressive* path (live-image clear, Quran decoded-cache release, lowered
+///   ceiling) must not run for BACKGROUND; that path regressed FLUTTER-9 on
+///   CPH2529.
+///
+/// **Residual:** Flutter's embedding still forwards BACKGROUND (and other
+/// levels ≥ 10) via SystemChannel → [PaintingBinding.handleMemoryPressure] →
+/// `imageCache.clear()`. This handler does not suppress that built-in clear;
+/// it only gates Tilawa's extra severe release. Confirm via production
+/// CPH2529 telemetry after ship.
+///
+/// This bridge is only invoked for severe levels from native.
 abstract final class AppMemoryPressureHandler {
   static const String channelName = 'com.tilawa.app/memory_pressure';
 
@@ -22,6 +34,16 @@ abstract final class AppMemoryPressureHandler {
   /// the next process start (180MB default is restored from DI on cold start).
   static const int severeMaximumSizeBytes = 48 * 1024 * 1024;
   static const int severeMaximumSize = 80;
+
+  /// Android [ComponentCallbacks2] levels that warrant cache eviction.
+  /// Mirrors native `SevereMemoryPressureBridge.isSevereTrimLevel`.
+  static const Set<int> severeTrimLevels = <int>{
+    5, // TRIM_MEMORY_RUNNING_MODERATE
+    10, // TRIM_MEMORY_RUNNING_LOW
+    15, // TRIM_MEMORY_RUNNING_CRITICAL
+    60, // TRIM_MEMORY_MODERATE
+    80, // TRIM_MEMORY_COMPLETE
+  };
 
   static bool _attached = false;
   static MethodChannel? _channel;
@@ -60,6 +82,12 @@ abstract final class AppMemoryPressureHandler {
     final int? level = rawLevel is int
         ? rawLevel
         : int.tryParse(rawLevel?.toString() ?? '');
+    if (level != null && !severeTrimLevels.contains(level)) {
+      logger.d(
+        '[AppMemoryPressure] ignoring non-severe level=$level',
+      );
+      return;
+    }
     releaseSevereCaches(level: level);
   }
 
@@ -103,3 +131,4 @@ abstract final class AppMemoryPressureHandler {
     releaseCallCount = 0;
   }
 }
+
