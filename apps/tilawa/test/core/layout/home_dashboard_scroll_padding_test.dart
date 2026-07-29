@@ -11,12 +11,12 @@ void main() {
       tokens = MeMuslimDesignTokens.light();
     });
 
-    test('content gap is 16 dp via spaceLarge token', () {
-      expect(tokens.spaceLarge, 16);
+    test('content gap is 24 dp via spaceExtraLarge token', () {
+      expect(tokens.spaceExtraLarge, 24);
     });
 
     testWidgets(
-      'returns 16 dp when hosted in TilawaShellPadding without player',
+      'returns 24 dp when hosted in TilawaShellPadding without player',
       (
         tester,
       ) async {
@@ -39,11 +39,11 @@ void main() {
           ),
         );
 
-        expect(padding, tokens.spaceLarge);
+        expect(padding, tokens.spaceExtraLarge);
       },
     );
 
-    testWidgets('returns 16 dp when hosted in TilawaShellPadding with player', (
+    testWidgets('returns 24 dp when hosted in TilawaShellPadding with player', (
       tester,
     ) async {
       late double padding;
@@ -65,10 +65,10 @@ void main() {
         ),
       );
 
-      expect(padding, tokens.spaceLarge);
+      expect(padding, tokens.spaceExtraLarge);
     });
 
-    testWidgets('returns 16 dp when shell padding host is absent', (
+    testWidgets('returns 24 dp when shell padding host is absent', (
       tester,
     ) async {
       late double padding;
@@ -87,7 +87,7 @@ void main() {
         ),
       );
 
-      expect(padding, tokens.spaceLarge);
+      expect(padding, tokens.spaceExtraLarge);
     });
 
     testWidgets('player height does not change bottom padding', (tester) async {
@@ -129,8 +129,8 @@ void main() {
         ),
       );
 
-      expect(paddingWithoutPlayer, tokens.spaceLarge);
-      expect(paddingWithPlayer, tokens.spaceLarge);
+      expect(paddingWithoutPlayer, tokens.spaceExtraLarge);
+      expect(paddingWithPlayer, tokens.spaceExtraLarge);
       expect(paddingWithPlayer, paddingWithoutPlayer);
     });
   });
