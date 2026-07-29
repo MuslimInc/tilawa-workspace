@@ -28,3 +28,7 @@ plugins {
 }
 
 include ":app"
+
+// Play Console bitmap-downsampling lint: patch audio_service before plugin compile.
+apply from: "patch_audio_service_bitmap.gradle"
+

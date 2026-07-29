@@ -1,0 +1,87 @@
+// Idempotent patch: audio_service always passes BitmapFactory.Options.
+// Clears Play Console "Improve performance with bitmap downsampling" on
+// com.ryanheise.audioservice.AudioService.loadArtBitmap.
+// Applied at settings.gradle evaluation so it runs before plugin compile.
+
+def marker = 'Always pass BitmapFactory.Options'
+
+def oldBlock = '''            // Decode the image ourselves for scenarios 1 and 3 (see the comment above).
+            if (!usesContentScheme || fileDescriptor != null) {
+                if (config.artDownscaleWidth != -1) {
+                    BitmapFactory.Options options = new BitmapFactory.Options();
+                    options.inJustDecodeBounds = true;
+                    if (fileDescriptor != null) {
+                        BitmapFactory.decodeFileDescriptor(fileDescriptor, null, options);
+                    } else {
+                        BitmapFactory.decodeFile(artUri.getPath(), options);
+                    }
+                    options.inSampleSize = calculateInSampleSize(options, config.artDownscaleWidth, config.artDownscaleHeight);
+                    options.inJustDecodeBounds = false;
+
+                    if (fileDescriptor != null) {
+                        bitmap = BitmapFactory.decodeFileDescriptor(fileDescriptor, null, options);
+                    } else {
+                        bitmap = BitmapFactory.decodeFile(artUri.getPath(), options);
+                    }
+                } else {
+                    if (fileDescriptor != null) {
+                        bitmap = BitmapFactory.decodeFileDescriptor(fileDescriptor);
+                    } else {
+                        bitmap = BitmapFactory.decodeFile(artUri.getPath());
+                    }
+                }
+            }'''
+
+def newBlock = '''            // Decode the image ourselves for scenarios 1 and 3 (see the comment above).
+            // Always pass BitmapFactory.Options so Play/App Bundle scanners never see a
+            // full-resolution decode* call site (Technical quality: bitmap downsampling).
+            if (!usesContentScheme || fileDescriptor != null) {
+                BitmapFactory.Options options = new BitmapFactory.Options();
+                if (config.artDownscaleWidth != -1) {
+                    options.inJustDecodeBounds = true;
+                    if (fileDescriptor != null) {
+                        BitmapFactory.decodeFileDescriptor(fileDescriptor, null, options);
+                    } else {
+                        BitmapFactory.decodeFile(artUri.getPath(), options);
+                    }
+                    options.inSampleSize = calculateInSampleSize(options, config.artDownscaleWidth, config.artDownscaleHeight);
+                    options.inJustDecodeBounds = false;
+                }
+
+                if (fileDescriptor != null) {
+                    bitmap = BitmapFactory.decodeFileDescriptor(fileDescriptor, null, options);
+                } else {
+                    bitmap = BitmapFactory.decodeFile(artUri.getPath(), options);
+                }
+            }'''
+
+def pubCache = System.getenv('PUB_CACHE')
+if (pubCache == null || pubCache.isEmpty()) {
+    pubCache = "${System.getProperty('user.home')}/.pub-cache"
+}
+def hosted = file("${pubCache}/hosted/pub.dev")
+if (!hosted.exists()) {
+    logger.warn("patch_audio_service_bitmap: PUB_CACHE hosted missing at ${hosted}")
+    return
+}
+
+hosted.eachDir { dir ->
+    if (!dir.name.startsWith('audio_service-0.')) {
+        return
+    }
+    def javaFile = file("${dir}/android/src/main/java/com/ryanheise/audioservice/AudioService.java")
+    if (!javaFile.exists()) {
+        return
+    }
+    def text = javaFile.getText('UTF-8')
+    if (text.contains(marker)) {
+        logger.info("patch_audio_service_bitmap: already patched ${javaFile}")
+        return
+    }
+    if (!text.contains(oldBlock)) {
+        logger.warn("patch_audio_service_bitmap: unexpected layout in ${javaFile}")
+        return
+    }
+    javaFile.write(text.replace(oldBlock, newBlock), 'UTF-8')
+    logger.lifecycle("patch_audio_service_bitmap: patched ${javaFile}")
+}

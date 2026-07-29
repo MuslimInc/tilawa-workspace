@@ -40,6 +40,9 @@ melos:
   command:
     bootstrap:
       usePubspecOverrides: true
+      hooks:
+        # Clear Play Console loadArtBitmap / missing BitmapFactory.Options lint.
+        post: dart run tool/patch_audio_service_bitmap.dart
 
   scripts:
     # -- Analysis & Formatting -----------------------------------------

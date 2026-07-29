@@ -9,7 +9,7 @@ environment:
   sdk: ^3.12.2
 
 dependencies:
-  audio_service: ^0.18.18
+  audio_service: ^0.18.19
   audio_session: ^0.2.2
   audio_video_progress_bar: ^2.0.3
   bloc_concurrency: ^0.3.0
