@@ -2,7 +2,6 @@ import 'package:audio_service/audio_service.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:cloud_functions/cloud_functions.dart';
 import 'package:connectivity_plus/connectivity_plus.dart';
-import 'package:in_app_purchase/in_app_purchase.dart';
 import 'package:device_info_plus/device_info_plus.dart';
 import 'package:dio/dio.dart';
 import 'package:firebase_analytics/firebase_analytics.dart';
@@ -12,14 +11,16 @@ import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:firebase_performance/firebase_performance.dart';
 import 'package:firebase_storage/firebase_storage.dart';
 import 'package:flutter/services.dart';
+import 'package:get_it/get_it.dart';
 import 'package:google_sign_in/google_sign_in.dart';
 import 'package:hive_ce/hive.dart';
-import 'package:injectable/injectable.dart';
+import 'package:in_app_purchase/in_app_purchase.dart';
 import 'package:logger/logger.dart';
 import 'package:quran_qcf/quran_qcf.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:tilawa/core/bootstrap/app_launch_config.dart';
 import 'package:tilawa/core/bootstrap/shared_preferences_migration.dart';
+import 'package:tilawa/core/di/get_it_idempotent.dart';
 import 'package:tilawa/core/logging/app_logger.dart';
 import 'package:tilawa/features/audio_player/domain/services/artist_media_playlist_cache.dart';
 import 'package:tilawa/features/audio_player/domain/services/audio_entity_media_item_mapper.dart';
@@ -33,114 +34,93 @@ import 'package:tilawa_core/services/analytics_service.dart';
 import '../../shared/audio/audio_player_handler.dart';
 import '../../shared/audio/audio_player_handler_impl.dart';
 
-@module
-abstract class ExternalDependenciesModule {
-  @singleton
-  Logger get loggerInstance => logger;
+/// Third-party / platform SDK wiring for GetIt.
+class ExternalDependenciesModule {
+  ExternalDependenciesModule._();
 
-  @lazySingleton
-  Connectivity get connectivity => Connectivity();
+  static void register(GetIt getIt) {
+    getIt.registerEagerSingletonIfAbsent<Logger>(() => logger);
+    getIt.registerLazySingletonIfAbsent<Connectivity>(Connectivity.new);
+    getIt.registerLazySingletonIfAbsent<DeviceInfoPlugin>(DeviceInfoPlugin.new);
+    getIt.registerEagerSingletonIfAbsent<FirebaseFirestore>(
+      () => FirebaseFirestore.instance,
+    );
+    getIt.registerEagerSingletonIfAbsent<FirebaseFunctions>(
+      () => FirebaseFunctions.instanceFor(region: 'us-central1'),
+    );
+    getIt.registerEagerSingletonIfAbsent<InAppPurchase>(
+      () => InAppPurchase.instance,
+    );
+    getIt.registerEagerSingletonIfAbsent<FirebaseAuth>(
+      () => FirebaseAuth.instance,
+    );
+    getIt.registerEagerSingletonIfAbsent<FirebaseStorage>(
+      () => FirebaseStorage.instance,
+    );
+    getIt.registerEagerSingletonIfAbsent<GoogleSignIn>(
+      () => GoogleSignIn.instance,
+    );
+    getIt.registerEagerSingletonIfAbsent<FirebaseAnalytics>(
+      () => FirebaseAnalytics.instance,
+    );
+    getIt.registerEagerSingletonIfAbsent<FirebaseCrashlytics>(
+      () => FirebaseCrashlytics.instance,
+    );
+    getIt.registerEagerSingletonIfAbsent<FirebaseMessaging>(
+      () => FirebaseMessaging.instance,
+    );
+    getIt.registerEagerSingletonIfAbsent<FirebasePerformance>(
+      () => FirebasePerformance.instance,
+    );
+    getIt.registerEagerSingletonIfAbsent<SharedPreferencesAsync>(
+      () => SharedPreferencesAsync(options: tilawaSharedPreferencesOptions),
+    );
+    getIt.registerEagerSingletonIfAbsent<HiveInterface>(() => Hive);
+    getIt.registerEagerSingletonIfAbsent<Dio>(
+      () => Dio(
+        BaseOptions(
+          baseUrl: ApiConfig.baseUrl,
+          connectTimeout: const Duration(seconds: 15),
+          receiveTimeout: const Duration(seconds: 30),
+          followRedirects: true,
+          maxRedirects: 5,
+          validateStatus: (status) =>
+              status != null && status >= 200 && status < 300,
+          headers: {
+            'Accept': 'application/json',
+            'User-Agent': 'tilawa/1.0 (Flutter; Dart)',
+          },
+        ),
+      ),
+    );
+    getIt.registerEagerSingletonIfAbsent<List<MediaItem>>(() => <MediaItem>[]);
+    getIt.registerEagerSingletonIfAbsent<AssetBundle>(() => rootBundle);
+    getIt.registerEagerSingletonIfAbsent<QuranFontService>(
+      () => QuranFontService(
+        mushafService: quranQcfLocator<MushafService>(),
+        idleScheduler: quranQcfLocator<IdleScheduler>(),
+      ),
+    );
 
-  @lazySingleton
-  DeviceInfoPlugin get deviceInfoPlugin => DeviceInfoPlugin();
-
-  @singleton
-  FirebaseFirestore get firestore => FirebaseFirestore.instance;
-
-  @singleton
-  FirebaseFunctions get firebaseFunctions =>
-      FirebaseFunctions.instanceFor(region: 'us-central1');
-
-  @singleton
-  InAppPurchase get inAppPurchase => InAppPurchase.instance;
-
-  @singleton
-  FirebaseAuth get firebaseAuth => FirebaseAuth.instance;
-
-  @singleton
-  FirebaseStorage get firebaseStorage => FirebaseStorage.instance;
-
-  @singleton
-  GoogleSignIn get googleSignIn => GoogleSignIn.instance;
-
-  @singleton
-  FirebaseAnalytics get firebaseAnalytics => FirebaseAnalytics.instance;
-
-  @singleton
-  FirebaseCrashlytics get firebaseCrashlytics => FirebaseCrashlytics.instance;
-
-  @singleton
-  FirebaseMessaging get firebaseMessaging => FirebaseMessaging.instance;
-
-  @singleton
-  FirebasePerformance get firebasePerformance => FirebasePerformance.instance;
-
-  @singleton
-  SharedPreferencesAsync get sharedPreferences =>
-      SharedPreferencesAsync(options: tilawaSharedPreferencesOptions);
-
-  @singleton
-  HiveInterface get hive => Hive;
-
-  @singleton
-  Dio dioClient() => Dio(
-    BaseOptions(
-      baseUrl: ApiConfig.baseUrl,
-      connectTimeout: const Duration(seconds: 15),
-      receiveTimeout: const Duration(seconds: 30),
-      followRedirects: true,
-      maxRedirects: 5,
-      validateStatus: (status) =>
-          status != null && status >= 200 && status < 300,
-      headers: {
-        'Accept': 'application/json',
-        'User-Agent': 'tilawa/1.0 (Flutter; Dart)',
-      },
-    ),
-  );
-
-  @singleton
-  SubscriptionPlansService subscriptionPlansService(
-    FirebaseFirestore firestore,
-    AppLaunchConfig launchConfig,
-  ) => SubscriptionPlansService(
-    firestore: firestore,
-    firestoreCatalogEnabled: launchConfig.subscriptionServiceEnabled,
-  );
-
-  @singleton
-  List<MediaItem> mediaItemList() => [];
-
-  @singleton
-  AudioPlayerHandler audioPlayerHandler(
-    List<MediaItem> mediaItems,
-    AnalyticsService analyticsService,
-    ReciterAudioCatalogCache catalogCache,
-    PlaybackUriResolver playbackUriResolver,
-    MoshafSurahAudioListBuilder moshafSurahAudioListBuilder,
-    ArtistMediaPlaylistCache artistMediaPlaylistCache,
-    AudioEntityMediaItemMapper mediaItemMapper,
-  ) {
-    // Create the handler synchronously so DI doesn't block the first frame.
-    // AudioService.init() (the platform notification bridge) is deferred to
-    // initializeAudioService() which runs post-frame in main.dart.
-    return AudioPlayerHandlerImpl(
-      mediaItems,
-      analyticsService,
-      catalogCache,
-      playbackUriResolver,
-      moshafSurahAudioListBuilder,
-      artistMediaPlaylistCache,
-      mediaItemMapper,
+    // Lazy: depends on types registered by feature modules.
+    getIt.registerLazySingletonIfAbsent<SubscriptionPlansService>(
+      () => SubscriptionPlansService(
+        firestore: getIt<FirebaseFirestore>(),
+        firestoreCatalogEnabled:
+            getIt<AppLaunchConfig>().subscriptionServiceEnabled,
+      ),
+    );
+    // Lazy so DI does not block the first frame; AudioService.init stays deferred.
+    getIt.registerLazySingletonIfAbsent<AudioPlayerHandler>(
+      () => AudioPlayerHandlerImpl(
+        getIt<List<MediaItem>>(),
+        getIt<AnalyticsService>(),
+        getIt<ReciterAudioCatalogCache>(),
+        getIt<PlaybackUriResolver>(),
+        getIt<MoshafSurahAudioListBuilder>(),
+        getIt<ArtistMediaPlaylistCache>(),
+        getIt<AudioEntityMediaItemMapper>(),
+      ),
     );
   }
-
-  @singleton
-  AssetBundle get assetBundle => rootBundle;
-
-  @singleton
-  QuranFontService get quranFontService => QuranFontService(
-    mushafService: quranQcfLocator<MushafService>(),
-    idleScheduler: quranQcfLocator<IdleScheduler>(),
-  );
 }

@@ -1,24 +1,25 @@
-import 'package:injectable/injectable.dart';
+import 'package:get_it/get_it.dart';
 import 'package:quran_qcf/quran_qcf.dart';
+import 'package:tilawa/core/di/get_it_idempotent.dart';
 
 import '../domain/services/recitation_speech_normalizer.dart';
 import '../domain/services/recitation_text_aligner.dart';
 
-@module
-abstract class RecitationPracticeModule {
-  @lazySingleton
-  TextNormalizationService textNormalizationService() =>
-      const TextNormalizationServiceImpl();
+class RecitationPracticeModule {
+  RecitationPracticeModule._();
 
-  @lazySingleton
-  RecitationSpeechNormalizer recitationSpeechNormalizer(
-    TextNormalizationService textNormalizationService,
-  ) => RecitationSpeechNormalizer(textNormalizationService);
-
-  @lazySingleton
-  VerseService verseService() => const VerseServiceImpl();
-
-  @lazySingleton
-  RecitationTextAligner recitationTextAligner() =>
-      const RecitationTextAligner();
+  static void register(GetIt getIt) {
+    getIt.registerLazySingletonIfAbsent<TextNormalizationService>(
+      () => const TextNormalizationServiceImpl(),
+    );
+    getIt.registerLazySingletonIfAbsent<RecitationSpeechNormalizer>(
+      () => RecitationSpeechNormalizer(getIt<TextNormalizationService>()),
+    );
+    getIt.registerLazySingletonIfAbsent<VerseService>(
+      () => const VerseServiceImpl(),
+    );
+    getIt.registerLazySingletonIfAbsent<RecitationTextAligner>(
+      () => const RecitationTextAligner(),
+    );
+  }
 }
