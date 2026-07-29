@@ -275,7 +275,10 @@ class MainActivity : AudioServiceFragmentActivity() {
 
     override fun onDestroy() {
         launchSplashController.onDestroy()
-        severeMemoryPressureBridge.unregister(this)
+        // Keep Application ComponentCallbacks2 registered for the process so
+        // Activity recreate mid-boot cannot miss RUNNING_*/COMPLETE trims.
+        // Only detach the Dart channel; configureFlutterEngine re-attaches it.
+        severeMemoryPressureBridge.detachChannel()
         BootDeviceEventBreadcrumbs.unregister(this)
         super.onDestroy()
     }

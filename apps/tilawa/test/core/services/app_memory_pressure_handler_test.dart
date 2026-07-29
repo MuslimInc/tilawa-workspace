@@ -47,6 +47,25 @@ void main() {
     );
   });
 
+  test('BACKGROUND trim level 40 does not release caches', () async {
+    AppMemoryPressureHandler.debugIsAndroidOverride = true;
+    const MethodChannel channel = MethodChannel(
+      AppMemoryPressureHandler.channelName,
+    );
+    AppMemoryPressureHandler.attach(channel: channel);
+
+    await TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger
+        .handlePlatformMessage(
+          channel.name,
+          channel.codec.encodeMethodCall(
+            const MethodCall('severe', <String, Object?>{'level': 40}),
+          ),
+          (_) {},
+        );
+
+    check(AppMemoryPressureHandler.releaseCallCount).equals(0);
+  });
+
   test('releaseSevereCaches clears registered decoded Quran cache', () {
     final _FakeDecodedCache fake = _FakeDecodedCache();
     GetIt.instance.registerSingleton<DecodedQuranImageCache>(fake);

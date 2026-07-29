@@ -53,7 +53,9 @@ class MainActivityTest {
 
     @Test
     fun `getRenderMode always uses texture to avoid surface ANR`() {
-        assert(activity.getRenderMode() == RenderMode.texture)
+        val method = MainActivity::class.java.getDeclaredMethod("getRenderMode")
+        method.isAccessible = true
+        assert(method.invoke(activity) == RenderMode.texture)
     }
 
     @Test
@@ -100,3 +102,4 @@ class MainActivityTest {
         assert(intent.action == null)
     }
 }
+

@@ -11,9 +11,18 @@ import io.flutter.plugin.common.MethodChannel
  * before LMK kills the process (Sentry FLUTTER-9: AppExitInfo ANR after
  * LOW_MEMORY → Activity recreate).
  *
- * Deliberately ignores [ComponentCallbacks2.TRIM_MEMORY_UI_HIDDEN]: OEMs such
- * as OPPO fire that on every lock, and eviction then only hurts unlock frames
- * (see quran_image reader memory-pressure guard).
+ * Deliberately ignores:
+ * - [ComponentCallbacks2.TRIM_MEMORY_UI_HIDDEN]: OEMs such as OPPO fire that on
+ *   every lock; eviction then only hurts unlock frames (see quran_image reader
+ *   memory-pressure guard).
+ * - [ComponentCallbacks2.TRIM_MEMORY_BACKGROUND]: normal "app entered LRU"
+ *   signal on background/lock. Treating it as severe cleared Flutter's image
+ *   cache while invisible, forcing a full re-decode on the next resume frame
+ *   and regressing FLUTTER-9 on OPPO CPH2529 (Sentry level=40 breadcrumbs).
+ *
+ * Registration is process-scoped (Application [ComponentCallbacks2]). Activity
+ * destroy only detaches the MethodChannel so mid-boot Activity recreate cannot
+ * miss a RUNNING_* / COMPLETE trim.
  */
 internal class SevereMemoryPressureBridge(
     private val log: (String) -> Unit = { message ->
@@ -25,8 +34,27 @@ internal class SevereMemoryPressureBridge(
 
     private var registered = false
 
+    @Volatile
+    private var pendingSevereLevel: Int? = null
+
+    @Volatile
+    private var pendingSevereReason: String? = null
+
     fun attachChannel(methodChannel: MethodChannel) {
         channel = methodChannel
+        val level = pendingSevereLevel
+        val reason = pendingSevereReason
+        if (level != null && reason != null) {
+            pendingSevereLevel = null
+            pendingSevereReason = null
+            log("flushing pending severe reason=$reason level=$level")
+            invokeSevere(methodChannel, level, reason)
+        }
+    }
+
+    /** Clears the Dart channel without unregistering Application callbacks. */
+    fun detachChannel() {
+        channel = null
     }
 
     fun register(context: Context) {
@@ -49,6 +77,8 @@ internal class SevereMemoryPressureBridge(
         }
         registered = false
         channel = null
+        pendingSevereLevel = null
+        pendingSevereReason = null
     }
 
     override fun onTrimMemory(level: Int) {
@@ -73,9 +103,19 @@ internal class SevereMemoryPressureBridge(
         log("severe memory pressure reason=$reason level=$level")
         val activeChannel = channel
         if (activeChannel == null) {
-            log("channel not ready; breadcrumb only")
+            pendingSevereLevel = level
+            pendingSevereReason = reason
+            log("channel not ready; queued pending severe")
             return
         }
+        invokeSevere(activeChannel, level, reason)
+    }
+
+    private fun invokeSevere(
+        activeChannel: MethodChannel,
+        level: Int,
+        reason: String,
+    ) {
         try {
             activeChannel.invokeMethod(
                 "severe",
@@ -100,10 +140,8 @@ internal class SevereMemoryPressureBridge(
             return level == ComponentCallbacks2.TRIM_MEMORY_RUNNING_MODERATE ||
                 level == ComponentCallbacks2.TRIM_MEMORY_RUNNING_LOW ||
                 level == ComponentCallbacks2.TRIM_MEMORY_RUNNING_CRITICAL ||
-                level == ComponentCallbacks2.TRIM_MEMORY_BACKGROUND ||
                 level == ComponentCallbacks2.TRIM_MEMORY_MODERATE ||
                 level == ComponentCallbacks2.TRIM_MEMORY_COMPLETE
         }
     }
 }
-

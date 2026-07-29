@@ -23,7 +23,18 @@ class SevereMemoryPressureBridgeTest {
     }
 
     @Test
-    fun `RUNNING_CRITICAL and COMPLETE are severe`() {
+    fun `BACKGROUND is not severe so lock unlock does not wipe image cache`() {
+        // OPPO fires BACKGROUND on normal background/lock. Clearing Flutter's
+        // image cache then forces unlock-frame re-decode (FLUTTER-9).
+        assertFalse(
+            SevereMemoryPressureBridge.isSevereTrimLevel(
+                ComponentCallbacks2.TRIM_MEMORY_BACKGROUND,
+            ),
+        )
+    }
+
+    @Test
+    fun `RUNNING_CRITICAL MODERATE and COMPLETE are severe`() {
         assertTrue(
             SevereMemoryPressureBridge.isSevereTrimLevel(
                 ComponentCallbacks2.TRIM_MEMORY_RUNNING_CRITICAL,
@@ -31,12 +42,22 @@ class SevereMemoryPressureBridgeTest {
         )
         assertTrue(
             SevereMemoryPressureBridge.isSevereTrimLevel(
-                ComponentCallbacks2.TRIM_MEMORY_COMPLETE,
+                ComponentCallbacks2.TRIM_MEMORY_RUNNING_LOW,
             ),
         )
         assertTrue(
             SevereMemoryPressureBridge.isSevereTrimLevel(
-                ComponentCallbacks2.TRIM_MEMORY_BACKGROUND,
+                ComponentCallbacks2.TRIM_MEMORY_RUNNING_MODERATE,
+            ),
+        )
+        assertTrue(
+            SevereMemoryPressureBridge.isSevereTrimLevel(
+                ComponentCallbacks2.TRIM_MEMORY_MODERATE,
+            ),
+        )
+        assertTrue(
+            SevereMemoryPressureBridge.isSevereTrimLevel(
+                ComponentCallbacks2.TRIM_MEMORY_COMPLETE,
             ),
         )
     }
