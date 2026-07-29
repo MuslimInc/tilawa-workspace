@@ -5,6 +5,7 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:go_router/go_router.dart';
 import 'package:mocktail/mocktail.dart';
 import 'package:quran_sessions/quran_sessions.dart';
+import 'package:tilawa/core/bootstrap/app_launch_config.dart';
 import 'package:tilawa/core/di/injection.dart';
 import 'package:tilawa/features/auth/domain/entities/user_entity.dart';
 import 'package:tilawa/features/auth/presentation/bloc/auth_bloc.dart';
@@ -50,6 +51,12 @@ void seedPlatformConfig({
     getIt.unregister<QuranSessionsPlatformConfigStore>();
   }
   getIt.registerSingleton<QuranSessionsPlatformConfigStore>(store);
+  if (getIt.isRegistered<AppLaunchConfig>()) {
+    getIt.unregister<AppLaunchConfig>();
+  }
+  getIt.registerSingleton<AppLaunchConfig>(
+    const AppLaunchConfig(learnQuranStudentFeatureEnabled: true),
+  );
 }
 
 void main() {

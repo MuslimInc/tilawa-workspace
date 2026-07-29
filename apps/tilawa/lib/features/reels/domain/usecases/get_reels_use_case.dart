@@ -1,6 +1,5 @@
 import 'package:dartz_plus/dartz_plus.dart';
 import 'package:equatable/equatable.dart';
-import 'package:injectable/injectable.dart';
 import 'package:tilawa_core/usecases/usecase.dart';
 import 'package:tilawa_core/utils/typedefs.dart';
 
@@ -35,7 +34,6 @@ class GetReelsResult extends Equatable {
   List<Object?> get props => [reels, engagement];
 }
 
-@lazySingleton
 class GetReelsUseCase extends UseCase<GetReelsResult, GetReelsParams> {
   GetReelsUseCase(this._repository);
 

@@ -4,7 +4,6 @@ import 'dart:ui';
 import 'package:clock/clock.dart';
 import 'package:flutter/foundation.dart';
 import 'package:equatable/equatable.dart';
-import 'package:injectable/injectable.dart';
 import 'package:tilawa_core/config/language_config.dart';
 
 import '../../../../l10n/generated/app_localizations.dart';
@@ -16,7 +15,6 @@ import '../models/download_progress.dart';
 import 'download_service_interface.dart';
 
 /// Manages a queue of pending downloads and controls concurrency
-@LazySingleton()
 class DownloadQueueManager implements IDownloadQueueService {
   DownloadQueueManager(this._downloadService, this._notificationService);
 

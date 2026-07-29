@@ -1,6 +1,5 @@
 import 'dart:async';
 
-import 'package:injectable/injectable.dart';
 import 'package:tilawa/core/logging/app_logger.dart';
 
 import '../entities/user_entity.dart';
@@ -13,7 +12,6 @@ import 'await_auth_restoration_use_case.dart';
 /// [AuthBloc]'s authenticated state. Pass [sessionUser] from presentation
 /// so server actions can wait for Firebase to catch up instead of failing
 /// with a false "not signed in" error.
-@injectable
 class ResolveAuthenticatedUserUseCase {
   ResolveAuthenticatedUserUseCase(
     this._authRepository,

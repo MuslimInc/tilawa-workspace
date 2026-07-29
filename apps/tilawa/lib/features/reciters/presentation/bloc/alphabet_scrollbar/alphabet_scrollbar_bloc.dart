@@ -1,13 +1,10 @@
 import 'package:equatable/equatable.dart';
 import 'package:freezed_annotation/freezed_annotation.dart';
 import 'package:hydrated_bloc/hydrated_bloc.dart';
-import 'package:injectable/injectable.dart';
-
 part 'alphabet_scrollbar_bloc.freezed.dart';
 part 'alphabet_scrollbar_event.dart';
 part 'alphabet_scrollbar_state.dart';
 
-@injectable
 class AlphabetScrollbarBloc
     extends Bloc<AlphabetScrollbarEvent, AlphabetScrollbarState> {
   AlphabetScrollbarBloc() : super(const AlphabetScrollbarState()) {

@@ -2,7 +2,6 @@ import 'dart:async';
 
 import 'package:equatable/equatable.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:injectable/injectable.dart';
 import 'package:tilawa/features/auth/data/services/google_sign_in_session_tracker.dart';
 import 'package:tilawa/features/auth/data/services/pending_session_revoke_store.dart';
 import 'package:tilawa/features/auth/device_registry_feature_flags.dart';
@@ -40,7 +39,6 @@ class SessionValidityState extends Equatable {
 }
 
 /// Lightweight session epoch checks on resume and FCM `session_revoked`.
-@injectable
 class SessionValidityCubit extends Cubit<SessionValidityState> {
   SessionValidityCubit(
     this._authRepository,

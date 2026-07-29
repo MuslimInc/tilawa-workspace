@@ -1,14 +1,11 @@
 import 'package:dartz_plus/dartz_plus.dart';
 import 'package:flutter/foundation.dart';
-import 'package:injectable/injectable.dart';
-
 import 'package:tilawa_core/entities/reciter_entity.dart';
 import 'package:tilawa_core/errors/failures.dart';
 import 'package:tilawa_core/usecases/usecase.dart';
 import 'package:tilawa_core/utils/typedefs.dart';
 import '../repositories/reciters_repository.dart';
 
-@lazySingleton
 class GetFavoriteRecitersUseCase
     implements UseCase<List<ReciterEntity>, NoParams> {
   GetFavoriteRecitersUseCase(this._repository);

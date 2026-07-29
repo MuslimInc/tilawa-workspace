@@ -1,12 +1,9 @@
-import 'package:injectable/injectable.dart';
-
 import '../entities/home_dashboard.dart';
 import '../entities/home_dashboard_renderability.dart';
 import '../repositories/home_dashboard_cache.dart';
 import '../repositories/home_dashboard_repository.dart';
 
 /// Returns the current Home dashboard snapshot.
-@injectable
 final class GetHomeDashboardUseCase {
   GetHomeDashboardUseCase(
     this._repository,

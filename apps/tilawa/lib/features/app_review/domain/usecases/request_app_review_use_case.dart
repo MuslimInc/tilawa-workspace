@@ -1,10 +1,8 @@
 import 'package:dartz_plus/dartz_plus.dart';
-import 'package:injectable/injectable.dart';
 import 'package:tilawa_core/errors/failures.dart';
 
 import '../repositories/app_review_repository.dart';
 
-@lazySingleton
 class RequestAppReviewUseCase {
   const RequestAppReviewUseCase(this._repository);
 

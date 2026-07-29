@@ -1,6 +1,5 @@
 import 'dart:developer' show log;
 
-import 'package:injectable/injectable.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:tilawa_core/config/language_config.dart';
 import 'package:tilawa_core/entities/audio.dart';
@@ -11,7 +10,6 @@ import 'package:tilawa_core/utils/surah_names.dart';
 import 'package:tilawa_core/utils/url_validator.dart';
 
 /// Builds localized [AudioEntity] lists for a single moshaf surah list.
-@lazySingleton
 class MoshafSurahAudioListBuilder {
   MoshafSurahAudioListBuilder(this._prefs);
 

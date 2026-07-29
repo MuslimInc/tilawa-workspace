@@ -1,6 +1,4 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:injectable/injectable.dart';
-
 import '../../domain/entities/dedication.dart';
 import '../../domain/enums/dedication_status.dart';
 import '../mappers/dedication_mapper.dart';
@@ -9,7 +7,6 @@ abstract class DedicationsRemoteDataSource {
   Future<List<Dedication>> getPublishedDedications();
 }
 
-@LazySingleton(as: DedicationsRemoteDataSource)
 class FirestoreDedicationsRemoteDataSource
     implements DedicationsRemoteDataSource {
   FirestoreDedicationsRemoteDataSource(this._firestore);

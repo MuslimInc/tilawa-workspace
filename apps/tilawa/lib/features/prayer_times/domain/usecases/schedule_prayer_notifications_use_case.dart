@@ -1,5 +1,4 @@
 import 'package:dartz_plus/dartz_plus.dart';
-import 'package:injectable/injectable.dart';
 import 'package:tilawa_core/core.dart';
 
 import '../../../../core/services/prayer_notification_config.dart';
@@ -14,7 +13,6 @@ import '../services/prayer_adhan_notification_service_interface.dart';
 /// Pass `forceReschedule: true` from user-driven triggers (settings change,
 /// location change) so the service bypasses its same-day fingerprint dedup
 /// guard. Cold-start / boot triggers should pass `false` to honour dedup.
-@injectable
 class SchedulePrayerNotificationsUseCase {
   const SchedulePrayerNotificationsUseCase(this._service, this._repository);
 

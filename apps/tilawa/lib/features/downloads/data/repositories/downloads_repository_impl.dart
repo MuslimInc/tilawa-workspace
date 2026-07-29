@@ -3,7 +3,6 @@ import 'dart:async';
 import 'package:audio_service/audio_service.dart';
 import 'package:collection/collection.dart';
 import 'package:flutter/services.dart';
-import 'package:injectable/injectable.dart';
 import 'package:tilawa/core/config/notification_config.dart';
 import 'package:tilawa/core/logging/app_logger.dart';
 import 'package:tilawa_core/errors/failures.dart';
@@ -26,7 +25,6 @@ import '../services/download_validator.dart';
 /// Registered for all segregated interfaces to support proper dependency injection:
 /// - Use cases can inject specific interfaces they need
 /// - Backward compatibility maintained via DownloadsRepository
-@LazySingleton(as: DownloadsRepository)
 class DownloadsRepositoryImpl implements DownloadsRepository {
   DownloadsRepositoryImpl(
     this.localDataSource,

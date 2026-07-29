@@ -1,6 +1,5 @@
 import 'package:audio_service/audio_service.dart' as audio_service;
 import 'package:dartz_plus/dartz_plus.dart';
-import 'package:injectable/injectable.dart';
 import 'package:rxdart/rxdart.dart';
 import 'package:tilawa_core/entities/audio.dart';
 import 'package:tilawa_core/errors/failures.dart';
@@ -13,7 +12,6 @@ import '../../domain/entities/audio_modes.dart';
 import '../../domain/repositories/audio_player_repository.dart';
 import 'mapped_playback_queue_cache.dart';
 
-@LazySingleton(as: AudioPlayerRepository)
 class AudioPlayerRepositoryImpl implements AudioPlayerRepository {
   AudioPlayerRepositoryImpl(this._audioHandler, this._positionService);
 

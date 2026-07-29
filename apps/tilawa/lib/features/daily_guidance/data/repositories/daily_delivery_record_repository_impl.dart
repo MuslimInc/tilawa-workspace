@@ -1,11 +1,8 @@
-import 'package:injectable/injectable.dart';
-
 import '../../domain/entities/daily_delivery_record.dart';
 import '../../domain/repositories/daily_delivery_record_repository.dart';
 import '../datasources/daily_guidance_local_data_source.dart';
 import '../models/daily_delivery_record_model.dart';
 
-@LazySingleton(as: DailyDeliveryRecordRepository)
 class DailyDeliveryRecordRepositoryImpl
     implements DailyDeliveryRecordRepository {
   final DailyGuidanceLocalDataSource _localDataSource;

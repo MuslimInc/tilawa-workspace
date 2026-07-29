@@ -1,5 +1,4 @@
 import 'package:equatable/equatable.dart';
-import 'package:injectable/injectable.dart';
 import 'package:tilawa_core/usecases/usecase.dart';
 import 'package:tilawa_core/utils/typedefs.dart';
 
@@ -15,7 +14,6 @@ class GetReelCategoriesParams extends Equatable {
   List<Object?> get props => [language];
 }
 
-@lazySingleton
 class GetReelCategoriesUseCase
     extends UseCase<List<ReelCategory>, GetReelCategoriesParams> {
   GetReelCategoriesUseCase(this._repository);

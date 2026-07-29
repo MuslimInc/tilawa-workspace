@@ -1,12 +1,9 @@
-import 'package:injectable/injectable.dart';
-
 import '../entities/daily_guidance_item.dart';
 import '../entities/daily_guidance_enums.dart';
 import '../repositories/daily_delivery_record_repository.dart';
 import '../repositories/daily_guidance_repository.dart';
 
 /// Returns the committed item for today without attempting to select a new one.
-@injectable
 class GetTodayGuidanceUseCase {
   final DailyGuidanceRepository _repository;
   final DailyDeliveryRecordRepository _recordRepository;

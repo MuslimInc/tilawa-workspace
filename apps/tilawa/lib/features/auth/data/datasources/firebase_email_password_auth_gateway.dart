@@ -1,6 +1,5 @@
 import 'package:dartz_plus/dartz_plus.dart';
 import 'package:firebase_auth/firebase_auth.dart';
-import 'package:injectable/injectable.dart';
 import 'package:tilawa/core/network/network_error_message.dart';
 import 'package:tilawa_core/errors/failures.dart';
 
@@ -10,7 +9,6 @@ import '../../domain/entities/user_entity.dart';
 import '../../domain/gateways/email_password_auth_gateway.dart';
 import '../mappers/firebase_auth_exception_mapper.dart';
 
-@LazySingleton(as: EmailPasswordAuthGateway)
 class FirebaseEmailPasswordAuthGateway implements EmailPasswordAuthGateway {
   FirebaseEmailPasswordAuthGateway(this._firebaseAuth);
 

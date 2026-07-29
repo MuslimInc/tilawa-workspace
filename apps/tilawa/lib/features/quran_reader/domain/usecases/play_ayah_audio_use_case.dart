@@ -1,4 +1,3 @@
-import 'package:injectable/injectable.dart';
 import 'package:tilawa/features/audio_player/domain/usecases/audio_player_usecases.dart';
 import 'package:tilawa/features/share/domain/services/reciter_audio_catalog.dart';
 import 'package:tilawa_core/entities/audio.dart';
@@ -9,7 +8,6 @@ import 'package:tilawa_core/utils/typedefs.dart';
 import '../entities/entities.dart';
 
 /// Plays a single ayah using everyayah.com verse audio for the active reciter.
-@injectable
 class PlayAyahAudioUseCase {
   const PlayAyahAudioUseCase(this._playFromQueue);
 

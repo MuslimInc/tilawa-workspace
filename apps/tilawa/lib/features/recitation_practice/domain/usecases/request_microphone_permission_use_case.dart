@@ -1,10 +1,8 @@
 import 'package:dartz_plus/dartz_plus.dart';
-import 'package:injectable/injectable.dart';
 import 'package:tilawa_core/errors/failures.dart';
 
 import '../../data/services/microphone_permission_service.dart';
 
-@lazySingleton
 class RequestMicrophonePermissionUseCase {
   const RequestMicrophonePermissionUseCase(this._permissionService);
 

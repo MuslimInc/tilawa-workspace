@@ -2,7 +2,6 @@ import 'dart:async';
 
 import 'package:dartz_plus/dartz_plus.dart';
 import 'package:flutter/foundation.dart';
-import 'package:injectable/injectable.dart';
 import 'package:tilawa_core/entities/reciter_entity.dart';
 import 'package:tilawa_core/errors/failures.dart';
 import 'package:tilawa_core/usecases/usecase.dart';
@@ -17,7 +16,6 @@ import 'package:tilawa/features/reciters/domain/usecases/get_reciters_use_case.d
 /// [MainScreen] after navigation (shell activation + initial tab mount) and
 /// prefetches the reciters catalog + favorites list while the splash is
 /// visible so downstream blocs can hydrate without a loading flash.
-@lazySingleton
 class AppStartupReadiness {
   AppStartupReadiness(this._getReciters, this._getFavorites);
 

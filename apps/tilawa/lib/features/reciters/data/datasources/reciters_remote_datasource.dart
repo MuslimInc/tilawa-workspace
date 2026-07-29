@@ -1,5 +1,4 @@
 import 'package:dio/dio.dart';
-import 'package:injectable/injectable.dart';
 import 'package:tilawa_core/config/api_config.dart';
 import '../models/reciter_model.dart';
 
@@ -7,7 +6,6 @@ abstract class RecitersRemoteDataSource {
   Future<List<ReciterModel>> getReciters({String? language});
 }
 
-@LazySingleton(as: RecitersRemoteDataSource)
 class RecitersRemoteDataSourceImpl implements RecitersRemoteDataSource {
   const RecitersRemoteDataSourceImpl(this._dio);
 

@@ -1,7 +1,6 @@
 import 'dart:async';
 
 import 'package:dartz_plus/dartz_plus.dart';
-import 'package:injectable/injectable.dart';
 import 'package:tilawa/core/logging/app_logger.dart';
 import 'package:tilawa/core/network/network_error_message.dart';
 import 'package:tilawa_core/errors/failures.dart';
@@ -10,7 +9,6 @@ import '../entities/session_validity_result.dart';
 import '../repositories/session_validity_repository.dart';
 import '../services/token_sync_cache.dart';
 
-@injectable
 class CheckSessionValidityUseCase {
   CheckSessionValidityUseCase(this._repository, this._tokenSyncCache);
 

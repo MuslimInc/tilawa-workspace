@@ -1,7 +1,6 @@
 import 'package:dartz_plus/dartz_plus.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:freezed_annotation/freezed_annotation.dart';
-import 'package:injectable/injectable.dart';
 import 'package:tilawa_core/core.dart';
 
 import '../../../../core/services/android_adhan_alarm_player.dart';
@@ -22,7 +21,6 @@ abstract class PrayerPermissionsState with _$PrayerPermissionsState {
   }) = _PrayerPermissionsState;
 }
 
-@injectable
 class PrayerPermissionsCubit extends Cubit<PrayerPermissionsState> {
   PrayerPermissionsCubit(
     this._checkCapabilityUseCase,

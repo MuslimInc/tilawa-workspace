@@ -2,7 +2,6 @@ import 'dart:io';
 
 import 'package:cloud_functions/cloud_functions.dart';
 import 'package:dartz_plus/dartz_plus.dart';
-import 'package:injectable/injectable.dart';
 import 'package:tilawa_core/errors/failures.dart';
 
 import '../../domain/entities/recitation_comparison_result.dart';
@@ -12,7 +11,6 @@ import '../services/microphone_permission_service.dart';
 import '../services/recitation_audio_recorder.dart';
 import '../services/recitation_audio_verification_client.dart';
 
-@LazySingleton(as: RecitationAudioVerificationRepository)
 class RecitationAudioVerificationRepositoryImpl
     implements RecitationAudioVerificationRepository {
   RecitationAudioVerificationRepositoryImpl(

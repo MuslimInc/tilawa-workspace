@@ -1,9 +1,6 @@
 import 'package:cloud_functions/cloud_functions.dart';
-import 'package:injectable/injectable.dart';
-
 import 'account_deletion_remote_data_source.dart';
 
-@LazySingleton(as: AccountDeletionRemoteDataSource)
 class AccountDeletionRemoteDataSourceImpl
     implements AccountDeletionRemoteDataSource {
   AccountDeletionRemoteDataSourceImpl(this._functions);

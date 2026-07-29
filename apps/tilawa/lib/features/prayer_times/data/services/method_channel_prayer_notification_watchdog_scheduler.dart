@@ -2,12 +2,10 @@ import 'dart:io';
 
 import 'package:flutter/foundation.dart';
 import 'package:flutter/services.dart';
-import 'package:injectable/injectable.dart';
 import 'package:tilawa/core/logging/app_logger.dart';
 
 import '../../domain/services/prayer_notification_watchdog_scheduler.dart';
 
-@LazySingleton(as: PrayerNotificationWatchdogScheduler)
 class MethodChannelPrayerNotificationWatchdogScheduler
     implements PrayerNotificationWatchdogScheduler {
   const MethodChannelPrayerNotificationWatchdogScheduler();

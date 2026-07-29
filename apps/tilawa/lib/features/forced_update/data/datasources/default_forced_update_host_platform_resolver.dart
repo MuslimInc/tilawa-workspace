@@ -1,10 +1,7 @@
 import 'package:flutter/foundation.dart';
-import 'package:injectable/injectable.dart';
-
 import '../../domain/entities/forced_update_host_platform.dart';
 import '../../domain/services/forced_update_host_platform_resolver.dart';
 
-@LazySingleton(as: ForcedUpdateHostPlatformResolver)
 class DefaultForcedUpdateHostPlatformResolver
     implements ForcedUpdateHostPlatformResolver {
   const DefaultForcedUpdateHostPlatformResolver();

@@ -1,9 +1,6 @@
-import 'package:injectable/injectable.dart';
-
 import '../../application/prayer_location_update_notifier.dart';
 
 /// Notifies prayer-times consumers that saved scheduling location changed.
-@lazySingleton
 class NotifyPrayerLocationUpdatedUseCase {
   const NotifyPrayerLocationUpdatedUseCase(this._notifier);
 

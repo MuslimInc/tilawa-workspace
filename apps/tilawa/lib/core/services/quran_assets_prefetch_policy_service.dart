@@ -1,7 +1,5 @@
-import 'package:injectable/injectable.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
-@lazySingleton
 class QuranAssetsPrefetchPolicyService {
   QuranAssetsPrefetchPolicyService(this._preferences);
 
@@ -9,7 +7,6 @@ class QuranAssetsPrefetchPolicyService {
 
   final SharedPreferencesAsync _preferences;
 
-  @factoryMethod
   QuranAssetsPrefetchPolicyService.fromPreferences(
     SharedPreferencesAsync preferences,
   ) : _preferences = preferences;

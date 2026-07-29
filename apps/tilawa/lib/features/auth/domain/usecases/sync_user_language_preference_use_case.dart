@@ -1,10 +1,8 @@
-import 'package:injectable/injectable.dart';
 import 'package:tilawa_core/config/language_config.dart';
 
 import '../repositories/user_repository.dart';
 
 /// Persists the in-app language choice on `users/{uid}.languageCode`.
-@lazySingleton
 class SyncUserLanguagePreferenceUseCase {
   const SyncUserLanguagePreferenceUseCase(this._userRepository);
 

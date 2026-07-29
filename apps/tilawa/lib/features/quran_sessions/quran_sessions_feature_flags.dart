@@ -7,8 +7,10 @@ import 'quran_sessions_platform_config_store.dart';
 
 /// Resolves [QuranSessionsFeatureConfig] from Admin/Firestore runtime config.
 ///
-/// Admin config wins over [AppLaunchConfig]. When no cached/admin config
-/// exists, the app fails closed with [QuranSessionsPlatformConfig.safeFallback].
+/// Admin config supplies product toggles. App launch kill switches can still
+/// force student Learn Quran off ([AppLaunchConfig.learnQuranStudentFeatureEnabled]).
+/// When no cached/admin config exists, the app fails closed with
+/// [QuranSessionsPlatformConfig.safeFallback].
 QuranSessionsFeatureConfig quranSessionsFeatureConfig() {
   final AppLaunchConfig config = getIt.isRegistered<AppLaunchConfig>()
       ? getIt<AppLaunchConfig>()
@@ -16,7 +18,9 @@ QuranSessionsFeatureConfig quranSessionsFeatureConfig() {
   final platformConfig = quranSessionsEffectivePlatformConfig();
   return QuranSessionsFeatureConfig(
     quranSessionsEnabled: platformConfig.quranSessionsEnabled,
-    learnQuranStudentFeatureEnabled: platformConfig.studentEntryEnabled,
+    learnQuranStudentFeatureEnabled:
+        config.learnQuranStudentFeatureEnabled &&
+        platformConfig.studentEntryEnabled,
     teacherApplicationEntryEnabled:
         platformConfig.teacherApplicationEntryEnabled,
     homeTeacherApplicationCardEnabled:

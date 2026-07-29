@@ -1,5 +1,4 @@
 import 'package:go_router/go_router.dart';
-import 'package:injectable/injectable.dart';
 import 'package:tilawa/core/navigation/quran_player_navigation.dart';
 import 'package:tilawa/router/app_router.dart';
 import 'package:tilawa/router/app_router_config.dart';
@@ -7,7 +6,6 @@ import 'package:tilawa/router/shell_route_location.dart';
 
 export 'package:tilawa/core/navigation/quran_player_navigation.dart';
 
-@LazySingleton(as: QuranPlayerNavigation)
 class GoRouterQuranPlayerNavigation implements QuranPlayerNavigation {
   @override
   bool get isExpandedRouteOnStack {

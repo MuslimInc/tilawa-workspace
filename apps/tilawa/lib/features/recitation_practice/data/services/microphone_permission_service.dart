@@ -1,12 +1,10 @@
 import 'dart:io';
 
-import 'package:injectable/injectable.dart';
 import 'package:permission_handler/permission_handler.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:tilawa/features/recitation_practice/core/voice_recitation_log.dart';
 
 /// Handles microphone permission for recitation practice.
-@lazySingleton
 class MicrophonePermissionService {
   MicrophonePermissionService(this._prefs);
 

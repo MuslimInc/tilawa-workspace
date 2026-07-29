@@ -3,7 +3,6 @@ import 'dart:async';
 import 'package:dartz_plus/dartz_plus.dart';
 import 'package:equatable/equatable.dart';
 import 'package:hydrated_bloc/hydrated_bloc.dart';
-import 'package:injectable/injectable.dart';
 import 'package:tilawa/features/history/domain/entities/history_entity.dart';
 import 'package:tilawa/features/history/domain/usecases/get_history_by_reciter_use_case.dart';
 import 'package:tilawa/shared/audio/audio_player_handler.dart';
@@ -21,7 +20,6 @@ import '../../../surah/domain/usecases/refresh_surah_download_status_use_case.da
 part 'reciter_details_event.dart';
 part 'reciter_details_state.dart';
 
-@injectable
 class ReciterDetailsBloc
     extends HydratedBloc<ReciterDetailsEvent, ReciterDetailsState> {
   ReciterDetailsBloc(

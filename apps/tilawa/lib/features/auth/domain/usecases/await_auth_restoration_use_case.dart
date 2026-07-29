@@ -1,6 +1,5 @@
 import 'dart:async';
 
-import 'package:injectable/injectable.dart';
 import 'package:tilawa/core/logging/app_logger.dart';
 
 import '../entities/user_entity.dart';
@@ -32,7 +31,6 @@ enum AuthRestorationOutcome {
 /// emission up to [startupTimeout] instead of the first raw event. With no
 /// hint there is nothing to restore, so we return immediately and keep the
 /// login path fast.
-@injectable
 class AwaitAuthRestorationUseCase {
   AwaitAuthRestorationUseCase(this._authRepository);
 

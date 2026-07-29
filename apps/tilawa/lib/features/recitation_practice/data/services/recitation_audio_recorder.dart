@@ -1,11 +1,9 @@
-import 'package:injectable/injectable.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:record/record.dart';
 
 import '../../domain/entities/recitation_target.dart';
 
 /// Captures one ayah recitation as a WAV file for acoustic verification.
-@lazySingleton
 class RecitationAudioRecorder {
   RecitationAudioRecorder() : _recorder = AudioRecorder();
 

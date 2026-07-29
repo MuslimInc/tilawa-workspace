@@ -1,5 +1,3 @@
-import 'package:injectable/injectable.dart';
-
 import '../prayer_times_clock.dart';
 
 /// Decides whether loaded prayer-time data is stale for the current device time.
@@ -7,7 +5,6 @@ import '../prayer_times_clock.dart';
 /// This use case intentionally checks only the minimal freshness signals that
 /// are already available to the Prayer Times feature: the loaded local date and
 /// the loaded UTC offset.
-@injectable
 class ShouldRefreshPrayerTimesUseCase {
   const ShouldRefreshPrayerTimesUseCase();
 

@@ -1,7 +1,5 @@
 import 'dart:async';
 
-import 'package:injectable/injectable.dart';
-
 /// Broadcasts `session_taken_over` FCM events, scoped to a live session
 /// (ADR-008 Phase 2).
 ///
@@ -9,7 +7,6 @@ import 'package:injectable/injectable.dart';
 /// of the app — it only means the same user joined the *same live session* from
 /// another device. The receiver leaves the RTC room and surfaces a
 /// "Moved to another device" message. Emits the affected `sessionId`.
-@lazySingleton
 class SessionTakenOverNotifier {
   final StreamController<String> _controller =
       StreamController<String>.broadcast();

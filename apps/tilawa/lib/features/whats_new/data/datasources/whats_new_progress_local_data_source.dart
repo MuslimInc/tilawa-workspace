@@ -1,4 +1,3 @@
-import 'package:injectable/injectable.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 /// SharedPreferences keys for what's new progress (do not rename after release).
@@ -10,7 +9,6 @@ abstract interface class WhatsNewProgressLocalDataSource {
   Future<void> clear();
 }
 
-@LazySingleton(as: WhatsNewProgressLocalDataSource)
 class WhatsNewProgressLocalDataSourceImpl
     implements WhatsNewProgressLocalDataSource {
   WhatsNewProgressLocalDataSourceImpl(this._prefs);

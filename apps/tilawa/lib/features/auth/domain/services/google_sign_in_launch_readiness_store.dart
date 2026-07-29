@@ -1,9 +1,6 @@
-import 'package:injectable/injectable.dart';
-
 import '../entities/google_sign_in_launch_readiness.dart';
 
 /// In-memory cache of the last prewarm readiness check for login fast-path.
-@lazySingleton
 class GoogleSignInLaunchReadinessStore {
   GoogleSignInLaunchReadiness? _cached;
 

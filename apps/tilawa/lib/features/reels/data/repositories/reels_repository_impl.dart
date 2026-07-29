@@ -2,7 +2,6 @@ import 'dart:io';
 
 import 'package:dartz_plus/dartz_plus.dart';
 import 'package:dio/dio.dart';
-import 'package:injectable/injectable.dart';
 import 'package:path/path.dart' as p;
 import 'package:path_provider/path_provider.dart';
 import 'package:share_plus/share_plus.dart';
@@ -19,7 +18,6 @@ import '../datasources/reels_remote_datasource.dart';
 import '../models/reel_video_dto_mapper.dart';
 import '../services/reels_analytics.dart';
 
-@LazySingleton(as: ReelsRepository)
 class ReelsRepositoryImpl implements ReelsRepository {
   ReelsRepositoryImpl(
     this._remote,

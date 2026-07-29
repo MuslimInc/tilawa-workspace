@@ -1,7 +1,6 @@
 import 'dart:async';
 
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:injectable/injectable.dart';
 import 'package:tilawa_core/constants/analytics_constants.dart';
 import 'package:tilawa_core/errors/failures.dart';
 import 'package:tilawa_core/services/analytics_service.dart';
@@ -12,7 +11,6 @@ import '../../domain/services/dedication_photo_url_resolver.dart';
 import '../../domain/usecases/get_sadaqah_jariyah_page_use_case.dart';
 import 'sadaqah_jariyah_state.dart';
 
-@injectable
 class SadaqahJariyahCubit extends Cubit<SadaqahJariyahState> {
   SadaqahJariyahCubit(
     this._getPage,

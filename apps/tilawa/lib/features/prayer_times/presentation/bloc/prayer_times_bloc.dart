@@ -4,7 +4,6 @@ import 'package:bloc_concurrency/bloc_concurrency.dart';
 import 'package:dartz_plus/dartz_plus.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:freezed_annotation/freezed_annotation.dart';
-import 'package:injectable/injectable.dart';
 import 'package:tilawa/features/prayer_times/domain/repositories/prayer_times_repository.dart';
 import 'package:tilawa_core/errors/failures.dart';
 
@@ -62,7 +61,6 @@ abstract class PrayerTimesState with _$PrayerTimesState {
 
 enum PrayerTimesStatus { initial, loading, loaded, error, locationRequired }
 
-@injectable
 class PrayerTimesBloc extends Bloc<PrayerTimesEvent, PrayerTimesState> {
   PrayerTimesBloc(
     this._getPrayerTimesUseCase,

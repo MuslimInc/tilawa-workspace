@@ -3,7 +3,6 @@ import 'dart:io';
 
 import 'package:dio/dio.dart';
 import 'package:flutter/foundation.dart';
-import 'package:injectable/injectable.dart';
 import 'package:path/path.dart' as p;
 import 'package:tilawa_core/constants/app_strings.dart';
 import 'package:tilawa_core/errors/failures.dart';
@@ -15,7 +14,6 @@ import '../ffmpeg/ffmpeg_runner.dart';
 import '../utils/share_cancel_token_bridge.dart';
 import 'share_file_manager.dart';
 
-@lazySingleton
 class VideoService {
   VideoService(this._fileManager, this._runner);
 

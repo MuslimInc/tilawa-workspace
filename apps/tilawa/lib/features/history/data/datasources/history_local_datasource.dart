@@ -1,7 +1,6 @@
 import 'dart:convert';
 
 import 'package:hive_ce/hive.dart';
-import 'package:injectable/injectable.dart';
 import 'package:tilawa/core/services/hive_readiness.dart';
 
 import '../../domain/entities/history_entity.dart';
@@ -37,7 +36,6 @@ abstract class HistoryLocalDataSource {
   Future<int> getHistoryCount();
 }
 
-@LazySingleton(as: HistoryLocalDataSource)
 class HistoryLocalDataSourceImpl implements HistoryLocalDataSource {
   HistoryLocalDataSourceImpl(this._hive, this._hiveReadiness);
 

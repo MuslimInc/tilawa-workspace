@@ -2,7 +2,6 @@ import 'dart:collection';
 
 import 'package:dartz_plus/dartz_plus.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:injectable/injectable.dart';
 import 'package:tilawa_core/entities/reciter_entity.dart';
 import 'package:tilawa_core/errors/failures.dart';
 import 'package:tilawa_core/usecases/usecase.dart';
@@ -13,7 +12,6 @@ import '../../domain/usecases/toggle_favorite_reciter_use_case.dart';
 import '../utils/reciter_list_order.dart';
 import 'favorites_state.dart';
 
-@injectable
 class FavoritesCubit extends Cubit<FavoritesState> {
   FavoritesCubit(
     this._getFavorites,

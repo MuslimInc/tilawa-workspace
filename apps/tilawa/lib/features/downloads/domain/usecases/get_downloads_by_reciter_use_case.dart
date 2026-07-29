@@ -1,6 +1,4 @@
 import 'package:dartz_plus/dartz_plus.dart';
-import 'package:injectable/injectable.dart';
-
 import 'package:tilawa_core/entities/reciter_entity.dart';
 import 'package:tilawa_core/errors/failures.dart';
 import '../../../reciters/domain/repositories/reciters_repository.dart';
@@ -9,7 +7,6 @@ import '../entities/download_item.dart';
 import '../repositories/downloads_repository.dart';
 import '../services/completed_download_file_validator.dart';
 
-@injectable
 class GetDownloadsByReciterUseCase {
   const GetDownloadsByReciterUseCase(
     this._repository,

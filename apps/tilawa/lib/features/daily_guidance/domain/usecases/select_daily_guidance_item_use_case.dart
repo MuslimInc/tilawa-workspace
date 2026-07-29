@@ -1,6 +1,4 @@
 import 'dart:math';
-import 'package:injectable/injectable.dart';
-
 import '../entities/daily_delivery_record.dart';
 import '../entities/daily_guidance_enums.dart';
 import '../entities/daily_guidance_item.dart';
@@ -19,7 +17,6 @@ import '../repositories/daily_guidance_repository.dart';
 ///    - Apply deterministic selection based on date seed.
 ///    - Persist the selection as committed.
 /// 3. Returns null if no eligible content exists.
-@injectable
 class SelectDailyGuidanceItemUseCase {
   final DailyGuidanceRepository _repository;
   final DailyDeliveryRecordRepository _recordRepository;

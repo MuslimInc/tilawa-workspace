@@ -1,11 +1,9 @@
-import 'package:injectable/injectable.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:tilawa/core/services/prayer_notification_config.dart';
 
 import '../../domain/entities/prayer_notification_schedule_snapshot.dart';
 import '../../domain/repositories/prayer_notification_schedule_repository.dart';
 
-@LazySingleton(as: PrayerNotificationScheduleRepository)
 class PrayerNotificationScheduleRepositoryImpl
     implements PrayerNotificationScheduleRepository {
   const PrayerNotificationScheduleRepositoryImpl(this._prefs);

@@ -1,4 +1,3 @@
-import 'package:injectable/injectable.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 import 'package:tilawa_core/config/language_config.dart';
@@ -9,7 +8,6 @@ abstract class LocalizationLocalDataSource {
   Future<List<String>> getSupportedLanguages();
 }
 
-@LazySingleton(as: LocalizationLocalDataSource)
 class LocalizationLocalDataSourceImpl implements LocalizationLocalDataSource {
   const LocalizationLocalDataSourceImpl(this._prefs);
 

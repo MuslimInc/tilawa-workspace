@@ -1,5 +1,4 @@
 import 'package:dartz_plus/dartz_plus.dart';
-import 'package:injectable/injectable.dart';
 import 'package:tilawa_core/core.dart';
 
 import '../../../../core/services/notification_permission_service.dart';
@@ -8,7 +7,6 @@ import '../../../../core/services/notification_permission_service.dart';
 ///
 /// Kept behind a use case so presentation never talks to platform permission
 /// APIs directly.
-@injectable
 class RequestNotificationPermissionUseCase {
   const RequestNotificationPermissionUseCase(this._permissions);
 

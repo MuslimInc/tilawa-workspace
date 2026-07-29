@@ -1,8 +1,5 @@
-import 'package:injectable/injectable.dart';
-
 import '../services/download_queue_service_interface.dart';
 
-@Singleton()
 class RemoveFromDownloadQueueUseCase {
   const RemoveFromDownloadQueueUseCase(this._queueService);
 

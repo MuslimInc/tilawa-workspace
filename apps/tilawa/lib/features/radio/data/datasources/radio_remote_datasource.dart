@@ -1,5 +1,4 @@
 import 'package:dio/dio.dart';
-import 'package:injectable/injectable.dart';
 import 'package:tilawa_core/config/api_config.dart';
 
 import '../models/radio_station_dto.dart';
@@ -11,7 +10,6 @@ abstract class RadioRemoteDataSource {
   });
 }
 
-@LazySingleton(as: RadioRemoteDataSource)
 class RadioRemoteDataSourceImpl implements RadioRemoteDataSource {
   const RadioRemoteDataSourceImpl(this._dio);
 

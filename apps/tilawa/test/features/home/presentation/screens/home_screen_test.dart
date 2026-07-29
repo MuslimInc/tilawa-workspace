@@ -365,7 +365,7 @@ void main() {
 
     if (!getIt.isRegistered<AppLaunchConfig>()) {
       getIt.registerSingleton<AppLaunchConfig>(
-        const AppLaunchConfig(),
+        const AppLaunchConfig(learnQuranStudentFeatureEnabled: true),
       );
     }
     addTearDown(() async {
@@ -601,7 +601,7 @@ void main() {
 
       if (!getIt.isRegistered<AppLaunchConfig>()) {
         getIt.registerSingleton<AppLaunchConfig>(
-          const AppLaunchConfig(),
+          const AppLaunchConfig(learnQuranStudentFeatureEnabled: true),
         );
       }
       // Feature flags fail closed without the runtime platform-config store —

@@ -1,9 +1,7 @@
-import 'package:injectable/injectable.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 import '../../domain/services/token_sync_cache.dart';
 
-@LazySingleton(as: TokenSyncCache)
 class TokenSyncCacheImpl implements TokenSyncCache {
   TokenSyncCacheImpl(this._prefs);
 

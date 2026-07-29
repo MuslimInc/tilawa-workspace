@@ -74,7 +74,9 @@ void main() {
     if (getIt.isRegistered<AppLaunchConfig>()) {
       getIt.unregister<AppLaunchConfig>();
     }
-    getIt.registerSingleton<AppLaunchConfig>(const AppLaunchConfig());
+    getIt.registerSingleton<AppLaunchConfig>(
+      const AppLaunchConfig(learnQuranStudentFeatureEnabled: true),
+    );
 
     if (getIt.isRegistered<AuthSessionProvider>()) {
       getIt.unregister<AuthSessionProvider>();

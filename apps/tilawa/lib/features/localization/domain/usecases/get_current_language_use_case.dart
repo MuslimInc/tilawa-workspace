@@ -1,8 +1,6 @@
-import 'package:injectable/injectable.dart';
 import 'package:tilawa_core/utils/typedefs.dart';
 import '../repositories/localization_repository.dart';
 
-@Singleton()
 class GetCurrentLanguageUseCase {
   const GetCurrentLanguageUseCase(this._repository);
 

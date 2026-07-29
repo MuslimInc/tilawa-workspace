@@ -1,10 +1,7 @@
-import 'package:injectable/injectable.dart';
-
 import '../../domain/entities/history_entity.dart';
 import '../../domain/repositories/history_repository.dart';
 import '../datasources/history_local_datasource.dart';
 
-@LazySingleton(as: HistoryRepository)
 class HistoryRepositoryImpl implements HistoryRepository {
   HistoryRepositoryImpl(this._localDataSource);
 

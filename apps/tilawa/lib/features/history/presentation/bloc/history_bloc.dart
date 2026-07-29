@@ -1,8 +1,6 @@
 import 'package:dartz_plus/dartz_plus.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:freezed_annotation/freezed_annotation.dart';
-import 'package:injectable/injectable.dart';
-
 import 'package:tilawa_core/errors/failures.dart';
 import '../../domain/entities/history_entity.dart';
 import '../../domain/usecases/usecases.dart';
@@ -39,7 +37,6 @@ abstract class HistoryState with _$HistoryState {
 
 enum HistoryStatus { initial, loading, loaded, error, empty }
 
-@injectable
 class HistoryBloc extends Bloc<HistoryEvent, HistoryState> {
   HistoryBloc(
     this._getAllHistoryUseCase,

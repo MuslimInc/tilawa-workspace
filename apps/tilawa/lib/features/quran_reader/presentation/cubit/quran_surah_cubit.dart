@@ -1,5 +1,4 @@
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:injectable/injectable.dart';
 import 'package:tilawa_core/errors/failures.dart';
 
 import '../../domain/entities/entities.dart';
@@ -34,7 +33,6 @@ final class QuranSurahError extends QuranSurahState {
   final String message;
 }
 
-@injectable
 class QuranSurahCubit extends Cubit<QuranSurahState> {
   QuranSurahCubit(
     this._getSurahContentUseCase,

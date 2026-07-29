@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
-import 'package:injectable/injectable.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:tilawa/l10n/generated/app_localizations.dart';
 import 'package:tilawa_core/services/interfaces/notification_dispatcher_interface.dart';
@@ -9,7 +8,6 @@ import 'package:timezone/timezone.dart' as tz;
 import '../../domain/entities/daily_guidance_preferences.dart';
 import '../../domain/usecases/schedule_daily_guidance_use_case.dart';
 
-@LazySingleton(as: DailyGuidanceNotificationService)
 class DailyGuidanceNotificationServiceImpl
     implements DailyGuidanceNotificationService {
   final INotificationDispatcher _dispatcher;

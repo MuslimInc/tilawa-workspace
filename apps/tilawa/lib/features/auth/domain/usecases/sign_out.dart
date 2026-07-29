@@ -1,5 +1,4 @@
 import 'package:dartz_plus/dartz_plus.dart';
-import 'package:injectable/injectable.dart';
 import 'package:tilawa_core/errors/failures.dart';
 
 import '../../../../core/domain/server_action_guard.dart';
@@ -8,7 +7,6 @@ import '../repositories/auth_repository.dart';
 import '../services/token_sync_cache.dart';
 import 'sync_device_token_use_case.dart';
 
-@injectable
 class SignOut {
   SignOut(
     this._repository,

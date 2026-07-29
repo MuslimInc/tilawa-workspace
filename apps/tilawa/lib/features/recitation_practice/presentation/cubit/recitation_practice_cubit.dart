@@ -1,7 +1,6 @@
 import 'dart:async';
 
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:injectable/injectable.dart';
 import 'package:tilawa_core/errors/failures.dart';
 
 import '../../core/voice_recitation_log.dart';
@@ -12,7 +11,6 @@ import '../../domain/repositories/recitation_audio_verification_repository.dart'
 import '../../domain/usecases/get_page_recitation_targets_use_case.dart';
 import 'recitation_practice_state.dart';
 
-@injectable
 class RecitationPracticeCubit extends Cubit<RecitationPracticeState> {
   RecitationPracticeCubit(
     this._getPageTargets,

@@ -1,5 +1,3 @@
-import 'package:injectable/injectable.dart';
-
 import '../entities/user_entity.dart';
 import '../services/token_sync_cache.dart';
 
@@ -19,7 +17,6 @@ import '../services/token_sync_cache.dart';
 /// [TokenSyncCache.clearSession] during explicit sign-out. We reuse it as the
 /// restoration hint — no new storage or write sites. The returned entity is an
 /// id-only placeholder; the real profile comes from Firebase once restored.
-@lazySingleton
 class GetPersistedAuthenticatedUserUseCase {
   GetPersistedAuthenticatedUserUseCase(this._tokenSyncCache);
 

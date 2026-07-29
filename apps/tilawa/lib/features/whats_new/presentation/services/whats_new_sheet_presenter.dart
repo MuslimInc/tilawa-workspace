@@ -1,12 +1,10 @@
 import 'package:flutter/material.dart';
-import 'package:injectable/injectable.dart';
 import 'package:tilawa/router/app_router.dart';
 
 import '../../domain/entities/changelog_release.dart';
 import '../widgets/whats_new_sheet.dart';
 import 'whats_new_presenter.dart';
 
-@LazySingleton(as: WhatsNewPresenter)
 class WhatsNewSheetPresenter implements WhatsNewPresenter {
   @override
   Future<void> show({

@@ -3,7 +3,6 @@ import 'dart:convert';
 import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
-import 'package:injectable/injectable.dart';
 import 'package:logger/logger.dart';
 import 'package:tilawa/core/navigation/notification_destination.dart';
 import 'package:tilawa/core/services/navigation_service.dart';
@@ -11,7 +10,6 @@ import 'package:tilawa/router/deep_link_resolver.dart';
 import 'package:tilawa/core/config/android_notification_defaults.dart';
 import 'package:tilawa_core/services/interfaces/notification_dispatcher_interface.dart';
 
-@lazySingleton
 class FCMNotificationHandlerService {
   final INotificationDispatcher _dispatcher;
   final Logger _logger;

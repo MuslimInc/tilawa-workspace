@@ -1,8 +1,6 @@
 import 'dart:async';
 
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:injectable/injectable.dart';
-
 import '../../domain/entities/reel.dart';
 import '../../domain/entities/reel_category.dart';
 import '../../domain/entities/reel_reaction.dart';
@@ -16,7 +14,6 @@ import '../../domain/usecases/save_reel_use_case.dart';
 import '../../domain/usecases/share_reel_use_case.dart';
 import 'reels_state.dart';
 
-@injectable
 class ReelsCubit extends Cubit<ReelsState> {
   ReelsCubit(
     this._getReels,

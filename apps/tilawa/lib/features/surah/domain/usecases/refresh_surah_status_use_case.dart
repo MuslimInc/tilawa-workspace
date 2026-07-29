@@ -1,11 +1,8 @@
-import 'package:injectable/injectable.dart';
-
 import 'package:tilawa_core/entities/audio.dart';
 import '../../../downloads/domain/repositories/downloads_repository.dart';
 import '../entities/surah_entity.dart';
 import '../repositories/surah_repository.dart';
 
-@Singleton()
 class RefreshSurahStatusUseCase {
   const RefreshSurahStatusUseCase(
     this._surahRepository,

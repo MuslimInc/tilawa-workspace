@@ -1,10 +1,7 @@
 import 'package:dartz_plus/dartz_plus.dart';
-import 'package:injectable/injectable.dart';
-
 import 'package:tilawa_core/errors/failures.dart';
 import '../repositories/bookmarks_repository.dart';
 
-@lazySingleton
 class DeleteBookmarkUseCase {
   const DeleteBookmarkUseCase(this._repository);
 

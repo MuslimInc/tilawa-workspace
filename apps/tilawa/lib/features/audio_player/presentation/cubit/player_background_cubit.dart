@@ -1,6 +1,5 @@
 import 'package:hydrated_bloc/hydrated_bloc.dart';
 import 'package:image_picker/image_picker.dart';
-import 'package:injectable/injectable.dart';
 import 'package:tilawa_core/errors/failures.dart';
 import '../../domain/entities/player_background_configuration.dart';
 import '../../domain/usecases/decode_persisted_player_background_use_case.dart';
@@ -10,7 +9,6 @@ import '../../domain/usecases/pick_player_background_use_case.dart';
 import '../../domain/usecases/reset_player_background_use_case.dart';
 import 'player_background_state.dart';
 
-@injectable
 class PlayerBackgroundCubit extends HydratedCubit<PlayerBackgroundState> {
   PlayerBackgroundCubit(
     this._decodePersistedConfiguration,

@@ -1,5 +1,3 @@
-import 'package:injectable/injectable.dart';
-
 import '../../domain/entities/auth_result.dart';
 import '../../domain/entities/user_entity.dart';
 import '../../domain/gateways/apple_auth_gateway.dart';
@@ -8,7 +6,6 @@ import '../../domain/providers/auth_provider_interface.dart';
 import '../../domain/repositories/auth_repository.dart';
 import '../datasources/google_sign_in_prepare_data_source.dart';
 
-@LazySingleton(as: AuthRepository)
 class AuthRepositoryImpl implements AuthRepository {
   AuthRepositoryImpl(
     AuthProviderInterface authProvider,

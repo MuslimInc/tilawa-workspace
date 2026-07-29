@@ -1,10 +1,7 @@
-import 'package:injectable/injectable.dart';
-
 import '../../domain/entities/download_item.dart';
 import '../../utils/download_path_utils.dart';
 import '../datasources/downloads_local_datasource.dart';
 
-@LazySingleton()
 class DownloadPathResolver {
   DownloadPathResolver(this._localDataSource);
 

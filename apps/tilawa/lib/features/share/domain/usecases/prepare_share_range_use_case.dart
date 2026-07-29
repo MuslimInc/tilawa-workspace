@@ -1,9 +1,7 @@
-import 'package:injectable/injectable.dart';
 import '../utils/share_ayah_range_utils.dart';
 import '../utils/video_page_specs.dart';
 import '../entities/share_range_result.dart';
 
-@injectable
 class PrepareShareRangeUseCase {
   const PrepareShareRangeUseCase();
 

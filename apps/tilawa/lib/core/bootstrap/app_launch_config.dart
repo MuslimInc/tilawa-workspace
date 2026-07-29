@@ -33,12 +33,13 @@ import 'package:flutter/foundation.dart';
 /// Example: `--dart-define=TILAWA_LAUNCH_TEACHER_APPLICATION_FORM_URL=https://…`
 /// Example: `--dart-define=TILAWA_LAUNCH_AGORA_APP_ID=your_agora_app_id`
 /// Example: `--dart-define=TILAWA_LAUNCH_LIVEKIT_URL=wss://tilawa-7whzug8z.livekit.cloud`
+/// Example: `--dart-define=TILAWA_LAUNCH_LEARN_QURAN_STUDENT_FEATURE_ENABLED=true`
 /// Example: `--dart-define=TILAWA_LAUNCH_DEVICE_REGISTRY_WRITE_ENABLED=true`
 /// Example: `--dart-define=TILAWA_LAUNCH_MULTI_DEVICE_LOGIN_ENABLED=false`
 ///
-/// Quran Sessions product behavior is controlled by Admin Panel Firestore
-/// config, not launch config. Launch config only carries SDK credentials such
-/// as Agora App ID and LiveKit URL.
+/// Quran Sessions product behavior is primarily Admin Panel Firestore config.
+/// Launch config carries SDK credentials (Agora / LiveKit) plus temporary
+/// app-side kill switches such as [AppLaunchConfig.learnQuranStudentFeatureEnabled].
 /// Google Form for experienced Quran teacher/tutor applications (production default).
 const String kDefaultTeacherApplicationFormUrl =
     'https://docs.google.com/forms/d/e/1FAIpQLScjFOySgVJqDxaY0IgR9GYDEnemxOkPSbW2QQea7KrORvRQQA/viewform';
@@ -224,6 +225,10 @@ abstract final class _LaunchEnvironment {
     'TILAWA_LAUNCH_GENUI_ASSISTANT_ENABLED',
     defaultValue: false,
   );
+  static const bool learnQuranStudentFeatureEnabled = bool.fromEnvironment(
+    'TILAWA_LAUNCH_LEARN_QURAN_STUDENT_FEATURE_ENABLED',
+    defaultValue: false,
+  );
 }
 
 @immutable
@@ -271,6 +276,7 @@ class AppLaunchConfig extends Equatable {
     this.agoraAppId = '',
     this.livekitServerUrl = '',
     this.genUiAssistantEnabled = false,
+    this.learnQuranStudentFeatureEnabled = false,
   });
 
   factory AppLaunchConfig.fromEnvironment() {
@@ -325,6 +331,8 @@ class AppLaunchConfig extends Equatable {
       agoraAppId: _LaunchEnvironment.agoraAppId,
       livekitServerUrl: _LaunchEnvironment.livekitServerUrl,
       genUiAssistantEnabled: _LaunchEnvironment.genUiAssistantEnabled,
+      learnQuranStudentFeatureEnabled:
+          _LaunchEnvironment.learnQuranStudentFeatureEnabled,
     );
   }
 
@@ -423,6 +431,13 @@ class AppLaunchConfig extends Equatable {
   /// Example: `--dart-define=TILAWA_LAUNCH_GENUI_ASSISTANT_ENABLED=true`
   final bool genUiAssistantEnabled;
 
+  /// Temporary app-side kill switch for Learn Quran student experience.
+  /// Defaults to **false** — Admin `studentEntryEnabled` alone cannot turn
+  /// student entry on until this is re-enabled.
+  ///
+  /// Example: `--dart-define=TILAWA_LAUNCH_LEARN_QURAN_STUDENT_FEATURE_ENABLED=true`
+  final bool learnQuranStudentFeatureEnabled;
+
   @override
   List<Object?> get props => [
     resetLaunchState,
@@ -467,5 +482,6 @@ class AppLaunchConfig extends Equatable {
     agoraAppId,
     livekitServerUrl,
     genUiAssistantEnabled,
+    learnQuranStudentFeatureEnabled,
   ];
 }

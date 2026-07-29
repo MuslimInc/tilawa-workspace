@@ -1,5 +1,4 @@
 import 'package:dartz_plus/dartz_plus.dart';
-import 'package:injectable/injectable.dart';
 import 'package:tilawa_core/core.dart';
 
 import '../../../../core/services/notification_permission_service.dart';
@@ -36,7 +35,6 @@ const Set<String> _autostartOems = <String>{
 /// the BLoC and UI can reason about. All checks are fail-soft: a failure in
 /// one defaults to the safe value so the UI surfaces the degraded state
 /// rather than crashing.
-@injectable
 class CheckPrayerAlarmCapabilityUseCase {
   const CheckPrayerAlarmCapabilityUseCase(
     this._service,

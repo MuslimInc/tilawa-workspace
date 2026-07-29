@@ -164,7 +164,7 @@ void main() {
   ) async {
     await resetScopeGetIt();
     getIt.registerSingleton<AppLaunchConfig>(
-      const AppLaunchConfig(),
+      const AppLaunchConfig(learnQuranStudentFeatureEnabled: true),
     );
     getIt.registerSingleton<QuranSessionsPlatformConfigStore>(
       QuranSessionsPlatformConfigStore()..setConfig(
@@ -194,7 +194,7 @@ void main() {
   ) async {
     await resetScopeGetIt();
     getIt.registerSingleton<AppLaunchConfig>(
-      const AppLaunchConfig(),
+      const AppLaunchConfig(learnQuranStudentFeatureEnabled: true),
     );
     getIt.registerSingleton<QuranSessionsPlatformConfigStore>(
       QuranSessionsPlatformConfigStore()..setConfig(
@@ -224,7 +224,7 @@ void main() {
   ) async {
     await resetScopeGetIt();
     getIt.registerSingleton<AppLaunchConfig>(
-      const AppLaunchConfig(),
+      const AppLaunchConfig(learnQuranStudentFeatureEnabled: true),
     );
     getIt.registerSingleton<QuranSessionsPlatformConfigStore>(
       QuranSessionsPlatformConfigStore()..setConfig(
@@ -268,7 +268,7 @@ void main() {
     testWidgets('does not push routes when feature disabled', (tester) async {
       await resetScopeGetIt();
       getIt.registerSingleton<AppLaunchConfig>(
-        const AppLaunchConfig(),
+        const AppLaunchConfig(learnQuranStudentFeatureEnabled: true),
       );
       getIt.registerSingleton<QuranSessionsPlatformConfigStore>(
         QuranSessionsPlatformConfigStore()..setConfig(
@@ -307,7 +307,7 @@ void main() {
     testWidgets('routes logged-out users to login', (tester) async {
       await resetScopeGetIt();
       getIt.registerSingleton<AppLaunchConfig>(
-        const AppLaunchConfig(),
+        const AppLaunchConfig(learnQuranStudentFeatureEnabled: true),
       );
       getIt.registerSingleton<QuranSessionsPlatformConfigStore>(
         QuranSessionsPlatformConfigStore()..setConfig(
@@ -360,7 +360,7 @@ void main() {
     ) async {
       await resetScopeGetIt();
       getIt.registerSingleton<AppLaunchConfig>(
-        const AppLaunchConfig(),
+        const AppLaunchConfig(learnQuranStudentFeatureEnabled: true),
       );
       getIt.registerSingleton<QuranSessionsPlatformConfigStore>(
         QuranSessionsPlatformConfigStore()..setConfig(
@@ -404,7 +404,7 @@ void main() {
     ) async {
       await resetScopeGetIt();
       getIt.registerSingleton<AppLaunchConfig>(
-        const AppLaunchConfig(),
+        const AppLaunchConfig(learnQuranStudentFeatureEnabled: true),
       );
       getIt.registerSingleton<QuranSessionsPlatformConfigStore>(
         QuranSessionsPlatformConfigStore()..setConfig(
@@ -449,7 +449,7 @@ void main() {
     ) async {
       await resetScopeGetIt();
       getIt.registerSingleton<AppLaunchConfig>(
-        const AppLaunchConfig(),
+        const AppLaunchConfig(learnQuranStudentFeatureEnabled: true),
       );
       getIt.registerSingleton<QuranSessionsPlatformConfigStore>(
         QuranSessionsPlatformConfigStore()..setConfig(
@@ -498,7 +498,7 @@ void main() {
     ) async {
       await resetScopeGetIt();
       getIt.registerSingleton<AppLaunchConfig>(
-        const AppLaunchConfig(),
+        const AppLaunchConfig(learnQuranStudentFeatureEnabled: true),
       );
       getIt.registerSingleton<QuranSessionsPlatformConfigStore>(
         QuranSessionsPlatformConfigStore()..setConfig(

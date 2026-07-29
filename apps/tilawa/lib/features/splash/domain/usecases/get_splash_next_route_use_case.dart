@@ -1,4 +1,3 @@
-import 'package:injectable/injectable.dart';
 import 'package:tilawa/core/logging/app_logger.dart';
 
 import '../../../auth/domain/entities/user_entity.dart';
@@ -16,7 +15,6 @@ class SplashRouteResult {
   final Map<String, dynamic>? notificationData;
 }
 
-@injectable
 class GetSplashNextRouteUseCase {
   GetSplashNextRouteUseCase(
     this._getCurrentUserUseCase,

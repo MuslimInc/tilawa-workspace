@@ -5,7 +5,6 @@ import 'package:dartz_plus/dartz_plus.dart';
 import 'package:equatable/equatable.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:injectable/injectable.dart';
 import 'package:qibla/qibla.dart';
 import 'package:tilawa_core/errors/failures.dart';
 import 'package:tilawa_core/usecases/usecase.dart';
@@ -28,7 +27,6 @@ void _qiblaCompassDebug(void Function() emitLog) {
   }());
 }
 
-@injectable
 class QiblaBloc extends Bloc<QiblaEvent, QiblaState> {
   QiblaBloc(
     this._getQiblaDirection,

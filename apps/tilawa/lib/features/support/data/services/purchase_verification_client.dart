@@ -1,5 +1,4 @@
 import 'package:cloud_functions/cloud_functions.dart';
-import 'package:injectable/injectable.dart';
 import 'package:tilawa/core/firebase/app_check_failure.dart';
 import 'package:tilawa_core/errors/failures.dart';
 
@@ -23,7 +22,6 @@ class VerifiedPurchase {
   final String productId;
 }
 
-@LazySingleton(as: PurchaseVerificationClient)
 class FirebasePurchaseVerificationClient implements PurchaseVerificationClient {
   FirebasePurchaseVerificationClient(this._functions);
 

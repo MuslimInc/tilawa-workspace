@@ -1,10 +1,8 @@
 import 'package:audio_service/audio_service.dart';
-import 'package:injectable/injectable.dart';
 import 'package:tilawa_core/entities/audio.dart';
 import 'package:tilawa_core/entities/audio_extras_keys.dart';
 
 /// Maps domain [AudioEntity] values to [MediaItem] for [audio_service].
-@lazySingleton
 class AudioEntityMediaItemMapper {
   const AudioEntityMediaItemMapper();
 

@@ -1,9 +1,6 @@
-import 'package:injectable/injectable.dart';
-
 import '../entities/download_item.dart';
 import '../repositories/single_download_repository.dart';
 
-@injectable
 class ObserveReciterDownloadsUseCase {
   ObserveReciterDownloadsUseCase(this._repository);
 

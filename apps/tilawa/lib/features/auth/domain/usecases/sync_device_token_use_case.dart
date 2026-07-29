@@ -1,5 +1,4 @@
 import 'package:dartz_plus/dartz_plus.dart';
-import 'package:injectable/injectable.dart';
 import 'package:tilawa_core/errors/failures.dart';
 
 import '../../device_registry_feature_flags.dart';
@@ -7,7 +6,6 @@ import '../entities/auth_error_key.dart';
 import '../services/session_revoked_notifier.dart';
 import 'register_active_device_use_case.dart';
 
-@injectable
 class SyncDeviceTokenUseCase {
   SyncDeviceTokenUseCase(
     this._registerActiveDeviceUseCase,

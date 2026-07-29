@@ -1,7 +1,6 @@
 import 'dart:async';
 import 'dart:developer' as developer;
 
-import 'package:injectable/injectable.dart';
 import 'package:tilawa_core/errors/failures.dart';
 
 import '../entities/app_review_engagement.dart';
@@ -16,7 +15,6 @@ import 'app_review_flow_guard.dart';
 ///
 /// Provider-agnostic: delegates the actual dialog to [RequestAppReviewUseCase].
 /// All gating is local (SharedPreferences) for MVP.
-@lazySingleton
 class AppReviewTriggerManager {
   AppReviewTriggerManager(
     this._engagementRepository,

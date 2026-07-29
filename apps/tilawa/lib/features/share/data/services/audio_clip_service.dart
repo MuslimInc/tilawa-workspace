@@ -2,7 +2,6 @@ import 'dart:async';
 import 'dart:io';
 
 import 'package:dio/dio.dart';
-import 'package:injectable/injectable.dart';
 import 'package:path/path.dart' as p;
 import 'package:tilawa_core/constants/app_strings.dart';
 import 'package:tilawa_core/logger.dart';
@@ -17,7 +16,6 @@ import 'ayah_timing_service.dart';
 import 'share_file_manager.dart';
 
 /// Downloads verse-level audio files and concatenates them into a single MP3 clip.
-@lazySingleton
 class AudioClipService {
   AudioClipService(
     this._dio,

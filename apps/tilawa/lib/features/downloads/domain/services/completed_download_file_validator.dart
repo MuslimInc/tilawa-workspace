@@ -1,12 +1,9 @@
 import 'dart:math' as math;
 
-import 'package:injectable/injectable.dart';
-
 import '../entities/download_item.dart';
 import '../repositories/downloads_repository.dart';
 
 /// Validates on-disk files for completed downloads in bounded parallel batches.
-@injectable
 class CompletedDownloadFileValidator {
   const CompletedDownloadFileValidator(this._repository);
 

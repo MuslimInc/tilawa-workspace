@@ -3,7 +3,6 @@ import 'dart:io';
 import 'package:equatable/equatable.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:image_picker/image_picker.dart';
-import 'package:injectable/injectable.dart';
 import 'package:meta/meta.dart';
 import 'package:quran_sessions/quran_sessions.dart';
 import 'package:tilawa/core/di/injection.dart';
@@ -96,7 +95,6 @@ class EditProfileState extends Equatable {
   ];
 }
 
-@injectable
 class EditProfileCubit extends Cubit<EditProfileState> {
   EditProfileCubit(
     this._userRepository,

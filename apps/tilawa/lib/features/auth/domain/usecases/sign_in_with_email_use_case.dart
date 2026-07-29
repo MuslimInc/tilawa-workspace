@@ -1,6 +1,5 @@
 import 'dart:async';
 
-import 'package:injectable/injectable.dart';
 import 'package:tilawa/core/logging/app_logger.dart';
 import 'package:tilawa_core/errors/failures.dart';
 
@@ -10,7 +9,6 @@ import '../entities/user_entity.dart';
 import '../repositories/auth_repository.dart';
 import '../repositories/user_repository.dart';
 
-@injectable
 class SignInWithEmailUseCase {
   SignInWithEmailUseCase(
     this._authRepository,

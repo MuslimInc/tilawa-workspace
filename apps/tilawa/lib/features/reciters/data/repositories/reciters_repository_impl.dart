@@ -1,7 +1,6 @@
 import 'dart:async';
 
 import 'package:dartz_plus/dartz_plus.dart';
-import 'package:injectable/injectable.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 import 'package:tilawa_core/config/language_config.dart';
@@ -16,7 +15,6 @@ import '../datasources/reciters_local_datasource.dart';
 import '../datasources/reciters_remote_datasource.dart';
 import '../models/reciter_model.dart';
 
-@LazySingleton(as: RecitersRepository)
 class RecitersRepositoryImpl implements RecitersRepository {
   RecitersRepositoryImpl(
     this._remoteDataSource,

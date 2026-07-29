@@ -1,5 +1,4 @@
 import 'package:dartz_plus/dartz_plus.dart';
-import 'package:injectable/injectable.dart';
 import 'package:tilawa/core/services/device_token_service.dart';
 import 'package:tilawa_core/entities/app_info.dart';
 import 'package:tilawa_core/errors/failures.dart';
@@ -12,7 +11,6 @@ import '../repositories/active_device_repository.dart';
 import '../services/device_info_service.dart';
 import '../services/token_sync_cache.dart';
 
-@injectable
 class RegisterActiveDeviceUseCase {
   RegisterActiveDeviceUseCase(
     this._repository,

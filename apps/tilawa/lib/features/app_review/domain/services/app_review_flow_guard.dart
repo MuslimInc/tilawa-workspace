@@ -1,5 +1,3 @@
-import 'package:injectable/injectable.dart';
-
 import '../entities/app_review_blocked_flow.dart';
 
 /// Tracks worship-focused surfaces where review prompts must never appear.
@@ -7,7 +5,6 @@ import '../entities/app_review_blocked_flow.dart';
 /// Tab selection and nested scopes (e.g. Athkar tab + details) use separate
 /// ref counts so one [exit] does not clear blocking while the user remains
 /// in the same sacred flow.
-@lazySingleton
 class AppReviewFlowGuard {
   final Map<AppReviewBlockedFlow, int> _scopeRefCounts =
       <AppReviewBlockedFlow, int>{};

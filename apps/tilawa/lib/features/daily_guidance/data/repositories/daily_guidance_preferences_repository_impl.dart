@@ -1,13 +1,11 @@
 import 'dart:convert';
 import 'package:flutter/material.dart';
-import 'package:injectable/injectable.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 import '../../domain/entities/daily_guidance_enums.dart';
 import '../../domain/entities/daily_guidance_preferences.dart';
 import '../../domain/repositories/daily_guidance_preferences_repository.dart';
 
-@LazySingleton(as: DailyGuidancePreferencesRepository)
 class DailyGuidancePreferencesRepositoryImpl
     implements DailyGuidancePreferencesRepository {
   final SharedPreferencesAsync _prefs;

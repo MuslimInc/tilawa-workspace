@@ -1,8 +1,6 @@
-import 'package:injectable/injectable.dart';
 import '../../../quran_reader/domain/entities/entities.dart';
 import '../../../quran_reader/domain/repositories/quran_reader_repository.dart';
 
-@injectable
 class GetShareAyahsUseCase {
   const GetShareAyahsUseCase(this._repository);
 

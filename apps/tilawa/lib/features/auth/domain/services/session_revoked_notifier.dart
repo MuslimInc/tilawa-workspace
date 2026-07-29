@@ -1,12 +1,9 @@
 import 'dart:async';
 
-import 'package:injectable/injectable.dart';
-
 /// Broadcasts `session_revoked` FCM events (one shot per push).
 ///
 /// [SessionValidityCubit] subscribes at app root so stale devices sign out
 /// without a Firestore listener.
-@lazySingleton
 class SessionRevokedNotifier {
   final StreamController<void> _controller = StreamController<void>.broadcast();
 

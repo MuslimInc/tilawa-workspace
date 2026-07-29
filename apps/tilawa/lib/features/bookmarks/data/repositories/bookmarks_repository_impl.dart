@@ -1,10 +1,7 @@
-import 'package:injectable/injectable.dart';
-
 import '../../domain/entities/bookmark_entity.dart';
 import '../../domain/repositories/bookmarks_repository.dart';
 import '../datasources/bookmarks_local_datasource.dart';
 
-@LazySingleton(as: BookmarksRepository)
 class BookmarksRepositoryImpl implements BookmarksRepository {
   BookmarksRepositoryImpl(this._localDataSource);
 

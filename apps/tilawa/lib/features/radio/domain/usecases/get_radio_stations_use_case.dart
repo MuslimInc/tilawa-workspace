@@ -1,6 +1,5 @@
 import 'package:dartz_plus/dartz_plus.dart';
 import 'package:equatable/equatable.dart';
-import 'package:injectable/injectable.dart';
 import 'package:tilawa_core/errors/failures.dart';
 import 'package:tilawa_core/usecases/usecase.dart';
 
@@ -16,7 +15,6 @@ class GetRadioStationsParams extends Equatable {
   List<Object?> get props => [language];
 }
 
-@lazySingleton
 class GetRadioStationsUseCase
     extends UseCase<List<RadioStation>, GetRadioStationsParams> {
   GetRadioStationsUseCase(this._repository);

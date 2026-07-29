@@ -1,5 +1,4 @@
 import 'package:dartz_plus/dartz_plus.dart';
-import 'package:injectable/injectable.dart';
 import 'package:tilawa_core/core.dart';
 
 import '../services/prayer_adhan_notification_service_interface.dart';
@@ -8,7 +7,6 @@ import '../services/prayer_adhan_notification_service_interface.dart';
 ///
 /// No-op on platforms where the permission does not exist; failures are
 /// surfaced as a [Failure] so the UI can render an explanation.
-@injectable
 class RequestExactAlarmPermissionUseCase {
   const RequestExactAlarmPermissionUseCase(this._service);
 

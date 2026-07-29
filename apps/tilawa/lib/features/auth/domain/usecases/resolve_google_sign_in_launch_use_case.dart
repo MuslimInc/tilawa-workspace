@@ -1,5 +1,3 @@
-import 'package:injectable/injectable.dart';
-
 import '../entities/google_sign_in_launch_readiness.dart';
 import '../gateways/google_sign_in_launch_gateway.dart';
 import '../services/google_sign_in_launch_readiness_store.dart';
@@ -11,7 +9,6 @@ enum GoogleSignInLaunchTrigger {
 }
 
 /// Resolves launch readiness using the prewarm cache and OEM UI-settle policy.
-@injectable
 class ResolveGoogleSignInLaunchUseCase {
   ResolveGoogleSignInLaunchUseCase(this._readinessStore);
 

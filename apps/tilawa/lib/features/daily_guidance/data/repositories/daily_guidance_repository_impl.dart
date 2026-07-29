@@ -1,5 +1,3 @@
-import 'package:injectable/injectable.dart';
-
 import '../../../../core/logging/app_logger.dart';
 import '../../domain/entities/daily_guidance_enums.dart';
 import '../../domain/entities/daily_guidance_item.dart';
@@ -10,7 +8,6 @@ import '../datasources/daily_guidance_seed_data_source.dart';
 import '../mappers/daily_guidance_content_validator.dart';
 import '../models/daily_guidance_item_model.dart';
 
-@LazySingleton(as: DailyGuidanceRepository)
 class DailyGuidanceRepositoryImpl implements DailyGuidanceRepository {
   final DailyGuidanceLocalDataSource _localDataSource;
   final DailyGuidanceSeedDataSource _seedDataSource;

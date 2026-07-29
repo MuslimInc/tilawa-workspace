@@ -1,11 +1,8 @@
 import 'package:dartz_plus/dartz_plus.dart';
-import 'package:injectable/injectable.dart';
-
 import 'package:tilawa_core/errors/failures.dart';
 import '../entities/history_entity.dart';
 import '../repositories/history_repository.dart';
 
-@lazySingleton
 class SearchHistoryUseCase {
   const SearchHistoryUseCase(this._repository);
 

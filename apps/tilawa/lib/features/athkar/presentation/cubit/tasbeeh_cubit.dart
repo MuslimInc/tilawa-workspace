@@ -1,5 +1,4 @@
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:injectable/injectable.dart';
 import 'package:tilawa_core/errors/failures.dart';
 import 'package:tilawa_core/usecases/usecase.dart';
 
@@ -21,7 +20,6 @@ import '../../domain/usecases/set_tasbeeh_reminder_use_case.dart';
 import '../../domain/usecases/set_tasbeeh_target_count_use_case.dart';
 import 'tasbeeh_state.dart';
 
-@injectable
 class TasbeehCubit extends Cubit<TasbeehState> {
   TasbeehCubit(
     this._getSavedTasbeeh,

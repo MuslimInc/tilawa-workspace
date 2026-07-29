@@ -1,7 +1,6 @@
 import 'package:equatable/equatable.dart';
 // ignore_for_file: avoid_public_fields, prefer_void_public_methods_on_cubit
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:injectable/injectable.dart';
 import 'package:tilawa/features/auth/domain/entities/registered_device.dart';
 import 'package:tilawa/features/auth/domain/repositories/device_registry_repository.dart';
 
@@ -62,7 +61,6 @@ class ManageDevicesState extends Equatable {
 /// Drives the Manage Devices screen: loads the registry, signs out a single
 /// device, or signs out all other devices. Reads are one-shot; every write is
 /// followed by a refresh so the list reflects server truth.
-@injectable
 class ManageDevicesCubit extends Cubit<ManageDevicesState> {
   ManageDevicesCubit(this._repository) : super(const ManageDevicesState());
 

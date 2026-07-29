@@ -1,6 +1,5 @@
 import 'dart:convert';
 
-import 'package:injectable/injectable.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 import '../../domain/entities/reel.dart';
@@ -21,7 +20,6 @@ abstract class ReelsLocalDataSource {
   Future<void> setReaction(int reelId, ReelReaction? reaction);
 }
 
-@LazySingleton(as: ReelsLocalDataSource)
 class ReelsLocalDataSourceImpl implements ReelsLocalDataSource {
   ReelsLocalDataSourceImpl(this._prefs);
 

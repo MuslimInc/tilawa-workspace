@@ -1,13 +1,11 @@
 import 'package:firebase_analytics/firebase_analytics.dart';
 import 'package:flutter/foundation.dart';
-import 'package:injectable/injectable.dart';
 import 'package:tilawa_core/constants/analytics_constants.dart';
 import 'package:tilawa_core/services/analytics_service.dart';
 
 import 'package:tilawa/core/logging/app_logger.dart';
 
 /// Firebase Analytics implementation
-@Singleton(as: AnalyticsService)
 class FirebaseAnalyticsService implements AnalyticsService {
   FirebaseAnalyticsService(this._analytics) {
     if (kDebugMode) {

@@ -1,6 +1,5 @@
 // ignore_for_file: avoid_public_fields, prefer_void_public_methods_on_cubit
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:injectable/injectable.dart';
 import 'package:quran_sessions/quran_sessions.dart';
 import 'package:tilawa/core/di/injection.dart';
 import 'package:tilawa/features/quran_sessions/presentation/quran_sessions_user.dart';
@@ -10,7 +9,6 @@ import '../config/home_learning_config.dart';
 import '../services/home_learning_preference_store.dart';
 import 'home_learning_state.dart';
 
-@injectable
 class HomeLearningCubit extends Cubit<HomeLearningState> {
   HomeLearningCubit({
     required this._getStudentSessions,

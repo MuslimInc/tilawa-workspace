@@ -1,12 +1,9 @@
 import 'dart:convert';
 
-import 'package:injectable/injectable.dart';
-
 import '../../domain/entities/playlist.dart';
 import '../../domain/repositories/playlists_repository.dart';
 import '../datasources/playlists_local_datasource.dart';
 
-@LazySingleton(as: PlaylistsRepository)
 class PlaylistsRepositoryImpl implements PlaylistsRepository {
   PlaylistsRepositoryImpl(this._localDataSource);
   final PlaylistsLocalDataSource _localDataSource;

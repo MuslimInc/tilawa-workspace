@@ -2,14 +2,12 @@ import 'dart:ui' as ui;
 
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
-import 'package:injectable/injectable.dart';
 import 'package:tilawa_core/logger.dart';
 import 'package:tilawa_ui_kit/tilawa_ui_kit.dart';
 
 import 'share_file_manager.dart';
 
 /// Captures the current Quran page and composites a branded PNG image.
-@lazySingleton
 class ScreenshotService {
   ScreenshotService(this._fileManager);
 

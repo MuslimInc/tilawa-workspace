@@ -1,8 +1,6 @@
-import 'package:injectable/injectable.dart';
 import '../entities/subscription_plan.dart';
 import '../repositories/premium_repository.dart';
 
-@Singleton()
 class GetAvailablePlansUseCase {
   const GetAvailablePlansUseCase(this._premiumRepository);
 

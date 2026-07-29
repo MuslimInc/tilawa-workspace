@@ -2,12 +2,10 @@ import 'dart:io';
 
 import 'package:device_info_plus/device_info_plus.dart';
 import 'package:flutter/foundation.dart';
-import 'package:injectable/injectable.dart';
 import 'package:tilawa/core/logging/app_logger.dart';
 import 'package:tilawa/features/auth/core/android_credential_manager_oem_policy.dart';
 
 /// Resolves whether this Android build must avoid automatic sign-in flows.
-@lazySingleton
 class AndroidSignInPlatformPolicy {
   AndroidSignInPlatformPolicy({DeviceInfoPlugin? deviceInfoPlugin})
     : _deviceInfoPlugin = deviceInfoPlugin ?? DeviceInfoPlugin(),

@@ -2,7 +2,6 @@ import 'dart:async';
 import 'dart:io';
 
 import 'package:flutter/foundation.dart';
-import 'package:injectable/injectable.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:tilawa_core/services/interfaces/notification_dispatcher_interface.dart';
 
@@ -16,12 +15,11 @@ import '../navigation/notification_launch_dedup.dart';
 typedef NotificationNavigator = void Function(String location, {Object? extra});
 
 // ---------------------------------------------------------------------------
-// Minimal injectable wrappers for platform-level dependencies
+// Minimal wrappers for platform-level dependencies
 // ---------------------------------------------------------------------------
 
 /// Provides the current OS process ID.
 /// Wraps [dart:io.pid] to allow constructor injection and unit testing.
-@lazySingleton
 class ProcessIdProvider {
   const ProcessIdProvider();
 
@@ -31,7 +29,6 @@ class ProcessIdProvider {
 /// Wraps [initializeNotificationHandlers] for constructor injection.
 /// Calling this registers all notification handlers (download, athkar, prayer)
 /// and is idempotent — [AppStartupTasks] memoises the underlying future.
-@lazySingleton
 class NotificationHandlersInitializer {
   const NotificationHandlersInitializer();
 
@@ -74,7 +71,6 @@ abstract interface class NotificationStartupService {
 // Implementation
 // ---------------------------------------------------------------------------
 
-@LazySingleton(as: NotificationStartupService)
 class NotificationStartupServiceImpl implements NotificationStartupService {
   NotificationStartupServiceImpl(
     this._dispatcher,
@@ -82,7 +78,7 @@ class NotificationStartupServiceImpl implements NotificationStartupService {
     this._pidProvider,
     this._handlersInitializer,
     this._adhanPlayer, {
-    @visibleForTesting @ignoreParam NotificationNavigator? navigator,
+    @visibleForTesting NotificationNavigator? navigator,
   }) : _navigator = navigator ?? AppRouter.navigateToNotification;
 
   final INotificationDispatcher _dispatcher;

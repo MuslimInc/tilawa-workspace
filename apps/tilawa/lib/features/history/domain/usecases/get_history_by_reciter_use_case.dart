@@ -1,12 +1,10 @@
 import 'package:dartz_plus/dartz_plus.dart';
-import 'package:injectable/injectable.dart';
 import 'package:tilawa_core/errors/failures.dart';
 import 'package:tilawa_core/usecases/usecase.dart';
 
 import '../entities/history_entity.dart';
 import '../repositories/history_repository.dart';
 
-@lazySingleton
 class GetHistoryByReciterUseCase
     implements UseCase<List<HistoryEntity>, String> {
   GetHistoryByReciterUseCase(this._repository);

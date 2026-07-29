@@ -1,12 +1,9 @@
 import 'package:dartz_plus/dartz_plus.dart';
-import 'package:injectable/injectable.dart';
-
 import 'package:tilawa_core/errors/failures.dart';
 import 'package:tilawa_core/usecases/usecase.dart';
 import '../entities/download_item.dart';
 import '../repositories/downloads_repository.dart';
 
-@lazySingleton
 class ValidateDownloadedFileUseCase implements UseCase<bool, DownloadItem> {
   ValidateDownloadedFileUseCase(this._repository);
   final DownloadsRepository _repository;

@@ -1,6 +1,5 @@
 import 'package:cloud_functions/cloud_functions.dart';
 import 'package:dartz_plus/dartz_plus.dart';
-import 'package:injectable/injectable.dart';
 import 'package:tilawa/core/logging/app_logger.dart';
 import 'package:tilawa/core/network/network_error_message.dart';
 import 'package:tilawa_core/errors/failures.dart';
@@ -9,7 +8,6 @@ import '../../domain/entities/auth_error_key.dart';
 import '../../domain/repositories/account_deletion_repository.dart';
 import '../datasources/account_deletion_remote_data_source.dart';
 
-@LazySingleton(as: AccountDeletionRepository)
 class AccountDeletionRepositoryImpl implements AccountDeletionRepository {
   AccountDeletionRepositoryImpl(this._remoteDataSource);
 

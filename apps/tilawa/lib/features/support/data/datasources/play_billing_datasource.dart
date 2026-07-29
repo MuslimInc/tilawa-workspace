@@ -2,7 +2,6 @@ import 'dart:async';
 import 'dart:developer' as developer;
 
 import 'package:in_app_purchase/in_app_purchase.dart';
-import 'package:injectable/injectable.dart';
 import 'package:tilawa_core/errors/failures.dart';
 
 import '../../domain/constants/support_product_ids.dart';
@@ -55,7 +54,6 @@ abstract class PlayBillingDataSource {
   void dispose();
 }
 
-@LazySingleton(as: PlayBillingDataSource)
 class PlayBillingDataSourceImpl implements PlayBillingDataSource {
   PlayBillingDataSourceImpl(this._inAppPurchase) {
     // Subscribe at construction so purchases delivered before the support

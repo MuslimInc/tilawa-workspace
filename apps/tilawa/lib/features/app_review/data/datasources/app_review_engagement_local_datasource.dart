@@ -1,4 +1,3 @@
-import 'package:injectable/injectable.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 import '../../domain/entities/app_review_engagement.dart';
@@ -10,7 +9,6 @@ abstract class AppReviewEngagementLocalDataSource {
   Future<void> write(AppReviewEngagement engagement);
 }
 
-@LazySingleton(as: AppReviewEngagementLocalDataSource)
 class AppReviewEngagementLocalDataSourceImpl
     implements AppReviewEngagementLocalDataSource {
   AppReviewEngagementLocalDataSourceImpl(this._prefs);

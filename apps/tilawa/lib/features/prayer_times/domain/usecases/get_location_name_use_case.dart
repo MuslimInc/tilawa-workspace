@@ -1,8 +1,5 @@
-import 'package:injectable/injectable.dart';
-
 import '../repositories/prayer_times_repository.dart';
 
-@injectable
 class GetLocationNameUseCase {
   GetLocationNameUseCase(this._repository);
 

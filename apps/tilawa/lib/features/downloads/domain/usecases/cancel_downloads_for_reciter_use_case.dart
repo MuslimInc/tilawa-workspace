@@ -1,5 +1,4 @@
 import 'package:dartz_plus/dartz_plus.dart';
-import 'package:injectable/injectable.dart';
 import 'package:tilawa_core/entities/reciter_entity.dart';
 import 'package:tilawa_core/errors/failures.dart';
 import 'package:tilawa_core/usecases/usecase.dart';
@@ -10,7 +9,6 @@ import '../repositories/downloads_repository.dart';
 import '../services/batch_download_service_interface.dart';
 import '../services/download_queue_service_interface.dart';
 
-@injectable
 class CancelDownloadsForReciterUseCase implements UseCase<void, String> {
   CancelDownloadsForReciterUseCase(
     this._repository,

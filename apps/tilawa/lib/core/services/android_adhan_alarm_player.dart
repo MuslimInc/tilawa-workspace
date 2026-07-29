@@ -4,8 +4,6 @@ import 'dart:io';
 
 import 'package:flutter/foundation.dart';
 import 'package:flutter/services.dart';
-import 'package:injectable/injectable.dart';
-
 import '../../features/prayer_times/domain/services/adhan_alarm_player_interface.dart';
 import '../logging/app_logger.dart';
 
@@ -19,10 +17,9 @@ import '../logging/app_logger.dart';
 /// Registered both as itself (for callers that need the boot-receiver and
 /// battery-optimisation extension methods) and as [IAdhanAlarmPlayer] for
 /// the domain `PrayerAdhanNotificationService`.
-@lazySingleton
 class AndroidAdhanAlarmPlayer implements IAdhanAlarmPlayer {
   AndroidAdhanAlarmPlayer({
-    @visibleForTesting @ignoreParam this._isSupportedOverride,
+    @visibleForTesting this._isSupportedOverride,
   }) {
     _channel.setMethodCallHandler((call) async {
       if (call.method == 'onNotificationTapped') {

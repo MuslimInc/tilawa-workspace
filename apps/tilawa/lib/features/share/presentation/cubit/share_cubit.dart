@@ -3,7 +3,6 @@ import 'dart:developer' as developer;
 import 'dart:ui' show Color;
 
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:injectable/injectable.dart';
 import 'package:quran_qcf/quran_qcf.dart';
 import 'package:tilawa/features/share/domain/entities/audio_clip_config.dart';
 import 'package:tilawa/features/share/domain/entities/share_cancel_token.dart';
@@ -25,7 +24,6 @@ import '../utils/share_footer_colors_mapper.dart';
 import '../utils/share_reciter_options.dart';
 import 'share_state.dart';
 
-@injectable
 class ShareCubit extends Cubit<ShareState> {
   ShareCubit(
     this._captureScreenshot,

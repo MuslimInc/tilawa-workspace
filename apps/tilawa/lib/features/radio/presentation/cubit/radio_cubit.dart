@@ -3,7 +3,6 @@ import 'dart:async';
 import 'package:connectivity_plus/connectivity_plus.dart';
 import 'package:dartz_plus/dartz_plus.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:injectable/injectable.dart';
 import 'package:tilawa_core/constants/analytics_constants.dart';
 import 'package:tilawa_core/entities/audio.dart';
 import 'package:tilawa_core/errors/failures.dart';
@@ -23,7 +22,6 @@ import '../../domain/usecases/toggle_radio_favorite_use_case.dart';
 import 'radio_state.dart';
 
 /// Presentation state machine for Islamic Radio catalog and preferences.
-@injectable
 class RadioCubit extends Cubit<RadioState> {
   RadioCubit(
     this._getStations,

@@ -1,6 +1,5 @@
 import 'dart:convert';
 
-import 'package:injectable/injectable.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 import '../../domain/entities/entities.dart';
@@ -17,7 +16,6 @@ abstract class ReaderSettingsDataSource {
   getLastReadPosition();
 }
 
-@LazySingleton(as: ReaderSettingsDataSource)
 class ReaderSettingsDataSourceImpl implements ReaderSettingsDataSource {
   ReaderSettingsDataSourceImpl(this._prefs);
 

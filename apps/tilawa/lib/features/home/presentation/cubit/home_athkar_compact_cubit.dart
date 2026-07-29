@@ -1,5 +1,4 @@
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:injectable/injectable.dart';
 import 'package:tilawa/features/athkar/data/datasources/athkar_daily_progress_local_datasource.dart';
 import 'package:tilawa/features/athkar/domain/athkar_context_recommendation.dart';
 import 'package:tilawa/features/athkar/domain/entities/athkar_category.dart';
@@ -13,7 +12,6 @@ import 'home_athkar_compact_state.dart';
 /// Canonical daily athkar categories shown on Home.
 const List<int> homeAthkarCompactCategoryIds = AthkarContextCategoryIds.daily;
 
-@injectable
 class HomeAthkarCompactCubit extends Cubit<HomeAthkarCompactState> {
   HomeAthkarCompactCubit(
     this._getCategories,

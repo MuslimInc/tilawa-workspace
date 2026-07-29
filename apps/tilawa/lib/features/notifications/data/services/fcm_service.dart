@@ -1,13 +1,11 @@
 import 'dart:async';
 
-import 'package:injectable/injectable.dart';
 import 'package:tilawa/core/services/device_token_service.dart';
 
 import '../../../auth/domain/repositories/auth_repository.dart';
 import '../../../auth/domain/usecases/sync_device_token_use_case.dart';
 
 /// Syncs FCM device tokens when auth state or the platform token changes.
-@lazySingleton
 class FCMService {
   FCMService(
     this._authRepository,

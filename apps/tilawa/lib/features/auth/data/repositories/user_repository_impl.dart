@@ -1,12 +1,9 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
-import 'package:injectable/injectable.dart';
-
 import '../../domain/entities/email_registration_draft.dart';
 import '../../domain/entities/user_entity.dart';
 import '../../domain/repositories/user_repository.dart';
 
-@LazySingleton(as: UserRepository)
 class UserRepositoryImpl implements UserRepository {
   UserRepositoryImpl(this._firestore, this._firebaseAuth);
 

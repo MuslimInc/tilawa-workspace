@@ -1,11 +1,8 @@
 import 'package:dartz_plus/dartz_plus.dart';
-import 'package:injectable/injectable.dart';
-
 import 'package:tilawa_core/core.dart';
 import '../entities/entities.dart';
 import '../repositories/quran_reader_repository.dart';
 
-@injectable
 class LoadReaderSettingsUseCase {
   LoadReaderSettingsUseCase(this._repository);
 

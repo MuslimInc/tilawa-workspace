@@ -4,7 +4,6 @@ import 'dart:developer' as developer;
 import 'package:dartz_plus/dartz_plus.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:freezed_annotation/freezed_annotation.dart';
-import 'package:injectable/injectable.dart';
 import 'package:tilawa_core/entities/audio.dart';
 import 'package:tilawa_core/entities/audio_extras_keys.dart';
 import 'package:tilawa_core/errors/failures.dart';
@@ -32,7 +31,6 @@ part 'audio_player_bloc.freezed.dart';
 part 'audio_player_event.dart';
 part 'audio_player_state.dart';
 
-@injectable
 class AudioPlayerBloc extends Bloc<AudioPlayerEvent, AudioPlayerState> {
   /// When false, unit tests avoid scheduled [syncActivePlayback] side effects.
   @visibleForTesting

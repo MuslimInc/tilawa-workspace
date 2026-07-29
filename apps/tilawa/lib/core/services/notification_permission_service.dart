@@ -1,14 +1,12 @@
 import 'dart:io';
 
 import 'package:flutter/foundation.dart';
-import 'package:injectable/injectable.dart';
 import 'package:permission_handler/permission_handler.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 import 'package:tilawa/core/logging/app_logger.dart';
 
 /// Service to handle notification permission requests
-@lazySingleton
 class NotificationPermissionService {
   NotificationPermissionService(this._prefs);
   static const String _notificationPermissionRequestedKey =

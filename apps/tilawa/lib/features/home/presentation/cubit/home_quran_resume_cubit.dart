@@ -1,6 +1,5 @@
 import 'package:dartz_plus/dartz_plus.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:injectable/injectable.dart';
 import 'package:tilawa/features/history/domain/entities/history_entity.dart';
 import 'package:tilawa/features/history/domain/repositories/history_repository.dart';
 import 'package:tilawa/features/quran_reader/domain/usecases/get_last_read_position_use_case.dart';
@@ -10,7 +9,6 @@ import 'package:tilawa_core/errors/failures.dart';
 import '../../domain/quran_engagement_streak.dart';
 import 'home_quran_resume_state.dart';
 
-@injectable
 class HomeQuranResumeCubit extends Cubit<HomeQuranResumeState> {
   HomeQuranResumeCubit(
     this._getLastReadPosition,

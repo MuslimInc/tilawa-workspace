@@ -1,4 +1,3 @@
-import 'package:injectable/injectable.dart';
 import 'package:tilawa/core/logging/app_logger.dart';
 import 'package:tilawa_core/services/interfaces/app_info_service.dart';
 
@@ -12,7 +11,6 @@ import '../services/forced_update_host_platform_resolver.dart';
 /// Loads remote policy + install build, then resolves [ForcedUpdateDecision].
 ///
 /// Policy/network failures fail open to [ForcedUpdateDecision.none].
-@lazySingleton
 class EvaluateForcedUpdateUseCase {
   const EvaluateForcedUpdateUseCase(
     this._repository,

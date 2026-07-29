@@ -1,5 +1,4 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:injectable/injectable.dart';
 
 abstract class RecitersFavoritesDataSource {
   Future<void> addFavoriteReciter({
@@ -15,7 +14,6 @@ abstract class RecitersFavoritesDataSource {
   Future<List<String>> getFavoriteReciterIds({required String userId});
 }
 
-@LazySingleton(as: RecitersFavoritesDataSource)
 class RecitersFavoritesDataSourceImpl implements RecitersFavoritesDataSource {
   RecitersFavoritesDataSourceImpl(this._firestore);
 

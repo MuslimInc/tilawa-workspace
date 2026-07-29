@@ -1,6 +1,4 @@
 import 'package:dartz_plus/dartz_plus.dart';
-import 'package:injectable/injectable.dart';
-
 import 'package:tilawa_core/entities/audio.dart';
 import 'package:tilawa_core/entities/reciter_entity.dart';
 import 'package:tilawa_core/errors/failures.dart';
@@ -11,7 +9,6 @@ import '../entities/surah_entity.dart';
 import '../mappers/surah_mapper.dart';
 import '../repositories/surah_repository.dart';
 
-@injectable
 class ConvertAudioEntitiesToSurahsUseCase {
   const ConvertAudioEntitiesToSurahsUseCase(
     this._surahRepository,

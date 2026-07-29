@@ -1,7 +1,6 @@
 import 'dart:async';
 
 import 'package:flutter/foundation.dart';
-import 'package:injectable/injectable.dart';
 import 'package:tilawa/core/logging/app_logger.dart';
 import 'package:tilawa/features/app_review/domain/usecases/open_app_store_listing_use_case.dart';
 
@@ -10,7 +9,6 @@ import '../../domain/usecases/evaluate_forced_update_use_case.dart';
 import '../services/forced_update_gate_presenter.dart';
 
 /// Orchestrates forced-update checks on startup / resume.
-@singleton
 class ForcedUpdateCoordinator {
   ForcedUpdateCoordinator(
     this._evaluateUpdate,

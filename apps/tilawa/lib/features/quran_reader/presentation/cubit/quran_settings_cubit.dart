@@ -1,6 +1,4 @@
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:injectable/injectable.dart';
-
 import '../../domain/entities/entities.dart';
 import '../../domain/usecases/load_reader_settings_use_case.dart';
 import '../../domain/usecases/save_reader_settings_use_case.dart';
@@ -10,7 +8,6 @@ import '../../domain/usecases/save_reader_settings_use_case.dart';
 /// Extracted from [QuranReaderBloc] so that settings changes do not emit
 /// on the same stream as page-navigation events — preventing [QuranPageView]
 /// from rebuilding on every page swipe just because settings are in scope.
-@lazySingleton
 class QuranSettingsCubit extends Cubit<ReaderSettingsEntity> {
   QuranSettingsCubit(this._loadSettings, this._saveSettings)
     : super(const ReaderSettingsEntity());

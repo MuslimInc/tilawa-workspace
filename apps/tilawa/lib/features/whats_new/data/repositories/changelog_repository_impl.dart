@@ -1,7 +1,6 @@
 import 'dart:convert';
 
 import 'package:dartz_plus/dartz_plus.dart';
-import 'package:injectable/injectable.dart';
 import 'package:tilawa_core/errors/failures.dart';
 import 'package:tilawa_core/services/interfaces/app_info_service.dart';
 
@@ -11,7 +10,6 @@ import '../../domain/repositories/changelog_repository.dart';
 import '../datasources/changelog_asset_data_source.dart';
 import '../models/changelog_catalog_dto.dart';
 
-@LazySingleton(as: ChangelogRepository)
 class ChangelogRepositoryImpl implements ChangelogRepository {
   ChangelogRepositoryImpl(
     this._assetDataSource,

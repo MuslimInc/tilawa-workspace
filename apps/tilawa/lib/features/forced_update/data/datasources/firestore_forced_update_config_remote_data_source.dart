@@ -1,12 +1,10 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:injectable/injectable.dart';
 import 'package:tilawa/core/logging/app_logger.dart';
 
 import '../../domain/entities/forced_update_policy.dart';
 import 'forced_update_config_remote_data_source.dart';
 import 'forced_update_policy_mapper.dart';
 
-@LazySingleton(as: ForcedUpdateConfigRemoteDataSource)
 class FirestoreForcedUpdateConfigRemoteDataSource
     implements ForcedUpdateConfigRemoteDataSource {
   FirestoreForcedUpdateConfigRemoteDataSource(this._firestore);

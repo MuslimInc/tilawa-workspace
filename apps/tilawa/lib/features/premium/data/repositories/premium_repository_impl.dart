@@ -1,4 +1,3 @@
-import 'package:injectable/injectable.dart';
 import 'package:tilawa/core/logging/app_logger.dart';
 import 'package:tilawa_core/config/currency_config.dart';
 
@@ -8,7 +7,6 @@ import '../../domain/repositories/premium_repository.dart';
 import '../datasources/premium_local_datasource.dart';
 import '../datasources/premium_remote_datasource.dart';
 
-@LazySingleton(as: PremiumRepository)
 class PremiumRepositoryImpl implements PremiumRepository {
   PremiumRepositoryImpl(
     this._localDataSource,

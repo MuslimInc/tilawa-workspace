@@ -1,6 +1,5 @@
 import 'package:firebase_crashlytics/firebase_crashlytics.dart';
 import 'package:flutter/foundation.dart';
-import 'package:injectable/injectable.dart';
 import 'package:tilawa/core/bootstrap/app_error_guard.dart';
 import 'package:tilawa/core/logging/app_logger.dart';
 import 'package:tilawa/core/telemetry/crash_reporting_context.dart';
@@ -50,7 +49,6 @@ abstract class CrashlyticsService {
   Future<void> setBreadcrumb(String message);
 }
 
-@Singleton(as: CrashlyticsService)
 class FirebaseCrashlyticsServiceImpl implements CrashlyticsService {
   FirebaseCrashlyticsServiceImpl(this._crashlytics);
 

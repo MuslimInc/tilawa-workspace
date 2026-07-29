@@ -1,11 +1,8 @@
-import 'package:injectable/injectable.dart';
-
 import '../entities/share_content.dart';
 import '../entities/share_footer_colors.dart';
 import '../entities/widget_capture_handle.dart';
 import '../repositories/share_repository.dart';
 
-@injectable
 class CaptureScreenshotUseCase {
   CaptureScreenshotUseCase(this._repository);
   final ShareRepository _repository;

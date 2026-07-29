@@ -1,7 +1,6 @@
 import 'dart:async';
 
 import 'package:dartz_plus/dartz_plus.dart';
-import 'package:injectable/injectable.dart';
 import 'package:tilawa_core/errors/failures.dart';
 import 'package:tilawa_core/network/network_info.dart';
 
@@ -17,7 +16,6 @@ enum ServerActionType {
 }
 
 /// Guards actions that must not run while the device cannot reach the network.
-@lazySingleton
 class ServerActionGuard {
   ServerActionGuard(this._networkInfo);
 

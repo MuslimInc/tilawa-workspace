@@ -1,13 +1,11 @@
 import 'dart:io';
 
 import 'package:firebase_storage/firebase_storage.dart';
-import 'package:injectable/injectable.dart';
 
 /// Uploads / deletes the signed-in user's single optimized avatar object.
 ///
 /// One object path per user (`avatar.jpg`) — overwrites on each change so
 /// Storage never keeps original large images or historical versions.
-@lazySingleton
 class ProfileAvatarStorage {
   ProfileAvatarStorage(this._storage);
 

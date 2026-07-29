@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
-import 'package:injectable/injectable.dart';
 import 'package:share_plus/share_plus.dart';
 import 'package:tilawa/features/share/domain/entities/widget_capture_handle.dart';
 import 'package:tilawa_core/logger.dart';
@@ -19,7 +18,6 @@ import '../services/screenshot_service.dart';
 import '../services/share_file_manager.dart';
 import '../services/video_service.dart';
 
-@LazySingleton(as: ShareRepository)
 class ShareRepositoryImpl implements ShareRepository {
   ShareRepositoryImpl(
     this._screenshotService,

@@ -1,7 +1,5 @@
-import 'package:injectable/injectable.dart';
 import '../entities/notification_action.dart';
 
-@lazySingleton
 class HandleFcmNotificationUseCase {
   HandleFcmNotificationUseCase();
 

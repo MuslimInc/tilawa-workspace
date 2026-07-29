@@ -28,9 +28,9 @@ void main() {
     check(config.walletEnabled).isFalse();
   });
 
-  test('admin config enables student entry and booking', () {
+  test('admin config enables student entry when launch kill switch on', () {
     getIt.registerSingleton<AppLaunchConfig>(
-      const AppLaunchConfig(),
+      const AppLaunchConfig(learnQuranStudentFeatureEnabled: true),
     );
     final store = QuranSessionsPlatformConfigStore()
       ..setConfig(
@@ -54,9 +54,32 @@ void main() {
     check(config.walletEnabled).isTrue();
   });
 
-  test('admin config overrides launch config', () {
+  test('launch kill switch keeps student entry off when admin enables it', () {
     getIt.registerSingleton<AppLaunchConfig>(
       const AppLaunchConfig(),
+    );
+    final store = QuranSessionsPlatformConfigStore()
+      ..setConfig(
+        const QuranSessionsPlatformConfig(
+          quranSessionsEnabled: true,
+          studentEntryEnabled: true,
+          bookingEnabled: true,
+          bookingMode: 'autoConfirm',
+          sessionMode: 'videoOnly',
+          enabledCallProviders: {'external', 'mock'},
+        ),
+      );
+    getIt.registerSingleton<QuranSessionsPlatformConfigStore>(store);
+
+    final config = quranSessionsFeatureConfig();
+
+    check(config.quranSessionsEnabled).isTrue();
+    check(config.showLearnQuranStudentExperience).isFalse();
+  });
+
+  test('admin config can disable sessions even when launch switch on', () {
+    getIt.registerSingleton<AppLaunchConfig>(
+      const AppLaunchConfig(learnQuranStudentFeatureEnabled: true),
     );
     final store = QuranSessionsPlatformConfigStore()
       ..setConfig(

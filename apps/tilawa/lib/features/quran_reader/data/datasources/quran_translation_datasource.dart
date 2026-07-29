@@ -1,7 +1,6 @@
 import 'dart:convert';
 
 import 'package:flutter/services.dart';
-import 'package:injectable/injectable.dart';
 
 /// Loads bundled Quran verse translations keyed by surah and ayah number.
 abstract class QuranTranslationDataSource {
@@ -17,7 +16,6 @@ abstract class QuranTranslationDataSource {
   });
 }
 
-@LazySingleton(as: QuranTranslationDataSource)
 class QuranTranslationDataSourceImpl implements QuranTranslationDataSource {
   QuranTranslationDataSourceImpl();
 

@@ -1,14 +1,12 @@
 import 'dart:async';
 
 import 'package:flutter/material.dart';
-import 'package:injectable/injectable.dart';
 import 'package:tilawa/core/logging/app_logger.dart';
 import 'package:tilawa/router/app_router.dart';
 
 import '../widgets/forced_update_gate_page.dart';
 import 'forced_update_gate_presenter.dart';
 
-@LazySingleton(as: ForcedUpdateGatePresenter)
 class NavigatorForcedUpdateGatePresenter implements ForcedUpdateGatePresenter {
   bool _isShowing = false;
   Future<void> Function()? _onUpdate;

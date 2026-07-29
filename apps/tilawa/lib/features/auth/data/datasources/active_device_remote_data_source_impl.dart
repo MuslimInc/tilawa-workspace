@@ -1,12 +1,9 @@
 import 'package:cloud_functions/cloud_functions.dart';
-import 'package:injectable/injectable.dart';
-
 import '../../device_registry_feature_flags.dart';
 import '../../domain/entities/device_info_snapshot.dart';
 import '../../domain/entities/session_registration.dart';
 import 'active_device_remote_data_source.dart';
 
-@LazySingleton(as: ActiveDeviceRemoteDataSource)
 class ActiveDeviceRemoteDataSourceImpl implements ActiveDeviceRemoteDataSource {
   ActiveDeviceRemoteDataSourceImpl(this._functions);
 

@@ -4,7 +4,6 @@ import 'dart:ui';
 import 'package:flutter/foundation.dart';
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 import 'package:flutter_timezone/flutter_timezone.dart';
-import 'package:injectable/injectable.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:tilawa/core/config/android_notification_defaults.dart';
 import 'package:tilawa/core/config/notification_config.dart';
@@ -20,7 +19,6 @@ import 'package:tilawa_core/services/interfaces/notification_dispatcher_interfac
 import 'package:timezone/data/latest_all.dart' as tz;
 import 'package:timezone/timezone.dart' as tz;
 
-@LazySingleton(as: TasbeehReminderScheduler)
 class TasbeehReminderNotificationService implements TasbeehReminderScheduler {
   TasbeehReminderNotificationService(
     this._prefs,

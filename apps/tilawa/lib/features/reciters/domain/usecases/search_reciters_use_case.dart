@@ -1,6 +1,4 @@
 import 'package:dartz_plus/dartz_plus.dart';
-import 'package:injectable/injectable.dart';
-
 import 'package:tilawa_core/entities/reciter_entity.dart';
 import 'package:tilawa_core/errors/failures.dart';
 import 'package:tilawa_core/utils/typedefs.dart';
@@ -8,7 +6,6 @@ import 'package:tilawa_core/utils/typedefs.dart';
 import '../services/reciter_catalog_index.dart';
 import 'get_reciters_use_case.dart';
 
-@injectable
 class SearchRecitersUseCase {
   SearchRecitersUseCase(this._getReciters);
 

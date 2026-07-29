@@ -6,7 +6,6 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/scheduler.dart';
 import 'package:flutter/services.dart';
 import 'package:google_sign_in/google_sign_in.dart';
-import 'package:injectable/injectable.dart';
 import 'package:tilawa/core/logging/app_logger.dart';
 
 import '../mappers/firebase_auth_exception_mapper.dart';
@@ -56,7 +55,6 @@ class _CredentialManagerUiTracker {
   }
 }
 
-@LazySingleton(as: AuthProviderInterface)
 class GoogleAuthProviderImpl implements AuthProviderInterface {
   GoogleAuthProviderImpl(
     this._firebaseAuth,

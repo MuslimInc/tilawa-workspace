@@ -1,10 +1,7 @@
 import 'package:dartz_plus/dartz_plus.dart';
-import 'package:injectable/injectable.dart';
-
 import 'package:tilawa_core/core.dart';
 import '../repositories/prayer_times_repository.dart';
 
-@injectable
 class GetCurrentLocationUseCase {
   GetCurrentLocationUseCase(this._repository);
 

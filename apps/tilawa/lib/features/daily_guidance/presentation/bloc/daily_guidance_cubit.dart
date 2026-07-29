@@ -1,5 +1,4 @@
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:injectable/injectable.dart';
 import 'package:intl/intl.dart';
 
 import '../../../../core/logging/app_logger.dart';
@@ -9,7 +8,6 @@ import '../../domain/usecases/select_daily_guidance_item_use_case.dart';
 import '../../domain/usecases/schedule_daily_guidance_use_case.dart';
 import 'daily_guidance_state.dart';
 
-@injectable
 class DailyGuidanceCubit extends Cubit<DailyGuidanceState> {
   final SelectDailyGuidanceItemUseCase _selectUseCase;
   final ToggleDailyGuidanceUseCase _toggleUseCase;

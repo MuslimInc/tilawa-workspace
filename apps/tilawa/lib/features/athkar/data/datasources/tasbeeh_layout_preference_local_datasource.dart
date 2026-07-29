@@ -1,4 +1,3 @@
-import 'package:injectable/injectable.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 import '../../domain/constants/tasbeeh_constants.dart';
@@ -10,7 +9,6 @@ abstract class TasbeehLayoutPreferenceLocalDataSource {
   Future<void> writeLayoutMode(TasbeehLayoutMode mode);
 }
 
-@LazySingleton(as: TasbeehLayoutPreferenceLocalDataSource)
 class TasbeehLayoutPreferenceLocalDataSourceImpl
     implements TasbeehLayoutPreferenceLocalDataSource {
   TasbeehLayoutPreferenceLocalDataSourceImpl(this._prefs);

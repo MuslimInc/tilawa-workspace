@@ -1,7 +1,6 @@
 import 'dart:async';
 
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:injectable/injectable.dart';
 import 'package:tilawa/core/bootstrap/app_startup_readiness.dart';
 import 'package:tilawa/core/logging/app_logger.dart';
 
@@ -14,7 +13,6 @@ import 'splash_event.dart';
 import 'splash_state.dart';
 
 /// Orchestrates splash-held startup and initial navigation.
-@injectable
 class SplashBloc extends Bloc<SplashEvent, SplashState> {
   SplashBloc(
     this._getSplashNextRoute,

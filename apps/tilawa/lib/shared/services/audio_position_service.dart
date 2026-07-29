@@ -1,14 +1,12 @@
 import 'dart:async';
 
 import 'package:audio_service/audio_service.dart';
-import 'package:injectable/injectable.dart';
 import 'package:tilawa/shared/audio/audio_player_handler.dart';
 
 abstract class AudioPositionService {
   Stream<Duration> get position;
 }
 
-@LazySingleton(as: AudioPositionService)
 class AudioPositionServiceImpl implements AudioPositionService {
   AudioPositionServiceImpl(this._audioHandler);
 

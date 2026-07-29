@@ -1,6 +1,4 @@
 import 'package:dartz_plus/dartz_plus.dart';
-import 'package:injectable/injectable.dart';
-
 import 'package:tilawa_core/entities/audio.dart';
 import 'package:tilawa_core/errors/failures.dart';
 import 'package:tilawa_core/network/network_info.dart';
@@ -14,7 +12,6 @@ import '../../../downloads/domain/repositories/downloads_repository.dart';
 ///
 /// It depends on abstractions (NetworkInfo, DownloadsRepository) following the
 /// Dependency Inversion Principle.
-@injectable
 class CheckAudioPlayabilityUseCase {
   const CheckAudioPlayabilityUseCase(
     this._networkInfo,

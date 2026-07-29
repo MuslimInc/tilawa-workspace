@@ -2,14 +2,12 @@ import 'dart:async';
 
 import 'package:equatable/equatable.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:injectable/injectable.dart';
 import 'package:tilawa_core/entities/reciter_entity.dart';
 
 import '../../domain/usecases/search_reciters_use_case.dart';
 
 part 'reciters_search_state.dart';
 
-@injectable
 class RecitersSearchCubit extends Cubit<RecitersSearchState> {
   RecitersSearchCubit(this._searchReciters)
     : super(const RecitersSearchInitial());

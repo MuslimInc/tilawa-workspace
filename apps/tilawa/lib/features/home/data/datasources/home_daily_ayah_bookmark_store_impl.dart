@@ -1,9 +1,7 @@
-import 'package:injectable/injectable.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 import '../../domain/repositories/home_daily_ayah_bookmark_store.dart';
 
-@LazySingleton(as: HomeDailyAyahBookmarkStore)
 class SharedPreferencesHomeDailyAyahBookmarkStore
     implements HomeDailyAyahBookmarkStore {
   SharedPreferencesHomeDailyAyahBookmarkStore(this._prefs);

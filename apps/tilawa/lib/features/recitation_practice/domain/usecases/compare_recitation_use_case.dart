@@ -1,11 +1,8 @@
-import 'package:injectable/injectable.dart';
-
 import '../entities/recitation_comparison_result.dart';
 import '../services/recitation_transcript_scope.dart';
 import '../services/recitation_speech_normalizer.dart';
 import '../services/recitation_text_aligner.dart';
 
-@lazySingleton
 class CompareRecitationUseCase {
   const CompareRecitationUseCase(
     this._speechNormalizer,

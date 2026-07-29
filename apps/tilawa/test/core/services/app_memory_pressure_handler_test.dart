@@ -113,4 +113,3 @@ class _FakeDecodedCache implements DecodedQuranImageCache {
     throw UnimplementedError();
   }
 }
-
