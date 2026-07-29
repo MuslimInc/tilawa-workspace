@@ -157,7 +157,7 @@ void main() {
 
   group('TilawaSafeAreaX — floatingBottomPadding', () {
     testWidgets(
-      'uses systemBottomSafeArea + spaceSmall buffer when safe area > 0',
+      'uses systemBottomSafeArea alone when safe area > 0',
       (tester) async {
         late double padding;
 
@@ -173,7 +173,7 @@ void main() {
           ),
         );
 
-        expect(padding, 34 + _spaceSmall);
+        expect(padding, 34);
       },
     );
 
@@ -221,7 +221,7 @@ void main() {
           ),
         );
 
-        expect(padding, 34 + _spaceSmall);
+        expect(padding, 34);
       },
     );
   });
@@ -264,7 +264,7 @@ void main() {
         ),
       );
 
-      expect(padding, 34 + _spaceSmall);
+      expect(padding, 34);
     });
 
     testWidgets(
@@ -275,9 +275,9 @@ void main() {
 
         await tester.pumpWidget(
           _wrap(
-            // Home-indicator device: floating = 34 + 8 = 42.
+            // Home-indicator device: floating = 34.
             viewPadding: const EdgeInsets.only(bottom: 34),
-            // Keyboard only partway in: 10 + 8 = 18 < 42.
+            // Keyboard only partway in: 10 + 8 = 18 < 34.
             viewInsets: const EdgeInsets.only(bottom: 10),
             child: Builder(
               builder: (context) {
@@ -290,7 +290,7 @@ void main() {
 
         // The continuous max() must hold at the floating value rather than
         // dropping to 18 (the old boolean branch) and springing back up.
-        expect(padding, 34 + _spaceSmall);
+        expect(padding, 34);
       },
     );
   });
@@ -333,7 +333,7 @@ void main() {
         ),
       );
 
-      expect(padding, 34 + _spaceSmall);
+      expect(padding, 34);
     });
   });
 

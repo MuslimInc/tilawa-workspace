@@ -73,7 +73,7 @@ extension TilawaSafeAreaX on BuildContext {
   /// For floating bottom widgets that should not be glued to the screen edge.
   ///
   /// Uses:
-  /// - system bottom safe area + buffer when available
+  /// - system bottom safe area when available (no extra buffer)
   /// - fallback spacing when Android reports 0 bottom safe area
   double get floatingBottomPadding {
     final fallback = theme.tokens.spaceExtraLarge;
