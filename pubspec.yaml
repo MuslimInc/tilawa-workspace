@@ -31,7 +31,6 @@ dev_dependencies:
 
 dependency_overrides:
   ffi: ^2.1.4
-  device_info_plus: ^13.1.0
   # 2.6.0 FFI throws caught ArgumentError (OBJC_CLASS_$_NSArray) on iOS
   # simulator Debug; 2.5.1 is last plugin-based release (see changelog).
   path_provider_foundation: 2.5.1
@@ -171,7 +170,7 @@ melos:
         ROOT="$(pwd)"
 
         restore_rtc() {
-          (cd "$ROOT/apps/tilawa" && dart run tool/configure_rtc_deps.dart --sdk) || true
+          (cd "$ROOT/apps/tilawa" && dart run tool/configure_rtc_deps.dart --stub) || true
           (cd "$ROOT" && dart run melos bootstrap) || true
         }
         trap restore_rtc EXIT
@@ -209,7 +208,7 @@ melos:
 
         restore_env() {
           flutter config --enable-swift-package-manager >/dev/null 2>&1 || true
-          (cd "$ROOT/apps/tilawa" && dart run tool/configure_rtc_deps.dart --sdk) || true
+          (cd "$ROOT/apps/tilawa" && dart run tool/configure_rtc_deps.dart --stub) || true
           (cd "$ROOT" && dart run melos bootstrap) || true
         }
         trap restore_env EXIT
@@ -246,3 +245,5 @@ sentry:
   upload_source_maps: true
   project: flutter
   org: tilawa-2y
+
+
