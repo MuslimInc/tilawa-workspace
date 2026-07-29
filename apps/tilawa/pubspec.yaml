@@ -107,8 +107,6 @@ dependencies:
   lottie: ^3.5.1
 
 dev_dependencies:
-  quran_sessions_rtc_stub:
-    path: ../../packages/quran_sessions_rtc_stub
   bloc_lint: ^0.4.1
   bloc_test: ^10.0.0
   build_runner: ">=2.15.0 <2.15.2" # 2.15.2 needs analyzer >=13.3; Flutter 3.44 meta 1.18.0 blocks that

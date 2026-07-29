@@ -164,11 +164,20 @@ melos:
     tilawa:build:android:production:
       description: >-
         Clean-build MeMuslim production App Bundle. Wipes Flutter and Gradle
-        intermediates to prevent stale native artifacts.
+        intermediates to prevent stale native artifacts. Uses RTC stub (no
+        Agora/LiveKit native SDKs).
       run: |
         set -euo pipefail
+        ROOT="$(pwd)"
+
+        restore_rtc() {
+          (cd "$ROOT/apps/tilawa" && dart run tool/configure_rtc_deps.dart --sdk) || true
+          (cd "$ROOT" && dart run melos bootstrap) || true
+        }
+        trap restore_rtc EXIT
 
         cd apps/tilawa
+        dart run tool/configure_rtc_deps.dart --stub
 
         flutter clean
         (cd android && ./gradlew clean --no-build-cache)
@@ -187,10 +196,53 @@ melos:
           --obfuscate \
           --split-debug-info=../../artifacts/symbols/android/production
 
+    tilawa:build:ios:production:
+      description: >-
+        Clean-build MeMuslim production IPA for TestFlight / App Store
+        (com.memuslim.app). Wipes Flutter/iOS intermediates to prevent stale
+        native artifacts. Uses RTC stub (no Agora/LiveKit native SDKs) and
+        CocoaPods (SPM disabled for this build to avoid Xcode SPM resolver
+        crashes).
+      run: |
+        set -euo pipefail
+        ROOT="$(pwd)"
+
+        restore_env() {
+          flutter config --enable-swift-package-manager >/dev/null 2>&1 || true
+          (cd "$ROOT/apps/tilawa" && dart run tool/configure_rtc_deps.dart --sdk) || true
+          (cd "$ROOT" && dart run melos bootstrap) || true
+        }
+        trap restore_env EXIT
+
+        cd apps/tilawa
+        dart run tool/configure_rtc_deps.dart --stub
+        flutter config --no-enable-swift-package-manager
+
+        # Force-remove intermediates first — flutter clean alone can fail with
+        # "Directory not empty" and leave stale SPM/plugin artifacts (e.g. Agora).
+        chmod -R u+w build ios/build 2>/dev/null || true
+        rm -rf build ios/build ios/Pods ios/.symlinks ios/Flutter/ephemeral \
+          ios/Runner.xcworkspace/xcshareddata/swiftpm \
+          ios/Runner.xcodeproj/project.xcworkspace/xcshareddata/swiftpm \
+          "${HOME}/Library/Developer/Xcode/DerivedData"/Runner-*
+        flutter clean || true
+
+        cd ../..
+        dart run melos bootstrap
+        dart run melos run gen
+
+        cd apps/tilawa
+        flutter pub get
+        (cd ios && pod install --repo-update)
+        flutter build ipa \
+          --release \
+          --flavor production \
+          --dart-define-from-file=env/production.json \
+          --obfuscate \
+          --split-debug-info=../../artifacts/symbols/ios/production
+
 sentry:
   upload_debug_symbols: true
   upload_source_maps: true
   project: flutter
   org: tilawa-2y
-
-
