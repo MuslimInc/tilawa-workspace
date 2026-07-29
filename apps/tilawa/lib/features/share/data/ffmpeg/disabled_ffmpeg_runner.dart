@@ -1,17 +1,14 @@
 import 'dart:async';
 
-import 'package:injectable/injectable.dart';
-
 import '../../presentation/utils/share_feature_flags.dart';
 import 'ffmpeg_runner.dart';
 
 /// Production [FFmpegRunner] when native FFmpeg is frozen/disabled.
 ///
 /// Keeps [VideoService] and audio-clip code paths compilable without shipping
-/// `ffmpeg_kit_flutter_new`. Swap the injectable binding to
-/// `FfmpegKitRunner` (see `apps/tilawa/frozen/share/`) after re-adding the
-/// plugin to `pubspec.yaml`.
-@LazySingleton(as: FFmpegRunner)
+/// `ffmpeg_kit_flutter_new`. Swap the GetIt `FFmpegRunner` binding to
+/// `FfmpegKitRunner` in ShareDi (see `apps/tilawa/frozen/share/`) after
+/// re-adding the plugin to `pubspec.yaml`.
 class DisabledFfmpegRunner implements FFmpegRunner {
   const DisabledFfmpegRunner();
 
