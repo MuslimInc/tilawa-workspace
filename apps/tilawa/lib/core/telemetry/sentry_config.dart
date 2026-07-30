@@ -34,6 +34,11 @@ abstract final class SentryConfig {
     options.enableMetrics = true;
     options.tracesSampleRate = kReleaseMode ? 0.1 : 1.0;
 
+    // Standalone App Start root (process start → finishExtendedAppStart), not
+    // nested under synthetic ui.load. Android/iOS only; see [runWithExtendedAppStart].
+    // ignore: experimental_member_use
+    options.enableStandaloneAppStartTracing = true;
+
     // Disabled due to Sentry Flutter bug: '!duration.isNegative' assertion failure
     // when TTFD duration calculation goes backwards due to frame timing issues.
     options.enableTimeToFullDisplayTracing = false;
@@ -46,6 +51,9 @@ abstract final class SentryConfig {
     // Explicit Android ANR / AppExitInfo capture (defaults true; keep intentional).
     options.anrEnabled = true;
     options.anrTimeoutInterval = const Duration(milliseconds: 5000);
+    // iOS app hangs: a Dart VM debugger pause blocks the main thread and reads
+    // as a native hang, and Cocoa's is-being-traced check does not catch it.
+    options.enableAppHangTracking = kReleaseMode;
     SentryUserFeedback.bindFlutterOptions(options);
     options.navigatorKey = AppRouter.navigatorKey;
     options.attachScreenshot = true;
@@ -141,4 +149,22 @@ abstract final class SentryConfig {
 
   /// Root [runApp] wrapper required for Session Replay widget capture.
   static Widget wrapRootWidget(Widget child) => SentryWidget(child: child);
+
+  /// Extends standalone App Start across [action] past the first frame.
+  ///
+  /// Call before the first frame so session restore + critical init count toward
+  /// reported duration. Always finishes the extension (30s deadline otherwise
+  /// drops it and falls back to first-frame end).
+  static Future<T> runWithExtendedAppStart<T>(
+    Future<T> Function() action,
+  ) async {
+    // ignore: experimental_member_use
+    SentryFlutter.extendAppStart();
+    try {
+      return await action();
+    } finally {
+      // ignore: experimental_member_use
+      await SentryFlutter.finishExtendedAppStart();
+    }
+  }
 }

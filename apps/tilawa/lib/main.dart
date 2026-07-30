@@ -11,11 +11,14 @@ import 'core/telemetry/session_diagnostics_hub.dart';
 import 'features/prayer_times/application/prayer_notification_watchdog_bootstrap.dart';
 
 Future<void> _runTilawaApp() async {
-  // Recover prior-process playback/session snapshot before AppExitInfo ANRs
-  // are ingested and before UI mounts (enriches Sentry beforeSend).
-  await SessionDiagnosticsHub.restorePriorSession();
-  await CrashReportingContext.applyToSentry();
-  await bootstrap();
+  // Extend App Start past first frame through session restore + critical init.
+  await SentryConfig.runWithExtendedAppStart(() async {
+    // Recover prior-process playback/session snapshot before AppExitInfo ANRs
+    // are ingested and before UI mounts (enriches Sentry beforeSend).
+    await SessionDiagnosticsHub.restorePriorSession();
+    await CrashReportingContext.applyToSentry();
+    await bootstrap();
+  });
 }
 
 Future<void> main() async {
