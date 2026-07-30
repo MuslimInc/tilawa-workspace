@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:tilawa/core/extensions.dart';
 import 'package:tilawa/features/home/domain/entities/home_prayer_slot.dart';
-import 'package:tilawa/features/prayer_times/domain/entities/prayer_time_entity.dart';
 import 'package:tilawa/features/home/presentation/formatters/home_prayer_time_format.dart';
+import 'package:tilawa/features/prayer_times/domain/entities/prayer_time_entity.dart';
 import 'package:tilawa_ui_kit/tilawa_ui_kit.dart';
 
 /// Five-prayer strip — soft gold parchment panel on the green hero.
@@ -81,9 +81,9 @@ class HomePrayerScheduleStrip extends StatelessWidget {
                   VerticalDivider(
                     // 0.5 line + 1.0 horizontal pad each side.
                     width: tokens.borderWidthThin * 5,
-                    thickness: tokens.borderWidthThin,
-                    indent: tokens.spaceExtraSmall,
-                    endIndent: tokens.spaceExtraSmall,
+                    thickness: tokens.borderWidthThin * 2,
+                    indent: tokens.spaceLarge,
+                    endIndent: tokens.spaceLarge,
                     color: divider,
                   ),
                 Expanded(

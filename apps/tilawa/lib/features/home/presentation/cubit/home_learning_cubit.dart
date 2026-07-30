@@ -31,6 +31,8 @@ class HomeLearningCubit extends Cubit<HomeLearningState> {
   /// Safe and idempotent: returns early if already loading or if state has already
   /// loaded for the current user (unless [force] is true).
   Future<void> load({bool force = false}) async {
+    if (isClosed) return;
+
     final config = quranSessionsFeatureConfig();
     if (!config.quranSessionsEnabled) {
       emit(const HomeLearningState(status: HomeLearningStatus.none));
@@ -61,6 +63,7 @@ class HomeLearningCubit extends Cubit<HomeLearningState> {
 
       // 1. Fetch the student's sessions (upcoming and past)
       final result = await _getStudentSessions(userId);
+      if (isClosed) return;
 
       await result.fold(
         (failure) async {
@@ -164,6 +167,7 @@ class HomeLearningCubit extends Cubit<HomeLearningState> {
 
             final lastPracticedId = await _preferenceStore
                 .getLastPracticedSessionId();
+            if (isClosed) return;
             for (final pastSession in completedPast) {
               // Check if age is <= 7 days
               final diff = now.difference(pastSession.startsAt);
@@ -180,6 +184,7 @@ class HomeLearningCubit extends Cubit<HomeLearningState> {
                   final aggregateResult = await _getSessionAggregate(
                     pastSession.bookingId,
                   );
+                  if (isClosed) return;
                   final hasValidRevision = aggregateResult.fold(
                     (failure) => false,
                     (aggregate) {
@@ -211,6 +216,7 @@ class HomeLearningCubit extends Cubit<HomeLearningState> {
               .getHasSetLearningInterest();
           final isInterested =
               hasSetInterest && await _preferenceStore.getIsInterested();
+          if (isClosed) return;
           emit(
             HomeLearningState(
               status: HomeLearningStatus.none,
@@ -222,6 +228,7 @@ class HomeLearningCubit extends Cubit<HomeLearningState> {
       );
     } catch (_) {
       // Graceful error fallback to avoid breaking Home screen
+      if (isClosed) return;
       emit(const HomeLearningState(status: HomeLearningStatus.none));
     } finally {
       _isLoading = false;
@@ -234,6 +241,7 @@ class HomeLearningCubit extends Cubit<HomeLearningState> {
   Future<void> setTutoringInterest({required bool isInterested}) async {
     await _preferenceStore.setIsInterested(isInterested);
     await _preferenceStore.setHasSetLearningInterest(true);
+    if (isClosed) return;
     emit(
       state.copyWith(
         isInterestSignalNeeded: false,

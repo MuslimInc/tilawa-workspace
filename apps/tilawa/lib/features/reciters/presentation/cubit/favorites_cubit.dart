@@ -46,9 +46,13 @@ class FavoritesCubit extends Cubit<FavoritesState> {
     );
   }
 
+  /// Refreshes in place when favorites are already loaded — passing through
+  /// [FavoritesLoading] blanks every heart icon mid pull-to-refresh.
   Future<void> loadFavorites() async {
     if (isClosed) return;
-    emit(FavoritesLoading());
+    if (state is! FavoritesLoaded) {
+      emit(FavoritesLoading());
+    }
     final Either<Failure, List<ReciterEntity>> result = await _getFavorites(
       const NoParams(),
     );

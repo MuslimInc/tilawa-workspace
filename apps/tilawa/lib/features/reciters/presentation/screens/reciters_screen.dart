@@ -149,6 +149,7 @@ class _RecitersScreenState extends State<RecitersScreen> {
   bool _isStartupLiteUi = true;
   bool _allowHeavyLoadedResults = false;
   bool _pendingStartupFavoriteOrdering = false;
+  RecitersLoaded? _lastLoadedCatalog;
   late final FavoritesCubit _favoritesCubit;
 
   ScrollController get _activeRecitersScrollController => _allScrollController;
@@ -588,7 +589,20 @@ class _RecitersScreenState extends State<RecitersScreen> {
               }
               return true;
             },
-            builder: (context, state) {
+            builder: (context, blocState) {
+              // Pull-to-refresh re-runs [LoadReciters], which passes through
+              // [RecitersLoading]. Rendering that as the loading pane would
+              // blank the catalog mid-gesture, so the last loaded catalog
+              // stays on screen until the fetch settles.
+              if (blocState is RecitersLoaded) {
+                _lastLoadedCatalog = blocState;
+              } else if (blocState is RecitersError) {
+                _lastLoadedCatalog = null;
+              }
+              final RecitersState state =
+                  blocState is RecitersLoading && _lastLoadedCatalog != null
+                  ? _lastLoadedCatalog!
+                  : blocState;
               final bool showLetterIndex = context.select<SettingsCubit, bool>(
                 (cubit) => cubit.state.showRecitersAlphabetIndex,
               );

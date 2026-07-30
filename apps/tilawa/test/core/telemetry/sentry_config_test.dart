@@ -26,11 +26,15 @@ void main() {
       expect(options.debug, kDebugMode);
       expect(options.enableLogs, kReleaseMode);
       expect(options.tracesSampleRate, kReleaseMode ? 0.1 : 1.0);
+      // ignore: experimental_member_use
+      expect(options.enableStandaloneAppStartTracing, isTrue);
       // Disabled: Sentry Flutter TTFD can assert '!duration.isNegative'.
       expect(options.enableTimeToFullDisplayTracing, isFalse);
       // ignore: experimental_member_use
       expect(options.profilesSampleRate, kReleaseMode ? 0.1 : 1.0);
       expect(options.autoInitializeNativeSdk, isFalse);
+      // Debug Dart VM debugger pauses otherwise report as iOS app hangs.
+      expect(options.enableAppHangTracking, kReleaseMode);
       expect(options.navigatorKey, AppRouter.navigatorKey);
       expect(options.attachScreenshot, isTrue);
       expect(
@@ -80,6 +84,26 @@ void main() {
       final Widget child = SentryConfig.wrapRootWidget(const Text('root'));
 
       expect(child, isA<SentryWidget>());
+    });
+
+    test('runWithExtendedAppStart runs action and always finishes', () async {
+      var ran = false;
+      final int result = await SentryConfig.runWithExtendedAppStart(() async {
+        ran = true;
+        return 42;
+      });
+
+      expect(ran, isTrue);
+      expect(result, 42);
+    });
+
+    test('runWithExtendedAppStart finishes when action throws', () async {
+      await expectLater(
+        SentryConfig.runWithExtendedAppStart(() async {
+          throw StateError('bootstrap failed');
+        }),
+        throwsA(isA<StateError>()),
+      );
     });
   });
 }
