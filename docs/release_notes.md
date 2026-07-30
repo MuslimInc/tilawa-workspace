@@ -12,8 +12,35 @@ the changelog for full engineering detail.
 
 | Field | Value |
 |-------|--------|
+| Version | **2.2.3** (build **96**) |
+| Git tag | `v2.2.3+96` (pending) |
+| Date | 2026-07-31 |
+| Track | Both (Google Play + App Store) — Preparing |
+
+### What's new (en-US) — copy for Play Console
+
+```text
+• More stable tabs when switching between Home and Reciters
+• Reciters list stays visible while you refresh
+• Better stability after backgrounding on some Android devices
+```
+
+### ما الجديد (ar) — نص متجر Play
+
+```text
+• تبويبات أثبت عند التنقل بين الرئيسية والقرّاء
+• قائمة القرّاء تبقى ظاهرة أثناء السحب للتحديث
+• استقرار أفضل بعد إخراج التطبيق للخلفية على بعض أجهزة أندرويد
+```
+
+---
+
+## Previous current release (2.2.2+95)
+
+| Field | Value |
+|-------|--------|
 | Version | **2.2.2** (build **95**) |
-| Git tag | `v2.2.2+95` (pending) |
+| Git tag | `v2.2.2+95` (pending — superseded by 2.2.3+96) |
 | Date | 2026-07-27 |
 | Track | Both (Google Play + App Store) — Preparing |
 

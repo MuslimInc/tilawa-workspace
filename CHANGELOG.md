@@ -7,6 +7,28 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [2.2.3+96] - 2026-07-31 [Both]
+
+### Fixed
+
+- **Shell**: Switching tabs no longer remounts the inactive tab subtree or
+  closes its blocs mid-flight (`PrimaryScrollController` widget-type flip,
+  Sentry `FLUTTER-DT`); home cubits skip emits after close.
+- **Reciters**: Pull-to-refresh keeps the catalog and favorite hearts on
+  screen instead of flashing a blank loading pane.
+- **Android**: Ignore `TRIM_MEMORY_BACKGROUND` / `UI_HIDDEN` trim levels so
+  OPPO/ColorOS devices stop ANRing after backgrounding (Sentry `FLUTTER-9`).
+
+### Changed
+
+- **Home**: Prayer schedule strip dividers are slightly thicker with more
+  indent.
+- **Sentry**: Bump `sentry_flutter` to 9.26.0; standalone App Start tracing
+  past first frame through critical init; iOS app hang tracking only in
+  release (avoids Dart VM debugger false positives, Sentry `FLUTTER-DW`).
+- **DI**: Remove `injectable` / codegen; register dependencies with manual
+  GetIt modules.
+
 ## [2.2.2+95] - 2026-07-27 [Both]
 
 ### Added
