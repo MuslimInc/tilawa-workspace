@@ -16,10 +16,31 @@ abstract final class ShellTabPrimaryScroll {
   ShellTabPrimaryScroll._();
 
   /// Wraps [child] so inactive tabs do not attach to the ambient primary.
+  ///
+  /// Both branches emit a [PrimaryScrollController] so that toggling
+  /// [isActive] updates that element in place. Returning [child] unwrapped
+  /// while active would change the widget type at this slot on every tab
+  /// switch, unmounting and rebuilding the whole tab subtree — which closes
+  /// the tab's blocs mid-flight (Sentry FLUTTER-DT).
   static Widget wrap({required bool isActive, required Widget child}) {
-    if (isActive) {
-      return child;
-    }
-    return PrimaryScrollController.none(child: child);
+    return Builder(
+      builder: (BuildContext context) {
+        final PrimaryScrollController? ambient = isActive
+            ? context
+                  .dependOnInheritedWidgetOfExactType<PrimaryScrollController>()
+            : null;
+        final ScrollController? controller = ambient?.controller;
+        if (ambient == null || controller == null) {
+          return PrimaryScrollController.none(child: child);
+        }
+        return PrimaryScrollController(
+          controller: controller,
+          automaticallyInheritForPlatforms:
+              ambient.automaticallyInheritForPlatforms,
+          scrollDirection: ambient.scrollDirection ?? Axis.vertical,
+          child: child,
+        );
+      },
+    );
   }
 }

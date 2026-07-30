@@ -66,6 +66,47 @@ void main() {
         ambient.dispose();
       },
     );
+
+    testWidgets('tab subtree stays mounted across activation changes', (
+      tester,
+    ) async {
+      final ScrollController ambient = ScrollController();
+      _TabProbe.reset();
+
+      Widget shell({required bool isActive}) {
+        return MaterialApp(
+          home: PrimaryScrollController(
+            controller: ambient,
+            child: Offstage(
+              offstage: !isActive,
+              child: ShellTabPrimaryScroll.wrap(
+                isActive: isActive,
+                child: const _TabProbe(),
+              ),
+            ),
+          ),
+        );
+      }
+
+      await tester.pumpWidget(shell(isActive: true));
+      expect(_TabProbe.initCount, 1);
+
+      await tester.pumpWidget(shell(isActive: false));
+      await tester.pumpWidget(shell(isActive: true));
+
+      expect(
+        _TabProbe.disposeCount,
+        0,
+        reason: 'leaving a tab must not tear down its subtree',
+      );
+      expect(
+        _TabProbe.initCount,
+        1,
+        reason: 'returning to a tab must not rebuild it from scratch',
+      );
+
+      ambient.dispose();
+    });
   });
 }
 
@@ -122,4 +163,36 @@ class _TinyNestedScroll extends StatelessWidget {
       ),
     );
   }
+}
+
+class _TabProbe extends StatefulWidget {
+  const _TabProbe();
+
+  static int initCount = 0;
+  static int disposeCount = 0;
+
+  static void reset() {
+    initCount = 0;
+    disposeCount = 0;
+  }
+
+  @override
+  State<_TabProbe> createState() => _TabProbeState();
+}
+
+class _TabProbeState extends State<_TabProbe> {
+  @override
+  void initState() {
+    super.initState();
+    _TabProbe.initCount++;
+  }
+
+  @override
+  void dispose() {
+    _TabProbe.disposeCount++;
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) => const SizedBox.shrink();
 }

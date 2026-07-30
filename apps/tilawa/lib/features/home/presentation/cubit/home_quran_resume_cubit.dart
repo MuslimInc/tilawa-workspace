@@ -19,6 +19,7 @@ class HomeQuranResumeCubit extends Cubit<HomeQuranResumeState> {
   final HistoryRepository _historyRepository;
 
   Future<void> load({DateTime? now}) async {
+    if (isClosed) return;
     emit(
       state.copyWith(
         status: HomeQuranResumeStatus.loading,
@@ -42,6 +43,8 @@ class HomeQuranResumeCubit extends Cubit<HomeQuranResumeState> {
       );
       khatmaTarget = targetResult.fold((_) => null, (value) => value);
     }
+
+    if (isClosed) return;
 
     positionResult.fold(
       (failure) => emit(

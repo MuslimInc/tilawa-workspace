@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:dartz_plus/dartz_plus.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:tilawa/features/history/domain/entities/history_entity.dart';
@@ -32,6 +34,22 @@ void main() {
 
     expect(cubit.state.failure, isNotNull);
   });
+
+  test('load does not emit once the cubit is closed mid-flight', () async {
+    final getLastRead = _PendingGetLastRead();
+    final cubit = HomeQuranResumeCubit(
+      getLastRead,
+      _FakeHistoryRepository(),
+    );
+
+    final Future<void> loading = cubit.load();
+    await cubit.close();
+    getLastRead.completer.complete(
+      const Right((surahNumber: 2, ayahNumber: 43, page: 42)),
+    );
+
+    await expectLater(loading, completes);
+  });
 }
 
 class _SuccessGetLastRead implements GetLastReadPositionUseCase {
@@ -48,6 +66,17 @@ class _FailingGetLastRead implements GetLastReadPositionUseCase {
   call() async {
     return Left(Failure.unexpectedError('storage'));
   }
+}
+
+class _PendingGetLastRead implements GetLastReadPositionUseCase {
+  final Completer<
+    Either<Failure, ({int? surahNumber, int? ayahNumber, int? page})>
+  >
+  completer = Completer();
+
+  @override
+  Future<Either<Failure, ({int? surahNumber, int? ayahNumber, int? page})>>
+  call() => completer.future;
 }
 
 class _FakeHistoryRepository implements HistoryRepository {

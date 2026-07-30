@@ -24,12 +24,14 @@ class HomeAthkarCompactCubit extends Cubit<HomeAthkarCompactState> {
   final AthkarDailyProgressLocalDataSource _dailyProgress;
 
   Future<void> load({DateTime? now}) async {
+    if (isClosed) return;
     emit(state.copyWith(status: HomeAthkarRowStatus.loading));
 
     final DateTime effectiveNow = now ?? DateTime.now();
     final String dateKey = athkarDailyProgressDateKey(effectiveNow);
 
     final categoriesResult = await _getCategories(const NoParams());
+    if (isClosed) return;
     final List<AthkarCategory> allCategories = categoriesResult.fold(
       (_) => const [],
       (value) => value,
@@ -54,6 +56,7 @@ class HomeAthkarCompactCubit extends Cubit<HomeAthkarCompactState> {
         categoryId: categoryId,
         dateKey: dateKey,
       );
+      if (isClosed) return;
 
       final int totalRequired = items.fold<int>(
         0,

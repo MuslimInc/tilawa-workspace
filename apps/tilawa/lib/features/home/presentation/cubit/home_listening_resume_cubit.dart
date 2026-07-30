@@ -11,11 +11,13 @@ class HomeListeningResumeCubit extends Cubit<HomeListeningResumeState> {
   final HistoryRepository _historyRepository;
 
   Future<void> load() async {
+    if (isClosed) return;
     emit(state.copyWith(status: HomeListeningResumeStatus.loading));
 
     try {
       final List<HistoryEntity> history = await _historyRepository
           .getRecentHistory(limit: 1);
+      if (isClosed) return;
       if (history.isEmpty) {
         emit(
           const HomeListeningResumeState(
@@ -44,6 +46,7 @@ class HomeListeningResumeCubit extends Cubit<HomeListeningResumeState> {
         ),
       );
     } catch (_) {
+      if (isClosed) return;
       emit(
         const HomeListeningResumeState(
           status: HomeListeningResumeStatus.ready,
