@@ -8,34 +8,14 @@ The Quran reader renders a 604-page mushaf using per-page QCF4 bitmap fonts. Eac
 
 ## Android rendering backend
 
-**Policy:** Tilawa ships **Skia** on Android and keeps **Impeller disabled** until
-Flutter's Impeller backend is stable for our workload (604 per-page bitmap fonts,
-heavy glyph-atlas churn, verse-marker tessellation).
+**Policy:** Tilawa uses Flutter’s **default** Android renderer (Impeller on
+current Flutter). No `io.flutter.embedding.android.EnableImpeller` override in
+`AndroidManifest.xml`.
 
-Configuration: `apps/tilawa/android/app/src/main/AndroidManifest.xml`
-
-```xml
-<meta-data
-    android:name="io.flutter.embedding.android.EnableImpeller"
-    android:value="false" />
-```
-
-**Why:** On real devices we saw first-frame raster spikes (17–55 ms) from Impeller's
-lazy glyph-atlas build when switching pages/fonts. Warm-up mitigations help, but
-Skia is the safer default until Impeller behaviour is predictable across our
-device matrix.
-
-**Re-enable checklist (when revisiting):**
-
-1. Remove or set `EnableImpeller` to `true` in the manifest above.
-2. Cold-start and page-flip on mid-range Android (profile mode); compare raster
-   thread timings vs Skia baseline.
-3. Re-run glyph warm-up paths (`precacheTextGlyphs`, verse-marker warm-up) and
-   confirm no regression on orientation change.
-4. Check `adb logcat` for `Using the Impeller rendering backend`.
+**Verify:** `adb logcat` should show `Using the Impeller rendering backend`.
 
 Glyph warm-up and `PreparedQuranPage` pre-layout remain renderer-agnostic; they
-benefit both Skia and Impeller.
+still matter for Impeller first-frame glyph-atlas cost on QCF page fonts.
 
 ---
 
@@ -70,7 +50,7 @@ Result: user saw a spinner for 200–700 ms every time they opened the reader, e
 
 ### First-frame raster jank (~17–55 ms)
 
-On Impeller (disabled on Android — see [Android rendering backend](#android-rendering-backend)), the engine builds its glyph atlas lazily — the first frame that paints a glyph for a given `(fontFamily, fontSize)` pays the GPU texture upload cost on the raster thread. With 604 per-page fonts, every new page triggered a ~17–21 ms raster spike. Skia has similar atlas work but behaved more predictably on our device matrix, which is why we default to Skia for now.
+On Impeller (see [Android rendering backend](#android-rendering-backend)), the engine builds its glyph atlas lazily — the first frame that paints a glyph for a given `(fontFamily, fontSize)` pays the GPU texture upload cost on the raster thread. With 604 per-page fonts, every new page triggered a ~17–21 ms raster spike. Glyph warm-up (`precacheTextGlyphs`, verse-marker warm-up) mitigates this on Impeller.
 
 ### `PageContent` build-time work
 
@@ -89,7 +69,7 @@ All on the UI thread, inside `build()`.
 |---|---|---|
 | `_LoadingView` visible | 200–700 ms | Async font + data init before reader shown |
 | `_isReaderPrepared` gate | 1–3 frames | Offstage prepare + callback round-trip |
-| First-frame glyph atlas | 17–55 ms raster | Lazy atlas build on first paint (Impeller; mitigated via warm-up; Skia on Android) |
+| First-frame glyph atlas | 17–55 ms raster | Lazy atlas build on first paint (Impeller; mitigated via warm-up) |
 | `PageContent` build work | 3–8 ms UI | 15× `TextPainter.layout()` in `build()` |
 
 ---
