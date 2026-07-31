@@ -1,4 +1,7 @@
 import 'package:flutter_test/flutter_test.dart';
+import 'package:quran_image/data/repositories/in_memory_navigation_visibility_repository.dart';
+import 'package:quran_image/data/repositories/in_memory_page_repository.dart';
+import 'package:quran_image/domain/domain.dart';
 import 'package:quran_image/presentation/bloc/navigation/navigation_bloc.dart';
 import 'package:quran_image/presentation/bloc/navigation/navigation_event.dart';
 import 'package:quran_image/presentation/bloc/navigation/navigation_state.dart';
@@ -113,6 +116,33 @@ void main() {
       expect((bloc.state as NavigationLoaded).pageState.currentPage, 1);
     });
 
+    test('clamps surah jump into NavigationBloc page bounds', () async {
+      await bloc.close();
+      bloc = NavigationBloc(
+        pageRepository: InMemoryPageRepository(),
+        visibilityRepository: InMemoryNavigationVisibilityRepository(),
+        saveLastVisitedPageUseCase: SaveLastVisitedPageUseCase(
+          _NoopLastVisitedPageRepository(),
+        ),
+        getLastVisitedPageUseCase: GetLastVisitedPageUseCase(
+          _NoopLastVisitedPageRepository(),
+        ),
+      );
+      bloc.add(
+        const NavigationInitialized(
+          initialPage: 1,
+          firstPage: 1,
+          lastPage: 5,
+        ),
+      );
+      await pumpNavigationBloc(bloc);
+
+      QuranImageReaderIndexNavigation.dispatchSelection(bloc, 114);
+      await pumpNavigationBloc(bloc);
+
+      expect((bloc.state as NavigationLoaded).pageState.currentPage, 5);
+    });
+
     test(
       'NavigationBloc ignores PageChanged when page is already current',
       () async {
@@ -125,4 +155,15 @@ void main() {
       },
     );
   });
+}
+
+class _NoopLastVisitedPageRepository implements LastVisitedPageRepository {
+  @override
+  Future<void> clearLastVisitedPage() async {}
+
+  @override
+  Future<int?> getLastVisitedPage() async => 1;
+
+  @override
+  Future<void> saveLastVisitedPage(int pageNumber) async {}
 }

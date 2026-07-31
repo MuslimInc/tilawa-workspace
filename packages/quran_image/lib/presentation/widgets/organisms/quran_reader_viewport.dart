@@ -11,6 +11,8 @@ class QuranReaderViewport extends StatelessWidget {
     required this.onToggleNavigation,
     required this.onShowNavigation,
     required this.onPageChanged,
+    this.firstPage = 1,
+    this.pageCount = PageState.quranPageCount,
     this.headerImageFilter,
   });
 
@@ -18,6 +20,13 @@ class QuranReaderViewport extends StatelessWidget {
   final VoidCallback onToggleNavigation;
   final VoidCallback onShowNavigation;
   final ValueChanged<int> onPageChanged;
+
+  /// First absolute Mushaf page in the allowed range.
+  final int firstPage;
+
+  /// Number of pages in the allowed range.
+  final int pageCount;
+
   final ColorFilter? headerImageFilter;
 
   @override
@@ -40,15 +49,23 @@ class QuranReaderViewport extends StatelessWidget {
           onVerticalDragStart: isLandscape ? null : (_) => onShowNavigation(),
           child: PageView.builder(
             controller: pageController,
-            itemCount: PageState.quranPageCount,
+            itemCount: pageCount,
             allowImplicitScrolling: false,
             physics: const PageScrollPhysics(),
-            onPageChanged: (index) => onPageChanged(index + 1),
-            itemBuilder: (_, index) => QuranImagePage(
-              key: ValueKey<int>(index + 1),
-              pageNumber: index + 1,
-              headerImageFilter: headerImageFilter,
+            onPageChanged: (index) => onPageChanged(
+              PageState.indexToPage(index, firstPage: firstPage),
             ),
+            itemBuilder: (_, index) {
+              final pageNumber = PageState.indexToPage(
+                index,
+                firstPage: firstPage,
+              );
+              return QuranImagePage(
+                key: ValueKey<int>(pageNumber),
+                pageNumber: pageNumber,
+                headerImageFilter: headerImageFilter,
+              );
+            },
           ),
         );
       },

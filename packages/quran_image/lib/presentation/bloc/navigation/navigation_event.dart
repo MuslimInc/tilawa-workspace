@@ -15,10 +15,20 @@ abstract class NavigationEvent extends Equatable {
 class NavigationInitialized extends NavigationEvent {
   final int? initialPage;
 
-  const NavigationInitialized({this.initialPage});
+  /// First allowed absolute Mushaf page (inclusive). Defaults to 1.
+  final int? firstPage;
+
+  /// Last allowed absolute Mushaf page (inclusive). Defaults to 604.
+  final int? lastPage;
+
+  const NavigationInitialized({
+    this.initialPage,
+    this.firstPage,
+    this.lastPage,
+  });
 
   @override
-  List<Object?> get props => [initialPage];
+  List<Object?> get props => [initialPage, firstPage, lastPage];
 }
 
 /// Event to show navigation controls

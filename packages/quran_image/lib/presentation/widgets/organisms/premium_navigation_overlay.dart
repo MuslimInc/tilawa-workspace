@@ -230,7 +230,8 @@ class _PremiumNavigationControls extends StatelessWidget {
                               committedPage: committedPageState.currentPage,
                               state: effectivePageState,
                               canGoToPreviousPage:
-                                  committedPageState.currentPage > 1,
+                                  committedPageState.currentPage >
+                                  committedPageState.firstPage,
                               canGoToNextPage:
                                   committedPageState.currentPage <
                                   committedPageState.totalPages,

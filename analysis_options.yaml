@@ -64,6 +64,12 @@ analyzer:
     - "lib/l10n/**"
     - "**/parse_json.dart"
     - "packages/quran_qcf/scratch/**"
+    - android/**
+    - ios/**
+    - web/**
+    - windows/**
+    - macos/**
+    - linux/**
 
 linter:
   rules:

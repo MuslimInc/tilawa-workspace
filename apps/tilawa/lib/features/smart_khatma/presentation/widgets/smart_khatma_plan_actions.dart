@@ -164,7 +164,11 @@ Future<void> openKhatmaReaderAndRefresh(
   BuildContext context,
   KhatmaPlan plan,
 ) async {
-  await KhatmaReaderRoute(initialPage: plan.resumePage).push<void>(context);
+  await KhatmaReaderRoute(
+    initialPage: plan.resumePage,
+    firstPage: plan.startPage,
+    lastPage: plan.targetPage,
+  ).push<void>(context);
   if (!context.mounted) {
     return;
   }

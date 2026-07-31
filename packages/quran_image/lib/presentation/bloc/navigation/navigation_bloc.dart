@@ -38,6 +38,9 @@ class NavigationBloc extends Bloc<NavigationEvent, NavigationState> {
   /// cancelled when they hide or the user starts interacting.
   Timer? _autoHideTimer;
 
+  /// Last successful init params — reused by [NavigationRetryRequested].
+  NavigationInitialized _lastInitEvent = const NavigationInitialized();
+
   NavigationBloc({
     PageRepository? pageRepository,
     NavigationVisibilityRepository? visibilityRepository,
@@ -71,11 +74,31 @@ class NavigationBloc extends Bloc<NavigationEvent, NavigationState> {
   ) async {
     emit(const NavigationLoading());
     try {
-      // Get the requested initial page or fall back to last visited page (or page 1)
+      _lastInitEvent = event;
+      final int firstPage = (event.firstPage ?? 1).clamp(
+        1,
+        PageState.quranPageCount,
+      );
+      final int lastPage = (event.lastPage ?? PageState.quranPageCount).clamp(
+        firstPage,
+        PageState.quranPageCount,
+      );
+
+      // Apply session bounds before navigating so isValidPage uses them.
+      _pageRepository.savePageState(
+        PageState.initial().copyWith(
+          firstPage: firstPage,
+          totalPages: lastPage,
+          currentPage: firstPage,
+        ),
+      );
+
+      // Get the requested initial page or fall back to last visited page.
       final savedPage =
           event.initialPage ??
-          await _getLastVisitedPageUseCase.executeOrDefault(1);
-      final pageState = _pageRepository.navigateToPage(savedPage);
+          await _getLastVisitedPageUseCase.executeOrDefault(firstPage);
+      final clampedPage = savedPage.clamp(firstPage, lastPage);
+      final pageState = _pageRepository.navigateToPage(clampedPage);
       final visibility = await _visibilityRepository.getVisibility();
       emit(NavigationLoaded(pageState: pageState, visibility: visibility));
     } catch (e) {
@@ -226,17 +249,18 @@ class NavigationBloc extends Bloc<NavigationEvent, NavigationState> {
     final currentState = state;
     if (currentState is NavigationLoaded) {
       // Only update if page actually changed
-      if (currentState.pageState.currentPage != event.pageNumber) {
+      final int targetPage = currentState.pageState.clampPage(event.pageNumber);
+      if (currentState.pageState.currentPage != targetPage) {
         PerfLogger.log(
           widgetName: 'NavigationBloc',
           message:
               'page changed from=${currentState.pageState.currentPage} '
-              'to=${event.pageNumber}',
+              'to=$targetPage',
         );
-        final pageState = _pageRepository.navigateToPage(event.pageNumber);
+        final pageState = _pageRepository.navigateToPage(targetPage);
         emit(currentState.copyWith(pageState: pageState));
         // Persist the newly visited page
-        add(LastVisitedPageSaved(event.pageNumber));
+        add(LastVisitedPageSaved(targetPage));
       }
     }
   }
@@ -262,7 +286,7 @@ class NavigationBloc extends Bloc<NavigationEvent, NavigationState> {
     NavigationRetryRequested event,
     Emitter<NavigationState> emit,
   ) async {
-    await _onInitialized(const NavigationInitialized(), emit);
+    await _onInitialized(_lastInitEvent, emit);
   }
 
   @override

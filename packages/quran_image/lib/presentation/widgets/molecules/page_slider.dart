@@ -19,6 +19,10 @@ class PageSlider extends StatefulWidget {
   /// when slider navigation has finished so the post-drag hold can end.
   final int committedPage;
 
+  /// First allowed absolute Mushaf page (slider minimum).
+  final int minPage;
+
+  /// Last allowed absolute Mushaf page (slider maximum).
   final int totalPages;
   final ValueChanged<double> onChanged;
   final ValueChanged<double>? onChangeEnd;
@@ -32,6 +36,7 @@ class PageSlider extends StatefulWidget {
     required this.onChanged,
     this.onChangeEnd,
     required this.screenWidth,
+    this.minPage = 1,
   });
 
   @override
@@ -61,7 +66,8 @@ class _PageSliderState extends State<PageSlider> {
     if (widget.committedPage == _pendingReleasePage) {
       PerfLogger.logQuranPerf(
         '[QuranPerf][Slider]',
-        'pendingRelease cleared committedPage=${widget.committedPage} '
+        'pendingRelease cleared reason=committed '
+            'committedPage=${widget.committedPage} '
             'matchedPending=$_pendingReleasePage',
       );
       _pendingReleasePage = null;
@@ -80,14 +86,17 @@ class _PageSliderState extends State<PageSlider> {
   }
 
   double get _sliderValue {
+    final min = widget.minPage.toDouble();
     final max = widget.totalPages.toDouble();
     if (_dragging && _dragValue != null) {
-      return _dragValue!.clamp(1.0, max);
+      return _dragValue!.clamp(min, max);
     }
     if (_pendingReleasePage != null) {
-      return _pendingReleasePage!.clamp(1, widget.totalPages).toDouble();
+      return _pendingReleasePage!
+          .clamp(widget.minPage, widget.totalPages)
+          .toDouble();
     }
-    return widget.currentPage.toDouble().clamp(1.0, max);
+    return widget.currentPage.toDouble().clamp(min, max);
   }
 
   @override
@@ -97,6 +106,8 @@ class _PageSliderState extends State<PageSlider> {
     final colorScheme = theme.colorScheme;
     final thumbRadius = tokens.spaceSmall;
     final overlayRadius = tokens.iconSizeLarge;
+    final min = widget.minPage.toDouble();
+    final max = widget.totalPages.toDouble();
 
     return SliderTheme(
       data: SliderThemeData(
@@ -119,11 +130,11 @@ class _PageSliderState extends State<PageSlider> {
       child: RepaintBoundary(
         child: Slider(
           value: _sliderValue,
-          min: 1,
-          max: widget.totalPages.toDouble(),
-          // divisions intentionally omitted — 603 tick marks are invisible at
-          // this density and cause expensive CustomPainter repaints on every
-          // animation frame when the nav overlay slides in/out.
+          min: min,
+          max: max,
+          // divisions intentionally omitted — dense tick marks are invisible
+          // and cause expensive CustomPainter repaints on every animation frame
+          // when the nav overlay slides in/out.
           onChangeStart: (_) {
             if (_pendingReleasePage != null) {
               PerfLogger.logQuranPerf(
@@ -142,7 +153,10 @@ class _PageSliderState extends State<PageSlider> {
             widget.onChanged(value);
           },
           onChangeEnd: (value) {
-            final rounded = value.round().clamp(1, widget.totalPages);
+            final rounded = value.round().clamp(
+              widget.minPage,
+              widget.totalPages,
+            );
             PerfLogger.logQuranPerf(
               '[QuranPerf][Slider]',
               'pendingRelease set page=$rounded',

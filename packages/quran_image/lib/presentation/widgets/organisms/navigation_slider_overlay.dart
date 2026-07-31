@@ -98,6 +98,7 @@ class NavigationSliderOverlay extends StatelessWidget {
                         PageSlider(
                           currentPage: state.displayPage,
                           committedPage: committedPage,
+                          minPage: state.firstPage,
                           totalPages: state.totalPages,
                           onChanged: (value) =>
                               onPreviewPageChanged(value.round()),
