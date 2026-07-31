@@ -7,3 +7,12 @@ environment:
   sdk: ^3.12.2
 
 resolution: workspace
+analyzer:
+  exclude:
+    - build/**
+    - android/**
+    - ios/**
+    - web/**
+    - windows/**
+    - macos/**
+    - linux/**
