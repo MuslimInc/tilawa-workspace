@@ -8,4 +8,15 @@ void main() {
       '/khatma-reader/42',
     );
   });
+
+  test('Khatma reader route encodes plan page bounds as query params', () {
+    expect(
+      const KhatmaReaderRoute(
+        initialPage: 1,
+        firstPage: 1,
+        lastPage: 5,
+      ).location,
+      '/khatma-reader/1?first-page=1&last-page=5',
+    );
+  });
 }

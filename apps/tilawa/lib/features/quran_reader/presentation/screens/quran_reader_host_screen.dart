@@ -27,6 +27,8 @@ class QuranReaderHostScreen extends StatefulWidget {
     required this.surahNumber,
     this.initialAyah,
     this.initialPage,
+    this.firstPage,
+    this.lastPage,
     this.showSaveProgressAction = false,
     this.openPracticeOnLaunch = false,
   });
@@ -36,6 +38,10 @@ class QuranReaderHostScreen extends StatefulWidget {
 
   final int? initialAyah;
   final int? initialPage;
+
+  /// Optional Mushaf page window (inclusive). Used by Khatma reader.
+  final int? firstPage;
+  final int? lastPage;
   final bool showSaveProgressAction;
   final bool openPracticeOnLaunch;
 
@@ -170,6 +176,8 @@ class _QuranReaderHostScreenState extends State<QuranReaderHostScreen> {
       surahNumber: _activeSurah,
       initialAyah: _activeAyah,
       initialPage: widget.initialPage,
+      firstPage: widget.firstPage,
+      lastPage: widget.lastPage,
       openPracticeOnLaunch: widget.openPracticeOnLaunch,
       onActiveSurahChanged: _onActiveSurahChanged,
       viewSwitchAction: QuranReaderViewToggle(

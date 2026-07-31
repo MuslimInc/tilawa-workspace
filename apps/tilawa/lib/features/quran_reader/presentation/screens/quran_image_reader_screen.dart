@@ -51,6 +51,8 @@ class QuranImageReaderScreen extends StatefulWidget {
     required this.surahNumber,
     this.initialAyah,
     this.initialPage,
+    this.firstPage,
+    this.lastPage,
     this.openPracticeOnLaunch = false,
     this.onActiveSurahChanged,
     this.viewSwitchAction,
@@ -64,6 +66,12 @@ class QuranImageReaderScreen extends StatefulWidget {
 
   /// Optional plan-owned Mushaf page. Takes precedence over [surahNumber].
   final int? initialPage;
+
+  /// Optional first allowed Mushaf page (inclusive) for this session.
+  final int? firstPage;
+
+  /// Optional last allowed Mushaf page (inclusive) for this session.
+  final int? lastPage;
 
   /// Opens the recitation practice panel after the reader is ready.
   final bool openPracticeOnLaunch;
@@ -137,7 +145,13 @@ class _QuranImageReaderScreenState extends State<QuranImageReaderScreen>
             : null);
 
     _navigationBloc = NavigationBloc()
-      ..add(NavigationInitialized(initialPage: initialPage));
+      ..add(
+        NavigationInitialized(
+          initialPage: initialPage,
+          firstPage: widget.firstPage,
+          lastPage: widget.lastPage,
+        ),
+      );
     logger.d(
       '[QuranImagesPerformance] source=QuranImageReaderScreen NavigationBloc initialized with page: $initialPage',
     );

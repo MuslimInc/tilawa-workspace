@@ -699,9 +699,19 @@ class QuranLastReadRoute extends GoRouteData
 @TypedGoRoute<KhatmaReaderRoute>(path: '/khatma-reader/:initialPage')
 class KhatmaReaderRoute extends GoRouteData
     with $KhatmaReaderRoute, TilawaRouteData {
-  const KhatmaReaderRoute({required this.initialPage});
+  const KhatmaReaderRoute({
+    required this.initialPage,
+    this.firstPage,
+    this.lastPage,
+  });
 
   final int initialPage;
+
+  /// First allowed Mushaf page for this Khatma session.
+  final int? firstPage;
+
+  /// Last allowed Mushaf page for this Khatma session.
+  final int? lastPage;
 
   @override
   Widget build(BuildContext context, GoRouterState state) {
@@ -710,6 +720,8 @@ class KhatmaReaderRoute extends GoRouteData
       child: QuranReaderHostScreen(
         surahNumber: 1,
         initialPage: initialPage,
+        firstPage: firstPage,
+        lastPage: lastPage,
         showSaveProgressAction: true,
       ),
     );
