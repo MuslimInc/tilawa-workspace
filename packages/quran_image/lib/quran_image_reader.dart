@@ -134,6 +134,9 @@ class _QuranImageReaderState extends State<QuranImageReader>
     final initialIndex = currentState is NavigationLoaded
         ? currentState.pageState.pageIndex
         : 0;
+    final initialAbsolutePage = currentState is NavigationLoaded
+        ? currentState.pageState.currentPage
+        : 1;
     _lastSettledPageIndex = initialIndex;
     _pageController = PageController(initialPage: initialIndex);
 
@@ -147,7 +150,7 @@ class _QuranImageReaderState extends State<QuranImageReader>
     WidgetsBinding.instance.addPostFrameCallback((_) {
       if (!mounted) return;
       _imagePrewarmer.startInitialPrewarm(
-        currentPageNumber: initialIndex + 1,
+        currentPageNumber: initialAbsolutePage,
         cacheWidth: _cacheWidth,
       );
       _scheduleBackgroundMarkerWarmUp();
@@ -156,7 +159,7 @@ class _QuranImageReaderState extends State<QuranImageReader>
     PerfLogger.logElapsed(
       sw,
       widgetName: 'QuranImageReader',
-      message: 'initState initialPage=${initialIndex + 1}',
+      message: 'initState initialPage=$initialAbsolutePage',
     );
 
     // Apply system UI configuration after the first frame to ensure it sticks.
@@ -251,7 +254,7 @@ class _QuranImageReaderState extends State<QuranImageReader>
   /// Deferring to the next frame lets the rotation frame complete unencumbered,
   /// then the warmup runs when the GPU is idle.
   void _scheduleOrientationPrewarm() {
-    final currentPage = _lastSettledPageIndex + 1;
+    final currentPage = _settledAbsolutePage;
     PerfLogger.log(
       widgetName: 'QuranImageReader',
       message:
@@ -391,13 +394,13 @@ class _QuranImageReaderState extends State<QuranImageReader>
       // App returned to foreground — restart prewarm for the current page so
       // the unlock frame has warm images if the cache survived.
       _imagePrewarmer.prewarmCurrentTarget(
-        pageNumber: _lastSettledPageIndex + 1,
+        pageNumber: _settledAbsolutePage,
         cacheWidth: _cacheWidth,
       );
       PerfLogger.log(
         widgetName: 'QuranImageReader',
         message:
-            'app foregrounded page=${_lastSettledPageIndex + 1} '
+            'app foregrounded page=$_settledAbsolutePage '
             'cacheWidth=$_cacheWidth',
       );
     }
@@ -415,7 +418,7 @@ class _QuranImageReaderState extends State<QuranImageReader>
         widgetName: 'QuranImageReader',
         message:
             'memory pressure ignored reason=app-in-background '
-            'page=${_lastSettledPageIndex + 1}',
+            'page=$_settledAbsolutePage',
       );
       return;
     }
@@ -426,7 +429,7 @@ class _QuranImageReaderState extends State<QuranImageReader>
       message:
           'memory pressure handled '
           'snapshotsCleared=true '
-          'page=${_lastSettledPageIndex + 1}',
+          'page=$_settledAbsolutePage',
     );
   }
 
@@ -439,8 +442,8 @@ class _QuranImageReaderState extends State<QuranImageReader>
     }
     final page = _pageController.page;
     if (page == null) return;
-    // Round to nearest page index (0-based) then convert to 1-based page number.
-    final nearest = page.round() + 1;
+    // Round to nearest page index (0-based) then convert to absolute page.
+    final nearest = _currentPageBounds().firstPage + page.round();
     if (nearest == _lastScrollPrewarmPage) return;
     _lastScrollPrewarmPage = nearest;
     _imagePrewarmer.prewarmCurrentTarget(
@@ -524,6 +527,20 @@ class _QuranImageReaderState extends State<QuranImageReader>
     _previewPageStateNotifier.value = null;
   }
 
+  ({int firstPage, int lastPage}) _currentPageBounds() {
+    final state = context.read<NavigationBloc>().state;
+    if (state is NavigationLoaded) {
+      return (
+        firstPage: state.pageState.firstPage,
+        lastPage: state.pageState.lastPage,
+      );
+    }
+    return (firstPage: 1, lastPage: PageState.quranPageCount);
+  }
+
+  int get _settledAbsolutePage =>
+      _currentPageBounds().firstPage + _lastSettledPageIndex;
+
   void _navigateToPage(int pageNumber) {
     PerfLogger.log(
       widgetName: 'QuranImageReader',
@@ -536,8 +553,12 @@ class _QuranImageReaderState extends State<QuranImageReader>
     final navTimer = Stopwatch()..start();
     final requestGeneration = ++_navigationRequestGeneration;
     _jumpTransitionSnapshotNotifier.value = null;
-    final safePageNumber = pageNumber.clamp(1, PageState.quranPageCount);
-    final targetIndex = safePageNumber - 1;
+    final pageBounds = _currentPageBounds();
+    final safePageNumber = pageNumber.clamp(
+      pageBounds.firstPage,
+      pageBounds.lastPage,
+    );
+    final targetIndex = safePageNumber - pageBounds.firstPage;
     if (targetIndex == _lastSettledPageIndex) {
       _clearPreviewPage();
       PerfLogger.log(
@@ -691,7 +712,8 @@ class _QuranImageReaderState extends State<QuranImageReader>
   }
 
   void _onReaderPageChanged(int pageNumber) {
-    final pageIndex = pageNumber - 1;
+    final pageBounds = _currentPageBounds();
+    final pageIndex = pageNumber - pageBounds.firstPage;
     _lastSettledPageIndex = pageIndex;
     _clearPreviewPage();
     PerfLogger.log(widgetName: 'PageView', message: 'swiped page=$pageNumber');
@@ -753,7 +775,8 @@ class _QuranImageReaderState extends State<QuranImageReader>
   void _navigateToPreviousPage() {
     final currentState = context.read<NavigationBloc>().state;
     if (currentState is! NavigationLoaded ||
-        currentState.pageState.currentPage <= 1) {
+        currentState.pageState.currentPage <=
+            currentState.pageState.firstPage) {
       return;
     }
     PerfLogger.log(
@@ -769,8 +792,7 @@ class _QuranImageReaderState extends State<QuranImageReader>
   void _navigateToNextPage() {
     final currentState = context.read<NavigationBloc>().state;
     if (currentState is! NavigationLoaded ||
-        currentState.pageState.currentPage >=
-            currentState.pageState.totalPages) {
+        currentState.pageState.currentPage >= currentState.pageState.lastPage) {
       return;
     }
     PerfLogger.log(
@@ -826,8 +848,8 @@ class _QuranImageReaderState extends State<QuranImageReader>
 
   Future<void> _preparePageForNavigation(int pageNumber) async {
     if (!mounted ||
-        pageNumber < 1 ||
-        pageNumber > PageState.quranPageCount ||
+        pageNumber < _currentPageBounds().firstPage ||
+        pageNumber > _currentPageBounds().lastPage ||
         _cacheWidth <= 0) {
       return;
     }
@@ -855,8 +877,8 @@ class _QuranImageReaderState extends State<QuranImageReader>
     int pageNumber,
   ) async {
     if (!mounted ||
-        pageNumber < 1 ||
-        pageNumber > PageState.quranPageCount ||
+        pageNumber < _currentPageBounds().firstPage ||
+        pageNumber > _currentPageBounds().lastPage ||
         _cacheWidth <= 0) {
       return null;
     }
@@ -1130,6 +1152,11 @@ class _QuranImageReaderState extends State<QuranImageReader>
                       ),
                       QuranReaderViewport(
                         pageController: _pageController,
+                        firstPage: _currentPageBounds().firstPage,
+                        pageCount:
+                            _currentPageBounds().lastPage -
+                            _currentPageBounds().firstPage +
+                            1,
                         onToggleNavigation: _toggleNavigation,
                         onShowNavigation: _showNavigation,
                         onPageChanged: _onReaderPageChanged,
@@ -1169,7 +1196,7 @@ class _QuranImageReaderState extends State<QuranImageReader>
               onInteractionStart: _onNavigationInteractionStarted,
               onInteractionEnd: _onNavigationInteractionEnded,
               onShareRequested: widget.onShareRequested != null
-                  ? () => widget.onShareRequested!(_lastSettledPageIndex + 1)
+                  ? () => widget.onShareRequested!(_settledAbsolutePage)
                   : null,
               onShowIndex: widget.onShowIndex,
               trailingAction: widget.viewSwitchAction,
@@ -1196,7 +1223,7 @@ class _QuranImageReaderState extends State<QuranImageReader>
         listener: (context, state) {
           if (state is NavigationLoaded) {
             final target = state.pageState.currentPage;
-            if (target != _lastSettledPageIndex + 1) {
+            if (target != _settledAbsolutePage) {
               _navigateToPage(target);
             }
           }
