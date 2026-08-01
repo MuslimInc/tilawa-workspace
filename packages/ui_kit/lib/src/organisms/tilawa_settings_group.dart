@@ -118,6 +118,49 @@ class TilawaHubNavigationGroup extends StatelessWidget {
   }
 }
 
+/// Flat settings section for utility screens with one continuous page surface.
+///
+/// Rows remain visually separated by their own hairline dividers; no card,
+/// border, radius, or elevated background is added around the section.
+class TilawaSettingsSection extends StatelessWidget {
+  const TilawaSettingsSection({
+    super.key,
+    required this.title,
+    required this.children,
+    this.includeTopGap = true,
+  });
+
+  final String title;
+  final List<Widget> children;
+
+  /// Adds [MeMuslimDesignTokens.spaceLarge] above the section header.
+  final bool includeTopGap;
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final tokens = theme.tokens;
+    final topGap = includeTopGap ? tokens.spaceMedium : 0.0;
+
+    return _TilawaSettingsSectionLayout(
+      topGap: topGap,
+      header: TilawaSectionHeader(
+        title: title,
+        padding: EdgeInsetsDirectional.only(
+          start: tokens.spaceSmall,
+          top: tokens.spaceSmall,
+          bottom: tokens.spaceExtraSmall,
+        ),
+        titleTextStyle: theme.textTheme.labelLarge?.copyWith(
+          color: theme.colorScheme.onSurfaceVariant,
+          fontWeight: FontWeight.w700,
+        ),
+      ),
+      children: children,
+    );
+  }
+}
+
 class TilawaSettingsGroup extends StatelessWidget {
   const TilawaSettingsGroup({
     super.key,
@@ -138,18 +181,36 @@ class TilawaSettingsGroup extends StatelessWidget {
   Widget build(BuildContext context) {
     final topGap = includeTopGap ? Theme.of(context).tokens.spaceLarge : 0.0;
 
+    return _TilawaSettingsSectionLayout(
+      topGap: topGap,
+      header: TilawaSectionHeader.settings(
+        title: title,
+        leadingIcon: leadingIcon,
+      ),
+      children: [TilawaSettingsGroupPanel(children: children)],
+    );
+  }
+}
+
+class _TilawaSettingsSectionLayout extends StatelessWidget {
+  const _TilawaSettingsSectionLayout({
+    required this.topGap,
+    required this.header,
+    required this.children,
+  });
+
+  final double topGap;
+  final Widget header;
+  final List<Widget> children;
+
+  @override
+  Widget build(BuildContext context) {
     return Padding(
       padding: EdgeInsets.only(top: topGap),
       child: TilawaSettingsGroupHorizontalInset(
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.stretch,
-          children: [
-            TilawaSectionHeader.settings(
-              title: title,
-              leadingIcon: leadingIcon,
-            ),
-            TilawaSettingsGroupPanel(children: children),
-          ],
+          children: [header, ...children],
         ),
       ),
     );

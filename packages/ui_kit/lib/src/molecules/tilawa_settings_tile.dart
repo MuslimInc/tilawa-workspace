@@ -45,14 +45,19 @@ class TilawaSettingsTile extends StatelessWidget {
     required this.onTap,
     this.subtitle,
     this.iconColor,
+    this.titleColor,
     this.showDivider = true,
     this.borderRadius = BorderRadius.zero,
     this.trailing,
+    this.showChevron = true,
     this.semanticsIdentifier,
   });
 
   final IconData? icon;
   final Color? iconColor;
+
+  /// Optional semantic foreground for the title, such as a destructive action.
+  final Color? titleColor;
   final String title;
   final VoidCallback onTap;
 
@@ -65,6 +70,9 @@ class TilawaSettingsTile extends StatelessWidget {
   final bool showDivider;
   final BorderRadiusGeometry borderRadius;
   final Widget? trailing;
+
+  /// Whether to show the default navigation chevron when [trailing] is absent.
+  final bool showChevron;
   final String? semanticsIdentifier;
 
   @override
@@ -104,16 +112,19 @@ class TilawaSettingsTile extends StatelessWidget {
             title,
             subtitle: subtitle,
             tokens: tokens,
+            titleColor: titleColor,
           ),
           trailing:
               trailing ??
-              Icon(
-                TilawaIcons.chevronRightSmall,
-                size: tokens.tileTrailingSize,
-                color: colorScheme.onSurfaceVariant.withValues(
-                  alpha: tokens.tileTrailingOpacity,
-                ),
-              ),
+              (showChevron
+                  ? Icon(
+                      TilawaIcons.chevronRightSmall,
+                      size: tokens.tileTrailingSize,
+                      color: colorScheme.onSurfaceVariant.withValues(
+                        alpha: tokens.tileTrailingOpacity,
+                      ),
+                    )
+                  : null),
         ),
         if (showDivider)
           Padding(
@@ -218,10 +229,12 @@ class _SettingsTileLabel extends StatelessWidget {
     this.title, {
     required this.tokens,
     this.subtitle,
+    this.titleColor,
   });
 
   final String title;
   final String? subtitle;
+  final Color? titleColor;
   final TilawaSettingsGroupTokens tokens;
 
   @override
@@ -231,6 +244,7 @@ class _SettingsTileLabel extends StatelessWidget {
       return _SettingsTileTitle(
         title,
         tokens: tokens,
+        color: titleColor,
       );
     }
 
@@ -238,6 +252,7 @@ class _SettingsTileLabel extends StatelessWidget {
       title: title,
       subtitle: subtitleText,
       tokens: tokens,
+      titleColor: titleColor,
     );
   }
 }
@@ -247,11 +262,13 @@ class _SettingsTileTitleStack extends StatelessWidget {
     required this.title,
     required this.subtitle,
     required this.tokens,
+    this.titleColor,
   });
 
   final String title;
   final String subtitle;
   final TilawaSettingsGroupTokens tokens;
+  final Color? titleColor;
 
   @override
   Widget build(BuildContext context) {
@@ -263,6 +280,7 @@ class _SettingsTileTitleStack extends StatelessWidget {
         _SettingsTileTitle(
           title,
           tokens: tokens,
+          color: titleColor,
         ),
         Text(
           subtitle,
@@ -280,10 +298,12 @@ class _SettingsTileTitle extends StatelessWidget {
   const _SettingsTileTitle(
     this.title, {
     required this.tokens,
+    this.color,
   });
 
   final String title;
   final TilawaSettingsGroupTokens tokens;
+  final Color? color;
 
   @override
   Widget build(BuildContext context) {
@@ -292,22 +312,23 @@ class _SettingsTileTitle extends StatelessWidget {
       maxLines: 2,
       overflow: TextOverflow.ellipsis,
       textAlign: TextAlign.start,
-      style: _titleStyle(context, tokens),
+      style: _titleStyle(context, tokens, color: color),
     );
   }
 }
 
 TextStyle _titleStyle(
   BuildContext context,
-  TilawaSettingsGroupTokens tokens,
-) {
+  TilawaSettingsGroupTokens tokens, {
+  Color? color,
+}) {
   final theme = Theme.of(context);
   return tilawaResolveTextRole(
     theme.textTheme,
     tokens.tileTitleTextRole,
   ).copyWith(
     fontWeight: FontWeight.w600,
-    color: theme.colorScheme.onSurface,
+    color: color ?? theme.colorScheme.onSurface,
     height: 1.2,
   );
 }

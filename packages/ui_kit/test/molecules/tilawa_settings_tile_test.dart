@@ -108,5 +108,48 @@ void main() {
 
       expect(find.byType(TilawaInteractiveSurface), findsOneWidget);
     });
+
+    testWidgets('applies an optional semantic title color', (
+      WidgetTester tester,
+    ) async {
+      const title = 'Delete account';
+
+      await tester.pumpWidget(
+        _app(
+          SizedBox(
+            width: 360,
+            child: TilawaSettingsTile(
+              title: title,
+              titleColor: Colors.red,
+              onTap: () {},
+              showDivider: false,
+            ),
+          ),
+        ),
+      );
+
+      final Text titleWidget = tester.widget(find.text(title));
+      expect(titleWidget.style?.color, Colors.red);
+    });
+
+    testWidgets('can omit navigation affordance for immediate actions', (
+      WidgetTester tester,
+    ) async {
+      await tester.pumpWidget(
+        _app(
+          SizedBox(
+            width: 360,
+            child: TilawaSettingsTile(
+              title: 'Logout',
+              showChevron: false,
+              onTap: () {},
+              showDivider: false,
+            ),
+          ),
+        ),
+      );
+
+      expect(find.byIcon(TilawaIcons.chevronRightSmall), findsNothing);
+    });
   });
 }
