@@ -92,10 +92,10 @@ class _TilawaCardNestedTapDemoScreenState
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.stretch,
                       children: <Widget>[
-                        Semantics(
-                          identifier: TilawaCardDemoSemanticsIds.blankArea,
-                          child: const Expanded(
-                            child: Align(
+                        Expanded(
+                          child: Semantics(
+                            identifier: TilawaCardDemoSemanticsIds.blankArea,
+                            child: const Align(
                               alignment: AlignmentDirectional.centerStart,
                               child: Text('Blank body'),
                             ),
