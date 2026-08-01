@@ -170,6 +170,26 @@ void main() {
       });
     });
 
+    test('flags Xiaomi / Redmi ROM for autostart guidance', () async {
+      when(mockService.canScheduleExactAlarms()).thenAnswer((_) async => true);
+      when(mockPermissions.isPermissionGranted()).thenAnswer((_) async => true);
+      when(mockAdhanPlayer.manufacturer()).thenAnswer((_) async => 'Xiaomi');
+
+      final result = await useCase();
+
+      result.fold((l) => fail('Expected Right but got Left: $l'), (
+        capability,
+      ) {
+        expect(capability.oemRequiresAutostart, isTrue);
+      });
+
+      when(mockAdhanPlayer.manufacturer()).thenAnswer((_) async => 'Redmi');
+      final redmi = await useCase();
+      redmi.fold((l) => fail('Expected Right but got Left: $l'), (capability) {
+        expect(capability.oemRequiresAutostart, isTrue);
+      });
+    });
+
     test(
       'returns isIgnoringBatteryOptimizations=false when adhan player reports false',
       () async {

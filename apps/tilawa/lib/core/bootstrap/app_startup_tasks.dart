@@ -65,6 +65,7 @@ import 'package:tilawa/router/app_router.dart';
 import 'package:tilawa/router/app_router_config.dart';
 import 'package:tilawa/router/notification_navigation_resolver.dart';
 import 'package:tilawa/shared/audio/audio_player_handler.dart';
+import 'package:tilawa/shared/audio/tilawa_audio_service_config.dart';
 import 'package:tilawa_core/observers/app_bloc_observer.dart';
 import 'package:tilawa_core/services/app_orientation_service.dart';
 import 'package:tilawa_core/services/interfaces/athkar_notification_service_interface.dart';
@@ -1194,17 +1195,7 @@ class AppStartupTasks {
       final handler = getIt<AudioPlayerHandler>();
       await AudioService.init(
         builder: () => handler as AudioHandler,
-        config: const AudioServiceConfig(
-          androidNotificationChannelId: 'com.tilawa.app.channel.audio',
-          androidNotificationChannelName: 'Audio playback',
-          androidNotificationOngoing: true,
-          // Required companion of ongoing=true; while paused the service drops
-          // FGS priority (killable). While playing, FGS stays elevated.
-          androidStopForegroundOnPause: true,
-          // Bound artwork decode RAM during long background listens (LMK risk).
-          artDownscaleWidth: 256,
-          artDownscaleHeight: 256,
-        ),
+        config: TilawaAudioServiceConfig.value,
       );
       SessionDiagnosticsHub.bindAudioHandler(handler);
       _wirePlaybackNotificationBridge();

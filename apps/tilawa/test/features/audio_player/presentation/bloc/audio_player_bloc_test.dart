@@ -824,13 +824,17 @@ void main() {
       build: buildBloc,
       act: (bloc) => bloc.add(const AudioPlayerEvent.audioTimerExpired()),
       expect: () => [
-        isA<AudioPlayerState>().having(
-          (s) => s.sleepTimerTargetTime,
-          'sleepTimerTargetTime',
-          isNull,
-        ),
+        isA<AudioPlayerState>()
+            .having(
+              (s) => s.sleepTimerTargetTime,
+              'sleepTimerTargetTime',
+              isNull,
+            )
+            // Pause only — session must keep the track (unlike OEM process kill).
+            .having((s) => s.currentAudio, 'currentAudio', historyAudio),
       ],
       verify: (_) {
+        verify(mockPauseAudio.call()).called(1);
         verify(
           mockAddOrUpdateHistory.call(
             surahId: 789,
