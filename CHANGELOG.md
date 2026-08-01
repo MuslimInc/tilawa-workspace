@@ -7,8 +7,19 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [2.2.4+97] - 2026-08-01 [Google Play Production]
+
+### Changed
+
+- **Settings**: Replace raised preference groups with flat, continuous sections;
+  present logout and delete-account actions as compact, localized account rows.
+- **Home**: Match cold-start placeholders to the loaded dashboard hierarchy with
+  neutral action surfaces and a structured five-prayer schedule skeleton.
+
 ### Fixed
 
+- **Android startup**: Keep the reused Flutter engine attached through Activity
+  recreation and hand off the splash as soon as the first Flutter frame renders.
 - **Sentry**: Drop non-actionable Android AppExitInfo Background ANRs whose
   main looper is idle (`nativePollOnce` / `epoll_pwait`) and Quran playback
   was not active (OEM kill noise, Sentry `FLUTTER-8`).
@@ -1260,4 +1271,3 @@ ReciterDetailsRoute(reciterId: '123', reciter: reciter).go(context);
 ## Previous Versions
 
 _Previous changelog entries would be documented here_
-

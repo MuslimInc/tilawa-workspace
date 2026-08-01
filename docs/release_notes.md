@@ -12,6 +12,33 @@ the changelog for full engineering detail.
 
 | Field | Value |
 |-------|--------|
+| Version | **2.2.4** (build **97**) |
+| Git tag | `v2.2.4+97` (pending) |
+| Date | 2026-08-01 |
+| Track | Google Play Production — Preparing |
+
+### What's new (en-US) — copy for Play Console
+
+```text
+• Faster, smoother startup on Android
+• Cleaner Settings layout with clearer account actions
+• More natural Home loading placeholders
+```
+
+### ما الجديد (ar) — نص متجر Play
+
+```text
+• تشغيل أسرع وأكثر سلاسة على أندرويد
+• تصميم أوضح للإعدادات وإجراءات الحساب
+• مؤشرات تحميل أكثر تناسقًا في الرئيسية
+```
+
+---
+
+## Previous current release (2.2.3+96)
+
+| Field | Value |
+|-------|--------|
 | Version | **2.2.3** (build **96**) |
 | Git tag | `v2.2.3+96` (pending) |
 | Date | 2026-07-31 |
@@ -35,7 +62,7 @@ the changelog for full engineering detail.
 
 ---
 
-## Previous current release (2.2.2+95)
+## Previous release (2.2.2+95)
 
 | Field | Value |
 |-------|--------|
@@ -883,7 +910,6 @@ Tilawa keeps **one shared version** in [`apps/tilawa/pubspec.yaml`](../apps/tila
      `dart run melos run tilawa:build:android:production`.
    - iOS: archive the **production** flavor for TestFlight (`com.memuslim.app`).
 5. Android checklist: [`google_play_release_checklist.md`](google_play_release_checklist.md)
-
 
 
 
