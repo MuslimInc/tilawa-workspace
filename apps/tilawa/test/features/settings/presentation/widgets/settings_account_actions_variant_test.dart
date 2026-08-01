@@ -1,4 +1,5 @@
 import 'package:bloc_test/bloc_test.dart';
+import 'package:fluentui_system_icons/fluentui_system_icons.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_test/flutter_test.dart';
@@ -11,6 +12,26 @@ import 'package:tilawa/l10n/generated/app_localizations.dart';
 import 'package:tilawa_ui_kit/tilawa_ui_kit.dart';
 
 class _MockAuthBloc extends MockCubit<AuthState> implements AuthBloc {}
+
+Widget _app(AuthBloc authBloc, {Locale locale = const Locale('en')}) {
+  return MaterialApp(
+    theme: AppTheme.getLightTheme(
+      primaryColor: PrimaryColorPreset.defaultPreset.value,
+    ),
+    supportedLocales: AppLocalizations.supportedLocales,
+    localizationsDelegates: AppLocalizations.localizationsDelegates,
+    locale: locale,
+    home: BlocProvider<AuthBloc>.value(
+      value: authBloc,
+      child: Scaffold(
+        body: SettingsAccountActions(
+          onLogout: () {},
+          onDeleteAccount: () {},
+        ),
+      ),
+    ),
+  );
+}
 
 void main() {
   late _MockAuthBloc authBloc;
@@ -28,35 +49,42 @@ void main() {
     when(() => authBloc.stream).thenAnswer((_) => const Stream.empty());
   });
 
-  testWidgets('logout uses ghost variant for lower emphasis', (tester) async {
-    await tester.pumpWidget(
-      MaterialApp(
-        theme: AppTheme.getLightTheme(
-          primaryColor: PrimaryColorPreset.defaultPreset.value,
-        ),
-        supportedLocales: AppLocalizations.supportedLocales,
-        localizationsDelegates: AppLocalizations.localizationsDelegates,
-        locale: const Locale('en'),
-        home: BlocProvider<AuthBloc>.value(
-          value: authBloc,
-          child: Scaffold(
-            body: SettingsAccountActions(
-              onLogout: () {},
-              onDeleteAccount: () {},
-            ),
-          ),
-        ),
-      ),
-    );
+  testWidgets('uses compact account rows with calm destructive emphasis', (
+    tester,
+  ) async {
+    await tester.pumpWidget(_app(authBloc));
     await tester.pump();
 
-    final TilawaButton logout = tester.widget(
-      find.widgetWithText(TilawaButton, 'Logout'),
+    final tiles = tester.widgetList<TilawaSettingsTile>(
+      find.byType(TilawaSettingsTile),
     );
-    final TilawaButton delete = tester.widget(
-      find.widgetWithText(TilawaButton, 'Delete account'),
+    final delete = tiles.singleWhere((tile) => tile.title == 'Delete account');
+
+    expect(find.text('Your account'), findsOneWidget);
+    expect(find.byType(TilawaButton), findsNothing);
+    expect(tiles, hasLength(2));
+    expect(delete.icon, FluentIcons.delete_24_regular);
+    expect(
+      delete.iconColor,
+      Theme.of(tester.element(find.text('Delete account'))).colorScheme.error,
     );
-    expect(logout.variant, TilawaButtonVariant.ghost);
-    expect(delete.variant, TilawaButtonVariant.dangerOutline);
+    expect(delete.titleColor, delete.iconColor);
+    expect(delete.showDivider, isFalse);
+    expect(tiles.every((tile) => !tile.showChevron), isTrue);
+  });
+
+  testWidgets('keeps account actions localized in RTL', (tester) async {
+    await tester.pumpWidget(_app(authBloc, locale: const Locale('ar')));
+    await tester.pump();
+
+    final BuildContext context = tester.element(
+      find.byType(SettingsAccountActions),
+    );
+    final AppLocalizations l10n = AppLocalizations.of(context);
+
+    expect(Directionality.of(context), TextDirection.rtl);
+    expect(find.text(l10n.settingsYourAccount), findsOneWidget);
+    expect(find.text(l10n.logout), findsOneWidget);
+    expect(find.text(l10n.deleteAccount), findsOneWidget);
   });
 }

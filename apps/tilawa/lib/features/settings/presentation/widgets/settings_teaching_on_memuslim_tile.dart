@@ -28,7 +28,7 @@ bool _suppressTeachingSectionForGoogleFormApply({
 /// Self-contained Settings block for teacher capability — no section header.
 ///
 /// Premium approved states render a standalone [TilawaCapabilityActionCard].
-/// Other states keep a single-row [TilawaSettingsGroupPanel] without a title.
+/// Other states keep a flat single row on the shared Settings surface.
 class SettingsTeachingOnMemuslimSection extends StatelessWidget {
   const SettingsTeachingOnMemuslimSection({super.key});
 
@@ -98,10 +98,8 @@ class SettingsTeachingOnMemuslimSection extends StatelessWidget {
         top: tokens.spaceMedium,
         bottom: tokens.spaceLarge,
       ),
-      child: TilawaSettingsGroupHorizontalInset(
-        child: capability.showsPremiumSettingsCapabilityCard
-            ? tile
-            : const TilawaSettingsGroupPanel(children: [tile]),
+      child: const TilawaSettingsGroupHorizontalInset(
+        child: tile,
       ),
     );
   }

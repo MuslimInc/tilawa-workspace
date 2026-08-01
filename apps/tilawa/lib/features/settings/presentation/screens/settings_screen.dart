@@ -1,6 +1,5 @@
 import 'dart:async';
 
-import 'package:fluentui_system_icons/fluentui_system_icons.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
@@ -139,14 +138,13 @@ class _SettingsScreenState extends State<SettingsScreen> {
                 ),
                 children: [
                   const SettingsProfileHeader(),
-                  const SettingsGuestAccountGroup(),
+                  const SettingsGuestAccountSection(),
                   if (!isGuest &&
                       quranSessionsFeatureConfig().quranSessionsEnabled)
                     const SettingsTeachingOnMemuslimSection(),
                   // Preference cluster — daily controls under identity.
-                  TilawaSettingsGroup(
+                  TilawaSettingsSection(
                     title: l10n.settingsAppearance,
-                    leadingIcon: FluentIcons.weather_moon_24_regular,
                     includeTopGap: isGuest,
                     children: [
                       BlocBuilder<ThemeCubit, ThemeState>(
@@ -207,9 +205,8 @@ class _SettingsScreenState extends State<SettingsScreen> {
                   ),
                   // Content & playback — merged reciters display, daily
                   // guidance, and playback/storage to cut single-tile headers.
-                  TilawaSettingsGroup(
+                  TilawaSettingsSection(
                     title: l10n.settingsContentAndPlayback,
-                    leadingIcon: FluentIcons.storage_24_regular,
                     children: [
                       BlocBuilder<SettingsCubit, SettingsState>(
                         builder: (context, state) {
@@ -262,9 +259,8 @@ class _SettingsScreenState extends State<SettingsScreen> {
                     ],
                   ),
                   if (!isGuest)
-                    TilawaSettingsGroup(
+                    TilawaSettingsSection(
                       title: l10n.settingsSecuritySection,
-                      leadingIcon: FluentIcons.phone_24_regular,
                       children: [
                         TilawaSettingsTile(
                           title: l10n.settingsManageDevicesTile,
@@ -273,12 +269,8 @@ class _SettingsScreenState extends State<SettingsScreen> {
                         ),
                       ],
                     ),
-                  // Support / legal cluster — larger gap from preferences.
-                  SizedBox(height: tokens.spaceExtraLarge),
-                  TilawaSettingsGroup(
+                  TilawaSettingsSection(
                     title: l10n.settingsSupportSection,
-                    leadingIcon: FluentIcons.person_support_24_regular,
-                    includeTopGap: false,
                     children: [
                       if (widget.sadaqahJariyahEnabled)
                         const SettingsSadaqahJariyahTile(),
@@ -296,6 +288,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
                               getIt<WhatsNewCoordinator>().showFromSettings(),
                         ),
                       SettingsShareAppTile(
+                        isLast: !widget.privacyPolicyEnabled,
                         onShareRequested: () {
                           final shareText = buildSettingsShareAppText(l10n);
                           return widget.shareContent(
@@ -320,17 +313,15 @@ class _SettingsScreenState extends State<SettingsScreen> {
                         ),
                   ),
                   if (isQuranSessionsDebugToolsVisible())
-                    const TilawaSettingsGroup(
+                    const TilawaSettingsSection(
                       title: 'QA Tools',
-                      leadingIcon: FluentIcons.beaker_24_regular,
                       children: [
                         DebugLiveKitCallTile(isLast: true),
                       ],
                     ),
                   if (kDebugMode)
-                    TilawaSettingsGroup(
+                    TilawaSettingsSection(
                       title: 'Developer',
-                      leadingIcon: FluentIcons.code_24_regular,
                       children: [
                         TilawaSettingsTile(
                           title: 'Route list',

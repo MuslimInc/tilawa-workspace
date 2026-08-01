@@ -461,8 +461,8 @@ class _SettingsShareAppTileState extends State<SettingsShareAppTile> {
   }
 }
 
-class SettingsGuestAccountGroup extends StatelessWidget {
-  const SettingsGuestAccountGroup({super.key});
+class SettingsGuestAccountSection extends StatelessWidget {
+  const SettingsGuestAccountSection({super.key});
 
   @override
   Widget build(BuildContext context) {
@@ -472,9 +472,8 @@ class SettingsGuestAccountGroup extends StatelessWidget {
           return const SizedBox.shrink();
         }
 
-        return TilawaSettingsGroup(
+        return TilawaSettingsSection(
           title: context.l10n.settingsLoginSection,
-          leadingIcon: FluentIcons.person_24_regular,
           includeTopGap: false,
           children: [
             TilawaSettingsTile(
@@ -627,39 +626,34 @@ class _SettingsAccountActionsState extends State<SettingsAccountActions> {
           return const SizedBox.shrink();
         }
 
-        final tokens = context.tokens;
+        final colorScheme = Theme.of(context).colorScheme;
 
-        return TilawaSettingsGroupHorizontalInset(
-          child: Padding(
-            // Extra gap before destructive zone — separate from preference/
-            // support scan path (proximity chunking).
-            padding: EdgeInsets.only(top: tokens.spaceExtraLarge),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.stretch,
-              spacing: tokens.spaceSmall,
-              children: [
-                TilawaButton(
-                  text: context.l10n.logout,
-                  variant: TilawaButtonVariant.ghost,
-                  isFullWidth: true,
-                  onPressed: () => unawaited(
-                    _guardAndRun(ServerActionType.logout, widget.onLogout),
-                  ),
-                ),
-                TilawaButton(
-                  text: context.l10n.deleteAccount,
-                  variant: TilawaButtonVariant.dangerOutline,
-                  isFullWidth: true,
-                  onPressed: () => unawaited(
-                    _guardAndRun(
-                      ServerActionType.deleteAccount,
-                      widget.onDeleteAccount,
-                    ),
-                  ),
-                ),
-              ],
+        return TilawaSettingsSection(
+          title: context.l10n.settingsYourAccount,
+          children: [
+            TilawaSettingsTile(
+              icon: FluentIcons.sign_out_24_regular,
+              title: context.l10n.logout,
+              showChevron: false,
+              onTap: () => unawaited(
+                _guardAndRun(ServerActionType.logout, widget.onLogout),
+              ),
             ),
-          ),
+            TilawaSettingsTile(
+              icon: FluentIcons.delete_24_regular,
+              iconColor: colorScheme.error,
+              titleColor: colorScheme.error,
+              title: context.l10n.deleteAccount,
+              showDivider: false,
+              showChevron: false,
+              onTap: () => unawaited(
+                _guardAndRun(
+                  ServerActionType.deleteAccount,
+                  widget.onDeleteAccount,
+                ),
+              ),
+            ),
+          ],
         );
       },
     );
@@ -682,7 +676,7 @@ class SettingsLegalSection extends StatelessWidget {
 
     final l10n = context.l10n;
 
-    return TilawaSettingsGroup(
+    return TilawaSettingsSection(
       title: l10n.settingsLegalSection,
       children: [
         TilawaSettingsTile(

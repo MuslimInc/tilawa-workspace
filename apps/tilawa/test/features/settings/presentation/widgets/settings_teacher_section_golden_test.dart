@@ -213,7 +213,7 @@ class _AppearanceSectionStub extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return TilawaSettingsGroup(
+    return TilawaSettingsSection(
       title: AppLocalizations.of(context).settingsAppearance,
       children: const [
         SizedBox(height: 48, child: ColoredBox(color: Color(0xFFECECEC))),
