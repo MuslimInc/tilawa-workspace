@@ -91,10 +91,10 @@ jobs:
           distribution: zulu
           java-version: "17"
 
-      - name: Set up Flutter 3.44.2
+      - name: Set up Flutter 3.44.8
         uses: subosito/flutter-action@v2
         with:
-          flutter-version: "3.44.2"
+          flutter-version: "3.44.8"
           channel: stable
           cache: true
 
