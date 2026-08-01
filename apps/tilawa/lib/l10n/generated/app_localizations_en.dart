@@ -1194,6 +1194,22 @@ class AppLocalizationsEn extends AppLocalizations {
   String get settingsSupportSection => 'Support';
 
   @override
+  String get settingsFollowUsSection => 'Follow us';
+
+  @override
+  String get settingsFacebookTile => 'Facebook';
+
+  @override
+  String get settingsInstagramTile => 'Instagram';
+
+  @override
+  String get settingsYoutubeTile => 'YouTube';
+
+  @override
+  String get settingsOpenSocialLinkFailed =>
+      'We could not open this link. Please try again.';
+
+  @override
   String get whatsNewSettingsTile => 'What\'s new';
 
   @override

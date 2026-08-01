@@ -2101,6 +2101,36 @@ abstract class AppLocalizations {
   /// **'Support'**
   String get settingsSupportSection;
 
+  /// Settings section header for MeMuslim social channels
+  ///
+  /// In en, this message translates to:
+  /// **'Follow us'**
+  String get settingsFollowUsSection;
+
+  /// Settings row that opens the MeMuslim Facebook page
+  ///
+  /// In en, this message translates to:
+  /// **'Facebook'**
+  String get settingsFacebookTile;
+
+  /// Settings row that opens the MeMuslim Instagram profile
+  ///
+  /// In en, this message translates to:
+  /// **'Instagram'**
+  String get settingsInstagramTile;
+
+  /// Settings row that opens the MeMuslim YouTube channel
+  ///
+  /// In en, this message translates to:
+  /// **'YouTube'**
+  String get settingsYoutubeTile;
+
+  /// Error when launching a social profile URL from settings fails
+  ///
+  /// In en, this message translates to:
+  /// **'We could not open this link. Please try again.'**
+  String get settingsOpenSocialLinkFailed;
+
   /// Settings tile to open release notes for the current version
   ///
   /// In en, this message translates to:

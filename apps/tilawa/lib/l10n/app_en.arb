@@ -1368,6 +1368,26 @@
     "@settingsSupportSection": {
         "description": "Support section header on settings screen"
     },
+    "settingsFollowUsSection": "Follow us",
+    "@settingsFollowUsSection": {
+        "description": "Settings section header for MeMuslim social channels"
+    },
+    "settingsFacebookTile": "Facebook",
+    "@settingsFacebookTile": {
+        "description": "Settings row that opens the MeMuslim Facebook page"
+    },
+    "settingsInstagramTile": "Instagram",
+    "@settingsInstagramTile": {
+        "description": "Settings row that opens the MeMuslim Instagram profile"
+    },
+    "settingsYoutubeTile": "YouTube",
+    "@settingsYoutubeTile": {
+        "description": "Settings row that opens the MeMuslim YouTube channel"
+    },
+    "settingsOpenSocialLinkFailed": "We could not open this link. Please try again.",
+    "@settingsOpenSocialLinkFailed": {
+        "description": "Error when launching a social profile URL from settings fails"
+    },
     "whatsNewSettingsTile": "What's new",
     "@whatsNewSettingsTile": {
         "description": "Settings tile to open release notes for the current version"

@@ -1188,6 +1188,21 @@ class AppLocalizationsAr extends AppLocalizations {
   String get settingsSupportSection => 'الدعم';
 
   @override
+  String get settingsFollowUsSection => 'تابعنا';
+
+  @override
+  String get settingsFacebookTile => 'فيسبوك';
+
+  @override
+  String get settingsInstagramTile => 'إنستغرام';
+
+  @override
+  String get settingsYoutubeTile => 'يوتيوب';
+
+  @override
+  String get settingsOpenSocialLinkFailed => 'تعذر فتح الرابط. حاول مرة أخرى.';
+
+  @override
   String get whatsNewSettingsTile => 'ما الجديد';
 
   @override
