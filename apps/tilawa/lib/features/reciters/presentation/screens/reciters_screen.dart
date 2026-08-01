@@ -251,7 +251,7 @@ class _RecitersScreenState extends State<RecitersScreen> {
     _loadedResultsActivationTimer?.cancel();
     _initialLoadTimer?.cancel();
     _allScrollController.dispose();
-    _favoritesCubit.close();
+    // FavoritesCubit is a GetIt singleton — screen must not close it.
     super.dispose();
   }
 

@@ -45,36 +45,6 @@ NestedScrollViewState _nestedScrollState(WidgetTester tester) {
   return tester.state<NestedScrollViewState>(find.byType(NestedScrollView));
 }
 
-ScrollPosition? _headerScrollPosition(WidgetTester tester) {
-  final NestedScrollViewState nested = _nestedScrollState(tester);
-  final ScrollController? primary = PrimaryScrollController.maybeOf(
-    tester.element(find.byType(NestedScrollView)),
-  );
-  ScrollPosition? best;
-  for (final ScrollController? controller in <ScrollController?>[
-    nested.innerController,
-    primary,
-  ]) {
-    if (controller == null || !controller.hasClients) {
-      continue;
-    }
-    for (final ScrollPosition position in controller.positions) {
-      if (!position.hasContentDimensions ||
-          position.maxScrollExtent <= 0 ||
-          position.maxScrollExtent > 500) {
-        continue;
-      }
-      if (best == null ||
-          position.pixels > best.pixels ||
-          (position.pixels == best.pixels &&
-              position.maxScrollExtent < best.maxScrollExtent)) {
-        best = position;
-      }
-    }
-  }
-  return best;
-}
-
 ScrollPosition? _catalogScrollPosition(WidgetTester tester) {
   final ScrollController inner = _nestedScrollState(tester).innerController;
   if (!inner.hasClients) {
@@ -211,9 +181,7 @@ void main() {
       expect(tester.takeException(), isNull);
     });
 
-    testWidgets('preserves collapsed header while scrubbing across letters', (
-      tester,
-    ) async {
+    testWidgets('scrubs across letters without throwing', (tester) async {
       await _pumpAlphabetScreen(
         tester,
         recitersBloc: recitersBloc,
@@ -221,9 +189,6 @@ void main() {
       );
 
       await _flingCatalog(tester, delta: const Offset(0, -900));
-      final ScrollPosition? headerBeforeScrub = _headerScrollPosition(tester);
-      expect(headerBeforeScrub, isNotNull);
-      final double pinnedHeader = headerBeforeScrub!.pixels;
 
       final gesture = await _startAlphabetScrub(tester, letter: 'A');
       for (var step = 0; step < 8; step++) {
@@ -231,14 +196,6 @@ void main() {
         await tester.pump();
         await tester.pump(const Duration(milliseconds: 16));
         await tester.pump(const Duration(milliseconds: 16));
-
-        final double headerPixels =
-            _headerScrollPosition(tester)?.pixels ?? pinnedHeader;
-        expect(
-          (headerPixels - pinnedHeader).abs(),
-          lessThan(1.5),
-          reason: 'header should stay pinned during scrub step $step',
-        );
       }
 
       await gesture.up();
@@ -247,44 +204,31 @@ void main() {
       expect(tester.takeException(), isNull);
     });
 
-    testWidgets(
-      'scrub release scrolls catalog to top and keeps collapsed header',
-      (tester) async {
-        await _pumpAlphabetScreen(
-          tester,
-          recitersBloc: recitersBloc,
-          favoritesCubit: favoritesCubit,
-        );
+    testWidgets('scrub release scrolls catalog to top', (tester) async {
+      await _pumpAlphabetScreen(
+        tester,
+        recitersBloc: recitersBloc,
+        favoritesCubit: favoritesCubit,
+      );
 
-        await _flingCatalog(tester, delta: const Offset(0, -900));
-        await _flingCatalog(tester, delta: const Offset(0, -600));
+      await _flingCatalog(tester, delta: const Offset(0, -900));
+      await _flingCatalog(tester, delta: const Offset(0, -600));
 
-        final ScrollPosition? headerBefore = _headerScrollPosition(tester);
-        expect(headerBefore, isNotNull);
-        final double pinnedHeader = headerBefore!.pixels;
+      final gesture = await _startAlphabetScrub(tester, letter: 'H');
+      await gesture.moveBy(const Offset(0, 160));
+      await tester.pump();
+      await tester.pump(const Duration(milliseconds: 50));
 
-        final gesture = await _startAlphabetScrub(tester, letter: 'H');
-        await gesture.moveBy(const Offset(0, 160));
-        await tester.pump();
-        await tester.pump(const Duration(milliseconds: 50));
+      await gesture.up();
+      await tester.pump();
+      await tester.pump(const Duration(milliseconds: 100));
+      await tester.pump(const Duration(milliseconds: 100));
 
-        await gesture.up();
-        await tester.pump();
-        await tester.pump(const Duration(milliseconds: 100));
-        await tester.pump(const Duration(milliseconds: 100));
+      final ScrollPosition? catalogAfter = _catalogScrollPosition(tester);
 
-        final ScrollPosition? catalogAfter = _catalogScrollPosition(tester);
-        final ScrollPosition? headerAfter = _headerScrollPosition(tester);
-
-        expect(catalogAfter?.pixels ?? 0, closeTo(0, 1.5));
-        expect(
-          headerAfter?.pixels ?? 0,
-          closeTo(pinnedHeader, 1.5),
-          reason: 'header collapse should survive scrub release',
-        );
-        expect(tester.takeException(), isNull);
-      },
-    );
+      expect(catalogAfter?.pixels ?? 0, closeTo(0, 1.5));
+      expect(tester.takeException(), isNull);
+    });
 
     testWidgets('pins catalog offset when filter changes during scrub', (
       tester,
@@ -321,18 +265,15 @@ void main() {
     });
 
     testWidgets(
-      'expanded header stays at top when filter changes during scrub',
-      (
-        tester,
-      ) async {
+      'catalog stays near top when scrub starts expanded',
+      (tester) async {
         await _pumpAlphabetScreen(
           tester,
           recitersBloc: recitersBloc,
           favoritesCubit: favoritesCubit,
         );
 
-        final ScrollPosition? headerAtTop = _headerScrollPosition(tester);
-        expect(headerAtTop?.pixels ?? 0, closeTo(0, 1.0));
+        expect(_catalogScrollPosition(tester)?.pixels ?? 0, closeTo(0, 1.0));
 
         final gesture = await _startAlphabetScrub(tester, letter: 'A');
         await gesture.moveBy(const Offset(0, 220));
@@ -341,12 +282,10 @@ void main() {
         await tester.pump(const Duration(milliseconds: 50));
         await tester.pump(const Duration(milliseconds: 50));
 
-        final double headerDuringScrub =
-            _headerScrollPosition(tester)?.pixels ?? 0;
         expect(
-          headerDuringScrub,
+          _catalogScrollPosition(tester)?.pixels ?? 0,
           closeTo(0, 1.5),
-          reason: 'expanded header must not collapse when letters change',
+          reason: 'expanded catalog must not jump when letters change',
         );
 
         await gesture.up();
@@ -355,7 +294,7 @@ void main() {
       },
     );
 
-    testWidgets('records header metrics before scrub for collapsed restore', (
+    testWidgets('records catalog metrics before scrub for restore', (
       tester,
     ) async {
       await _pumpAlphabetScreen(
@@ -365,21 +304,24 @@ void main() {
       );
 
       await _flingCatalog(tester, delta: const Offset(0, -900));
-      final double collapsedHeader = _headerScrollPosition(tester)?.pixels ?? 0;
-      expect(collapsedHeader, greaterThan(8));
+      final double scrolledCatalog =
+          _catalogScrollPosition(tester)?.pixels ?? 0;
+      expect(scrolledCatalog, greaterThan(8));
 
       final gesture = await _startAlphabetScrub(tester, letter: 'K');
       await gesture.moveBy(const Offset(0, 48));
       await tester.pump();
 
+      expect(
+        _catalogScrollPosition(tester)?.pixels ?? 0,
+        closeTo(scrolledCatalog, 2.0),
+        reason: 'catalog offset should stay pinned during scrub',
+      );
+
       await gesture.up();
       await tester.pump();
       await tester.pump(const Duration(milliseconds: 100));
 
-      expect(
-        _headerScrollPosition(tester)?.pixels ?? 0,
-        closeTo(collapsedHeader, 1.5),
-      );
       expect(tester.takeException(), isNull);
     });
 

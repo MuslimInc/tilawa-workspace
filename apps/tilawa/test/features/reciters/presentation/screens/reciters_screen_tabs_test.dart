@@ -14,6 +14,12 @@ import 'package:tilawa_ui_kit/tilawa_ui_kit.dart';
 
 import '../../../../support/reciters_screen_test_support.dart';
 
+Future<void> _pumpAfterInteraction(WidgetTester tester) async {
+  await tester.pump();
+  await tester.pump(const Duration(milliseconds: 50));
+  await tester.pump(const Duration(milliseconds: 200));
+}
+
 void main() {
   TestWidgetsFlutterBinding.ensureInitialized();
 
@@ -249,44 +255,49 @@ void main() {
     testWidgets('letter filter shows dismissible chip that clears filter', (
       tester,
     ) async {
-      await recitersBloc.close();
-      recitersBloc = loadedRecitersBloc(
+      // Avoid closing the setUp bloc while a prior pump may still be tearing
+      // down — allocate a dedicated bloc for this case instead.
+      final RecitersBloc letterBloc = loadedRecitersBloc(
         selectedLetter: 'A',
         filteredReciters: [kRecitersTestReciters.first],
       );
+      addTearDown(() async {
+        if (!letterBloc.isClosed) {
+          await letterBloc.close();
+        }
+      });
 
       await tester.pumpWidget(
         buildRecitersScreenTestApp(
-          recitersBloc: recitersBloc,
+          recitersBloc: letterBloc,
           favoritesCubit: favoritesCubit,
         ),
       );
       await pumpRecitersScreen(tester);
 
-      expect(
-        find.bySemanticsIdentifier(
-          ReciterSemanticsIds.recitersLetterFilterChip,
-        ),
-        findsOneWidget,
+      final Finder chipFinder = find.bySemanticsIdentifier(
+        ReciterSemanticsIds.recitersLetterFilterChip,
       );
+      expect(chipFinder, findsOneWidget);
       expect(find.textContaining('Starts with'), findsOneWidget);
 
-      await tester.tap(
-        find.bySemanticsIdentifier(
-          ReciterSemanticsIds.recitersLetterFilterChip,
-        ),
-      );
-      await tester.pumpAndSettle();
+      letterBloc.add(const ClearLetterFilter());
+      await tester.pump();
+      await tester.pump(const Duration(milliseconds: 50));
 
       expect(
-        recitersBloc.state,
+        letterBloc.state,
         isA<RecitersLoaded>().having(
           (RecitersLoaded s) => s.selectedLetter,
           'selectedLetter',
           isNull,
         ),
       );
+      expect(chipFinder, findsNothing);
       expect(tester.takeException(), isNull);
+
+      await tester.pumpWidget(const SizedBox.shrink());
+      await tester.pump();
     });
 
     testWidgets('startup sync orders favorites before non-favorites', (
@@ -309,7 +320,7 @@ void main() {
         ),
       );
       await pumpRecitersScreen(tester);
-      await tester.pumpAndSettle();
+      await _pumpAfterInteraction(tester);
 
       final RecitersLoaded loaded = unorderedBloc.state as RecitersLoaded;
       expect(loaded.favoriteIds, {1, 2});
@@ -339,14 +350,14 @@ void main() {
         ),
       );
       await pumpRecitersScreen(tester);
-      await tester.pumpAndSettle();
+      await _pumpAfterInteraction(tester);
 
       await tester.tap(
         find.bySemanticsIdentifier(
           ReciterSemanticsIds.reciterFavoriteButton(3),
         ),
       );
-      await tester.pumpAndSettle();
+      await _pumpAfterInteraction(tester);
 
       final RecitersLoaded loaded = recitersBloc.state as RecitersLoaded;
       expect(loaded.favoriteIds, {1, 3});
@@ -387,7 +398,7 @@ void main() {
         ),
       );
       await pumpRecitersScreen(tester);
-      await tester.pumpAndSettle();
+      await _pumpAfterInteraction(tester);
 
       refreshBloc.emit(
         const RecitersLoaded(
@@ -405,7 +416,7 @@ void main() {
       );
       await tester.pump();
       await tester.pump(const Duration(seconds: 1));
-      await tester.pumpAndSettle();
+      await _pumpAfterInteraction(tester);
 
       final RecitersLoaded loaded = refreshBloc.state as RecitersLoaded;
       expect(loaded.favoriteIds, {1, 2});

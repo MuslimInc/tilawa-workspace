@@ -120,6 +120,22 @@ void main() {
     when(mockDownloadService.resume(any)).thenAnswer((_) async {
       return;
     });
+    when(
+      mockDownloadService.download(
+        id: anyNamed('id'),
+        url: anyNamed('url'),
+        filePath: anyNamed('filePath'),
+        title: anyNamed('title'),
+        reciterName: anyNamed('reciterName'),
+        reciterId: anyNamed('reciterId'),
+        showNotification: anyNamed('showNotification'),
+      ),
+    ).thenAnswer((_) async {
+      return;
+    });
+    when(mockLocalDataSource.addDownloads(any)).thenAnswer((_) async {
+      return;
+    });
     when(mockNetworkInfo.isConnected).thenAnswer((_) async => true);
 
     // Stub testing-specific new logic
@@ -829,16 +845,37 @@ void main() {
         },
       );
       test('should enqueue batch of items', () async {
-        // Arrange
+        // Arrange — mock queue manager so enqueueBatch does not await real
+        // DownloadService.download / periodic sync (can hang the test zone).
+        final GetIt getIt = GetIt.instance;
+        final mockQueueManager = MockDownloadQueueManager();
+        if (getIt.isRegistered<DownloadQueueManager>()) {
+          getIt.unregister<DownloadQueueManager>();
+        }
+        getIt.registerSingleton<DownloadQueueManager>(mockQueueManager);
+
+        repository = DownloadsRepositoryImpl(
+          mockLocalDataSource,
+          mockDownloadService,
+          mockBatchDownloadManager,
+          mockPathResolver,
+          mockStatusSynchronizer,
+          mockValidator,
+          mockQueueManager,
+          mockNetworkInfo,
+        );
+
+        when(mockQueueManager.isQueued(any)).thenReturn(false);
+        when(mockQueueManager.isActive(any)).thenReturn(false);
+        when(mockQueueManager.locale).thenReturn(const Locale('en'));
+        when(mockQueueManager.enqueueBatch(any)).thenAnswer((_) async {});
+
         final String testDownloadsDir = Directory.systemTemp
             .createTempSync()
             .path;
         when(
           mockPathResolver.getDownloadsDir(),
         ).thenAnswer((_) async => testDownloadsDir);
-        when(mockLocalDataSource.addDownload(any)).thenAnswer((_) async {
-          return;
-        });
 
         final List<
           ({int reciterId, String reciterName, String surahTitle, String url})
@@ -862,11 +899,9 @@ void main() {
         await repository.startDownloadBatch(items);
 
         // Assert
-        // getDownloadsDir is called once at the top of startDownloadBatch.
-        // The per-item isSurahDownloaded check was replaced with an in-memory
-        // scan of the pre-fetched existingDownloads list, so no extra calls.
         verify(mockPathResolver.getDownloadsDir()).called(1);
         verify(mockLocalDataSource.addDownloads(any)).called(1);
+        verify(mockQueueManager.enqueueBatch(any)).called(1);
         verifyNever(mockLocalDataSource.addDownload(any));
       });
 

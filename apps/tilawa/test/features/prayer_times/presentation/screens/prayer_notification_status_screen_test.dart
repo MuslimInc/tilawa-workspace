@@ -119,10 +119,10 @@ void main() {
     await pumpStatusScreenReady(tester);
 
     expect(find.text('Fajr'), findsOneWidget);
+    expect(find.text('Notification'), findsOneWidget);
+    expect(find.text('Received'), findsOneWidget);
     expect(find.text('Adhan'), findsOneWidget);
     expect(find.text('Enabled'), findsOneWidget);
-    expect(find.text('Sound'), findsOneWidget);
-    expect(find.text('adhan_makkah'), findsOneWidget);
   });
 
   testWidgets('accepts local notification payload keys', (tester) async {
