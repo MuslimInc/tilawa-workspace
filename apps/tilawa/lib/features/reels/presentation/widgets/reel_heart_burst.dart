@@ -1,6 +1,7 @@
 import 'dart:async';
 
 import 'package:flutter/material.dart';
+import 'package:tilawa_ui_kit/tilawa_ui_kit.dart';
 
 /// Short heart burst for double-tap / reaction.
 class ReelHeartBurst extends StatefulWidget {
@@ -50,7 +51,11 @@ class _ReelHeartBurstState extends State<ReelHeartBurst>
       child: ScaleTransition(
         scale: _scale,
         child: const Center(
-          child: Icon(Icons.favorite, size: 96, color: Colors.white),
+          child: Icon(
+            Icons.favorite,
+            size: 96,
+            color: AppReelsFeedColors.onCanvas,
+          ),
         ),
       ),
     );

@@ -133,7 +133,7 @@ class _ReelsFeedPageState extends State<ReelsFeedPage> {
         statusBarColor: Colors.transparent,
       ),
       child: Scaffold(
-        backgroundColor: Colors.black,
+        backgroundColor: AppReelsFeedColors.canvas,
         body: BlocConsumer<ReelsCubit, ReelsState>(
           listenWhen: (p, c) =>
               p.reels != c.reels ||
@@ -207,12 +207,12 @@ class _ReelsFeedPageState extends State<ReelsFeedPage> {
                   left: 0,
                   right: 0,
                   child: DecoratedBox(
-                    decoration: BoxDecoration(
+                    decoration: const BoxDecoration(
                       gradient: LinearGradient(
                         begin: Alignment.topCenter,
                         end: Alignment.bottomCenter,
                         colors: [
-                          Colors.black.withValues(alpha: 0.55),
+                          AppReelsFeedColors.topScrim,
                           Colors.transparent,
                         ],
                       ),
@@ -238,7 +238,7 @@ class _ReelsFeedPageState extends State<ReelsFeedPage> {
                                         Navigator.of(context).maybePop(),
                                     icon: const Icon(
                                       Icons.arrow_back,
-                                      color: Colors.white,
+                                      color: AppReelsFeedColors.onCanvas,
                                     ),
                                     tooltip: MaterialLocalizations.of(
                                       context,
@@ -252,7 +252,7 @@ class _ReelsFeedPageState extends State<ReelsFeedPage> {
                                           .textTheme
                                           .titleSmall
                                           ?.copyWith(
-                                            color: Colors.white,
+                                            color: AppReelsFeedColors.onCanvas,
                                             fontWeight: FontWeight.w700,
                                           ),
                                     ),
@@ -262,7 +262,7 @@ class _ReelsFeedPageState extends State<ReelsFeedPage> {
                                         .push<void>(context),
                                     icon: const Icon(
                                       Icons.collections_bookmark_outlined,
-                                      color: Colors.white,
+                                      color: AppReelsFeedColors.onCanvas,
                                     ),
                                     tooltip: l10n.reelsSavedTitle,
                                   ),
@@ -289,18 +289,17 @@ class _ReelsFeedPageState extends State<ReelsFeedPage> {
                                         label: cat.label,
                                         semanticsSelected: selected,
                                         backgroundColor: selected
-                                            ? Colors.white
-                                            : Colors.white.withValues(
-                                                alpha: 0.18,
-                                              ),
+                                            ? AppReelsFeedColors.onCanvas
+                                            : AppReelsFeedColors.glassFill,
                                         foregroundColor: selected
-                                            ? Colors.black
-                                            : Colors.white,
+                                            ? AppReelsFeedColors.canvas
+                                            : AppReelsFeedColors.onCanvas,
                                         borderColor: selected
-                                            ? Colors.white
-                                            : Colors.white.withValues(
-                                                alpha: 0.35,
-                                              ),
+                                            ? AppReelsFeedColors.onCanvas
+                                            : AppReelsFeedColors.onCanvas
+                                                  .withValues(
+                                                    alpha: 0.35,
+                                                  ),
                                         padding: EdgeInsets.symmetric(
                                           horizontal: tokens.spaceSmall,
                                           vertical: tokens.spaceExtraSmall,
@@ -351,9 +350,12 @@ class _MessageState extends StatelessWidget {
             Text(
               message,
               textAlign: TextAlign.center,
-              style: Theme.of(
-                context,
-              ).textTheme.bodyLarge?.copyWith(color: Colors.white),
+              style:
+                  Theme.of(
+                    context,
+                  ).textTheme.bodyLarge?.copyWith(
+                    color: AppReelsFeedColors.onCanvas,
+                  ),
             ),
             SizedBox(height: tokens.spaceMedium),
             TilawaButton(onPressed: onAction, text: actionLabel),

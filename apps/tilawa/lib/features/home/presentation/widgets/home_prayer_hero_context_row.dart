@@ -27,12 +27,13 @@ class HomePrayerHeroContextRow extends StatelessWidget {
   final Color? chipBackground;
   final Color? chipBorder;
 
-  /// Figma hijri / subcopy: rgba(255,255,255,0.698039)
-  static const Color figmaMuted = Color.fromRGBO(255, 255, 255, 0.698);
-
   @override
   Widget build(BuildContext context) {
     final MeMuslimDesignTokens tokens = context.tokens;
+    final TilawaHomeNextPrayerHeroTokens heroTokens = Theme.of(
+      context,
+    ).componentTokens.homeNextPrayerHero;
+    final Color onHero = ink ?? heroTokens.foregroundColor;
     final String locationLabel =
         PrayerLocationLabelFormatter.abbreviatedLocationLabel(
           locationName: locationName,
@@ -42,8 +43,9 @@ class HomePrayerHeroContextRow extends StatelessWidget {
       date: DateTime.now(),
       languageCode: Localizations.localeOf(context).languageCode,
     );
-    final Color dateColor = muted ?? figmaMuted;
-    final Color cityColor = (ink ?? Colors.white).withValues(alpha: 0.8);
+    final Color dateColor =
+        muted ?? onHero.withValues(alpha: heroTokens.mutedForegroundOpacity);
+    final Color cityColor = onHero.withValues(alpha: 0.8);
 
     return Padding(
       padding: const EdgeInsets.only(bottom: 12),

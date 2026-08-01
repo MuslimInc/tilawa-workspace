@@ -103,7 +103,7 @@ class _ReelPageState extends State<ReelPage> {
     final controller = widget.pool.controllerFor(widget.reel.id);
 
     return ColoredBox(
-      color: Colors.black,
+      color: AppReelsFeedColors.canvas,
       child: Stack(
         fit: StackFit.expand,
         children: [
@@ -148,13 +148,13 @@ class _ReelPageState extends State<ReelPage> {
             bottom: 0,
             child: IgnorePointer(
               child: DecoratedBox(
-                decoration: BoxDecoration(
+                decoration: const BoxDecoration(
                   gradient: LinearGradient(
                     begin: Alignment.topCenter,
                     end: Alignment.bottomCenter,
                     colors: [
                       Colors.transparent,
-                      Colors.black.withValues(alpha: 0.78),
+                      AppReelsFeedColors.bottomScrim,
                     ],
                   ),
                 ),
@@ -210,7 +210,7 @@ class _ReelPageState extends State<ReelPage> {
               child: Icon(
                 Icons.pause_circle_filled,
                 size: 64,
-                color: Colors.white70,
+                color: AppReelsFeedColors.onCanvasMuted,
               ),
             ),
         ],
@@ -232,7 +232,7 @@ class _CoverVideo extends StatelessWidget {
   Widget build(BuildContext context) {
     final size = controller.value.size;
     if (size.width <= 0 || size.height <= 0) {
-      return const ColoredBox(color: Colors.black);
+      return const ColoredBox(color: AppReelsFeedColors.canvas);
     }
     return LayoutBuilder(
       builder: (context, constraints) {
@@ -242,7 +242,7 @@ class _CoverVideo extends StatelessWidget {
         );
         return ClipRect(
           child: ColoredBox(
-            color: Colors.black,
+            color: AppReelsFeedColors.canvas,
             child: Center(
               child: Transform.scale(
                 scale: scale,
@@ -281,7 +281,7 @@ class _ThinProgressBar extends StatelessWidget {
       child: LinearProgressIndicator(
         value: progress,
         minHeight: 2,
-        backgroundColor: Colors.white.withValues(alpha: 0.22),
+        backgroundColor: AppReelsFeedColors.progressTrack,
         color: playedColor,
       ),
     );
@@ -314,10 +314,10 @@ class _ReelInfo extends StatelessWidget {
               child: Text(
                 reel.sheikhName,
                 style: Theme.of(context).textTheme.titleSmall?.copyWith(
-                  color: Colors.white,
+                  color: AppReelsFeedColors.onCanvas,
                   fontWeight: FontWeight.w700,
                   shadows: const [
-                    Shadow(blurRadius: 8, color: Colors.black54),
+                    Shadow(blurRadius: 8, color: AppReelsFeedColors.textShadow),
                   ],
                 ),
                 maxLines: 1,
@@ -330,18 +330,23 @@ class _ReelInfo extends StatelessWidget {
         Text(
           category,
           style: Theme.of(context).textTheme.bodySmall?.copyWith(
-            color: Colors.white.withValues(alpha: 0.92),
+            color: AppReelsFeedColors.onCanvas.withValues(alpha: 0.92),
             fontWeight: FontWeight.w600,
-            shadows: const [Shadow(blurRadius: 6, color: Colors.black54)],
+            shadows: const [
+              Shadow(blurRadius: 6, color: AppReelsFeedColors.textShadow),
+            ],
           ),
         ),
         if (duration != null && duration!.inSeconds > 0) ...[
           SizedBox(height: tokens.spaceExtraSmall / 2),
           Text(
             _formatDuration(duration!),
-            style: Theme.of(
-              context,
-            ).textTheme.labelSmall?.copyWith(color: Colors.white70),
+            style:
+                Theme.of(
+                  context,
+                ).textTheme.labelSmall?.copyWith(
+                  color: AppReelsFeedColors.onCanvasMuted,
+                ),
           ),
         ],
       ],
@@ -373,9 +378,12 @@ class _ErrorBody extends StatelessWidget {
             Text(
               message,
               textAlign: TextAlign.center,
-              style: Theme.of(
-                context,
-              ).textTheme.bodyLarge?.copyWith(color: Colors.white),
+              style:
+                  Theme.of(
+                    context,
+                  ).textTheme.bodyLarge?.copyWith(
+                    color: AppReelsFeedColors.onCanvas,
+                  ),
             ),
             SizedBox(height: tokens.spaceMedium),
             TilawaButton(

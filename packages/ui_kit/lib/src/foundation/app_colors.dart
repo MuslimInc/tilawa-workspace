@@ -758,6 +758,58 @@ abstract final class AppVideoReelDesignDefaults {
   static const Color frameSurfaceColor = Color(0xFFFFF9F2);
 }
 
+/// Always-dark chrome for the immersive vertical video feed.
+///
+/// Intentionally outside [ColorScheme] — video sits on a black stage regardless
+/// of app theme. Features import this documented palette (see color_architecture).
+abstract final class AppReelsFeedColors {
+  static const Color canvas = Color(0xFF000000);
+  static const Color onCanvas = Color(0xFFFFFFFF);
+
+  /// ~70% white — secondary captions on video.
+  static const Color onCanvasMuted = Color(0xB3FFFFFF);
+
+  /// Top chrome scrim (~55% black).
+  static const Color topScrim = Color(0x8C000000);
+
+  /// Thumbnail footer scrim (~75% black).
+  static const Color footerScrim = Color(0xBF000000);
+
+  /// Bottom info gradient end (~78% black).
+  static const Color bottomScrim = Color(0xC7000000);
+
+  /// Compact action chip scrim (~45% black).
+  static const Color actionScrim = Color(0x73000000);
+
+  /// Soft text shadow (~54% black).
+  static const Color textShadow = Color(0x8A000000);
+
+  /// Progress track fill (~22% white).
+  static const Color progressTrack = Color(0x38FFFFFF);
+
+  /// Idle glass chip fill (~18% white).
+  static const Color glassFill = Color(0x2EFFFFFF);
+}
+
+/// Hardware-accurate phone chassis paints for onboarding device frames.
+abstract final class AppOnboardingDeviceColors {
+  static const Color iphoneChassisLight = Color(0xFF1C1C1E);
+  static const Color iphoneSideRail = Color(0xFF2C2C2E);
+  static const Color samsungChassisLight = Color(0xFF2B2B2B);
+  static const Color samsungSideRail = Color(0xFF3A3A3A);
+  static const Color ink = Color(0xFF000000);
+  static const Color highlight = Color(0xFFFFFFFF);
+
+  /// Dynamic Island lens tint (~35% black).
+  static const Color islandLens = Color(0x59000000);
+
+  /// Hole-punch inner ring (~85% black).
+  static const Color punchInner = Color(0xD9000000);
+
+  /// Hole-punch specular (~12% white).
+  static const Color punchSpecular = Color(0x1FFFFFFF);
+}
+
 /// Legacy static palette for [QuranReaderTheme] light/dark defaults in the app.
 ///
 /// The reader resolves most chrome from [ColorScheme] at runtime via

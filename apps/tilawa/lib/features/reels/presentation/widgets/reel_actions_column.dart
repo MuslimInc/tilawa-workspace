@@ -34,28 +34,28 @@ class ReelActionsColumn extends StatelessWidget {
       children: [
         _ActionButton(
           icon: hasReaction ? Icons.favorite : Icons.favorite_border,
-          color: hasReaction ? scheme.error : Colors.white,
+          color: hasReaction ? scheme.error : AppReelsFeedColors.onCanvas,
           label: context.l10n.reelsActionReact,
           onTap: onReact,
         ),
         SizedBox(height: tokens.spaceSmall),
         _ActionButton(
           icon: isSaved ? Icons.bookmark : Icons.bookmark_border,
-          color: Colors.white,
+          color: AppReelsFeedColors.onCanvas,
           label: context.l10n.reelsActionSave,
           onTap: onSave,
         ),
         SizedBox(height: tokens.spaceSmall),
         _ActionButton(
           icon: Icons.ios_share_rounded,
-          color: Colors.white,
+          color: AppReelsFeedColors.onCanvas,
           label: context.l10n.reelsActionShare,
           onTap: onShare,
         ),
         SizedBox(height: tokens.spaceSmall),
         _ActionButton(
           icon: Icons.more_horiz,
-          color: Colors.white,
+          color: AppReelsFeedColors.onCanvas,
           label: context.l10n.reelsActionMore,
           onTap: onMore,
         ),
@@ -114,8 +114,8 @@ class _ActionButtonState extends State<_ActionButton>
         child: Column(
           children: [
             DecoratedBox(
-              decoration: BoxDecoration(
-                color: Colors.white.withValues(alpha: 0.18),
+              decoration: const BoxDecoration(
+                color: AppReelsFeedColors.glassFill,
                 shape: BoxShape.circle,
               ),
               child: Padding(
@@ -127,8 +127,10 @@ class _ActionButtonState extends State<_ActionButton>
             Text(
               widget.label,
               style: Theme.of(context).textTheme.labelSmall?.copyWith(
-                color: Colors.white,
-                shadows: const [Shadow(blurRadius: 6, color: Colors.black54)],
+                color: AppReelsFeedColors.onCanvas,
+                shadows: const [
+                  Shadow(blurRadius: 6, color: AppReelsFeedColors.textShadow),
+                ],
               ),
             ),
           ],

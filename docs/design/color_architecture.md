@@ -74,6 +74,8 @@ Kit-owned formulas (search field, bottom nav, hero prayer gradients via `homeNex
 | Quran reader scaffolds | Transparent or `QuranReaderTheme.pageBackground` — mushaf page, not app chrome |
 | Share / reel composers | `AppShareComposerColors` + `ImmersiveComposerScaffold` — marketing-style dark gradient |
 | `AppShareComposerColors` + share sheet literals | Marketing-style share/reel composer — intentional brand palette outside `ColorScheme` |
+| `AppReelsFeedColors` | Immersive vertical video feed chrome (always-dark stage) |
+| `AppOnboardingDeviceColors` | Onboarding phone chassis paints (hardware mock) |
 | `AppQuranReaderLegacyColors` | Mushaf reading presets (surfaced via `TilawaProductColors`) |
 | `features/color_picker/` | Dev/QA tool |
 | `notificationAccent` | OS notification channel cannot read `ThemeData` |

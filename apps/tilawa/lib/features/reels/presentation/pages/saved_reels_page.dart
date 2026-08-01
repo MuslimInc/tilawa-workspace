@@ -100,13 +100,13 @@ class _SavedReelsPageState extends State<SavedReelsPage> {
                             right: 0,
                             bottom: 0,
                             child: DecoratedBox(
-                              decoration: BoxDecoration(
+                              decoration: const BoxDecoration(
                                 gradient: LinearGradient(
                                   begin: Alignment.topCenter,
                                   end: Alignment.bottomCenter,
                                   colors: [
                                     Colors.transparent,
-                                    Colors.black.withValues(alpha: 0.75),
+                                    AppReelsFeedColors.footerScrim,
                                   ],
                                 ),
                               ),
@@ -131,7 +131,10 @@ class _SavedReelsPageState extends State<SavedReelsPage> {
                                       style: Theme.of(context)
                                           .textTheme
                                           .labelSmall
-                                          ?.copyWith(color: Colors.white70),
+                                          ?.copyWith(
+                                            color: AppReelsFeedColors
+                                                .onCanvasMuted,
+                                          ),
                                     ),
                                     Text(
                                       reel.sheikhName,
@@ -141,7 +144,7 @@ class _SavedReelsPageState extends State<SavedReelsPage> {
                                           .textTheme
                                           .labelMedium
                                           ?.copyWith(
-                                            color: Colors.white,
+                                            color: AppReelsFeedColors.onCanvas,
                                             fontWeight: FontWeight.w600,
                                           ),
                                     ),
@@ -158,13 +161,13 @@ class _SavedReelsPageState extends State<SavedReelsPage> {
                       top: tokens.spaceExtraSmall,
                       end: tokens.spaceExtraSmall,
                       child: Material(
-                        color: Colors.black45,
+                        color: AppReelsFeedColors.actionScrim,
                         shape: const CircleBorder(),
                         child: IconButton(
                           visualDensity: VisualDensity.compact,
                           icon: const Icon(
                             Icons.bookmark_remove_outlined,
-                            color: Colors.white,
+                            color: AppReelsFeedColors.onCanvas,
                           ),
                           tooltip: l10n.reelsActionSave,
                           onPressed: () =>

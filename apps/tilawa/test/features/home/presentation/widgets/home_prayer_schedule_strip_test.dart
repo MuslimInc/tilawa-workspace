@@ -48,9 +48,11 @@ void main() {
       primaryColor: AppColors.defaultPrimary,
     );
     final ColorScheme scheme = dark.colorScheme;
+    final Color chipBackground =
+        dark.componentTokens.homeScreen.homeHeaderChipBackground;
     final Color expectedActiveFill = Color.alphaBlend(
-      Colors.white.withValues(alpha: 0.16),
-      scheme.surface,
+      scheme.onSurface.withValues(alpha: 0.14),
+      chipBackground,
     );
 
     await tester.pumpWidget(

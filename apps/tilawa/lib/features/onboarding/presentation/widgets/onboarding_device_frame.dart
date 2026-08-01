@@ -58,7 +58,7 @@ class _Iphone16DeviceFrame extends StatelessWidget {
     final MeMuslimDesignTokens tokens = theme.tokens;
     final ColorScheme scheme = theme.colorScheme;
     final Color chassis = scheme.brightness == Brightness.light
-        ? const Color(0xFF1C1C1E)
+        ? AppOnboardingDeviceColors.iphoneChassisLight
         : scheme.surfaceContainerHighest;
 
     return LayoutBuilder(
@@ -85,7 +85,7 @@ class _Iphone16DeviceFrame extends StatelessWidget {
               child: _SideRail(
                 width: buttonThickness,
                 height: frameWidth * 0.04,
-                color: const Color(0xFF2C2C2E),
+                color: AppOnboardingDeviceColors.iphoneSideRail,
               ),
             ),
             Positioned(
@@ -94,7 +94,7 @@ class _Iphone16DeviceFrame extends StatelessWidget {
               child: _SideRail(
                 width: buttonThickness,
                 height: frameWidth * 0.09,
-                color: const Color(0xFF2C2C2E),
+                color: AppOnboardingDeviceColors.iphoneSideRail,
               ),
             ),
             Positioned(
@@ -103,7 +103,7 @@ class _Iphone16DeviceFrame extends StatelessWidget {
               child: _SideRail(
                 width: buttonThickness,
                 height: frameWidth * 0.09,
-                color: const Color(0xFF2C2C2E),
+                color: AppOnboardingDeviceColors.iphoneSideRail,
               ),
             ),
             // Power (right rail).
@@ -113,13 +113,17 @@ class _Iphone16DeviceFrame extends StatelessWidget {
               child: _SideRail(
                 width: buttonThickness,
                 height: frameWidth * 0.12,
-                color: const Color(0xFF2C2C2E),
+                color: AppOnboardingDeviceColors.iphoneSideRail,
               ),
             ),
             _ChassisBody(
               outerRadius: outerCorner,
               bezel: bezel,
-              rimColor: Color.lerp(chassis, Colors.white, 0.14)!,
+              rimColor: Color.lerp(
+                chassis,
+                AppOnboardingDeviceColors.highlight,
+                0.14,
+              )!,
               chassisColor: chassis,
               innerCorner: innerCorner,
               child: Stack(
@@ -161,7 +165,7 @@ class _SamsungDeviceFrame extends StatelessWidget {
     final MeMuslimDesignTokens tokens = theme.tokens;
     final ColorScheme scheme = theme.colorScheme;
     final Color chassis = scheme.brightness == Brightness.light
-        ? const Color(0xFF2B2B2B)
+        ? AppOnboardingDeviceColors.samsungChassisLight
         : scheme.surfaceContainerHigh;
 
     return LayoutBuilder(
@@ -187,7 +191,7 @@ class _SamsungDeviceFrame extends StatelessWidget {
               child: _SideRail(
                 width: buttonThickness,
                 height: frameWidth * 0.14,
-                color: const Color(0xFF3A3A3A),
+                color: AppOnboardingDeviceColors.samsungSideRail,
                 sharp: true,
               ),
             ),
@@ -197,14 +201,18 @@ class _SamsungDeviceFrame extends StatelessWidget {
               child: _SideRail(
                 width: buttonThickness,
                 height: frameWidth * 0.14,
-                color: const Color(0xFF3A3A3A),
+                color: AppOnboardingDeviceColors.samsungSideRail,
                 sharp: true,
               ),
             ),
             _ChassisBody(
               outerRadius: outerCorner,
               bezel: bezel,
-              rimColor: Color.lerp(chassis, Colors.white, 0.18)!,
+              rimColor: Color.lerp(
+                chassis,
+                AppOnboardingDeviceColors.highlight,
+                0.18,
+              )!,
               chassisColor: chassis,
               innerCorner: innerCorner,
               child: Stack(
@@ -255,9 +263,13 @@ class _ChassisBody extends StatelessWidget {
           begin: Alignment.topLeft,
           end: Alignment.bottomRight,
           colors: <Color>[
-            Color.lerp(chassisColor, Colors.white, 0.08)!,
+            Color.lerp(
+              chassisColor,
+              AppOnboardingDeviceColors.highlight,
+              0.08,
+            )!,
             chassisColor,
-            Color.lerp(chassisColor, Colors.black, 0.22)!,
+            Color.lerp(chassisColor, AppOnboardingDeviceColors.ink, 0.22)!,
           ],
           stops: const <double>[0, 0.45, 1],
         ),
@@ -342,13 +354,13 @@ class _IphoneDynamicIsland extends StatelessWidget {
             child: DecoratedBox(
               key: const ValueKey<String>('onboarding_iphone_dynamic_island'),
               decoration: BoxDecoration(
-                color: Colors.black,
+                color: AppOnboardingDeviceColors.ink,
                 borderRadius: BorderRadius.circular(islandHeight),
-                boxShadow: <BoxShadow>[
+                boxShadow: const <BoxShadow>[
                   BoxShadow(
-                    color: Colors.black.withValues(alpha: 0.35),
+                    color: AppOnboardingDeviceColors.islandLens,
                     blurRadius: 2,
-                    offset: const Offset(0, 1),
+                    offset: Offset(0, 1),
                   ),
                 ],
               ),
@@ -412,14 +424,14 @@ class _SamsungHolePunch extends StatelessWidget {
               key: const ValueKey<String>('onboarding_samsung_hole_punch'),
               decoration: BoxDecoration(
                 shape: BoxShape.circle,
-                color: Colors.black,
+                color: AppOnboardingDeviceColors.ink,
                 border: Border.all(
-                  color: Colors.black.withValues(alpha: 0.85),
+                  color: AppOnboardingDeviceColors.punchInner,
                   width: 0.5,
                 ),
-                boxShadow: <BoxShadow>[
+                boxShadow: const <BoxShadow>[
                   BoxShadow(
-                    color: Colors.white.withValues(alpha: 0.12),
+                    color: AppOnboardingDeviceColors.punchSpecular,
                     blurRadius: 1,
                     spreadRadius: 0.2,
                   ),
