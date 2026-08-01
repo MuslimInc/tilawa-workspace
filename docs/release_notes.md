@@ -12,8 +12,8 @@ the changelog for full engineering detail.
 
 | Field | Value |
 |-------|--------|
-| Version | **2.2.4** (build **97**) |
-| Git tag | `v2.2.4+97` (pending) |
+| Version | **2.2.4** (build **98**) |
+| Git tag | `v2.2.4+98` (pending) |
 | Date | 2026-08-01 |
 | Track | Google Play Production — Preparing |
 
@@ -910,7 +910,6 @@ Tilawa keeps **one shared version** in [`apps/tilawa/pubspec.yaml`](../apps/tila
      `dart run melos run tilawa:build:android:production`.
    - iOS: archive the **production** flavor for TestFlight (`com.memuslim.app`).
 5. Android checklist: [`google_play_release_checklist.md`](google_play_release_checklist.md)
-
 
 
 
