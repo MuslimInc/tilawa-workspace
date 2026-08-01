@@ -510,6 +510,7 @@ void main() {
         ),
         tileIconPadding: EdgeInsets.all(8),
         tileIconSize: 20.0,
+        tileIconBorderRadius: 8.0,
         tileTitleTextRole: TilawaTextRole.titleMedium,
         tileSubtitleTextRole: TilawaTextRole.bodySmall,
         tileSubtitleOpacity: 0.4,
@@ -545,6 +546,7 @@ void main() {
         ),
         tileIconPadding: EdgeInsets.all(12),
         tileIconSize: 24.0,
+        tileIconBorderRadius: 12.0,
         tileTitleTextRole: TilawaTextRole.bodyLarge,
         tileSubtitleTextRole: TilawaTextRole.labelLarge,
         tileSubtitleOpacity: 0.6,
@@ -568,6 +570,7 @@ void main() {
 
       final result = TilawaSettingsGroupTokens.lerp(first, second, 0.5);
       expect(result.groupHorizontalPadding, closeTo(16.0, 0.01));
+      expect(result.tileIconBorderRadius, closeTo(10.0, 0.01));
       expect(result.tileTitleTextRole, TilawaTextRole.bodyLarge);
       expect(result.switchActiveTrackOpacity, closeTo(0.5, 0.01));
       expect(

@@ -1005,6 +1005,7 @@ class TilawaSettingsGroupTokens {
     required this.switchTileContentPadding,
     required this.tileIconPadding,
     required this.tileIconSize,
+    required this.tileIconBorderRadius,
     required this.tileTitleTextRole,
     required this.tileSubtitleTextRole,
     required this.tileSubtitleOpacity,
@@ -1039,6 +1040,12 @@ class TilawaSettingsGroupTokens {
   final EdgeInsetsGeometry switchTileContentPadding;
   final EdgeInsetsGeometry tileIconPadding;
   final double tileIconSize;
+
+  /// Corner radius for the tinted leading-icon rest behind settings row icons.
+  ///
+  /// Kept tighter than [TilawaRadiusFamily.decorative] so ~36 dp icon wells
+  /// read as soft squares, not near-circles.
+  final double tileIconBorderRadius;
   final TilawaTextRole tileTitleTextRole;
   final TilawaTextRole tileSubtitleTextRole;
   final double tileSubtitleOpacity;
@@ -1130,6 +1137,7 @@ class TilawaSettingsGroupTokens {
       ),
       tileIconPadding: const EdgeInsets.all(7),
       tileIconSize: 22,
+      tileIconBorderRadius: designTokens.spaceSmall,
       tileTitleTextRole: TilawaTextRole.bodyLarge,
       tileSubtitleTextRole: TilawaTextRole.bodySmall,
       // Full [onSurfaceVariant] — extra alpha was muddying the hierarchy.
@@ -1180,6 +1188,7 @@ class TilawaSettingsGroupTokens {
     EdgeInsetsGeometry? switchTileContentPadding,
     EdgeInsetsGeometry? tileIconPadding,
     double? tileIconSize,
+    double? tileIconBorderRadius,
     TilawaTextRole? tileTitleTextRole,
     TilawaTextRole? tileSubtitleTextRole,
     double? tileSubtitleOpacity,
@@ -1215,6 +1224,7 @@ class TilawaSettingsGroupTokens {
           switchTileContentPadding ?? this.switchTileContentPadding,
       tileIconPadding: tileIconPadding ?? this.tileIconPadding,
       tileIconSize: tileIconSize ?? this.tileIconSize,
+      tileIconBorderRadius: tileIconBorderRadius ?? this.tileIconBorderRadius,
       tileTitleTextRole: tileTitleTextRole ?? this.tileTitleTextRole,
       tileSubtitleTextRole: tileSubtitleTextRole ?? this.tileSubtitleTextRole,
       tileSubtitleOpacity: tileSubtitleOpacity ?? this.tileSubtitleOpacity,
@@ -1298,6 +1308,11 @@ class TilawaSettingsGroupTokens {
         t,
       )!,
       tileIconSize: lerpTokenDouble(a.tileIconSize, b.tileIconSize, t),
+      tileIconBorderRadius: lerpTokenDouble(
+        a.tileIconBorderRadius,
+        b.tileIconBorderRadius,
+        t,
+      ),
       tileTitleTextRole: lerpTilawaTextRole(
         a.tileTitleTextRole,
         b.tileTitleTextRole,
