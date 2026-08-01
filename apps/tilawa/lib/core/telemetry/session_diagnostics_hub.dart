@@ -209,6 +209,83 @@ abstract final class SessionDiagnosticsHub {
     return message.contains('ApplicationNotResponding') || message == 'ANR';
   }
 
+  /// True for AppExitInfo "Background ANR" dumps where the main looper is idle
+  /// and Quran playback was not active (Sentry FLUTTER-8).
+  ///
+  /// OEMs (vivo / OPPO / …) often classify process kills as Background ANR;
+  /// next-launch AppExitInfo then ships a useless `nativePollOnce` /
+  /// `epoll_pwait` stack. Keep foreground ANRs and any ANR while playing.
+  static bool isNonActionableIdleBackgroundAnr(SentryEvent event) {
+    if (!isAnrLikeEvent(event) || !_isBackgroundAnr(event)) {
+      return false;
+    }
+    if (!_hasIdleMainLooperFrames(event)) {
+      return false;
+    }
+    if (_wasPlayingDuringAnr(event)) {
+      return false;
+    }
+    return true;
+  }
+
+  static bool _isBackgroundAnr(SentryEvent event) {
+    for (final SentryException exception in event.exceptions ?? const []) {
+      final String value = exception.value ?? '';
+      if (value.toLowerCase().contains('background anr')) {
+        return true;
+      }
+    }
+    final String message = event.message?.formatted ?? '';
+    return message.toLowerCase().contains('background anr');
+  }
+
+  static bool _wasPlayingDuringAnr(SentryEvent event) {
+    final Map<String, String>? tags = event.tags;
+    if (tags?['tilawa.playing'] == 'true' ||
+        tags?['tilawa.prior_playing'] == 'true') {
+      return true;
+    }
+    if (_live.playing == true || _priorSession?.playing == true) {
+      return true;
+    }
+    return false;
+  }
+
+  static bool _hasIdleMainLooperFrames(SentryEvent event) {
+    for (final SentryException exception in event.exceptions ?? const []) {
+      if (_framesLookLikeIdleMainLooper(exception.stackTrace?.frames)) {
+        return true;
+      }
+    }
+    for (final SentryThread thread in event.threads ?? const []) {
+      final bool isMain =
+          thread.crashed == true || (thread.name?.toLowerCase() == 'main');
+      if (isMain && _framesLookLikeIdleMainLooper(thread.stacktrace?.frames)) {
+        return true;
+      }
+    }
+    return false;
+  }
+
+  static bool _framesLookLikeIdleMainLooper(List<SentryStackFrame>? frames) {
+    if (frames == null || frames.isEmpty) {
+      return false;
+    }
+    for (final SentryStackFrame frame in frames) {
+      final String haystack =
+          '${frame.function ?? ''} ${frame.module ?? ''} '
+                  '${frame.package ?? ''} ${frame.absPath ?? ''}'
+              .toLowerCase();
+      if (haystack.contains('nativepollonce') ||
+          haystack.contains('epoll_pwait') ||
+          haystack.contains('__epoll_pwait') ||
+          haystack.contains('messagequeue.next')) {
+        return true;
+      }
+    }
+    return false;
+  }
+
   static void dispose() {
     for (final StreamSubscription<dynamic> sub in _subscriptions) {
       unawaited(sub.cancel());

@@ -76,4 +76,106 @@ void main() {
     );
     check(SessionDiagnosticsHub.isAnrLikeEvent(event)).isTrue();
   });
+
+  group('isNonActionableIdleBackgroundAnr', () {
+    SentryEvent idleBackgroundAnr({
+      String value = 'Background ANR',
+      List<SentryStackFrame>? frames,
+      Map<String, String>? tags,
+    }) {
+      return SentryEvent(
+        tags: tags,
+        exceptions: <SentryException>[
+          SentryException(
+            type: 'ApplicationNotResponding',
+            value: value,
+            mechanism: Mechanism(type: 'AppExitInfo'),
+            stackTrace: SentryStackTrace(
+              frames:
+                  frames ??
+                  <SentryStackFrame>[
+                    SentryStackFrame(function: 'nativePollOnce'),
+                    SentryStackFrame(function: 'MessageQueue.next'),
+                  ],
+            ),
+          ),
+        ],
+      );
+    }
+
+    test('drops idle Background ANR when not playing', () {
+      SessionDiagnosticsHub.resetForTesting();
+      final SentryEvent event = idleBackgroundAnr(
+        tags: <String, String>{'tilawa.playing': 'false'},
+      );
+
+      check(
+        SessionDiagnosticsHub.isNonActionableIdleBackgroundAnr(event),
+      ).isTrue();
+    });
+
+    test('keeps Background ANR when playback was active', () {
+      SessionDiagnosticsHub.resetForTesting();
+      final SentryEvent event = idleBackgroundAnr(
+        tags: <String, String>{
+          'tilawa.playing': 'false',
+          'tilawa.prior_playing': 'true',
+        },
+      );
+
+      check(
+        SessionDiagnosticsHub.isNonActionableIdleBackgroundAnr(event),
+      ).isFalse();
+    });
+
+    test('keeps foreground ANR even with idle frames', () {
+      SessionDiagnosticsHub.resetForTesting();
+      final SentryEvent event = idleBackgroundAnr(value: 'ANR');
+
+      check(
+        SessionDiagnosticsHub.isNonActionableIdleBackgroundAnr(event),
+      ).isFalse();
+    });
+
+    test('keeps Background ANR without idle looper frames', () {
+      SessionDiagnosticsHub.resetForTesting();
+      final SentryEvent event = idleBackgroundAnr(
+        frames: <SentryStackFrame>[
+          SentryStackFrame(function: 'doSomethingExpensive'),
+        ],
+      );
+
+      check(
+        SessionDiagnosticsHub.isNonActionableIdleBackgroundAnr(event),
+      ).isFalse();
+    });
+
+    test('detects idle frames via epoll_pwait on crashed main thread', () {
+      SessionDiagnosticsHub.resetForTesting();
+      final SentryEvent event = SentryEvent(
+        exceptions: <SentryException>[
+          SentryException(
+            type: 'ApplicationNotResponding',
+            value: 'Background ANR',
+            mechanism: Mechanism(type: 'AppExitInfo'),
+          ),
+        ],
+        threads: <SentryThread>[
+          SentryThread(
+            name: 'main',
+            crashed: true,
+            stacktrace: SentryStackTrace(
+              frames: <SentryStackFrame>[
+                SentryStackFrame(function: '__epoll_pwait'),
+              ],
+            ),
+          ),
+        ],
+      );
+
+      check(
+        SessionDiagnosticsHub.isNonActionableIdleBackgroundAnr(event),
+      ).isTrue();
+    });
+  });
 }

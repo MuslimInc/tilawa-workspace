@@ -42,6 +42,13 @@ abstract final class SentryUserFeedback {
 
     final SentryEvent enriched = SessionDiagnosticsHub.enrichEvent(filtered);
 
+    // Drop OEM idle Background ANR / AppExitInfo noise (FLUTTER-8) after
+    // enrichment so playing tags from the prior process are available.
+    if (kReleaseMode &&
+        SessionDiagnosticsHub.isNonActionableIdleBackgroundAnr(enriched)) {
+      return null;
+    }
+
     if (shouldPromptFeedbackForEvent(enriched)) {
       // coverage:ignore-start
       await _presentFeedbackForEvent(enriched);

@@ -7,6 +7,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Fixed
+
+- **Sentry**: Drop non-actionable Android AppExitInfo Background ANRs whose
+  main looper is idle (`nativePollOnce` / `epoll_pwait`) and Quran playback
+  was not active (OEM kill noise, Sentry `FLUTTER-8`).
+
 ## [2.2.3+96] - 2026-07-31 [Both]
 
 ### Fixed
