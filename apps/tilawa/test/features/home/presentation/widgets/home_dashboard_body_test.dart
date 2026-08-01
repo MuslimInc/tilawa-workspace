@@ -58,6 +58,16 @@ void main() {
     expect(find.byType(HomeQuickToolsSection), findsNothing);
     expect(find.byType(HomeMoreActionsGroup), findsNothing);
     expect(find.byType(HomeDailyInspirationSection), findsNothing);
+
+    final Color primary = Theme.of(
+      tester.element(find.byType(HomeDashboardBodySkeleton)),
+    ).colorScheme.primary;
+    final bool hasSaturatedPrimaryPlaceholder = tester
+        .widgetList<DecoratedBox>(find.byType(DecoratedBox))
+        .map((box) => box.decoration)
+        .whereType<BoxDecoration>()
+        .any((decoration) => decoration.color == primary);
+    expect(hasSaturatedPrimaryPlaceholder, isFalse);
   });
 
   testWidgets('shows primary actions, quick tools, more, and inspiration', (

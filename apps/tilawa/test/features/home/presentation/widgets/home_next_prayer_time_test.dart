@@ -62,6 +62,17 @@ void main() {
     expect(find.byType(TilawaSkeleton), findsOneWidget);
     expect(find.text('Cairo'), findsNothing);
     expect(find.byType(HomePrayerScheduleStrip), findsNothing);
+    final scheduleSkeleton = find.byKey(
+      const ValueKey<String>('home-prayer-schedule-skeleton'),
+    );
+    expect(scheduleSkeleton, findsOneWidget);
+    expect(
+      find.descendant(
+        of: scheduleSkeleton,
+        matching: find.byType(TilawaSkeletonLine),
+      ),
+      findsNWidgets(10),
+    );
   });
 
   testWidgets('keeps prayer content visible during pull-to-refresh', (

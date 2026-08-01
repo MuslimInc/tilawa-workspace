@@ -34,7 +34,6 @@ class HomeDashboardBodySkeleton extends StatelessWidget {
           SizedBox(height: zoneGap),
           HomeDashboardSection(
             title: context.l10n.moreOptions,
-            compact: true,
             child: const _GroupedListSkeleton(rowCount: 4),
           ),
           SizedBox(height: zoneGap),
@@ -88,7 +87,6 @@ class _PrimaryActionTileSkeleton extends StatelessWidget {
       decoration: HomeDashboardElevatedSurface.decoration(
         context,
         borderRadius: BorderRadius.circular(radius),
-        color: theme.colorScheme.primary,
       ),
       child: Padding(
         padding: EdgeInsets.all(tokens.spaceMedium),

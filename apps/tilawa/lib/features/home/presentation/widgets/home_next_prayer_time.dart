@@ -845,6 +845,7 @@ class _HomeHeroSkeletonScope extends StatelessWidget {
       data: theme.copyWith(
         colorScheme: theme.colorScheme.copyWith(
           surface: onHero.withValues(alpha: 0.18),
+          onSurface: onHero,
         ),
       ),
       child: TilawaSkeleton(
@@ -954,11 +955,75 @@ class _HomePrayerScheduleStripSkeleton extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final tokens = context.tokens;
+    final theme = Theme.of(context);
+    final double radius = tokens.resolveRadius(
+      family: TilawaRadiusFamily.chrome,
+    );
 
-    return TilawaSkeletonBone(
-      width: double.infinity,
+    return SizedBox(
+      key: const ValueKey<String>('home-prayer-schedule-skeleton'),
       height: HomePrayerScheduleStrip.stripHeightFor(tokens),
-      borderRadius: tokens.resolveRadius(family: TilawaRadiusFamily.card),
+      child: DecoratedBox(
+        decoration: BoxDecoration(
+          color: theme.colorScheme.surface,
+          borderRadius: BorderRadius.circular(radius),
+          border: Border.all(
+            color: theme.colorScheme.onSurface.withValues(
+              alpha: tokens.opacitySubtle,
+            ),
+            width: tokens.borderWidthThin,
+          ),
+        ),
+        child: Padding(
+          padding: EdgeInsets.all(tokens.spaceExtraSmall),
+          child: Row(
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            children: [
+              for (int index = 0; index < 5; index++) ...[
+                if (index > 0)
+                  VerticalDivider(
+                    width: tokens.borderWidthThin * 5,
+                    thickness: tokens.borderWidthThin,
+                    indent: tokens.spaceMedium,
+                    endIndent: tokens.spaceMedium,
+                    color: theme.colorScheme.onSurface.withValues(
+                      alpha: tokens.opacitySubtle,
+                    ),
+                  ),
+                const Expanded(child: _HomePrayerScheduleSlotSkeleton()),
+              ],
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+class _HomePrayerScheduleSlotSkeleton extends StatelessWidget {
+  const _HomePrayerScheduleSlotSkeleton();
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final tokens = context.tokens;
+
+    return Padding(
+      padding: EdgeInsets.symmetric(horizontal: tokens.spaceExtraSmall),
+      child: Column(
+        mainAxisAlignment: MainAxisAlignment.center,
+        spacing: tokens.spaceExtraSmall,
+        children: [
+          FractionallySizedBox(
+            widthFactor: 0.72,
+            child: TilawaSkeletonLine(style: theme.textTheme.labelMedium),
+          ),
+          FractionallySizedBox(
+            widthFactor: 0.88,
+            child: TilawaSkeletonLine(style: theme.textTheme.bodySmall),
+          ),
+        ],
+      ),
     );
   }
 }
