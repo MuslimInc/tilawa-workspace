@@ -30,6 +30,9 @@
 .pub-cache/
 .pub/
 build/
+# Keep docs under docs/build/ trackable (generic build/ would ignore them).
+!docs/build/
+!docs/build/**
 
 # Web related
 lib/generated_plugin_registrant.dart

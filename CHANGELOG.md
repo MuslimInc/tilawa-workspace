@@ -500,8 +500,9 @@ Superseded by **2.0.17+69** (build 68 release workflow cancelled).
 
 - **Version**: Production track bumped to **2.0.12** (build **57**).
 - **Android**: Native libraries stored uncompressed in the APK
-  (`extractNativeLibs="false"`) so Google Play delta updates no longer
-  re-download the full app on every release.
+  (`extractNativeLibs="false"`) to improve Play’s binary-delta efficiency on
+  native libraries and avoid on-device lib extraction (does not guarantee
+  small updates when `libapp.so` / engine libs change heavily).
 - **Player**: Tablet mini player anchored in the shell footer without overlapping
   the navigation rail or bar.
 - **Onboarding**: Full-width stacked primary and back actions in the footer bar.
