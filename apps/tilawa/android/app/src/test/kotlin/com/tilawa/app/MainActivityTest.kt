@@ -8,6 +8,8 @@ import com.tilawa.app.prayer.PrayerNotificationsWatchdogScheduler
 import io.flutter.embedding.android.RenderMode
 import io.flutter.embedding.engine.FlutterEngine
 import io.flutter.embedding.engine.dart.DartExecutor
+import io.flutter.embedding.engine.renderer.FlutterRenderer
+import io.flutter.embedding.engine.renderer.FlutterUiDisplayListener
 import io.flutter.plugin.common.BinaryMessenger
 import io.flutter.plugin.common.MethodChannel
 import io.mockk.*
@@ -29,6 +31,7 @@ class MainActivityTest {
 
     @Before
     fun setup() {
+        MainActivity.resetReadyFlutterEngineForTesting()
         mockkConstructor(MethodChannel::class)
         every { anyConstructed<MethodChannel>().setMethodCallHandler(any()) } just Runs
 
@@ -67,6 +70,53 @@ class MainActivityTest {
     }
 
     @Test
+    fun `warm activity frame dismisses launch splash without Dart signal`() {
+        val renderer = mockk<FlutterRenderer>(relaxed = true)
+        val listener = slot<FlutterUiDisplayListener>()
+        every { mockEngine.renderer } returns renderer
+        every {
+            renderer.addIsDisplayingFlutterUiListener(capture(listener))
+        } just Runs
+        MainActivity.keepLaunchSplashOnScreen = true
+
+        activity.attachFlutterUiDisplayListener(mockEngine)
+        listener.captured.onFlutterUiDisplayed()
+
+        assert(!MainActivity.keepLaunchSplashOnScreen)
+    }
+
+    @Test
+    fun `warm activity with displayed renderer dismisses splash immediately`() {
+        val renderer = mockk<FlutterRenderer>(relaxed = true)
+        every { mockEngine.renderer } returns renderer
+        every { renderer.isDisplayingFlutterUi } returns true
+        MainActivity.keepLaunchSplashOnScreen = true
+
+        activity.attachFlutterUiDisplayListener(mockEngine)
+
+        assert(!MainActivity.keepLaunchSplashOnScreen)
+    }
+
+    @Test
+    fun `recreated activity dismisses splash for the same ready engine`() {
+        val renderer = mockk<FlutterRenderer>(relaxed = true)
+        val listener = slot<FlutterUiDisplayListener>()
+        every { mockEngine.renderer } returns renderer
+        every {
+            renderer.addIsDisplayingFlutterUiListener(capture(listener))
+        } just Runs
+        activity.attachFlutterUiDisplayListener(mockEngine)
+        listener.captured.onFlutterUiDisplayed()
+
+        val recreatedActivity =
+            Robolectric.buildActivity(MainActivity::class.java).get()
+        MainActivity.keepLaunchSplashOnScreen = true
+        recreatedActivity.attachFlutterUiDisplayListener(mockEngine)
+
+        assert(!MainActivity.keepLaunchSplashOnScreen)
+    }
+
+    @Test
     fun `handleIntent consumes open prayer status action after routing once`() {
         val intent = Intent(activity, MainActivity::class.java).apply {
             action = MainActivity.ACTION_OPEN_PRAYER_STATUS
@@ -101,5 +151,3 @@ class MainActivityTest {
         assert(intent.action == null)
     }
 }
-
-

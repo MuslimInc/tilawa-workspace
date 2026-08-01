@@ -17,8 +17,10 @@ import io.flutter.embedding.android.RenderMode
 import io.sentry.Sentry
 import io.sentry.flutter.SentryFlutterPlugin
 import io.flutter.embedding.engine.FlutterEngine
+import io.flutter.embedding.engine.renderer.FlutterUiDisplayListener
 import io.flutter.plugin.common.MethodChannel
 import org.json.JSONObject
+import java.lang.ref.WeakReference
 
 class MainActivity : AudioServiceFragmentActivity() {
     companion object {
@@ -42,6 +44,13 @@ class MainActivity : AudioServiceFragmentActivity() {
          */
         @Volatile
         var keepLaunchSplashOnScreen: Boolean = true
+
+        private var readyFlutterEngine: WeakReference<FlutterEngine>? = null
+
+        @VisibleForTesting
+        internal fun resetReadyFlutterEngineForTesting() {
+            readyFlutterEngine = null
+        }
     }
 
     private val launchSplashController =
@@ -52,6 +61,8 @@ class MainActivity : AudioServiceFragmentActivity() {
                 BootDeviceEventBreadcrumbs.markBootComplete()
             },
         )
+    private var flutterEngineForUiListener: FlutterEngine? = null
+    private var flutterUiDisplayListener: FlutterUiDisplayListener? = null
 
     private fun firstFrameLog(message: String) {
         Log.d(FIRST_FRAME_TAG, message)
@@ -137,6 +148,7 @@ class MainActivity : AudioServiceFragmentActivity() {
 
     override fun configureFlutterEngine(flutterEngine: FlutterEngine) {
         super.configureFlutterEngine(flutterEngine)
+        attachFlutterUiDisplayListener(flutterEngine)
         registerAppMethodChannels(flutterEngine)
         memoryPressureBridge().attachChannel(
             this,
@@ -157,6 +169,49 @@ class MainActivity : AudioServiceFragmentActivity() {
         // Belt-and-suspenders for cold start; hot restart is restored from Dart
         // main() before SentryFlutter.init.
         restoreSentryFlutterApplicationContext()
+    }
+
+    @VisibleForTesting
+    internal fun attachFlutterUiDisplayListener(flutterEngine: FlutterEngine) {
+        detachFlutterUiDisplayListener()
+        val listener = object : FlutterUiDisplayListener {
+            override fun onFlutterUiDisplayed() {
+                // The first Flutter frame is the authoritative splash handoff.
+                // On a warm Activity recreation it can arrive before Dart's
+                // MethodChannel call, which otherwise leaves the splash up
+                // until the native failsafe expires.
+                dismissLaunchSplashFromFlutter("Flutter UI displayed", flutterEngine)
+            }
+
+            override fun onFlutterUiNoLongerDisplayed() = Unit
+        }
+        flutterEngineForUiListener = flutterEngine
+        flutterUiDisplayListener = listener
+        val renderer = flutterEngine.renderer
+        renderer.addIsDisplayingFlutterUiListener(listener)
+        if (readyFlutterEngine?.get() === flutterEngine || renderer.isDisplayingFlutterUi) {
+            dismissLaunchSplashFromFlutter("Flutter UI already displayed", flutterEngine)
+        }
+    }
+
+    private fun dismissLaunchSplashFromFlutter(
+        source: String,
+        flutterEngine: FlutterEngine,
+    ) {
+        readyFlutterEngine = WeakReference(flutterEngine)
+        firstFrameLog("$source → LaunchSplashController.dismiss")
+        launchSplashController.dismissFromFlutterReady()
+        keepLaunchSplashOnScreen = launchSplashController.keepOnScreen
+    }
+
+    private fun detachFlutterUiDisplayListener() {
+        val engine = flutterEngineForUiListener
+        val listener = flutterUiDisplayListener
+        if (engine != null && listener != null) {
+            engine.renderer.removeIsDisplayingFlutterUiListener(listener)
+        }
+        flutterEngineForUiListener = null
+        flutterUiDisplayListener = null
     }
 
     @VisibleForTesting
@@ -185,9 +240,7 @@ class MainActivity : AudioServiceFragmentActivity() {
             .setMethodCallHandler { call, result ->
                 when (call.method) {
                     "ready" -> {
-                        firstFrameLog("MethodChannel ready → LaunchSplashController.dismiss")
-                        launchSplashController.dismissFromFlutterReady()
-                        keepLaunchSplashOnScreen = launchSplashController.keepOnScreen
+                        dismissLaunchSplashFromFlutter("MethodChannel ready", flutterEngine)
                         result.success(null)
                     }
                     else -> result.notImplemented()
@@ -278,6 +331,7 @@ class MainActivity : AudioServiceFragmentActivity() {
 
     override fun onDestroy() {
         launchSplashController.onDestroy()
+        detachFlutterUiDisplayListener()
         // Process-scoped bridge stays registered; only detach this Activity's
         // Dart channel (owner-token) so recreate cannot miss RUNNING_*/COMPLETE.
         memoryPressureBridge().detachChannel(this)
@@ -314,5 +368,3 @@ class MainActivity : AudioServiceFragmentActivity() {
      */
     override fun getRenderMode(): RenderMode = RenderMode.texture
 }
-
-
