@@ -48,6 +48,7 @@ class HomeFeaturedRitualCard extends StatelessWidget {
         categoryId: category.id,
         categoryName: title,
         source: 'home_featured_ritual',
+        restoreProgress: true,
       ).push(context);
     }
 

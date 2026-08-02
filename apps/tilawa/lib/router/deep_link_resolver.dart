@@ -90,6 +90,7 @@ class DeepLinkResolver {
             categoryId: categoryId,
             categoryName: categoryName,
             source: NavigationSource.notification.wireValue,
+            restoreProgress: true,
           ).location;
         }
         return const AthkarCategoriesRoute().location;
@@ -166,6 +167,7 @@ class DeepLinkResolver {
         categoryId: athkarMorningCategoryId,
         categoryName: athkarMorningCategoryName,
         source: source.wireValue,
+        restoreProgress: true,
       ).location,
       source: source,
     );
@@ -180,6 +182,7 @@ class DeepLinkResolver {
         categoryId: athkarEveningCategoryId,
         categoryName: athkarEveningCategoryName,
         source: source.wireValue,
+        restoreProgress: true,
       ).location,
       source: source,
     );

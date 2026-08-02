@@ -24,6 +24,23 @@ void main() {
       expect(style.systemNavigationBarIconBrightness, Brightness.dark);
       expect(style.statusBarColor, scaffold);
     });
+
+    test('preserves fully transparent status bar color', () {
+      final theme = ThemeData(
+        colorScheme: const ColorScheme.light(),
+        scaffoldBackgroundColor: const Color(0xFFF5F5F5),
+      );
+
+      final SystemUiOverlayStyle style =
+          AppSystemChromeStyle.buildDefaultAppStyle(
+            theme,
+            statusBarBackgroundColor: const Color(0x00000000),
+            navigationBarColor: const Color(0xFFFFFFFF),
+          );
+
+      expect(style.statusBarColor, const Color(0x00000000));
+      expect(style.statusBarIconBrightness, Brightness.light);
+    });
   });
 
   group('AppSystemChromeStyle.buildColoredScreenStyle', () {

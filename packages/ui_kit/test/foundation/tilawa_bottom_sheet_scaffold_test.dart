@@ -315,7 +315,8 @@ void main() {
     'compact action sheet does not overflow while keyboard inset is present',
     (tester) async {
       const keyboardInset = 200.0;
-      const sheetMaxHeight = 400.0;
+      // Shorter than handle + title + 3 tiles + comfortable footer.
+      const sheetMaxHeight = 220.0;
 
       await tester.pumpWidget(
         MaterialApp(
@@ -324,7 +325,10 @@ void main() {
           ),
           home: MediaQuery(
             data: const MediaQueryData(
+              size: Size(400, 800),
               viewInsets: EdgeInsets.only(bottom: keyboardInset),
+              viewPadding: EdgeInsets.only(bottom: 48),
+              padding: EdgeInsets.only(bottom: 48),
             ),
             child: Scaffold(
               body: Align(
@@ -347,6 +351,7 @@ void main() {
                         children: [
                           ListTile(title: Text('Gallery')),
                           ListTile(title: Text('Camera')),
+                          ListTile(title: Text('Remove photo')),
                         ],
                       ),
                     ],
@@ -359,6 +364,74 @@ void main() {
       );
 
       expect(tester.takeException(), isNull);
+      expect(find.text('Gallery'), findsOneWidget);
+    },
+  );
+
+  testWidgets(
+    'confirm sheet keeps handle sticky under tight max height',
+    (tester) async {
+      const sheetMaxHeight = 295.0;
+
+      await tester.pumpWidget(
+        MaterialApp(
+          theme: AppTheme.getLightTheme(
+            primaryColor: AppColors.defaultPrimary,
+          ),
+          home: MediaQuery(
+            data: const MediaQueryData(
+              size: Size(360, 590),
+              viewPadding: EdgeInsets.only(bottom: 48),
+              padding: EdgeInsets.only(bottom: 48),
+            ),
+            child: Scaffold(
+              body: Align(
+                alignment: Alignment.bottomCenter,
+                child: Builder(
+                  builder: (context) {
+                    return ConstrainedBox(
+                      constraints: const BoxConstraints(
+                        maxHeight: sheetMaxHeight,
+                      ),
+                      child: TilawaBottomSheetScaffold(
+                        topBar: const TilawaBottomSheetTitleRow(
+                          title: 'Reset',
+                        ),
+                        footer: TilawaBottomSheetActions(
+                          primaryLabel: 'Reset',
+                          onPrimary: () {},
+                          secondaryLabel: 'Cancel',
+                          onSecondary: () {},
+                        ),
+                        children: [
+                          Expanded(
+                            child: SingleChildScrollView(
+                              child: Padding(
+                                padding:
+                                    TilawaBottomSheetScaffold.resolvedBodyPadding(
+                                      context,
+                                    ),
+                                child: const Text(
+                                  'Reset the count for this dhikr? Your '
+                                  'progress on it will be cleared.',
+                                ),
+                              ),
+                            ),
+                          ),
+                        ],
+                      ),
+                    );
+                  },
+                ),
+              ),
+            ),
+          ),
+        ),
+      );
+
+      expect(tester.takeException(), isNull);
+      expect(find.byType(TilawaSheetHandle), findsOneWidget);
+      expect(find.text('Reset'), findsWidgets);
     },
   );
 

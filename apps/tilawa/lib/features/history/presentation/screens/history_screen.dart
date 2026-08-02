@@ -1,3 +1,5 @@
+import 'dart:math' as math;
+
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
@@ -159,13 +161,12 @@ class _HistoryScreenState extends State<HistoryScreen> {
     switch (state.status) {
       case HistoryStatus.initial:
       case HistoryStatus.loading:
-        return const SliverFillRemaining(
-          hasScrollBody: false,
+        return const _HistoryViewportFillSliver(
           child: TilawaLoadingIndicator(),
         );
 
       case HistoryStatus.error:
-        return SliverFillRemaining(
+        return _HistoryViewportFillSliver(
           child: TilawaErrorState(
             icon: Icons.error_outline,
             title:
@@ -182,14 +183,14 @@ class _HistoryScreenState extends State<HistoryScreen> {
 
       case HistoryStatus.empty:
         if (state.searchQuery.isNotEmpty) {
-          return SliverFillRemaining(
+          return _HistoryViewportFillSliver(
             child: TilawaEmptyState(
               icon: Icons.search_off_rounded,
               title: context.l10n.noSearchResults,
             ),
           );
         }
-        return SliverFillRemaining(
+        return _HistoryViewportFillSliver(
           child: TilawaEmptyState(
             icon: Icons.history_rounded,
             title: context.l10n.noHistoryYet,
@@ -367,5 +368,35 @@ class _HistoryScreenState extends State<HistoryScreen> {
     if (confirmed ?? false) {
       context.read<HistoryBloc>().add(const HistoryEvent.clearAllHistory());
     }
+  }
+}
+
+/// Fills remaining viewport without [SliverFillRemaining] intrinsic queries.
+///
+/// [TilawaEmptyState] / [TilawaErrorState] use [LayoutBuilder] via
+/// [TilawaIllustratedState], which cannot report intrinsics — so
+/// [SliverFillRemaining] with `hasScrollBody: false` throws.
+class _HistoryViewportFillSliver extends StatelessWidget {
+  const _HistoryViewportFillSliver({required this.child});
+
+  final Widget child;
+
+  @override
+  Widget build(BuildContext context) {
+    return SliverLayoutBuilder(
+      builder: (BuildContext context, constraints) {
+        final double height = math.max(constraints.remainingPaintExtent, 0);
+
+        return SliverToBoxAdapter(
+          child: ConstrainedBox(
+            constraints: BoxConstraints.tightFor(
+              width: constraints.crossAxisExtent,
+              height: height,
+            ),
+            child: Center(child: child),
+          ),
+        );
+      },
+    );
   }
 }

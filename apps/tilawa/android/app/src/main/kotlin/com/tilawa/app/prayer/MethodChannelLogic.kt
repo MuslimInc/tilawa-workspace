@@ -93,7 +93,21 @@ internal class MethodChannelLogic(
                     val sound = (entry["sound"] as? String) ?: (if (key == "fajr") "adhan_fajr" else "adhan")
                     val locationName = (entry["locationName"] as? String).orEmpty()
                     val languageCode = (entry["languageCode"] as? String).orEmpty()
-                    AlarmMetadata(id, name, key, trigger, sound, locationName, languageCode)
+                    fun intField(key: String): Int? = (entry[key] as? Number)?.toInt()
+                    AlarmMetadata(
+                        id = id,
+                        name = name,
+                        key = key,
+                        triggerMs = trigger,
+                        sound = sound,
+                        locationName = locationName,
+                        languageCode = languageCode,
+                        year = intField("year"),
+                        month = intField("month"),
+                        day = intField("day"),
+                        hour = intField("hour"),
+                        minute = intField("minute"),
+                    )
                 }
                 bootReceiver.persistPendingAlarms(alarms)
                 alarms.firstOrNull { it.locationName.isNotBlank() }?.locationName?.let {

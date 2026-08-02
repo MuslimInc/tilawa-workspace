@@ -21,7 +21,11 @@ class HomeHeroBackground extends StatelessWidget {
   /// When false, paints only the Figma clean green ramp (no pattern / mosque).
   final bool showDecorativeLayers;
 
-  /// Status bar icon brightness from hero gradient luminance.
+  /// Status bar style for the immersive prayer hero.
+  ///
+  /// Always transparent so the gradient paints under the system bar. Icon
+  /// brightness follows hero luminance. Nav-bar fields stay null so
+  /// [RenderView] can merge them from the app-level [AnnotatedRegion].
   static SystemUiOverlayStyle systemOverlayStyle(
     TilawaHomeNextPrayerHeroTokens heroTokens,
   ) {
@@ -30,9 +34,13 @@ class HomeHeroBackground extends StatelessWidget {
       heroTokens.gradientBottomEnd,
       0.35,
     )!;
-    return sample.computeLuminance() > 0.52
-        ? SystemUiOverlayStyle.dark
-        : SystemUiOverlayStyle.light;
+    final bool lightIcons = sample.computeLuminance() <= 0.52;
+    return SystemUiOverlayStyle(
+      statusBarColor: const Color(0x00000000),
+      statusBarIconBrightness: lightIcons ? Brightness.light : Brightness.dark,
+      statusBarBrightness: lightIcons ? Brightness.dark : Brightness.light,
+      systemStatusBarContrastEnforced: false,
+    );
   }
 
   @override

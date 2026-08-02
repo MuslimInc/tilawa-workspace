@@ -179,14 +179,11 @@ Future<void> showKhatmaSaveProgressSheet(
     minimumPage,
     plan.assignmentEndPage,
   );
-  final int? confirmedPage = await showTilawaModalBottomSheet<int>(
+  final int? confirmedPage = await _showKhatmaProgressConfirmationSheet(
     context: context,
-    useSafeArea: true,
-    builder: (_) => _KhatmaProgressConfirmationSheet(
-      minimumPage: minimumPage,
-      maximumPage: plan.assignmentEndPage,
-      suggestedPage: suggestedPage,
-    ),
+    minimumPage: minimumPage,
+    maximumPage: plan.assignmentEndPage,
+    suggestedPage: suggestedPage,
   );
   if (!context.mounted) return;
   if (confirmedPage != null) {
@@ -217,14 +214,11 @@ Future<void> openKhatmaReaderAndRefresh(
     minimumPage,
     plan.assignmentEndPage,
   );
-  final int? confirmedPage = await showTilawaModalBottomSheet<int>(
+  final int? confirmedPage = await _showKhatmaProgressConfirmationSheet(
     context: context,
-    useSafeArea: true,
-    builder: (_) => _KhatmaProgressConfirmationSheet(
-      minimumPage: minimumPage,
-      maximumPage: plan.assignmentEndPage,
-      suggestedPage: suggestedPage,
-    ),
+    minimumPage: minimumPage,
+    maximumPage: plan.assignmentEndPage,
+    suggestedPage: suggestedPage,
   );
   if (!context.mounted) return;
   if (confirmedPage != null) {
@@ -232,6 +226,38 @@ Future<void> openKhatmaReaderAndRefresh(
   } else {
     context.read<KhatmaPlanBloc>().add(const KhatmaPlanStarted());
   }
+}
+
+/// Scroll-controlled save-progress sheet with sticky handle/title/footer.
+Future<int?> _showKhatmaProgressConfirmationSheet({
+  required BuildContext context,
+  required int minimumPage,
+  required int maximumPage,
+  required int suggestedPage,
+}) {
+  final ThemeData theme = Theme.of(context);
+  return showTilawaModalBottomSheet<int>(
+    context: context,
+    backgroundColor: theme.colorScheme.surface,
+    shape: TilawaBottomSheetScaffold.modalShape(context),
+    isScrollControlled: true,
+    builder: (BuildContext sheetContext) {
+      final double keyboardInset = sheetContext.effectiveKeyboardInset;
+      final double availableHeight =
+          MediaQuery.sizeOf(sheetContext).height - keyboardInset;
+      return Padding(
+        padding: EdgeInsets.only(bottom: keyboardInset),
+        child: ConstrainedBox(
+          constraints: BoxConstraints(maxHeight: availableHeight * 0.75),
+          child: _KhatmaProgressConfirmationSheet(
+            minimumPage: minimumPage,
+            maximumPage: maximumPage,
+            suggestedPage: suggestedPage,
+          ),
+        ),
+      );
+    },
+  );
 }
 
 class _KhatmaProgressConfirmationSheet extends StatefulWidget {
@@ -280,42 +306,48 @@ class _KhatmaProgressConfirmationSheetState
         onSecondary: () => Navigator.of(context).pop(),
       ),
       children: [
-        Padding(
-          padding: EdgeInsetsDirectional.symmetric(
-            horizontal:
-                theme.componentTokens.settingsGroup.groupHorizontalPadding,
-          ),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.stretch,
-            spacing: tokens.spaceMedium,
-            children: [
-              Text(
-                context.l10n.khatmaCompletedThroughPage(_page),
-                style: theme.textTheme.bodyLarge,
-                textAlign: TextAlign.center,
+        Expanded(
+          child: SingleChildScrollView(
+            physics: const ClampingScrollPhysics(),
+            child: Padding(
+              padding: EdgeInsetsDirectional.symmetric(
+                horizontal:
+                    theme.componentTokens.settingsGroup.groupHorizontalPadding,
               ),
-              if (widget.minimumPage < widget.maximumPage)
-                Semantics(
-                  label: context.l10n.khatmaProgressPageSelector,
-                  child: SliderTheme(
-                    data: SliderTheme.of(context).copyWith(
-                      trackHeight: 4,
-                      activeTrackColor: colorScheme.primary,
-                      inactiveTrackColor: colorScheme.surfaceContainerHighest,
-                      thumbColor: colorScheme.primary,
-                    ),
-                    child: Slider(
-                      value: _page.toDouble(),
-                      min: widget.minimumPage.toDouble(),
-                      max: widget.maximumPage.toDouble(),
-                      divisions: widget.maximumPage - widget.minimumPage,
-                      label: '$_page',
-                      onChanged: (value) =>
-                          setState(() => _page = value.round()),
-                    ),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.stretch,
+                spacing: tokens.spaceMedium,
+                children: [
+                  Text(
+                    context.l10n.khatmaCompletedThroughPage(_page),
+                    style: theme.textTheme.bodyLarge,
+                    textAlign: TextAlign.center,
                   ),
-                ),
-            ],
+                  if (widget.minimumPage < widget.maximumPage)
+                    Semantics(
+                      label: context.l10n.khatmaProgressPageSelector,
+                      child: SliderTheme(
+                        data: SliderTheme.of(context).copyWith(
+                          trackHeight: 4,
+                          activeTrackColor: colorScheme.primary,
+                          inactiveTrackColor:
+                              colorScheme.surfaceContainerHighest,
+                          thumbColor: colorScheme.primary,
+                        ),
+                        child: Slider(
+                          value: _page.toDouble(),
+                          min: widget.minimumPage.toDouble(),
+                          max: widget.maximumPage.toDouble(),
+                          divisions: widget.maximumPage - widget.minimumPage,
+                          label: '$_page',
+                          onChanged: (value) =>
+                              setState(() => _page = value.round()),
+                        ),
+                      ),
+                    ),
+                ],
+              ),
+            ),
           ),
         ),
       ],

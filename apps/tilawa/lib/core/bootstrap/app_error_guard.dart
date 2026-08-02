@@ -56,9 +56,7 @@ abstract final class AppErrorGuard {
     _bufferedFlutterErrors.clear();
     _bufferedPlatformErrors.clear();
 
-    for (final FlutterErrorDetails details in flutterBacklog) {
-      onFlutterError(details);
-    }
+    flutterBacklog.forEach(onFlutterError);
     for (final (Object error, StackTrace stackTrace) in platformBacklog) {
       onPlatformError(error, stackTrace);
     }

@@ -21,6 +21,22 @@ import 'package:tilawa_ui_kit/tilawa_ui_kit.dart';
 ///
 /// On web, image Mushaf cache uses `dart:io` / path_provider and is unavailable;
 /// the host stays on ayah-list until a web-capable image cache exists.
+
+/// Merges a persisted last-read position onto the host's active coordinates.
+@visibleForTesting
+({int surah, int? ayah, int? page}) applyLastReadPosition({
+  required int currentSurah,
+  required int? currentAyah,
+  required int? currentPage,
+  required ({int? surahNumber, int? ayahNumber, int? page}) position,
+}) {
+  return (
+    surah: position.surahNumber ?? currentSurah,
+    ayah: position.ayahNumber ?? currentAyah,
+    page: position.page ?? currentPage,
+  );
+}
+
 class QuranReaderHostScreen extends StatefulWidget {
   const QuranReaderHostScreen({
     super.key,
@@ -53,6 +69,7 @@ class _QuranReaderHostScreenState extends State<QuranReaderHostScreen> {
   late final QuranSettingsCubit _settingsCubit;
   late int _activeSurah;
   int? _activeAyah;
+  int? _activePage;
   bool _ayahListVisited = false;
   bool _isLoadingLastRead = false;
 
@@ -64,6 +81,7 @@ class _QuranReaderHostScreenState extends State<QuranReaderHostScreen> {
     _isLoadingLastRead = widget.surahNumber == 0;
     _activeSurah = widget.surahNumber > 0 ? widget.surahNumber : 1;
     _activeAyah = widget.initialAyah;
+    _activePage = widget.initialPage;
     if (kIsWeb) {
       // Image Mushaf prepare fails on web (MissingPluginException / dart:io).
       _ayahListVisited = true;
@@ -89,10 +107,15 @@ class _QuranReaderHostScreenState extends State<QuranReaderHostScreen> {
           return;
         }
         setState(() {
-          if (position.surahNumber != null) {
-            _activeSurah = position.surahNumber!;
-          }
-          _activeAyah = position.ayahNumber ?? _activeAyah;
+          final resolved = applyLastReadPosition(
+            currentSurah: _activeSurah,
+            currentAyah: _activeAyah,
+            currentPage: _activePage,
+            position: position,
+          );
+          _activeSurah = resolved.surah;
+          _activeAyah = resolved.ayah;
+          _activePage = resolved.page;
           _isLoadingLastRead = false;
         });
       },
@@ -157,7 +180,7 @@ class _QuranReaderHostScreenState extends State<QuranReaderHostScreen> {
     return QuranImageReaderScreen(
       surahNumber: _activeSurah,
       initialAyah: _activeAyah,
-      initialPage: widget.initialPage,
+      initialPage: _activePage,
       firstPage: widget.firstPage,
       lastPage: widget.lastPage,
       openPracticeOnLaunch: widget.openPracticeOnLaunch,

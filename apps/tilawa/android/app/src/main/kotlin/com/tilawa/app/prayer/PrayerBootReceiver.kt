@@ -12,9 +12,10 @@ import org.json.JSONObject
  * schedule (reboot, app update, time/timezone change).
  *
  * Strategy: every successful Dart-side schedule pass persists the next 14 days
- * of (id, prayerName, triggerMs) tuples to SharedPreferences. After boot, this
- * receiver re-installs `setAlarmClock` entries whose trigger time is still in
- * the future — without bringing up Flutter at boot. The next app launch (or
+ * of (id, prayerName, triggerMs, local wall-clock) tuples to SharedPreferences.
+ * After boot / TZ / time change, this receiver rebuilds trigger epochs from the
+ * wall-clock fields (when present) and re-installs future `setAlarmClock`
+ * entries — without bringing up Flutter at boot. The next app launch (or
  * the WorkManager watchdog the Dart side schedules at startup) performs a
  * full Dart reschedule and refreshes the persisted list. The WorkManager
  * watchdog also re-arms from this JSON natively (no FlutterEngine) so alarms
@@ -33,6 +34,11 @@ internal class PrayerBootReceiver : BroadcastReceiver() {
         private const val FIELD_SOUND = "sound"
         private const val FIELD_LOCATION = "location"
         private const val FIELD_LANGUAGE = "language"
+        private const val FIELD_YEAR = "year"
+        private const val FIELD_MONTH = "month"
+        private const val FIELD_DAY = "day"
+        private const val FIELD_HOUR = "hour"
+        private const val FIELD_MINUTE = "minute"
 
         @JvmStatic
         fun persistPendingAlarms(
@@ -53,6 +59,13 @@ internal class PrayerBootReceiver : BroadcastReceiver() {
                         }
                         if (it.languageCode.isNotBlank()) {
                             put(FIELD_LANGUAGE, it.languageCode)
+                        }
+                        if (it.hasLocalWallClock) {
+                            put(FIELD_YEAR, it.year)
+                            put(FIELD_MONTH, it.month)
+                            put(FIELD_DAY, it.day)
+                            put(FIELD_HOUR, it.hour)
+                            put(FIELD_MINUTE, it.minute)
                         }
                     },
                 )

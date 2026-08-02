@@ -92,6 +92,7 @@ class _RadioHomePageState extends State<RadioHomePage> {
                 language: RadioPlaybackActions.apiLanguage(context),
               ),
               child: CustomScrollView(
+                physics: const AlwaysScrollableScrollPhysics(),
                 keyboardDismissBehavior:
                     ScrollViewKeyboardDismissBehavior.onDrag,
                 slivers: [
@@ -120,39 +121,46 @@ class _RadioHomePageState extends State<RadioHomePage> {
                         ),
                       ),
                     ),
-                  SliverPadding(
-                    padding: EdgeInsets.all(tokens.spaceMedium),
-                    sliver: SliverList(
-                      delegate: SliverChildListDelegate([
-                        if (state.featured != null && !state.hasSearch)
-                          _FeaturedStation(
-                            station: state.featured!,
+                  // Box headers (not SliverList) — horizontal ListViews as
+                  // multi-box sliver children can leave null geometry on paint
+                  // under RefreshIndicator stretch (FLUTTER-79).
+                  SliverToBoxAdapter(
+                    child: Padding(
+                      padding: EdgeInsets.all(tokens.spaceMedium),
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.stretch,
+                        children: [
+                          if (state.featured != null && !state.hasSearch) ...[
+                            _FeaturedStation(
+                              station: state.featured!,
+                            ),
+                            SizedBox(height: tokens.spaceLarge),
+                          ],
+                          if (!state.hasSearch &&
+                              state.favorites.isNotEmpty) ...[
+                            _SectionTitle(title: l10n.radioFavorites),
+                            SizedBox(height: tokens.spaceSmall),
+                            _HorizontalStations(
+                              stations: state.favorites,
+                            ),
+                            SizedBox(height: tokens.spaceLarge),
+                          ],
+                          if (!state.hasSearch && state.recent.isNotEmpty) ...[
+                            _SectionTitle(title: l10n.radioRecentlyPlayed),
+                            SizedBox(height: tokens.spaceSmall),
+                            _HorizontalStations(
+                              stations: state.recent,
+                            ),
+                            SizedBox(height: tokens.spaceLarge),
+                          ],
+                          _SectionTitle(
+                            title: state.hasSearch
+                                ? l10n.radioSearchResults
+                                : l10n.radioAllStations,
                           ),
-                        if (state.featured != null && !state.hasSearch)
-                          SizedBox(height: tokens.spaceLarge),
-                        if (!state.hasSearch && state.favorites.isNotEmpty) ...[
-                          _SectionTitle(title: l10n.radioFavorites),
                           SizedBox(height: tokens.spaceSmall),
-                          _HorizontalStations(
-                            stations: state.favorites,
-                          ),
-                          SizedBox(height: tokens.spaceLarge),
                         ],
-                        if (!state.hasSearch && state.recent.isNotEmpty) ...[
-                          _SectionTitle(title: l10n.radioRecentlyPlayed),
-                          SizedBox(height: tokens.spaceSmall),
-                          _HorizontalStations(
-                            stations: state.recent,
-                          ),
-                          SizedBox(height: tokens.spaceLarge),
-                        ],
-                        _SectionTitle(
-                          title: state.hasSearch
-                              ? l10n.radioSearchResults
-                              : l10n.radioAllStations,
-                        ),
-                        SizedBox(height: tokens.spaceSmall),
-                      ]),
+                      ),
                     ),
                   ),
                   if (state.visibleStations.isEmpty)
@@ -240,6 +248,7 @@ class _HorizontalStations extends StatelessWidget {
       height: 128,
       child: ListView.separated(
         scrollDirection: Axis.horizontal,
+        primary: false,
         itemCount: stations.length,
         separatorBuilder: (_, _) => SizedBox(width: tokens.spaceSmall),
         itemBuilder: (context, index) {

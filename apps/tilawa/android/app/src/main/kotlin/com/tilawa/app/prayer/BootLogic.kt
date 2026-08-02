@@ -21,9 +21,10 @@ internal class BootLogic(
     }
 
     /**
-     * Boot / package-replace path: mark Dart for a full refresh, keep the
-     * WorkManager watchdog armed, then re-install future AlarmManager clocks
-     * from the persisted DPS JSON (no Flutter).
+     * Boot / package-replace / TZ / time path: mark Dart for a full refresh,
+     * keep the WorkManager watchdog armed, then re-install future AlarmManager
+     * clocks from the persisted DPS JSON (no Flutter). Triggers with local
+     * wall-clock fields are recalculated for the current timezone.
      */
     fun reArmAlarms(now: Long) {
         storage.setNeedsReschedule(true)
@@ -50,25 +51,7 @@ internal class BootLogic(
     private fun reArmPendingAlarms(now: Long, contextLabel: String): Int {
         val raw = storage.getPendingAlarmsJson() ?: return 0
         val pending = try {
-            val arr = JSONArray(raw)
-            buildList {
-                for (i in 0 until arr.length()) {
-                    val obj = arr.getJSONObject(i)
-                    val name = obj.optString("name", "")
-                    val key = obj.optString("key", name.lowercase())
-                    add(
-                        AlarmEntry(
-                            obj.getInt("id"),
-                            name,
-                            key,
-                            obj.getLong("trigger"),
-                            obj.optString("sound", "adhan"),
-                            obj.optString("location", ""),
-                            obj.optString("language", ""),
-                        ),
-                    )
-                }
-            }
+            parsePendingAlarms(raw)
         } catch (t: Throwable) {
             analytics?.logError(
                 "Failed to parse pending alarms JSON",
@@ -85,20 +68,28 @@ internal class BootLogic(
 
         if (pending.isEmpty()) return 0
 
+        val resolved = pending.map { entry ->
+            entry.copy(triggerMs = PendingAlarmTriggerResolver.resolveTriggerMs(entry))
+        }
+
+        // Keep DPS in sync with recalculated epochs so later rearms stay accurate.
+        storage.setPendingAlarmsJson(serializePendingAlarms(resolved))
+
         var scheduled = 0
-        for (entry in pending) {
-            if (entry.trigger <= now) continue
+        for (entry in resolved) {
+            if (entry.triggerMs <= now) continue
             try {
                 logDebug(
                     "ADHAN_AUDIT source=$contextLabel event=attempt prayerKey=${entry.key} " +
-                        "prayerName=${entry.name} scheduledMs=${entry.trigger} " +
-                        "notificationId=${entry.id} requestCode=${entry.id}",
+                        "prayerName=${entry.name} scheduledMs=${entry.triggerMs} " +
+                        "notificationId=${entry.id} requestCode=${entry.id} " +
+                        "wallClock=${entry.hasLocalWallClock}",
                 )
                 val ok = scheduler.schedule(
                     entry.id,
                     entry.name,
                     entry.key,
-                    entry.trigger,
+                    entry.triggerMs,
                     entry.sound,
                     entry.locationName,
                     entry.languageCode,
@@ -139,15 +130,61 @@ internal class BootLogic(
         return scheduled
     }
 
-    private data class AlarmEntry(
-        val id: Int,
-        val name: String,
-        val key: String,
-        val trigger: Long,
-        val sound: String,
-        val locationName: String,
-        val languageCode: String,
-    )
+    companion object {
+        internal fun parsePendingAlarms(raw: String): List<AlarmMetadata> {
+            val arr = JSONArray(raw)
+            return buildList {
+                for (i in 0 until arr.length()) {
+                    val obj = arr.getJSONObject(i)
+                    val name = obj.optString("name", "")
+                    val key = obj.optString("key", name.lowercase())
+                    fun optInt(field: String): Int? =
+                        if (obj.has(field) && !obj.isNull(field)) obj.getInt(field) else null
+                    add(
+                        AlarmMetadata(
+                            id = obj.getInt("id"),
+                            name = name,
+                            key = key,
+                            triggerMs = obj.getLong("trigger"),
+                            sound = obj.optString("sound", "adhan"),
+                            locationName = obj.optString("location", ""),
+                            languageCode = obj.optString("language", ""),
+                            year = optInt("year"),
+                            month = optInt("month"),
+                            day = optInt("day"),
+                            hour = optInt("hour"),
+                            minute = optInt("minute"),
+                        ),
+                    )
+                }
+            }
+        }
+
+        internal fun serializePendingAlarms(entries: List<AlarmMetadata>): String {
+            val arr = JSONArray()
+            entries.forEach { entry ->
+                arr.put(
+                    org.json.JSONObject().apply {
+                        put("id", entry.id)
+                        put("name", entry.name)
+                        put("key", entry.key)
+                        put("trigger", entry.triggerMs)
+                        put("sound", entry.sound)
+                        if (entry.locationName.isNotBlank()) put("location", entry.locationName)
+                        if (entry.languageCode.isNotBlank()) put("language", entry.languageCode)
+                        if (entry.hasLocalWallClock) {
+                            put("year", entry.year)
+                            put("month", entry.month)
+                            put("day", entry.day)
+                            put("hour", entry.hour)
+                            put("minute", entry.minute)
+                        }
+                    },
+                )
+            }
+            return arr.toString()
+        }
+    }
 }
 
 interface AdhanSchedulerProxy {

@@ -195,4 +195,41 @@ class BootLogicTest {
             )
         }
     }
+
+    @Test
+    fun `reArmAlarms recalculates wall-clock triggers instead of stale millis`() {
+        val zoneId = java.util.TimeZone.getDefault()
+        val calendar = java.util.Calendar.getInstance(zoneId).apply {
+            set(java.util.Calendar.MILLISECOND, 0)
+            set(2026, java.util.Calendar.JUNE, 1, 5, 15, 0)
+        }
+        val expected = calendar.timeInMillis
+        val stale = expected + 3_600_000L // pretend persisted wrong absolute time
+        val json = """
+            [{
+              "id": 9,
+              "name": "fajr",
+              "key": "fajr",
+              "trigger": $stale,
+              "sound": "adhan_fajr",
+              "year": 2026,
+              "month": 6,
+              "day": 1,
+              "hour": 5,
+              "minute": 15
+            }]
+        """.trimIndent()
+        every { mockStorage.getPendingAlarmsJson() } returns json
+        every {
+            mockScheduler.schedule(any(), any(), any(), any(), any(), any(), any())
+        } returns true
+
+        val scheduled = logic.reArmPendingAlarmsForWatchdog(expected - 1_000L)
+
+        assertEquals(1, scheduled)
+        verify { mockScheduler.schedule(9, "fajr", "fajr", expected, "adhan_fajr") }
+        verify { mockStorage.setPendingAlarmsJson(match { it.contains("\"year\":2026") }) }
+    }
+
+
 }
