@@ -18,6 +18,8 @@ import 'package:go_router/go_router.dart';
 import 'package:quran_image/core/perf_logger.dart';
 import 'package:tilawa/core/di/injection.dart';
 import 'package:tilawa/core/extensions.dart';
+import 'package:tilawa_core/errors/failures.dart';
+import 'package:tilawa/router/app_router_config.dart';
 import 'package:tilawa/features/audio_player/domain/entities/player_background_configuration.dart';
 import 'package:tilawa/features/audio_player/presentation/bloc/audio_player_bloc.dart';
 import 'package:tilawa/features/audio_player/presentation/cubit/player_background_cubit.dart';
@@ -1397,13 +1399,34 @@ class QuranPlayerWidgetState extends State<QuranPlayerWidget>
           _dismissAnimController.value = 0;
           _dismissOffsetX = 0;
         }
-        final String? message = state.failure?.localizedMessage(context);
+        final Failure? failure = state.failure;
+        final String? message = failure?.localizedMessage(context);
         if (message != null) {
-          TilawaFeedback.showToast(
-            context,
-            message: message,
-            variant: TilawaFeedbackVariant.error,
-          );
+          final bool offerRedownload =
+              failure is OfflinePlaybackFailure &&
+              (failure.reason == OfflinePlaybackReason.fileMissing ||
+                  failure.reason == OfflinePlaybackReason.fileCorrupted);
+          if (offerRedownload) {
+            TilawaFeedback.showActionable(
+              context,
+              message: message,
+              variant: TilawaFeedbackVariant.error,
+              actions: <TilawaFeedbackAction>[
+                TilawaFeedbackAction(
+                  label: context.l10n.offlinePlaybackRedownloadAction,
+                  onPressed: () {
+                    const DownloadsRoute().push<void>(context);
+                  },
+                ),
+              ],
+            );
+          } else {
+            TilawaFeedback.showToast(
+              context,
+              message: message,
+              variant: TilawaFeedbackVariant.error,
+            );
+          }
         }
       },
       builder: (context, state) {

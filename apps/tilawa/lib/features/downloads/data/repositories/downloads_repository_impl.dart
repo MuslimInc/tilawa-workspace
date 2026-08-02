@@ -10,6 +10,7 @@ import 'package:tilawa_core/network/network_info.dart';
 
 import '../../../../l10n/generated/app_localizations.dart';
 import '../../domain/entities/download_item.dart';
+import '../../domain/entities/downloaded_file_integrity.dart';
 import '../../domain/repositories/downloads_repository.dart';
 import '../../utils/download_path_utils.dart';
 import '../datasources/downloads_local_datasource.dart';
@@ -787,7 +788,30 @@ class DownloadsRepositoryImpl implements DownloadsRepository {
 
   @override
   Future<bool> validateDownloadedFile(DownloadItem download) async {
-    return validator.verifyFileExists(download.filePath);
+    final DownloadedFileIntegrity integrity = await inspectDownloadedFile(
+      download,
+    );
+    return integrity == DownloadedFileIntegrity.valid;
+  }
+
+  @override
+  Future<DownloadedFileIntegrity> inspectDownloadedFile(
+    DownloadItem download,
+  ) async {
+    final bool exists = await validator.verifyFileExists(download.filePath);
+    if (!exists) {
+      return DownloadedFileIntegrity.missing;
+    }
+    if (download.fileSize > 0) {
+      final bool sizeValid = await validator.verifyFileSize(
+        download.filePath,
+        download.fileSize,
+      );
+      if (!sizeValid) {
+        return DownloadedFileIntegrity.corrupted;
+      }
+    }
+    return DownloadedFileIntegrity.valid;
   }
 
   List<MediaItem> createMediaItemsFromDownloads(List<DownloadItem> downloads) {

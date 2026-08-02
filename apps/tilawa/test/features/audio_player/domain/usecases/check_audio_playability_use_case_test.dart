@@ -6,6 +6,7 @@ import 'package:tilawa_core/errors/failures.dart';
 import 'package:tilawa_core/network/network_info.dart';
 import 'package:tilawa/features/audio_player/domain/usecases/check_audio_playability_use_case.dart';
 import 'package:tilawa/features/downloads/domain/entities/download_item.dart';
+import 'package:tilawa/features/downloads/domain/entities/downloaded_file_integrity.dart';
 import 'package:tilawa/features/downloads/domain/repositories/downloads_repository.dart';
 
 class MockNetworkInfo extends Mock implements NetworkInfo {}
@@ -70,8 +71,8 @@ void main() {
           () => mockDownloadsRepository.getDownloadItem(tAudio.id),
         ).thenAnswer((_) async => tDownloadItem);
         when(
-          () => mockDownloadsRepository.validateDownloadedFile(tDownloadItem),
-        ).thenAnswer((_) async => true);
+          () => mockDownloadsRepository.inspectDownloadedFile(tDownloadItem),
+        ).thenAnswer((_) async => DownloadedFileIntegrity.valid);
 
         // act
         final Either<Failure, void> result = await useCase(tAudio);
@@ -83,7 +84,7 @@ void main() {
           () => mockDownloadsRepository.getDownloadItem(tAudio.id),
         ).called(1);
         verify(
-          () => mockDownloadsRepository.validateDownloadedFile(tDownloadItem),
+          () => mockDownloadsRepository.inspectDownloadedFile(tDownloadItem),
         ).called(1);
       },
     );
@@ -167,8 +168,8 @@ void main() {
           () => mockDownloadsRepository.getDownloadItem(tAudio.id),
         ).thenAnswer((_) async => tDownloadItem);
         when(
-          () => mockDownloadsRepository.validateDownloadedFile(tDownloadItem),
-        ).thenAnswer((_) async => false); // File missing
+          () => mockDownloadsRepository.inspectDownloadedFile(tDownloadItem),
+        ).thenAnswer((_) async => DownloadedFileIntegrity.missing);
 
         // act
         final Either<Failure, void> result = await useCase(tAudio);
@@ -177,7 +178,45 @@ void main() {
         expect(result, isA<Left>());
         result.fold((failure) {
           expect(failure, isA<OfflinePlaybackFailure>());
-          expect(failure.message, contains('File missing'));
+          final OfflinePlaybackFailure offline =
+              failure as OfflinePlaybackFailure;
+          expect(offline.reason, OfflinePlaybackReason.fileMissing);
+        }, (_) => fail('Should return failure'));
+      },
+    );
+
+    test(
+      'should return Left(OfflinePlaybackFailure.fileCorrupted) when size invalid',
+      () async {
+        when(() => mockNetworkInfo.isConnected).thenAnswer((_) async => false);
+
+        final tDownloadItem = DownloadItem(
+          id: tAudio.id,
+          title: tAudio.title,
+          url: tAudio.url,
+          filePath: '/path/to/file.mp3',
+          reciterName: 'Test Reciter',
+          status: DownloadStatus.completed,
+          progress: 1.0,
+          fileSize: 1024,
+          downloadedSize: 1024,
+          createdAt: DateTime.now(),
+        );
+
+        when(
+          () => mockDownloadsRepository.getDownloadItem(tAudio.id),
+        ).thenAnswer((_) async => tDownloadItem);
+        when(
+          () => mockDownloadsRepository.inspectDownloadedFile(tDownloadItem),
+        ).thenAnswer((_) async => DownloadedFileIntegrity.corrupted);
+
+        final Either<Failure, void> result = await useCase(tAudio);
+
+        expect(result, isA<Left>());
+        result.fold((failure) {
+          final OfflinePlaybackFailure offline =
+              failure as OfflinePlaybackFailure;
+          expect(offline.reason, OfflinePlaybackReason.fileCorrupted);
         }, (_) => fail('Should return failure'));
       },
     );

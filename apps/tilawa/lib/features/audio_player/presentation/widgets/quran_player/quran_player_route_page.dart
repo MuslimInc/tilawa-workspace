@@ -24,13 +24,34 @@ class QuranPlayerExpandedPageContent extends StatelessWidget {
     return BlocConsumer<AudioPlayerBloc, AudioPlayerState>(
       listenWhen: (previous, current) => previous.failure != current.failure,
       listener: (context, state) {
-        final String? message = state.failure?.localizedMessage(context);
+        final Failure? failure = state.failure;
+        final String? message = failure?.localizedMessage(context);
         if (message != null) {
-          TilawaFeedback.showToast(
-            context,
-            message: message,
-            variant: TilawaFeedbackVariant.error,
-          );
+          final bool offerRedownload =
+              failure is OfflinePlaybackFailure &&
+              (failure.reason == OfflinePlaybackReason.fileMissing ||
+                  failure.reason == OfflinePlaybackReason.fileCorrupted);
+          if (offerRedownload) {
+            TilawaFeedback.showActionable(
+              context,
+              message: message,
+              variant: TilawaFeedbackVariant.error,
+              actions: <TilawaFeedbackAction>[
+                TilawaFeedbackAction(
+                  label: context.l10n.offlinePlaybackRedownloadAction,
+                  onPressed: () {
+                    const DownloadsRoute().push<void>(context);
+                  },
+                ),
+              ],
+            );
+          } else {
+            TilawaFeedback.showToast(
+              context,
+              message: message,
+              variant: TilawaFeedbackVariant.error,
+            );
+          }
         }
       },
       buildWhen: QuranPlayerTransportControls.playerTreeBuildWhen,

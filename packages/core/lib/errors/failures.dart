@@ -75,7 +75,12 @@ final class VideoGenerationFailure extends Failure {
   List<Object?> get props => [message, reason];
 }
 
-enum OfflinePlaybackReason { notDownloaded, fileMissing, downloadIncomplete }
+enum OfflinePlaybackReason {
+  notDownloaded,
+  fileMissing,
+  downloadIncomplete,
+  fileCorrupted,
+}
 
 final class OfflinePlaybackFailure extends NetworkFailure {
   const OfflinePlaybackFailure([

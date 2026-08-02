@@ -44,6 +44,7 @@ extension FailureExtensions on Failure {
         OfflinePlaybackReason.fileMissing => l10n.offlineFileMissingError,
         OfflinePlaybackReason.downloadIncomplete =>
           l10n.offlineDownloadIncompleteError,
+        OfflinePlaybackReason.fileCorrupted => l10n.offlineFileCorruptedError,
       },
       NetworkFailure() => l10n.networkError,
       ServerFailure() => l10n.serverError,
