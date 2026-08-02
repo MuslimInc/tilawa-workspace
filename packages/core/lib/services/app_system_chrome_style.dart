@@ -73,11 +73,16 @@ final class AppSystemChromeStyle {
         ? Brightness.light
         : Brightness.dark;
 
-    final Color opaqueStatusColor = statusBackground.withValues(alpha: 1);
+    // Fully transparent must stay transparent — forcing alpha:1 turns
+    // Colors.transparent into opaque black and paints a false status strip
+    // over immersive heroes (home).
+    final Color resolvedStatusColor = statusBackground.a == 0.0
+        ? statusBackground
+        : statusBackground.withValues(alpha: 1);
     final Color opaqueNavColor = resolvedNavColor.withValues(alpha: 1);
 
     return SystemUiOverlayStyle(
-      statusBarColor: opaqueStatusColor,
+      statusBarColor: resolvedStatusColor,
       statusBarIconBrightness: statusIconBrightness,
       statusBarBrightness: statusBarBrightness,
       systemNavigationBarColor: opaqueNavColor,
