@@ -18,6 +18,8 @@ void main() {
     expect(find.textContaining('1–21'), findsOneWidget);
     expect(find.textContaining('5 confirmed'), findsOneWidget);
     expect(find.textContaining('16 remaining'), findsOneWidget);
+    expect(find.text('Current wird'), findsOneWidget);
+    expect(find.byType(LinearProgressIndicator), findsOneWidget);
 
     final Size cardSize = tester.getSize(
       find.byType(KhatmaHomeDestinationCard),
