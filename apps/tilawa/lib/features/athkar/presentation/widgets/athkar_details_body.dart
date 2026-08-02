@@ -12,11 +12,13 @@ class AthkarDetailsBody extends StatefulWidget {
     super.key,
     required this.items,
     required this.currentCounts,
+    required this.pageController,
     required this.onPageChanged,
   });
 
   final List<AthkarItem> items;
   final Map<int, int> currentCounts;
+  final PageController pageController;
   final ValueChanged<int> onPageChanged;
 
   @override
@@ -24,27 +26,14 @@ class AthkarDetailsBody extends StatefulWidget {
 }
 
 class _AthkarDetailsBodyState extends State<AthkarDetailsBody> {
-  late PageController _pageController;
   bool _isAnimating = false;
-
-  @override
-  void initState() {
-    super.initState();
-    _pageController = PageController(initialPage: 0);
-  }
-
-  @override
-  void dispose() {
-    _pageController.dispose();
-    super.dispose();
-  }
 
   @override
   Widget build(BuildContext context) {
     return IgnorePointer(
       ignoring: _isAnimating,
       child: PageView.builder(
-        controller: _pageController,
+        controller: widget.pageController,
         physics: const PageScrollPhysics(parent: BouncingScrollPhysics()),
         dragStartBehavior: DragStartBehavior.down,
         onPageChanged: widget.onPageChanged,
@@ -54,13 +43,10 @@ class _AthkarDetailsBodyState extends State<AthkarDetailsBody> {
           final int currentCount = widget.currentCounts[item.id] ?? 0;
           return SafeArea(
             top: false,
+            bottom: false,
             child: AthkarItemWidget(
               item: item,
-              currentCount: currentCount,
               onTap: () => _onItemTap(context, item, index, currentCount),
-              onReset: () {
-                context.read<AthkarCubit>().resetCount(item.id);
-              },
             ),
           );
         },
@@ -79,35 +65,40 @@ class _AthkarDetailsBodyState extends State<AthkarDetailsBody> {
     }
 
     if (currentCount <= 1) {
-      if (_pageController.hasClients && index < widget.items.length - 1) {
-        setState(() {
-          _isAnimating = true;
-        });
-        _pageController
-            .animateToPage(
-              index + 1,
-              duration: context.tokens.durationFast,
-              curve: Curves.easeInOut,
-            )
-            .whenComplete(() {
-              if (mounted) {
-                setState(() {
-                  _isAnimating = false;
-                });
-              }
-            });
-      }
+      _advanceAfterComplete(index);
     }
+  }
+
+  void _advanceAfterComplete(int index) {
+    if (!widget.pageController.hasClients || index >= widget.items.length - 1) {
+      return;
+    }
+    setState(() {
+      _isAnimating = true;
+    });
+    widget.pageController
+        .animateToPage(
+          index + 1,
+          duration: context.tokens.durationFast,
+          curve: Curves.easeInOut,
+        )
+        .whenComplete(() {
+          if (mounted) {
+            setState(() {
+              _isAnimating = false;
+            });
+          }
+        });
   }
 
   @override
   void didUpdateWidget(AthkarDetailsBody oldWidget) {
     super.didUpdateWidget(oldWidget);
-    if (_isAnimating || !_pageController.hasClients) {
+    if (_isAnimating || !widget.pageController.hasClients) {
       return;
     }
 
-    final int currentPage = _pageController.page?.round() ?? 0;
+    final int currentPage = widget.pageController.page?.round() ?? 0;
     if (currentPage >= widget.items.length) {
       return;
     }
@@ -123,8 +114,8 @@ class _AthkarDetailsBodyState extends State<AthkarDetailsBody> {
         _isAnimating = true;
       });
       Future.delayed(const Duration(milliseconds: 500), () {
-        if (mounted && _pageController.hasClients) {
-          _pageController
+        if (mounted && widget.pageController.hasClients) {
+          widget.pageController
               .animateToPage(
                 currentPage + 1,
                 duration: context.tokens.durationFast,
@@ -137,12 +128,10 @@ class _AthkarDetailsBodyState extends State<AthkarDetailsBody> {
                   });
                 }
               });
-        } else {
-          if (mounted) {
-            setState(() {
-              _isAnimating = false;
-            });
-          }
+        } else if (mounted) {
+          setState(() {
+            _isAnimating = false;
+          });
         }
       });
     }
