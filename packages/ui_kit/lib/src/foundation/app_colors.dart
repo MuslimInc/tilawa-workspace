@@ -818,11 +818,11 @@ abstract final class AppOnboardingDeviceColors {
 abstract final class AppQuranReaderLegacyColors {
   // --- Light ---
 
-  static const Color lightPageBackground = Color(0xFFFFF9F1);
+  static const Color lightPageBackground = Color(0xFFFFF9F2);
   static const Color lightOnSurface = Color(0xFF000000);
   static const Color lightPrimary = Color(0xFF8B6B23);
   static const Color lightHeaderBackground = Color(0xFFF4EAD2);
-  static const Color lightSystemBar = Color(0xFFFFF9F1);
+  static const Color lightSystemBar = Color(0xFFFFF9F2);
 
   /// ~60% black — slider range labels and secondary reader text.
   static const Color lightMutedOnSurface = Color(0x99000000);

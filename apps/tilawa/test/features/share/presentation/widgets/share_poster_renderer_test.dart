@@ -158,7 +158,7 @@ Widget _buildHarness({int surahNumber = 1, int fromAyah = 1, int toAyah = 7}) {
   return MaterialApp(
     theme: ThemeData(extensions: [MeMuslimDesignTokens.light()]),
     home: Scaffold(
-      backgroundColor: const Color(0xFFFFF9F1),
+      backgroundColor: const Color(0xFFFFF9F2),
       body: SafeArea(
         child: Column(
           children: [

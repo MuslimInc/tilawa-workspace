@@ -7,6 +7,7 @@ import 'package:flutter/rendering.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:quran_image/core/di/dependency_injection.dart';
+import 'package:quran_image/core/design_tokens/colors.dart';
 import 'package:quran_image/core/perf_logger.dart';
 import 'package:quran_image/domain/domain.dart';
 import 'package:quran_image/page_mapping.dart';
@@ -359,7 +360,9 @@ class _QuranImageReaderState extends State<QuranImageReader>
   }
 
   void _applySystemUiOverlayStyle() {
-    final scaffoldColor = Theme.of(context).scaffoldBackgroundColor;
+    final scaffoldColor = QuranImageColors.pageBackground(
+      Theme.of(context).brightness,
+    );
     final isDarkTheme = Theme.of(context).brightness == Brightness.dark;
 
     SystemChrome.setSystemUIOverlayStyle(
@@ -1074,8 +1077,14 @@ class _QuranImageReaderState extends State<QuranImageReader>
       isImmersive: isImmersive,
     );
 
+    // Immersive Mushaf: keep the 15-line page stack at full viewport height.
+    // Default Scaffold resize would squash BoxFit.fill line images when a
+    // sheet search field opens the IME (same contract as the QCF reader).
     final scaffold = Scaffold(
-      backgroundColor: Theme.of(context).scaffoldBackgroundColor,
+      backgroundColor: QuranImageColors.pageBackground(
+        Theme.of(context).brightness,
+      ),
+      resizeToAvoidBottomInset: false,
       body: AnnotatedRegion<SystemUiOverlayStyle>(
         value: const SystemUiOverlayStyle(
           statusBarColor: Colors.transparent,
@@ -1094,9 +1103,12 @@ class _QuranImageReaderState extends State<QuranImageReader>
           children: [
             Positioned.fill(
               child: MediaQuery(
-                data: MediaQuery.of(
-                  context,
-                ).copyWith(padding: padding, viewPadding: padding),
+                data: MediaQuery.of(context).copyWith(
+                  padding: padding,
+                  viewPadding: padding,
+                  // Sheet / IME own keyboard geometry; page layout must not.
+                  viewInsets: EdgeInsets.zero,
+                ),
                 child: Padding(
                   padding: EdgeInsets.only(
                     top: padding.top,

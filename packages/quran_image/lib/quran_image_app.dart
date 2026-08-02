@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:quran_image/core/design_tokens/colors.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:quran_image/core/perf_logger.dart';
 import 'package:quran_image/data/repositories/asset_verse_marker_repository.dart';
@@ -141,7 +142,9 @@ class _QuranReaderHome extends StatelessWidget {
         } else if (state is NavigationError) {
           final l10n = QuranImageLocalizations.of(context);
           result = Scaffold(
-            backgroundColor: Theme.of(context).scaffoldBackgroundColor,
+            backgroundColor: QuranImageColors.pageBackground(
+              Theme.of(context).brightness,
+            ),
             body: Center(
               child: Padding(
                 padding: const EdgeInsets.all(32),
@@ -171,7 +174,9 @@ class _QuranReaderHome extends StatelessWidget {
         } else {
           // Silent loading state with matching background.
           result = Scaffold(
-            backgroundColor: Theme.of(context).scaffoldBackgroundColor,
+            backgroundColor: QuranImageColors.pageBackground(
+              Theme.of(context).brightness,
+            ),
           );
         }
 
