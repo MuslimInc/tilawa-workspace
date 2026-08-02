@@ -36,7 +36,7 @@ if (keystorePropertiesFile.exists()) {
 
 android {
     namespace "com.tilawa.app"
-    compileSdkVersion 36
+    compileSdkVersion 37
     ndkVersion flutter.ndkVersion
 
     compileOptions {
