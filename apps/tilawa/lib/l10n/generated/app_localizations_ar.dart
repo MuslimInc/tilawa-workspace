@@ -854,6 +854,201 @@ class AppLocalizationsAr extends AppLocalizations {
   String get khatmaSavePlanChangesAction => 'حفظ التغييرات';
 
   @override
+  String get khatmaWizardStartTitle => 'حدد مكان البدء';
+
+  @override
+  String get khatmaWizardStartSubtitle =>
+      'الرجاء تحديد المكان أو الجزء الذي تريد أن تبدأ منه الختمة.';
+
+  @override
+  String get khatmaWizardStartFromLabel => 'البدء من';
+
+  @override
+  String get khatmaWizardBeginningOfMushaf => 'بداية المصحف';
+
+  @override
+  String khatmaWizardJuzOption(int number) {
+    return 'الجزء $number';
+  }
+
+  @override
+  String get khatmaWizardContinue => 'الاستمرار';
+
+  @override
+  String get khatmaWizardDurationTitle => 'حدد المدة أو كمية الورد';
+
+  @override
+  String get khatmaWizardDurationSubtitle =>
+      'الرجاء تحديد المدة التي تريد أن تختم فيها أو كمية الورد اليومي.';
+
+  @override
+  String get khatmaWizardDurationLabel => 'مدة الختمة';
+
+  @override
+  String get khatmaWizardDailyAmountLabel => 'كمية الورد';
+
+  @override
+  String get khatmaWizardAdvancedBoundaries => 'حدود متقدمة للبداية والنهاية';
+
+  @override
+  String get khatmaWizardHideAdvanced => 'إخفاء الخيارات المتقدمة';
+
+  @override
+  String get khatmaCurrentWirdTitle => 'الورد الحالي';
+
+  @override
+  String get khatmaFromHisWords => 'من قوله تعالى';
+
+  @override
+  String khatmaJuzLabel(int number) {
+    return 'الجزء $number';
+  }
+
+  @override
+  String khatmaSurahAyahLabel(String surah, int ayah) {
+    return 'سورة $surah - آية $ayah';
+  }
+
+  @override
+  String khatmaToSurahAyahLabel(String surah, int ayah) {
+    return 'إلى سورة $surah - آية $ayah';
+  }
+
+  @override
+  String khatmaPageLabel(int page) {
+    return 'صفحة $page';
+  }
+
+  @override
+  String get khatmaReadWirdAction => 'اقرأ الورد';
+
+  @override
+  String get khatmaFinishedReadingAction => 'أتممت القراءة';
+
+  @override
+  String khatmaPreviousSessionsCount(int count) {
+    return 'الأوراد السابقة : $count';
+  }
+
+  @override
+  String khatmaUpcomingSessionsCount(int count) {
+    return 'الأوراد القادمة : $count';
+  }
+
+  @override
+  String get khatmaPreviousSessionsTitle => 'الأوراد السابقة';
+
+  @override
+  String get khatmaUpcomingSessionsTitle => 'الأوراد القادمة';
+
+  @override
+  String khatmaSessionNumber(int number) {
+    return 'الورد $number';
+  }
+
+  @override
+  String khatmaBehindSchedule(int days) {
+    String _temp0 = intl.Intl.pluralLogic(
+      days,
+      locale: localeName,
+      other: '$days أيام',
+      two: 'يومين',
+      one: 'يوم واحد',
+    );
+    return 'أنت متأخر عن ختمتك بـ $_temp0';
+  }
+
+  @override
+  String get khatmaOnTrack => 'ختمتك على المسار';
+
+  @override
+  String get khatmaReminderOptInTitle => 'منبه الختمة اليومي';
+
+  @override
+  String get khatmaReminderOptInMessage =>
+      'هل تود ضبط منبه لتذكيرك بقراءة وردك كل يوم؟';
+
+  @override
+  String get khatmaReminderOptInYes => 'نعم';
+
+  @override
+  String get khatmaReminderOptInNo => 'لا';
+
+  @override
+  String get khatmaReminderSetTitle => 'تم ضبط المنبه';
+
+  @override
+  String get khatmaReminderSetMessage =>
+      'تم ضبط منبه للختمة. يمكنك تعديله من هذه الشاشة.';
+
+  @override
+  String get khatmaReminderContinue => 'الاستمرار';
+
+  @override
+  String get khatmaReminderSettingsTitle => 'المنبه اليومي';
+
+  @override
+  String get khatmaReminderSettingsSubtitle => 'ذكّرني بقراءة وردي كل يوم';
+
+  @override
+  String get khatmaReminderTimeLabel => 'وقت المنبه';
+
+  @override
+  String get khatmaReminderNotificationTitle => 'حان وقت ورد الختمة';
+
+  @override
+  String get khatmaReminderNotificationBody =>
+      'افتح تلاوة وتابع قراءتك اليومية.';
+
+  @override
+  String get khatmaBaqarahReminderTitle => 'منبه سورة البقرة';
+
+  @override
+  String get khatmaBaqarahReminderBody => 'تذكير يومي بقراءة سورة البقرة.';
+
+  @override
+  String get khatmaBaqarahReminderPromptMessage =>
+      'هل تود ضبط منبه لتذكيرك بقراءة سورة البقرة كل يوم؟';
+
+  @override
+  String get khatmaKahfReminderTitle => 'منبه سورة الكهف';
+
+  @override
+  String get khatmaKahfReminderBody => 'تذكير يوم الجمعة بقراءة سورة الكهف.';
+
+  @override
+  String get khatmaKahfReminderPromptMessage =>
+      'هل تود ضبط منبه يوم الجمعة لقراءة سورة الكهف؟';
+
+  @override
+  String get khatmaSurahRemindersTitle => 'منبهات السور';
+
+  @override
+  String get khatmaSurahRemindersSubtitle =>
+      'منبهات اختيارية لسورتي البقرة والكهف';
+
+  @override
+  String get khatmaCompletionDuaAction => 'دعاء ختم القرآن';
+
+  @override
+  String get khatmaCompletionDuaTitle => 'دعاء ختم القرآن';
+
+  @override
+  String get khatmaCompletionShareAction => 'شارك';
+
+  @override
+  String khatmaCompletionShareText(String iosStoreUrl, String androidStoreUrl) {
+    return 'لقد أتممت ختمتي القرآنية بمساعدة تطبيق تلاوة.\niOS: $iosStoreUrl\nAndroid: $androidStoreUrl';
+  }
+
+  @override
+  String get khatmaCompletionDoneMessage => 'تم الانتهاء من الختمة الحالية.';
+
+  @override
+  String get khatmaDuaBody =>
+      'اللَّهُمَّ ارْحَمْنِي بِالْقُرْآنِ وَاجْعَلْهُ لِي إِمَامًا وَنُورًا وَهُدًى وَرَحْمَةً.\n\nاللَّهُمَّ ذَكِّرْنِي مِنْهُ مَا نَسِيتُ وَعَلِّمْنِي مِنْهُ مَا جَهِلْتُ وَارْزُقْنِي تِلَاوَتَهُ آنَاءَ اللَّيْلِ وَأَطْرَافَ النَّهَارِ وَاجْعَلْهُ لِي حُجَّةً يَا رَبَّ الْعَالَمِينَ.\n\nاللَهُمَّ أَصْلِحْ لِي دِينِي الَّذِي هُوَ عِصْمَةُ أَمْرِي، وَأَصْلِحْ لِي دُنْيَايَ الَّتِي فِيهَا مَعَاشِي، وَأَصْلِحْ لِي آخِرَتِي الَّتِي فِيهَا مَعَادِي، وَاجْعَلِ الْحَيَاةَ زِيَادَةً لِي فِي كُلِّ خَيْرٍ، وَاجْعَلِ الْمَوْتَ رَاحَةً لِي مِنْ كُلِّ شَرٍّ.\n\nاللَهُمَّ اجْعَلْ خَيْرَ عُمُرِي آخِرَهُ، وَخَيْرَ عَمَلِي خَوَاتِمَهُ، وَخَيْرَ أَيَّامِي يَوْمَ أَلْقَاكَ فِيهِ.';
+
+  @override
   String get khatmaDeletePlanAction => 'حذف الخطة';
 
   @override

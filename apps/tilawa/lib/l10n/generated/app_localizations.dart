@@ -1525,6 +1525,324 @@ abstract class AppLocalizations {
   /// **'Save changes'**
   String get khatmaSavePlanChangesAction;
 
+  /// No description provided for @khatmaWizardStartTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Choose where to start'**
+  String get khatmaWizardStartTitle;
+
+  /// No description provided for @khatmaWizardStartSubtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Select the place or Juz from which you want to begin your Khatma.'**
+  String get khatmaWizardStartSubtitle;
+
+  /// No description provided for @khatmaWizardStartFromLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Start from'**
+  String get khatmaWizardStartFromLabel;
+
+  /// No description provided for @khatmaWizardBeginningOfMushaf.
+  ///
+  /// In en, this message translates to:
+  /// **'Beginning of the Mushaf'**
+  String get khatmaWizardBeginningOfMushaf;
+
+  /// No description provided for @khatmaWizardJuzOption.
+  ///
+  /// In en, this message translates to:
+  /// **'Juz {number}'**
+  String khatmaWizardJuzOption(int number);
+
+  /// No description provided for @khatmaWizardContinue.
+  ///
+  /// In en, this message translates to:
+  /// **'Continue'**
+  String get khatmaWizardContinue;
+
+  /// No description provided for @khatmaWizardDurationTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Choose duration or daily amount'**
+  String get khatmaWizardDurationTitle;
+
+  /// No description provided for @khatmaWizardDurationSubtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Set how many days you want to finish in, or adjust the daily pages.'**
+  String get khatmaWizardDurationSubtitle;
+
+  /// No description provided for @khatmaWizardDurationLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Khatma duration'**
+  String get khatmaWizardDurationLabel;
+
+  /// No description provided for @khatmaWizardDailyAmountLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Daily wird'**
+  String get khatmaWizardDailyAmountLabel;
+
+  /// No description provided for @khatmaWizardAdvancedBoundaries.
+  ///
+  /// In en, this message translates to:
+  /// **'Advanced start and end'**
+  String get khatmaWizardAdvancedBoundaries;
+
+  /// No description provided for @khatmaWizardHideAdvanced.
+  ///
+  /// In en, this message translates to:
+  /// **'Hide advanced options'**
+  String get khatmaWizardHideAdvanced;
+
+  /// No description provided for @khatmaCurrentWirdTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Current wird'**
+  String get khatmaCurrentWirdTitle;
+
+  /// No description provided for @khatmaFromHisWords.
+  ///
+  /// In en, this message translates to:
+  /// **'From the words of Allah'**
+  String get khatmaFromHisWords;
+
+  /// No description provided for @khatmaJuzLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Juz {number}'**
+  String khatmaJuzLabel(int number);
+
+  /// No description provided for @khatmaSurahAyahLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Surah {surah} — Ayah {ayah}'**
+  String khatmaSurahAyahLabel(String surah, int ayah);
+
+  /// No description provided for @khatmaToSurahAyahLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'To Surah {surah} — Ayah {ayah}'**
+  String khatmaToSurahAyahLabel(String surah, int ayah);
+
+  /// No description provided for @khatmaPageLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Page {page}'**
+  String khatmaPageLabel(int page);
+
+  /// No description provided for @khatmaReadWirdAction.
+  ///
+  /// In en, this message translates to:
+  /// **'Read the wird'**
+  String get khatmaReadWirdAction;
+
+  /// No description provided for @khatmaFinishedReadingAction.
+  ///
+  /// In en, this message translates to:
+  /// **'I finished reading'**
+  String get khatmaFinishedReadingAction;
+
+  /// No description provided for @khatmaPreviousSessionsCount.
+  ///
+  /// In en, this message translates to:
+  /// **'Previous sessions: {count}'**
+  String khatmaPreviousSessionsCount(int count);
+
+  /// No description provided for @khatmaUpcomingSessionsCount.
+  ///
+  /// In en, this message translates to:
+  /// **'Upcoming sessions: {count}'**
+  String khatmaUpcomingSessionsCount(int count);
+
+  /// No description provided for @khatmaPreviousSessionsTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Previous sessions'**
+  String get khatmaPreviousSessionsTitle;
+
+  /// No description provided for @khatmaUpcomingSessionsTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Upcoming sessions'**
+  String get khatmaUpcomingSessionsTitle;
+
+  /// No description provided for @khatmaSessionNumber.
+  ///
+  /// In en, this message translates to:
+  /// **'Session {number}'**
+  String khatmaSessionNumber(int number);
+
+  /// No description provided for @khatmaBehindSchedule.
+  ///
+  /// In en, this message translates to:
+  /// **'You are behind by {days, plural, =1{1 day} other{{days} days}}'**
+  String khatmaBehindSchedule(int days);
+
+  /// No description provided for @khatmaOnTrack.
+  ///
+  /// In en, this message translates to:
+  /// **'Your Khatma is on track'**
+  String get khatmaOnTrack;
+
+  /// No description provided for @khatmaReminderOptInTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Daily Khatma reminder'**
+  String get khatmaReminderOptInTitle;
+
+  /// No description provided for @khatmaReminderOptInMessage.
+  ///
+  /// In en, this message translates to:
+  /// **'Would you like a daily reminder for your Khatma wird?'**
+  String get khatmaReminderOptInMessage;
+
+  /// No description provided for @khatmaReminderOptInYes.
+  ///
+  /// In en, this message translates to:
+  /// **'Yes'**
+  String get khatmaReminderOptInYes;
+
+  /// No description provided for @khatmaReminderOptInNo.
+  ///
+  /// In en, this message translates to:
+  /// **'No'**
+  String get khatmaReminderOptInNo;
+
+  /// No description provided for @khatmaReminderSetTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Reminder set'**
+  String get khatmaReminderSetTitle;
+
+  /// No description provided for @khatmaReminderSetMessage.
+  ///
+  /// In en, this message translates to:
+  /// **'A daily Khatma reminder is set. You can change it from this screen.'**
+  String get khatmaReminderSetMessage;
+
+  /// No description provided for @khatmaReminderContinue.
+  ///
+  /// In en, this message translates to:
+  /// **'Continue'**
+  String get khatmaReminderContinue;
+
+  /// No description provided for @khatmaReminderSettingsTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Daily reminder'**
+  String get khatmaReminderSettingsTitle;
+
+  /// No description provided for @khatmaReminderSettingsSubtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Remind me to read my wird each day'**
+  String get khatmaReminderSettingsSubtitle;
+
+  /// No description provided for @khatmaReminderTimeLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Reminder time'**
+  String get khatmaReminderTimeLabel;
+
+  /// No description provided for @khatmaReminderNotificationTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Time for your Khatma wird'**
+  String get khatmaReminderNotificationTitle;
+
+  /// No description provided for @khatmaReminderNotificationBody.
+  ///
+  /// In en, this message translates to:
+  /// **'Open Tilawa and continue your daily reading.'**
+  String get khatmaReminderNotificationBody;
+
+  /// No description provided for @khatmaBaqarahReminderTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Surah Al-Baqarah reminder'**
+  String get khatmaBaqarahReminderTitle;
+
+  /// No description provided for @khatmaBaqarahReminderBody.
+  ///
+  /// In en, this message translates to:
+  /// **'Would you like a daily reminder to read Surah Al-Baqarah?'**
+  String get khatmaBaqarahReminderBody;
+
+  /// No description provided for @khatmaBaqarahReminderPromptMessage.
+  ///
+  /// In en, this message translates to:
+  /// **'Set a daily reminder to read Surah Al-Baqarah?'**
+  String get khatmaBaqarahReminderPromptMessage;
+
+  /// No description provided for @khatmaKahfReminderTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Surah Al-Kahf reminder'**
+  String get khatmaKahfReminderTitle;
+
+  /// No description provided for @khatmaKahfReminderBody.
+  ///
+  /// In en, this message translates to:
+  /// **'Friday reminder to read Surah Al-Kahf.'**
+  String get khatmaKahfReminderBody;
+
+  /// No description provided for @khatmaKahfReminderPromptMessage.
+  ///
+  /// In en, this message translates to:
+  /// **'Set a Friday reminder to read Surah Al-Kahf?'**
+  String get khatmaKahfReminderPromptMessage;
+
+  /// No description provided for @khatmaSurahRemindersTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Surah reminders'**
+  String get khatmaSurahRemindersTitle;
+
+  /// No description provided for @khatmaSurahRemindersSubtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Optional reminders for Al-Baqarah and Al-Kahf'**
+  String get khatmaSurahRemindersSubtitle;
+
+  /// No description provided for @khatmaCompletionDuaAction.
+  ///
+  /// In en, this message translates to:
+  /// **'Dua for completing the Quran'**
+  String get khatmaCompletionDuaAction;
+
+  /// No description provided for @khatmaCompletionDuaTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Dua for completing the Quran'**
+  String get khatmaCompletionDuaTitle;
+
+  /// No description provided for @khatmaCompletionShareAction.
+  ///
+  /// In en, this message translates to:
+  /// **'Share'**
+  String get khatmaCompletionShareAction;
+
+  /// No description provided for @khatmaCompletionShareText.
+  ///
+  /// In en, this message translates to:
+  /// **'I completed my Quranic Khatma with Tilawa.\niOS: {iosStoreUrl}\nAndroid: {androidStoreUrl}'**
+  String khatmaCompletionShareText(String iosStoreUrl, String androidStoreUrl);
+
+  /// No description provided for @khatmaCompletionDoneMessage.
+  ///
+  /// In en, this message translates to:
+  /// **'The current Khatma has been completed.'**
+  String get khatmaCompletionDoneMessage;
+
+  /// No description provided for @khatmaDuaBody.
+  ///
+  /// In en, this message translates to:
+  /// **'اللَّهُمَّ ارْحَمْنِي بِالْقُرْآنِ وَاجْعَلْهُ لِي إِمَامًا وَنُورًا وَهُدًى وَرَحْمَةً.\n\nاللَّهُمَّ ذَكِّرْنِي مِنْهُ مَا نَسِيتُ وَعَلِّمْنِي مِنْهُ مَا جَهِلْتُ وَارْزُقْنِي تِلَاوَتَهُ آنَاءَ اللَّيْلِ وَأَطْرَافَ النَّهَارِ وَاجْعَلْهُ لِي حُجَّةً يَا رَبَّ الْعَالَمِينَ.\n\nاللَّهُمَّ أَصْلِحْ لِي دِينِي الَّذِي هُوَ عِصْمَةُ أَمْرِي، وَأَصْلِحْ لِي دُنْيَايَ الَّتِي فِيهَا مَعَاشِي، وَأَصْلِحْ لِي آخِرَتِي الَّتِي فِيهَا مَعَادِي، وَاجْعَلِ الْحَيَاةَ زِيَادَةً لِي فِي كُلِّ خَيْرٍ، وَاجْعَلِ الْمَوْتَ رَاحَةً لِي مِنْ كُلِّ شَرٍّ.\n\nاللَّهُمَّ اجْعَلْ خَيْرَ عُمُرِي آخِرَهُ، وَخَيْرَ عَمَلِي خَوَاتِمَهُ، وَخَيْرَ أَيَّامِي يَوْمَ أَلْقَاكَ فِيهِ.'**
+  String get khatmaDuaBody;
+
   /// No description provided for @khatmaDeletePlanAction.
   ///
   /// In en, this message translates to:
