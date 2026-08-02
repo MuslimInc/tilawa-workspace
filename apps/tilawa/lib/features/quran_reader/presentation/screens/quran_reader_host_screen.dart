@@ -134,34 +134,15 @@ class _QuranReaderHostScreenState extends State<QuranReaderHostScreen> {
         builder: (context, settings) {
           final bool showAyahList =
               kIsWeb || settings.viewMode == QuranReaderViewMode.ayahList;
-          return Stack(
+          return IndexedStack(
+            index: showAyahList ? 1 : 0,
+            sizing: StackFit.expand,
             children: [
-              Positioned.fill(
-                child: IndexedStack(
-                  index: showAyahList ? 1 : 0,
-                  sizing: StackFit.expand,
-                  children: [
-                    _buildMushafLayer(settings),
-                    if (_ayahListVisited || showAyahList)
-                      _buildAyahListLayer()
-                    else
-                      const SizedBox.shrink(),
-                  ],
-                ),
-              ),
-              if (widget.showSaveProgressAction)
-                SafeArea(
-                  child: Align(
-                    alignment: AlignmentDirectional.bottomEnd,
-                    child: Padding(
-                      padding: EdgeInsets.all(context.tokens.spaceLarge),
-                      child: TilawaButton(
-                        text: context.l10n.khatmaSaveProgressAction,
-                        onPressed: () => Navigator.of(context).pop(),
-                      ),
-                    ),
-                  ),
-                ),
+              _buildMushafLayer(settings),
+              if (_ayahListVisited || showAyahList)
+                _buildAyahListLayer()
+              else
+                const SizedBox.shrink(),
             ],
           );
         },
@@ -172,6 +153,7 @@ class _QuranReaderHostScreenState extends State<QuranReaderHostScreen> {
   Widget _buildMushafLayer(ReaderSettingsEntity settings) {
     // The view switch now lives in the reader's bottom navigation panel
     // (thumb-reachable) instead of the hard-to-reach top corner.
+    final bool isKhatmaSession = widget.showSaveProgressAction;
     return QuranImageReaderScreen(
       surahNumber: _activeSurah,
       initialAyah: _activeAyah,
@@ -180,10 +162,20 @@ class _QuranReaderHostScreenState extends State<QuranReaderHostScreen> {
       lastPage: widget.lastPage,
       openPracticeOnLaunch: widget.openPracticeOnLaunch,
       onActiveSurahChanged: _onActiveSurahChanged,
-      viewSwitchAction: QuranReaderViewToggle(
-        currentMode: settings.viewMode,
-        onPressed: _switchToAyahList,
-      ),
+      // Khatma is page-windowed — Surah index is for full Mushaf browse only.
+      showSurahIndex: !isKhatmaSession,
+      // Save Progress lives in the nav overlay (not a FAB over ayahs).
+      // Ayah-list toggle stays off for bounded Khatma sessions.
+      viewSwitchAction: isKhatmaSession
+          ? TilawaButton(
+              text: context.l10n.khatmaSaveProgressAction,
+              isFullWidth: true,
+              onPressed: () => Navigator.of(context).pop(),
+            )
+          : QuranReaderViewToggle(
+              currentMode: settings.viewMode,
+              onPressed: _switchToAyahList,
+            ),
     );
   }
 
