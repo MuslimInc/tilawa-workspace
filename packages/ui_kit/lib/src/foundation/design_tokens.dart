@@ -254,9 +254,9 @@ class MeMuslimDesignTokens extends ThemeExtension<MeMuslimDesignTokens> {
   /// inset. Matches [kMinIconSize] on the default ramp.
   double get minIconSize => iconSizeMedium + spaceSmall;
 
-  /// Standard tinted icon well — [iconSizeLarge] glyph plus one [spaceMedium]
+  /// Standard tinted icon well — [iconSizeLarge] glyph plus one [spaceLarge]
   /// inset. Matches [kIconBoxSize] on the default ramp.
-  double get iconBoxSize => iconSizeLarge + spaceMedium;
+  double get iconBoxSize => iconSizeLarge + spaceLarge;
 
   /// Badge-sized icon well — [iconSizeLarge] glyph plus one [spaceExtraLarge]
   /// inset. Matches [kIconBadgeSize] on the default ramp.
