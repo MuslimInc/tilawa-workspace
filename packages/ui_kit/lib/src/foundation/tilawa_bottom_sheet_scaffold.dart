@@ -1,7 +1,10 @@
+import 'dart:math' as math;
+
 import 'package:flutter/material.dart';
 
 import '../atoms/tilawa_sheet_handle.dart';
 import 'component_tokens.dart';
+import 'safe_area_ext.dart';
 import 'tilawa_comfortable_reach_padding.dart';
 
 /// Standard layout for modal bottom sheet content aligned with
@@ -18,6 +21,9 @@ import 'tilawa_comfortable_reach_padding.dart';
 /// viewport with comfortable thumb-zone spacing. Keyboard lift is owned by
 /// the modal route / resized parent — footer uses [keyboardAware]: false
 /// (same contract as [TilawaFormScreenScaffold] / ADR-009).
+///
+/// Handle, title/close, and footer stay pinned. Only the body scrolls when
+/// space is tight — never the full sheet chrome.
 class TilawaBottomSheetScaffold extends StatelessWidget {
   const TilawaBottomSheetScaffold({
     super.key,
@@ -27,6 +33,11 @@ class TilawaBottomSheetScaffold extends StatelessWidget {
     required this.children,
     this.footer,
   });
+
+  /// Below this max-height, footer drops comfortable-reach extras so chrome
+  /// (handle + title + actions) can still fit without overflowing.
+  @visibleForTesting
+  static const double tightHeightBreakpoint = 360;
 
   final bool showHandle;
 
@@ -52,48 +63,107 @@ class TilawaBottomSheetScaffold extends StatelessWidget {
     final footerPadding = tokens.footerPadding.resolve(direction);
     // Modal sheets / resized parents already lift for the IME — do not stack
     // [effectiveKeyboardInset] again (overflow while keyboard shows/dismisses).
-    final bottomPadding = TilawaComfortableReachPadding.resolve(
+    final double comfortableBottom = TilawaComfortableReachPadding.resolve(
       context,
       kind: TilawaComfortableReachKind.sheet,
       keyboardAware: false,
       keyboardBuffer: footerPadding.bottom,
     );
 
-    return Column(
-      mainAxisSize: MainAxisSize.min,
-      crossAxisAlignment: CrossAxisAlignment.stretch,
-      children: <Widget>[
-        if (showHandle) const TilawaSheetHandle(),
-        if (topBar != null)
-          Padding(
-            padding: tokens.headerPadding,
-            child: topBar,
-          ),
-        ...betweenTopBarAndBody,
-        ...children,
-        if (footer != null)
-          Material(
-            color: theme.colorScheme.surface,
-            child: DecoratedBox(
-              decoration: BoxDecoration(
-                border: Border(
-                  top: BorderSide(
-                    color: theme.colorScheme.outlineVariant,
-                    width: tokens.footerTopBorderWidth,
+    final bool hasFlexChild = children.any(
+      (Widget child) => child is Flexible || child is Expanded,
+    );
+
+    return LayoutBuilder(
+      builder: (BuildContext context, BoxConstraints constraints) {
+        final bool hasBound =
+            constraints.hasBoundedHeight && constraints.maxHeight.isFinite;
+        final bool tight =
+            hasBound && constraints.maxHeight < tightHeightBreakpoint;
+
+        // Short viewports: keep system inset, drop spaceHuge / reach buffer so
+        // handle + title/close + actions still fit with a sticky footer.
+        final double footerBottom = tight
+            ? math.max(
+                footerPadding.bottom,
+                context.effectiveSystemBottomSafeArea,
+              )
+            : comfortableBottom;
+
+        final Widget? footerWidget = footer == null
+            ? null
+            : Material(
+                color: theme.colorScheme.surface,
+                child: DecoratedBox(
+                  decoration: BoxDecoration(
+                    border: Border(
+                      top: BorderSide(
+                        color: theme.colorScheme.outlineVariant,
+                        width: tokens.footerTopBorderWidth,
+                      ),
+                    ),
+                  ),
+                  child: SafeArea(
+                    top: false,
+                    bottom: false,
+                    child: Padding(
+                      padding: footerPadding.copyWith(bottom: footerBottom),
+                      child: footer,
+                    ),
                   ),
                 ),
-              ),
-              child: SafeArea(
-                top: false,
-                bottom: false,
-                child: Padding(
-                  padding: footerPadding.copyWith(bottom: bottomPadding),
-                  child: footer,
+              );
+
+        final List<Widget> headerChildren = <Widget>[
+          if (showHandle) const TilawaSheetHandle(),
+          if (topBar != null)
+            Padding(
+              padding: tokens.headerPadding,
+              child: topBar,
+            ),
+          ...betweenTopBarAndBody,
+        ];
+
+        final List<Widget> bodyChildren;
+        if (hasFlexChild) {
+          bodyChildren = children;
+        } else if (hasBound) {
+          // Compact action sheets: scroll tiles only; pin handle / title / footer.
+          bodyChildren = <Widget>[
+            Flexible(
+              child: SingleChildScrollView(
+                physics: const ClampingScrollPhysics(),
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  crossAxisAlignment: CrossAxisAlignment.stretch,
+                  children: children,
                 ),
               ),
             ),
-          ),
-      ],
+          ];
+        } else {
+          bodyChildren = children;
+        }
+
+        final Widget column = Column(
+          mainAxisSize: hasBound ? MainAxisSize.max : MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          children: <Widget>[
+            ...headerChildren,
+            ...bodyChildren,
+            ?footerWidget,
+          ],
+        );
+
+        if (!hasBound) {
+          return column;
+        }
+
+        return ConstrainedBox(
+          constraints: BoxConstraints(maxHeight: constraints.maxHeight),
+          child: column,
+        );
+      },
     );
   }
 

@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 
 import '../atoms/tilawa_button.dart';
+import 'safe_area_ext.dart';
 import 'tilawa_bottom_sheet_actions.dart';
 import 'tilawa_bottom_sheet_scaffold.dart';
 import 'tilawa_bottom_sheet_title_row.dart';
@@ -120,7 +121,7 @@ Future<bool?> showTilawaConfirmSheet({
   bool trailingClose = true,
   VoidCallback? onClose,
   String? sheetSemanticsLabel,
-  double maxHeightFraction = 0.5,
+  double maxHeightFraction = 0.75,
 }) {
   return _showTilawaPresetSheet<bool>(
     context: context,
@@ -169,35 +170,41 @@ Future<T?> _showTilawaPresetSheet<T>({
     backgroundColor: colorScheme.surface,
     shape: TilawaBottomSheetScaffold.modalShape(context),
     sheetSemanticsLabel: sheetSemanticsLabel ?? title,
+    isScrollControlled: true,
     builder: (sheetContext) {
-      final maxHeight =
-          MediaQuery.sizeOf(sheetContext).height * maxHeightFraction;
+      final double keyboardInset = sheetContext.effectiveKeyboardInset;
+      final double availableHeight =
+          MediaQuery.sizeOf(sheetContext).height - keyboardInset;
+      final double maxHeight = availableHeight * maxHeightFraction;
       final body = bodyBuilder(sheetContext);
 
-      return ConstrainedBox(
-        constraints: BoxConstraints(maxHeight: maxHeight),
-        child: TilawaBottomSheetScaffold(
-          topBar: TilawaBottomSheetTitleRow(
-            title: title,
-            trailingClose: trailingClose,
-            onClose: onClose,
+      // isScrollControlled sheets must pad for the IME themselves.
+      return Padding(
+        padding: EdgeInsets.only(bottom: keyboardInset),
+        child: ConstrainedBox(
+          constraints: BoxConstraints(maxHeight: maxHeight),
+          child: TilawaBottomSheetScaffold(
+            topBar: TilawaBottomSheetTitleRow(
+              title: title,
+              trailingClose: trailingClose,
+              onClose: onClose,
+            ),
+            footer: TilawaBottomSheetActions(
+              primaryLabel: primaryLabel,
+              onPrimary: onPrimary,
+              secondaryLabel: secondaryLabel,
+              onSecondary: onSecondary,
+              primaryVariant: primaryVariant,
+            ),
+            children: [
+              if (shrinkWrapBody)
+                Expanded(
+                  child: SingleChildScrollView(child: body),
+                )
+              else
+                Expanded(child: body),
+            ],
           ),
-          footer: TilawaBottomSheetActions(
-            primaryLabel: primaryLabel,
-            onPrimary: onPrimary,
-            secondaryLabel: secondaryLabel,
-            onSecondary: onSecondary,
-            primaryVariant: primaryVariant,
-          ),
-          children: [
-            if (shrinkWrapBody)
-              Flexible(
-                fit: FlexFit.loose,
-                child: SingleChildScrollView(child: body),
-              )
-            else
-              Expanded(child: body),
-          ],
         ),
       );
     },
