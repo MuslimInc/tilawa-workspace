@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:tilawa/core/di/injection.dart';
 import 'package:tilawa/core/extensions.dart';
+import 'package:tilawa/features/smart_khatma/data/khatma_reminder_notification_service.dart';
 import 'package:tilawa/router/app_router_config.dart';
 import 'package:tilawa_ui_kit/tilawa_ui_kit.dart';
 
@@ -127,6 +129,10 @@ Future<void> confirmKhatmaPlanReset(BuildContext context) async {
   if (confirmed != true || !context.mounted) {
     return;
   }
+  if (getIt.isRegistered<KhatmaReminderNotificationService>()) {
+    await getIt<KhatmaReminderNotificationService>().clearOnPlanReset();
+  }
+  if (!context.mounted) return;
   context.read<KhatmaPlanBloc>().add(const KhatmaPlanResetRequested());
 }
 
@@ -157,6 +163,34 @@ Future<void> confirmKhatmaExtension(
   );
   if (confirmed == true && context.mounted) {
     context.read<KhatmaPlanBloc>().add(const KhatmaPlanExtendSelected());
+  }
+}
+
+Future<void> showKhatmaSaveProgressSheet(
+  BuildContext context,
+  KhatmaPlan plan,
+) async {
+  final int minimumPage =
+      (plan.confirmedCompletedThroughPage == null
+              ? plan.assignmentStartPage
+              : plan.confirmedCompletedThroughPage! + 1)
+          .clamp(plan.assignmentStartPage, plan.assignmentEndPage);
+  final int suggestedPage = plan.resumePage.clamp(
+    minimumPage,
+    plan.assignmentEndPage,
+  );
+  final int? confirmedPage = await showTilawaModalBottomSheet<int>(
+    context: context,
+    useSafeArea: true,
+    builder: (_) => _KhatmaProgressConfirmationSheet(
+      minimumPage: minimumPage,
+      maximumPage: plan.assignmentEndPage,
+      suggestedPage: suggestedPage,
+    ),
+  );
+  if (!context.mounted) return;
+  if (confirmedPage != null) {
+    context.read<KhatmaPlanBloc>().add(KhatmaProgressConfirmed(confirmedPage));
   }
 }
 

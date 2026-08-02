@@ -185,7 +185,7 @@ class _KhatmaProgressRing extends StatelessWidget {
           Positioned.fill(
             child: CircularProgressIndicator(
               value: clamped,
-              strokeWidth: tokens.borderWidthThin * 3,
+              strokeWidth: tokens.borderWidthThin * 5,
               backgroundColor: accent.withValues(alpha: 0.14),
               color: accent,
               strokeCap: StrokeCap.round,
