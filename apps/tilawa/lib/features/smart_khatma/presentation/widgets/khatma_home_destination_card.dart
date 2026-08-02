@@ -4,10 +4,10 @@ import 'package:tilawa/features/home/presentation/widgets/home_dashboard_icon_we
 import 'package:tilawa/features/home/presentation/widgets/home_feature_pastel.dart';
 import 'package:tilawa_ui_kit/tilawa_ui_kit.dart';
 
-/// Smart Khatma home entry — solid primary fill + on-primary chrome.
+/// Smart Khatma home entry — neutral lift + focused green progress/CTA.
 ///
-/// Explicit brand green body (same family as hero / CTAs). White peers stay
-/// white; this is the one solid-primary habit card on Home.
+/// Strong green is reserved for the icon glyph, progress, and single CTA so the
+/// daily habit remains scannable without competing with the Home hero.
 class KhatmaHomeDestinationCard extends StatelessWidget {
   const KhatmaHomeDestinationCard({
     super.key,
@@ -19,7 +19,6 @@ class KhatmaHomeDestinationCard extends StatelessWidget {
     this.statusChipLabel,
     this.detail,
     this.actionLabel,
-    this.actionVariant = TilawaButtonVariant.primary,
     this.trailing,
     this.progress,
     this.trackProgress,
@@ -44,11 +43,9 @@ class KhatmaHomeDestinationCard extends StatelessWidget {
   /// Featured CTA under the copy (empty / continue / open hub).
   final String? actionLabel;
 
-  /// Use [TilawaButtonVariant.outline] when today’s wird is already done.
-  final TilawaButtonVariant actionVariant;
   final Widget? trailing;
 
-  /// Optional 0–100 overall plan progress for the green micro-ring.
+  /// Optional 0–100 overall plan progress for the compact green status pill.
   final int? progress;
 
   /// Optional 0–1 today's wird track under the copy.
@@ -59,8 +56,6 @@ class KhatmaHomeDestinationCard extends StatelessWidget {
   final bool showChevron;
   final String? semanticLabel;
 
-  static const double _onPrimaryMuted = 0.82;
-
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
@@ -69,146 +64,167 @@ class KhatmaHomeDestinationCard extends StatelessWidget {
     final screenTokens = theme.componentTokens.homeScreen;
     final Color accent = screenTokens.homePrayerHeroAccent;
     final Color onAccent = colorScheme.onPrimary;
+    final Color foreground = colorScheme.onSurface;
+    final Color mutedForeground = colorScheme.onSurfaceVariant;
     final double radius = tokens.resolveRadius(family: TilawaRadiusFamily.hero);
     final BorderRadius borderRadius = BorderRadius.circular(radius);
     final bool isArabic = Localizations.localeOf(context).languageCode == 'ar';
-    final Color surface = HomeFeaturePastel.featuredHabitSurface(
-      accent: accent,
-      colorScheme: colorScheme,
-    );
-    final Color mutedOnAccent = onAccent.withValues(alpha: _onPrimaryMuted);
+    final Color surface = HomeFeaturePastel.cardSurface(colorScheme);
+    final LinearGradient headerGradient =
+        HomeFeaturePastel.featuredHeaderGradient(
+          accent: accent,
+          colorScheme: colorScheme,
+        );
     final TextStyle? bodyStyle = theme.textTheme.bodyLarge?.copyWith(
-      color: mutedOnAccent,
+      color: mutedForeground,
       height: isArabic ? tokens.textHeightLoose : 1.45,
     );
     final bool showTrailingChevron = showChevron && actionLabel == null;
-    final bool outlineCta = actionVariant == TilawaButtonVariant.outline;
+    final BorderRadius headerRadius = BorderRadius.vertical(
+      top: Radius.circular(radius),
+    );
 
     return HomeDashboardElevatedSurface.interactive(
       context: context,
       borderRadius: borderRadius,
       onTap: onTap,
       semanticLabel: semanticLabel ?? title,
-      stateLayerColor: onAccent,
+      stateLayerColor: accent,
       color: surface,
       tier: HomeDashboardElevationTier.primary,
-      child: Padding(
-        padding: EdgeInsetsDirectional.fromSTEB(
-          tokens.spaceLarge,
-          tokens.spaceMedium,
-          tokens.spaceLarge,
-          tokens.spaceMedium,
-        ),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.stretch,
-          spacing: tokens.spaceSmall,
-          children: [
-            Row(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              spacing: tokens.spaceSmall,
-              children: [
-                HomeDashboardIconWell(
-                  accent: onAccent,
-                  fillAlpha: HomeFeaturePastel.solidIconWellFillAlpha,
-                  extent: tokens.iconBadgeSize,
-                  child: Icon(
-                    icon,
-                    size: tokens.iconSizeLarge,
-                    color: accent,
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: [
+          DecoratedBox(
+            decoration: BoxDecoration(
+              gradient: headerGradient,
+              borderRadius: headerRadius,
+            ),
+            child: Padding(
+              padding: EdgeInsetsDirectional.fromSTEB(
+                tokens.spaceLarge,
+                tokens.spaceMedium,
+                tokens.spaceLarge,
+                tokens.spaceMedium,
+              ),
+              child: Row(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                spacing: tokens.spaceSmall,
+                children: [
+                  HomeDashboardIconWell(
+                    accent: surface,
+                    fillAlpha: HomeFeaturePastel.solidIconWellFillAlpha,
+                    extent: tokens.iconBadgeSize,
+                    child: Icon(
+                      icon,
+                      size: tokens.iconSizeLarge,
+                      color: accent,
+                    ),
                   ),
-                ),
-                Expanded(
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    spacing: tokens.spaceExtraSmall,
-                    children: [
-                      if (eyebrow case final String eyebrowText)
+                  Expanded(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      spacing: tokens.spaceExtraSmall,
+                      children: [
+                        if (eyebrow case final String eyebrowText)
+                          Text(
+                            eyebrowText,
+                            maxLines: 1,
+                            overflow: TextOverflow.ellipsis,
+                            style: theme.textTheme.labelLarge?.copyWith(
+                              color: mutedForeground,
+                              fontWeight: FontWeight.w600,
+                              height: 1.2,
+                            ),
+                          ),
                         Text(
-                          eyebrowText,
+                          title,
                           maxLines: 1,
                           overflow: TextOverflow.ellipsis,
-                          style: theme.textTheme.labelLarge?.copyWith(
-                            color: mutedOnAccent,
-                            fontWeight: FontWeight.w600,
+                          style: theme.textTheme.titleLarge?.copyWith(
+                            color: foreground,
+                            fontWeight: FontWeight.w800,
                             height: 1.2,
+                            letterSpacing: -0.2,
                           ),
                         ),
-                      Text(
-                        title,
-                        maxLines: 2,
-                        overflow: TextOverflow.ellipsis,
-                        style: theme.textTheme.titleLarge?.copyWith(
-                          color: onAccent,
-                          fontWeight: FontWeight.w800,
-                          height: 1.2,
-                          letterSpacing: -0.2,
-                        ),
-                      ),
-                      if (statusChipLabel case final String chipLabel)
-                        Align(
-                          alignment: AlignmentDirectional.centerStart,
-                          child: TilawaStatusChip(
-                            label: chipLabel,
-                            backgroundColor: onAccent.withValues(alpha: 0.18),
-                            foregroundColor: onAccent,
+                        if (statusChipLabel != null || progress != null)
+                          Wrap(
+                            spacing: tokens.spaceExtraSmall,
+                            runSpacing: tokens.spaceExtraSmall,
+                            children: [
+                              if (statusChipLabel case final String chipLabel)
+                                TilawaStatusChip(
+                                  label: chipLabel,
+                                  backgroundColor: surface,
+                                  foregroundColor: foreground,
+                                ),
+                              if (progress case final int value)
+                                TilawaStatusChip(
+                                  label: '${value.clamp(0, 100)}%',
+                                  backgroundColor: accent,
+                                  foregroundColor: onAccent,
+                                ),
+                            ],
                           ),
-                        ),
-                    ],
+                      ],
+                    ),
                   ),
-                ),
-                if (progress case final int value)
-                  _KhatmaProgressRing(
-                    progress: value,
-                    accent: onAccent,
+                  if (trailing case final Widget trailingWidget) trailingWidget,
+                  if (showTrailingChevron)
+                    Icon(
+                      Icons.chevron_right_rounded,
+                      color: mutedForeground,
+                      size: tokens.iconSizeLarge,
+                    ),
+                ],
+              ),
+            ),
+          ),
+          Padding(
+            padding: EdgeInsetsDirectional.fromSTEB(
+              tokens.spaceLarge,
+              tokens.spaceMedium,
+              tokens.spaceLarge,
+              tokens.spaceMedium,
+            ),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.stretch,
+              spacing: tokens.spaceSmall,
+              children: [
+                if (subtitle case final String bodyText)
+                  Text(
+                    bodyText,
+                    maxLines: 3,
+                    overflow: TextOverflow.ellipsis,
+                    style: bodyStyle,
                   ),
-                if (trailing case final Widget trailingWidget) trailingWidget,
-                if (showTrailingChevron)
-                  Icon(
-                    Icons.chevron_right_rounded,
-                    color: mutedOnAccent,
-                    size: tokens.iconSizeLarge,
+                if (detail case final String detailText)
+                  Text(
+                    detailText,
+                    maxLines: 2,
+                    overflow: TextOverflow.ellipsis,
+                    style: bodyStyle,
+                  ),
+                if (trackProgress case final double todayFraction)
+                  _KhatmaTodayTrack(
+                    progress: todayFraction,
+                    track: accent.withValues(alpha: 0.18),
+                    fill: accent,
+                  ),
+                if (actionLabel case final String cta)
+                  TilawaButton(
+                    text: cta,
+                    variant: TilawaButtonVariant.primary,
+                    isFullWidth: true,
+                    backgroundColor: accent,
+                    foregroundColor: onAccent,
+                    onPressed: onTap,
                   ),
               ],
             ),
-            if (subtitle case final String bodyText)
-              Text(
-                bodyText,
-                maxLines: 3,
-                overflow: TextOverflow.ellipsis,
-                style: bodyStyle,
-              ),
-            if (detail case final String detailText)
-              Text(
-                detailText,
-                maxLines: 2,
-                overflow: TextOverflow.ellipsis,
-                style: bodyStyle,
-              ),
-            if (trackProgress case final double todayFraction)
-              _KhatmaTodayTrack(
-                progress: todayFraction,
-                track: onAccent.withValues(alpha: 0.28),
-                fill: onAccent,
-              ),
-            if (actionLabel case final String cta)
-              Padding(
-                padding: EdgeInsetsDirectional.only(
-                  top: tokens.spaceExtraSmall,
-                ),
-                child: TilawaButton(
-                  text: cta,
-                  variant: outlineCta
-                      ? TilawaButtonVariant.outline
-                      : TilawaButtonVariant.primary,
-                  isFullWidth: true,
-                  backgroundColor: outlineCta ? null : onAccent,
-                  foregroundColor: outlineCta ? onAccent : accent,
-                  borderColor: onAccent,
-                  onPressed: onTap,
-                ),
-              ),
-          ],
-        ),
+          ),
+        ],
       ),
     );
   }
@@ -238,88 +254,6 @@ class _KhatmaTodayTrack extends StatelessWidget {
         minHeight: trackHeight,
         backgroundColor: track,
         color: fill,
-      ),
-    );
-  }
-}
-
-class _KhatmaProgressRing extends StatelessWidget {
-  const _KhatmaProgressRing({
-    required this.progress,
-    required this.accent,
-  });
-
-  final int progress;
-
-  /// Ring + label color (on-primary on a solid primary card).
-  final Color accent;
-
-  static const double _trackAlpha = 0.28;
-  static const double _discAlpha = 0.22;
-
-  @override
-  Widget build(BuildContext context) {
-    final theme = Theme.of(context);
-    final tokens = theme.tokens;
-    final double size = tokens.iconBadgeSize + tokens.spaceSmall;
-    final double stroke = tokens.spaceSmall;
-    final double inset = tokens.spaceExtraSmall;
-    final int clampedPct = progress.clamp(0, 100);
-    final double clamped = clampedPct / 100;
-    final bool isComplete = clampedPct >= 100;
-
-    return Semantics(
-      value: '$clampedPct%',
-      child: SizedBox(
-        width: size,
-        height: size,
-        child: DecoratedBox(
-          decoration: BoxDecoration(
-            shape: BoxShape.circle,
-            color: accent.withValues(alpha: _discAlpha),
-          ),
-          child: Padding(
-            padding: EdgeInsets.all(inset),
-            child: Stack(
-              alignment: Alignment.center,
-              children: [
-                Positioned.fill(
-                  child: CircularProgressIndicator(
-                    value: clamped,
-                    strokeWidth: stroke,
-                    backgroundColor: accent.withValues(alpha: _trackAlpha),
-                    color: accent,
-                    strokeCap: StrokeCap.round,
-                  ),
-                ),
-                Padding(
-                  padding: EdgeInsets.all(tokens.spaceExtraSmall),
-                  child: FittedBox(
-                    fit: BoxFit.scaleDown,
-                    child: isComplete
-                        ? Icon(
-                            Icons.check_rounded,
-                            color: accent,
-                            size: tokens.iconSizeLarge,
-                          )
-                        : Text(
-                            '$clampedPct%',
-                            style: theme.textTheme.titleSmall?.copyWith(
-                              color: accent,
-                              fontWeight: FontWeight.w800,
-                              height: 1,
-                              letterSpacing: -0.4,
-                              fontFeatures: const [
-                                FontFeature.tabularFigures(),
-                              ],
-                            ),
-                          ),
-                  ),
-                ),
-              ],
-            ),
-          ),
-        ),
       ),
     );
   }

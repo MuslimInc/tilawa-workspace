@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:tilawa/features/home/presentation/widgets/home_dashboard_icon_well.dart';
+import 'package:tilawa/features/home/presentation/widgets/home_feature_pastel.dart';
 import 'package:tilawa/features/smart_khatma/presentation/widgets/khatma_home_destination_card.dart';
 import 'package:tilawa/features/smart_khatma/smart_khatma.dart';
 import 'package:tilawa/l10n/generated/app_localizations.dart';
@@ -40,6 +42,99 @@ void main() {
       TextDirection.rtl,
     );
   });
+
+  testWidgets(
+    'Khatma card uses focused accents in light and dark themes',
+    (
+      tester,
+    ) async {
+      final themes = <ThemeData>[
+        AppTheme.getLightTheme(primaryColor: AppColors.defaultPrimary),
+        AppTheme.getDarkTheme(primaryColor: AppColors.defaultPrimary),
+      ];
+
+      for (final theme in themes) {
+        await tester.pumpWidget(
+          MaterialApp(
+            locale: const Locale('ar'),
+            theme: theme,
+            darkTheme: theme,
+            themeMode: theme.brightness == Brightness.dark
+                ? ThemeMode.dark
+                : ThemeMode.light,
+            localizationsDelegates: AppLocalizations.localizationsDelegates,
+            supportedLocales: AppLocalizations.supportedLocales,
+            home: Scaffold(
+              body: SingleChildScrollView(
+                child: KhatmaHomeDestinationCard(
+                  icon: Icons.auto_stories_outlined,
+                  onTap: () {},
+                  eyebrow: 'الورد الحالي',
+                  title: 'الصفحات 582–583',
+                  statusChipLabel: 'اليوم 1 من 15',
+                  detail: 'اكتمل ورد اليوم',
+                  progress: 9,
+                  trackProgress: 0.25,
+                  actionLabel: 'افتح الختمة',
+                ),
+              ),
+            ),
+          ),
+        );
+        await tester.pumpAndSettle();
+
+        final Color accent =
+            theme.componentTokens.homeScreen.homePrayerHeroAccent;
+        final Material cardMaterial = tester.widget<Material>(
+          find
+              .descendant(
+                of: find.byType(KhatmaHomeDestinationCard),
+                matching: find.byType(Material),
+              )
+              .first,
+        );
+        final HomeDashboardIconWell iconWell = tester
+            .widget<HomeDashboardIconWell>(find.byType(HomeDashboardIconWell));
+        final bool hasHeaderGradient = tester
+            .widgetList<DecoratedBox>(
+              find.descendant(
+                of: find.byType(KhatmaHomeDestinationCard),
+                matching: find.byType(DecoratedBox),
+              ),
+            )
+            .any(
+              (box) =>
+                  box.decoration is BoxDecoration &&
+                  (box.decoration as BoxDecoration).gradient != null,
+            );
+        final TilawaButton button = tester.widget<TilawaButton>(
+          find.byType(TilawaButton),
+        );
+        final LinearProgressIndicator track = tester
+            .widget<LinearProgressIndicator>(
+              find.byType(LinearProgressIndicator),
+            );
+
+        expect(cardMaterial.color, theme.colorScheme.surface);
+        expect(hasHeaderGradient, isTrue);
+        expect(iconWell.accent, theme.colorScheme.surface);
+        expect(iconWell.fillAlpha, HomeFeaturePastel.solidIconWellFillAlpha);
+        expect(button.backgroundColor, accent);
+        expect(button.foregroundColor, theme.colorScheme.onPrimary);
+        expect(track.color, accent);
+        expect(find.text('9%'), findsOneWidget);
+        expect(find.byType(CircularProgressIndicator), findsNothing);
+        expect(
+          tester.widget<Text>(find.text('الصفحات 582–583')).maxLines,
+          1,
+        );
+        expect(
+          tester.getSize(find.byType(KhatmaHomeDestinationCard)).height,
+          lessThan(280),
+        );
+      }
+    },
+  );
 }
 
 KhatmaPlanBloc _bloc(KhatmaPlanRepository repository) {

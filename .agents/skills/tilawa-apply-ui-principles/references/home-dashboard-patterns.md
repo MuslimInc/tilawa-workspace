@@ -58,12 +58,12 @@ subtitles use `bodyLarge`. More list rows use ~88dp min height
 |------|---------|--------|
 | Prayer hero | Solid primary | Strongest green on viewport |
 | Mushaf / Athkar | Elevated white | Solid primary icon well + onPrimary glyph |
-| Khatma | Solid primary (fully opaque) | Explicit brand green — on-primary chrome |
+| Khatma | Mint-to-white header + white action area | One-line metric + compact progress pill + green CTA |
 | Quick tools | Elevated white | Solid per-feature icon well + onPrimary glyph |
 | More list | Elevated white | Hairline rows |
 
-Do **not** mint-wash every Home card — that flattens hierarchy. Keep solid green on
-hero, icon wells, progress, and primary CTAs.
+Do **not** mint-wash every Home card — that flattens hierarchy. Keep solid green
+on hero, icon wells, progress, and primary CTAs.
 
 This is **not** a multi-tab launcher grid. Preserve the calm, polished,
 RTL-first dashboard — two featured primary tiles, one compact tools row, flat
@@ -299,10 +299,6 @@ flutter test test/features/home/
 
 Manual: light + dark, RTL Arabic, text scale 1.4, pinned profile row, tutor pin when
 flag on.
-
-
-
-
 
 
 

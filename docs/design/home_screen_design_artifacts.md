@@ -81,6 +81,8 @@ tools is an approved exception (selects existing tab).
 - Sections: `HomeDashboardSection` / `TilawaSectionTitle`
 - Cards: `HomeDashboardCard`, `HomeDashboardElevatedSurface`
 - Hero accent: `homePrayerHeroAccent` on primary/tool icon treatments
+- Khatma: airy mint-to-white summary header over a white action area, with a
+  one-line page metric, compact progress pill, and solid green main CTA
 
 ---
 
@@ -109,6 +111,3 @@ Do not implement from: `docs/product/home_screen_redesign.md`,
 `docs/plans/home_screen_redesign_plan.md`,
 `docs/migrations/home_screen_redesign_migration.md`,
 `docs/specs/home_screen_acceptance_criteria.md`.
-
-
-

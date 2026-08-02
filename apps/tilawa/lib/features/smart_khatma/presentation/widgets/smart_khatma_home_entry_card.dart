@@ -149,9 +149,6 @@ class _KhatmaHomeActiveEntry extends StatelessWidget {
       actionLabel: isTodayCompleted
           ? context.l10n.homeKhatmaOpenAction
           : context.l10n.homeKhatmaContinueAction,
-      actionVariant: isTodayCompleted
-          ? TilawaButtonVariant.outline
-          : TilawaButtonVariant.primary,
     );
   }
 }
