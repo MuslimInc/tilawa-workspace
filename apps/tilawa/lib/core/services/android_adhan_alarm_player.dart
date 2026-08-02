@@ -258,21 +258,28 @@ class AndroidAdhanAlarmPlayer implements IAdhanAlarmPlayer {
     if (!isSupported) return;
     try {
       await _channel.invokeMethod<void>('persistPendingAlarms', {
-        'alarms': alarms
-            .map(
-              (a) => {
-                'id': a.id,
-                'name': a.prayerName,
-                'key': a.prayerKey,
-                'triggerAtMillis': a.triggerAt.millisecondsSinceEpoch,
-                'sound': a.sound,
-                if (a.locationName != null && a.locationName!.isNotEmpty)
-                  'locationName': a.locationName,
-                if (a.languageCode != null && a.languageCode!.isNotEmpty)
-                  'languageCode': a.languageCode,
-              },
-            )
-            .toList(),
+        'alarms': alarms.map(
+          (a) {
+            final DateTime local = a.triggerAt.toLocal();
+            return {
+              'id': a.id,
+              'name': a.prayerName,
+              'key': a.prayerKey,
+              'triggerAtMillis': a.triggerAt.millisecondsSinceEpoch,
+              'sound': a.sound,
+              // Wall-clock for native DST/TZ re-arm without Flutter.
+              'year': local.year,
+              'month': local.month,
+              'day': local.day,
+              'hour': local.hour,
+              'minute': local.minute,
+              if (a.locationName != null && a.locationName!.isNotEmpty)
+                'locationName': a.locationName,
+              if (a.languageCode != null && a.languageCode!.isNotEmpty)
+                'languageCode': a.languageCode,
+            };
+          },
+        ).toList(),
       });
     } on PlatformException catch (e) {
       logger.e(

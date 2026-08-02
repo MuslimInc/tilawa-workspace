@@ -57,4 +57,14 @@ data class AlarmMetadata(
     val sound: String,
     val locationName: String = "",
     val languageCode: String = "",
-)
+    /** Local wall-clock year when the prayer was scheduled (device TZ). */
+    val year: Int? = null,
+    /** Local month 1–12. */
+    val month: Int? = null,
+    val day: Int? = null,
+    val hour: Int? = null,
+    val minute: Int? = null,
+) {
+    val hasLocalWallClock: Boolean
+        get() = year != null && month != null && day != null && hour != null && minute != null
+}
