@@ -74,7 +74,7 @@ Color get _shellChromeColor =>
 SystemUiOverlayStyle _homeShellOverlayStyle() =>
     AppSystemChromeStyle.buildDefaultAppStyle(
       _theme,
-      statusBarBackgroundColor: _shellChromeColor,
+      statusBarBackgroundColor: const Color(0x00000000),
       navigationBarColor: _shellChromeColor,
     );
 
@@ -353,11 +353,16 @@ void main() {
 
       expect(overlayStyleCalls, isNotEmpty);
       expect(_annotatedStyle(tester), styleBeforeResume);
+      expect(styleBeforeResume.statusBarColor, const Color(0x00000000));
       final Map<Object?, Object?> sent =
           overlayStyleCalls.last.arguments as Map<Object?, Object?>;
       expect(
         sent['statusBarIconBrightness'],
         '${styleBeforeResume.statusBarIconBrightness}',
+      );
+      expect(
+        sent['statusBarColor'],
+        styleBeforeResume.statusBarColor?.toARGB32(),
       );
     });
 

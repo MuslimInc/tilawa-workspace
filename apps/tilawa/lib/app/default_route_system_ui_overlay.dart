@@ -158,8 +158,6 @@ class _DefaultRouteSystemUiOverlayState
     final String path = _currentRoutePath;
     final Color shellChromeColor =
         theme.componentTokens.adaptiveShell.bottomNavBackgroundColor;
-    final bool matchesBottomNavChrome =
-        AppShellRoutePolicy.isPhoneBottomNavigationVisible(path);
     final Color? playerNavOverride = context
         .read<QuranPlayerChromeNotifier>()
         .systemNavigationBarColorOverride;
@@ -177,11 +175,17 @@ class _DefaultRouteSystemUiOverlayState
         statusBarBackgroundColor: theme.scaffoldBackgroundColor,
         navigationBarColor: theme.scaffoldBackgroundColor,
       ),
+      // Main shell home: status bar is transparent so the prayer hero paints
+      // edge-to-edge. Opaque shell/surface fill was re-applied on resume /
+      // hot-restart and left a white (or cached) strip above the green hero.
+      '/' || '' => AppSystemChromeStyle.buildDefaultAppStyle(
+        theme,
+        statusBarBackgroundColor: const Color(0x00000000),
+        navigationBarColor: playerNavOverride ?? shellChromeColor,
+      ),
       _ => AppSystemChromeStyle.buildDefaultAppStyle(
         theme,
-        statusBarBackgroundColor: matchesBottomNavChrome
-            ? shellChromeColor
-            : theme.scaffoldBackgroundColor,
+        statusBarBackgroundColor: theme.scaffoldBackgroundColor,
         navigationBarColor: playerNavOverride ?? shellChromeColor,
       ),
     };

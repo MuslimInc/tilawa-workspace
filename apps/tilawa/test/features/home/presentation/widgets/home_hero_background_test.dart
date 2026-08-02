@@ -49,6 +49,8 @@ void main() {
     );
 
     expect(style.statusBarIconBrightness, Brightness.light);
+    expect(style.statusBarColor, const Color(0x00000000));
+    expect(style.systemStatusBarContrastEnforced, isFalse);
   });
 
   test('system overlay uses light icons on pre-dawn gradient', () {
