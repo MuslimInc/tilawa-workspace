@@ -2904,6 +2904,48 @@
     "@athkarLeaveConfirm": {
         "description": "Confirm button to leave the Athkar reading session"
     },
+    "athkarRepeatCount": "{count, plural, =1{Once} other{{count} times}}",
+    "@athkarRepeatCount": {
+        "description": "How many times to recite the current Athkar item",
+        "placeholders": {
+            "count": {
+                "type": "int",
+                "description": "Target repetition count"
+            }
+        }
+    },
+    "athkarIndexTitle": "Athkar index",
+    "@athkarIndexTitle": {
+        "description": "Title for the Athkar session table-of-contents sheet"
+    },
+    "athkarIndexTooltip": "Athkar list",
+    "@athkarIndexTooltip": {
+        "description": "Tooltip and semantics for opening the Athkar index sheet"
+    },
+    "athkarSearchHint": "Search — {categoryName}",
+    "@athkarSearchHint": {
+        "description": "Search field placeholder in the Athkar index sheet",
+        "placeholders": {
+            "categoryName": {
+                "type": "String",
+                "description": "Localized Athkar category title"
+            }
+        }
+    },
+    "athkarPageIndicator": "{total} | {current}",
+    "@athkarPageIndicator": {
+        "description": "Session page indicator showing total items and current position",
+        "placeholders": {
+            "total": {
+                "type": "int",
+                "description": "Total Athkar items in the category"
+            },
+            "current": {
+                "type": "int",
+                "description": "1-based index of the current item"
+            }
+        }
+    },
     "qibla": "Qibla",
     "@qibla": {
         "description": "Qibla tab label"

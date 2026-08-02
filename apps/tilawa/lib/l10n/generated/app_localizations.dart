@@ -4333,6 +4333,36 @@ abstract class AppLocalizations {
   /// **'Leave'**
   String get athkarLeaveConfirm;
 
+  /// How many times to recite the current Athkar item
+  ///
+  /// In en, this message translates to:
+  /// **'{count, plural, =1{Once} other{{count} times}}'**
+  String athkarRepeatCount(int count);
+
+  /// Title for the Athkar session table-of-contents sheet
+  ///
+  /// In en, this message translates to:
+  /// **'Athkar index'**
+  String get athkarIndexTitle;
+
+  /// Tooltip and semantics for opening the Athkar index sheet
+  ///
+  /// In en, this message translates to:
+  /// **'Athkar list'**
+  String get athkarIndexTooltip;
+
+  /// Search field placeholder in the Athkar index sheet
+  ///
+  /// In en, this message translates to:
+  /// **'Search — {categoryName}'**
+  String athkarSearchHint(String categoryName);
+
+  /// Session page indicator showing total items and current position
+  ///
+  /// In en, this message translates to:
+  /// **'{total} | {current}'**
+  String athkarPageIndicator(int total, int current);
+
   /// Qibla tab label
   ///
   /// In en, this message translates to:

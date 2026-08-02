@@ -2483,6 +2483,33 @@ class AppLocalizationsEn extends AppLocalizations {
   String get athkarLeaveConfirm => 'Leave';
 
   @override
+  String athkarRepeatCount(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count times',
+      one: 'Once',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get athkarIndexTitle => 'Athkar index';
+
+  @override
+  String get athkarIndexTooltip => 'Athkar list';
+
+  @override
+  String athkarSearchHint(String categoryName) {
+    return 'Search — $categoryName';
+  }
+
+  @override
+  String athkarPageIndicator(int total, int current) {
+    return '$total | $current';
+  }
+
+  @override
   String get qibla => 'Qibla';
 
   @override

@@ -2458,6 +2458,34 @@ class AppLocalizationsAr extends AppLocalizations {
   String get athkarLeaveConfirm => 'خروج';
 
   @override
+  String athkarRepeatCount(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count مرات',
+      two: 'مرتان',
+      one: 'مرة واحدة',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get athkarIndexTitle => 'فهرس الأذكار';
+
+  @override
+  String get athkarIndexTooltip => 'قائمة الأذكار';
+
+  @override
+  String athkarSearchHint(String categoryName) {
+    return 'ابحث — $categoryName';
+  }
+
+  @override
+  String athkarPageIndicator(int total, int current) {
+    return '$total | $current';
+  }
+
+  @override
   String get qibla => 'القبلة';
 
   @override
