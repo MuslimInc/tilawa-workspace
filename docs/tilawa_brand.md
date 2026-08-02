@@ -45,18 +45,18 @@ and calm home rituals in one warm, approachable shell. The product name is
 | **Brand orange** | `colorScheme.primary` (`#FA5B2E`) | CTAs, active nav, selected pills/segments, switch ON, progress |
 | **On-primary** | `colorScheme.onPrimary` (`#FFFFFF`) | Labels/icons on orange fills |
 | **Gold gilding** | `colorScheme.tertiary` / featured gradient stops | Hero cards, Last Read, surah header banners — not purchase buttons |
-| **Canvas** | `colorScheme.surfaceContainerLowest` (`#F4F4F4`) | Scaffold, canvas (~60% neutral) |
+| **Canvas** | `colorScheme.surfaceContainerLowest` (`#FFFFFF`) | Scaffold, canvas (~60% neutral) |
 | **Card white** | `colorScheme.surface` (`#FFFFFF`) | List rows, settings tiles (~30% secondary) |
-| **Warm chip rest** | `colorScheme.surfaceContainerHigh` (`#F4F4F4`) | Idle chips, search rests |
+| **Warm chip rest** | `colorScheme.surfaceContainerHigh` (`#E8F5EC`) | Idle chips, search rests |
 | **Body ink** | `colorScheme.onSurface` (`#050505`) | Headings, primary copy |
 | **Muted labels** | `colorScheme.onSurfaceVariant` (`#6B6B6B`) | Metadata, captions |
 | **Hairline** | `colorScheme.outlineVariant` (`#EEEEEE`) | Dividers at `borderWidthThin` (0.5) |
 | **Featured text** | `AppColors.featuredGradientForeground` | Copy on gold gradient cards |
 
 **Anti-patterns:**
-- Don't flatten scaffold/canvas to pure white (`#FFFFFF`) — use cool off-white (`#F4F4F4`) so white cards lift.
+- Keep card elevation when canvas is white (`#FFFFFF`) so raised surfaces still lift.
 - Don't reintroduce legacy purple (`#7A5C89`), brown (`#8B5E3C`), sage (`#219653`), or teal (`#00897B`) as production primary.
-- Canvas is cool off-white (`#F4F4F4`); keep white cards for lift.
+- Canvas is white (`#FFFFFF`); cards lift via elevation shadows.
 - Don't use gold gradient on Support MeMuslim CTAs.
 
 ---

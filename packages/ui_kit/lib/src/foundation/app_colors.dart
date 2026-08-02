@@ -3,13 +3,13 @@ import 'package:flutter/material.dart';
 /// Centralized app color constants.
 ///
 /// The MeMuslim palette is intentionally **small and calm**:
-/// cool whisper-green scaffold ([lightCanvas] `#F5F8F5`), green global accent
+/// white scaffold ([lightCanvas] `#FFFFFF`), green global accent
 /// ([defaultPrimary] `#1DAB61`), deep ink ([tripGlideInk] `#14201A`),
 /// white elevated cards, and restrained category accents for hub tiles.
 ///
 /// Some `tripGlide*` names remain as compatibility aliases for the current
-/// travel-inspired Home layout (e.g. [tripGlideCanvas] `#FFFFFF` for elevated
-/// card surfaces — not the scaffold). Scaffold assembly uses [lightCanvas].
+/// travel-inspired Home layout (e.g. [tripGlideCanvas] `#FFFFFF`). Scaffold
+/// assembly uses [lightCanvas] (also `#FFFFFF`); cards lift via elevation.
 ///
 /// All hex values used by `AppTheme` to assemble `ColorScheme` live here
 /// so there is exactly one source of truth. Product widgets should read
@@ -235,7 +235,7 @@ abstract final class AppColors {
   /// Radial glow accent on dark Home canvas.
   static const Color homeBackgroundGlowDark = Color(0xFF2A2A2A);
 
-  /// Neutral dashboard canvas — cool off-white (`#F5F8F5`).
+  /// Neutral dashboard canvas — white (`#FFFFFF`), via [lightCanvas].
   static const Color homeDashboardCanvas = lightCanvas;
 
   /// Elevated card surface on the Home dashboard.
@@ -405,16 +405,16 @@ abstract final class AppColors {
 
   // ---------------------------------------------------------------------------
   // Light neutral ramp — cool off-white near-white canvas + white cards
-  // (#F4F4F4 / #FFFFFF / near-black ink). One temperature family end-to-end,
+  // (#FFFFFF canvas + cards / near-black ink). One temperature family end-to-end,
   // hue-aligned with the brand green (#1DAB61) and the dark ramp.
   // 60-30-10: canvas (~60%), elevated surfaces (~30%), accent (~10%).
   // ---------------------------------------------------------------------------
 
-  /// App canvas / scaffold — cool off-white matching DESIGN.md (`#F5F8F5`).
+  /// App canvas / scaffold — white matching DESIGN.md (`#FFFFFF`).
   ///
-  /// Cards use [lightSurface] (`#FFFFFF`) for quiet lift with soft shadows.
+  /// Same white as [lightSurface]; raised cards lift via elevation shadows.
   /// Home top glow still uses [homeBackgroundGradientStart] separately.
-  static const Color lightCanvas = Color(0xFFF5F8F5);
+  static const Color lightCanvas = Color(0xFFFFFFFF);
 
   /// Alias for scaffold assembly — same as [lightCanvas].
   static const Color lightBackground = lightCanvas;
