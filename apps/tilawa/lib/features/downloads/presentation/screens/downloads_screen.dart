@@ -335,6 +335,7 @@ class _DownloadsSliverBody extends StatelessWidget {
             onBrowseReciters: onBrowseReciters,
           ),
           DownloadsStateStatus.error => SliverFillRemaining(
+            hasScrollBody: false,
             child: _ErrorView(
               message: state.errorMessage ?? context.l10n.error,
             ),
@@ -415,6 +416,7 @@ class _DownloadsSliverList extends StatelessWidget {
   Widget build(BuildContext context) {
     if (downloadsByReciter.isEmpty) {
       return SliverFillRemaining(
+        hasScrollBody: false,
         child: _EmptyDownloadsView(onBrowseReciters: onBrowseReciters),
       );
     }

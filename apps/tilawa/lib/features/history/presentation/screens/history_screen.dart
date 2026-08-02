@@ -166,6 +166,7 @@ class _HistoryScreenState extends State<HistoryScreen> {
 
       case HistoryStatus.error:
         return SliverFillRemaining(
+          hasScrollBody: false,
           child: TilawaErrorState(
             icon: Icons.error_outline,
             title:
@@ -183,6 +184,7 @@ class _HistoryScreenState extends State<HistoryScreen> {
       case HistoryStatus.empty:
         if (state.searchQuery.isNotEmpty) {
           return SliverFillRemaining(
+            hasScrollBody: false,
             child: TilawaEmptyState(
               icon: Icons.search_off_rounded,
               title: context.l10n.noSearchResults,
@@ -190,6 +192,7 @@ class _HistoryScreenState extends State<HistoryScreen> {
           );
         }
         return SliverFillRemaining(
+          hasScrollBody: false,
           child: TilawaEmptyState(
             icon: Icons.history_rounded,
             title: context.l10n.noHistoryYet,

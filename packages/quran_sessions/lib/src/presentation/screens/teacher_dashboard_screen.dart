@@ -1599,6 +1599,7 @@ class _CategoryEmptySliver extends StatelessWidget {
     final tokens = Theme.of(context).tokens;
 
     return SliverFillRemaining(
+      hasScrollBody: false,
       child: Center(
         child: Padding(
           padding: EdgeInsets.all(tokens.spaceLarge),
