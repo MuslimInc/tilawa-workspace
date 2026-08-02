@@ -112,6 +112,7 @@ abstract final class HomeDashboardElevatedSurface {
 
     return DecoratedBox(
       decoration: BoxDecoration(
+        color: color ?? fill.color,
         borderRadius: borderRadius,
         boxShadow: shadows(context, tier),
       ),

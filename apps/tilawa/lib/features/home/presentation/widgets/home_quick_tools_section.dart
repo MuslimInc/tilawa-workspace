@@ -36,7 +36,7 @@ class HomeQuickToolsSection extends StatelessWidget {
               Expanded(
                 child: _QuickToolTile(
                   icon: item.buildIcon(
-                    HomeFeaturePastel.accentFor(item.feature, product),
+                    Theme.of(context).colorScheme.onPrimary,
                     iconSize,
                   ),
                   label: item.label,
@@ -72,7 +72,7 @@ class _QuickToolTile extends StatelessWidget {
     final tokens = context.tokens;
     final theme = Theme.of(context);
     final colorScheme = theme.colorScheme;
-    final Color surface = colorScheme.surface;
+    final Color surface = HomeFeaturePastel.cardSurface(colorScheme);
     final BorderRadius borderRadius = BorderRadius.circular(radius);
     return HomeDashboardElevatedSurface.interactive(
       context: context,
@@ -90,11 +90,11 @@ class _QuickToolTile extends StatelessWidget {
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           mainAxisSize: MainAxisSize.min,
-          spacing: tokens.spaceSmall,
+          spacing: tokens.spaceLarge,
           children: [
             HomeDashboardIconWell(
               accent: accent,
-              fillAlpha: HomeFeaturePastel.iconWellFillAlpha,
+              fillAlpha: HomeFeaturePastel.solidIconWellFillAlpha,
               extent: tokens.iconBoxSize,
               child: icon,
             ),

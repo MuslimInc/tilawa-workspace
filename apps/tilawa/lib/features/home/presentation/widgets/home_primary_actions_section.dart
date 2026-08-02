@@ -28,7 +28,8 @@ import 'package:tilawa_ui_kit/tilawa_ui_kit.dart';
 ///
 /// No visible section title — tiles self-label. Mushaf shows a quiet Surah
 /// Index secondary; Athkar is destination-first (category + window icon) with
-/// a quiet library secondary pinned to the card bottom.
+/// a quiet library secondary pinned to the card bottom. Khatma lives in its
+/// own featured Home section — do not duplicate it on the Mushaf tile.
 class HomePrimaryActionsSection extends StatelessWidget {
   const HomePrimaryActionsSection({super.key});
 
@@ -37,17 +38,9 @@ class HomePrimaryActionsSection extends StatelessWidget {
     final tokens = context.tokens;
     final ThemeData theme = Theme.of(context);
     final ColorScheme colorScheme = theme.colorScheme;
-    final Color surface = colorScheme.primary;
+    // Ngajii ladder: white card bodies; solid primary wells + onPrimary glyphs.
+    final Color surface = HomeFeaturePastel.cardSurface(colorScheme);
     final Color chrome = colorScheme.onPrimary;
-    final product = theme.productColors;
-    final Color quranAccent = HomeFeaturePastel.accentFor(
-      HomeExploreFeature.quran,
-      product,
-    );
-    final Color athkarAccent = HomeFeaturePastel.accentFor(
-      HomeExploreFeature.athkar,
-      product,
-    );
     final double iconSize = tokens.iconSizeLarge;
 
     return Semantics(
@@ -60,7 +53,7 @@ class HomePrimaryActionsSection extends StatelessWidget {
           children: [
             Expanded(
               child: _QuranPrimaryTile(
-                accent: quranAccent,
+                accent: colorScheme.primary,
                 iconSize: iconSize,
                 surface: surface,
                 chrome: chrome,
@@ -68,7 +61,7 @@ class HomePrimaryActionsSection extends StatelessWidget {
             ),
             Expanded(
               child: _AthkarPrimaryTile(
-                accent: athkarAccent,
+                accent: colorScheme.primary,
                 iconSize: iconSize,
                 surface: surface,
                 chrome: chrome,
@@ -102,7 +95,7 @@ class _QuranPrimaryTile extends StatelessWidget {
       color: chrome,
     );
     final String label = context.l10n.homeQuickQuranReader;
-    final String secondaryLabel = context.l10n.surahIndex;
+    final String indexSecondaryLabel = context.l10n.surahIndex;
     void openIndex() => const QuranIndexRoute().push<void>(context);
     void openResume() => const QuranLastReadRoute().push<void>(context);
 
@@ -112,7 +105,7 @@ class _QuranPrimaryTile extends StatelessWidget {
         surfaceColor: surface,
         icon: icon,
         label: label,
-        secondaryLabel: secondaryLabel,
+        secondaryLabel: indexSecondaryLabel,
         onSecondaryTap: openIndex,
         onTap: openResume,
       );
@@ -131,7 +124,7 @@ class _QuranPrimaryTile extends StatelessWidget {
           icon: icon,
           label: label,
           progress: _quranTileProgress(state),
-          secondaryLabel: secondaryLabel,
+          secondaryLabel: indexSecondaryLabel,
           onSecondaryTap: openIndex,
           onTap: openResume,
         );
