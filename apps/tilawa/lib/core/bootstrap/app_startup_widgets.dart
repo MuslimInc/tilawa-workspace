@@ -155,6 +155,7 @@ class _BootGateState extends State<_BootGate> {
   static const Duration _bootWatchdogTimeout = Duration(seconds: 20);
 
   bool _ready = false;
+  bool _initFailed = false;
   bool _handoffToAppStarted = false;
   Future<void>? _criticalInitFuture;
   Timer? _bootWatchdogTimer;
@@ -181,13 +182,14 @@ class _BootGateState extends State<_BootGate> {
   }
 
   void _startBootWatchdog() {
+    _bootWatchdogTimer?.cancel();
     _bootWatchdogTimer = Timer(_bootWatchdogTimeout, () {
       if (!mounted || _ready) {
         return;
       }
       logger.e(
         'BootGate stuck: critical init not complete after '
-        '${_bootWatchdogTimeout.inSeconds}s; user is still on launch splash',
+        '${_bootWatchdogTimeout.inSeconds}s; showing retry UI',
       );
       unawaited(
         StartupTelemetry.failure(
@@ -200,6 +202,12 @@ class _BootGateState extends State<_BootGate> {
           phase: 'boot_gate',
         ),
       );
+      if (mounted && !_ready) {
+        setState(() {
+          _initFailed = true;
+          _criticalInitFuture = null;
+        });
+      }
     });
   }
 
@@ -263,7 +271,7 @@ class _BootGateState extends State<_BootGate> {
         .catchError((Object error, StackTrace stackTrace) {
           _criticalInitFuture = null;
           logger.e(
-            'Critical init failed; staying on launch splash',
+            'Critical init failed; showing recoverable BootGate error',
             error: error,
             stackTrace: stackTrace,
           );
@@ -275,6 +283,12 @@ class _BootGateState extends State<_BootGate> {
               phase: 'boot_gate',
             ),
           );
+          if (mounted && !_ready) {
+            _bootWatchdogTimer?.cancel();
+            setState(() {
+              _initFailed = true;
+            });
+          }
         });
   }
 
@@ -324,8 +338,29 @@ class _BootGateState extends State<_BootGate> {
     }
   }
 
+  Future<void> _retryCriticalInit() async {
+    if (_ready || _criticalInitFuture != null) {
+      return;
+    }
+    setState(() {
+      _initFailed = false;
+      _handoffToAppStarted = false;
+    });
+    SplashLaunchHandoff.resetForNewLaunch();
+    _startBootWatchdog();
+    _awaitCriticalInit();
+    // Keep the fatal-error button spinner until the next state change.
+    await (_criticalInitFuture ?? Future<void>.value());
+  }
+
   @override
   Widget build(BuildContext context) {
+    if (_initFailed) {
+      return Directionality(
+        textDirection: TextDirection.ltr,
+        child: _StartupFatalErrorScreen(onRetry: _retryCriticalInit),
+      );
+    }
     if (!_loggedBootGateSplash) {
       _loggedBootGateSplash = true;
       ColdStartNavigationMetrics.recordBootGateSplash();
