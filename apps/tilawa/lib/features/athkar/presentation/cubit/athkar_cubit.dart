@@ -51,9 +51,13 @@ class AthkarCubit extends Cubit<AthkarState> {
 
   /// Loads items for a specific category.
   ///
-  /// Always starts from the first dhikr with full counts — daily saved
-  /// progress is not restored on entry (each visit is a fresh pass).
-  Future<void> loadAthkar(int categoryId) async {
+  /// When [restoreProgress] is true, restores today's saved remaining counts
+  /// and resumes at the first incomplete dhikr. When false (default), starts a
+  /// fresh pass with full counts and overwrites any mid-session snapshot.
+  Future<void> loadAthkar(
+    int categoryId, {
+    bool restoreProgress = false,
+  }) async {
     emit(const AthkarState.loading());
     final Either<Failure, List<AthkarItem>> result = await _getAthkarByCategory(
       categoryId,
@@ -61,19 +65,52 @@ class AthkarCubit extends Cubit<AthkarState> {
     await result.fold(
       (failure) async => emit(AthkarState.error(failure)),
       (items) async {
-        final Map<int, int> counts = {
+        final Map<int, int> fullCounts = {
           for (final AthkarItem item in items) item.id: item.count,
         };
+        Map<int, int> counts = fullCounts;
+        int resumeIndex = 0;
+
+        if (restoreProgress) {
+          final Map<int, int> saved = await _dailyProgress.loadCounts(
+            categoryId: categoryId,
+            dateKey: athkarDailyProgressDateKey(DateTime.now()),
+          );
+          if (saved.isNotEmpty) {
+            counts = {
+              for (final AthkarItem item in items)
+                item.id: (saved[item.id] ?? item.count).clamp(0, item.count),
+            };
+            resumeIndex = resumeIndexForCounts(items, counts);
+          }
+        }
+
         final AthkarItemsLoaded next = AthkarItemsLoaded(
           items: items,
           currentCounts: counts,
+          resumeIndex: resumeIndex,
         );
         emit(next);
-        // Overwrite any mid-session snapshot so Home completion stays aligned
-        // with a fresh entry (not a resumed partial pass).
-        unawaited(_persistCounts(next));
+        if (!restoreProgress) {
+          // Fresh entry: overwrite snapshot so Home completion matches a new pass.
+          unawaited(_persistCounts(next));
+        }
       },
     );
+  }
+
+  /// First item with remaining repetitions, or `0` when all complete / empty.
+  static int resumeIndexForCounts(
+    List<AthkarItem> items,
+    Map<int, int> currentCounts,
+  ) {
+    for (int i = 0; i < items.length; i++) {
+      final int remaining = currentCounts[items[i].id] ?? 0;
+      if (remaining > 0) {
+        return i;
+      }
+    }
+    return 0;
   }
 
   /// Decrements the counter for a specific Athkar item.

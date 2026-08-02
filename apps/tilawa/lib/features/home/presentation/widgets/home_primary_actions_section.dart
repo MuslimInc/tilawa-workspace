@@ -292,6 +292,8 @@ class _AthkarPrimaryTileState extends State<_AthkarPrimaryTile> {
         categoryId: row.category.id,
         categoryName: title,
         source: 'home_primary',
+        restoreProgress:
+            recommendation.intent == AthkarContextIntent.continueSession,
       ).push<void>(context),
     );
   }

@@ -24,11 +24,13 @@ class AthkarDetailsScreen extends StatefulWidget {
     required this.categoryId,
     required this.categoryName,
     this.source = 'manual',
+    this.restoreProgress = false,
   });
 
   final int categoryId;
   final String categoryName;
   final String source;
+  final bool restoreProgress;
 
   @override
   State<AthkarDetailsScreen> createState() => _AthkarDetailsScreenState();
@@ -38,6 +40,7 @@ class _AthkarDetailsScreenState extends State<AthkarDetailsScreen> {
   late final PageController _pageController;
   int _currentIndex = 0;
   bool _isConfirmingLeave = false;
+  bool _didApplyResumeIndex = false;
 
   @override
   void initState() {
@@ -48,6 +51,28 @@ class _AthkarDetailsScreenState extends State<AthkarDetailsScreen> {
       widget.categoryName,
       source: widget.source,
     );
+  }
+
+  void _applyResumeIndexIfNeeded(AthkarItemsLoaded loaded) {
+    if (_didApplyResumeIndex || !widget.restoreProgress) {
+      return;
+    }
+    _didApplyResumeIndex = true;
+    final int index = loaded.resumeIndex.clamp(
+      0,
+      loaded.items.isEmpty ? 0 : loaded.items.length - 1,
+    );
+    if (index <= 0) {
+      _currentIndex = 0;
+      return;
+    }
+    _currentIndex = index;
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (!mounted || !_pageController.hasClients) {
+        return;
+      }
+      _pageController.jumpToPage(index);
+    });
   }
 
   @override
@@ -132,8 +157,11 @@ class _AthkarDetailsScreenState extends State<AthkarDetailsScreen> {
     return AppReviewSacredFlowScope(
       flow: AppReviewBlockedFlow.athkar,
       child: BlocProvider(
-        create: (context) =>
-            getIt<AthkarCubit>()..loadAthkar(widget.categoryId),
+        create: (context) => getIt<AthkarCubit>()
+          ..loadAthkar(
+            widget.categoryId,
+            restoreProgress: widget.restoreProgress,
+          ),
         child: PopScope(
           canPop: false,
           onPopInvokedWithResult: (bool didPop, _) {
@@ -147,6 +175,9 @@ class _AthkarDetailsScreenState extends State<AthkarDetailsScreen> {
               final AthkarItemsLoaded? loaded = state is AthkarItemsLoaded
                   ? state
                   : null;
+              if (loaded != null) {
+                _applyResumeIndexIfNeeded(loaded);
+              }
               final double progress = loaded == null || loaded.items.isEmpty
                   ? 0
                   : (_currentIndex + 1) / loaded.items.length;
@@ -196,6 +227,7 @@ class _AthkarDetailsScreenState extends State<AthkarDetailsScreen> {
                           onRetry: () {
                             context.read<AthkarCubit>().loadAthkar(
                               widget.categoryId,
+                              restoreProgress: widget.restoreProgress,
                             );
                           },
                         ),

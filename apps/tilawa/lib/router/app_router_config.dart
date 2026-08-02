@@ -500,10 +500,12 @@ class AthkarDetailsRoute extends GoRouteData
     required this.categoryId,
     required this.categoryName,
     this.source = 'manual',
+    this.restoreProgress = false,
   });
   final int categoryId;
   final String categoryName;
   final String source;
+  final bool restoreProgress;
 
   @override
   Widget build(BuildContext context, GoRouterState state) {
@@ -511,6 +513,7 @@ class AthkarDetailsRoute extends GoRouteData
       categoryId: categoryId,
       categoryName: categoryName,
       source: source,
+      restoreProgress: restoreProgress,
     );
   }
 }
