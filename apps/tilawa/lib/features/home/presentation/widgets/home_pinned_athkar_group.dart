@@ -94,6 +94,7 @@ class _PinnedAthkarGroupRow extends StatelessWidget {
           categoryId: category.id,
           categoryName: title,
           source: 'home_pinned_row',
+          restoreProgress: true,
         ).push(context);
       },
       onLongPress: onLongPress,

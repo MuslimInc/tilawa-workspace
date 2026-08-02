@@ -37,6 +37,7 @@ class HomePinnedAthkarGrid extends StatelessWidget {
               categoryId: category.id,
               categoryName: title,
               source: 'home_pinned_grid',
+              restoreProgress: true,
             ).push(context);
           },
         );

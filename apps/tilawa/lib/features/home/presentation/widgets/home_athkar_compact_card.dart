@@ -92,6 +92,9 @@ class _HomeAthkarCompactRow extends StatelessWidget {
           categoryId: row.category.id,
           categoryName: title,
           source: 'home_compact',
+          // Compact rows surface remaining counts — always restore today's
+          // snapshot. Explicit fresh-start lives on Home primary / library.
+          restoreProgress: true,
         ).push(context),
         stateLayerColor: colorScheme.primary,
         child: Padding(
