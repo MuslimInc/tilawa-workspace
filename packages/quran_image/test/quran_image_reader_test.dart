@@ -13,6 +13,7 @@ import 'package:quran_image/domain/domain.dart';
 import 'package:quran_image/l10n/quran_image_localizations.dart';
 import 'package:quran_image/presentation/bloc/navigation/navigation_bloc.dart';
 import 'package:quran_image/presentation/bloc/navigation/navigation_state.dart';
+import 'package:quran_image/presentation/widgets/quran_image_content.dart';
 import 'package:quran_image/presentation/widgets/organisms/navigation_slider_overlay.dart';
 import 'package:quran_image/quran_image_reader.dart';
 
@@ -165,6 +166,34 @@ void main() {
       await tester.pump();
       expect(imagePrewarmer.memoryPressureCount, 1);
       expect(imagePrewarmer.cancelCount, greaterThanOrEqualTo(1));
+    },
+  );
+
+  testWidgets(
+    'keyboard viewInsets do not shrink the Mushaf page stack',
+    (tester) async {
+      tester.view.physicalSize = const Size(1080, 2400);
+      tester.view.devicePixelRatio = 3;
+      addTearDown(tester.view.reset);
+
+      await _pumpReaderHarness(tester, navigationBloc);
+
+      final Scaffold scaffold = tester.widget<Scaffold>(
+        find.byType(Scaffold).first,
+      );
+      expect(scaffold.resizeToAvoidBottomInset, isFalse);
+
+      final double heightWithoutKeyboard = tester
+          .getSize(find.byType(QuranImageContent).first)
+          .height;
+
+      tester.view.viewInsets = const FakeViewPadding(bottom: 320);
+      await tester.pump();
+
+      final double heightWithKeyboard = tester
+          .getSize(find.byType(QuranImageContent).first)
+          .height;
+      expect(heightWithKeyboard, heightWithoutKeyboard);
     },
   );
 

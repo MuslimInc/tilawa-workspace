@@ -191,15 +191,18 @@ class _PanelActionRow extends StatelessWidget {
     final tokens = Theme.of(context).tokens;
     final indexLabel = QuranImageLocalizations.of(context).surahIndex;
 
+    final Widget? trailing = trailingAction == null
+        ? null
+        : (onShowIndex == null
+              ? Expanded(child: trailingAction!)
+              : trailingAction);
     return Row(
       mainAxisAlignment: MainAxisAlignment.spaceBetween,
       spacing: tokens.spaceSmall,
       children: [
         if (onShowIndex != null)
-          _PanelIndexButton(label: indexLabel, onPressed: onShowIndex!)
-        else
-          const SizedBox.shrink(),
-        trailingAction ?? const SizedBox.shrink(),
+          _PanelIndexButton(label: indexLabel, onPressed: onShowIndex!),
+        ?trailing,
       ],
     );
   }
