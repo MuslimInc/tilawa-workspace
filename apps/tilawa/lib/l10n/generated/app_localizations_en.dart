@@ -140,6 +140,22 @@ class AppLocalizationsEn extends AppLocalizations {
   String get homeExploreSubtitle => 'Everyday tools at a glance';
 
   @override
+  String get homeKhatmaSectionTitle => 'Quran Khatma';
+
+  @override
+  String get homeKhatmaSectionSubtitle =>
+      'Your daily wird toward completing the Mushaf';
+
+  @override
+  String get homeKhatmaStartAction => 'Start your Khatma';
+
+  @override
+  String get homeKhatmaContinueAction => 'Continue today’s wird';
+
+  @override
+  String get homeKhatmaOpenAction => 'Open Khatma';
+
+  @override
   String get homeKhatmaCarouselSubtitle => 'Progress on your khatma';
 
   @override

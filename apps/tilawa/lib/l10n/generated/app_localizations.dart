@@ -314,6 +314,36 @@ abstract class AppLocalizations {
   /// **'Everyday tools at a glance'**
   String get homeExploreSubtitle;
 
+  /// Home section title promoting Quran Khatma under primary actions
+  ///
+  /// In en, this message translates to:
+  /// **'Quran Khatma'**
+  String get homeKhatmaSectionTitle;
+
+  /// Home section subtitle for Quran Khatma
+  ///
+  /// In en, this message translates to:
+  /// **'Your daily wird toward completing the Mushaf'**
+  String get homeKhatmaSectionSubtitle;
+
+  /// Primary CTA on the empty Home Khatma card
+  ///
+  /// In en, this message translates to:
+  /// **'Start your Khatma'**
+  String get homeKhatmaStartAction;
+
+  /// Primary CTA on the active Home Khatma card
+  ///
+  /// In en, this message translates to:
+  /// **'Continue today’s wird'**
+  String get homeKhatmaContinueAction;
+
+  /// Home Khatma card CTA when today’s wird is already complete
+  ///
+  /// In en, this message translates to:
+  /// **'Open Khatma'**
+  String get homeKhatmaOpenAction;
+
   /// Home carousel subtitle for Smart Khatma promo card
   ///
   /// In en, this message translates to:

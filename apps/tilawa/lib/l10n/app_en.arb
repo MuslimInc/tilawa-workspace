@@ -175,6 +175,26 @@
     "@homeExploreSubtitle": {
         "description": "Home feature category grid supporting line"
     },
+    "homeKhatmaSectionTitle": "Quran Khatma",
+    "@homeKhatmaSectionTitle": {
+        "description": "Home section title promoting Quran Khatma under primary actions"
+    },
+    "homeKhatmaSectionSubtitle": "Your daily wird toward completing the Mushaf",
+    "@homeKhatmaSectionSubtitle": {
+        "description": "Home section subtitle for Quran Khatma"
+    },
+    "homeKhatmaStartAction": "Start your Khatma",
+    "@homeKhatmaStartAction": {
+        "description": "Primary CTA on the empty Home Khatma card"
+    },
+    "homeKhatmaContinueAction": "Continue today’s wird",
+    "@homeKhatmaContinueAction": {
+        "description": "Primary CTA on the active Home Khatma card"
+    },
+    "homeKhatmaOpenAction": "Open Khatma",
+    "@homeKhatmaOpenAction": {
+        "description": "Home Khatma card CTA when today’s wird is already complete"
+    },
     "homeKhatmaCarouselSubtitle": "Progress on your khatma",
     "@homeKhatmaCarouselSubtitle": {
         "description": "Home carousel subtitle for Smart Khatma promo card"

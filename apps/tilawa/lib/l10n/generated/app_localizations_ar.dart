@@ -142,6 +142,21 @@ class AppLocalizationsAr extends AppLocalizations {
   String get homeExploreSubtitle => 'أدواتك اليومية بلمحة';
 
   @override
+  String get homeKhatmaSectionTitle => 'ختمة القرآن';
+
+  @override
+  String get homeKhatmaSectionSubtitle => 'وردك اليومي حتى تتمّ المصحف';
+
+  @override
+  String get homeKhatmaStartAction => 'ابدأ ختمتك';
+
+  @override
+  String get homeKhatmaContinueAction => 'أكمل ورد اليوم';
+
+  @override
+  String get homeKhatmaOpenAction => 'افتح الختمة';
+
+  @override
   String get homeKhatmaCarouselSubtitle => 'تقدّم في ختمتك';
 
   @override
