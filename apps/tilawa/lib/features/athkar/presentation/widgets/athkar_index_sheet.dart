@@ -85,104 +85,118 @@ class _AthkarIndexSheetState extends State<AthkarIndexSheet> {
     final MeMuslimDesignTokens tokens = theme.tokens;
     final ColorScheme colorScheme = theme.colorScheme;
     final List<({int index, AthkarItem item})> filtered = _filtered;
+    final EdgeInsets bodyPadding =
+        TilawaBottomSheetScaffold.resolvedBodyPadding(context);
+    // showTilawaModalBottomSheet defaults useSafeArea: false.
+    final double keyboardInset = context.effectiveKeyboardInset;
+    final double availableHeight =
+        MediaQuery.sizeOf(context).height - keyboardInset;
+    final EdgeInsets scrollPadding = bodyPadding.copyWith(
+      bottom:
+          bodyPadding.bottom +
+          (keyboardInset > 0
+              ? tokens.spaceMedium
+              : context.floatingBottomPadding),
+    );
 
-    return ConstrainedBox(
-      constraints: BoxConstraints(
-        maxHeight: MediaQuery.sizeOf(context).height * 0.85,
-      ),
-      child: TilawaBottomSheetScaffold(
-        topBar: TilawaSearchField(
-          controller: _searchController,
-          hintText: context.l10n.athkarSearchHint(widget.categoryName),
-          margin: EdgeInsets.zero,
-          onChanged: (String value) {
-            setState(() {
-              _query = value;
-            });
-          },
-          onClear: () {
-            _searchController.clear();
-            setState(() {
-              _query = '';
-            });
-          },
-          clearButtonTooltip: context.l10n.a11yClearSearch,
+    return Padding(
+      padding: EdgeInsets.only(bottom: keyboardInset),
+      child: ConstrainedBox(
+        constraints: BoxConstraints(
+          maxHeight: availableHeight * 0.85,
         ),
-        children: [
-          Flexible(
-            child: filtered.isEmpty
-                ? Padding(
-                    padding: TilawaBottomSheetScaffold.resolvedBodyPadding(
-                      context,
-                    ),
-                    child: Center(
-                      child: Text(
-                        context.l10n.noResultsFound,
-                        style: theme.textTheme.bodyMedium?.copyWith(
-                          color: colorScheme.onSurfaceVariant,
+        child: TilawaBottomSheetScaffold(
+          topBar: TilawaSearchField(
+            controller: _searchController,
+            hintText: context.l10n.athkarSearchHint(widget.categoryName),
+            margin: EdgeInsets.zero,
+            onChanged: (String value) {
+              setState(() {
+                _query = value;
+              });
+            },
+            onClear: () {
+              _searchController.clear();
+              setState(() {
+                _query = '';
+              });
+            },
+            clearButtonTooltip: context.l10n.a11yClearSearch,
+          ),
+          children: [
+            Flexible(
+              child: filtered.isEmpty
+                  ? Padding(
+                      padding: scrollPadding,
+                      child: Center(
+                        child: Text(
+                          context.l10n.noResultsFound,
+                          style: theme.textTheme.bodyMedium?.copyWith(
+                            color: colorScheme.onSurfaceVariant,
+                          ),
                         ),
                       ),
-                    ),
-                  )
-                : ListView.separated(
-                    padding: TilawaBottomSheetScaffold.resolvedBodyPadding(
-                      context,
-                    ),
-                    itemCount: filtered.length,
-                    separatorBuilder: (_, _) => TilawaDivider(
-                      height: tokens.borderWidthThin,
-                      color: colorScheme.outlineVariant,
-                    ),
-                    itemBuilder: (BuildContext context, int i) {
-                      final ({int index, AthkarItem item}) entry = filtered[i];
-                      final bool selected = entry.index == widget.currentIndex;
-                      final String preview = entry.item.textAr;
+                    )
+                  : ListView.separated(
+                      padding: scrollPadding,
+                      itemCount: filtered.length,
+                      separatorBuilder: (_, _) => TilawaDivider(
+                        height: tokens.borderWidthThin,
+                        color: colorScheme.outlineVariant,
+                      ),
+                      itemBuilder: (BuildContext context, int i) {
+                        final ({int index, AthkarItem item}) entry =
+                            filtered[i];
+                        final bool selected =
+                            entry.index == widget.currentIndex;
+                        final String preview = entry.item.textAr;
 
-                      return InkWell(
-                        onTap: () => Navigator.of(context).pop(entry.index),
-                        child: Padding(
-                          padding: EdgeInsets.symmetric(
-                            vertical: tokens.spaceMedium,
-                          ),
-                          child: Row(
-                            spacing: tokens.spaceMedium,
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              Expanded(
-                                child: Text(
-                                  preview,
-                                  textDirection: TextDirection.rtl,
-                                  textAlign: TextAlign.start,
-                                  maxLines: 3,
-                                  overflow: TextOverflow.ellipsis,
-                                  style: theme.textTheme.bodyLarge?.copyWith(
-                                    color: selected
-                                        ? colorScheme.primary
-                                        : colorScheme.onSurface,
-                                    fontWeight: selected
-                                        ? FontWeight.w700
-                                        : FontWeight.w500,
-                                    height: tokens.textHeightLoose,
+                        return InkWell(
+                          onTap: () => Navigator.of(context).pop(entry.index),
+                          child: Padding(
+                            padding: EdgeInsets.symmetric(
+                              vertical: tokens.spaceMedium,
+                            ),
+                            child: Row(
+                              spacing: tokens.spaceMedium,
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                Expanded(
+                                  child: Text(
+                                    preview,
+                                    textDirection: TextDirection.rtl,
+                                    textAlign: TextAlign.start,
+                                    maxLines: 3,
+                                    overflow: TextOverflow.ellipsis,
+                                    style: theme.textTheme.bodyLarge?.copyWith(
+                                      color: selected
+                                          ? colorScheme.primary
+                                          : colorScheme.onSurface,
+                                      fontWeight: selected
+                                          ? FontWeight.w700
+                                          : FontWeight.w500,
+                                      height: tokens.textHeightLoose,
+                                    ),
                                   ),
                                 ),
-                              ),
-                              Text(
-                                '${entry.index + 1}',
-                                style: theme.textTheme.titleMedium?.copyWith(
-                                  color: selected
-                                      ? colorScheme.primary
-                                      : colorScheme.onSurfaceVariant,
-                                  fontWeight: FontWeight.w600,
+                                Text(
+                                  '${entry.index + 1}',
+                                  style: theme.textTheme.titleMedium?.copyWith(
+                                    color: selected
+                                        ? colorScheme.primary
+                                        : colorScheme.onSurfaceVariant,
+                                    fontWeight: FontWeight.w600,
+                                  ),
                                 ),
-                              ),
-                            ],
+                              ],
+                            ),
                           ),
-                        ),
-                      );
-                    },
-                  ),
-          ),
-        ],
+                        );
+                      },
+                    ),
+            ),
+          ],
+        ),
       ),
     );
   }

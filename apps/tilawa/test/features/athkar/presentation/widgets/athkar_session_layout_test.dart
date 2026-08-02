@@ -67,6 +67,27 @@ void main() {
 
       expect(taps, 1);
     });
+
+    testWidgets('short viewport does not overflow with reference meta', (
+      WidgetTester tester,
+    ) async {
+      await tester.pumpWidget(
+        _harness(
+          child: SizedBox(
+            height: 120,
+            child: AthkarItemWidget(
+              item: _sampleItem,
+              onTap: () {},
+            ),
+          ),
+        ),
+      );
+      await tester.pumpAndSettle();
+
+      expect(tester.takeException(), isNull);
+      expect(find.textContaining('الإخلاص'), findsOneWidget);
+      expect(find.text('3 times'), findsOneWidget);
+    });
   });
 
   group('AthkarSessionBottomBar', () {
@@ -138,6 +159,76 @@ void main() {
       await tester.pumpAndSettle();
 
       expect(selected, 1);
+    });
+
+    testWidgets('list padding clears system bottom safe area', (
+      WidgetTester tester,
+    ) async {
+      const double systemBottom = 48;
+
+      await tester.pumpWidget(
+        MaterialApp(
+          theme: AppTheme.getLightTheme(
+            primaryColor: PrimaryColorPreset.defaultPreset.value,
+          ),
+          locale: const Locale('en'),
+          localizationsDelegates: AppLocalizations.localizationsDelegates,
+          supportedLocales: AppLocalizations.supportedLocales,
+          home: const MediaQuery(
+            data: MediaQueryData(
+              size: Size(400, 800),
+              viewPadding: EdgeInsets.only(bottom: systemBottom),
+              padding: EdgeInsets.only(bottom: systemBottom),
+            ),
+            child: Scaffold(
+              body: AthkarIndexSheet(
+                items: [_sampleItem, _sampleItemTwo],
+                currentIndex: 0,
+                categoryName: 'Evening Athkar',
+              ),
+            ),
+          ),
+        ),
+      );
+      await tester.pumpAndSettle();
+
+      final ListView list = tester.widget<ListView>(find.byType(ListView));
+      final EdgeInsets padding = list.padding!.resolve(TextDirection.ltr);
+      expect(padding.bottom, greaterThanOrEqualTo(systemBottom));
+    });
+
+    testWidgets('keyboard inset does not overflow sheet column', (
+      WidgetTester tester,
+    ) async {
+      const double keyboard = 320;
+
+      await tester.pumpWidget(
+        MaterialApp(
+          theme: AppTheme.getLightTheme(
+            primaryColor: PrimaryColorPreset.defaultPreset.value,
+          ),
+          locale: const Locale('en'),
+          localizationsDelegates: AppLocalizations.localizationsDelegates,
+          supportedLocales: AppLocalizations.supportedLocales,
+          home: const MediaQuery(
+            data: MediaQueryData(
+              size: Size(400, 800),
+              viewInsets: EdgeInsets.only(bottom: keyboard),
+            ),
+            child: Scaffold(
+              body: AthkarIndexSheet(
+                items: [_sampleItem, _sampleItemTwo],
+                currentIndex: 0,
+                categoryName: 'Evening Athkar',
+              ),
+            ),
+          ),
+        ),
+      );
+      await tester.pumpAndSettle();
+
+      expect(tester.takeException(), isNull);
+      expect(find.textContaining('Search'), findsOneWidget);
     });
   });
 }

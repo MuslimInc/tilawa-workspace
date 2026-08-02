@@ -64,50 +64,65 @@ class _AthkarItemWidgetState extends State<AthkarItemWidget> {
           constraints: BoxConstraints(
             maxWidth: tokens.contentMaxWidthReader,
           ),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.stretch,
-            children: [
-              Expanded(
-                child: _AthkarDhikrTapSurface(
-                  tapFeedbackGeneration: _tapFeedbackGeneration,
-                  onTap: _handleDhikrTap,
-                  child: _AthkarDhikrText(
-                    text: widget.item.textAr,
-                    scrollController: _scrollController,
-                    textStyle: theme.textTheme.titleLarge?.copyWith(
-                      color: colorScheme.onSurface,
-                      height: tokens.textHeightLoose,
+          // Short viewports must scroll; Expanded fills when space allows.
+          child: LayoutBuilder(
+            builder: (context, constraints) {
+              return SingleChildScrollView(
+                physics: const ClampingScrollPhysics(),
+                child: ConstrainedBox(
+                  constraints: BoxConstraints(
+                    minHeight: constraints.maxHeight,
+                  ),
+                  child: IntrinsicHeight(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.stretch,
+                      children: [
+                        Expanded(
+                          child: _AthkarDhikrTapSurface(
+                            tapFeedbackGeneration: _tapFeedbackGeneration,
+                            onTap: _handleDhikrTap,
+                            child: _AthkarDhikrText(
+                              text: widget.item.textAr,
+                              scrollController: _scrollController,
+                              textStyle: theme.textTheme.titleLarge?.copyWith(
+                                color: colorScheme.onSurface,
+                                height: tokens.textHeightLoose,
+                              ),
+                            ),
+                          ),
+                        ),
+                        if (reference.isNotEmpty) ...[
+                          SizedBox(height: tokens.spaceMedium),
+                          Text(
+                            '«$reference»',
+                            textDirection: TextDirection.rtl,
+                            textAlign: TextAlign.center,
+                            style: theme.textTheme.bodyMedium?.copyWith(
+                              color: colorScheme.primary,
+                              fontWeight: FontWeight.w600,
+                            ),
+                          ),
+                        ],
+                        SizedBox(height: tokens.spaceMedium),
+                        TilawaDivider(
+                          height: tokens.borderWidthThin,
+                          color: colorScheme.outlineVariant,
+                        ),
+                        SizedBox(height: tokens.spaceMedium),
+                        Text(
+                          context.l10n.athkarRepeatCount(widget.item.count),
+                          textAlign: TextAlign.center,
+                          style: theme.textTheme.titleMedium?.copyWith(
+                            color: colorScheme.onSurface,
+                            fontWeight: FontWeight.w500,
+                          ),
+                        ),
+                      ],
                     ),
                   ),
                 ),
-              ),
-              if (reference.isNotEmpty) ...[
-                SizedBox(height: tokens.spaceMedium),
-                Text(
-                  '«$reference»',
-                  textDirection: TextDirection.rtl,
-                  textAlign: TextAlign.center,
-                  style: theme.textTheme.bodyMedium?.copyWith(
-                    color: colorScheme.primary,
-                    fontWeight: FontWeight.w600,
-                  ),
-                ),
-              ],
-              SizedBox(height: tokens.spaceMedium),
-              TilawaDivider(
-                height: tokens.borderWidthThin,
-                color: colorScheme.outlineVariant,
-              ),
-              SizedBox(height: tokens.spaceMedium),
-              Text(
-                context.l10n.athkarRepeatCount(widget.item.count),
-                textAlign: TextAlign.center,
-                style: theme.textTheme.titleMedium?.copyWith(
-                  color: colorScheme.onSurface,
-                  fontWeight: FontWeight.w500,
-                ),
-              ),
-            ],
+              );
+            },
           ),
         ),
       ),

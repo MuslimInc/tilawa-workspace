@@ -183,6 +183,8 @@ class _AthkarDetailsScreenState extends State<AthkarDetailsScreen> {
                   : (_currentIndex + 1) / loaded.items.length;
 
               return Scaffold(
+                // Index-sheet search owns the IME; keep session layout stable.
+                resizeToAvoidBottomInset: false,
                 appBar: TilawaAppBar(
                   title: widget.categoryName,
                   actions: [
