@@ -272,7 +272,7 @@ class AppTheme {
       surfaceTint: Colors.transparent,
       surfaceContainerLowest: AppColors.lightCanvas,
       surfaceContainerLow: AppColors.lightSurface,
-      // Cool off-white canvas + white card ramp.
+      // White canvas + white card ramp (cards lift via elevation).
       surfaceContainer: AppColors.lightCanvas,
       surfaceContainerHigh: AppColors.catalogFilterUnselectedLight,
       surfaceContainerHighest: AppColors.lightSurfaceContainerHighestBase,

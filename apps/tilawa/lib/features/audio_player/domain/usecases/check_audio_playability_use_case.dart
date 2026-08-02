@@ -3,6 +3,7 @@ import 'package:tilawa_core/entities/audio.dart';
 import 'package:tilawa_core/errors/failures.dart';
 import 'package:tilawa_core/network/network_info.dart';
 import '../../../downloads/domain/entities/download_item.dart';
+import '../../../downloads/domain/entities/downloaded_file_integrity.dart';
 import '../../../downloads/domain/repositories/downloads_repository.dart';
 
 /// Use case to check if an audio can be played based on network and download status.
@@ -57,20 +58,24 @@ class CheckAudioPlayabilityUseCase {
 
       // Check if download is completed
       if (downloadItem.status == DownloadStatus.completed) {
-        // Validate file still exists on disk
-        final bool fileExists = await _downloadsRepository
-            .validateDownloadedFile(downloadItem);
+        final DownloadedFileIntegrity integrity = await _downloadsRepository
+            .inspectDownloadedFile(downloadItem);
 
-        if (fileExists) {
-          return const Right(null); // Downloaded and valid
-        } else {
-          return const Left(
+        return switch (integrity) {
+          DownloadedFileIntegrity.valid => const Right(null),
+          DownloadedFileIntegrity.missing => const Left(
             OfflinePlaybackFailure(
               'File missing',
               OfflinePlaybackReason.fileMissing,
             ),
-          );
-        }
+          ),
+          DownloadedFileIntegrity.corrupted => const Left(
+            OfflinePlaybackFailure(
+              'File corrupted',
+              OfflinePlaybackReason.fileCorrupted,
+            ),
+          ),
+        };
       }
 
       // Download exists but not completed (pending, downloading, failed, etc.)

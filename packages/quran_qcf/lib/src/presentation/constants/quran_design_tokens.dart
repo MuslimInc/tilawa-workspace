@@ -20,7 +20,7 @@ class QuranDesignTokens extends ThemeExtension<QuranDesignTokens> {
   });
 
   /// The default background color for Quran pages (warm off-white).
-  /// Default: 0xFFFFF9F1
+  /// Default: 0xFFFFF9F2
   final Color pageBackgroundColor;
 
   /// The default text color for Quran verses (black).

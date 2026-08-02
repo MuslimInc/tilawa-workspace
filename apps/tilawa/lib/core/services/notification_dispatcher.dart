@@ -457,6 +457,8 @@ class NotificationDispatcher implements INotificationDispatcher {
         return 1;
       case 'tasbeeh_reminder':
         return 1;
+      case 'khatma_reminder':
+        return 1;
       case 'fcm_service':
         return 1;
       case 'downloads':

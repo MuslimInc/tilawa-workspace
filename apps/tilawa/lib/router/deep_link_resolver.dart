@@ -38,6 +38,10 @@ class DeepLinkResolver {
   /// Prefix for Daily Guidance local notifications.
   static const String dailyGuidancePayloadPrefix = 'daily_guidance_payload';
 
+  /// Smart Khatma local reminder payloads.
+  static const String khatmaDailyPayload = 'khatma:daily';
+  static const String khatmaSurahPayloadPrefix = 'khatma:surah:';
+
   // ---------------------------------------------------------------------------
   // Map (FCM / generic deep-link) resolution
   // ---------------------------------------------------------------------------
@@ -111,6 +115,8 @@ class DeepLinkResolver {
           return TasbeehRoute(dhikrId: dhikrId).location;
         }
         return const TasbeehRoute().location;
+      case 'khatma':
+        return const SmartKhatmaHubRoute().location;
       case 'incoming_quran_session_call':
       case 'quran_session':
         // Session ID might be passed as sessionId or bookingId
@@ -200,6 +206,27 @@ class DeepLinkResolver {
     );
   }
 
+  /// Smart Khatma hub destination.
+  NotificationDestination khatmaHub({
+    NavigationSource source = NavigationSource.notification,
+  }) {
+    return NotificationDestination(
+      location: const SmartKhatmaHubRoute().location,
+      source: source,
+    );
+  }
+
+  /// Quran reader destination for a Surah reminder.
+  NotificationDestination quranSurah(
+    int surahNumber, {
+    NavigationSource source = NavigationSource.notification,
+  }) {
+    return NotificationDestination(
+      location: QuranReaderRoute(surahNumber: surahNumber).location,
+      source: source,
+    );
+  }
+
   // ---------------------------------------------------------------------------
   // Internal helpers (moved verbatim from the previous resolvers)
   // ---------------------------------------------------------------------------
@@ -250,11 +277,30 @@ class DeepLinkResolver {
     if (dailyGuidance != null) {
       return dailyGuidance;
     }
+    final Map<String, dynamic>? khatma = _khatmaDataFromPayload(payload);
+    if (khatma != null) {
+      return khatma;
+    }
     try {
       return Map<String, dynamic>.from(jsonDecode(payload) as Map);
     } catch (_) {
       return null;
     }
+  }
+
+  static Map<String, dynamic>? _khatmaDataFromPayload(String payload) {
+    if (payload == khatmaDailyPayload) {
+      return <String, dynamic>{'type': 'khatma'};
+    }
+    if (payload.startsWith(khatmaSurahPayloadPrefix)) {
+      final int? surah = int.tryParse(
+        payload.substring(khatmaSurahPayloadPrefix.length),
+      );
+      if (surah != null && surah >= 1 && surah <= 114) {
+        return <String, dynamic>{'type': 'quran', 'surahNumber': surah};
+      }
+    }
+    return null;
   }
 
   /// Maps a plain-string athkar payload to the normalized `athkar` data map

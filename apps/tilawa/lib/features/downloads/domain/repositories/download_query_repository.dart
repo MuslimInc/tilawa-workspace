@@ -1,4 +1,5 @@
 import '../entities/download_item.dart';
+import '../entities/downloaded_file_integrity.dart';
 
 /// Repository interface for querying download data
 ///
@@ -13,8 +14,11 @@ abstract class DownloadQueryRepository {
   /// Get a specific download item by ID
   Future<DownloadItem?> getDownloadItem(String id);
 
-  /// Validate if downloaded file exists on disk
+  /// Validate if downloaded file exists on disk (and matches expected size).
   Future<bool> validateDownloadedFile(DownloadItem download);
+
+  /// Inspect existence and size integrity of a completed download.
+  Future<DownloadedFileIntegrity> inspectDownloadedFile(DownloadItem download);
 
   /// Get total size of all downloads in bytes
   Future<int> getTotalDownloadsSize();

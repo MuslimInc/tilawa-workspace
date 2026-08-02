@@ -49,7 +49,6 @@ class HomePrimaryActionTile extends StatelessWidget {
     final Color secondaryForeground = isPrimarySurface
         ? colorScheme.onPrimary.withValues(alpha: 0.85)
         : HomeDashboardSection.secondaryTextColor(context);
-    final Color chrome = isPrimarySurface ? colorScheme.onPrimary : accent;
     final double radius = tokens.resolveRadius(
       family: TilawaRadiusFamily.hero,
     );
@@ -93,8 +92,8 @@ class HomePrimaryActionTile extends StatelessWidget {
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         HomeDashboardIconWell(
-          accent: chrome,
-          fillAlpha: HomeFeaturePastel.iconWellFillAlpha,
+          accent: accent,
+          fillAlpha: HomeFeaturePastel.solidIconWellFillAlpha,
           extent: tokens.iconBoxSize,
           child: icon,
         ),
@@ -105,8 +104,8 @@ class HomePrimaryActionTile extends StatelessWidget {
             child: LinearProgressIndicator(
               value: clampedProgress,
               minHeight: tokens.progressHeight,
-              backgroundColor: chrome.withValues(alpha: 0.12),
-              color: chrome,
+              backgroundColor: accent.withValues(alpha: 0.12),
+              color: accent,
             ),
           ),
       ],
@@ -117,7 +116,7 @@ class HomePrimaryActionTile extends StatelessWidget {
       borderRadius: borderRadius,
       onTap: onTap,
       semanticLabel: label,
-      stateLayerColor: chrome,
+      stateLayerColor: accent,
       color: surface,
       tier: HomeDashboardElevationTier.primary,
       child: Padding(
@@ -134,14 +133,14 @@ class HomePrimaryActionTile extends StatelessWidget {
                     size: TilawaButtonSize.small,
                     isFullWidth: true,
                     backgroundColor: Color.alphaBlend(
-                      chrome.withValues(
+                      accent.withValues(
                         alpha: HomeFeaturePastel.iconWellFillAlpha,
                       ),
                       surface,
                     ),
-                    foregroundColor: chrome,
+                    foregroundColor: accent,
                     textStyle: theme.textTheme.labelMedium?.copyWith(
-                      color: chrome,
+                      color: accent,
                       fontWeight: FontWeight.w700,
                     ),
                     onPressed: onSecondaryTap,

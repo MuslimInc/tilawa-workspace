@@ -5,6 +5,7 @@ import 'package:tilawa_ui_kit/tilawa_ui_kit.dart';
 
 import '../../domain/entities/entities.dart';
 import '../bloc/prayer_permissions_cubit.dart';
+import 'prayer_adhan_health_status_card.dart';
 import '../bloc/prayer_times_bloc.dart';
 import '../prayer_alerts_permission_navigation.dart';
 import '../prayer_alerts_setup_pending_steps.dart';
@@ -96,6 +97,11 @@ class _PrayerNotificationSettingsSheetState
                       ),
                     );
                   },
+                ),
+
+                Padding(
+                  padding: EdgeInsets.only(bottom: tokens.spaceMedium),
+                  child: const PrayerAdhanHealthStatusCard(),
                 ),
 
                 _SettingsSwitch(

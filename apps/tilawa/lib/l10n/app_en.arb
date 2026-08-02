@@ -175,6 +175,26 @@
     "@homeExploreSubtitle": {
         "description": "Home feature category grid supporting line"
     },
+    "homeKhatmaSectionTitle": "Quran Khatma",
+    "@homeKhatmaSectionTitle": {
+        "description": "Home section title promoting Quran Khatma under primary actions"
+    },
+    "homeKhatmaSectionSubtitle": "Your daily wird toward completing the Mushaf",
+    "@homeKhatmaSectionSubtitle": {
+        "description": "Home section subtitle for Quran Khatma"
+    },
+    "homeKhatmaStartAction": "Start your Khatma",
+    "@homeKhatmaStartAction": {
+        "description": "Primary CTA on the empty Home Khatma card"
+    },
+    "homeKhatmaContinueAction": "Continue today’s wird",
+    "@homeKhatmaContinueAction": {
+        "description": "Primary CTA on the active Home Khatma card"
+    },
+    "homeKhatmaOpenAction": "Open Khatma",
+    "@homeKhatmaOpenAction": {
+        "description": "Home Khatma card CTA when today’s wird is already complete"
+    },
     "homeKhatmaCarouselSubtitle": "Progress on your khatma",
     "@homeKhatmaCarouselSubtitle": {
         "description": "Home carousel subtitle for Smart Khatma promo card"
@@ -912,6 +932,70 @@
     "khatmaEditPlanTitle": "Review plan changes",
     "khatmaEditPlanSubtitle": "Adjust duration or end date; progress stays saved.",
     "khatmaSavePlanChangesAction": "Save changes",
+
+    "khatmaWizardStartTitle": "Choose where to start",
+    "khatmaWizardStartSubtitle": "Select the place or Juz from which you want to begin your Khatma.",
+    "khatmaWizardStartFromLabel": "Start from",
+    "khatmaWizardBeginningOfMushaf": "Beginning of the Mushaf",
+    "khatmaWizardJuzOption": "Juz {number}",
+    "@khatmaWizardJuzOption": {"placeholders": {"number": {"type": "int"}}},
+    "khatmaWizardContinue": "Continue",
+    "khatmaWizardDurationTitle": "Choose duration or daily amount",
+    "khatmaWizardDurationSubtitle": "Set how many days you want to finish in, or adjust the daily pages.",
+    "khatmaWizardDurationLabel": "Khatma duration",
+    "khatmaWizardDailyAmountLabel": "Daily wird",
+    "khatmaWizardAdvancedBoundaries": "Advanced start and end",
+    "khatmaWizardHideAdvanced": "Hide advanced options",
+    "khatmaCurrentWirdTitle": "Current wird",
+    "khatmaFromHisWords": "From the words of Allah",
+    "khatmaJuzLabel": "Juz {number}",
+    "@khatmaJuzLabel": {"placeholders": {"number": {"type": "int"}}},
+    "khatmaSurahAyahLabel": "Surah {surah} — Ayah {ayah}",
+    "@khatmaSurahAyahLabel": {"placeholders": {"surah": {"type": "String"}, "ayah": {"type": "int"}}},
+    "khatmaToSurahAyahLabel": "To Surah {surah} — Ayah {ayah}",
+    "@khatmaToSurahAyahLabel": {"placeholders": {"surah": {"type": "String"}, "ayah": {"type": "int"}}},
+    "khatmaPageLabel": "Page {page}",
+    "@khatmaPageLabel": {"placeholders": {"page": {"type": "int"}}},
+    "khatmaReadWirdAction": "Read the wird",
+    "khatmaFinishedReadingAction": "I finished reading",
+    "khatmaPreviousSessionsCount": "Previous sessions: {count}",
+    "@khatmaPreviousSessionsCount": {"placeholders": {"count": {"type": "int"}}},
+    "khatmaUpcomingSessionsCount": "Upcoming sessions: {count}",
+    "@khatmaUpcomingSessionsCount": {"placeholders": {"count": {"type": "int"}}},
+    "khatmaPreviousSessionsTitle": "Previous sessions",
+    "khatmaUpcomingSessionsTitle": "Upcoming sessions",
+    "khatmaSessionNumber": "Session {number}",
+    "@khatmaSessionNumber": {"placeholders": {"number": {"type": "int"}}},
+    "khatmaBehindSchedule": "You are behind by {days, plural, =1{1 day} other{{days} days}}",
+    "@khatmaBehindSchedule": {"placeholders": {"days": {"type": "int"}}},
+    "khatmaOnTrack": "Your Khatma is on track",
+    "khatmaReminderOptInTitle": "Daily Khatma reminder",
+    "khatmaReminderOptInMessage": "Would you like a daily reminder for your Khatma wird?",
+    "khatmaReminderOptInYes": "Yes",
+    "khatmaReminderOptInNo": "No",
+    "khatmaReminderSetTitle": "Reminder set",
+    "khatmaReminderSetMessage": "A daily Khatma reminder is set. You can change it from this screen.",
+    "khatmaReminderContinue": "Continue",
+    "khatmaReminderSettingsTitle": "Daily reminder",
+    "khatmaReminderSettingsSubtitle": "Remind me to read my wird each day",
+    "khatmaReminderTimeLabel": "Reminder time",
+    "khatmaReminderNotificationTitle": "Time for your Khatma wird",
+    "khatmaReminderNotificationBody": "Open Tilawa and continue your daily reading.",
+    "khatmaBaqarahReminderTitle": "Surah Al-Baqarah reminder",
+    "khatmaBaqarahReminderBody": "Would you like a daily reminder to read Surah Al-Baqarah?",
+    "khatmaBaqarahReminderPromptMessage": "Set a daily reminder to read Surah Al-Baqarah?",
+    "khatmaKahfReminderTitle": "Surah Al-Kahf reminder",
+    "khatmaKahfReminderBody": "Friday reminder to read Surah Al-Kahf.",
+    "khatmaKahfReminderPromptMessage": "Set a Friday reminder to read Surah Al-Kahf?",
+    "khatmaSurahRemindersTitle": "Surah reminders",
+    "khatmaSurahRemindersSubtitle": "Optional reminders for Al-Baqarah and Al-Kahf",
+    "khatmaCompletionDuaAction": "Dua for completing the Quran",
+    "khatmaCompletionDuaTitle": "Dua for completing the Quran",
+    "khatmaCompletionShareAction": "Share",
+    "khatmaCompletionShareText": "I completed my Quranic Khatma with Tilawa.\niOS: {iosStoreUrl}\nAndroid: {androidStoreUrl}",
+    "@khatmaCompletionShareText": {"placeholders": {"iosStoreUrl": {"type": "String"}, "androidStoreUrl": {"type": "String"}}},
+    "khatmaCompletionDoneMessage": "The current Khatma has been completed.",
+    "khatmaDuaBody": "اللَّهُمَّ ارْحَمْنِي بِالْقُرْآنِ وَاجْعَلْهُ لِي إِمَامًا وَنُورًا وَهُدًى وَرَحْمَةً.\n\nاللَّهُمَّ ذَكِّرْنِي مِنْهُ مَا نَسِيتُ وَعَلِّمْنِي مِنْهُ مَا جَهِلْتُ وَارْزُقْنِي تِلَاوَتَهُ آنَاءَ اللَّيْلِ وَأَطْرَافَ النَّهَارِ وَاجْعَلْهُ لِي حُجَّةً يَا رَبَّ الْعَالَمِينَ.\n\nاللَّهُمَّ أَصْلِحْ لِي دِينِي الَّذِي هُوَ عِصْمَةُ أَمْرِي، وَأَصْلِحْ لِي دُنْيَايَ الَّتِي فِيهَا مَعَاشِي، وَأَصْلِحْ لِي آخِرَتِي الَّتِي فِيهَا مَعَادِي، وَاجْعَلِ الْحَيَاةَ زِيَادَةً لِي فِي كُلِّ خَيْرٍ، وَاجْعَلِ الْمَوْتَ رَاحَةً لِي مِنْ كُلِّ شَرٍّ.\n\nاللَّهُمَّ اجْعَلْ خَيْرَ عُمُرِي آخِرَهُ، وَخَيْرَ عَمَلِي خَوَاتِمَهُ، وَخَيْرَ أَيَّامِي يَوْمَ أَلْقَاكَ فِيهِ.",
     "khatmaDeletePlanAction": "Delete plan",
     "khatmaResetCorruptAction": "Reset Khatma",
     "@khatmaHubResetSubtitle": {
@@ -2820,6 +2904,48 @@
     "@athkarLeaveConfirm": {
         "description": "Confirm button to leave the Athkar reading session"
     },
+    "athkarRepeatCount": "{count, plural, =1{Once} other{{count} times}}",
+    "@athkarRepeatCount": {
+        "description": "How many times to recite the current Athkar item",
+        "placeholders": {
+            "count": {
+                "type": "int",
+                "description": "Target repetition count"
+            }
+        }
+    },
+    "athkarIndexTitle": "Athkar index",
+    "@athkarIndexTitle": {
+        "description": "Title for the Athkar session table-of-contents sheet"
+    },
+    "athkarIndexTooltip": "Athkar list",
+    "@athkarIndexTooltip": {
+        "description": "Tooltip and semantics for opening the Athkar index sheet"
+    },
+    "athkarSearchHint": "Search — {categoryName}",
+    "@athkarSearchHint": {
+        "description": "Search field placeholder in the Athkar index sheet",
+        "placeholders": {
+            "categoryName": {
+                "type": "String",
+                "description": "Localized Athkar category title"
+            }
+        }
+    },
+    "athkarPageIndicator": "{total} | {current}",
+    "@athkarPageIndicator": {
+        "description": "Session page indicator showing total items and current position",
+        "placeholders": {
+            "total": {
+                "type": "int",
+                "description": "Total Athkar items in the category"
+            },
+            "current": {
+                "type": "int",
+                "description": "1-based index of the current item"
+            }
+        }
+    },
     "qibla": "Qibla",
     "@qibla": {
         "description": "Qibla tab label"
@@ -3107,6 +3233,10 @@
     "offlineDownloadIncompleteError": "This content is not fully downloaded. Please complete the download first.",
     "@offlineDownloadIncompleteError": {
         "description": "Error shown when download exists but is not completed"
+    },
+    "offlineFileCorruptedError": "This download is corrupted or incomplete. Please re-download it.",
+    "@offlineFileCorruptedError": {
+        "description": "Shown when a local Quran audio file fails size validation before offline playback."
     },
     "bookmarks": "Bookmarks",
     "@bookmarks": {
@@ -4293,6 +4423,42 @@
     "prayerAlertsPermissionOemAutostartBody": "On this device, enable Autostart for MeMuslim in your phone settings so reminders are not stopped in the background.",
     "@prayerAlertsPermissionOemAutostartBody": {
         "description": "Body for OEM autostart guidance step"
+    },
+    "prayerAdhanHealthTitle": "Adhan readiness",
+    "@prayerAdhanHealthTitle": {
+        "description": "Title for the read-only Adhan system readiness card in prayer notification settings."
+    },
+    "prayerAdhanHealthSubtitle": "Status of permissions required for reliable prayer alerts.",
+    "@prayerAdhanHealthSubtitle": {
+        "description": "Subtitle under the Adhan readiness card."
+    },
+    "prayerAdhanHealthNotificationsLabel": "Notifications",
+    "@prayerAdhanHealthNotificationsLabel": {
+        "description": "Label for notification permission readiness row."
+    },
+    "prayerAdhanHealthExactAlarmLabel": "Exact alarms",
+    "@prayerAdhanHealthExactAlarmLabel": {
+        "description": "Label for exact-alarm readiness row."
+    },
+    "prayerAdhanHealthBatteryLabel": "Battery unrestricted",
+    "@prayerAdhanHealthBatteryLabel": {
+        "description": "Label for battery optimization readiness row."
+    },
+    "prayerAdhanHealthOemLabel": "Background access",
+    "@prayerAdhanHealthOemLabel": {
+        "description": "Label for OEM autostart readiness row."
+    },
+    "prayerAdhanHealthFixAction": "Fix",
+    "@prayerAdhanHealthFixAction": {
+        "description": "Action to request a missing Adhan-related permission."
+    },
+    "prayerAdhanHealthOpenSettingsAction": "Open settings",
+    "@prayerAdhanHealthOpenSettingsAction": {
+        "description": "Action to open system app settings for battery or OEM guidance."
+    },
+    "offlinePlaybackRedownloadAction": "Re-download",
+    "@offlinePlaybackRedownloadAction": {
+        "description": "Toast action that opens Downloads after a missing or corrupted offline file."
     },
     "prayerAlertsPermissionAllow": "Allow",
     "@prayerAlertsPermissionAllow": {

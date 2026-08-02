@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:quran_image/core/constants/surah_header_constants.dart';
+import 'package:quran_image/core/design_tokens/colors.dart';
 import 'package:quran_image/core/perf_logger.dart';
 import 'package:quran_image/domain/domain.dart';
 import 'package:quran_image/presentation/widgets/widgets.dart';
@@ -35,7 +36,9 @@ class QuranImageContent extends StatelessWidget {
   Widget build(BuildContext context) {
     PerfLogger.markBuild('QuranImageContent');
     final contentStack = ColoredBox(
-      color: backgroundColor ?? Theme.of(context).scaffoldBackgroundColor,
+      color:
+          backgroundColor ??
+          QuranImageColors.pageBackground(Theme.of(context).brightness),
       child: Stack(
         clipBehavior: Clip.none,
         children: [

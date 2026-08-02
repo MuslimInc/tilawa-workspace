@@ -15,6 +15,7 @@ sealed class AthkarState with _$AthkarState {
   const factory AthkarState.itemsLoaded({
     required List<AthkarItem> items,
     required Map<int, int> currentCounts,
+    @Default(0) int resumeIndex,
   }) = AthkarItemsLoaded;
   const factory AthkarState.error(Failure failure) = AthkarError;
 }

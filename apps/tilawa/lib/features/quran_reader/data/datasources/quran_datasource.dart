@@ -2,6 +2,8 @@ import 'dart:convert';
 
 import 'package:collection/collection.dart';
 import 'package:flutter/services.dart';
+import 'package:tilawa/core/utils/arabic_search_normalizer.dart';
+
 import '../../domain/entities/entities.dart';
 
 abstract class QuranDataSource {
@@ -227,14 +229,19 @@ class QuranDataSourceImpl implements QuranDataSource {
     _ensureDatasetAvailable();
 
     final List<AyahEntity> results = [];
-    final String normalizedQuery = query.toLowerCase();
+    final String normalizedQuery = ArabicSearchNormalizer.normalize(query);
+    if (normalizedQuery.isEmpty) {
+      return results;
+    }
 
     for (final Map<String, dynamic> surah
         in _surahList!.cast<Map<String, dynamic>>()) {
       final List<dynamic> surahAyahs = surah['ayahs'] as List<dynamic>? ?? [];
       for (final dynamic ayah in surahAyahs) {
         final ayahMap = ayah as Map<String, dynamic>;
-        final String text = ayahMap['text']?.toString().toLowerCase() ?? '';
+        final String text = ArabicSearchNormalizer.normalize(
+          ayahMap['text']?.toString() ?? '',
+        );
         if (text.contains(normalizedQuery)) {
           results.add(
             _ayahFromMap(

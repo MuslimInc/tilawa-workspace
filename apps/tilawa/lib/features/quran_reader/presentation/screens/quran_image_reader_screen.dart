@@ -56,6 +56,7 @@ class QuranImageReaderScreen extends StatefulWidget {
     this.openPracticeOnLaunch = false,
     this.onActiveSurahChanged,
     this.viewSwitchAction,
+    this.showSurahIndex = true,
   });
 
   /// Surah number to open (`1`–`114`), or `0` to use last-read.
@@ -82,6 +83,9 @@ class QuranImageReaderScreen extends StatefulWidget {
   /// Host-supplied view-switch control rendered in the reader's bottom
   /// navigation panel (thumb-reachable), replacing the old top-corner toggle.
   final Widget? viewSwitchAction;
+
+  /// When false, hides Surah-index entry points (Khatma / bounded sessions).
+  final bool showSurahIndex;
 
   @override
   State<QuranImageReaderScreen> createState() => _QuranImageReaderScreenState();
@@ -357,7 +361,7 @@ class _QuranImageReaderScreenState extends State<QuranImageReaderScreen>
       value: bloc,
       child: _ReaderShell(
         onShareRequested: _showShareOptions,
-        onShowIndex: _showSurahIndex,
+        onShowIndex: widget.showSurahIndex ? _showSurahIndex : null,
         onPageSettled: (page) => unawaited(_recordReadingProgress(page)),
         viewSwitchAction: widget.viewSwitchAction,
       ),
@@ -405,13 +409,13 @@ class _QuranImageReaderScreenState extends State<QuranImageReaderScreen>
 class _ReaderShell extends StatelessWidget {
   const _ReaderShell({
     required this.onShareRequested,
-    required this.onShowIndex,
     required this.onPageSettled,
+    this.onShowIndex,
     this.viewSwitchAction,
   });
 
   final Future<void> Function(int currentPage) onShareRequested;
-  final VoidCallback onShowIndex;
+  final VoidCallback? onShowIndex;
   final ValueChanged<int> onPageSettled;
   final Widget? viewSwitchAction;
 

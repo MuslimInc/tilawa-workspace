@@ -140,6 +140,22 @@ class AppLocalizationsEn extends AppLocalizations {
   String get homeExploreSubtitle => 'Everyday tools at a glance';
 
   @override
+  String get homeKhatmaSectionTitle => 'Quran Khatma';
+
+  @override
+  String get homeKhatmaSectionSubtitle =>
+      'Your daily wird toward completing the Mushaf';
+
+  @override
+  String get homeKhatmaStartAction => 'Start your Khatma';
+
+  @override
+  String get homeKhatmaContinueAction => 'Continue today’s wird';
+
+  @override
+  String get homeKhatmaOpenAction => 'Open Khatma';
+
+  @override
   String get homeKhatmaCarouselSubtitle => 'Progress on your khatma';
 
   @override
@@ -857,6 +873,203 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get khatmaSavePlanChangesAction => 'Save changes';
+
+  @override
+  String get khatmaWizardStartTitle => 'Choose where to start';
+
+  @override
+  String get khatmaWizardStartSubtitle =>
+      'Select the place or Juz from which you want to begin your Khatma.';
+
+  @override
+  String get khatmaWizardStartFromLabel => 'Start from';
+
+  @override
+  String get khatmaWizardBeginningOfMushaf => 'Beginning of the Mushaf';
+
+  @override
+  String khatmaWizardJuzOption(int number) {
+    return 'Juz $number';
+  }
+
+  @override
+  String get khatmaWizardContinue => 'Continue';
+
+  @override
+  String get khatmaWizardDurationTitle => 'Choose duration or daily amount';
+
+  @override
+  String get khatmaWizardDurationSubtitle =>
+      'Set how many days you want to finish in, or adjust the daily pages.';
+
+  @override
+  String get khatmaWizardDurationLabel => 'Khatma duration';
+
+  @override
+  String get khatmaWizardDailyAmountLabel => 'Daily wird';
+
+  @override
+  String get khatmaWizardAdvancedBoundaries => 'Advanced start and end';
+
+  @override
+  String get khatmaWizardHideAdvanced => 'Hide advanced options';
+
+  @override
+  String get khatmaCurrentWirdTitle => 'Current wird';
+
+  @override
+  String get khatmaFromHisWords => 'From the words of Allah';
+
+  @override
+  String khatmaJuzLabel(int number) {
+    return 'Juz $number';
+  }
+
+  @override
+  String khatmaSurahAyahLabel(String surah, int ayah) {
+    return 'Surah $surah — Ayah $ayah';
+  }
+
+  @override
+  String khatmaToSurahAyahLabel(String surah, int ayah) {
+    return 'To Surah $surah — Ayah $ayah';
+  }
+
+  @override
+  String khatmaPageLabel(int page) {
+    return 'Page $page';
+  }
+
+  @override
+  String get khatmaReadWirdAction => 'Read the wird';
+
+  @override
+  String get khatmaFinishedReadingAction => 'I finished reading';
+
+  @override
+  String khatmaPreviousSessionsCount(int count) {
+    return 'Previous sessions: $count';
+  }
+
+  @override
+  String khatmaUpcomingSessionsCount(int count) {
+    return 'Upcoming sessions: $count';
+  }
+
+  @override
+  String get khatmaPreviousSessionsTitle => 'Previous sessions';
+
+  @override
+  String get khatmaUpcomingSessionsTitle => 'Upcoming sessions';
+
+  @override
+  String khatmaSessionNumber(int number) {
+    return 'Session $number';
+  }
+
+  @override
+  String khatmaBehindSchedule(int days) {
+    String _temp0 = intl.Intl.pluralLogic(
+      days,
+      locale: localeName,
+      other: '$days days',
+      one: '1 day',
+    );
+    return 'You are behind by $_temp0';
+  }
+
+  @override
+  String get khatmaOnTrack => 'Your Khatma is on track';
+
+  @override
+  String get khatmaReminderOptInTitle => 'Daily Khatma reminder';
+
+  @override
+  String get khatmaReminderOptInMessage =>
+      'Would you like a daily reminder for your Khatma wird?';
+
+  @override
+  String get khatmaReminderOptInYes => 'Yes';
+
+  @override
+  String get khatmaReminderOptInNo => 'No';
+
+  @override
+  String get khatmaReminderSetTitle => 'Reminder set';
+
+  @override
+  String get khatmaReminderSetMessage =>
+      'A daily Khatma reminder is set. You can change it from this screen.';
+
+  @override
+  String get khatmaReminderContinue => 'Continue';
+
+  @override
+  String get khatmaReminderSettingsTitle => 'Daily reminder';
+
+  @override
+  String get khatmaReminderSettingsSubtitle =>
+      'Remind me to read my wird each day';
+
+  @override
+  String get khatmaReminderTimeLabel => 'Reminder time';
+
+  @override
+  String get khatmaReminderNotificationTitle => 'Time for your Khatma wird';
+
+  @override
+  String get khatmaReminderNotificationBody =>
+      'Open Tilawa and continue your daily reading.';
+
+  @override
+  String get khatmaBaqarahReminderTitle => 'Surah Al-Baqarah reminder';
+
+  @override
+  String get khatmaBaqarahReminderBody =>
+      'Would you like a daily reminder to read Surah Al-Baqarah?';
+
+  @override
+  String get khatmaBaqarahReminderPromptMessage =>
+      'Set a daily reminder to read Surah Al-Baqarah?';
+
+  @override
+  String get khatmaKahfReminderTitle => 'Surah Al-Kahf reminder';
+
+  @override
+  String get khatmaKahfReminderBody => 'Friday reminder to read Surah Al-Kahf.';
+
+  @override
+  String get khatmaKahfReminderPromptMessage =>
+      'Set a Friday reminder to read Surah Al-Kahf?';
+
+  @override
+  String get khatmaSurahRemindersTitle => 'Surah reminders';
+
+  @override
+  String get khatmaSurahRemindersSubtitle =>
+      'Optional reminders for Al-Baqarah and Al-Kahf';
+
+  @override
+  String get khatmaCompletionDuaAction => 'Dua for completing the Quran';
+
+  @override
+  String get khatmaCompletionDuaTitle => 'Dua for completing the Quran';
+
+  @override
+  String get khatmaCompletionShareAction => 'Share';
+
+  @override
+  String khatmaCompletionShareText(String iosStoreUrl, String androidStoreUrl) {
+    return 'I completed my Quranic Khatma with Tilawa.\niOS: $iosStoreUrl\nAndroid: $androidStoreUrl';
+  }
+
+  @override
+  String get khatmaCompletionDoneMessage =>
+      'The current Khatma has been completed.';
+
+  @override
+  String get khatmaDuaBody =>
+      'اللَّهُمَّ ارْحَمْنِي بِالْقُرْآنِ وَاجْعَلْهُ لِي إِمَامًا وَنُورًا وَهُدًى وَرَحْمَةً.\n\nاللَّهُمَّ ذَكِّرْنِي مِنْهُ مَا نَسِيتُ وَعَلِّمْنِي مِنْهُ مَا جَهِلْتُ وَارْزُقْنِي تِلَاوَتَهُ آنَاءَ اللَّيْلِ وَأَطْرَافَ النَّهَارِ وَاجْعَلْهُ لِي حُجَّةً يَا رَبَّ الْعَالَمِينَ.\n\nاللَّهُمَّ أَصْلِحْ لِي دِينِي الَّذِي هُوَ عِصْمَةُ أَمْرِي، وَأَصْلِحْ لِي دُنْيَايَ الَّتِي فِيهَا مَعَاشِي، وَأَصْلِحْ لِي آخِرَتِي الَّتِي فِيهَا مَعَادِي، وَاجْعَلِ الْحَيَاةَ زِيَادَةً لِي فِي كُلِّ خَيْرٍ، وَاجْعَلِ الْمَوْتَ رَاحَةً لِي مِنْ كُلِّ شَرٍّ.\n\nاللَّهُمَّ اجْعَلْ خَيْرَ عُمُرِي آخِرَهُ، وَخَيْرَ عَمَلِي خَوَاتِمَهُ، وَخَيْرَ أَيَّامِي يَوْمَ أَلْقَاكَ فِيهِ.';
 
   @override
   String get khatmaDeletePlanAction => 'Delete plan';
@@ -2270,6 +2483,33 @@ class AppLocalizationsEn extends AppLocalizations {
   String get athkarLeaveConfirm => 'Leave';
 
   @override
+  String athkarRepeatCount(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count times',
+      one: 'Once',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get athkarIndexTitle => 'Athkar index';
+
+  @override
+  String get athkarIndexTooltip => 'Athkar list';
+
+  @override
+  String athkarSearchHint(String categoryName) {
+    return 'Search — $categoryName';
+  }
+
+  @override
+  String athkarPageIndicator(int total, int current) {
+    return '$total | $current';
+  }
+
+  @override
   String get qibla => 'Qibla';
 
   @override
@@ -2496,6 +2736,10 @@ class AppLocalizationsEn extends AppLocalizations {
   @override
   String get offlineDownloadIncompleteError =>
       'This content is not fully downloaded. Please complete the download first.';
+
+  @override
+  String get offlineFileCorruptedError =>
+      'This download is corrupted or incomplete. Please re-download it.';
 
   @override
   String get bookmarks => 'Bookmarks';
@@ -3390,6 +3634,34 @@ class AppLocalizationsEn extends AppLocalizations {
   @override
   String get prayerAlertsPermissionOemAutostartBody =>
       'On this device, enable Autostart for MeMuslim in your phone settings so reminders are not stopped in the background.';
+
+  @override
+  String get prayerAdhanHealthTitle => 'Adhan readiness';
+
+  @override
+  String get prayerAdhanHealthSubtitle =>
+      'Status of permissions required for reliable prayer alerts.';
+
+  @override
+  String get prayerAdhanHealthNotificationsLabel => 'Notifications';
+
+  @override
+  String get prayerAdhanHealthExactAlarmLabel => 'Exact alarms';
+
+  @override
+  String get prayerAdhanHealthBatteryLabel => 'Battery unrestricted';
+
+  @override
+  String get prayerAdhanHealthOemLabel => 'Background access';
+
+  @override
+  String get prayerAdhanHealthFixAction => 'Fix';
+
+  @override
+  String get prayerAdhanHealthOpenSettingsAction => 'Open settings';
+
+  @override
+  String get offlinePlaybackRedownloadAction => 'Re-download';
 
   @override
   String get prayerAlertsPermissionAllow => 'Allow';

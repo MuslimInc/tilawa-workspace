@@ -1,10 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:tilawa/features/smart_khatma/presentation/formatters/khatma_page_range_text.dart';
 import 'package:tilawa/features/smart_khatma/smart_khatma.dart';
 import 'package:tilawa/l10n/generated/app_localizations.dart';
-import 'package:tilawa/l10n/generated/app_localizations_en.dart';
 import 'package:tilawa_core/services/analytics_service.dart';
 import 'package:tilawa_ui_kit/tilawa_ui_kit.dart';
 
@@ -28,7 +26,7 @@ void main() {
   );
 
   testWidgets(
-    'creation review is usable on a narrow screen at 1.4 text scale',
+    'setup wizard then review is usable on a narrow screen at 1.4 text scale',
     (tester) async {
       final semantics = tester.ensureSemantics();
       tester.view.physicalSize = const Size(320, 700);
@@ -59,16 +57,11 @@ void main() {
       );
       await tester.pumpAndSettle();
 
-      expect(find.text('Create Khatma'), findsOneWidget);
-      expect(find.bySemanticsLabel('Create Khatma'), findsWidgets);
-      await tester.tap(find.text('Create Khatma'));
+      expect(find.text('Choose where to start'), findsOneWidget);
+      expect(find.text('Continue'), findsOneWidget);
+      await tester.tap(find.text('Continue'));
       await tester.pumpAndSettle();
-      expect(find.text('Surah range'), findsOneWidget);
-      expect(tester.takeException(), isNull);
-      await tester.tap(find.text('Page range'));
-      await tester.pumpAndSettle();
-      expect(find.text('Start page'), findsOneWidget);
-      expect(find.text('End page'), findsOneWidget);
+      expect(find.textContaining('duration'), findsWidgets);
       expect(tester.takeException(), isNull);
 
       bloc.add(
@@ -95,8 +88,8 @@ void main() {
   );
 
   for (final (name, plan, expected) in <(String, KhatmaPlan, String)>[
-    ('no progress today', _plan(), 'Start today’s Wird'),
-    ('partial progress', _plan(confirmedThrough: 5), 'Resume today’s Wird'),
+    ('no progress today', _plan(), 'Read the wird'),
+    ('partial progress', _plan(confirmedThrough: 5), 'Read the wird'),
     (
       'today completed',
       _plan(confirmedThrough: 21),
@@ -107,20 +100,21 @@ void main() {
       await _pumpHub(tester, _bloc(_Repository(plan)));
 
       expect(find.text(expected), findsOneWidget);
-      expect(
-        find.text(formatKhatmaPageRange(AppLocalizationsEn(), 1, 21)),
-        findsWidgets,
-      );
-      expect(find.textContaining('Expected completion:'), findsOneWidget);
+      expect(find.text('Current wird'), findsOneWidget);
+      expect(find.text('I finished reading'), findsOneWidget);
     });
   }
 
-  testWidgets('full completion exposes both required actions', (tester) async {
+  testWidgets('full completion exposes dua share and start actions', (
+    tester,
+  ) async {
     await _pumpHub(
       tester,
       _bloc(_Repository(_plan(confirmedThrough: 604))),
     );
 
+    expect(find.text('Dua for completing the Quran'), findsOneWidget);
+    expect(find.text('Share'), findsOneWidget);
     expect(find.text('Start another Khatma'), findsOneWidget);
     expect(find.text('Return to Quran'), findsOneWidget);
   });
@@ -132,23 +126,6 @@ void main() {
 
     expect(find.text('Retry'), findsOneWidget);
     expect(find.text('Delete plan'), findsOneWidget);
-  });
-
-  testWidgets('navigation rows keep chevrons only for drill-down actions', (
-    tester,
-  ) async {
-    await _pumpHub(tester, _bloc(_Repository(_plan())));
-
-    expect(find.byIcon(TilawaIcons.chevronRightSmall), findsNWidgets(2));
-  });
-
-  testWidgets('primary navigation row uses strongest title weight', (
-    tester,
-  ) async {
-    await _pumpHub(tester, _bloc(_Repository(_plan())));
-
-    final title = tester.widget<Text>(find.text('Start today’s Wird'));
-    expect(title.style?.fontWeight, FontWeight.w700);
   });
 
   testWidgets('delete confirmation shows delete copy and keeps plan on cancel', (
@@ -173,19 +150,6 @@ void main() {
     expect(repository.plan, isNotNull);
   });
 
-  testWidgets('close dismisses delete confirmation without clearing plan', (
-    tester,
-  ) async {
-    final repository = _Repository(_plan());
-    await _pumpHub(tester, _bloc(repository));
-
-    await _openDeleteConfirmation(tester);
-    await tester.tap(find.byTooltip('Close'));
-    await tester.pumpAndSettle();
-
-    expect(repository.plan, isNotNull);
-  });
-
   testWidgets('confirmed delete clears active plan only', (tester) async {
     final repository = _Repository(_plan());
     await _pumpHub(tester, _bloc(repository));
@@ -197,25 +161,25 @@ void main() {
     expect(repository.plan, isNull);
   });
 
-  testWidgets('Arabic hub renders isolated page range in navigation subtitle', (
-    tester,
-  ) async {
+  testWidgets('Arabic hub renders current wird page labels', (tester) async {
     await _pumpHub(
       tester,
       _bloc(_Repository(_plan(assignmentEndPage: 41))),
       locale: const Locale('ar'),
     );
 
-    expect(
-      find.textContaining('\u20661–41\u2069'),
-      findsWidgets,
-    );
+    expect(find.textContaining('صفحة'), findsWidgets);
+    expect(find.text('الورد الحالي'), findsOneWidget);
   });
 }
 
 Future<void> _openDeleteConfirmation(WidgetTester tester) async {
   final deleteRow = find.text('Delete plan');
-  await tester.ensureVisible(deleteRow);
+  await tester.dragUntilVisible(
+    deleteRow,
+    find.byType(ListView),
+    const Offset(0, -240),
+  );
   await tester.pumpAndSettle();
   await tester.tap(deleteRow);
   await tester.pumpAndSettle();

@@ -11,6 +11,50 @@ abstract final class KhatmaPlanBoundaries {
     return getPageNumber(surah, ayah);
   }
 
+  /// First Mushaf page of [juz] (1–30), or null when invalid.
+  static int? pageForJuz(int juz) {
+    final Juz? part = getJuz(juz);
+    if (part == null) return null;
+    return pageForSurahAyah(part.start.surah, part.start.verse);
+  }
+
+  /// First surah/ayah pair that opens [page], or null when invalid.
+  static ({int surah, int ayah})? firstVerseOnPage(int page) {
+    if (page < KhatmaPlan.firstQuranPage || page > KhatmaPlan.lastQuranPage) {
+      return null;
+    }
+    try {
+      final List<PageSurahEntry> entries = getPageData(page);
+      if (entries.isEmpty) return null;
+      final PageSurahEntry first = entries.first;
+      return (surah: first.surah, ayah: first.start);
+    } on Object {
+      return null;
+    }
+  }
+
+  /// Last surah/ayah pair that closes [page], or null when invalid.
+  static ({int surah, int ayah})? lastVerseOnPage(int page) {
+    if (page < KhatmaPlan.firstQuranPage || page > KhatmaPlan.lastQuranPage) {
+      return null;
+    }
+    try {
+      final List<PageSurahEntry> entries = getPageData(page);
+      if (entries.isEmpty) return null;
+      final PageSurahEntry last = entries.last;
+      return (surah: last.surah, ayah: last.end);
+    } on Object {
+      return null;
+    }
+  }
+
+  static int? juzForPage(int page) {
+    final ({int surah, int ayah})? verse = firstVerseOnPage(page);
+    if (verse == null) return null;
+    final int juz = getJuzNumber(verse.surah, verse.ayah);
+    return juz >= 1 && juz <= 30 ? juz : null;
+  }
+
   static bool isOrderedSurahRange({
     required int startSurah,
     required int startAyah,

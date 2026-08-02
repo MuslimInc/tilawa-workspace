@@ -4,6 +4,7 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:mockito/annotations.dart';
 import 'package:mockito/mockito.dart';
 import 'package:tilawa/features/prayer_times/domain/entities/prayer_settings_entity.dart';
+import 'package:tilawa/features/prayer_times/domain/value_objects/prayer_alarm_capability.dart';
 import 'package:tilawa/features/prayer_times/presentation/bloc/prayer_permissions_cubit.dart';
 import 'package:tilawa/features/prayer_times/presentation/bloc/prayer_times_bloc.dart';
 import 'package:tilawa/features/prayer_times/presentation/widgets/prayer_notification_settings_sheet.dart';
@@ -72,6 +73,32 @@ void main() {
       await tester.pumpAndSettle();
 
       expect(find.text('Done'), findsOneWidget);
+    });
+
+    testWidgets('renders Adhan readiness health rows from capability', (
+      tester,
+    ) async {
+      when(mockPermissionsCubit.state).thenReturn(
+        const PrayerPermissionsState(
+          capability: PrayerAlarmCapability(
+            canScheduleExact: false,
+            hasNotificationPermission: true,
+            isIgnoringBatteryOptimizations: false,
+            oemRequiresAutostart: true,
+          ),
+          hasLocationPermission: true,
+        ),
+      );
+
+      await tester.pumpWidget(buildSubject());
+      await tester.pumpAndSettle();
+
+      expect(find.text('Adhan readiness'), findsOneWidget);
+      expect(find.text('Exact alarms'), findsOneWidget);
+      expect(find.text('Battery unrestricted'), findsOneWidget);
+      expect(find.text('Background access'), findsOneWidget);
+      expect(find.text('Fix'), findsWidgets);
+      expect(find.text('Open settings'), findsWidgets);
     });
   });
 }

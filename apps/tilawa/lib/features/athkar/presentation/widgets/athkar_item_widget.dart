@@ -5,21 +5,17 @@ import 'package:tilawa/core/extensions.dart';
 import 'package:tilawa_ui_kit/tilawa_ui_kit.dart';
 
 import '../../domain/entities/athkar_item.dart';
-import 'item_count_widget.dart';
 
+/// Content-first Athkar reading page: text, reference, repeat label.
 class AthkarItemWidget extends StatefulWidget {
   const AthkarItemWidget({
     super.key,
     required this.item,
-    required this.currentCount,
     required this.onTap,
-    required this.onReset,
   });
 
   final AthkarItem item;
-  final int currentCount;
   final VoidCallback onTap;
-  final VoidCallback onReset;
 
   @override
   State<AthkarItemWidget> createState() => _AthkarItemWidgetState();
@@ -35,6 +31,12 @@ class _AthkarItemWidgetState extends State<AthkarItemWidget> {
     _scrollController = ScrollController();
   }
 
+  @override
+  void dispose() {
+    _scrollController.dispose();
+    super.dispose();
+  }
+
   void _handleDhikrTap() {
     setState(() {
       _tapFeedbackGeneration++;
@@ -44,27 +46,14 @@ class _AthkarItemWidgetState extends State<AthkarItemWidget> {
   }
 
   @override
-  void dispose() {
-    _scrollController.dispose();
-    super.dispose();
-  }
-
-  @override
   Widget build(BuildContext context) {
     final ThemeData theme = Theme.of(context);
     final MeMuslimDesignTokens tokens = theme.tokens;
     final ColorScheme colorScheme = theme.colorScheme;
-    final double bottomInset = context.systemBottomSafeArea;
-    final bool isDone = widget.currentCount == 0;
-    final bool canReset = widget.currentCount != widget.item.count;
+    final String reference = widget.item.reference.trim();
 
     return Padding(
-      padding: EdgeInsets.fromLTRB(
-        tokens.spaceLarge,
-        tokens.spaceSmall,
-        tokens.spaceLarge,
-        tokens.spaceMedium + bottomInset,
-      ),
+      padding: EdgeInsets.symmetric(horizontal: tokens.spaceLarge),
       child: Center(
         child: ConstrainedBox(
           constraints: BoxConstraints(
@@ -74,17 +63,9 @@ class _AthkarItemWidgetState extends State<AthkarItemWidget> {
             crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
               Expanded(
-                child: _AthkarDhikrTapCard(
+                child: _AthkarDhikrTapSurface(
                   tapFeedbackGeneration: _tapFeedbackGeneration,
-                  borderRadius: tokens.radiusExtraLarge,
                   onTap: _handleDhikrTap,
-                  backgroundColor: colorScheme.surface,
-                  splashColor: colorScheme.primary.withValues(
-                    alpha: tokens.opacityMedium,
-                  ),
-                  highlightColor: colorScheme.primary.withValues(
-                    alpha: tokens.opacitySubtle,
-                  ),
                   child: _AthkarDhikrText(
                     text: widget.item.textAr,
                     scrollController: _scrollController,
@@ -95,13 +76,31 @@ class _AthkarItemWidgetState extends State<AthkarItemWidget> {
                   ),
                 ),
               ),
+              if (reference.isNotEmpty) ...[
+                SizedBox(height: tokens.spaceMedium),
+                Text(
+                  '«$reference»',
+                  textDirection: TextDirection.rtl,
+                  textAlign: TextAlign.center,
+                  style: theme.textTheme.bodyMedium?.copyWith(
+                    color: colorScheme.primary,
+                    fontWeight: FontWeight.w600,
+                  ),
+                ),
+              ],
               SizedBox(height: tokens.spaceMedium),
-              _AthkarCountFooter(
-                item: widget.item,
-                currentCount: widget.currentCount,
-                isDone: isDone,
-                canReset: canReset,
-                onReset: widget.onReset,
+              TilawaDivider(
+                height: tokens.borderWidthThin,
+                color: colorScheme.outlineVariant,
+              ),
+              SizedBox(height: tokens.spaceMedium),
+              Text(
+                context.l10n.athkarRepeatCount(widget.item.count),
+                textAlign: TextAlign.center,
+                style: theme.textTheme.titleMedium?.copyWith(
+                  color: colorScheme.onSurface,
+                  fontWeight: FontWeight.w500,
+                ),
               ),
             ],
           ),
@@ -111,90 +110,75 @@ class _AthkarItemWidgetState extends State<AthkarItemWidget> {
   }
 }
 
-/// Full-card tap target via [TilawaCard.onTap], plus lighting flash and scale.
-class _AthkarDhikrTapCard extends StatelessWidget {
-  const _AthkarDhikrTapCard({
+/// Full-area tap target with a light flash on each count.
+class _AthkarDhikrTapSurface extends StatelessWidget {
+  const _AthkarDhikrTapSurface({
     required this.tapFeedbackGeneration,
-    required this.borderRadius,
     required this.onTap,
-    required this.backgroundColor,
-    required this.splashColor,
-    required this.highlightColor,
     required this.child,
   });
 
   final int tapFeedbackGeneration;
-  final double borderRadius;
   final VoidCallback onTap;
-  final Color backgroundColor;
-  final Color splashColor;
-  final Color highlightColor;
   final Widget child;
 
   @override
   Widget build(BuildContext context) {
-    final MeMuslimDesignTokens tokens = Theme.of(context).tokens;
-    final BorderRadius radius = BorderRadius.circular(borderRadius);
+    final ThemeData theme = Theme.of(context);
+    final MeMuslimDesignTokens tokens = theme.tokens;
+    final ColorScheme colorScheme = theme.colorScheme;
+    final BorderRadius radius = BorderRadius.circular(tokens.radiusLarge);
 
     return ClipRRect(
       borderRadius: radius,
       child: TweenAnimationBuilder<double>(
         key: ValueKey<int>(tapFeedbackGeneration),
-        tween: Tween<double>(begin: 0.992, end: 1),
+        tween: Tween<double>(begin: 0.995, end: 1),
         duration: tokens.durationFast,
         curve: Curves.easeOutCubic,
         builder: (context, scale, animatedChild) {
           return Transform.scale(scale: scale, child: animatedChild);
         },
-        child: SizedBox(
-          width: double.infinity,
-          height: double.infinity,
-          child: Stack(
-            fit: StackFit.expand,
-            children: [
-              Positioned.fill(
-                child: TilawaCard(
-                  borderRadius: borderRadius,
-                  surface: TilawaCardSurface.raised,
-                  backgroundColor: backgroundColor,
-                  padding: EdgeInsets.zero,
-                  child: SizedBox.expand(
-                    child: Material(
-                      type: MaterialType.transparency,
-                      child: InkWell(
-                        onTap: onTap,
-                        borderRadius: radius,
-                        splashColor: splashColor,
-                        highlightColor: highlightColor,
-                        child: Padding(
-                          padding: EdgeInsets.symmetric(
-                            horizontal: tokens.spaceLarge,
-                            vertical: tokens.spaceExtraLarge,
-                          ),
-                          child: SizedBox.expand(child: child),
-                        ),
-                      ),
+        child: Stack(
+          fit: StackFit.expand,
+          children: [
+            Positioned.fill(
+              child: Material(
+                type: MaterialType.transparency,
+                child: InkWell(
+                  onTap: onTap,
+                  borderRadius: radius,
+                  splashColor: colorScheme.primary.withValues(
+                    alpha: tokens.opacityMedium,
+                  ),
+                  highlightColor: colorScheme.primary.withValues(
+                    alpha: tokens.opacitySubtle,
+                  ),
+                  child: Padding(
+                    padding: EdgeInsets.symmetric(
+                      horizontal: tokens.spaceSmall,
+                      vertical: tokens.spaceMedium,
                     ),
+                    child: child,
                   ),
                 ),
               ),
-              Positioned.fill(
-                child: IgnorePointer(
-                  child: _AthkarTapFlash(
-                    generation: tapFeedbackGeneration,
-                    borderRadius: borderRadius,
-                  ),
+            ),
+            Positioned.fill(
+              child: IgnorePointer(
+                child: _AthkarTapFlash(
+                  generation: tapFeedbackGeneration,
+                  borderRadius: tokens.radiusLarge,
                 ),
               ),
-            ],
-          ),
+            ),
+          ],
         ),
       ),
     );
   }
 }
 
-/// Full-card lighting pulse drawn on each tap (visual only; taps pass through).
 class _AthkarTapFlash extends StatelessWidget {
   const _AthkarTapFlash({
     required this.generation,
@@ -229,98 +213,11 @@ class _AthkarTapFlash extends StatelessWidget {
                     color: colorScheme.primary.withValues(
                       alpha: tokens.opacitySubtle * intensity,
                     ),
-                    gradient: RadialGradient(
-                      center: Alignment.center,
-                      radius: 1.25,
-                      colors: [
-                        colorScheme.primary.withValues(
-                          alpha: tokens.opacityMedium * intensity,
-                        ),
-                        colorScheme.primary.withValues(
-                          alpha: tokens.opacitySubtle * 0.35 * intensity,
-                        ),
-                      ],
-                    ),
                   ),
                 );
               },
             ),
     );
-  }
-}
-
-/// Count ring centered with reset icon in the trailing [end] slot (RTL-aware).
-class _AthkarCountFooter extends StatelessWidget {
-  const _AthkarCountFooter({
-    required this.item,
-    required this.currentCount,
-    required this.isDone,
-    required this.canReset,
-    required this.onReset,
-  });
-
-  final AthkarItem item;
-  final int currentCount;
-  final bool isDone;
-  final bool canReset;
-  final VoidCallback onReset;
-
-  @override
-  Widget build(BuildContext context) {
-    final double sideSlotWidth = athkarCountRingLayoutSize(context);
-
-    final Widget resetControl = TilawaIconActionButton(
-      icon: Icons.restart_alt_rounded,
-      tooltip: context.l10n.reset,
-      semanticLabel: context.l10n.reset,
-      enabled: canReset,
-      onTap: () => _confirmAthkarReset(context, onReset),
-    );
-
-    return Align(
-      alignment: Alignment.center,
-      child: Row(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          SizedBox(width: sideSlotWidth),
-          Semantics(
-            label: isDone ? null : '$currentCount / ${item.count}',
-            child: ItemCountWidget(
-              item: item,
-              currentCount: currentCount,
-              isDone: isDone,
-              showProgressLabel: false,
-            ),
-          ),
-          SizedBox(
-            width: sideSlotWidth,
-            child: Align(
-              alignment: AlignmentDirectional.centerEnd,
-              child: resetControl,
-            ),
-          ),
-        ],
-      ),
-    );
-  }
-}
-
-Future<void> _confirmAthkarReset(
-  BuildContext context,
-  VoidCallback onReset,
-) async {
-  final bool? confirmed = await showTilawaConfirmSheet(
-    context: context,
-    title: context.l10n.reset,
-    message: context.l10n.athkarResetConfirmationMessage,
-    confirmLabel: context.l10n.reset,
-    cancelLabel: context.l10n.cancel,
-    confirmVariant: TilawaButtonVariant.primary,
-    onConfirm: () => Navigator.of(context).pop(true),
-    onClose: () => Navigator.of(context).pop(false),
-  );
-  if (confirmed == true && context.mounted) {
-    onReset();
   }
 }
 
@@ -353,11 +250,13 @@ class _AthkarDhikrText extends StatelessWidget {
               constraints: BoxConstraints(
                 minHeight: constraints.maxHeight,
               ),
-              child: Text(
-                text,
-                textDirection: TextDirection.rtl,
-                textAlign: TextAlign.center,
-                style: textStyle,
+              child: Center(
+                child: Text(
+                  text,
+                  textDirection: TextDirection.rtl,
+                  textAlign: TextAlign.center,
+                  style: textStyle,
+                ),
               ),
             ),
           ),

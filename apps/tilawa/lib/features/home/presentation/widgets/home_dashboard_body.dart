@@ -18,7 +18,7 @@ import 'home_quick_tools_section.dart';
 
 /// Home body under the immersive header zone — clear sections, no extra chrome.
 ///
-/// Order: primary worship → urgent Learn → soft Learn →
+/// Order: primary worship → Quran Khatma → urgent Learn → soft Learn →
 /// tools → More → listening → inspiration → closing mark.
 /// Greeting lives in the header zone (see [HomeNextPrayerTime]).
 class HomeDashboardBody extends StatelessWidget {
@@ -43,13 +43,13 @@ class HomeDashboardBody extends StatelessWidget {
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
         const HomePrimaryActionsSection(),
-        SizedBox(height: sectionGap),
-        const HomeLearningUrgentSection(),
-        const HomeLearningSoftPrompt(),
         if (isSmartKhatmaEnabled()) ...[
           SizedBox(height: zoneGap),
           const SmartKhatmaHomeEntryCard(),
         ],
+        SizedBox(height: sectionGap),
+        const HomeLearningUrgentSection(),
+        const HomeLearningSoftPrompt(),
         SizedBox(height: sectionGap + tokens.spaceExtraSmall),
         const HomeQuickToolsSection(),
         DeferredAfterFirstFrame(

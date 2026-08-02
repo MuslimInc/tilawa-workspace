@@ -21,8 +21,9 @@ class HomeDashboardIconWell extends StatelessWidget {
   /// Well width/height. Defaults to [TilawaDesignTokens.iconBoxSize].
   final double? extent;
 
-  /// Accent wash on the well fill. Parent Home cards are white surface;
-  /// the well carries the soft category tint.
+  /// Well fill opacity. Use [HomeFeaturePastel.solidIconWellFillAlpha] for
+  /// Ngajii-style solid chips on white cards, or [HomeFeaturePastel.iconWellFillAlpha]
+  /// for soft tints (Learn / resume).
   final double fillAlpha;
 
   @override

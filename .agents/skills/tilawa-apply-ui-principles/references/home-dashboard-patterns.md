@@ -31,18 +31,19 @@ Match this order everywhere (slivers + body):
 |---|--------|-------------------|
 | 1 | Sliver — Now | `HomeNextPrayerTime` (header zone: greeting, prayer, strip) |
 | 2 | Body | `HomePrimaryActionsSection` (Quran / Athkar) |
-| 3 | Body | `HomeLearningUrgentSection` → live session / pending / revision only |
-| 4 | Body | `HomeLearningSoftPrompt` → interest / browse (below worship) |
-| 5 | Body | `HomeQuickToolsSection` |
-| 6 | Body | `TodayPlanCard` (optional, deferred) |
-| 7 | Body | `HomeMoreActionsGroup` (deferred) |
-| 8 | Body | `HomeListeningResumeRow` (conditional, deferred) |
-| 9 | Body | `HomeDailyInspirationSection` (deferred) |
-| 10 | Body | `_HomeDashboardClosingMark` (deferred) |
+| 3 | Body | `SmartKhatmaHomeEntryCard` (flagged; section + featured CTA) |
+| 4 | Body | `HomeLearningUrgentSection` → live session / pending / revision only |
+| 5 | Body | `HomeLearningSoftPrompt` → interest / browse (below worship) |
+| 6 | Body | `HomeQuickToolsSection` |
+| 7 | Body | `TodayPlanCard` (optional, deferred) |
+| 8 | Body | `HomeMoreActionsGroup` (deferred) |
+| 9 | Body | `HomeListeningResumeRow` (conditional, deferred) |
+| 10 | Body | `HomeDailyInspirationSection` (deferred) |
+| 11 | Body | `_HomeDashboardClosingMark` (deferred) |
 
-Items 6–10 render inside `DeferredAfterFirstFrame` except primary actions,
-urgent Learn, soft Learn prompt, and quick tools, which load immediately
-under the prayer hero.
+Items 7–11 render inside `DeferredAfterFirstFrame` except primary actions,
+Khatma (when enabled), urgent Learn, soft Learn prompt, and quick tools,
+which load immediately under the prayer hero.
 
 **Spacing rhythm** (do not change casually without cause): within a zone
 `tokens.spaceLarge`; between unrelated zones `tokens.spaceExtraLarge`; More
@@ -50,6 +51,19 @@ uses `HomeDashboardSection(compact: true)` for tighter subtitle/content gaps
 only — section titles share one `titleLarge` style across zones; section
 subtitles use `bodyLarge`. More list rows use ~88dp min height
 (`minInteractiveDimension * 2`) with `titleLarge` + `bodyLarge` copy.
+
+**Card color ladder** (`HomeFeaturePastel` — Ngajii / Dribbble contrast):
+
+| Tier | Surface | Notes |
+|------|---------|--------|
+| Prayer hero | Solid primary | Strongest green on viewport |
+| Mushaf / Athkar | Elevated white | Solid primary icon well + onPrimary glyph |
+| Khatma | Mint-to-white header + white action area | One-line metric + compact progress pill + green CTA |
+| Quick tools | Elevated white | Solid per-feature icon well + onPrimary glyph |
+| More list | Elevated white | Hairline rows |
+
+Do **not** mint-wash every Home card — that flattens hierarchy. Keep solid green
+on hero, icon wells, progress, and primary CTAs.
 
 This is **not** a multi-tab launcher grid. Preserve the calm, polished,
 RTL-first dashboard — two featured primary tiles, one compact tools row, flat
@@ -74,6 +88,7 @@ Scaffold
             ├── HomeDashboardContentSliver (rounded sheet below hero fade)
                 └── HomeDashboardBody
                     ├── HomePrimaryActionsSection
+                    ├── [flag] SmartKhatmaHomeEntryCard (Quran Khatma section)
                     ├── HomeLearningUrgentSection (session / pending / revision)
                     ├── HomeLearningSoftPrompt (interest / browse)
                     ├── HomeQuickToolsSection
@@ -84,8 +99,9 @@ Scaffold
                     └── _HomeDashboardClosingMark
 ```
 Deferred body content uses `DeferredAfterFirstFrame` for first-frame perf.
-Above-deferred: primary + urgent/soft Learn + quick tools load immediately
-under the header zone. Greeting lives in the header, not the body.
+Above-deferred: primary + Khatma (when enabled) + urgent/soft Learn + quick
+tools load immediately under the header zone. Greeting lives in the header,
+not the body.
 
 ---
 
@@ -95,6 +111,7 @@ When `quranSessionsFeatureConfig().quranSessionsEnabled`:
 
 - Prayer context, metrics, and strip scroll away; only the profile row pins
 - Urgent + soft Learn cards live in the body after primary worship tiles
+  (and after Quran Khatma when the Smart Khatma flag is on)
 
 When the flag is off:
 
@@ -256,7 +273,8 @@ replace the body with patterns from superseded redesign docs.
 ## Feature flags
 
 - `isTodayPlanEnabled()` → `TodayPlanCard`
-- `isSmartKhatmaEnabled()` → Smart Khatma row in More
+- `isSmartKhatmaEnabled()` → `SmartKhatmaHomeEntryCard` under primary actions
+  (Khatma stays on its own featured card; Mushaf secondary stays Surah Index)
 - `quranSessionsFeatureConfig().quranSessionsEnabled` → urgent Learn sliver + soft prompt
 
 ---
@@ -281,10 +299,6 @@ flutter test test/features/home/
 
 Manual: light + dark, RTL Arabic, text scale 1.4, pinned profile row, tutor pin when
 flag on.
-
-
-
-
 
 
 
