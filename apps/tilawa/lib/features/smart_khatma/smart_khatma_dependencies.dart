@@ -1,15 +1,20 @@
 import 'dart:io';
 
 import 'package:flutter/services.dart';
+import 'package:get_it/get_it.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:tilawa/core/di/get_it_idempotent.dart';
 import 'package:tilawa/core/di/injection.dart';
+import 'package:tilawa/core/services/navigation_service.dart';
 import 'package:tilawa/features/quran_reader/domain/repositories/quran_reader_repository.dart';
 import 'package:tilawa_core/services/analytics_service.dart';
+import 'package:tilawa_core/services/interfaces/notification_dispatcher_interface.dart';
 
 import '../islamic_widgets/app/wird_progress_widget_sync_service.dart';
 import '../islamic_widgets/data/widget_snapshot_bridge.dart';
 
 import 'data/datasources/khatma_plan_local_datasource.dart';
+import 'data/khatma_reminder_notification_service.dart';
 import 'data/repositories/khatma_plan_repository_impl.dart';
 import 'domain/repositories/khatma_plan_repository.dart';
 import 'domain/entities/khatma_plan.dart';
@@ -27,6 +32,16 @@ import 'smart_khatma_feature_flags.dart';
 
 final class SmartKhatmaDependencies {
   const SmartKhatmaDependencies._();
+
+  static void register(GetIt getIt) {
+    getIt.registerLazySingletonIfAbsent<KhatmaReminderNotificationService>(
+      () => KhatmaReminderNotificationService(
+        getIt<SharedPreferencesAsync>(),
+        getIt<INotificationDispatcher>(),
+        getIt<NavigationService>(),
+      ),
+    );
+  }
 
   static KhatmaPlanRepository repository() {
     return KhatmaPlanRepositoryImpl(

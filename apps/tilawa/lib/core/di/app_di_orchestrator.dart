@@ -17,6 +17,7 @@ import 'package:tilawa/features/theme/di/theme_di.dart';
 import 'package:tilawa/core/di/core_services_di.dart';
 import 'package:tilawa/features/app_review/di/app_review_di.dart';
 import 'package:tilawa/features/athkar/di/athkar_di.dart';
+import 'package:tilawa/features/smart_khatma/smart_khatma_dependencies.dart';
 import 'package:tilawa/features/audio_player/di/audio_player_di.dart';
 import 'package:tilawa/features/daily_guidance/di/daily_guidance_di.dart';
 import 'package:tilawa/features/downloads/di/downloads_di.dart';
@@ -63,6 +64,7 @@ void registerManualDependencyGraph(GetIt getIt) {
   CoreDi.register(getIt);
   AppReviewDi.register(getIt);
   AthkarDi.register(getIt);
+  SmartKhatmaDependencies.register(getIt);
   AudioPlayerDi.register(getIt);
   DailyGuidanceDi.register(getIt);
   DownloadsDi.register(getIt);

@@ -1173,6 +1173,10 @@ class AppStartupTasks {
           await tasbeehReminderScheduler.initialize();
         }
 
+        if (getIt.isRegistered<KhatmaReminderNotificationService>()) {
+          await getIt<KhatmaReminderNotificationService>().initialize();
+        }
+
         logger.d(
           '[AppLaunch] source=AppStartupTasks.initializeNotificationHandlers: Notification handlers initialized at (${DateTime.now()})',
         );
