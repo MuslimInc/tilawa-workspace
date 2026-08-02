@@ -3234,6 +3234,10 @@
     "@offlineDownloadIncompleteError": {
         "description": "Error shown when download exists but is not completed"
     },
+    "offlineFileCorruptedError": "This download is corrupted or incomplete. Please re-download it.",
+    "@offlineFileCorruptedError": {
+        "description": "Shown when a local Quran audio file fails size validation before offline playback."
+    },
     "bookmarks": "Bookmarks",
     "@bookmarks": {
         "description": "Bookmarks screen title"
@@ -4419,6 +4423,42 @@
     "prayerAlertsPermissionOemAutostartBody": "On this device, enable Autostart for MeMuslim in your phone settings so reminders are not stopped in the background.",
     "@prayerAlertsPermissionOemAutostartBody": {
         "description": "Body for OEM autostart guidance step"
+    },
+    "prayerAdhanHealthTitle": "Adhan readiness",
+    "@prayerAdhanHealthTitle": {
+        "description": "Title for the read-only Adhan system readiness card in prayer notification settings."
+    },
+    "prayerAdhanHealthSubtitle": "Status of permissions required for reliable prayer alerts.",
+    "@prayerAdhanHealthSubtitle": {
+        "description": "Subtitle under the Adhan readiness card."
+    },
+    "prayerAdhanHealthNotificationsLabel": "Notifications",
+    "@prayerAdhanHealthNotificationsLabel": {
+        "description": "Label for notification permission readiness row."
+    },
+    "prayerAdhanHealthExactAlarmLabel": "Exact alarms",
+    "@prayerAdhanHealthExactAlarmLabel": {
+        "description": "Label for exact-alarm readiness row."
+    },
+    "prayerAdhanHealthBatteryLabel": "Battery unrestricted",
+    "@prayerAdhanHealthBatteryLabel": {
+        "description": "Label for battery optimization readiness row."
+    },
+    "prayerAdhanHealthOemLabel": "Background access",
+    "@prayerAdhanHealthOemLabel": {
+        "description": "Label for OEM autostart readiness row."
+    },
+    "prayerAdhanHealthFixAction": "Fix",
+    "@prayerAdhanHealthFixAction": {
+        "description": "Action to request a missing Adhan-related permission."
+    },
+    "prayerAdhanHealthOpenSettingsAction": "Open settings",
+    "@prayerAdhanHealthOpenSettingsAction": {
+        "description": "Action to open system app settings for battery or OEM guidance."
+    },
+    "offlinePlaybackRedownloadAction": "Re-download",
+    "@offlinePlaybackRedownloadAction": {
+        "description": "Toast action that opens Downloads after a missing or corrupted offline file."
     },
     "prayerAlertsPermissionAllow": "Allow",
     "@prayerAlertsPermissionAllow": {

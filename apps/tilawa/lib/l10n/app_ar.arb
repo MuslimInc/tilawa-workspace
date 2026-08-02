@@ -2635,6 +2635,10 @@
     "@offlineDownloadIncompleteError": {
         "description": "Error shown when download exists but is not completed"
     },
+    "offlineFileCorruptedError": "هذا التنزيل تالف أو غير مكتمل. يرجى إعادة تنزيله.",
+    "@offlineFileCorruptedError": {
+        "description": "Error shown when downloaded file fails size validation"
+    },
     "bookmarks": "العلامات المرجعية",
     "@bookmarks": {
         "description": "Bookmarks screen title"
@@ -3790,6 +3794,15 @@
     "prayerAlertsPermissionBatteryBody": "استثنِ أنا مسلم من تحسين البطارية حتى لا تتأخر تذكيرات الصلاة ليلاً.",
     "prayerAlertsPermissionOemAutostartTitle": "العمل في الخلفية",
     "prayerAlertsPermissionOemAutostartBody": "في هذا الجهاز، فعّل التشغيل التلقائي لتطبيق أنا مسلم من إعدادات الهاتف حتى لا تتوقف التذكيرات في الخلفية.",
+    "prayerAdhanHealthTitle": "جاهزية الأذان",
+    "prayerAdhanHealthSubtitle": "حالة الأذونات اللازمة لتنبيهات الصلاة الموثوقة.",
+    "prayerAdhanHealthNotificationsLabel": "الإشعارات",
+    "prayerAdhanHealthExactAlarmLabel": "المنبّهات الدقيقة",
+    "prayerAdhanHealthBatteryLabel": "البطارية غير مقيّدة",
+    "prayerAdhanHealthOemLabel": "التشغيل في الخلفية",
+    "prayerAdhanHealthFixAction": "إصلاح",
+    "prayerAdhanHealthOpenSettingsAction": "فتح الإعدادات",
+    "offlinePlaybackRedownloadAction": "إعادة التنزيل",
     "prayerAlertsPermissionAllow": "السماح",
     "prayerAlertsPermissionSkip": "تخطي",
     "prayerAlertsPermissionContinue": "متابعة",

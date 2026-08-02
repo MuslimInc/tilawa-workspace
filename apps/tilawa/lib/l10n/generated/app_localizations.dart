@@ -4717,6 +4717,12 @@ abstract class AppLocalizations {
   /// **'This content is not fully downloaded. Please complete the download first.'**
   String get offlineDownloadIncompleteError;
 
+  /// Shown when a local Quran audio file fails size validation before offline playback.
+  ///
+  /// In en, this message translates to:
+  /// **'This download is corrupted or incomplete. Please re-download it.'**
+  String get offlineFileCorruptedError;
+
   /// Bookmarks screen title
   ///
   /// In en, this message translates to:
@@ -6330,6 +6336,60 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'On this device, enable Autostart for MeMuslim in your phone settings so reminders are not stopped in the background.'**
   String get prayerAlertsPermissionOemAutostartBody;
+
+  /// Title for the read-only Adhan system readiness card in prayer notification settings.
+  ///
+  /// In en, this message translates to:
+  /// **'Adhan readiness'**
+  String get prayerAdhanHealthTitle;
+
+  /// Subtitle under the Adhan readiness card.
+  ///
+  /// In en, this message translates to:
+  /// **'Status of permissions required for reliable prayer alerts.'**
+  String get prayerAdhanHealthSubtitle;
+
+  /// Label for notification permission readiness row.
+  ///
+  /// In en, this message translates to:
+  /// **'Notifications'**
+  String get prayerAdhanHealthNotificationsLabel;
+
+  /// Label for exact-alarm readiness row.
+  ///
+  /// In en, this message translates to:
+  /// **'Exact alarms'**
+  String get prayerAdhanHealthExactAlarmLabel;
+
+  /// Label for battery optimization readiness row.
+  ///
+  /// In en, this message translates to:
+  /// **'Battery unrestricted'**
+  String get prayerAdhanHealthBatteryLabel;
+
+  /// Label for OEM autostart readiness row.
+  ///
+  /// In en, this message translates to:
+  /// **'Background access'**
+  String get prayerAdhanHealthOemLabel;
+
+  /// Action to request a missing Adhan-related permission.
+  ///
+  /// In en, this message translates to:
+  /// **'Fix'**
+  String get prayerAdhanHealthFixAction;
+
+  /// Action to open system app settings for battery or OEM guidance.
+  ///
+  /// In en, this message translates to:
+  /// **'Open settings'**
+  String get prayerAdhanHealthOpenSettingsAction;
+
+  /// Toast action that opens Downloads after a missing or corrupted offline file.
+  ///
+  /// In en, this message translates to:
+  /// **'Re-download'**
+  String get offlinePlaybackRedownloadAction;
 
   /// Primary action on prayer alerts permission setup screens
   ///

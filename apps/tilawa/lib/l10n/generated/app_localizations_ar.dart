@@ -2712,6 +2712,10 @@ class AppLocalizationsAr extends AppLocalizations {
       'لم يكتمل تنزيل هذا المحتوى. يرجى إكمال التنزيل أولاً.';
 
   @override
+  String get offlineFileCorruptedError =>
+      'هذا التنزيل تالف أو غير مكتمل. يرجى إعادة تنزيله.';
+
+  @override
   String get bookmarks => 'العلامات المرجعية';
 
   @override
@@ -3605,6 +3609,34 @@ class AppLocalizationsAr extends AppLocalizations {
   @override
   String get prayerAlertsPermissionOemAutostartBody =>
       'في هذا الجهاز، فعّل التشغيل التلقائي لتطبيق أنا مسلم من إعدادات الهاتف حتى لا تتوقف التذكيرات في الخلفية.';
+
+  @override
+  String get prayerAdhanHealthTitle => 'جاهزية الأذان';
+
+  @override
+  String get prayerAdhanHealthSubtitle =>
+      'حالة الأذونات اللازمة لتنبيهات الصلاة الموثوقة.';
+
+  @override
+  String get prayerAdhanHealthNotificationsLabel => 'الإشعارات';
+
+  @override
+  String get prayerAdhanHealthExactAlarmLabel => 'المنبّهات الدقيقة';
+
+  @override
+  String get prayerAdhanHealthBatteryLabel => 'البطارية غير مقيّدة';
+
+  @override
+  String get prayerAdhanHealthOemLabel => 'التشغيل في الخلفية';
+
+  @override
+  String get prayerAdhanHealthFixAction => 'إصلاح';
+
+  @override
+  String get prayerAdhanHealthOpenSettingsAction => 'فتح الإعدادات';
+
+  @override
+  String get offlinePlaybackRedownloadAction => 'إعادة التنزيل';
 
   @override
   String get prayerAlertsPermissionAllow => 'السماح';

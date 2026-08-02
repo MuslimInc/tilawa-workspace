@@ -2738,6 +2738,10 @@ class AppLocalizationsEn extends AppLocalizations {
       'This content is not fully downloaded. Please complete the download first.';
 
   @override
+  String get offlineFileCorruptedError =>
+      'This download is corrupted or incomplete. Please re-download it.';
+
+  @override
   String get bookmarks => 'Bookmarks';
 
   @override
@@ -3630,6 +3634,34 @@ class AppLocalizationsEn extends AppLocalizations {
   @override
   String get prayerAlertsPermissionOemAutostartBody =>
       'On this device, enable Autostart for MeMuslim in your phone settings so reminders are not stopped in the background.';
+
+  @override
+  String get prayerAdhanHealthTitle => 'Adhan readiness';
+
+  @override
+  String get prayerAdhanHealthSubtitle =>
+      'Status of permissions required for reliable prayer alerts.';
+
+  @override
+  String get prayerAdhanHealthNotificationsLabel => 'Notifications';
+
+  @override
+  String get prayerAdhanHealthExactAlarmLabel => 'Exact alarms';
+
+  @override
+  String get prayerAdhanHealthBatteryLabel => 'Battery unrestricted';
+
+  @override
+  String get prayerAdhanHealthOemLabel => 'Background access';
+
+  @override
+  String get prayerAdhanHealthFixAction => 'Fix';
+
+  @override
+  String get prayerAdhanHealthOpenSettingsAction => 'Open settings';
+
+  @override
+  String get offlinePlaybackRedownloadAction => 'Re-download';
 
   @override
   String get prayerAlertsPermissionAllow => 'Allow';
