@@ -12,8 +12,39 @@ the changelog for full engineering detail.
 
 | Field | Value |
 |-------|--------|
+| Version | **2.2.5** (build **99**) |
+| Git tag | `v2.2.5+99` (pending) |
+| Date | 2026-08-03 |
+| Track | Both (Google Play + App Store) — Preparing |
+
+### What's new (en-US) — copy for Play Console
+
+```text
+• Al-Khatmah — clearer reading plans, daily reminders, and Home progress
+• Redesigned Athkar reading sessions with easier progress restore
+• Follow us — Facebook, Instagram, and YouTube from Settings
+• More reliable prayer alarms after time-zone changes
+• Startup retry if the app fails to finish launching
+```
+
+### ما الجديد (ar) — نص متجر Play
+
+```text
+• الختمة — خطط أوضح وتذكيرات يومية وتقدّم في الرئيسية
+• جلسات أذكار أوضح مع استئناف أسهل للتقدّم
+• تابعنا — فيسبوك وإنستغرام ويوتيوب من الإعدادات
+• منبّهات صلاة أدق بعد تغيير المنطقة الزمنية
+• إعادة محاولة عند فشل اكتمال التشغيل
+```
+
+---
+
+## Previous current release (2.2.4+98)
+
+| Field | Value |
+|-------|--------|
 | Version | **2.2.4** (build **98**) |
-| Git tag | `v2.2.4+98` (pending) |
+| Git tag | `v2.2.4+98` (pending — superseded by 2.2.5+99) |
 | Date | 2026-08-01 |
 | Track | Google Play Production — Preparing |
 
@@ -35,7 +66,7 @@ the changelog for full engineering detail.
 
 ---
 
-## Previous current release (2.2.3+96)
+## Previous release (2.2.3+96)
 
 | Field | Value |
 |-------|--------|
