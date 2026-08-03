@@ -7,6 +7,43 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [2.2.5+99] - 2026-08-03 [Both]
+
+### Added
+
+- **Smart Khatma (Al-Khatmah)**: Full hub and setup journey — session schedule
+  slicer, daily/Surah reminders with deep links, completion Dua/share, and a
+  featured Home progress card with contextual Start/Continue CTAs.
+- **Athkar**: Redesigned reading-session chrome (progress, TOC sheet, floating
+  reset/counter/share bar) with clearer dhikr card surfaces.
+- **Settings**: Follow us links for Facebook, Instagram, and YouTube.
+
+### Changed
+
+- **Quran reader / Mushaf**: Soft ayah-style paper canvas; Khatma Save Progress
+  in the nav overlay when Surah index is hidden so actions never cover ayahs.
+- **Home**: Clearer dashboard color ladder and denser icon wells; Khatma slot
+  stays under primary actions.
+- **UI kit**: Sticky bottom-sheet chrome under tight heights / IME; tighter
+  settings leading-icon corner radius.
+- **Android**: Bump `compileSdkVersion` to 37.
+
+### Fixed
+
+- **Prayer alarms**: Recalculate pending AlarmManager epochs across boot,
+  package-replace, and time-zone changes so Adhan stays on the correct local
+  prayer.
+- **Bootstrap**: BootGate shows a retry path after critical init failure
+  instead of a stuck splash.
+- **Athkar**: Continue-session from Home and notifications restores today’s
+  progress snapshot.
+- **Quran reader**: Apply persisted last-read page when restoring into the
+  Mushaf host.
+- **UI**: Stop viewport paint crash on null sliver geometry (Sentry
+  `FLUTTER-79`); keep transparent status bar over immersive Home heroes;
+  avoid History/empty-state LayoutBuilder intrinsics crash; stop Khatma
+  save-progress sheet footer overflow.
+
 ## [2.2.4+98] - 2026-08-01 [Google Play Production]
 
 ### Changed
