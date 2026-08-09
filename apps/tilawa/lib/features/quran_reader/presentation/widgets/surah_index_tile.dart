@@ -110,9 +110,13 @@ class SurahIndexTile extends StatelessWidget {
       ],
     );
 
+    final String identifier = 'surah_index_$surahNumber';
+
     if (grouped) {
       return TilawaInteractiveSurface(
         onTap: onTap,
+        semanticsIdentifier: identifier,
+        semanticLabel: englishName,
         child: Padding(
           padding: indexTheme.tilePadding,
           child: row,
@@ -120,12 +124,17 @@ class SurahIndexTile extends StatelessWidget {
       );
     }
 
-    return TilawaCard(
-      onTap: onTap,
-      padding: indexTheme.tilePadding,
-      backgroundColor: colorScheme.surface,
-      borderRadius: tokens.radiusCard,
-      child: row,
+    return Semantics(
+      identifier: identifier,
+      button: true,
+      label: englishName,
+      child: TilawaCard(
+        onTap: onTap,
+        padding: indexTheme.tilePadding,
+        backgroundColor: colorScheme.surface,
+        borderRadius: tokens.radiusCard,
+        child: row,
+      ),
     );
   }
 }

@@ -695,9 +695,11 @@ class _HomeNextPrayerTimeFocus extends StatelessWidget {
 
     return Semantics(
       button: true,
+      identifier: 'home_next_prayer',
       label: context.l10n.nextPrayer,
       child: TilawaInteractiveSurface(
         onTap: onOpenPrayer,
+        semanticsIdentifier: 'home_next_prayer',
         borderRadius: BorderRadius.circular(tokens.radiusLarge),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.center,

@@ -3,6 +3,10 @@
     "maestro": {
       "command": "maestro",
       "args": ["mcp"]
+    },
+    "marionette": {
+      "command": "marionette_mcp",
+      "args": []
     }
   }
 }

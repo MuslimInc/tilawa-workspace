@@ -18,6 +18,7 @@ class HomePrimaryActionTile extends StatelessWidget {
     this.surfaceColor,
     this.secondaryLabel,
     this.onSecondaryTap,
+    this.semanticsIdentifier,
   });
 
   final Widget icon;
@@ -35,6 +36,9 @@ class HomePrimaryActionTile extends StatelessWidget {
   /// Quiet secondary path (e.g. Athkar library). Nested control at card bottom.
   final String? secondaryLabel;
   final VoidCallback? onSecondaryTap;
+
+  /// Maestro / Marionette resource id ([Semantics.identifier]).
+  final String? semanticsIdentifier;
 
   @override
   Widget build(BuildContext context) {
@@ -116,6 +120,7 @@ class HomePrimaryActionTile extends StatelessWidget {
       borderRadius: borderRadius,
       onTap: onTap,
       semanticLabel: label,
+      semanticsIdentifier: semanticsIdentifier,
       stateLayerColor: accent,
       color: surface,
       tier: HomeDashboardElevationTier.primary,

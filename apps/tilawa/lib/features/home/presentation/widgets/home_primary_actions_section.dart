@@ -108,6 +108,7 @@ class _QuranPrimaryTile extends StatelessWidget {
         secondaryLabel: indexSecondaryLabel,
         onSecondaryTap: openIndex,
         onTap: openResume,
+        semanticsIdentifier: 'home_last_read',
       );
     }
 
@@ -127,6 +128,7 @@ class _QuranPrimaryTile extends StatelessWidget {
           secondaryLabel: indexSecondaryLabel,
           onSecondaryTap: openIndex,
           onTap: openResume,
+          semanticsIdentifier: 'home_last_read',
         );
       },
     );
@@ -182,6 +184,7 @@ class _AthkarPrimaryTileState extends State<_AthkarPrimaryTile> {
         secondaryLabel: context.l10n.homeAthkarAll,
         onSecondaryTap: () => _openLibrary(context),
         onTap: () => _openLibrary(context),
+        semanticsIdentifier: 'home_athkar',
       );
     }
 
@@ -230,6 +233,7 @@ class _AthkarPrimaryTileState extends State<_AthkarPrimaryTile> {
             row: row,
             hasPrayerBounds: hasPrayerBounds,
           ),
+          semanticsIdentifier: 'home_athkar',
         );
       },
     );

@@ -1,9 +1,9 @@
-import 'package:flutter/foundation.dart';
 import 'package:sentry_flutter/sentry_flutter.dart';
 
 import 'core/bootstrap/app_environment.dart';
 import 'core/bootstrap/app_error_guard.dart';
 import 'core/bootstrap/app_startup.dart';
+import 'core/debug/marionette_binding.dart';
 import 'core/telemetry/crash_reporting_context.dart';
 import 'core/telemetry/sentry_android_context.dart';
 import 'core/telemetry/sentry_config.dart';
@@ -23,11 +23,10 @@ Future<void> _runTilawaApp() async {
 
 Future<void> main() async {
   // Required before any plugin (PackageInfo, device_info, MethodChannel) runs.
-  // Construct directly when absent — SentryWidgetsFlutterBinding.ensureInitialized()
-  // probes WidgetsBinding.instance first, which throws FlutterError on cold start.
-  if (BindingBase.debugBindingType() == null) {
-    SentryWidgetsFlutterBinding();
-  }
+  // MarionetteBinding must win in debug before SentryFlutter.init (Sentry
+  // reuses an existing binding; initializing after hangs on splash — see
+  // marionette_mcp flutter-setup docs). Profile/release keep Sentry binding.
+  ensureTilawaWidgetsBinding();
 
   AppEnvironment.assertProductionSafety();
 

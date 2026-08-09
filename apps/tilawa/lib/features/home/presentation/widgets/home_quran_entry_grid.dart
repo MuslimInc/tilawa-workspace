@@ -23,6 +23,7 @@ class HomeQuranEntryGrid extends StatelessWidget {
             icon: TilawaIcons.reciters,
             title: context.l10n.homeQuickReciters,
             subtitle: context.l10n.homeQuickRecitersSubtitle,
+            semanticsIdentifier: 'home_quick_reciters',
             onTap: () => context.read<MainScreenCubit>().selectTab(1),
           ),
         ),
@@ -36,6 +37,7 @@ class HomeQuranEntryGrid extends StatelessWidget {
             ),
             title: context.l10n.homeQuickQuran,
             subtitle: context.l10n.homeStartQuranSubtitle,
+            semanticsIdentifier: 'home_quick_quran',
             onTap: () => const QuranIndexRoute().push(context),
           ),
         ),
@@ -51,6 +53,7 @@ class _QuranEntryTile extends StatelessWidget {
     required this.title,
     required this.subtitle,
     required this.onTap,
+    this.semanticsIdentifier,
   }) : assert(icon != null || iconWidget != null);
 
   final IconData? icon;
@@ -58,6 +61,7 @@ class _QuranEntryTile extends StatelessWidget {
   final String title;
   final String subtitle;
   final VoidCallback onTap;
+  final String? semanticsIdentifier;
 
   @override
   Widget build(BuildContext context) {
@@ -69,42 +73,47 @@ class _QuranEntryTile extends StatelessWidget {
       height: 1.3,
     );
 
-    return HomeDashboardCard(
-      surface: TilawaCardSurface.raised,
-      onTap: onTap,
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        spacing: tokens.spaceExtraSmall,
-        children: [
-          TilawaIconBox(
-            icon: icon ?? Icons.circle_outlined,
-            size: tokens.iconSizeMedium,
-            padding: tokens.spaceSmall,
-            variant: TilawaIconBoxVariant.tinted,
-            semanticTint: TilawaSemanticTint.ink,
-            child: iconWidget,
-          ),
-          SizedBox(height: tokens.spaceExtraSmall),
-          Text(
-            title,
-            maxLines: 1,
-            overflow: TextOverflow.ellipsis,
-            style: theme.textTheme.titleSmall?.copyWith(
-              color: colorScheme.onSurface,
-              fontWeight: FontWeight.w700,
+    return Semantics(
+      identifier: semanticsIdentifier,
+      button: true,
+      label: title,
+      child: HomeDashboardCard(
+        surface: TilawaCardSurface.raised,
+        onTap: onTap,
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          spacing: tokens.spaceExtraSmall,
+          children: [
+            TilawaIconBox(
+              icon: icon ?? Icons.circle_outlined,
+              size: tokens.iconSizeMedium,
+              padding: tokens.spaceSmall,
+              variant: TilawaIconBoxVariant.tinted,
+              semanticTint: TilawaSemanticTint.ink,
+              child: iconWidget,
             ),
-          ),
-          SizedBox(
-            height: _homeQuranEntrySubtitleBlockHeight(subtitleStyle),
-            width: double.infinity,
-            child: Text(
-              subtitle,
-              maxLines: 2,
+            SizedBox(height: tokens.spaceExtraSmall),
+            Text(
+              title,
+              maxLines: 1,
               overflow: TextOverflow.ellipsis,
-              style: subtitleStyle,
+              style: theme.textTheme.titleSmall?.copyWith(
+                color: colorScheme.onSurface,
+                fontWeight: FontWeight.w700,
+              ),
             ),
-          ),
-        ],
+            SizedBox(
+              height: _homeQuranEntrySubtitleBlockHeight(subtitleStyle),
+              width: double.infinity,
+              child: Text(
+                subtitle,
+                maxLines: 2,
+                overflow: TextOverflow.ellipsis,
+                style: subtitleStyle,
+              ),
+            ),
+          ],
+        ),
       ),
     );
   }

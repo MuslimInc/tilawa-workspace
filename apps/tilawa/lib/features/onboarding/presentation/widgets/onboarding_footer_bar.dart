@@ -41,20 +41,28 @@ class OnboardingFooterBar extends StatelessWidget {
 
     return TilawaThumbReachActions(
       showSecondary: _canGoBack,
-      primary: TilawaButton(
-        text: _primaryLabel,
-        variant: TilawaButtonVariant.primary,
-        semanticLabel: _primaryLabel,
-        foregroundColor: colorScheme.onPrimary,
-        onPressed: _onPrimary,
-        isFullWidth: true,
+      primary: Semantics(
+        identifier: 'onboarding_primary',
+        button: true,
+        child: TilawaButton(
+          text: _primaryLabel,
+          variant: TilawaButtonVariant.primary,
+          semanticLabel: _primaryLabel,
+          foregroundColor: colorScheme.onPrimary,
+          onPressed: _onPrimary,
+          isFullWidth: true,
+        ),
       ),
-      secondary: TilawaButton(
-        text: backLabel,
-        variant: TilawaButtonVariant.ghost,
-        semanticLabel: backLabel,
-        onPressed: onBack,
-        isFullWidth: true,
+      secondary: Semantics(
+        identifier: 'onboarding_back',
+        button: true,
+        child: TilawaButton(
+          text: backLabel,
+          variant: TilawaButtonVariant.ghost,
+          semanticLabel: backLabel,
+          onPressed: onBack,
+          isFullWidth: true,
+        ),
       ),
     );
   }

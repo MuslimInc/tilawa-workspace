@@ -248,7 +248,11 @@ class _HomeQuranResumeReadyCard extends StatelessWidget {
       child: content,
     );
 
-    return card;
+    return Semantics(
+      identifier: 'home_quran_resume',
+      button: true,
+      child: card,
+    );
   }
 
   bool _isFreshStart(HomeQuranResumeState state) {

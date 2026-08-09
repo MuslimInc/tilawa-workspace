@@ -152,6 +152,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
                         builder: (context, state) {
                           return TilawaSettingsTile(
                             title: l10n.chooseTheme,
+                            semanticsIdentifier: 'settings_theme',
                             trailing: settingsPickerTrailing(
                               context,
                               value: settingsThemeLabel(state, l10n),
@@ -184,6 +185,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
                         builder: (context, state) {
                           return TilawaSettingsTile(
                             title: l10n.language,
+                            semanticsIdentifier: 'settings_language',
                             trailing: settingsPickerTrailing(
                               context,
                               value: settingsLanguageLabel(
